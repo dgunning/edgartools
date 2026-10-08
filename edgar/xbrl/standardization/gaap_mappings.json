@@ -2428,13 +2428,13 @@
   },
   "AccretionExpenseIncludingAssetRetirementObligations": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 21,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
@@ -5681,201 +5681,19 @@
   },
   "AdjustmentForAmortization": {
     "standard_tags": [
-      "GoodwillWriteoffs"
+      "DepreciationAmortizationCF"
     ],
-    "display_name": "Goodwill Impairment",
-    "statement": "IncomeStatement",
-    "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "display_name": "Depreciation & Amortization (CF)",
+    "statement": "CashFlowStatement",
+    "section": "Operating Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 294,
     "occurrence_rate": 0.033,
     "temporal_consistency": 0.583,
     "years_present": 7,
     "first_year": 2019,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.929
-      },
-      "Chems": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.87
-      },
-      "Drugs": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.989
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.946
-      },
-      "Food": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "AdjustmentsForAmortisationExpense": {
     "standard_tags": [
@@ -9513,13 +9331,13 @@
   },
   "AmortizationOfAcquisitionCosts": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "DepreciationExpense"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Depreciation Expense",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 38,
     "occurrence_rate": 0.004,
     "temporal_consistency": 0.417,
@@ -13592,13 +13410,13 @@
   },
   "CapitalLeasesIncomeStatementLeaseRevenue": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "RentalAndLeasingRevenue"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Rental and Leasing Revenue",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Revenue",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -13835,13 +13653,13 @@
   },
   "CapitalizedComputerSoftwareImpairments": {
     "standard_tags": [
-      "DepreciationExpense"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Depreciation Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -20530,13 +20348,13 @@
   },
   "CompensationExpenseExcludingCostOfGoodAndServiceSold": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "LaborExpenses"
     ],
-    "display_name": "Other Operating Expense",
+    "display_name": "Labor and Employee Benefits",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 19,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
@@ -24499,13 +24317,13 @@
   },
   "CostOfGoodsAndServicesSoldAmortization": {
     "standard_tags": [
-      "GoodwillWriteoffs"
+      "AmortizationOfIntangibles"
     ],
-    "display_name": "Goodwill Impairment",
+    "display_name": "Amortization of Intangibles",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 57,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.417,
@@ -29315,93 +29133,19 @@
   },
   "DeconsolidationGainOrLossAmount": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "NonoperatingIncomeExpense"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Non-Operating Income (Expense)",
     "statement": "IncomeStatement",
-    "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Operating Items",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 133,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2021,
-    "last_year": 2024,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.943
-      },
-      "Fin": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.976
-      },
-      "Oil": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.867
-      },
-      "RlEst": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2024
   },
   "DeferredAirTrafficRevenue": {
     "standard_tags": [
@@ -29421,13 +29165,13 @@
   },
   "DeferredCompensationArrangementWithIndividualCompensationExpense": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "LaborExpenses"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Labor and Employee Benefits",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Operating Expenses",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 13,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -34586,13 +34330,13 @@
   },
   "DefinedBenefitPlanServiceCost": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "PensionExpense"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Net Periodic Pension Cost",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.4,
+    "section": "Operating Expenses",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -40106,13 +39850,13 @@
   },
   "DisposalGroupNotDiscontinuedOperationLossGainOnWriteDown": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 30,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.333,
@@ -44688,66 +44432,19 @@
   },
   "EmployeeBenefitsAndShareBasedCompensation": {
     "standard_tags": [
-      "CostsSubtotal"
+      "LaborExpenses"
     ],
-    "display_name": "Total Costs and Expenses",
+    "display_name": "Labor and Employee Benefits",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 106,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.956
-      },
-      "Drugs": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.977
-      },
-      "Fin": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.889
-      },
-      "Fun": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.964
-      }
-    }
+    "last_year": 2025
   },
   "EmployeeBenefitsExpense": {
     "standard_tags": [
@@ -45578,13 +45275,13 @@
   },
   "EquityMethodInvestmentOtherThanTemporaryImpairment": {
     "standard_tags": [
-      "MinorityInterestIncomeExpense"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Net Income Attributable to Noncontrolling Interest",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
-    "section": "Net Income",
+    "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 95,
     "occurrence_rate": 0.011,
     "temporal_consistency": 0.5,
@@ -46701,13 +46398,13 @@
   },
   "ExplorationAbandonmentAndImpairmentExpense": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 15,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
@@ -49803,13 +49500,13 @@
   },
   "ForeignCurrencyTransactionLossBeforeTax": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "ForeignCurrencyGainLoss"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Foreign Currency Gain/Loss",
     "statement": "IncomeStatement",
     "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 39,
     "occurrence_rate": 0.004,
     "temporal_consistency": 0.417,
@@ -50183,355 +49880,29 @@
   },
   "GainLossOnDispositionOfAssets1": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "GainLossOnDispositions"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Gain/Loss on Dispositions",
     "statement": "IncomeStatement",
     "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.97,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 907,
     "occurrence_rate": 0.101,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Agric": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.958
-      },
-      "Autos": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.993
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.964
-      },
-      "Food": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.964
-      },
-      "Fun": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.9
-      },
-      "Meals": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Paper": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.943
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.976
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.893
-      },
-      "Steel": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Toys": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "GainLossOnDispositionOfIntangibleAssets": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "GainLossOnDispositions"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Gain/Loss on Dispositions",
     "statement": "IncomeStatement",
     "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 135,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.417,
@@ -51526,13 +50897,13 @@
   },
   "GainLossOnSaleOfOtherAssets": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "GainLossOnDispositions"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Gain/Loss on Dispositions",
     "statement": "IncomeStatement",
     "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 259,
     "occurrence_rate": 0.029,
     "temporal_consistency": 0.417,
@@ -51666,13 +51037,13 @@
   },
   "GainLossOnSaleOfProperty": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "GainLossOnDispositions"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Gain/Loss on Dispositions",
     "statement": "IncomeStatement",
     "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 34,
     "occurrence_rate": 0.004,
     "temporal_consistency": 0.417,
@@ -54389,246 +53760,19 @@
   },
   "GoodwillAndIntangibleAssetImpairment": {
     "standard_tags": [
-      "GoodwillWriteoffs"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Goodwill Impairment",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 345,
     "occurrence_rate": 0.038,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Agric": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.886
-      },
-      "Banks": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.886
-      },
-      "BldMt": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.987
-      },
-      "Chips": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.962
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.943
-      },
-      "Insur": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.855
-      },
-      "LabEq": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.966
-      },
-      "Telcm": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.948
-      },
-      "Toys": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "GoodwillAndIntangibleAssetsNet": {
     "standard_tags": [
@@ -54680,13 +53824,13 @@
   },
   "GoodwillImpairmentLoss": {
     "standard_tags": [
-      "AssetImpairmentChargesIS"
+      "GoodwillWriteoffs"
     ],
-    "display_name": "Asset Impairment Charges",
+    "display_name": "Goodwill Impairment",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.969,
+    "confidence": 0.9,
     "company_count": 877,
     "occurrence_rate": 0.097,
     "temporal_consistency": 0.5,
@@ -55248,13 +54392,13 @@
   },
   "ImpairmentChargeOnReclassifiedAssets": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 6,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -55264,49 +54408,29 @@
   },
   "ImpairmentLossRecognisedInProfitOrLoss": {
     "standard_tags": [
-      "GoodwillWriteoffs"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Goodwill Impairment",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 38,
     "occurrence_rate": 0.004,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2017,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.9
-      },
-      "Drugs": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.886
-      }
-    }
+    "last_year": 2025
   },
   "ImpairmentLossesRelatedToRealEstatePartnerships": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 6,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -55316,130 +54440,29 @@
   },
   "ImpairmentOfIntangibleAssetsExcludingGoodwill": {
     "standard_tags": [
-      "AmortizationOfIntangibles"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Amortization of Intangibles",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 246,
     "occurrence_rate": 0.027,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "AmortizationOfIntangibles"
-        ],
-        "display_name": "Amortization of Intangibles",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "AmortizationOfIntangibles"
-        ],
-        "display_name": "Amortization of Intangibles",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.949
-      },
-      "Chems": {
-        "standard_tags": [
-          "AmortizationOfIntangibles"
-        ],
-        "display_name": "Amortization of Intangibles",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "AmortizationOfIntangibles"
-        ],
-        "display_name": "Amortization of Intangibles",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "AmortizationOfIntangibles"
-        ],
-        "display_name": "Amortization of Intangibles",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.945
-      },
-      "Food": {
-        "standard_tags": [
-          "AmortizationOfIntangibles"
-        ],
-        "display_name": "Amortization of Intangibles",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "AmortizationOfIntangibles"
-        ],
-        "display_name": "Amortization of Intangibles",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.867
-      },
-      "LabEq": {
-        "standard_tags": [
-          "AmortizationOfIntangibles"
-        ],
-        "display_name": "Amortization of Intangibles",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.947
-      },
-      "MedEq": {
-        "standard_tags": [
-          "AmortizationOfIntangibles"
-        ],
-        "display_name": "Amortization of Intangibles",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "AmortizationOfIntangibles"
-        ],
-        "display_name": "Amortization of Intangibles",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "AmortizationOfIntangibles"
-        ],
-        "display_name": "Amortization of Intangibles",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ImpairmentOfIntangibleAssetsFinitelived": {
     "standard_tags": [
-      "AmortizationOfIntangibles"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Amortization of Intangibles",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 290,
     "occurrence_rate": 0.032,
     "temporal_consistency": 0.583,
@@ -55449,13 +54472,13 @@
   },
   "ImpairmentOfIntangibleAssetsIndefinitelivedExcludingGoodwill": {
     "standard_tags": [
-      "AmortizationOfIntangibles"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Amortization of Intangibles",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 142,
     "occurrence_rate": 0.016,
     "temporal_consistency": 0.417,
@@ -55537,13 +54560,13 @@
   },
   "ImpairmentOfLeasehold": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 20,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.5,
@@ -55821,40 +54844,29 @@
   },
   "ImpairmentOfOilAndGasProperties": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 57,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Oil": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.971
-      }
-    }
+    "last_year": 2025
   },
   "ImpairmentOfOngoingProject": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 14,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
@@ -55864,58 +54876,29 @@
   },
   "ImpairmentOfRealEstate": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 135,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.995
-      },
-      "RlEst": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ImpairmentOfRetainedInterest": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.083,
@@ -64215,13 +63198,13 @@
   },
   "InsuranceRecoveries": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 25,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.333,
@@ -66400,13 +65383,13 @@
   },
   "InterestIncomeDepositsWithFinancialInstitutions": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "InterestIncome"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Interest Income",
     "statement": "IncomeStatement",
     "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 188,
     "occurrence_rate": 0.021,
     "temporal_consistency": 0.417,
@@ -69348,13 +68331,13 @@
   },
   "InventoryRecallExpense": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 3,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.417,
@@ -69460,318 +68443,19 @@
   },
   "InventoryWriteDown": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "CostOfGoodsAndServicesSold"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Cost of Revenue",
     "statement": "IncomeStatement",
-    "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.967,
+    "section": "Cost of Revenue",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 755,
     "occurrence_rate": 0.084,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.985
-      },
-      "Clths": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.911
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Paper": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Toys": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "InvestmentAccountedForUsingEquityMethod": {
     "standard_tags": [
@@ -71534,165 +70218,19 @@
   },
   "LaborAndRelatedExpense": {
     "standard_tags": [
-      "CostOfGoodsAndServicesSold"
+      "LaborExpenses"
     ],
-    "display_name": "Cost of Revenue",
+    "display_name": "Labor and Employee Benefits",
     "statement": "IncomeStatement",
-    "section": "Cost of Revenue",
-    "is_total": true,
-    "confidence": 0.978,
+    "section": "Operating Expenses",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 875,
     "occurrence_rate": 0.097,
     "temporal_consistency": 0.583,
     "years_present": 7,
     "first_year": 2019,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 0.992
-      },
-      "BusSv": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 0.987
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 0.914
-      },
-      "Fun": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 0.976
-      },
-      "Oil": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 0.927
-      },
-      "Rtail": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "CostOfGoodsAndServicesSold"
-        ],
-        "display_name": "Cost of Revenue",
-        "section": "Cost of Revenue",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "Land": {
     "standard_tags": [
@@ -72056,13 +70594,13 @@
   },
   "LegalFees": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "ProfessionalFees"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Professional Fees",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 143,
     "occurrence_rate": 0.016,
     "temporal_consistency": 0.5,
@@ -73232,13 +71770,13 @@
   },
   "LitigationSettlementExpense": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 131,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.5,
@@ -76557,13 +75095,13 @@
   },
   "LossContingencyLossInPeriod": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 14,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
@@ -76780,13 +75318,13 @@
   },
   "MalpracticeLossContingencyClaimsIncurredNet": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.4,
+    "section": "Operating Expenses",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -79864,57 +78402,19 @@
   },
   "NetPeriodicDefinedBenefitsExpenseReversalOfExpenseExcludingServiceCostComponent": {
     "standard_tags": [
-      "PensionExpense"
+      "NonoperatingIncomeExpense"
     ],
-    "display_name": "Net Periodic Pension Cost",
+    "display_name": "Non-Operating Income (Expense)",
     "statement": "IncomeStatement",
-    "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Operating Items",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 91,
     "occurrence_rate": 0.01,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Boxes": {
-        "standard_tags": [
-          "PensionExpense"
-        ],
-        "display_name": "Net Periodic Pension Cost",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "PensionExpense"
-        ],
-        "display_name": "Net Periodic Pension Cost",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "PensionExpense"
-        ],
-        "display_name": "Net Periodic Pension Cost",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.886
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "PensionExpense"
-        ],
-        "display_name": "Net Periodic Pension Cost",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.933
-      }
-    }
+    "last_year": 2025
   },
   "NoncashOrPartNoncashAcquisitionFixedAssetsAcquired1": {
     "standard_tags": [
@@ -83430,13 +81930,13 @@
   },
   "OperatingLeaseImpairmentLoss": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Other Operating Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 217,
     "occurrence_rate": 0.024,
     "temporal_consistency": 0.5,
@@ -85697,156 +84197,19 @@
   },
   "OtherAssetImpairmentCharges": {
     "standard_tags": [
-      "RestructuringExpenseBenefit"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Restructuring Expense",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 217,
     "occurrence_rate": 0.024,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.89
-      },
-      "BldMt": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.855
-      },
-      "Oil": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.938
-      },
-      "Trans": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "RestructuringExpenseBenefit"
-        ],
-        "display_name": "Restructuring Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "OtherAssets": {
     "standard_tags": [
@@ -90149,165 +88512,19 @@
   },
   "OtherCostAndExpenseOperating": {
     "standard_tags": [
-      "OtherExpenseIS"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Other Expense",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.961,
+    "section": "Operating Expenses",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 489,
     "occurrence_rate": 0.054,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.937
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.982
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.953
-      },
-      "Fun": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Gold": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.869
-      },
-      "Meals": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.95
-      },
-      "MedEq": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.985
-      },
-      "RlEst": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.969
-      },
-      "Rtail": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.881
-      },
-      "Trans": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.97
-      },
-      "Util": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "OtherCostOfOperatingRevenue": {
     "standard_tags": [
@@ -90747,102 +88964,19 @@
   },
   "OtherExpenses": {
     "standard_tags": [
-      "OtherExpenseIS"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Other Expense",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Operating Expenses",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 331,
     "occurrence_rate": 0.037,
     "temporal_consistency": 0.667,
     "years_present": 8,
     "first_year": 2017,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.867
-      },
-      "Chips": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.967
-      },
-      "Insur": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.948
-      },
-      "Mines": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.886
-      },
-      "Other": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.947
-      },
-      "Trans": {
-        "standard_tags": [
-          "OtherExpenseIS"
-        ],
-        "display_name": "Other Expense",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.877
-      }
-    }
+    "last_year": 2025
   },
   "OtherFiniteLivedIntangibleAssetsGross": {
     "standard_tags": [
@@ -90968,75 +89102,19 @@
   },
   "OtherGeneralExpense": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Operating Expenses",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 125,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.897
-      },
-      "Fin": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.886
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.933
-      }
-    }
+    "last_year": 2025
   },
   "OtherHotelOperatingRevenue": {
     "standard_tags": [
@@ -94468,13 +92546,13 @@
   },
   "OtherNonrecurringExpense": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "SpecialItemsIncomeExpense(Pretax)"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Special Items",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Net Income",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 11,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -94500,13 +92578,13 @@
   },
   "OtherNonrecurringIncome": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "SpecialItemsIncomeExpense(Pretax)"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Special Items",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Net Income",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 10,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -94516,30 +92594,19 @@
   },
   "OtherNonrecurringIncomeExpense": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "SpecialItemsIncomeExpense(Pretax)"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Special Items",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Net Income",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 27,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "OtherNotesPayable": {
     "standard_tags": [
@@ -95029,48 +93096,19 @@
   },
   "OtherOperatingIncome": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "Revenue"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Revenue",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Revenue",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 141,
     "occurrence_rate": 0.016,
     "temporal_consistency": 0.583,
     "years_present": 7,
     "first_year": 2018,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Fin": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.929
-      },
-      "Oil": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.95
-      },
-      "Trans": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "OtherOperatingIncomeExpense": {
     "standard_tags": [
@@ -118793,22 +116831,6 @@
     "first_year": 2021,
     "last_year": 2024
   },
-  "RestructuringReserveTranslationAndOtherAdjustment": {
-    "standard_tags": [
-      "RestructuringExpenseBenefit"
-    ],
-    "display_name": "Restructuring Expense",
-    "statement": "IncomeStatement",
-    "section": "Operating Expenses",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
   "RestructuringSettlementAndImpairmentProvisions": {
     "standard_tags": [
       "RestructuringExpenseBenefit"
@@ -118902,13 +116924,13 @@
   },
   "ResultsOfOperationsImpairmentOfOilAndGasProperties": {
     "standard_tags": [
-      "GoodwillWriteoffs"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Goodwill Impairment",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 3,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.25,
@@ -121067,66 +119089,35 @@
   },
   "RevenueNotFromContractWithCustomer": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "Revenue"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Revenue",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Revenue",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 82,
     "occurrence_rate": 0.009,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "RevenueNotFromContractWithCustomerOther": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "Revenue"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Revenue",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Revenue",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 30,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Fin": {
-        "standard_tags": [
-          "NonoperatingIncomeExpense"
-        ],
-        "display_name": "Non-Operating Income (Expense)",
-        "section": "Non-Operating Items",
-        "is_total": false,
-        "confidence": 0.886
-      }
-    }
+    "last_year": 2025
   },
   "RevenueOilAndGasServices": {
     "standard_tags": [
@@ -122092,13 +120083,13 @@
   },
   "SaleAndLeasebackTransactionGainLossNet": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "GainLossOnDispositions"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Gain/Loss on Dispositions",
     "statement": "IncomeStatement",
     "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 52,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.417,
@@ -130152,66 +128143,19 @@
   },
   "TangibleAssetImpairmentCharges": {
     "standard_tags": [
-      "GoodwillWriteoffs"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Goodwill Impairment",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 104,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.962
-      },
-      "Chips": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "GoodwillWriteoffs"
-        ],
-        "display_name": "Goodwill Impairment",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "TaxAdjustmentsSettlementsAndUnusualProvisions": {
     "standard_tags": [
@@ -132627,13 +130571,13 @@
   },
   "UnamortizedCostsCapitalizedLessRelatedDeferredIncomeTaxesExceedCeilingLimitationExpense": {
     "standard_tags": [
-      "GoodwillWriteoffs"
+      "AssetImpairmentChargesIS"
     ],
-    "display_name": "Goodwill Impairment",
+    "display_name": "Asset Impairment Charges",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.083,
@@ -135708,8 +133652,13 @@
   },
   "ifrs-full_ImpairmentLossRecognisedInProfitOrLoss": {
     "standard_tags": [
-      "GoodwillWriteoffs"
-    ]
+      "AssetImpairmentChargesIS"
+    ],
+    "display_name": "Asset Impairment Charges",
+    "statement": "IncomeStatement",
+    "section": "Operating Expenses",
+    "is_total": false,
+    "confidence": 0.9
   },
   "ifrs-full_IncomeTaxExpenseContinuingOperations": {
     "standard_tags": [
