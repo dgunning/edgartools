@@ -49,6 +49,18 @@ class EntityFiling(Filing):
 
             **Solution for Legacy Filings**: Use the ``parsed_items`` property to extract
             accurate items from the filing document text. This works for all 8-K filings.
+
+        acceptance_datetime (datetime): When SEC accepted the filing, read from
+            ``acceptanceDateTime`` in SEC's submissions JSON.
+
+            **Not reliably UTC**: SEC labels this value UTC, but for some filers it is
+            hours off. Apple's 10-Q ``0000320193-26-000020`` was accepted at 10:01:02
+            UTC, and on 2026-10-08 read as 14:01:02 here. The offset varies by filer
+            and by day, so it cannot be corrected after the fact.
+
+            **For a precise time**: Use ``filing.header.acceptance_datetime``, which
+            reads the filing's own SGML header (naive Eastern time) and matches the
+            "Accepted" time on SEC's index page. It costs one extra request per filing.
     """
 
     def __init__(self,
