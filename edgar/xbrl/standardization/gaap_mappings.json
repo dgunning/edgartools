@@ -3156,13 +3156,13 @@
   },
   "AccruedParticipationLiabilitiesDueInNextOperatingCycle": {
     "standard_tags": [
-      "TradePayables"
+      "OtherOperatingCurrentLiabilities"
     ],
-    "display_name": "Accounts Payable",
+    "display_name": "Other Current Liabilities",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 3,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.25,
@@ -3335,48 +3335,19 @@
   },
   "AccruedRoyaltiesCurrent": {
     "standard_tags": [
-      "TradePayables"
+      "OtherOperatingCurrentLiabilities"
     ],
-    "display_name": "Accounts Payable",
+    "display_name": "Other Current Liabilities",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 48,
     "occurrence_rate": 0.005,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Drugs": {
-        "standard_tags": [
-          "TradePayables"
-        ],
-        "display_name": "Accounts Payable",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "TradePayables"
-        ],
-        "display_name": "Accounts Payable",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "TradePayables"
-        ],
-        "display_name": "Accounts Payable",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.975
-      }
-    }
+    "last_year": 2025
   },
   "AccruedRoyaltiesCurrentAndNoncurrent": {
     "standard_tags": [
@@ -10797,13 +10768,13 @@
   },
   "AssetRetirementObligation": {
     "standard_tags": [
-      "RetirementRelatedNonCurrentLiabilities"
+      "AssetRetirementObligations"
     ],
-    "display_name": "Retirement Related Liabilities, Non-Current",
+    "display_name": "Asset Retirement Obligations",
     "statement": "BalanceSheet",
     "section": "Non-Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 22,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
@@ -17688,456 +17659,6 @@
     "first_year": 2021,
     "last_year": 2025
   },
-  "CommitmentsAndContingencies": {
-    "standard_tags": [
-      "LiabilitiesAndEquity"
-    ],
-    "display_name": "Total Liabilities and Equity",
-    "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.6,
-    "company_count": 6299,
-    "occurrence_rate": 0.7,
-    "temporal_consistency": 0.583,
-    "years_present": 7,
-    "first_year": 2019,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Books": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Boxes": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Coal": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "FabPr": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Gold": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Guns": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 0.998
-      },
-      "Meals": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Paper": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Ships": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Smoke": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Soda": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Toys": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Txtls": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "LiabilitiesAndEquity"
-        ],
-        "display_name": "Total Liabilities and Equity",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
   "CommodityContractAssetCurrent": {
     "standard_tags": [
       "OtherNonOperatingCurrentAssets"
@@ -21442,13 +20963,13 @@
   },
   "ConstructionPayableCurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentLiabilities"
+      "TradePayables"
     ],
-    "display_name": "Other Current Liabilities",
+    "display_name": "Accounts Payable",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 15,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
@@ -21953,624 +21474,35 @@
   },
   "ContractWithCustomerLiabilityCurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentLiabilities"
+      "DeferredRevenueCurrent"
     ],
-    "display_name": "Other Current Liabilities",
+    "display_name": "Deferred Revenue, Current",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.994,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 1993,
     "occurrence_rate": 0.222,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.959
-      },
-      "Banks": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.955
-      },
-      "BldMt": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Books": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.989
-      },
-      "Chems": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.977
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.853
-      },
-      "Comps": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.996
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.968
-      },
-      "FabPr": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.992
-      },
-      "Food": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.967
-      },
-      "Fun": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Guns": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.921
-      },
-      "Insur": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.985
-      },
-      "Mach": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.979
-      },
-      "Meals": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.966
-      },
-      "MedEq": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.989
-      },
-      "Paper": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.976
-      },
-      "RlEst": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.978
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Ships": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Smoke": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Toys": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.983
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.991
-      }
-    }
+    "last_year": 2025
   },
   "ContractWithCustomerLiabilityNoncurrent": {
     "standard_tags": [
-      "ContractLiabilities"
+      "DeferredRevenueNonCurrent"
     ],
-    "display_name": "Contract Liabilities",
+    "display_name": "Deferred Revenue, Non-Current",
     "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.975,
+    "section": "Non-Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 772,
     "occurrence_rate": 0.086,
     "temporal_consistency": 0.583,
     "years_present": 7,
     "first_year": 2019,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.93
-      },
-      "Banks": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.953
-      },
-      "BusSv": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.995
-      },
-      "Chems": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.994
-      },
-      "Comps": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.975
-      },
-      "Mach": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.984
-      },
-      "Meals": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.88
-      },
-      "PerSv": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.984
-      },
-      "RlEst": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "ContractLiabilities"
-        ],
-        "display_name": "Contract Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "ContractWithCustomerReceivableBeforeAllowanceForCreditLoss": {
     "standard_tags": [
@@ -22642,13 +21574,13 @@
   },
   "ContractWithCustomerRefundLiabilityCurrent": {
     "standard_tags": [
-      "CustomerAdvances"
+      "OtherOperatingCurrentLiabilities"
     ],
-    "display_name": "Customer Advances and Deposits",
+    "display_name": "Other Current Liabilities",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 45,
     "occurrence_rate": 0.005,
     "temporal_consistency": 0.417,
@@ -27884,13 +26816,13 @@
   },
   "CustomerAdvancesAndDepositsCurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentLiabilities"
+      "CustomerAdvances"
     ],
-    "display_name": "Other Current Liabilities",
+    "display_name": "Customer Advances and Deposits",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 5,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -27934,39 +26866,19 @@
   },
   "CustomerAdvancesCurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentLiabilities"
+      "CustomerAdvances"
     ],
-    "display_name": "Other Current Liabilities",
+    "display_name": "Customer Advances and Deposits",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 53,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2020,
-    "last_year": 2024,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2024
   },
   "CustomerAdvancesForConstruction": {
     "standard_tags": [
@@ -28018,13 +26930,13 @@
   },
   "CustomerDepositsCurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentLiabilities"
+      "CustomerAdvances"
     ],
-    "display_name": "Other Current Liabilities",
+    "display_name": "Customer Advances and Deposits",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 50,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.5,
@@ -28410,57 +27322,19 @@
   },
   "DebtInstrumentCarryingAmount": {
     "standard_tags": [
-      "ShortTermDebt",
       "LongTermDebt"
     ],
-    "display_name": "Short-Term Debt",
+    "display_name": "Long-Term Debt",
     "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 28,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "ambiguous": true
-  },
-  "DebtInstrumentFaceAmount": {
-    "standard_tags": [
-      "ShortTermDebt",
-      "LongTermDebt"
-    ],
-    "display_name": "Short-Term Debt",
-    "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 17,
-    "occurrence_rate": 0.002,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "ambiguous": true
-  },
-  "DebtInstrumentIncreaseDecreaseForPeriodNet": {
-    "standard_tags": [
-      "ShortTermDebt",
-      "LongTermDebt"
-    ],
-    "display_name": "Short-Term Debt",
-    "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 8,
-    "occurrence_rate": 0.001,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024,
-    "ambiguous": true
+    "last_year": 2025
   },
   "DebtInstrumentUnamortizedDiscount": {
     "standard_tags": [
@@ -28615,24 +27489,6 @@
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025
-  },
-  "DebtLongtermAndShorttermCombinedAmount": {
-    "standard_tags": [
-      "ShortTermDebt",
-      "LongTermDebt"
-    ],
-    "display_name": "Short-Term Debt",
-    "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 59,
-    "occurrence_rate": 0.007,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "ambiguous": true
   },
   "DebtRelatedCommitmentFeesAndDebtIssuanceCosts": {
     "standard_tags": [
@@ -29453,13 +28309,13 @@
   },
   "DeferredCompensationCashbasedArrangementsLiabilityClassifiedNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentLiabilities"
+      "DeferredCompensationNonCurrent"
     ],
-    "display_name": "Other Non-Operating Non-Current Liabilities",
+    "display_name": "Deferred Compensation, Non-Current",
     "statement": "BalanceSheet",
     "section": "Non-Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -29625,13 +28481,13 @@
   },
   "DeferredCompensationSharebasedArrangementsLiabilityClassifiedNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentLiabilities"
+      "DeferredCompensationNonCurrent"
     ],
-    "display_name": "Other Non-Operating Non-Current Liabilities",
+    "display_name": "Deferred Compensation, Non-Current",
     "statement": "BalanceSheet",
     "section": "Non-Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 13,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -30366,66 +29222,19 @@
   },
   "DeferredIncomeCurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentLiabilities"
+      "DeferredRevenueCurrent"
     ],
-    "display_name": "Other Current Liabilities",
+    "display_name": "Deferred Revenue, Current",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 100,
     "occurrence_rate": 0.011,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "OtherOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "DeferredIncomeIncludingContractLiabilities": {
     "standard_tags": [
@@ -30445,48 +29254,19 @@
   },
   "DeferredIncomeNoncurrent": {
     "standard_tags": [
-      "OngoingOperatingProvisions(WarrantiesEtc)"
+      "DeferredRevenueNonCurrent"
     ],
-    "display_name": "Warranty and Other Provisions",
+    "display_name": "Deferred Revenue, Non-Current",
     "statement": "BalanceSheet",
     "section": "Non-Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 71,
     "occurrence_rate": 0.008,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "OngoingOperatingProvisions(WarrantiesEtc)"
-        ],
-        "display_name": "Warranty and Other Provisions",
-        "section": "Non-Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "OngoingOperatingProvisions(WarrantiesEtc)"
-        ],
-        "display_name": "Warranty and Other Provisions",
-        "section": "Non-Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "OngoingOperatingProvisions(WarrantiesEtc)"
-        ],
-        "display_name": "Warranty and Other Provisions",
-        "section": "Non-Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "DeferredIncomeOtherThanContractLiabilities": {
     "standard_tags": [
@@ -32054,13 +30834,13 @@
   },
   "DeferredRevenueAndCreditsNoncurrent": {
     "standard_tags": [
-      "OngoingOperatingProvisions(WarrantiesEtc)"
+      "DeferredRevenueNonCurrent"
     ],
-    "display_name": "Warranty and Other Provisions",
+    "display_name": "Deferred Revenue, Non-Current",
     "statement": "BalanceSheet",
     "section": "Non-Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 6,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -37276,32 +36056,19 @@
   },
   "DerivativeInstrumentsAndHedgesLiabilities": {
     "standard_tags": [
-      "OtherNonOperatingCurrentLiabilities",
-      "OtherNonOperatingNonCurrentLiabilities"
+      "OtherNonOperatingCurrentLiabilities"
     ],
     "display_name": "Other Non-Operating Current Liabilities",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 30,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "ambiguous": true,
-    "industry_overrides": {
-      "Util": {
-        "standard_tags": [
-          "OtherNonOperatingCurrentLiabilities"
-        ],
-        "display_name": "Other Non-Operating Current Liabilities",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "DerivativeInstrumentsAndHedgesLiabilitiesNoncurrent": {
     "standard_tags": [
@@ -39039,13 +37806,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationAccruedIncomeTaxPayableNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentAssets"
+      "OtherNonOperatingNonCurrentLiabilities"
     ],
-    "display_name": "Other Non-Operating Non-Current Assets",
+    "display_name": "Other Non-Operating Non-Current Liabilities",
     "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
+    "section": "Non-Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.083,
@@ -39775,13 +38542,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationPensionPlanBenefitObligationCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "OtherNonOperatingCurrentLiabilities"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Other Non-Operating Current Liabilities",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Current Liabilities",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -39823,13 +38590,13 @@
   },
   "DisposalGroupIncludingDiscontinuedOperationPostretirementPlanBenefitObligationCurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets"
+      "OtherNonOperatingCurrentLiabilities"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Other Non-Operating Current Liabilities",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
+    "section": "Current Liabilities",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -72222,21 +70989,19 @@
   },
   "LiabilitiesNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingNonCurrentLiabilities",
       "NonCurrentLiabilitiesTotal"
     ],
-    "display_name": "Other Non-Operating Non-Current Liabilities",
+    "display_name": "Total Non-Current Liabilities",
     "statement": "BalanceSheet",
-    "section": "Non-Current Liabilities",
+    "section": "Totals",
     "is_total": true,
-    "confidence": 1.0,
+    "confidence": 0.9,
     "company_count": 1499,
     "occurrence_rate": 0.167,
     "temporal_consistency": 0.833,
     "years_present": 10,
     "first_year": 2016,
-    "last_year": 2025,
-    "ambiguous": true
+    "last_year": 2025
   },
   "LiabilitiesOfBusinessTransferredUnderContractualArrangementCurrent": {
     "standard_tags": [
@@ -72330,22 +71095,6 @@
         "confidence": 0.859
       }
     }
-  },
-  "LiabilitiesOtherThanLongtermDebtNoncurrent": {
-    "standard_tags": [
-      "OtherNonOperatingNonCurrentLiabilities"
-    ],
-    "display_name": "Other Non-Operating Non-Current Liabilities",
-    "statement": "BalanceSheet",
-    "section": "Non-Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 71,
-    "occurrence_rate": 0.008,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
   },
   "LiabilitiesRelatedToInvestmentContractsFairValueDisclosure": {
     "standard_tags": [
@@ -74395,21 +73144,19 @@
   },
   "LongTermDebtAndCapitalLeaseObligationsIncludingCurrentMaturities": {
     "standard_tags": [
-      "ShortTermDebt",
       "LongTermDebt"
     ],
-    "display_name": "Short-Term Debt",
+    "display_name": "Long-Term Debt",
     "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 15,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2021,
-    "last_year": 2024,
-    "ambiguous": true
+    "last_year": 2024
   },
   "LongTermDebtCurrent": {
     "standard_tags": [
@@ -83516,35 +82263,6 @@
       }
     }
   },
-  "OperatingLeaseLiability": {
-    "standard_tags": [
-      "OperatingLeaseCurrentDebtEquivalent",
-      "OperatingLeaseNonCurrentDebtEquivalent"
-    ],
-    "display_name": "Operating Lease Liability, Current",
-    "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 398,
-    "occurrence_rate": 0.044,
-    "temporal_consistency": 0.583,
-    "years_present": 7,
-    "first_year": 2019,
-    "last_year": 2025,
-    "ambiguous": true,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "OperatingLeaseCurrentDebtEquivalent"
-        ],
-        "display_name": "Operating Lease Liability, Current",
-        "section": "Current Liabilities",
-        "is_total": false,
-        "confidence": 0.888
-      }
-    }
-  },
   "OperatingLeaseLiabilityCurrent": {
     "standard_tags": [
       "OperatingLeaseCurrentDebtEquivalent"
@@ -84426,22 +83144,6 @@
         "confidence": 1.0
       }
     }
-  },
-  "OperatingLeaseLiabilityStatementOfFinancialPositionExtensibleList": {
-    "standard_tags": [
-      "OperatingLeaseNonCurrentDebtEquivalent"
-    ],
-    "display_name": "Operating Lease Liability, Non-Current",
-    "statement": "BalanceSheet",
-    "section": "Non-Current Liabilities",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 7,
-    "occurrence_rate": 0.001,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
   },
   "OperatingLeasePayments": {
     "standard_tags": [
@@ -122676,48 +121378,19 @@
   },
   "SecuredDebt": {
     "standard_tags": [
-      "Liabilities"
+      "LongTermDebt"
     ],
-    "display_name": "Total Liabilities",
+    "display_name": "Long-Term Debt",
     "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.312,
+    "section": "Non-Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 180,
     "occurrence_rate": 0.02,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "Liabilities"
-        ],
-        "display_name": "Total Liabilities",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 0.851
-      },
-      "Fin": {
-        "standard_tags": [
-          "Liabilities"
-        ],
-        "display_name": "Total Liabilities",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 0.85
-      },
-      "RlEst": {
-        "standard_tags": [
-          "Liabilities"
-        ],
-        "display_name": "Total Liabilities",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "SecuredDebtCurrent": {
     "standard_tags": [
@@ -125966,51 +124639,6 @@
         ],
         "display_name": "Other Non-Operating Non-Current Liabilities",
         "section": "Non-Current Liabilities",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
-  "SharesSubjectToMandatoryRedemptionSettlementTermsFairValueOfShares": {
-    "standard_tags": [
-      "Liabilities"
-    ],
-    "display_name": "Total Liabilities",
-    "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.309,
-    "company_count": 140,
-    "occurrence_rate": 0.016,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2019,
-    "last_year": 2024,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "Liabilities"
-        ],
-        "display_name": "Total Liabilities",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "Liabilities"
-        ],
-        "display_name": "Total Liabilities",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "Liabilities"
-        ],
-        "display_name": "Total Liabilities",
-        "section": "Totals",
         "is_total": false,
         "confidence": 1.0
       }
@@ -129952,39 +128580,19 @@
   },
   "SubordinatedDebt": {
     "standard_tags": [
-      "Liabilities"
+      "LongTermDebt"
     ],
-    "display_name": "Total Liabilities",
+    "display_name": "Long-Term Debt",
     "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.311,
+    "section": "Non-Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 170,
     "occurrence_rate": 0.019,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "Liabilities"
-        ],
-        "display_name": "Total Liabilities",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 0.961
-      },
-      "Insur": {
-        "standard_tags": [
-          "Liabilities"
-        ],
-        "display_name": "Total Liabilities",
-        "section": "Totals",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "SubordinatedDebtCurrent": {
     "standard_tags": [
@@ -131350,22 +129958,6 @@
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025
-  },
-  "TemporaryEquityLiquidationPreference": {
-    "standard_tags": [
-      "CurrentLiabilitiesTotal"
-    ],
-    "display_name": "Total Current Liabilities",
-    "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": false,
-    "confidence": 0.32,
-    "company_count": 298,
-    "occurrence_rate": 0.033,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
     "last_year": 2025
   },
   "TemporaryEquityNetIncome": {
@@ -135293,13 +133885,13 @@
   },
   "WorkersCompensationLiabilityCurrent": {
     "standard_tags": [
-      "RetirementRelatedCurrentLiabilities"
+      "SelfInsuranceReserve"
     ],
-    "display_name": "Retirement Related Liabilities, Current",
+    "display_name": "Self-Insurance Reserve",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 16,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
