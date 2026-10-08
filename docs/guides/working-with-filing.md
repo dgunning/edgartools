@@ -104,6 +104,8 @@ print(f"Is XBRL: {filing.is_xbrl}")
 print(f"Is Inline XBRL: {filing.is_inline_xbrl}")
 ```
 
+`acceptance_datetime` comes from SEC's submissions JSON, which labels it UTC but for some filers is hours off, by an amount that varies by filer and by day. When the exact time matters, for example in point-in-time backtests, use `filing.header.acceptance_datetime`. It reads the filing's own SGML header, matches the "Accepted" time on SEC's index page, and is naive Eastern time. It costs one extra request per filing.
+
 ## Viewing Filings
 
 ### Open in Browser
