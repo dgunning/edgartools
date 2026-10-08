@@ -143,16 +143,20 @@ async def edgar_read(
         }
 
         # Determine available sections based on form type
-        result["available_sections"] = _get_section_list(filing.form)
+        available = _get_section_list(filing.form)
+        result["available_sections"] = available
+
+        # "summary" alone means metadata only, unless the form has a summary section
+        metadata_only = sections == ["summary"] and "summary" not in available
 
         # Extract requested sections
-        if "summary" not in sections or len(sections) > 1:
+        if not metadata_only:
             extracted = await _extract_sections(filing, sections)
             result["sections"] = extracted
 
         # Next steps
         next_steps = []
-        if "summary" in sections and len(sections) == 1:
+        if metadata_only:
             next_steps.append("Add sections like 'business', 'risk_factors', 'mda' to read content")
         next_steps.append("Use edgar_company for full company analysis")
 
@@ -204,7 +208,8 @@ async def _extract_sections(filing, sections: list[str]) -> dict[str, Any]:
             # Extract all available sections
             sections_to_extract = _get_section_list(filing.form)
         else:
-            sections_to_extract = [s for s in sections if s != "summary"]
+            available = _get_section_list(filing.form)
+            sections_to_extract = [s for s in sections if s != "summary" or "summary" in available]
 
         for section in sections_to_extract:
             content = _extract_section(obj, filing.form, section)
