@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "edgartools"
 description = 'Python library to access and analyze SEC Edgar filings, XBRL financial statements, 10-K, 10-Q, and 8-K reports'
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "MIT"
 keywords = [
     "sec", "edgar", "filings", "sec filings", "edgar filings",
@@ -21,7 +21,6 @@ authors = [
 classifiers = [
   "Development Status :: 4 - Beta",
   "Programming Language :: Python",
-  "Programming Language :: Python :: 3.10",
   "Programming Language :: Python :: 3.11",
   "Programming Language :: Python :: 3.12",
   "Programming Language :: Python :: 3.13",
@@ -334,7 +333,7 @@ dependencies = [
 ]
 
 [[tool.hatch.envs.test.matrix]]
-python = ["39", "310", "311", "312"]
+python = ["311", "312"]
 
 [tool.coverage.run]
 branch = true
