@@ -153,7 +153,7 @@ def _render_earnings_analysis(identifier: str) -> GetPromptResult:
 
 2. **Financial Trends**: Use edgar_trends with concepts ["revenue", "net_income", "eps", "gross_profit"] for both annual (5 years) and quarterly (8 quarters) to show the trajectory.
 
-3. **Peer Comparison**: Use edgar_compare with {identifier} and 2-3 peer companies, comparing ["revenue", "net_income", "net_margin"].
+3. **Peer Comparison**: Use edgar_compare with {identifier} and 2-3 peer companies, comparing ["revenue", "net_income", "margins"].
 
 4. **Management Commentary**: Use edgar_read with the latest 10-K or 10-Q, sections ["mda"] for management's discussion.
 
@@ -182,7 +182,7 @@ def _render_industry_overview(industry: str) -> GetPromptResult:
 
 2. **Top Players**: From the results, pick the 3-5 largest/most notable companies.
 
-3. **Comparative Analysis**: Use edgar_compare with those companies, comparing ["revenue", "net_income", "net_margin", "assets"].
+3. **Comparative Analysis**: Use edgar_compare with those companies, comparing ["revenue", "net_income", "margins", "assets"].
 
 4. **Growth Trends**: Use edgar_trends for the top 2-3 companies to show how the sector leaders are growing.
 
@@ -290,7 +290,7 @@ def _render_filing_comparison(identifier: str, form: str = "10-K", compare_to: s
 
 3. **Previous Filing**: Use edgar_search with identifier="{identifier}", form="{form}", search_type="filings" to list recent filings. Pick the second one's accession_number, then use edgar_read with that accession_number and sections=["business", "risk_factors", "mda"].
 
-4. **Financial Trends**: Use edgar_trends with identifier="{identifier}" and concepts ["revenue", "net_income", "eps", "assets"] over 5 periods to see the trajectory.
+4. **Financial Trends**: Use edgar_trends with identifier="{identifier}" and concepts ["revenue", "net_income", "eps", "total_assets"] over 5 periods to see the trajectory.
 
 5. **Recent Events**: Use edgar_read with form="8-K" for {identifier} to check for material events between the two filing periods.
 
