@@ -102,7 +102,6 @@
     "orcl_IncomeLossFromContinuingOperationsIncludingNoncontrollingInterestBeforeIncomeTaxesExtraordinaryItems"
   ],
   "Income Tax Expense": [
-    "us-gaap_IncomeTaxesPaidNet",
     "us-gaap_IncomeTaxExpenseBenefit"
   ],
   "_comment_net_income_hierarchy": "NET INCOME HIERARCHY FIX: Separated total net income from component income types to prevent duplicate labels. Continuing operations income and profit/loss are components that should have distinct labels from total net income.",

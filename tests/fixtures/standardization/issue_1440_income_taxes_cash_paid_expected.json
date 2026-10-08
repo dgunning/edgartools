@@ -1,0 +1,33 @@
+{
+  "DeferredIncomeTaxLiabilitiesNet": [
+    "DeferredTaxNonCurrentLiabilities"
+  ],
+  "TaxesPayableCurrent": [
+    "TaxesPayable"
+  ],
+  "DeferredTaxLiabilities": [
+    "DeferredTaxNonCurrentLiabilities"
+  ],
+  "AccruedIncomeTaxesNoncurrent": [
+    "OtherNonOperatingNonCurrentLiabilities"
+  ],
+  "LiabilityForUncertainTaxPositionsNoncurrent": [
+    "OtherNonOperatingNonCurrentLiabilities"
+  ],
+  "DeferredTaxAssetsNet": [
+    "DeferredTaxNoncurrentAssets"
+  ],
+  "DeferredIncomeTaxExpenseBenefit": [
+    "DeferredIncomeTaxExpense"
+  ],
+  "AdjustmentsToAdditionalPaidInCapitalTaxEffectFromShareBasedCompensation": null,
+  "IncomeTaxEffectsAllocatedDirectlyToEquityEmployeeStockOptions": null,
+  "IncomeTaxReconciliationNondeductibleExpenseCharitableContributions": null,
+  "EffectiveIncomeTaxRateReconciliationShareBasedCompensationExcessTaxBenefitAmount": null,
+  "InterestPaidNet": null,
+  "IncomeTaxesPaidNet": null,
+  "IncomeTaxesPaid": null,
+  "InterestPaid": null,
+  "ProceedsFromIncomeTaxRefunds": null,
+  "InterestPaidCapitalized": null
+}
