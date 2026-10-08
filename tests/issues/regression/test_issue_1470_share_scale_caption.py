@@ -346,6 +346,32 @@ def test_raw_or_unsupported_precision_keeps_all_share_cells_unscaled(decimals, s
 
 
 @pytest.mark.parametrize("standard", [False, True])
+def test_exact_issued_and_weighted_average_shares_use_actual_units(standard):
+    # Synthetic renderer inputs exercise a shared unit across concept families.
+    issued = "us-gaap_CommonStockSharesIssued"
+    rendered = _render_custom_shares(
+        [
+            _share_item(
+                BASIC,
+                {CURRENT: 276_000_000, PREVIOUS: 280_000_000},
+                {CURRENT: -6, PREVIOUS: -6},
+            ),
+            _share_item(
+                issued,
+                {CURRENT: 38_818_536, PREVIOUS: 39_000_000},
+                {CURRENT: "INF", PREVIOUS: "INF"},
+            ),
+        ],
+        standard=standard,
+    )
+    assert rendered.header.metadata["shares_scale"] == 0
+    _assert_custom_share_cells(rendered, BASIC, [276_000_000, 280_000_000], ["276,000,000", "280,000,000"])
+    _assert_custom_share_cells(rendered, issued, [38_818_536, 39_000_000], ["38,818,536", "39,000,000"])
+    _assert_eps(rendered)
+    _assert_caption_exports(rendered, "[italic](In millions, except shares in actual amounts and per share data)[/italic]")
+
+
+@pytest.mark.parametrize("standard", [False, True])
 @pytest.mark.parametrize(
     "first_decimals,second_decimals,raw,formatted,scale,note_unit",
     [
