@@ -38514,13 +38514,13 @@
   },
   "DiscontinuedOperationAmountOfAdjustmentToPriorPeriodGainLossOnDisposalBeforeIncomeTax": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "DiscontinuedOperationsIncome"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Income from Discontinued Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 8,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
@@ -38530,13 +38530,13 @@
   },
   "DiscontinuedOperationAmountOfAdjustmentToPriorPeriodGainLossOnDisposalNetOfTax": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "DiscontinuedOperationsIncome"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Income from Discontinued Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 3,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -38546,13 +38546,13 @@
   },
   "DiscontinuedOperationAmountOfOtherIncomeLossFromDispositionOfDiscontinuedOperationNetOfTax": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "DiscontinuedOperationsIncome"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Income from Discontinued Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -38562,13 +38562,13 @@
   },
   "DiscontinuedOperationAmountOfOtherIncomeLossFromDispositionOfDiscontinuedOperationsBeforeIncomeTax": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "DiscontinuedOperationsIncome"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Income from Discontinued Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -38594,13 +38594,13 @@
   },
   "DiscontinuedOperationGainLossFromDisposalOfDiscontinuedOperationBeforeIncomeTax": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "DiscontinuedOperationsIncome"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Income from Discontinued Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 54,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.5,
@@ -38610,58 +38610,29 @@
   },
   "DiscontinuedOperationGainLossOnDisposalOfDiscontinuedOperationNetOfTax": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "DiscontinuedOperationsIncome"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Income from Discontinued Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 172,
     "occurrence_rate": 0.019,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.95
-      },
-      "Meals": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.947
-      }
-    }
+    "last_year": 2025
   },
   "DiscontinuedOperationIncomeLossFromDiscontinuedOperationBeforeIncomeTax": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "DiscontinuedOperationsIncome"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Income from Discontinued Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 147,
     "occurrence_rate": 0.016,
     "temporal_consistency": 0.583,
@@ -38671,13 +38642,13 @@
   },
   "DiscontinuedOperationIncomeLossFromDiscontinuedOperationDuringPhaseOutPeriodBeforeIncomeTax": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "DiscontinuedOperationsIncome"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Income from Discontinued Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 19,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
@@ -38687,13 +38658,13 @@
   },
   "DiscontinuedOperationIncomeLossFromDiscontinuedOperationDuringPhaseOutPeriodNetOfTax": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "DiscontinuedOperationsIncome"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Income from Discontinued Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 82,
     "occurrence_rate": 0.009,
     "temporal_consistency": 0.417,
@@ -38735,13 +38706,13 @@
   },
   "DiscontinuedOperationProvisionForLossGainOnDisposalBeforeIncomeTax": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "DiscontinuedOperationsIncome"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Income from Discontinued Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 5,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -38751,209 +38722,19 @@
   },
   "DiscontinuedOperationProvisionForLossGainOnDisposalNetOfTax": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "DiscontinuedOperationsIncome"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Income from Discontinued Operations",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 11,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2022,
     "last_year": 2025
-  },
-  "DiscontinuedOperationTaxEffectOfAdjustmentToPriorPeriodGainLossOnDisposal": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.167,
-    "years_present": 2,
-    "first_year": 2023,
-    "last_year": 2024
-  },
-  "DiscontinuedOperationTaxEffectOfDiscontinuedOperation": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 146,
-    "occurrence_rate": 0.016,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.979
-      },
-      "BusSv": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.933
-      },
-      "Chips": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.96
-      }
-    }
-  },
-  "DiscontinuedOperationTaxEffectOfIncomeLossFromDiscontinuedOperationDuringPhaseOutPeriod": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 9,
-    "occurrence_rate": 0.001,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
-  "DiscontinuedOperationTaxEffectOfIncomeLossFromDisposalOfDiscontinuedOperation": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 29,
-    "occurrence_rate": 0.003,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "BusSv": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
-  "DiscontinuedOperationTaxEffectOfOtherIncomeLossFromDispositionOfDiscontinuedOperation": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "DiscontinuedOperationTaxExpenseBenefitFromProvisionForGainLossOnDisposal": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 6,
-    "occurrence_rate": 0.001,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
   },
   "DisposalGroupIncludingDiscontinuedOperationAccountsNotesAndLoansReceivableNet": {
     "standard_tags": [
@@ -39192,22 +38973,6 @@
     "first_year": 2020,
     "last_year": 2025
   },
-  "DisposalGroupIncludingDiscontinuedOperationCostsOfGoodsSold": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
   "DisposalGroupIncludingDiscontinuedOperationDeferredRevenue": {
     "standard_tags": [
       "OtherNonOperatingCurrentLiabilities",
@@ -39338,22 +39103,6 @@
     "first_year": null,
     "last_year": null
   },
-  "DisposalGroupIncludingDiscontinuedOperationGeneralAndAdministrativeExpense": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2024,
-    "last_year": 2024
-  },
   "DisposalGroupIncludingDiscontinuedOperationGoodwill1": {
     "standard_tags": [
       "OtherNonOperatingCurrentAssets",
@@ -39404,22 +39153,6 @@
     "first_year": 2023,
     "last_year": 2023
   },
-  "DisposalGroupIncludingDiscontinuedOperationGrossProfitLoss": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 3,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
   "DisposalGroupIncludingDiscontinuedOperationIntangibleAssets": {
     "standard_tags": [
       "OtherNonOperatingCurrentAssets",
@@ -39468,22 +39201,6 @@
     "temporal_consistency": 0.25,
     "years_present": 3,
     "first_year": 2022,
-    "last_year": 2024
-  },
-  "DisposalGroupIncludingDiscontinuedOperationInterestExpense": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2024,
     "last_year": 2024
   },
   "DisposalGroupIncludingDiscontinuedOperationInventory1": {
@@ -39582,38 +39299,6 @@
     "first_year": null,
     "last_year": null
   },
-  "DisposalGroupIncludingDiscontinuedOperationOperatingExpense": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 2,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
-  "DisposalGroupIncludingDiscontinuedOperationOperatingIncomeLoss": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 4,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.25,
-    "years_present": 3,
-    "first_year": 2022,
-    "last_year": 2024
-  },
   "DisposalGroupIncludingDiscontinuedOperationOtherAssets": {
     "standard_tags": [
       "OtherNonOperatingCurrentAssets",
@@ -39663,38 +39348,6 @@
     "years_present": 4,
     "first_year": 2021,
     "last_year": 2024
-  },
-  "DisposalGroupIncludingDiscontinuedOperationOtherExpense": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2022,
-    "last_year": 2022
-  },
-  "DisposalGroupIncludingDiscontinuedOperationOtherIncome": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
   },
   "DisposalGroupIncludingDiscontinuedOperationOtherLiabilities": {
     "standard_tags": [
@@ -39930,22 +39583,6 @@
     "confidence": 0.5,
     "company_count": 9,
     "occurrence_rate": 0.001,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
-  "DisposalGroupIncludingDiscontinuedOperationRevenue": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2021,
@@ -55998,22 +55635,6 @@
     "first_year": 2021,
     "last_year": 2025
   },
-  "IncomeLossBeforeExtraordinaryItemsAndCumulativeEffectOfChangeInAccountingPrinciple": {
-    "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
-    ],
-    "display_name": "Extraordinary Items",
-    "statement": "IncomeStatement",
-    "section": "Net Income",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
   "IncomeLossFromContinuingOperations": {
     "standard_tags": [
       "IncomeLossContinuingOperations"
@@ -56909,84 +56530,19 @@
   },
   "IncomeLossFromDiscontinuedOperationsNetOfTaxAttributableToNoncontrollingInterest": {
     "standard_tags": [
-      "ExtraordinaryItemsIncomeExpense(PostTax)"
+      "MinorityInterestIncomeExpense"
     ],
-    "display_name": "Extraordinary Items",
+    "display_name": "Net Income Attributable to Noncontrolling Interest",
     "statement": "IncomeStatement",
     "section": "Net Income",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 109,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.9
-      },
-      "BusSv": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "ExtraordinaryItemsIncomeExpense(PostTax)"
-        ],
-        "display_name": "Extraordinary Items",
-        "section": "Net Income",
-        "is_total": false,
-        "confidence": 0.911
-      }
-    }
+    "last_year": 2025
   },
   "IncomeLossFromDiscontinuedOperationsNetOfTaxAttributableToReportingEntity": {
     "standard_tags": [

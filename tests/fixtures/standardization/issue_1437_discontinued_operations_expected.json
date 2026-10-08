@@ -1,0 +1,54 @@
+{
+  "DiscontinuedOperationGainLossOnDisposalOfDiscontinuedOperationNetOfTax": [
+    "DiscontinuedOperationsIncome"
+  ],
+  "DiscontinuedOperationIncomeLossFromDiscontinuedOperationBeforeIncomeTax": [
+    "DiscontinuedOperationsIncome"
+  ],
+  "DiscontinuedOperationTaxEffectOfDiscontinuedOperation": null,
+  "IncomeLossFromDiscontinuedOperationsNetOfTaxAttributableToNoncontrollingInterest": [
+    "MinorityInterestIncomeExpense"
+  ],
+  "DiscontinuedOperationIncomeLossFromDiscontinuedOperationDuringPhaseOutPeriodNetOfTax": [
+    "DiscontinuedOperationsIncome"
+  ],
+  "DiscontinuedOperationGainLossFromDisposalOfDiscontinuedOperationBeforeIncomeTax": [
+    "DiscontinuedOperationsIncome"
+  ],
+  "DiscontinuedOperationTaxEffectOfIncomeLossFromDisposalOfDiscontinuedOperation": null,
+  "DiscontinuedOperationIncomeLossFromDiscontinuedOperationDuringPhaseOutPeriodBeforeIncomeTax": [
+    "DiscontinuedOperationsIncome"
+  ],
+  "DiscontinuedOperationProvisionForLossGainOnDisposalNetOfTax": [
+    "DiscontinuedOperationsIncome"
+  ],
+  "DiscontinuedOperationTaxEffectOfIncomeLossFromDiscontinuedOperationDuringPhaseOutPeriod": null,
+  "DiscontinuedOperationAmountOfAdjustmentToPriorPeriodGainLossOnDisposalBeforeIncomeTax": [
+    "DiscontinuedOperationsIncome"
+  ],
+  "DiscontinuedOperationTaxExpenseBenefitFromProvisionForGainLossOnDisposal": null,
+  "DiscontinuedOperationProvisionForLossGainOnDisposalBeforeIncomeTax": [
+    "DiscontinuedOperationsIncome"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationOperatingIncomeLoss": null,
+  "DiscontinuedOperationAmountOfAdjustmentToPriorPeriodGainLossOnDisposalNetOfTax": [
+    "DiscontinuedOperationsIncome"
+  ],
+  "DisposalGroupIncludingDiscontinuedOperationGrossProfitLoss": null,
+  "DisposalGroupIncludingDiscontinuedOperationOperatingExpense": null,
+  "DiscontinuedOperationTaxEffectOfAdjustmentToPriorPeriodGainLossOnDisposal": null,
+  "DisposalGroupIncludingDiscontinuedOperationCostsOfGoodsSold": null,
+  "DisposalGroupIncludingDiscontinuedOperationGeneralAndAdministrativeExpense": null,
+  "DisposalGroupIncludingDiscontinuedOperationInterestExpense": null,
+  "DisposalGroupIncludingDiscontinuedOperationOtherExpense": null,
+  "DisposalGroupIncludingDiscontinuedOperationRevenue": null,
+  "DiscontinuedOperationAmountOfOtherIncomeLossFromDispositionOfDiscontinuedOperationNetOfTax": [
+    "DiscontinuedOperationsIncome"
+  ],
+  "DiscontinuedOperationAmountOfOtherIncomeLossFromDispositionOfDiscontinuedOperationsBeforeIncomeTax": [
+    "DiscontinuedOperationsIncome"
+  ],
+  "DiscontinuedOperationTaxEffectOfOtherIncomeLossFromDispositionOfDiscontinuedOperation": null,
+  "DisposalGroupIncludingDiscontinuedOperationOtherIncome": null,
+  "IncomeLossBeforeExtraordinaryItemsAndCumulativeEffectOfChangeInAccountingPrinciple": null
+}
