@@ -1,0 +1,1 @@
+**`ReverseIndex.lookup()` misclassified prepaid, intangible and other disclosures.** 29 entries are remapped and four removed. Coca-Cola's FY2023 10-K (0000021344-24-000009) had `Goodwill` rows totaling $32,707M; now they total $18,358M, with $14,349M of trademarks mapped to `IntangibleAssets`. (GH #1438)
