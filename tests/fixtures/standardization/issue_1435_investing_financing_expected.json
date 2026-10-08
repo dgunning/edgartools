@@ -1,0 +1,197 @@
+{
+  "CapitalLeaseObligationsIncurred": null,
+  "CashAcquiredFromAcquisition": [
+    "AcquisitionsNet"
+  ],
+  "CashDivestedFromDeconsolidation": [
+    "DivestitureProceeds"
+  ],
+  "CashProvidedByUsedInFinancingActivitiesDiscontinuedOperations": null,
+  "CashProvidedByUsedInInvestingActivitiesDiscontinuedOperations": null,
+  "MinorityInterestDecreaseFromDistributionsToNoncontrollingInterestHolders": [
+    "DividendsEquity"
+  ],
+  "NetCashProvidedByUsedInDiscontinuedOperations": null,
+  "NotesIssued1": null,
+  "PaymentForContingentConsiderationLiabilityFinancingActivities": null,
+  "PaymentOfFinancingAndStockIssuanceCosts": [
+    "PaymentsOfDebtIssuanceCosts"
+  ],
+  "PaymentsForCapitalImprovements": [
+    "CapitalExpenses"
+  ],
+  "PaymentsForDerivativeInstrumentFinancingActivities": null,
+  "PaymentsForProceedsFromInvestments": [
+    "InvestmentPurchases"
+  ],
+  "PaymentsForProceedsFromLoansReceivable": [
+    "InvestmentPurchases"
+  ],
+  "PaymentsForProceedsFromOtherInvestingActivities": null,
+  "PaymentsForProceedsFromProductiveAssets": [
+    "CapitalExpenses"
+  ],
+  "PaymentsForProceedsFromShortTermInvestments": [
+    "InvestmentPurchases"
+  ],
+  "PaymentsForRepurchaseOfInitialPublicOffering": [
+    "StockRepurchasePayments"
+  ],
+  "PaymentsForRepurchaseOfRedeemableNoncontrollingInterest": [
+    "DistributionsToMinorityInterests"
+  ],
+  "PaymentsOfCapitalDistribution": [
+    "CommonDividendsPaid"
+  ],
+  "PaymentsOfDebtExtinguishmentCosts": [
+    "DebtRepayments"
+  ],
+  "PaymentsOfDistributionsToAffiliates": [
+    "CommonDividendsPaid"
+  ],
+  "PaymentsOfDividendsCommonStock": [
+    "CommonDividendsPaid"
+  ],
+  "PaymentsOfDividendsPreferredStockAndPreferenceStock": [
+    "CommonDividendsPaid"
+  ],
+  "PaymentsOfLoanCosts": [
+    "PaymentsOfDebtIssuanceCosts"
+  ],
+  "PaymentsOfMergerRelatedCostsFinancingActivities": [
+    "PaymentsOfDebtIssuanceCosts"
+  ],
+  "PaymentsOfOrdinaryDividends": [
+    "CommonDividendsPaid"
+  ],
+  "PaymentsOfStockIssuanceCosts": null,
+  "PaymentsRelatedToTaxWithholdingForShareBasedCompensation": null,
+  "PaymentsToAcquireInterestInJointVenture": [
+    "InvestmentPurchases"
+  ],
+  "PaymentsToAcquireInterestInSubsidiariesAndAffiliates": [
+    "InvestmentPurchases"
+  ],
+  "PaymentsToAcquireLifeInsurancePolicies": [
+    "InvestmentPurchases"
+  ],
+  "PaymentsToAcquireLoansReceivable": [
+    "InvestmentPurchases"
+  ],
+  "PaymentsToAcquireMachineryAndEquipment": [
+    "CapitalExpenses"
+  ],
+  "PaymentsToAcquireNotesReceivable": [
+    "InvestmentPurchases"
+  ],
+  "PaymentsToAcquireRealEstate": [
+    "CapitalExpenses"
+  ],
+  "PaymentsToFundLongtermLoansToRelatedParties": [
+    "InvestmentPurchases"
+  ],
+  "ProceedsFromCollectionOfLoansReceivable": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromCollectionOfLongtermLoansToRelatedParties": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromCollectionOfNotesReceivable": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromContributedCapital": [
+    "StockIssuanceProceeds"
+  ],
+  "ProceedsFromContributionsFromAffiliates": [
+    "StockIssuanceProceeds"
+  ],
+  "ProceedsFromContributionsFromParent": [
+    "StockIssuanceProceeds"
+  ],
+  "ProceedsFromDebtNetOfIssuanceCosts": [
+    "DebtProceeds"
+  ],
+  "ProceedsFromEquityMethodInvestmentDividendsOrDistributionsReturnOfCapital": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromInsuranceSettlementInvestingActivities": [
+    "ProceedsFromSaleOfPPE"
+  ],
+  "ProceedsFromIssuanceInitialPublicOffering": [
+    "StockIssuanceProceeds"
+  ],
+  "ProceedsFromIssuanceOfPrivatePlacement": [
+    "StockIssuanceProceeds"
+  ],
+  "ProceedsFromLifeInsurancePolicies": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromLinesOfCredit": [
+    "DebtProceeds"
+  ],
+  "ProceedsFromOtherEquity": [
+    "StockIssuanceProceeds"
+  ],
+  "ProceedsFromPaymentsForOtherFinancingActivities": null,
+  "ProceedsFromPaymentsToMinorityShareholders": [
+    "StockIssuanceProceeds"
+  ],
+  "ProceedsFromRepaymentsOfLinesOfCredit": [
+    "DebtProceeds"
+  ],
+  "ProceedsFromRepaymentsOfNotesPayable": [
+    "DebtProceeds"
+  ],
+  "ProceedsFromRepaymentsOfOtherDebt": [
+    "DebtProceeds"
+  ],
+  "ProceedsFromRepaymentsOfRelatedPartyDebt": [
+    "DebtProceeds"
+  ],
+  "ProceedsFromRepaymentsOfShortTermDebt": [
+    "DebtProceeds"
+  ],
+  "ProceedsFromSaleAndMaturityOfHeldToMaturitySecurities": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromSaleAndMaturityOfOtherInvestments": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromSaleMaturityAndCollectionsOfInvestments": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromSaleOfEquityMethodInvestments": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromSaleOfEquitySecuritiesFvNi": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromSaleOfForeclosedAssets": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromSaleOfIntangibleAssets": [
+    "ProceedsFromSaleOfPPE"
+  ],
+  "ProceedsFromSaleOfOtherRealEstate": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromSaleOfRealEstateHeldforinvestment": [
+    "InvestmentProceeds"
+  ],
+  "ProceedsFromSalesOfAssetsInvestingActivities": null,
+  "ProceedsFromSalesOfBusinessAffiliateAndProductiveAssets": null,
+  "ProceedsFromWarrantExercises": [
+    "StockIssuanceProceeds"
+  ],
+  "RepaymentOfNotesReceivableFromRelatedParties": [
+    "InvestmentProceeds"
+  ],
+  "RepaymentsOfLinesOfCredit": [
+    "DebtRepayments"
+  ],
+  "RestrictedStockValueSharesIssuedNetOfTaxWithholdings": [
+    "StockCompensationEquityImpact"
+  ],
+  "StockIssued1": null,
+  "StockIssuedDuringPeriodSharesAcquisitions": null
+}
