@@ -514,10 +514,18 @@ class MarkdownRenderer:
                 [self._expand_row_to_columns(row.cells, max_columns) for row in node.rows],
             )
 
-        # HTML rowspan=0 reaches the end of the header group. Project that
-        # span for the header matrix without modifying the original cells.
-        header_rows = [[replace(cell, rowspan=len(node.headers) - row_index) if cell.rowspan == 0 else cell
-                        for cell in row] for row_index, row in enumerate(node.headers)]
+        # Parsed headers can omit blank physical rows crossed by a rowspan.
+        # Use the source grid without changing public cells or body spacers.
+        groups = self._header_groups(node)
+        header_rows = []
+        for group in groups:
+            for row_index, (row, is_header) in enumerate(group):
+                remaining = len(group) - row_index
+                header_rows.append([
+                    replace(cell, content=cell.content if is_header else '',
+                            rowspan=remaining if cell.rowspan == 0 else min(cell.rowspan, remaining))
+                    for cell in row
+                ])
         # Use the matrix only for headers; retain the body expansion below.
         matrix = TableMatrix().build_from_rows(header_rows, [])
         max_columns = max(matrix.col_count, max((sum(cell.colspan for cell in row.cells)
@@ -544,6 +552,28 @@ class MarkdownRenderer:
                     expanded[column] = entry.original_cell.text().strip()
 
         return expanded_headers, expanded_data_rows
+
+    def _header_groups(self, node: TableNode) -> tuple:
+        """Use source geometry while the public header cells still match it."""
+        geometry = getattr(node, '_header_geometry', None)
+        if geometry is not None and node.headers is geometry.headers and len(node.headers) == len(geometry.source_rows):
+            matches = True
+            for current, (source_row, cells) in zip(node.headers, geometry.source_rows, strict=True):
+                if current is not source_row or len(current) < len(cells):
+                    matches = False
+                    break
+                if any(current[index] is not cell for index, cell in enumerate(cells)):
+                    matches = False
+                    break
+                # Rich appends empty one-column cells; they are not source
+                # geometry. Other public header replacements use the fallback.
+                if any(cell.text().strip() or cell.colspan != 1 or cell.rowspan != 1
+                       for cell in current[len(cells):]):
+                    matches = False
+                    break
+            if matches:
+                return geometry.groups
+        return (tuple((tuple(row), True) for row in node.headers),)
 
     def _expand_row_to_columns(self, cells: List, target_columns: int) -> List[str]:
         """Expand a row with colspan cells to match the target column count."""

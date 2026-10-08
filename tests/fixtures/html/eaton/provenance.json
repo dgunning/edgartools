@@ -1,0 +1,44 @@
+[
+  {
+    "file": "etn-20241231-table-28.html",
+    "accession": "0001551182-25-000006",
+    "primary_document": "etn-20241231.htm",
+    "document_table_index_0based": 28,
+    "raw_sha256": "80735b0481d2b59aeebabd80d35b31f37702e82e8d7a3b29a0441c303f02a779",
+    "fragment_sha256": "e2c130b2277366f7b3c4b597c93a9843b27f71da052cd64d76ed8d572fba4fd6",
+    "bytes": 123371,
+    "source_character_start": 983802,
+    "source_character_end": 1107173,
+    "source_byte_start": 983802,
+    "source_byte_end": 1107173,
+    "extraction": "Exact contiguous raw UTF-8 table bytes; own-row text/colspan/rowspan signatures match the observed Document table."
+  },
+  {
+    "file": "etn-20260331-table-22.html",
+    "accession": "0001551182-26-000013",
+    "primary_document": "etn-20260331.htm",
+    "document_table_index_0based": 22,
+    "raw_sha256": "0193229726f6bf96dc280d339159405797a2b814bcf534932a76daa8a7ff5baa",
+    "fragment_sha256": "8b4cd86ff8e5b926520ef0bb2dfec244c05ee005b81e731aa5d9b3a131881d20",
+    "bytes": 65578,
+    "source_character_start": 594524,
+    "source_character_end": 660102,
+    "source_byte_start": 594524,
+    "source_byte_end": 660102,
+    "extraction": "Exact contiguous raw UTF-8 table bytes; own-row text/colspan/rowspan signatures match the observed Document table."
+  },
+  {
+    "file": "etn-20260331-table-23.html",
+    "accession": "0001551182-26-000013",
+    "primary_document": "etn-20260331.htm",
+    "document_table_index_0based": 23,
+    "raw_sha256": "0193229726f6bf96dc280d339159405797a2b814bcf534932a76daa8a7ff5baa",
+    "fragment_sha256": "e99084b433226f0a88aaf6c75ccde303f0adebaaf2c1bf4fd1ef1d0e83541544",
+    "bytes": 68912,
+    "source_character_start": 660136,
+    "source_character_end": 729048,
+    "source_byte_start": 660136,
+    "source_byte_end": 729048,
+    "extraction": "Exact contiguous raw UTF-8 table bytes; own-row text/colspan/rowspan signatures match the observed Document table."
+  }
+]
