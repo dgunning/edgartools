@@ -27,9 +27,11 @@ class EffectiveData:
                  accession_no: Optional[str],
                  submission_type: Optional[str],
                  form: Optional[str],
-                 filer: Filer
+                 filer: Filer,
+                 final_effective_time: Optional[str] = None
                  ):
         self.final_effective_date: str = final_effective_date
+        self.final_effective_time: Optional[str] = final_effective_time
         self.file_number: Optional[str] = file_number
         self.accession_no: Optional[str] = accession_no
         self.form: Optional[str] = form
@@ -55,7 +57,23 @@ class Effect:
 
     @property
     def effective_date(self) -> str:
+        """Date the registration became effective (YYYY-MM-DD).
+
+        The notice's filing date equals this date, but SEC accepts and publishes
+        the notice at about 00:15 ET on the next business day, so it is not
+        public on its filing date. For point-in-time use, read
+        `filing.header.acceptance_datetime`.
+        """
         return self.effectiveness_data.final_effective_date
+
+    @property
+    def effective_time(self) -> Optional[str]:
+        """Time of day the registration became effective (HH:MM:SS, Eastern), or None.
+
+        Notices for an initial registration usually carry it; notices for a
+        post-effective amendment (POS AM) usually do not.
+        """
+        return self.effectiveness_data.final_effective_time
 
     @property
     def cik(self):
@@ -121,6 +139,8 @@ class Effect:
 
         # === CORE METADATA ===
         lines.append(f"Effective Date: {self.effective_date}")
+        if self.effective_time:
+            lines.append(f"Effective Time: {self.effective_time} ET")
         lines.append(f"Source Form: {self.source_submission_type}")
         if self.source_accession_no:
             lines.append(f"Source Accession: {self.source_accession_no}")
@@ -136,6 +156,7 @@ class Effect:
         lines.append("  .get_source_filing()       Navigate to the source filing")
         lines.append("  .summary()                 Summary as DataFrame")
         lines.append("  .effective_date            When the filing became effective")
+        lines.append("  .effective_time            Time of day it became effective (ET), if given")
         lines.append("  .source_submission_type    Form type that was made effective")
 
         return "\n".join(lines)
@@ -186,6 +207,7 @@ class Effect:
             is_live=child_text(root, "testOrLive") == 'LIVE',
             effectiveness_data=EffectiveData(
                 final_effective_date=child_text(effectiveness_el, "finalEffectivenessDispDate"),
+                final_effective_time=child_text(effectiveness_el, "finalEffectivenessDispTime"),
                 accession_no=child_text(effectiveness_el, "accessionNumber"),
                 file_number=child_text(effectiveness_el, "fileNumber"),
                 submission_type=child_text(effectiveness_el, "submissionType"),
