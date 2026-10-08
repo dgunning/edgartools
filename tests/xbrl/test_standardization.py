@@ -305,44 +305,66 @@ def test_bottom_up_handles_empty_items():
 
 
 # ── Industry overrides ──────────────────────────────────────────────────────
+#
+# The shipped gaap_mappings.json carries no industry_overrides since GH #1419:
+# every record restated its base entry, narrowed it to its first candidate or
+# swapped it, so they were removed (the invariant that no industry loses a base
+# mapping is in tests/issues/regression/test_issue_1419_industry_overrides.py).
+# The override mechanism is exercised here on a one-entry mapping file.
 
-def test_industry_override_resolves_ambiguous_tag():
+@pytest.fixture
+def index_with_banks_override(tmp_path):
+    """A ReverseIndex over one ambiguous entry that carries a Banks override."""
+    from edgar.xbrl.standardization.reverse_index import ReverseIndex
+
+    mappings = {
+        "AccountsPayableCurrentAndNoncurrent": {
+            "standard_tags": ["TradePayables", "OtherOperatingNonCurrentLiabilities"],
+            "ambiguous": True,
+            "industry_overrides": {
+                "Banks": {"standard_tags": ["OtherOperatingNonCurrentLiabilities"]},
+            },
+        },
+    }
+    path = tmp_path / "gaap_mappings.json"
+    path.write_text(json.dumps(mappings), encoding="utf-8")
+    return ReverseIndex(gaap_mappings_path=str(path))
+
+
+def test_industry_override_resolves_ambiguous_tag(index_with_banks_override):
     """Industry override narrows ambiguous tag to single concept."""
-    from edgar.xbrl.standardization.reverse_index import get_reverse_index
-    idx = get_reverse_index()
+    idx = index_with_banks_override
 
     # Without industry: ambiguous
-    result = idx.lookup("DeferredIncomeTaxLiabilitiesNet")
+    result = idx.lookup("AccountsPayableCurrentAndNoncurrent")
     assert result.is_ambiguous
-    assert len(result.standard_concepts) == 2
+    assert result.standard_concepts == ["TradePayables", "OtherOperatingNonCurrentLiabilities"]
 
-    # With Banks industry: resolved to single concept
-    result_banks = idx.lookup("DeferredIncomeTaxLiabilitiesNet", industry="Banks")
+    # With Banks industry: the override's single concept
+    result_banks = idx.lookup("AccountsPayableCurrentAndNoncurrent", industry="Banks")
     assert not result_banks.is_ambiguous
-    assert len(result_banks.standard_concepts) == 1
-    assert result_banks.standard_concepts[0] == "DeferredTaxCurrentLiabilities"
+    assert result_banks.standard_concepts == ["OtherOperatingNonCurrentLiabilities"]
 
 
-def test_industry_override_unknown_industry_returns_base():
+def test_industry_override_unknown_industry_returns_base(index_with_banks_override):
     """Unknown industry code falls back to base entry."""
-    from edgar.xbrl.standardization.reverse_index import get_reverse_index
-    idx = get_reverse_index()
+    idx = index_with_banks_override
 
-    result_base = idx.lookup("DeferredIncomeTaxLiabilitiesNet")
-    result_unknown = idx.lookup("DeferredIncomeTaxLiabilitiesNet", industry="FakeIndustry")
+    result_base = idx.lookup("AccountsPayableCurrentAndNoncurrent")
+    result_unknown = idx.lookup("AccountsPayableCurrentAndNoncurrent", industry="FakeIndustry")
     assert result_unknown.standard_concepts == result_base.standard_concepts
     assert result_unknown.is_ambiguous == result_base.is_ambiguous
 
 
-def test_industry_override_via_get_standard_concept():
+def test_industry_override_via_get_standard_concept(index_with_banks_override):
     """get_standard_concept passes industry through to lookup."""
-    from edgar.xbrl.standardization.reverse_index import get_reverse_index
-    idx = get_reverse_index()
+    idx = index_with_banks_override
 
-    # AccountsPayableCurrentAndNoncurrent is ambiguous: TradePayables vs OtherOperatingNonCurrentLiabilities
-    # Banks override resolves to TradePayables
+    # Base: ambiguous and no context, so the first candidate
+    assert idx.get_standard_concept("AccountsPayableCurrentAndNoncurrent") == "TradePayables"
+    # Banks: the override's concept, not that fallback
     concept = idx.get_standard_concept("AccountsPayableCurrentAndNoncurrent", industry="Banks")
-    assert concept == "TradePayables"
+    assert concept == "OtherOperatingNonCurrentLiabilities"
 
 
 def test_sic_to_fama_french_mapping():

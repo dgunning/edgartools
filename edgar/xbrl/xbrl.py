@@ -279,6 +279,19 @@ def _capture_sgml_period_of_report(xbrl: "XBRL", filing) -> None:
         )
 
 
+def _sic_code_from_header(sic: Optional[str]) -> Optional[str]:
+    """The bare SIC code in a filing header's SIC field, or None if there is none.
+
+    The full-text SEC header shows the SIC as 'NATIONAL COMMERCIAL BANKS [6021]',
+    or '[]' when the filer has none. The daily-feed header's ASSIGNED-SIC is
+    already the bare '6021'.
+    """
+    if not sic:
+        return None
+    code = sic.strip().rpartition("[")[2].rstrip("]")
+    return code if code.isdigit() else None
+
+
 # Members that aggregate other members of the same axis, rather than being a
 # disjoint part of the breakdown. Adding one of these to its own components
 # double-counts them.
@@ -1042,11 +1055,16 @@ class XBRL:
                 # Only use SIC if header is already loaded (no extra network call)
                 header = filing._sgml.header
                 if header and header.filers:
-                    sic = header.filers[0].company_data.assigned_sic
+                    company = header.filers[0].company_information
+                    sic = _sic_code_from_header(company.sic) if company else None
                     if sic:
                         xbrl.standardization.set_industry_from_sic(sic)
-        except Exception:
-            pass
+        except Exception as e:
+            log.debug(
+                "Could not set the industry from the filing header SIC for %s: %s",
+                getattr(filing, "accession_no", "<unknown filing>"),
+                e,
+            )
 
         # Load authoritative categories from FilingSummary.xml
         # SGML is already loaded from filing.attachments above, so this is zero-cost
