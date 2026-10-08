@@ -7,9 +7,10 @@ from edgar.reference.data.common import read_csv_from_package
 @lru_cache(maxsize=1)
 def _load_place_codes() -> dict:
     """Load place codes from CSV file."""
-    df = read_csv_from_package('place_codes.csv')
-    # Create mapping from code to (place_name, type)
-    return {row['Code']: (row['Place'].title(), row['Type']) for _, row in df.iterrows()}
+    # keep_default_na=False: Namibia's ISO code "NA" is a value, not a missing one.
+    df = read_csv_from_package('place_codes.csv', keep_default_na=False)
+    # Create mapping from code to (place_name, type, iso_country_code)
+    return {row['Code']: (row['Place'].title(), row['Type'], row['ISO'] or None) for _, row in df.iterrows()}
 
 
 def get_place_name(code: str) -> Optional[str]:
@@ -41,6 +42,26 @@ def get_place_type(code: str) -> Optional[str]:
     place_codes = _load_place_codes()
     result = place_codes.get(code)
     return result[1] if result else None
+
+
+def get_place_country_code(code: str) -> Optional[str]:
+    """
+    Get the ISO 3166-1 alpha-2 country code for a state/country code.
+
+    US states map to 'US' and Canadian provinces to 'CA'. US territories map to
+    their own ISO code ('PR', 'GU', 'VI', 'AS', 'MP', 'UM'), as ISO assigns them one.
+    Netherlands Antilles ('P8') maps to the withdrawn code 'AN'.
+
+    Args:
+        code: The SEC place code (e.g., 'DE', 'A6', 'E9')
+
+    Returns:
+        The ISO country code (e.g., 'US', 'CA', 'KY'), or None if the code is
+        unknown ('XX') or not found
+    """
+    place_codes = _load_place_codes()
+    result = place_codes.get(code)
+    return result[2] if result else None
 
 
 def get_filer_type(state_code: str) -> Optional[str]:
