@@ -1,5 +1,7 @@
 """Retain physical header-row geometry when Markdown omits body spacers.
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1474
+
 Eaton's 2024 10-K (0001551182-25-000006, table 28) and 2026 Q1 10-Q
 (0001551182-26-000013, tables 22/23) place a blank physical row between
 rowspanning equity groups and their Shares/Dollars leaves. The fixtures are
