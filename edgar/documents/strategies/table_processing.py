@@ -4,6 +4,7 @@ Advanced table processing strategy.
 
 import logging
 import re
+from dataclasses import dataclass
 from functools import lru_cache
 from typing import List, Optional
 
@@ -15,6 +16,14 @@ from edgar.documents.table_nodes import Cell, Row, TableNode
 from edgar.documents.types import TableType
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass(frozen=True)
+class _HeaderGeometry:
+    """Source rows for grouped Markdown, separate from public table exports."""
+    headers: List[List[Cell]]
+    source_rows: tuple
+    groups: tuple
 
 
 def _text_content(elem) -> str:
@@ -201,6 +210,14 @@ class TableProcessor:
 
     def _process_table_structure(self, element: HtmlElement, table: TableNode):
         """Process table structure (thead, tbody, tfoot)."""
+        physical_header_rows = []
+
+        def remember_row(tr, cells, is_header):
+            group = tr.getparent()
+            while group is not element and group is not None and group.tag not in ('thead', 'tbody', 'tfoot'):
+                group = group.getparent()
+            physical_header_rows.append((group, tuple(cells), is_header and bool(cells)))
+
         # Process thead
         thead = self._own_section(element, 'thead')
         # Identity, not id(). lxml materializes element proxies on demand and frees them
@@ -214,6 +231,7 @@ class TableProcessor:
         thead_rows = list(self._own_rows(thead)) if thead is not None else []
         for tr in thead_rows:
             cells = self._process_row(tr, is_header=True)
+            remember_row(tr, cells, True)
             if cells:
                 table.headers.append(cells)
 
@@ -259,6 +277,8 @@ class TableProcessor:
                                 is_header_row = True
 
             cells = self._process_row(tr, is_header=is_header_row)
+            if not data_rows_started:
+                remember_row(tr, cells, is_header_row)
             if cells:
                 if is_header_row:
                     table.headers.append(cells)
@@ -300,6 +320,31 @@ class TableProcessor:
                             data_rows_started = True
 
                     consecutive_header_rows = 0
+
+        if len(table.headers) >= 2:
+            groups = []
+            pending_rows = []
+            last_header = -1
+            previous_group = None
+            for group, cells, is_header in physical_header_rows:
+                # Physical rows between detected headers still occupy the
+                # source grid. Rowspans cannot cross an HTML row-group boundary.
+                if group is not previous_group:
+                    if last_header >= 0:
+                        groups.append(tuple(pending_rows[:last_header + 1]))
+                    pending_rows = []
+                    last_header = -1
+                previous_group = group
+                pending_rows.append((cells, is_header))
+                if is_header:
+                    last_header = len(pending_rows) - 1
+            if last_header >= 0:
+                groups.append(tuple(pending_rows[:last_header + 1]))
+            # Freeze row sequences, retaining Cell references so content edits
+            # remain visible. Rich may append padding to the public row lists.
+            table._header_geometry = _HeaderGeometry(
+                table.headers, tuple((row, tuple(row)) for row in table.headers), tuple(groups)
+            )
 
         # Process tfoot
         tfoot = self._own_section(element, 'tfoot')
