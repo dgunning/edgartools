@@ -25,9 +25,15 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import List, Optional, Union
 
+from edgar.exceptions import InvalidDateError, TransportError
+
 logger = logging.getLogger(__name__)
 
 EFTS_BASE_URL = "https://efts.sec.gov/LATEST/search-index"
+# EFTS serves 100 hits per request whatever `size` says, and rejects from + 100 > 10,000.
+EFTS_PAGE_SIZE = 100
+EFTS_RESULT_WINDOW = 10_000
+EFTS_LAST_OFFSET = EFTS_RESULT_WINDOW - EFTS_PAGE_SIZE
 
 
 @dataclass
@@ -297,7 +303,7 @@ class EFTSSearch:
         if not self._params:
             return None
         next_offset = self._offset + len(self.results)
-        if next_offset >= self.total:
+        if next_offset >= self.total or next_offset > EFTS_LAST_OFFSET:
             return None
         results, total, aggregations = _fetch_page(
             self._params, offset=next_offset, limit=min(100, self.total - next_offset)
@@ -314,7 +320,8 @@ class EFTSSearch:
     def fetch_more(self, n: int = 100) -> 'EFTSSearch':
         """Fetch up to n more results, append to current. Returns new EFTSSearch with combined results.
 
-        EFTS caps deep pagination at ~10,000; this method caps at 5,000 additional results.
+        EFTS caps deep pagination at 10,000 (`EFTS_RESULT_WINDOW`); this method caps at 5,000
+        additional results and stops before a page EFTS would refuse.
         """
         if not self._params:
             return self
@@ -324,7 +331,7 @@ class EFTSSearch:
         collected = 0
         current_offset = self._offset + len(self.results)
 
-        while collected < n and current_offset < self.total:
+        while collected < n and current_offset < self.total and current_offset <= EFTS_LAST_OFFSET:
             page_size = min(100, n - collected, self.total - current_offset)
             if page_size <= 0:
                 break
@@ -429,9 +436,9 @@ def _fetch_page(params: dict, offset: int = 0, limit: int = 100):
         request_params["from"] = offset
 
     response = get_with_retry(EFTS_BASE_URL, params=request_params)
-    data = orjson.loads(response.content)
+    data = _efts_payload(orjson.loads(response.content), request_params)
 
-    hits = data.get("hits", {})
+    hits = data["hits"]
     total = hits.get("total", {}).get("value", 0)
     results = []
 
@@ -444,6 +451,22 @@ def _fetch_page(params: dict, offset: int = 0, limit: int = 100):
     aggregations = _parse_aggregations(data.get("aggregations", {}))
 
     return results, total, aggregations
+
+
+def _efts_payload(data: dict, params: dict) -> dict:
+    """Return an EFTS response body, raising when it is an error instead of results.
+
+    EFTS reports a failed query with HTTP 200 and a body like
+    ``{"errorType": "ResponseError", "errorMessage": "..."}`` (an invalid date
+    such as ``2024-13-01``, or ``from`` past 10,000). Read with ``.get("hits", {})``
+    that body is indistinguishable from a search with no matches.
+    """
+    if "hits" in data:
+        return data
+
+    message = data.get("errorMessage") or f"EFTS returned no 'hits' block (keys: {sorted(data)})"
+    raise TransportError(f"EFTS search failed: {message[:300]}", context={"params": params},
+                         url=EFTS_BASE_URL, status_code=200)
 
 
 def _parse_hit(hit: dict) -> EFTSResult:
@@ -539,6 +562,9 @@ def search_filings(
 
     Raises:
         ValueError: If neither ``query`` nor ``items`` is provided.
+        InvalidDateError: If ``start_date`` or ``end_date`` is not a YYYY-MM-DD date.
+        TransportError: If EFTS rejects the query (it answers with HTTP 200 and an
+            error body, which used to be read as 0 results).
 
     Examples:
         >>> from edgar import search_filings
@@ -574,6 +600,8 @@ def search_filings(
         )
 
     limit = min(max(limit, 1), 100)
+    _check_date("start_date", start_date)
+    _check_date("end_date", end_date)
 
     # Build request parameters. EFTS accepts q="" when other filters are set.
     params: dict = {"q": query}
@@ -619,6 +647,22 @@ def search_filings(
         _params=params,
         _offset=0,
     )
+
+
+def _check_date(name: str, value: Optional[str]) -> None:
+    """Raise `InvalidDateError` unless `value` is None or a YYYY-MM-DD date.
+
+    EFTS answers a malformed date with an error body, which `_efts_payload` would
+    report as a failed request; a malformed date is the caller's mistake, so it
+    is rejected here before any request is made.
+    """
+    if value is None:
+        return
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+    except (TypeError, ValueError) as e:
+        raise InvalidDateError(f"{name} must be a YYYY-MM-DD date, got {value!r}",
+                               parameter=name, invalid_value=value) from e
 
 
 def _resolve_cik_from_ticker(ticker: str) -> str:
@@ -685,8 +729,9 @@ def resolve_accession(accession_number: str) -> Optional[dict]:
     normalized = accession_number.replace("-", "")
 
     try:
-        response = get_with_retry(EFTS_BASE_URL, params={"q": f'"{accession_number}"'})
-        hits = orjson.loads(response.content).get("hits", {}).get("hits", [])
+        params = {"q": f'"{accession_number}"'}
+        response = get_with_retry(EFTS_BASE_URL, params=params)
+        hits = _efts_payload(orjson.loads(response.content), params)["hits"].get("hits", [])
     except TRANSPORT_ERRORS:
         # Let the caller see the outage (bead edgartools-07lk.10, closing the
         # tg7y follow-up). The `return None` below means "EFTS has no filing at
