@@ -1293,6 +1293,27 @@ def _determine_shares_scale(rows: List[StatementRow]) -> Optional[int]:
     return shares_scale
 
 
+def _format_shares_scale(shares_scale: Optional[int]) -> str:
+    """Describe the display unit used for share quantities."""
+    shares_scale_text = ""
+    if shares_scale is not None:
+        if shares_scale == -3:
+            shares_scale_text = "thousands"
+        elif shares_scale == -6:
+            shares_scale_text = "millions"
+        elif shares_scale == -9:
+            shares_scale_text = "billions"
+        elif shares_scale == 0:
+            shares_scale_text = "actual amounts"
+        else:
+            # For other negative scales (like -4, -5, -7, etc.)
+            # Use a more generic description based on the scale
+            scale_factor = 10 ** (-shares_scale)
+            if scale_factor >= 1000:
+                shares_scale_text = f"units of {scale_factor:,}"
+    return shares_scale_text
+
+
 def _create_units_note(
     is_monetary_statement: bool,
     dominant_scale: int,
@@ -1320,32 +1341,16 @@ def _create_units_note(
     elif dominant_scale == -9:
         monetary_scale_text = "billions"
 
-    shares_scale_text = ""
-    if shares_scale is not None:
-        if shares_scale == -3:
-            shares_scale_text = "thousands"
-        elif shares_scale == -6:
-            shares_scale_text = "millions"
-        elif shares_scale == -9:
-            shares_scale_text = "billions"
-        elif shares_scale == 0:
-            shares_scale_text = "actual amounts"
-        else:
-            # For other negative scales (like -4, -5, -7, etc.)
-            # Use a more generic description based on the scale
-            scale_factor = 10 ** (-shares_scale)
-            if scale_factor >= 1000:
-                shares_scale_text = f"units of {scale_factor:,}"
+    shares_scale_text = _format_shares_scale(shares_scale)
 
     # Construct appropriate units note
-    if monetary_scale_text and shares_scale_text and shares_scale == dominant_scale:
-        return f"[italic](In {monetary_scale_text}, except per share data)[/italic]"
-    elif monetary_scale_text and shares_scale_text:
-        return f"[italic](In {monetary_scale_text}, except shares in {shares_scale_text} and per share data)[/italic]"
-    elif monetary_scale_text:
-        return f"[italic](In {monetary_scale_text}, except shares and per share data)[/italic]"
-    else:
+    if not monetary_scale_text:
         return ""
+    if not shares_scale_text:
+        return f"[italic](In {monetary_scale_text}, except shares and per share data)[/italic]"
+    if shares_scale == dominant_scale:
+        return f"[italic](In {monetary_scale_text}, except per share data)[/italic]"
+    return f"[italic](In {monetary_scale_text}, except shares in {shares_scale_text} and per share data)[/italic]"
 
 
 # The statements whose SEC-displayed sign differs from the filed sign.

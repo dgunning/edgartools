@@ -286,7 +286,7 @@ def test_mixed_period_precisions_use_the_finest_share_unit(standard, reverse_per
     _assert_eps(rendered)
     _assert_caption_exports(rendered, "[italic](In millions, except shares in thousands and per share data)[/italic]")
     # This round trip only reads the object serialized in this expression.
-    assert pickle.loads(pickle.dumps(rendered)).to_dict() == rendered.to_dict()  # noqa: S301
+    assert pickle.loads(pickle.dumps(rendered)).to_dict() == rendered.to_dict()  # noqa: S301  # nosec B301
 
 
 @pytest.mark.parametrize("standard", [False, True])
