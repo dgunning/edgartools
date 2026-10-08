@@ -49,6 +49,7 @@ from __future__ import annotations
 import os
 import socket
 import sys
+import threading
 import warnings
 
 import pytest
@@ -66,6 +67,8 @@ _real_connect = socket.socket.connect
 _real_connect_ex = socket.socket.connect_ex
 _real_getaddrinfo = socket.getaddrinfo
 _real_create_connection = socket.create_connection
+_real_socketpair = socket.socketpair
+_socketpair_call = threading.local()
 
 
 def _blocked(*args, **kwargs):
@@ -76,13 +79,35 @@ def _blocked(*args, **kwargs):
     )
 
 
+def _connect(sock, address):
+    if (
+        getattr(_socketpair_call, "active", False)
+        and isinstance(address, tuple)
+        and bool(address)
+        and ((sock.family == socket.AF_INET and address[0] == "127.0.0.1") or (sock.family == socket.AF_INET6 and address[0] == "::1"))
+    ):
+        return _real_connect(sock, address)
+    return _blocked(sock, address)
+
+
+def _socketpair(*args, **kwargs):
+    # Only this thread's synchronous socketpair setup may use loopback TCP.
+    previous = getattr(_socketpair_call, "active", False)
+    _socketpair_call.active = True
+    try:
+        return _real_socketpair(*args, **kwargs)
+    finally:
+        _socketpair_call.active = previous
+
+
 def pytest_configure(config):
     # getaddrinfo and create_connection cover httpx/httpcore; the two socket
     # methods catch anything that builds its own socket and connects directly.
-    socket.socket.connect = _blocked
+    socket.socket.connect = _connect
     socket.socket.connect_ex = _blocked
     socket.getaddrinfo = _blocked
     socket.create_connection = _blocked
+    socket.socketpair = _socketpair
 
 
 def pytest_unconfigure(config):
@@ -90,6 +115,7 @@ def pytest_unconfigure(config):
     socket.socket.connect_ex = _real_connect_ex
     socket.getaddrinfo = _real_getaddrinfo
     socket.create_connection = _real_create_connection
+    socket.socketpair = _real_socketpair
 
 
 def _try_clear(obj, failures: list) -> int:
