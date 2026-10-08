@@ -7596,22 +7596,6 @@
     "first_year": 2020,
     "last_year": 2025
   },
-  "AdjustmentsToAdditionalPaidInCapitalConvertibleDebtWithConversionFeature": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.32,
-    "company_count": 305,
-    "occurrence_rate": 0.034,
-    "temporal_consistency": 0.583,
-    "years_present": 7,
-    "first_year": 2019,
-    "last_year": 2025
-  },
   "AdjustmentsToAdditionalPaidInCapitalDividendsInExcessOfRetainedEarnings": {
     "standard_tags": [
       "DividendsEquity"
@@ -7626,22 +7610,6 @@
     "temporal_consistency": 0.5,
     "years_present": 5,
     "first_year": 2020,
-    "last_year": 2025
-  },
-  "AdjustmentsToAdditionalPaidInCapitalOther": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.347,
-    "company_count": 711,
-    "occurrence_rate": 0.079,
-    "temporal_consistency": 0.75,
-    "years_present": 9,
-    "first_year": 2016,
     "last_year": 2025
   },
   "AdjustmentsToAdditionalPaidInCapitalShareBasedCompensationStockOptionsRequisiteServicePeriodRecognition": {
@@ -8112,13 +8080,13 @@
   },
   "AdjustmentsToAdditionalPaidInCapitalStockIssuedIssuanceCosts": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "StockIssuancesEquity"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
+    "display_name": "Stock Issuances",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.356,
+    "confidence": 0.9,
     "company_count": 840,
     "occurrence_rate": 0.093,
     "temporal_consistency": 0.5,
@@ -8144,31 +8112,15 @@
   },
   "AdjustmentsToAdditionalPaidInCapitalWarrantIssued": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "StockIssuancesEquity"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
+    "display_name": "Stock Issuances",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.384,
+    "confidence": 0.9,
     "company_count": 1257,
     "occurrence_rate": 0.14,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
-  },
-  "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivities": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.313,
-    "company_count": 199,
-    "occurrence_rate": 0.022,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
@@ -9545,13 +9497,13 @@
   },
   "AmortizationOfDeferredHedgeGains": {
     "standard_tags": [
-      "InterestExpense"
+      "OtherNonCashItemsCF"
     ],
-    "display_name": "Interest Expense",
-    "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "display_name": "Other Non-Cash Items (CF)",
+    "statement": "CashFlowStatement",
+    "section": "Operating Activities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 27,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.417,
@@ -9561,13 +9513,13 @@
   },
   "AmortizationOfDeferredLoanOriginationFeesNet": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "OtherNonCashItemsCF"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Other Non-Cash Items (CF)",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Operating Activities",
     "is_total": false,
-    "confidence": 0.309,
+    "confidence": 0.9,
     "company_count": 136,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.5,
@@ -17090,321 +17042,6 @@
       }
     }
   },
-  "CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.34,
-    "company_count": 605,
-    "occurrence_rate": 0.067,
-    "temporal_consistency": 0.583,
-    "years_present": 7,
-    "first_year": 2012,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.977
-      },
-      "Beer": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.982
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.945
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.978
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.96
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.982
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "FabPr": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.96
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.917
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.976
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.941
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.983
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.945
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
   "CashSurrenderValueFairValueDisclosure": {
     "standard_tags": [
       "OtherNonOperatingNonCurrentAssets"
@@ -22753,38 +22390,6 @@
     "years_present": 0,
     "first_year": null,
     "last_year": null
-  },
-  "ConversionOfStockAmountConverted1": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.331,
-    "company_count": 462,
-    "occurrence_rate": 0.051,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
-  "ConversionOfStockAmountIssued1": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.314,
-    "company_count": 204,
-    "occurrence_rate": 0.023,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
   },
   "ConversionOfStockSharesConverted1": {
     "standard_tags": [
@@ -28268,22 +27873,6 @@
     "first_year": 2021,
     "last_year": 2023
   },
-  "DebtConversionConvertedInstrumentAmount1": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.327,
-    "company_count": 403,
-    "occurrence_rate": 0.045,
-    "temporal_consistency": 0.583,
-    "years_present": 7,
-    "first_year": 2012,
-    "last_year": 2025
-  },
   "DebtConversionConvertedInstrumentSharesIssued1": {
     "standard_tags": [
       "SharesFullyDilutedAverage"
@@ -28583,22 +28172,6 @@
     "years_present": 4,
     "first_year": 2021,
     "last_year": 2024
-  },
-  "DebtIssuanceCostsIncurredDuringNoncashOrPartialNoncashTransaction": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.318,
-    "company_count": 268,
-    "occurrence_rate": 0.03,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
   },
   "DebtIssuanceCostsLineOfCreditArrangementsNet": {
     "standard_tags": [
@@ -45154,22 +44727,6 @@
       }
     }
   },
-  "EmployeeServiceShareBasedCompensationAllocationOfRecognizedPeriodCostsCapitalizedAmount": {
-    "standard_tags": [
-      "StockBasedCompensationCF"
-    ],
-    "display_name": "Stock-Based Compensation (CF)",
-    "statement": "CashFlowStatement",
-    "section": "Operating Activities",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 88,
-    "occurrence_rate": 0.01,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
   "EmployeeServiceShareBasedCompensationTaxBenefitFromCompensationExpense": {
     "standard_tags": [
       "IncomeTaxes"
@@ -45562,13 +45119,13 @@
   },
   "EquityMethodInvestmentDividendsOrDistributions": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "OtherNonCashItemsCF"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Other Non-Cash Items (CF)",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Operating Activities",
     "is_total": false,
-    "confidence": 0.327,
+    "confidence": 0.9,
     "company_count": 402,
     "occurrence_rate": 0.045,
     "temporal_consistency": 0.5,
@@ -47065,123 +46622,6 @@
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025
-  },
-  "FairValueOfAssetsAcquired": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.315,
-    "company_count": 228,
-    "occurrence_rate": 0.025,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2018,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.975
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
   },
   "FederalDepositInsuranceCorporationPremiumExpense": {
     "standard_tags": [
@@ -52220,39 +51660,19 @@
   },
   "GainLossOnSalesOfLoansNet": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "GainLossOnAssetSalesCF"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Gain/Loss on Asset Sales (CF)",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.313,
+    "section": "Operating Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 198,
     "occurrence_rate": 0.022,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.971
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "GainLossOnSecuritizationOfFinancialAssets": {
     "standard_tags": [
@@ -52272,13 +51692,13 @@
   },
   "GainLossOnTerminationOfLease": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "GainLossOnDispositions"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
+    "display_name": "Gain/Loss on Dispositions",
+    "statement": "IncomeStatement",
+    "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.319,
+    "confidence": 0.9,
     "company_count": 281,
     "occurrence_rate": 0.031,
     "temporal_consistency": 0.417,
@@ -60161,13 +59581,13 @@
   },
   "IncreaseDecreaseDueFromAffiliates": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInReceivables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Receivable",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.307,
+    "confidence": 0.9,
     "company_count": 103,
     "occurrence_rate": 0.011,
     "temporal_consistency": 0.417,
@@ -61254,255 +60674,19 @@
   },
   "IncreaseDecreaseInContractWithCustomerAsset": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.331,
+    "section": "Working Capital Changes",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 466,
     "occurrence_rate": 0.052,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.995
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.957
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.918
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Guns": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.946
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.96
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "IncreaseDecreaseInContractWithCustomerLiability": {
     "standard_tags": [
@@ -61866,13 +61050,13 @@
   },
   "IncreaseDecreaseInDeferredCharges": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.317,
+    "confidence": 0.9,
     "company_count": 258,
     "occurrence_rate": 0.029,
     "temporal_consistency": 0.5,
@@ -61882,13 +61066,13 @@
   },
   "IncreaseDecreaseInDeferredCompensation": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.307,
+    "confidence": 0.9,
     "company_count": 112,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.583,
@@ -61898,310 +61082,29 @@
   },
   "IncreaseDecreaseInDeferredIncomeTaxes": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "DeferredIncomeTaxCF"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Deferred Income Tax (CF)",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.344,
+    "section": "Operating Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 662,
     "occurrence_rate": 0.074,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.997
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.872
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.993
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.976
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.975
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.952
-      }
-    }
+    "last_year": 2025
   },
   "IncreaseDecreaseInDeferredLiabilities": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.309,
+    "confidence": 0.9,
     "company_count": 138,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.5,
@@ -62243,13 +61146,13 @@
   },
   "IncreaseDecreaseInDepositOtherAssets": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.32,
+    "confidence": 0.9,
     "company_count": 294,
     "occurrence_rate": 0.033,
     "temporal_consistency": 0.5,
@@ -62322,13 +61225,13 @@
   },
   "IncreaseDecreaseInDerivativeLiabilities": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.313,
+    "confidence": 0.9,
     "company_count": 197,
     "occurrence_rate": 0.022,
     "temporal_consistency": 0.5,
@@ -62338,13 +61241,13 @@
   },
   "IncreaseDecreaseInDueFromRelatedParties": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInReceivables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Receivable",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.323,
+    "confidence": 0.9,
     "company_count": 346,
     "occurrence_rate": 0.038,
     "temporal_consistency": 0.5,
@@ -62354,13 +61257,13 @@
   },
   "IncreaseDecreaseInDueFromRelatedPartiesCurrent": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInReceivables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Receivable",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.314,
+    "confidence": 0.9,
     "company_count": 213,
     "occurrence_rate": 0.024,
     "temporal_consistency": 0.833,
@@ -62370,13 +61273,13 @@
   },
   "IncreaseDecreaseInDueToAffiliates": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInPayables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Payable",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.31,
+    "confidence": 0.9,
     "company_count": 157,
     "occurrence_rate": 0.017,
     "temporal_consistency": 0.417,
@@ -62386,13 +61289,13 @@
   },
   "IncreaseDecreaseInDueToRelatedParties": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInPayables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Payable",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.343,
+    "confidence": 0.9,
     "company_count": 649,
     "occurrence_rate": 0.072,
     "temporal_consistency": 0.833,
@@ -62402,13 +61305,13 @@
   },
   "IncreaseDecreaseInDueToRelatedPartiesCurrent": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInPayables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Payable",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.319,
+    "confidence": 0.9,
     "company_count": 284,
     "occurrence_rate": 0.032,
     "temporal_consistency": 0.667,
@@ -62434,13 +61337,13 @@
   },
   "IncreaseDecreaseInEquitySecuritiesFvNi": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Non-Operating Income (Expense)",
-    "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "display_name": "Change in Other Working Capital",
+    "statement": "CashFlowStatement",
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 52,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.333,
@@ -62450,13 +61353,13 @@
   },
   "IncreaseDecreaseInIncomeTaxes": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInAccruedLiabilities"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accrued Liabilities",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.316,
+    "confidence": 0.9,
     "company_count": 244,
     "occurrence_rate": 0.027,
     "temporal_consistency": 0.417,
@@ -62498,13 +61401,13 @@
   },
   "IncreaseDecreaseInInterestAndDividendsReceivable": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInReceivables"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accounts Receivable",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.308,
+    "confidence": 0.9,
     "company_count": 115,
     "occurrence_rate": 0.013,
     "temporal_consistency": 0.5,
@@ -62514,273 +61417,19 @@
   },
   "IncreaseDecreaseInInterestPayableNet": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInAccruedLiabilities"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accrued Liabilities",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.351,
+    "section": "Working Capital Changes",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 766,
     "occurrence_rate": 0.085,
     "temporal_consistency": 0.75,
     "years_present": 9,
     "first_year": 2015,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Gold": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.927
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "IncreaseDecreaseInInventories": {
     "standard_tags": [
@@ -62832,13 +61481,13 @@
   },
   "IncreaseDecreaseInOperatingLeaseLiability": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.426,
+    "confidence": 0.9,
     "company_count": 1894,
     "occurrence_rate": 0.211,
     "temporal_consistency": 0.5,
@@ -62928,13 +61577,13 @@
   },
   "IncreaseDecreaseInOtherNoncurrentAssets": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.363,
+    "confidence": 0.9,
     "company_count": 944,
     "occurrence_rate": 0.105,
     "temporal_consistency": 0.833,
@@ -62944,13 +61593,13 @@
   },
   "IncreaseDecreaseInOtherNoncurrentAssetsAndLiabilitiesNet": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.308,
+    "confidence": 0.9,
     "company_count": 121,
     "occurrence_rate": 0.013,
     "temporal_consistency": 0.417,
@@ -62960,13 +61609,13 @@
   },
   "IncreaseDecreaseInOtherNoncurrentLiabilities": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.351,
+    "confidence": 0.9,
     "company_count": 769,
     "occurrence_rate": 0.085,
     "temporal_consistency": 0.5,
@@ -63366,13 +62015,13 @@
   },
   "IncreaseDecreaseInPensionAndPostretirementObligations": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInAccruedLiabilities"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accrued Liabilities",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.307,
+    "confidence": 0.9,
     "company_count": 109,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.5,
@@ -63844,13 +62493,13 @@
   },
   "IncreaseDecreaseInPropertyAndOtherTaxesPayable": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInAccruedLiabilities"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Accrued Liabilities",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.307,
+    "confidence": 0.9,
     "company_count": 101,
     "occurrence_rate": 0.011,
     "temporal_consistency": 0.417,
@@ -63876,13 +62525,13 @@
   },
   "IncreaseDecreaseInSecurityDeposits": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.311,
+    "confidence": 0.9,
     "company_count": 169,
     "occurrence_rate": 0.019,
     "temporal_consistency": 0.583,
@@ -71141,13 +69790,13 @@
   },
   "IssuanceOfStockAndWarrantsForServicesOrClaims": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "StockBasedCompensationCF"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Stock-Based Compensation (CF)",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Operating Activities",
     "is_total": false,
-    "confidence": 0.342,
+    "confidence": 0.9,
     "company_count": 631,
     "occurrence_rate": 0.07,
     "temporal_consistency": 0.833,
@@ -72132,22 +70781,6 @@
     "temporal_consistency": 1.0,
     "years_present": 12,
     "first_year": 2012,
-    "last_year": 2025
-  },
-  "LiabilitiesAssumed1": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.317,
-    "company_count": 249,
-    "occurrence_rate": 0.028,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
     "last_year": 2025
   },
   "LiabilitiesCurrent": {
@@ -79916,121 +78549,6 @@
       }
     }
   },
-  "NoncashOrPartNoncashAcquisitionFixedAssetsAcquired1": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.315,
-    "company_count": 219,
-    "occurrence_rate": 0.024,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
-  "NoncashOrPartNoncashAcquisitionIntangibleAssetsAcquired1": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.309,
-    "company_count": 132,
-    "occurrence_rate": 0.015,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
-  },
   "NoncontrollingInterestDecreaseFromDeconsolidation": {
     "standard_tags": [
       "RestructuringExpenseBenefit"
@@ -85030,13 +83548,13 @@
   },
   "OperatingLeaseRightOfUseAssetAmortizationExpense": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "OtherNonCashItemsCF"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Other Non-Cash Items (CF)",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Operating Activities",
     "is_total": false,
-    "confidence": 0.395,
+    "confidence": 0.9,
     "company_count": 1426,
     "occurrence_rate": 0.159,
     "temporal_consistency": 0.5,
@@ -92895,210 +91413,19 @@
   },
   "OtherNoncashExpense": {
     "standard_tags": [
-      "CostsSubtotal"
+      "OtherNonCashItemsCF"
     ],
-    "display_name": "Total Costs and Expenses",
-    "statement": "IncomeStatement",
-    "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "display_name": "Other Non-Cash Items (CF)",
+    "statement": "CashFlowStatement",
+    "section": "Operating Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 334,
     "occurrence_rate": 0.037,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Autos": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.953
-      },
-      "BusSv": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "CostsSubtotal"
-        ],
-        "display_name": "Total Costs and Expenses",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "OtherNoncashIncome": {
     "standard_tags": [
@@ -94705,327 +93032,19 @@
   },
   "OtherOperatingActivitiesCashFlowStatement": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "OtherNonCashItemsCF"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Other Non-Cash Items (CF)",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.346,
+    "section": "Operating Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 697,
     "occurrence_rate": 0.077,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Boxes": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.959
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Coal": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.96
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.927
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.989
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Paper": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.956
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "OtherOperatingIncome": {
     "standard_tags": [
@@ -96705,38 +94724,6 @@
     "first_year": 2021,
     "last_year": 2025
   },
-  "PaymentsForOriginationAndPurchasesOfLoansHeldForSale": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.309,
-    "company_count": 139,
-    "occurrence_rate": 0.015,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
-  "PaymentsForOriginationOfMortgageLoansHeldForSale": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.312,
-    "company_count": 174,
-    "occurrence_rate": 0.019,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
   "PaymentsForOtherTaxes": {
     "standard_tags": [
       "OtherOperatingExpense"
@@ -97467,22 +95454,6 @@
     "first_year": 2021,
     "last_year": 2025
   },
-  "PaymentsForPurchaseOfInvestmentOperatingActivity": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.309,
-    "company_count": 130,
-    "occurrence_rate": 0.014,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2022,
-    "last_year": 2025
-  },
   "PaymentsForRepurchaseOfCommonStock": {
     "standard_tags": [
       "EquityExpenseIncome(BuybackIssued)"
@@ -98118,345 +96089,19 @@
   },
   "PaymentsOfDividends": {
     "standard_tags": [
-      "DistributionsToMinorityInterests"
+      "CommonDividendsPaid"
     ],
-    "display_name": "Distributions to Minority Interests",
+    "display_name": "Dividends Paid",
     "statement": "CashFlowStatement",
     "section": "Financing Activities",
-    "is_total": true,
-    "confidence": 0.993,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 1163,
     "occurrence_rate": 0.129,
     "temporal_consistency": 0.667,
     "years_present": 8,
     "first_year": 2016,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Beer": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Coal": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 0.995
-      },
-      "Food": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Paper": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "RlEst": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Telcm": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "DistributionsToMinorityInterests"
-        ],
-        "display_name": "Distributions to Minority Interests",
-        "section": "Financing Activities",
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "PaymentsOfDividendsCommonStock": {
     "standard_tags": [
@@ -104937,22 +102582,6 @@
       }
     }
   },
-  "ProceedsFromDispositionOfInvestmentOperatingActivity": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.308,
-    "company_count": 121,
-    "occurrence_rate": 0.013,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2022,
-    "last_year": 2025
-  },
   "ProceedsFromDivestitureOfBusinesses": {
     "standard_tags": [
       "DivestitureProceeds"
@@ -110227,22 +107856,6 @@
     "first_year": 2020,
     "last_year": 2025
   },
-  "ProceedsFromSaleOfLoansHeldForSale": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.315,
-    "company_count": 221,
-    "occurrence_rate": 0.025,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2018,
-    "last_year": 2025
-  },
   "ProceedsFromSaleOfLongtermInvestments": {
     "standard_tags": [
       "InvestmentProceeds"
@@ -110258,42 +107871,6 @@
     "years_present": 6,
     "first_year": 2020,
     "last_year": 2025
-  },
-  "ProceedsFromSaleOfMortgageLoansHeldForSale": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.308,
-    "company_count": 115,
-    "occurrence_rate": 0.013,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
   },
   "ProceedsFromSaleOfOtherInvestments": {
     "standard_tags": [
@@ -121413,346 +118990,6 @@
       }
     }
   },
-  "RightOfUseAssetObtainedInExchangeForFinanceLeaseLiability": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.325,
-    "company_count": 381,
-    "occurrence_rate": 0.042,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
-  "RightOfUseAssetObtainedInExchangeForOperatingLeaseLiability": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.408,
-    "company_count": 1623,
-    "occurrence_rate": 0.18,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Agric": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.998
-      },
-      "Beer": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.993
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Clths": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Food": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Insur": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "LabEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "MedEq": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mines": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Other": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.961
-      },
-      "RlEst": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 0.996
-      },
-      "Telcm": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Toys": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
-  },
   "RightofuseAssets": {
     "standard_tags": [
       "OperatingLeaseRightOfUseAsset"
@@ -124278,444 +121515,19 @@
   },
   "ShareBasedCompensation": {
     "standard_tags": [
-      "StockBasedCompensationExpense"
+      "StockBasedCompensationCF"
     ],
-    "display_name": "Stock-Based Compensation Expense",
-    "statement": "IncomeStatement",
-    "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 1.0,
+    "display_name": "Stock-Based Compensation (CF)",
+    "statement": "CashFlowStatement",
+    "section": "Operating Activities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 5596,
     "occurrence_rate": 0.622,
     "temporal_consistency": 0.917,
     "years_present": 11,
     "first_year": 2012,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Aero": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Agric": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Autos": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Banks": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.994
-      },
-      "Beer": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.996
-      },
-      "Books": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Boxes": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.877
-      },
-      "Chems": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.989
-      },
-      "Chips": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.99
-      },
-      "Clths": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Cnstr": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Coal": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Comps": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.99
-      },
-      "Drugs": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.976
-      },
-      "ElcEq": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "FabPr": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.927
-      },
-      "Food": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Gold": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Guns": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hshld": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.969
-      },
-      "Insur": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.996
-      },
-      "LabEq": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.99
-      },
-      "Mach": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Meals": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.886
-      },
-      "MedEq": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.994
-      },
-      "Mines": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Oil": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.906
-      },
-      "Other": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Paper": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.956
-      },
-      "RlEst": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.983
-      },
-      "Rubbr": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Ships": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Smoke": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Soda": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Steel": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.986
-      },
-      "Telcm": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.924
-      },
-      "Toys": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.994
-      },
-      "Util": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "StockBasedCompensationExpense"
-        ],
-        "display_name": "Stock-Based Compensation Expense",
-        "section": "Operating Expenses",
-        "is_total": false,
-        "confidence": 0.991
-      }
-    }
+    "last_year": 2025
   },
   "ShareBasedCompensationIncludingDiscontinuedOperations": {
     "standard_tags": [
@@ -126948,13 +123760,13 @@
   },
   "StockAndWarrantsIssuedDuringPeriodValuePreferredStockAndWarrants": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "StockIssuancesEquity"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
+    "display_name": "Stock Issuances",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.313,
+    "confidence": 0.9,
     "company_count": 197,
     "occurrence_rate": 0.022,
     "temporal_consistency": 0.5,
@@ -126964,156 +123776,19 @@
   },
   "StockGrantedDuringPeriodValueSharebasedCompensation": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "StockCompensationEquityImpact"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.314,
+    "display_name": "Stock-Based Compensation (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 206,
     "occurrence_rate": 0.023,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025,
-    "industry_overrides": {
-      "Banks": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BldMt": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "BusSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chems": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Chips": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Drugs": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fin": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Fun": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Hlth": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Mach": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "PerSv": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Rtail": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Trans": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Util": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      },
-      "Whlsl": {
-        "standard_tags": [
-          "NetCashFromOperatingActivities"
-        ],
-        "display_name": "Net Cash from Operating Activities",
-        "section": null,
-        "is_total": false,
-        "confidence": 1.0
-      }
-    }
+    "last_year": 2025
   },
   "StockIssued1": {
     "standard_tags": [
@@ -127849,22 +124524,6 @@
     "first_year": 2020,
     "last_year": 2025
   },
-  "StockIssuedDuringPeriodSharesIssuedForServices": {
-    "standard_tags": [
-      "NetCashFromOperatingActivities"
-    ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": false,
-    "confidence": 0.396,
-    "company_count": 1434,
-    "occurrence_rate": 0.159,
-    "temporal_consistency": 1.0,
-    "years_present": 12,
-    "first_year": 2012,
-    "last_year": 2025
-  },
   "StockIssuedDuringPeriodSharesRestrictedStockAwardGross": {
     "standard_tags": [
       "SharesFullyDilutedAverage"
@@ -128250,13 +124909,13 @@
   },
   "StockIssuedDuringPeriodValueConversionOfUnits": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "StockIssuancesEquity"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
+    "display_name": "Stock Issuances",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.343,
+    "confidence": 0.9,
     "company_count": 650,
     "occurrence_rate": 0.072,
     "temporal_consistency": 0.583,
@@ -128266,13 +124925,13 @@
   },
   "StockIssuedDuringPeriodValueIssuedForServices": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "StockCompensationEquityImpact"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
+    "display_name": "Stock-Based Compensation (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.398,
+    "confidence": 0.9,
     "company_count": 1474,
     "occurrence_rate": 0.164,
     "temporal_consistency": 1.0,
@@ -128705,13 +125364,13 @@
   },
   "StockIssuedDuringPeriodValueOther": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "StockIssuancesEquity"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
+    "display_name": "Stock Issuances",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.385,
+    "confidence": 0.9,
     "company_count": 1269,
     "occurrence_rate": 0.141,
     "temporal_consistency": 0.833,
@@ -128721,13 +125380,13 @@
   },
   "StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "StockCompensationEquityImpact"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
+    "display_name": "Stock-Based Compensation (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.364,
+    "confidence": 0.9,
     "company_count": 960,
     "occurrence_rate": 0.107,
     "temporal_consistency": 0.5,
@@ -129172,13 +125831,13 @@
   },
   "StockOptionPlanExpense": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "StockBasedCompensationCF"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Stock-Based Compensation (CF)",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Operating Activities",
     "is_total": false,
-    "confidence": 0.308,
+    "confidence": 0.9,
     "company_count": 123,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.417,
@@ -129188,13 +125847,13 @@
   },
   "StockRedeemedOrCalledDuringPeriodValue": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "StockRepurchasesEquity"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
+    "display_name": "Stock Repurchases (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.339,
+    "confidence": 0.9,
     "company_count": 585,
     "occurrence_rate": 0.065,
     "temporal_consistency": 0.583,
