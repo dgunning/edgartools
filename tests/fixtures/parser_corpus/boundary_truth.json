@@ -11,7 +11,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 1. Financial Statements Apple Inc. CONDENSED CONSOLIDATED STATEMENTS OF OPE",
-     "end": " income $ 28,202 $ 25,352 $ 100,623 $ 93,625 Apple Inc. | Q3 2025 Form 10-Q | 12"
+     "end": "737) (5,952) (5,659) Total operating income $ 28,202 $ 25,352 $ 100,623 $ 93,625"
     },
     "part_i_item_2": {
      "verified": "eye",
@@ -29,13 +29,13 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 4. Controls and Procedures Evaluation of Disclosure Controls and Procedures",
-     "end": "s internal control over financial reporting. Apple Inc. | Q3 2025 Form 10-Q | 19"
+     "end": "y to materially affect, the Company’s internal control over financial reporting."
     },
     "part_ii_item_1": {
      "verified": "eye",
      "method": "toc",
      "start": "Item 1. Legal Proceedings Digital Markets Act Investigations On March 25, 2024, ",
-     "end": "riod could be materially adversely affected. Apple Inc. | Q3 2025 Form 10-Q | 20"
+     "end": "rating results for that reporting period could be materially adversely affected."
     },
     "part_ii_item_1a": {
      "verified": "eye",
@@ -64,14 +64,14 @@
     "part_ii_item_5": {
      "verified": "eye",
      "method": "toc",
-     "start": "Item 5. Other Information Insider Trading Arrangements None. Apple Inc. | Q3 202",
-     "end": "formation Insider Trading Arrangements None. Apple Inc. | Q3 2025 Form 10-Q | 21"
+     "start": "Item 5. Other Information Insider Trading Arrangements None.",
+     "end": "Item 5. Other Information Insider Trading Arrangements None."
     },
     "part_ii_item_6": {
      "verified": "eye",
      "method": "toc",
      "start": "Item 6. Exhibits Incorporated by Reference Exhibit Exhibit Description Form Exhi",
-     "end": "et. * Filed herewith. ** Furnished herewith. Apple Inc. | Q3 2025 Form 10-Q | 22"
+     "end": "e Exhibit 101 Inline XBRL Document Set. * Filed herewith. ** Furnished herewith."
     }
    }
   },
@@ -913,9 +913,8 @@
      "end": "operations, financial condition and cash flows in a particular reporting period."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb and next Part header trail the slice",
      "start": "ITEM 4. RESERVED Not applicable.",
      "end": "ITEM 4. RESERVED Not applicable."
     },
@@ -926,9 +925,8 @@
      "end": "to the Consolidated Financial Statements for information regarding Common Stock."
     },
     "part_ii_item_6": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb trails the slice",
      "start": "ITEM 6. SELECTED FINANCIAL DATA Not applicable.",
      "end": "ITEM 6. SELECTED FINANCIAL DATA Not applicable."
     },
@@ -939,9 +937,8 @@
      "end": "r significantly from the results we discuss in these forward-looking statements."
     },
     "part_ii_item_7a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb trails the slice",
      "start": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Not applicab",
      "end": "M 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Not applicable."
     },
@@ -952,16 +949,14 @@
      "end": "ary Insurance Information 121 IV Reinsurance 122 VI Supplemental Information 123"
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb trails the slice",
      "start": "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
      "end": "AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURES None."
     },
     "part_ii_item_9b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb and next Part header trail the slice",
      "start": "ITEM 9B. OTHER INFORMATION None.",
      "end": "ITEM 9B. OTHER INFORMATION None."
     },
@@ -990,9 +985,8 @@
      "end": "amendment to this Report, to be filed with the SEC no later than April 30, 2010."
     },
     "part_iii_item_14": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb and next Part header trail the slice",
      "start": "ITEM 14. PRINCIPAL ACCOUNTANT FEES AND SERVICES The information required by this",
      "end": "amendment to this Report, to be filed with the SEC no later than April 30, 2010."
     },
@@ -1140,7 +1134,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 1C. Cybersecurity The Company’s management, led by its Head of Corporate In",
-     "end": "his Form 10-K under the heading “Risk Factors.” Apple Inc. | 2024 Form 10-K | 17"
+     "end": "y-related risks, see Item 1A of this Form 10-K under the heading “Risk Factors.”"
     },
     "part_i_item_2": {
      "verified": "eye",
@@ -1157,8 +1151,8 @@
     "part_i_item_4": {
      "verified": "eye",
      "method": "toc",
-     "start": "Item 4. Mine Safety Disclosures Not applicable. Apple Inc. | 2024 Form 10-K | 18",
-     "end": "Item 4. Mine Safety Disclosures Not applicable. Apple Inc. | 2024 Form 10-K | 18"
+     "start": "Item 4. Mine Safety Disclosures Not applicable.",
+     "end": "Item 4. Mine Safety Disclosures Not applicable."
     },
     "part_ii_item_5": {
      "verified": "eye",
@@ -1169,26 +1163,26 @@
     "part_ii_item_6": {
      "verified": "eye",
      "method": "toc",
-     "start": "Item 6. [Reserved] Apple Inc. | 2024 Form 10-K | 20",
-     "end": "Item 6. [Reserved] Apple Inc. | 2024 Form 10-K | 20"
+     "start": "Item 6. [Reserved]",
+     "end": "Item 6. [Reserved]"
     },
     "part_ii_item_7": {
      "verified": "eye",
      "method": "toc",
      "start": "Item 7. Management’s Discussion and Analysis of Financial Condition and Results ",
-     "end": "ny’s financial condition and operating results. Apple Inc. | 2024 Form 10-K | 26"
+     "end": "ve a material impact on the Company’s financial condition and operating results."
     },
     "part_ii_item_7a": {
      "verified": "eye",
      "method": "toc",
      "start": "Item 7A. Quantitative and Qualitative Disclosures About Market Risk The Company ",
-     "end": " of the Company’s foreign currency derivatives. Apple Inc. | 2024 Form 10-K | 27"
+     "end": "offset changes in the fair values of the Company’s foreign currency derivatives."
     },
     "part_ii_item_8": {
      "verified": "eye",
      "method": "toc",
      "start": "Item 8. Financial Statements and Supplementary Data Index to Consolidated Financ",
-     "end": "Young LLP San Jose, California November 1, 2024 Apple Inc. | 2024 Form 10-K | 50"
+     "end": "res may deteriorate. /s/ Ernst & Young LLP San Jose, California November 1, 2024"
     },
     "part_ii_item_9": {
      "verified": "eye",
@@ -1200,7 +1194,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 9A. Controls and Procedures Evaluation of Disclosure Controls and Procedure",
-     "end": "ny’s internal control over financial reporting. Apple Inc. | 2024 Form 10-K | 51"
+     "end": "y to materially affect, the Company’s internal control over financial reporting."
     },
     "part_ii_item_9b": {
      "verified": "eye",
@@ -1242,7 +1236,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 14. Principal Accountant Fees and Services The information required by this",
-     "end": "ement, and is incorporated herein by reference. Apple Inc. | 2024 Form 10-K | 52"
+     "end": "e included in the 2025 Proxy Statement, and is incorporated herein by reference."
     },
     "part_iv_item_15": {
      "verified": "eye",
@@ -1427,9 +1421,8 @@
      "end": "0 days or more preceding the end of our fiscal year 2025 that remain unresolved."
     },
     "part_i_item_1c": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "page footer and next page's running header trail the slice",
      "start": "ITEM 1C. CYBERSECURITY RISK MANAGEMENT AND STRATEGY Microsoft plays a central ro",
      "end": "curity awareness training and education and are expected to support our efforts."
     },
@@ -1488,9 +1481,8 @@
      "end": "REEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE Not applicable."
     },
     "part_ii_item_9a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "page footer and next page's running header trail the slice",
      "start": "ITEM 9A. CONTROLS AND PROCEDURES Under the supervision and with the participatio",
      "end": "res may deteriorate. /s/ DELOITTE & TOUCHE LLP Seattle, Washington July 30, 2025"
     },
@@ -2075,13 +2067,13 @@
      "verified": "eye",
      "method": "toc",
      "start": "Business Overview We are a global financial services firm that, through our subs",
-     "end": "Structured Products (December 2012 to December 2014). December 2024 Form 10-K 12"
+     "end": "Origination for Derivative Structured Products (December 2012 to December 2014)."
     },
     "part_i_item_1a": {
      "verified": "eye",
      "method": "toc",
      "start": "Risk Factors For a discussion of the risks and uncertainties that may affect our",
-     "end": "rate, see also “Business—Supervision and Regulation.” December 2024 Form 10-K 24"
+     "end": "environment in which we operate, see also “Business—Supervision and Regulation.”"
     },
     "part_i_item_1b": {
      "verified": "title",
@@ -2129,13 +2121,13 @@
      "verified": "eye",
      "method": "toc",
      "start": "Quantitative and Qualitative Disclosures about Risk Risk Management Overview Ris",
-     "end": "elated risks in line with our overall risk framework. 75 December 2024 Form 10-K"
+     "end": "roach to managing climate-related risks in line with our overall risk framework."
     },
     "part_ii_item_8": {
      "verified": "eye",
      "method": "toc",
      "start": "Financial Statements and Supplementary Data REPORT OF INDEPENDENT REGISTERED PUB",
-     "end": "eighted average cost of capital WM Wealth Management 151 December 2024 Form 10-K"
+     "end": "terest entity WACC Implied weighted average cost of capital WM Wealth Management"
     },
     "part_ii_item_9": {
      "verified": "eye",
@@ -2214,7 +2206,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 1A. Risk Factors We face a variety of risks that are substantial and inhere",
-     "end": "tion and cash flows could be adversely affected. Goldman Sachs 2024 Form 10-K 59"
+     "end": "s of operations, financial condition and cash flows could be adversely affected."
     },
     "part_i_item_1b": {
      "verified": "eye",
@@ -2251,14 +2243,13 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and I",
-     "end": "resented in Part III, Item 12 of this Form 10-K. Goldman Sachs 2024 Form 10-K 61"
+     "end": "are authorized for issuance is presented in Part III, Item 12 of this Form 10-K."
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice (title-only heading)",
-     "start": "Management’s Discussion and Analysis Item 7. Management’s Discussion and Analysi",
-     "end": " Factors” in Part I, Item 1A of this Form 10-K. 126 Goldman Sachs 2024 Form 10-K"
+     "start": "Item 7. Management’s Discussion and Analysis of Financial Condition and Results ",
+     "end": "ure of Risk Management” and “Risk Factors” in Part I, Item 1A of this Form 10-K."
     },
     "part_ii_item_7a": {
      "verified": "eye",
@@ -2270,7 +2261,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 8. Financial Statements and Supplementary Data Management’s Report on Inter",
-     "end": " primarily related to corporate loans for 2023. Goldman Sachs 2024 Form 10-K 239"
+     "end": "re not material for 2024 and were primarily related to corporate loans for 2023."
     },
     "part_ii_item_9": {
      "verified": "eye",
@@ -2426,9 +2417,8 @@
      "end": "regate number of shares to be sold under the trading arrangement have been sold."
     },
     "part_ii_item_9c": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "page number and next Part header trail the slice",
      "start": "Item 9C. Disclosure regarding Foreign Jurisdictions that Prevent Inspections. No",
      "end": "losure regarding Foreign Jurisdictions that Prevent Inspections. Not applicable."
     },
@@ -2952,7 +2942,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 1. BUSINESS Southern Company is a holding company that owns all of the outs",
-     "end": " by agreements with unions, with agreements expiring between 2026 and 2030. I-14"
+     "end": "vered by agreements with unions, with agreements expiring between 2026 and 2030."
     },
     "part_i_item_1a": {
      "verified": "eye",
@@ -2970,7 +2960,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 1C.CYBERSECURITY. Cybersecurity is a critical component of Southern Company",
-     "end": "rm 10-K which should be read in conjunction with the foregoing information. I-31"
+     "end": "is Form 10-K which should be read in conjunction with the foregoing information."
     },
     "part_i_item_2": {
      "verified": "eye",
@@ -2982,7 +2972,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 3.LEGAL PROCEEDINGS See Note 3 to the financial statements in Item 8 herein",
-     "end": "al authority where potential monetary sanctions are involved is $1 million. I-38"
+     "end": "nmental authority where potential monetary sanctions are involved is $1 million."
     },
     "part_i_item_4": {
      "verified": "wrong",
@@ -3000,26 +2990,26 @@
     "part_ii_item_6": {
      "verified": "eye",
      "method": "toc",
-     "start": "Item 6.RESERVED II-1",
-     "end": "Item 6.RESERVED II-1"
+     "start": "Item 6.RESERVED",
+     "end": "Item 6.RESERVED"
     },
     "part_ii_item_7": {
      "verified": "eye",
      "method": "toc",
      "start": "Item 7.MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS O",
-     "end": ", commercially available credit reports, and audited financial statements. II-67"
+     "end": "atings, commercially available credit reports, and audited financial statements."
     },
     "part_ii_item_7a": {
      "verified": "eye",
      "method": "toc",
      "start": "Item 7A.QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK See MANAGEMEN",
-     "end": "ein. Also see Notes 13 and 14 to the financial statements in Item 8 herein. II-2"
+     "end": "8 herein. Also see Notes 13 and 14 to the financial statements in Item 8 herein."
     },
     "part_ii_item_8": {
      "verified": "eye",
      "method": "toc",
      "start": "Item 8.FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA Page The Southern Company and",
-     "end": "2023. See Note 2 under \"Southern Company Gas\" for additional information. II-252"
+     "end": "ax) in 2023. See Note 2 under \"Southern Company Gas\" for additional information."
     },
     "part_ii_item_9": {
      "verified": "eye",
@@ -3050,25 +3040,25 @@
      "verified": "eye",
      "method": "toc",
      "start": "Items 10 (other than the information under \"Code of Ethics\" below), 11, 12, 13, ",
-     "end": "strant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K. III-1"
+     "end": "h Registrant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K."
     },
     "part_iii_item_11": {
      "verified": "eye",
      "method": "toc",
      "start": "Items 10 (other than the information under \"Code of Ethics\" below), 11, 12, 13, ",
-     "end": "strant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K. III-1"
+     "end": "h Registrant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K."
     },
     "part_iii_item_12": {
      "verified": "eye",
      "method": "toc",
      "start": "Items 10 (other than the information under \"Code of Ethics\" below), 11, 12, 13, ",
-     "end": "strant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K. III-1"
+     "end": "h Registrant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K."
     },
     "part_iii_item_13": {
      "verified": "eye",
      "method": "toc",
      "start": "Items 10 (other than the information under \"Code of Ethics\" below), 11, 12, 13, ",
-     "end": "strant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K. III-1"
+     "end": "h Registrant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K."
     },
     "part_iii_item_14": {
      "verified": "wrong",
@@ -3101,7 +3091,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 1. Business Overview Mastercard is a technology company in the global payme",
-     "end": "ailable electronically from the SEC at www.sec.gov. 24 MASTERCARD 2024 FORM 10-K"
+     "end": "port. Our filings are also available electronically from the SEC at www.sec.gov."
     },
     "part_i_item_1a": {
      "verified": "eye",
@@ -3119,12 +3109,11 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 1C. Cybersecurity Cybersecurity program As a technology company in the glob",
-     "end": "se and other risks related to information security. 40 MASTERCARD 2024 FORM 10-K"
+     "end": "or more information about these and other risks related to information security."
     },
     "part_i_item_2": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header (of the previous item) leads the slice",
      "start": "Item 2. Properties We own our corporate headquarters, located in Purchase, New Y",
      "end": "d impacts, or consolidate and dispose of facilities that are no longer required."
     },
@@ -3142,57 +3131,51 @@
      "end": null
     },
     "part_ii_item_5": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
-     "start": null,
+     "start": "Item 5. Market for registrant’s common equity, related stockholder matters and i",
      "end": "uthorizing us to repurchase up to $12.0 billion and $11.0 billion, respectively."
     },
     "part_ii_item_6": {
      "verified": "eye",
      "method": "toc",
-     "start": "Item 6. [Reserved] 45 MASTERCARD 2024 FORM 10-K",
-     "end": "Item 6. [Reserved] 45 MASTERCARD 2024 FORM 10-K"
+     "start": "Item 6. [Reserved]",
+     "end": "Item 6. [Reserved]"
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
-     "start": null,
-     "end": "t which are inherently uncertain and unpredictable. 59 MASTERCARD 2024 FORM 10-K"
+     "start": "Item 7. Management’s discussion and analysis of financial condition and results ",
+     "end": "believed to be reasonable, but which are inherently uncertain and unpredictable."
     },
     "part_ii_item_7a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
-     "start": null,
-     "end": "ffsetting effect of the underlying hedged activity. MASTERCARD 2024 FORM 10-K 60"
+     "start": "Item 7A. Quantitative and qualitative disclosures about market risk Market risk ",
+     "end": "ely, before considering the offsetting effect of the underlying hedged activity."
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
-     "start": null,
-     "end": "ntries 1,043 1,034 883 Total $ 2,138 $2,061 $2,006 107 MASTERCARD 2024 FORM 10-K"
+     "start": "Item 8. Financial statements and supplementary data Mastercard Incorporated Inde",
+     "end": " 1,095 $1,027 $1,123 Other countries 1,043 1,034 883 Total $ 2,138 $2,061 $2,006"
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
-     "start": null,
+     "start": "Item 9. Changes in and disagreements with accountants on accounting and financia",
      "end": "reements with accountants on accounting and financial disclosure Not applicable."
     },
     "part_ii_item_9a": {
      "verified": "eye",
      "method": "toc",
      "start": "Item 9A. Controls and procedures Evaluation of Disclosure Controls and Procedure",
-     "end": "rcard’s internal control over financial reporting. MASTERCARD 2024 FORM 10-K 108"
+     "end": "ly to materially affect, Mastercard’s internal control over financial reporting."
     },
     "part_ii_item_9b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
-     "start": null,
+     "start": "Item 9B. Other information Rule 10b5-1 and Non-Rule 10b5-1 Trading Arrangements ",
      "end": "ate by reference herein the disclosure contained in Exhibit 99.1 of this Report."
     },
     "part_ii_item_9c": {
@@ -3203,10 +3186,9 @@
      "end": null
     },
     "part_iii_item_10": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
-     "start": null,
+     "start": "Item 10. Directors, executive officers and corporate governance Information rega",
      "end": "ders (the “Proxy Statement”), and is incorporated by reference into this Report."
     },
     "part_iii_item_11": {
@@ -3235,10 +3217,9 @@
      "end": null
     },
     "part_iv_item_15": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
-     "start": null,
+     "start": "Item 15. Exhibits and financial statement schedules (a)The following documents a",
      "end": "re hereby incorporated by reference: Refer to the Exhibit Index included herein."
     },
     "part_iv_item_16": {
@@ -3424,7 +3405,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 1C. Cybersecurity Risk management and strategy The Company has documented c",
-     "end": " have occurred within the Company and within the industry. 2024 Annual Report 17"
+     "end": "ecurity incidents that have occurred within the Company and within the industry."
     },
     "part_i_item_2": {
      "verified": "eye",
@@ -3454,8 +3435,8 @@
     "part_ii_item_6": {
      "verified": "eye",
      "method": "toc",
-     "start": "Item 6. Reserved 2024 Annual Report 21",
-     "end": "Item 6. Reserved 2024 Annual Report 21"
+     "start": "Item 6. Reserved",
+     "end": "Item 6. Reserved"
     },
     "part_ii_item_7": {
      "verified": "eye",
@@ -3497,7 +3478,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 9C. Disclosure regarding foreign jurisdictions that prevent inspections Not",
-     "end": "gn jurisdictions that prevent inspections Not applicable. 2024 Annual Report 113"
+     "end": "closure regarding foreign jurisdictions that prevent inspections Not applicable."
     },
     "part_iii_item_10": {
      "verified": "eye",
@@ -3527,7 +3508,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 14. Principal accountant fees and services The information called for by th",
-     "end": "registered public accounting firm in the Proxy Statement. 2024 Annual Report 115"
+     "end": "intment of independent registered public accounting firm in the Proxy Statement."
     },
     "part_iv_item_15": {
      "verified": "eye",
@@ -3617,7 +3598,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 8. Financial Statements and Supplementary Data Index to Financial Statement",
-     "end": "entered a strategic partnership between Palantir, the Company and World View. F-"
+     "end": "ny entered a strategic partnership between Palantir, the Company and World View."
     },
     "part_ii_item_9": {
      "verified": "eye",
@@ -4297,13 +4278,13 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 1. Business Bank of America Corporation is a Delaware corporation, a bank h",
-     "end": "ications of certain cybersecurity incidents and data breaches. 7 Bank of America"
+     "end": "osure and/or notifications of certain cybersecurity incidents and data breaches."
     },
     "part_i_item_1a": {
      "verified": "eye",
      "method": "toc",
      "start": "Item 1A. Risk Factors The discussion below addresses our material risk factors o",
-     "end": "ospects and competitive position could be adversely affected. Bank of America 22"
+     "end": "ls, our business prospects and competitive position could be adversely affected."
     },
     "part_i_item_1b": {
      "verified": "eye",
@@ -4326,8 +4307,8 @@
     "part_i_item_4": {
      "verified": "eye",
      "method": "toc",
-     "start": "Item 4. Mine Safety Disclosures None 23 Bank of America",
-     "end": "Item 4. Mine Safety Disclosures None 23 Bank of America"
+     "start": "Item 4. Mine Safety Disclosures None",
+     "end": "Item 4. Mine Safety Disclosures None"
     },
     "part_ii_item_5": {
      "verified": "eye",
@@ -4338,14 +4319,14 @@
     "part_ii_item_6": {
      "verified": "eye",
      "method": "toc",
-     "start": "Item 6. [Reserved] Bank of America 24",
-     "end": "Item 6. [Reserved] Bank of America 24"
+     "start": "Item 6. [Reserved]",
+     "end": "Item 6. [Reserved]"
     },
     "part_ii_item_7": {
      "verified": "eye",
      "method": "toc",
      "start": "Item 7. Bank of America Corporation and Subsidiaries Management's Discussion and",
-     "end": " the Corporation, see Supplemental Financial Data on page 30. 85 Bank of America"
+     "end": "sing the results of the Corporation, see Supplemental Financial Data on page 30."
     },
     "part_ii_item_7a": {
      "verified": "eye",
@@ -4357,7 +4338,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 8. Financial Statements and Supplementary Data Table of Contents Page Conso",
-     "end": "erans Affairs VaR Value-at-Risk VIE Variable interest entity 171 Bank of America"
+     "end": "S. Department of Veterans Affairs VaR Value-at-Risk VIE Variable interest entity"
     },
     "part_ii_item_9": {
      "verified": "eye",
@@ -4393,7 +4374,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 11. Executive Compensation Information included under the following caption",
-     "end": "o;” ● “Corporate governance;” and ● “Director compensation.” 173 Bank of America"
+     "end": "on;” ● “CEO pay ratio;” ● “Corporate governance;” and ● “Director compensation.”"
     },
     "part_iii_item_12": {
      "verified": "eye",
@@ -4411,7 +4392,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "Item 14. Principal Accounting Fees and Services Information included under the f",
-     "end": "our independent registered public accounting firm for 2025.” Bank of America 174"
+     "end": " the appointment of our independent registered public accounting firm for 2025.”"
     },
     "part_iv_item_15": {
      "verified": "eye",
@@ -4669,9 +4650,8 @@
      "end": "le 10b5-1(c) under the Exchange Act or (ii) non-Rule 10b5-1 trading arrangement."
     },
     "part_ii_item_9c": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running header and next Part header trail the slice",
      "start": "ITEM 9C. DISCLOSURE REGARDING FOREIGN JURISDICTIONS THAT PREVENT INSPECTIONS Not",
      "end": "CLOSURE REGARDING FOREIGN JURISDICTIONS THAT PREVENT INSPECTIONS Not Applicable."
     },
@@ -4700,9 +4680,8 @@
      "end": "Corporate Governance, for information required by Item 407(a) of Regulation S-K."
     },
     "part_iii_item_14": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb and running header lead; running header and Part header trail",
      "start": "ITEM 14. PRINCIPAL ACCOUNTANT FEES AND SERVICES Fees and services performed by E",
      "end": ". All audit and non-audit fees were pre-approved by the Audit Committee in 2024."
     },
@@ -5360,10 +5339,9 @@
    "form": "10-K",
    "items": {
     "part_i_item_1": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running header leads the slice; the Item 1 heading is not at the start",
-     "start": null,
+     "start": "Item 1. Business Please refer to the Glossary of Terms for definitions of define",
      "end": " Relations Department at Eversource Energy, 107 Selden Street, Berlin, CT 06037."
     },
     "part_i_item_1a": {

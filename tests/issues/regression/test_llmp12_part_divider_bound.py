@@ -116,8 +116,9 @@ def test_apple_item_4_ends_before_part_ii():
     path = FIXTURES_DIR / "html" / "aapl" / "10k" / "aapl-10-k-2024-11-01.html"
     doc = _parse(path.read_text())
     text = doc.sections["part_i_item_4"].text()
-    # The page footer before the divider is a running header, left to a later fix.
-    assert text.rstrip().endswith("Apple Inc. | 2024 Form 10-K | 18"), text[-120:]
+    # The page footer before the divider is trailing furniture, dropped too (llmp.12 step 6).
+    assert text.rstrip().endswith("Not applicable."), text[-120:]
+    assert "Apple Inc. | 2024 Form 10-K" not in text
     assert "Not applicable." in text
     assert "PART II" not in text
     assert "PART III" not in doc.sections["part_ii_item_9c"].text()

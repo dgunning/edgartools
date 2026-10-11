@@ -251,6 +251,7 @@ class SECSectionExtractor:
         self._bound_sections_at_unlisted_item_headings(tree)
         self._bound_sections_at_part_dividers(tree)
         self._advance_starts_past_page_furniture(tree)
+        self._retreat_ends_before_page_furniture(tree)
 
     # A block that is an item heading: "Item 16.", "ITEM 7A -", "Items 1 and 2."
     _ITEM_HEADING_RE = re.compile(r'^\s*ITEMS?\s*(\d+[A-Z]?)(?![.\d]*\d)\b', re.IGNORECASE)
@@ -409,7 +410,15 @@ class SECSectionExtractor:
         r'|(?:back|return)\s+to\s+(?:top|index|contents|table\s+of\s+contents)|\d{1,4})', re.IGNORECASE)
     _CRUMB_LINE_RE = re.compile(r'^(?:' + _CRUMB_RE.pattern + r'[\s.|•·]*)+$', re.IGNORECASE)
     _PAGE_NUM_RE = re.compile(r'^(?:page\s+)?(?:\d{1,4}|[ivxlc]{1,6}|[A-Z]{1,3}-\d{1,3}|[IVX]{1,4}-\d{1,3})$', re.IGNORECASE)
-    _PARTS_HEADER_RE = re.compile(r'^Parts\s+[IVX]+\s+and\s+[IVX]+$', re.IGNORECASE)
+    # A running header made of Part or item numbers alone: "Parts III and IV"
+    # (JPMorgan), "PART II, III" over "Item 9B, 9C, 10, 11, 12, 13" (Microsoft).
+    _PARTS_HEADER_RE = re.compile(r'^Parts?\s+[IVX]+(?:\s*(?:,|and|&)\s*[IVX]+)+$', re.IGNORECASE)
+    _ITEM_LIST_RE = re.compile(r'^Items?\s+\d{1,2}[A-C]?(?:\s*(?:,|and|&)\s*\d{1,2}[A-C]?)+$', re.IGNORECASE)
+    # A date line ("February 20, 2025") closes an auditor's report or a
+    # signature; it repeats through a filing but is never furniture.
+    _DATE_LINE_RE = re.compile(
+        r'^(?:January|February|March|April|May|June|July|August|September|October|November|December)'
+        r'\s+\d{1,2},?\s+\d{4}\.?$', re.IGNORECASE)
     _FURNITURE_MAX_CHARS = 120
     _FURNITURE_MAX_BLOCKS = 8
     # A line that carries a page number or is set in capitals is a running
@@ -451,47 +460,18 @@ class SECSectionExtractor:
         a sentence, never furniture.
         The section then starts at the last own heading seen, if any, so a
         running header that restates the heading gives way to the heading
-        itself; otherwise at the content block. At most eight blocks are
-        skipped, and a start that reaches content first is left alone.
+        itself, and so does the previous item's heading printed as a running
+        header above it (Mastercard's "ITEM 1C. CYBERSECURITY" over "Item 2.
+        Properties"); another item's heading with no own heading after it is
+        a combined heading and starts the section. Otherwise the section
+        starts at the content block. At most eight blocks are skipped, and a
+        start that reaches content first is left alone.
         """
         schema = self.toc_analyzer.schema
         if schema.title_based or not self.section_boundaries:
             return
-        divider_re = TOCAnalyzer._BODY_PART_DIVIDER_STANDALONE
         block_tags = self._BLOCK_TAGS
-
-        def collapsed(el) -> str:
-            return ' '.join(el.text_content().split())
-
-        def masked(text: str) -> str:
-            return re.sub(r'\d+', '#', text)
-
-        # Lines this document prints on page after page, page numbers masked.
-        repeats: Dict[str, int] = {}
-        for el in tree.iter(*block_tags):
-            if next(el.iterdescendants(*block_tags), None) is not None:
-                continue
-            text = collapsed(el)
-            if text and len(text) <= self._FURNITURE_MAX_CHARS:
-                key = masked(text)
-                repeats[key] = repeats.get(key, 0) + 1
-
-        def is_own_heading(text: str, own_item: str) -> bool:
-            hm = self._ITEM_HEADING_RE.match(text)
-            return bool(hm) and hm.group(1).upper() == own_item
-
-        def is_furniture(text: str, own_rank: int) -> bool:
-            if self._CRUMB_LINE_RE.match(text) or self._PAGE_NUM_RE.match(text) or self._PARTS_HEADER_RE.match(text):
-                return True
-            pm = divider_re.match(text)
-            if pm and self._PART_RANK.get(pm.group(1).upper(), 9) <= own_rank:
-                return True
-            if text.endswith('.'):
-                return False
-            letters = [c for c in text if c.isalpha()]
-            marked = any(c.isdigit() for c in text) or (bool(letters) and all(c.isupper() for c in letters))
-            needed = self._FURNITURE_MIN_REPEATS if marked else self._PLAIN_HEADER_MIN_REPEATS
-            return repeats.get(masked(text), 0) >= needed
+        collapsed, is_own_heading, is_furniture = self._page_furniture_rules(tree)
 
         for name, boundary in self.section_boundaries.items():
             m = self._SECTION_KEY_RE.match(name)
@@ -539,15 +519,26 @@ class SECSectionExtractor:
                             seen = []
                             break
                         continue
+                    if self._ITEM_HEADING_RE.match(text):
+                        # Another item's heading: the previous page's running
+                        # header when the own heading follows (Mastercard's
+                        # "ITEM 1C. CYBERSECURITY" over "Item 2. Properties"),
+                        # otherwise a combined heading this item shares.
+                        seen.append((el, 'other'))
+                        skipping = el
+                        continue
                 if next(el.iterdescendants(*block_tags), None) is not None:
                     continue  # a container: look inside it
                 content = el
                 break
             headings = [el for el, kind in seen if kind == 'heading']
+            others = [el for el, kind in seen if kind == 'other']
             if headings:
                 target = headings[-1]
                 if target is seen[0][0] and len(headings) == 1:
                     continue  # the walk opened on the heading; nothing to skip
+            elif others:
+                target = others[0]
             elif seen and content is not None:
                 target = content
             else:
@@ -559,6 +550,176 @@ class SECSectionExtractor:
             tables = [a for a in target.iterancestors() if a.tag == 'table']
             boundary.start_element = tables[-1] if tables else target
             logger.info("Section %s starts after %d page-furniture block(s)", name, len(seen) - len(headings))
+
+
+    def _page_furniture_rules(self, tree):
+        """The three predicates the furniture passes share: a block's
+        collapsed text, whether it is the section's own "Item N" heading,
+        and whether it is page furniture (a line of contents backlinks, a
+        bare page number, a Part divider for the section's own Part or an
+        earlier one, or a running header this document repeats, page number
+        masked). The repeat counts are taken once over the whole tree."""
+        divider_re = TOCAnalyzer._BODY_PART_DIVIDER_STANDALONE
+        block_tags = self._BLOCK_TAGS
+
+        def collapsed(el) -> str:
+            return ' '.join(el.text_content().split())
+
+        def masked(text: str) -> str:
+            return re.sub(r'\d+', '#', text)
+
+        # Lines this document prints on page after page, page numbers masked.
+        repeats: Dict[str, int] = {}
+        for el in tree.iter(*block_tags):
+            if next(el.iterdescendants(*block_tags), None) is not None:
+                continue
+            text = collapsed(el)
+            if text and len(text) <= self._FURNITURE_MAX_CHARS:
+                key = masked(text)
+                repeats[key] = repeats.get(key, 0) + 1
+
+        def is_own_heading(text: str, own_item: str) -> bool:
+            hm = self._ITEM_HEADING_RE.match(text)
+            return bool(hm) and hm.group(1).upper() == own_item
+
+        def is_furniture(text: str, own_rank: int) -> bool:
+            if self._CRUMB_LINE_RE.match(text) or self._PAGE_NUM_RE.match(text):
+                return True
+            if self._PARTS_HEADER_RE.match(text) or self._ITEM_LIST_RE.match(text):
+                return True
+            pm = divider_re.match(text)
+            if pm and self._PART_RANK.get(pm.group(1).upper(), 9) <= own_rank:
+                return True
+            if text.endswith('.') or self._DATE_LINE_RE.match(text):
+                return False
+            letters = [c for c in text if c.isalpha()]
+            marked = any(c.isdigit() for c in text) or (bool(letters) and all(c.isupper() for c in letters))
+            needed = self._FURNITURE_MIN_REPEATS if marked else self._PLAIN_HEADER_MIN_REPEATS
+            return repeats.get(masked(text), 0) >= needed
+
+        return collapsed, is_own_heading, is_furniture
+
+    def _retreat_ends_before_page_furniture(self, tree) -> None:
+        """End a section before the page furniture that trails it.
+
+        The mirror of the start rule. A section ends at the next TOC anchor
+        or a Part divider, and the filer's page furniture sits between the
+        last block of content and that end: the backlink to the contents
+        (AmEx, Chevron, Southern, a 2010 10-K's "Index to Financial
+        Statements"), the page number and the running header of the page
+        that follows (Microsoft's "31 PART I Item 2, 3, 4", Goldman's and
+        Hertz's company-name headers, JPMorgan's "41 Parts III and IV",
+        Mastercard's footer). Measured over the truth corpus
+        (edgartools-llmp.12): trailing furniture was the largest end failure
+        left once the Part dividers were bound.
+
+        Walk the blocks of the range as the start rule does, a short block as
+        one unit, and keep the run of furniture blocks seen since the last
+        block of content; the section's own heading counts as content. When
+        the walk reaches the end with such a run, the section ends at its
+        first block. The run is left alone when it is longer than the
+        furniture budget, when it is the whole section, or when its first
+        block sits inside a table that also holds content, since a slice
+        must not cut a table in two. A section with no known end (the last
+        item of a 10-K) is not touched.
+        """
+        schema = self.toc_analyzer.schema
+        if schema.title_based or not self.section_boundaries:
+            return
+        block_tags = self._BLOCK_TAGS
+        collapsed, is_own_heading, is_furniture = self._page_furniture_rules(tree)
+
+        for name, boundary in self.section_boundaries.items():
+            m = self._SECTION_KEY_RE.match(name)
+            if not m:
+                continue
+            own_rank = self._PART_RANK.get(m.group(1).upper(), 0)
+            own_item = m.group(2).upper()
+            end_el = boundary.end_element
+            end_id = boundary.end_element_id
+            if end_el is None and not end_id:
+                continue
+            if end_el is None:
+                # The text walk ends at the heading block when the end anchor
+                # sits inside the next heading; stop where it stops.
+                end_targets = find_anchor_targets(tree, end_id)
+                if not end_targets:
+                    continue
+                end_el = heading_block(end_targets[0])
+            starts = find_anchor_targets(tree, boundary.anchor_id)
+            if not starts:
+                continue
+            start_el = boundary.start_element if boundary.start_element is not None else starts[0]
+
+            def holds_end(unit, end_el=end_el, end_id=end_id) -> bool:
+                # A unit is skipped whole, so the end must not sit inside it.
+                if end_el is not None and (end_el is unit or unit in end_el.iterancestors()):
+                    return True
+                return bool(end_id) and any(is_anchor_match(d, end_id) for d in unit.iter())
+
+            trail: List[object] = []
+            content_seen = False
+            skipping = None
+            for event, el in iterwalk_from(start_el):
+                if not isinstance(el.tag, str):
+                    continue
+                if skipping is not None:
+                    if event == 'end' and el is skipping:
+                        skipping = None
+                    continue
+                if event != 'start':
+                    continue
+                if el is not start_el:
+                    if end_el is not None and el is end_el:
+                        break
+                    if end_id and is_anchor_match(el, end_id):
+                        break
+                if el.tag not in block_tags:
+                    continue
+                if el is not start_el and holds_end(el) and el.tag == 'table':
+                    break  # the next heading's table; the end anchor is inside it
+                if el.tag == 'table':
+                    # A table is one unit: furniture when every cell is (a
+                    # page number beside a running header, Goldman), content
+                    # otherwise, since a slice must not cut a table in two.
+                    # Numeric cells repeat through any filing and would pass
+                    # for furniture one by one (Mastercard's Item 8 tail).
+                    leaves = [collapsed(c) for c in el.iter(*block_tags)
+                              if next(c.iterdescendants(*block_tags), None) is None]
+                    leaves = [t for t in leaves if t]
+                    skipping = el
+                    if not leaves:
+                        continue
+                    if all(len(t) <= self._FURNITURE_MAX_CHARS and is_furniture(t, own_rank) for t in leaves):
+                        trail.append(el)
+                    else:
+                        trail = []
+                        content_seen = True
+                    continue
+                text = collapsed(el)
+                if not text:
+                    continue
+                if len(text) <= self._FURNITURE_MAX_CHARS and not (el is not start_el and holds_end(el)):
+                    if is_own_heading(text, own_item):
+                        trail = []
+                        content_seen = True
+                        skipping = el
+                        continue
+                    if is_furniture(text, own_rank):
+                        trail.append(el)
+                        skipping = el
+                        continue
+                if next(el.iterdescendants(*block_tags), None) is not None:
+                    continue  # a container: look inside it
+                trail = []
+                content_seen = True
+            if not trail or not content_seen or len(trail) > self._FURNITURE_MAX_BLOCKS:
+                continue
+            target = trail[0]
+            if target is start_el or any(a.tag == 'table' for a in target.iterancestors()):
+                continue
+            boundary.end_element = target
+            logger.info("Section %s ends before %d page-furniture block(s)", name, len(trail))
 
     _PART_RANK = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5}
 

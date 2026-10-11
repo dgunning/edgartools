@@ -78,7 +78,7 @@ def _rates(truth, scored, form):
 # as a detector change that moves them, and say which items moved.
 PINNED = {
     # form: (items, start_exact, end_exact, both)
-    "10-K": (739, 698, 655, 640),   # 94.5% / 88.6% / 86.6%
+    "10-K": (739, 712, 664, 660),   # 96.3% / 89.9% / 89.3%
     "10-Q": (111, 110, 107, 106),   # 99.1% / 96.4% / 95.5%
 }
 

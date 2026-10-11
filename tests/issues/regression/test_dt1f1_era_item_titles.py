@@ -211,7 +211,7 @@ def test_a_modern_filing_keeps_the_modern_meanings():
         GATE_2010.read_text(encoding="utf-8", errors="replace")
     )
 
-    assert len(doc.sections["part_iii_item_14"].text()) == 252  # was 262: the trailing "PART IV" divider is no longer in the slice
+    assert len(doc.sections["part_iii_item_14"].text()) == 220  # was 262, then 252: the trailing "PART IV" divider, then the "Index to Financial Statements" backlink, left the slice
     assert "PRINCIPAL ACCOUNTANT FEES" in doc.sections["part_iii_item_14"].text()
     assert len(doc.sections["part_iv_item_15"].text()) == 150265  # tables rendered cell by cell (edgartools-wzgu)
 
