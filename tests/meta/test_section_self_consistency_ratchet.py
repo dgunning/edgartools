@@ -160,3 +160,46 @@ def test_fixed_embeds_are_removed_from_the_baseline(measured):
         "tightens:\n"
         + "\n".join(f"  {k[0]} {k[1]}: items {v}" for k, v in sorted(stale.items()))
     )
+
+
+# ---------------------------------------------------------------------------
+# Overlap over the whole corpus (edgartools-llmp.11, deliverable 3)
+# ---------------------------------------------------------------------------
+# test_section_boundary_corpus.py checks the sum-of-items / document ratio on
+# the nine ground-truth tickers only, so a 1.53x Citigroup slipped past the
+# test whose whole job is catching overlap (edgartools-rk02). This runs it over
+# every fixture the ratchet measures, from the same parse. A filing whose
+# sections come from the cross-reference index is exempt: one printed page
+# legitimately serves several items there, so >1.0 is the expected arithmetic
+# and not a boundary defect (Citi's Items 7 and 7A both cite pages 70-129).
+OVERLAP_MAX = 1.10
+
+# Measured 2026-10-11 on fix/llmp12-unlisted-item-bound: the filings over the
+# cap that are not index-detected. Both are era-corpus (gitignored) filings on
+# the pattern path; a new entrant anywhere is a boundary regression.
+OVERLAP_BASELINE = {
+    ("0001047469-03-011363", "10-K"),   # 1.24: pattern+toc, Item 15 runs into the F-pages
+    ("0001193125-21-082408", "10-Q"),   # 1.11: pattern+toc
+}
+
+
+@pytest.fixture(scope="module")
+def overlaps(corpus):
+    """{(label, form): (ratio, exempt)} for every fixture present."""
+    out = {}
+    for key, e in corpus.items():
+        m = scoring.document_measure(e["path"], e["form"])
+        out[key] = (scoring.overlap_ratio_of(m), "index" in m["methods"])
+    return out
+
+
+def test_no_new_section_overlap(overlaps):
+    over = {key: round(r, 2) for key, (r, exempt) in overlaps.items()
+            if r > OVERLAP_MAX and not exempt}
+    new = {k: v for k, v in over.items() if k not in OVERLAP_BASELINE}
+    assert not new, (
+        f"section text sums to more than {OVERLAP_MAX}x the document on filings "
+        f"that were clean (a boundary overshoot pulled a neighbour's body in): {new}"
+    )
+    stale = sorted(k for k in OVERLAP_BASELINE if k in overlaps and k not in over)
+    assert not stale, f"these OVERLAP_BASELINE entries now measure clean; remove them: {stale}"
