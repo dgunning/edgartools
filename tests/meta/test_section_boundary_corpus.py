@@ -45,13 +45,16 @@ pytestmark = pytest.mark.slow
 # If an intended parser change moves one, update the number in the same commit.
 # edgartools-wzgu re-pinned every table-bearing item: TOC sections now render
 # tables cell by cell; every letter and digit of the old text is still present.
+# Re-pinned for the page-furniture start (edgartools-llmp.12): Caterpillar Items 7
+# and 8, Meta Items 1A, 7 and 8 and Union Pacific Item 8 each lost the leading
+# "Table of Contents" backlink line (19 or 24 chars); nothing else moved.
 GROUND_TRUTH = {
     ("aapl", "10-K"): {"1": 15767, "1A": 68887, "7": 15563, "8": 61021},
     ("ko",   "10-K"): {"1": 54971, "1A": 90883, "7": 115072, "8": 237859},
     ("msft", "10-K"): {"1": 48674, "1A": 68824, "7": 48069, "8": 102166},
-    ("meta", "10-K"): {"1": 40273, "1A": 188466, "7": 61502, "8": 125841},
-    ("cat",  "10-K"): {"1": 39269, "1A": 53487, "7": 104445, "8": 185361},
-    ("unp",  "10-K"): {"1": 27521, "1A": 32791, "7": 57241, "8": 97022},
+    ("meta", "10-K"): {"1": 40273, "1A": 188447, "7": 61483, "8": 125822},
+    ("cat",  "10-K"): {"1": 39269, "1A": 53487, "7": 104421, "8": 185337},
+    ("unp",  "10-K"): {"1": 27521, "1A": 32791, "7": 57241, "8": 97003},
     ("aapl", "10-Q"): {"1": 25844, "2": 20053},
     ("nvda", "10-Q"): {"1": 53892, "2": 32956},
     ("ko",   "10-Q"): {"1": 103213, "2": 77610},

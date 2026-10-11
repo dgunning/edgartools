@@ -113,7 +113,7 @@ def test_10q_parse_item_from_text_drops_summary_row():
 def test_hertz_item_1a_is_the_real_risk_factors(hertz_sections):
     item1a = hertz_sections["part_i_item_1a"].text()
     # Before: 8,524 chars of the cautionary note's risk-factor summary.
-    assert len(item1a) == 100_175
+    assert len(item1a) == 100_065  # was 100,175: the leading crumb and running-header lines are no longer in the slice
     assert "ITEM\xa01A. RISK FACTORS" in item1a[:200]
     assert "CAUTIONARY NOTE" not in item1a[:200]
 
@@ -139,6 +139,6 @@ def test_ppl_item_7a_stops_at_item_8(ppl_sections):
 def test_ppl_item_8_opens_on_its_heading(ppl_sections):
     item8 = ppl_sections["part_ii_item_8"].text()
     # Before: 297,733 chars opening on "COMBINED NOTES TO FINANCIAL STATEMENTS".
-    assert len(item8) == 334_890  # tables rendered cell by cell (edgartools-wzgu)
+    assert len(item8) == 334_866  # was 334,890: the leading "Table of Contents" backlink is no longer in the slice
     assert "ITEM 8.\xa0\xa0FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA" in item8[:100]
     assert "CONSOLIDATED STATEMENTS OF INCOME" in item8[:200]

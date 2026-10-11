@@ -80,7 +80,7 @@ def test_southern_item7_keeps_its_mda(southern):
     item7 = southern["part_ii_item_7"].text()
     # Owner's span is unchanged: the displaced 7A text sits inside Item 7's
     # first page and the MD&A resumes after it.
-    assert len(item7) == 283_225  # tables rendered cell by cell (edgartools-wzgu)
+    assert len(item7) == 283_145  # was 283,225: the leading "Table of Contents / Index to Financial Statements" crumb line is no longer in the slice
     assert "COMBINED MANAGEMENT'S DISCUSSION AND ANALYSIS" in item7
     assert "Southern Company is a holding company that owns all of the common stock" in item7
 
@@ -110,7 +110,7 @@ def test_southern_combined_part_iii_is_left_alone(southern):
     deliberately left as one span rather than guessed at."""
     texts = {k: southern[k].text() for k in
              ("part_iii_item_10", "part_iii_item_11", "part_iii_item_12", "part_iii_item_13")}
-    assert {len(t) for t in texts.values()} == {2917}
+    assert {len(t) for t in texts.values()} == {2827}  # was 2917: the leading crumb line and "PART III" divider are no longer in the slice
 
 
 # --- Eversource: three consecutive items on one page -------------------------
@@ -148,20 +148,27 @@ def test_ondas_item1_ends_at_item1a(ondas):
 
 # Re-pinned for edgartools-wzgu: tables now render cell by cell, which drops the
 # blank lines the old walk emitted per cell; no letter or digit changed.
+# Re-pinned for the page-furniture start (edgartools-llmp.12): a section whose
+# anchor is a page start no longer opens on that page's number, so each
+# page-keyed item lost its page number and a line break (Item 12 also lost its
+# trailing "PART II" divider in #1515). The other eleven lost 16 chars of
+# cell padding: a heading laid out as a table row is now rendered as a table
+# ("ITEM 2.  OFFER STATISTICS") instead of walked cell by cell; the collapsed
+# text is unchanged.
 _20F_EXPECTED = {
     # page_6
-    "part_i_item_1": 2988, "part_i_item_2": 124, "part_i_item_3": 65447,
+    "part_i_item_1": 2981, "part_i_item_2": 108, "part_i_item_3": 65431,
     # page_29
-    "part_i_item_4a": 1077, "part_i_item_5": 10291,
+    "part_i_item_4a": 1069, "part_i_item_5": 10275,
     # page_59
-    "part_i_item_12": 1400, "part_ii_item_13": 94,  # 12 was 1413: trailing "PART II" divider dropped "part_ii_item_14": 123,
-    "part_ii_item_15": 4888,
+    "part_i_item_12": 1392, "part_ii_item_13": 78, "part_ii_item_14": 107,
+    "part_ii_item_15": 4872,
     # page_61
-    "part_ii_item_16a": 2615, "part_ii_item_16b": 428, "part_ii_item_16c": 474,
+    "part_ii_item_16a": 2607, "part_ii_item_16b": 412, "part_ii_item_16c": 458,
     # page_62
-    "part_ii_item_16d": 1564, "part_ii_item_16e": 118, "part_ii_item_16f": 671,
+    "part_ii_item_16d": 1556, "part_ii_item_16e": 102, "part_ii_item_16f": 655,
     # page_63
-    "part_ii_item_17": 2478, "part_ii_item_18": 151598,
+    "part_ii_item_17": 2470, "part_ii_item_18": 151582,
 }
 
 
