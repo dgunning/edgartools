@@ -249,6 +249,7 @@ class SECSectionExtractor:
 
         self._bound_open_sections_at_signatures(tree)
         self._bound_sections_at_unlisted_item_headings(tree)
+        self._bound_sections_at_part_dividers(tree)
 
     # A block that is an item heading: "Item 16.", "ITEM 7A -", "Items 1 and 2."
     _ITEM_HEADING_RE = re.compile(r'^\s*ITEMS?\s*(\d+[A-Z]?)(?![.\d]*\d)\b', re.IGNORECASE)
@@ -395,6 +396,95 @@ class SECSectionExtractor:
                 boundary.end_element = el
                 logger.info("Section %s ends at the unlisted Item %s heading", name, item)
                 break
+
+    _PART_RANK = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5}
+
+    def _bound_sections_at_part_dividers(self, tree) -> None:
+        """End a section at the divider of a later Part.
+
+        The last item of a Part (Item 4, Item 9C, Item 14 on a modern 10-K)
+        ends at the next TOC anchor, which belongs to the first item of the
+        next Part and sits after that Part's divider, so the divider trailed
+        the slice: 27 of the 32 tracked 10-Ks returned "Not applicable. PART
+        II" for Item 4, and every 10-Q's Part I Item 4 carried "PART II. OTHER
+        INFORMATION" into its markdown. A rescued Item 8 whose end anchor is
+        Item 15's ran through "PART IV" the same way (Chevron). The text walk
+        happened to drop the 10-Q line through the navigation filter; the
+        markdown slicer never did, and neither knew where the Part ended.
+
+        The divider is in the body, so read it: walk each section's range for
+        the first block whose whole text is a Part divider (a bare "PART II",
+        or a Part number, a separator and a short title, the same shape
+        ``TOCAnalyzer._BODY_PART_DIVIDER_STANDALONE`` accepts from an unbold
+        body divider) for a Part *later* than the section's own, and end the
+        section there. A running page header repeats the section's own Part
+        and never cuts it. When the divider opens a table, as Mastercard's
+        per-Part contents lists do, the whole table belongs to the next Part
+        and the section ends at the table. A section never ends before its
+        own heading: when a block opening on the section's own item number
+        follows the divider, the key's Part is wrong (a page-anchored 20-F
+        keys Item 17 to Part II, but its heading sits under "PART III"), and
+        the divider is left alone.
+        """
+        schema = self.toc_analyzer.schema
+        if schema.title_based or not self.section_boundaries:
+            return
+        divider_re = TOCAnalyzer._BODY_PART_DIVIDER_STANDALONE
+
+        def opens_on_part(el) -> bool:
+            # The first text node alone is not enough: Oracle splits the word
+            # across inline tags ("PAR" + "T IV").
+            return next((t.lstrip()[:1].lower() for t in el.itertext() if t.strip()), '') == 'p' \
+                and el.text_content().lstrip()[:4].lower() == 'part'
+
+        for name, boundary in self.section_boundaries.items():
+            m = self._SECTION_KEY_RE.match(name)
+            if not m:
+                continue
+            own_rank = self._PART_RANK.get(m.group(1).upper())
+            if own_rank is None:
+                continue
+            own_item = m.group(2).upper()
+            starts = find_anchor_targets(tree, boundary.anchor_id)
+            if not starts:
+                continue
+            start_el = boundary.start_element if boundary.start_element is not None else starts[0]
+            end_el = boundary.end_element
+            end_id = boundary.end_element_id
+            stop = part = None
+            for event, el in iterwalk_from(start_el):
+                if event != 'start' or not isinstance(el.tag, str):
+                    continue
+                if el is not start_el:
+                    if end_el is not None and el is end_el:
+                        break
+                    if end_id and is_anchor_match(el, end_id):
+                        break
+                if el.tag in _INLINE_TAGS:
+                    continue
+                text = el.text_content().strip()
+                if len(text) > self._ITEM_HEADING_MAX:
+                    continue
+                if stop is not None:
+                    hm = self._ITEM_HEADING_RE.match(text)
+                    if hm and hm.group(1).upper() == own_item:
+                        stop = None  # the section's own heading lies past the divider
+                        break
+                    continue
+                if not opens_on_part(el):
+                    continue
+                pm = divider_re.match(text)
+                if pm is None or self._PART_RANK.get(pm.group(1).upper(), 0) <= own_rank:
+                    continue
+                stop, part = el, pm.group(1).upper()
+                tables = [a for a in el.iterancestors() if a.tag == 'table']
+                if tables:
+                    first_cell = next(tables[-1].iter('td', 'th'), None)
+                    if first_cell is not None and divider_re.match(first_cell.text_content().strip()):
+                        stop = tables[-1]
+            if stop is not None:
+                boundary.end_element = stop
+                logger.info("Section %s ends at the Part %s divider", name, part)
 
     def _bound_open_sections_at_signatures(self, tree) -> None:
         """End a section with no end boundary at the next bare SIGNATURES line.

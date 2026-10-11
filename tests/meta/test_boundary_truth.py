@@ -73,12 +73,12 @@ def _rates(truth, scored, form):
     return n, start, end, both
 
 
-# Pinned 2026-10-11 on fix/llmp12-unlisted-item-bound. Counts, not
+# Pinned 2026-10-11 on fix/llmp12-part-divider-bound (10-K; 10-Q unchanged). Counts, not
 # percentages, so a one-item regression is visible. Update in the same commit
 # as a detector change that moves them, and say which items moved.
 PINNED = {
     # form: (items, start_exact, end_exact, both)
-    "10-K": (739, 600, 588, 503),   # 81.2% / 79.6% / 68.1%
+    "10-K": (739, 616, 650, 562),   # 83.4% / 88.0% / 76.0%
     "10-Q": (111, 96, 107, 92),     # 86.5% / 96.4% / 82.9%
 }
 

@@ -27,6 +27,7 @@ Offline (local fixtures):
   Ondas Inc. 10-K        0001213900-26-035981  tests/fixtures/html/onds/10k/
   20-F page-anchor TOC   0001062993-21-003193  tests/fixtures/parity_gate/20-F/
 """
+import re
 from pathlib import Path
 
 import pytest
@@ -153,7 +154,7 @@ _20F_EXPECTED = {
     # page_29
     "part_i_item_4a": 1077, "part_i_item_5": 10291,
     # page_59
-    "part_i_item_12": 1413, "part_ii_item_13": 94, "part_ii_item_14": 123,
+    "part_i_item_12": 1400, "part_ii_item_13": 94,  # 12 was 1413: trailing "PART II" divider dropped "part_ii_item_14": 123,
     "part_ii_item_15": 4888,
     # page_61
     "part_ii_item_16a": 2615, "part_ii_item_16b": 428, "part_ii_item_16c": 474,
@@ -172,6 +173,10 @@ def test_20f_page_anchor_collision_groups_are_resolved(page_anchor_20f):
     assert len(set(texts.values())) == len(texts)
     assert texts["part_ii_item_16e"].startswith("ITEM 16E.")
     assert "ITEM 18." not in texts["part_ii_item_17"]
+    # The TOC keys Item 17 to Part II, but on a 20-F its heading sits under
+    # "PART III": the Part-divider bound must not cut a section before its
+    # own heading.
+    assert re.search(r"ITEM 17\.\s+FINANCIAL STATEMENTS", texts["part_ii_item_17"])
 
 
 def test_ondas_risk_factors_friendly_name_still_resolves(ondas):
