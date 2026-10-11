@@ -100,7 +100,7 @@ def test_items_5_and_6_are_different_sections(pg_sections):
 
     assert item_5 != item_6
     assert len(item_5) == 308  # table cells no longer fused (edgartools-wzgu)
-    assert len(item_6) == 2309  # tables rendered cell by cell (edgartools-wzgu)
+    assert len(item_6) == 2269  # was 2309: the leading "30 The Procter & Gamble Company" footer is no longer in the slice
     # Content, not just length — each key must hold ITS item.
     # The heading is a two-cell table row; its cells are no longer fused (edgartools-wzgu).
     assert item_5.startswith("Item 5.  Other Information")

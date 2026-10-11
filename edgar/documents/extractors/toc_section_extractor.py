@@ -250,6 +250,7 @@ class SECSectionExtractor:
         self._bound_open_sections_at_signatures(tree)
         self._bound_sections_at_unlisted_item_headings(tree)
         self._bound_sections_at_part_dividers(tree)
+        self._advance_starts_past_page_furniture(tree)
 
     # A block that is an item heading: "Item 16.", "ITEM 7A -", "Items 1 and 2."
     _ITEM_HEADING_RE = re.compile(r'^\s*ITEMS?\s*(\d+[A-Z]?)(?![.\d]*\d)\b', re.IGNORECASE)
@@ -396,6 +397,168 @@ class SECSectionExtractor:
                 boundary.end_element = el
                 logger.info("Section %s ends at the unlisted Item %s heading", name, item)
                 break
+
+    # Page furniture: the lines a filer prints at the top of every page. A
+    # backlink to the contents, a bare page number, a running header. Measured
+    # over the truth corpus (edgartools-llmp.12): the single biggest start
+    # failure, 70 of 138, was a "Table of Contents" backlink between the TOC
+    # anchor and the heading; the rest were running headers (Goldman, Hertz,
+    # Mastercard, P&G), page numbers and the section's own Part divider.
+    _CRUMB_RE = re.compile(
+        r'(?:(?:financial\s+)?table\s+of\s+contents|index\s+to\s+(?:consolidated\s+)?financial\s+statements'
+        r'|(?:back|return)\s+to\s+(?:top|index|contents|table\s+of\s+contents)|\d{1,4})', re.IGNORECASE)
+    _CRUMB_LINE_RE = re.compile(r'^(?:' + _CRUMB_RE.pattern + r'[\s.|•·]*)+$', re.IGNORECASE)
+    _PAGE_NUM_RE = re.compile(r'^(?:page\s+)?(?:\d{1,4}|[ivxlc]{1,6}|[A-Z]{1,3}-\d{1,3}|[IVX]{1,4}-\d{1,3})$', re.IGNORECASE)
+    _PARTS_HEADER_RE = re.compile(r'^Parts\s+[IVX]+\s+and\s+[IVX]+$', re.IGNORECASE)
+    _FURNITURE_MAX_CHARS = 120
+    _FURNITURE_MAX_BLOCKS = 8
+    # A line that carries a page number or is set in capitals is a running
+    # header once it repeats on three pages; a plain line must repeat on
+    # twenty. Measured: Goldman's "Management's Discussion and Analysis"
+    # header repeats 65 times and P&G's footer 35, while Morgan Stanley's
+    # title-only Item 1C heading "Cybersecurity" repeats 3 times and must stay.
+    _FURNITURE_MIN_REPEATS = 3
+    _PLAIN_HEADER_MIN_REPEATS = 20
+    _BLOCK_TAGS = ('p', 'div', 'table', 'tr', 'td', 'th', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+                   'blockquote', 'pre', 'section', 'article', 'header', 'footer', 'center')
+
+    def _advance_starts_past_page_furniture(self, tree) -> None:
+        """Start a section at its heading, or its first block of content, not
+        at page furniture.
+
+        A TOC anchor often sits at the top of a page, before the backlink to
+        the contents, the page number and the running header the filer prints
+        on every page, and the section's heading comes after them. The text
+        walk then opened on "Table of Contents" (AmEx, Meta, Netflix, Regions,
+        Union Pacific and more), "THE GOLDMAN SACHS GROUP, INC. AND
+        SUBSIDIARIES" (Goldman), "32 The Procter & Gamble Company" (P&G), the
+        running "ITEM 1. BUSINESS" above the real "Item 1. Business"
+        (Mastercard), or the Part divider the anchor was placed on
+        (Eversource). The navigation filter keeps the first two occurrences of
+        a repeated link per section text, so a backlink at the head of every
+        section always survived it, and the markdown slicer never filtered.
+
+        The start is moved, not the text. Walk the blocks from the start
+        element, taking a short block (a row, a one-line div) as one unit:
+        furniture is skipped, the section's own "Item N" heading is noted,
+        and the first block of content stops the walk. Furniture is a line of
+        contents backlinks, a bare page number, a Part divider for the
+        section's own Part or an earlier one, or a running header: a short
+        line this document repeats with its page number masked, on three
+        pages when it carries a digit or is set in capitals, on twenty when
+        it is plain (Morgan Stanley's title-only "Cybersecurity" heading
+        repeats three times and must stay). A line that ends in a period is
+        a sentence, never furniture.
+        The section then starts at the last own heading seen, if any, so a
+        running header that restates the heading gives way to the heading
+        itself; otherwise at the content block. At most eight blocks are
+        skipped, and a start that reaches content first is left alone.
+        """
+        schema = self.toc_analyzer.schema
+        if schema.title_based or not self.section_boundaries:
+            return
+        divider_re = TOCAnalyzer._BODY_PART_DIVIDER_STANDALONE
+        block_tags = self._BLOCK_TAGS
+
+        def collapsed(el) -> str:
+            return ' '.join(el.text_content().split())
+
+        def masked(text: str) -> str:
+            return re.sub(r'\d+', '#', text)
+
+        # Lines this document prints on page after page, page numbers masked.
+        repeats: Dict[str, int] = {}
+        for el in tree.iter(*block_tags):
+            if next(el.iterdescendants(*block_tags), None) is not None:
+                continue
+            text = collapsed(el)
+            if text and len(text) <= self._FURNITURE_MAX_CHARS:
+                key = masked(text)
+                repeats[key] = repeats.get(key, 0) + 1
+
+        def is_own_heading(text: str, own_item: str) -> bool:
+            hm = self._ITEM_HEADING_RE.match(text)
+            return bool(hm) and hm.group(1).upper() == own_item
+
+        def is_furniture(text: str, own_rank: int) -> bool:
+            if self._CRUMB_LINE_RE.match(text) or self._PAGE_NUM_RE.match(text) or self._PARTS_HEADER_RE.match(text):
+                return True
+            pm = divider_re.match(text)
+            if pm and self._PART_RANK.get(pm.group(1).upper(), 9) <= own_rank:
+                return True
+            if text.endswith('.'):
+                return False
+            letters = [c for c in text if c.isalpha()]
+            marked = any(c.isdigit() for c in text) or (bool(letters) and all(c.isupper() for c in letters))
+            needed = self._FURNITURE_MIN_REPEATS if marked else self._PLAIN_HEADER_MIN_REPEATS
+            return repeats.get(masked(text), 0) >= needed
+
+        for name, boundary in self.section_boundaries.items():
+            m = self._SECTION_KEY_RE.match(name)
+            if not m:
+                continue
+            own_rank = self._PART_RANK.get(m.group(1).upper(), 0)
+            own_item = m.group(2).upper()
+            starts = find_anchor_targets(tree, boundary.anchor_id)
+            if not starts:
+                continue
+            start_el = boundary.start_element if boundary.start_element is not None else starts[0]
+            end_el = boundary.end_element
+            end_id = boundary.end_element_id
+            seen: List[Tuple[object, str]] = []   # (block, 'furniture' | 'heading')
+            content = None
+            skipping = None
+            for event, el in iterwalk_from(start_el):
+                if not isinstance(el.tag, str):
+                    continue
+                if skipping is not None:
+                    if event == 'end' and el is skipping:
+                        skipping = None
+                    continue
+                if event != 'start':
+                    continue
+                if el is not start_el:
+                    if end_el is not None and el is end_el:
+                        break
+                    if end_id and is_anchor_match(el, end_id):
+                        break
+                if el.tag not in block_tags:
+                    continue
+                text = collapsed(el)
+                if not text:
+                    continue
+                if len(text) <= self._FURNITURE_MAX_CHARS:
+                    if is_own_heading(text, own_item):
+                        seen.append((el, 'heading'))
+                        skipping = el
+                        continue
+                    if is_furniture(text, own_rank):
+                        seen.append((el, 'furniture'))
+                        skipping = el
+                        if sum(1 for _, k in seen if k == 'furniture') > self._FURNITURE_MAX_BLOCKS:
+                            seen = []
+                            break
+                        continue
+                if next(el.iterdescendants(*block_tags), None) is not None:
+                    continue  # a container: look inside it
+                content = el
+                break
+            headings = [el for el, kind in seen if kind == 'heading']
+            if headings:
+                target = headings[-1]
+                if target is seen[0][0] and len(headings) == 1:
+                    continue  # the walk opened on the heading; nothing to skip
+            elif seen and content is not None:
+                target = content
+            else:
+                continue
+            if target is start_el:
+                continue
+            # A heading laid out in a table cell starts at the table, so the
+            # markdown slice keeps a whole table.
+            tables = [a for a in target.iterancestors() if a.tag == 'table']
+            boundary.start_element = tables[-1] if tables else target
+            logger.info("Section %s starts after %d page-furniture block(s)", name, len(seen) - len(headings))
 
     _PART_RANK = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5}
 
@@ -1190,6 +1353,19 @@ class SECSectionExtractor:
             tag_name = el.tag.lower() if isinstance(el.tag, str) else ''
 
             if event == 'start':
+                # Check if we've reached the start: the heading element itself
+                # (its text belongs to the section), else the start anchor. The
+                # heading check comes before table rendering so a heading laid
+                # out as a table row (a page-anchored 20-F's "ITEM 4. |
+                # INFORMATION ON THE COMPANY") is rendered as a table, not
+                # walked cell by cell.
+                if boundary.start_element is not None:
+                    if el is boundary.start_element:
+                        in_range = True
+                elif is_anchor_match(el, boundary.anchor_id):
+                    in_range = True
+                    continue
+
                 # Render a table the way doc.text() does, rather than
                 # concatenating its cells' raw text, which fused adjacent cells
                 # ("November 1-30, 2021" + "7,294,800" -> "20217,294,800").
@@ -1202,15 +1378,6 @@ class SECSectionExtractor:
                         all_text.append(table_text)
                         rendered_table = el
                         continue
-
-                # Check if we've reached the start: the heading element itself
-                # (its text belongs to the section), else the start anchor.
-                if boundary.start_element is not None:
-                    if el is boundary.start_element:
-                        in_range = True
-                elif is_anchor_match(el, boundary.anchor_id):
-                    in_range = True
-                    continue
 
                 # Check if we've reached the end boundary
                 if boundary.end_element_id and is_anchor_match(el, boundary.end_element_id):

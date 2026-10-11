@@ -236,9 +236,8 @@
      "end": "t I, Item 1A of the Company's Form 10-K for the fiscal year ended June 30, 2024."
     },
     "part_ii_item_2": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "page footer 'The Procter & Gamble Company 29' leads the slice",
      "start": "Item 2. Unregistered Sales of Equity Securities, Use of Proceeds and Issuer Purc",
      "end": "ed to be financed by a combination of operating cash flows and issuance of debt."
     },
@@ -249,9 +248,8 @@
      "end": "08 of Regulation S-K. Amounts in millions of dollars unless otherwise specified."
     },
     "part_ii_item_6": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "page footer '30 The Procter & Gamble Company' leads the slice",
      "start": "Item 6. Exhibits 3.1 Amended Articles of Incorporation (as amended by shareholde",
      "end": " Senior Vice President - Chief Accounting Officer (Principal Accounting Officer)"
     }
@@ -403,16 +401,14 @@
      "end": "25. On August 1, 2025, the Company redeemed its GBDC 3 2022 Debt Securitization."
     },
     "part_i_item_2": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 2. Management’s Discussion and Analysis of Financial Condition and Results ",
      "end": "ems of income, expense, gain, or loss are recognized at some time in the future."
     },
     "part_i_item_3": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 3. Quantitative and Qualitative Disclosures about Market Risk We are subjec",
      "end": "ates with respect to the investments in our portfolio with fixed interest rates."
     },
@@ -471,16 +467,14 @@
    "form": "10-Q",
    "items": {
     "part_i_item_1": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "CONDENSED CONSOLIDATED FINANCIAL STATEMENTS Condensed Consolidated Statements of",
      "end": "lion and $303 million at September 30, 2025 and December 31, 2024, respectively."
     },
     "part_i_item_2": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb 'Table of Contents' leads the slice",
      "start": "MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF OPERA",
      "end": "nts—Note 1. Summary of Significant Accounting Policies—New Accounting Guidance.\""
     },
@@ -491,9 +485,8 @@
      "end": "der the heading \"Market Risk Exposures\" and is incorporated herein by reference."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "CONTROLS AND PROCEDURES Disclosure Controls and Procedures The management of Edi",
      "end": "nancial Statements—Note 2. Property, Plant and Equipment\" in the 2024 Form 10-K."
     },
@@ -516,9 +509,8 @@
      "end": "rading arrangements (in each case, as defined in Item 408(a) of Regulation S-K)."
     },
     "part_ii_item_6": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "EXHIBITS Exhibit Number Description 10.1** Edison International and Southern Cal",
      "end": "charges and, if mailed to the requesting party, the cost of first-class postage."
     }
@@ -593,9 +585,8 @@
      "end": "nconventional assets in the United States, as well as other smaller divestments."
     },
     "part_i_item_2": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 2. MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
      "end": "ssarily have the same meaning as in any government payment transparency reports."
     },
@@ -618,9 +609,8 @@
      "end": "this Quarterly Report on Form 10-Q for further information on legal proceedings."
     },
     "part_ii_item_2": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 2. UNREGISTERED SALES OF EQUITY SECURITIES AND USE OF PROCEEDS Issuer Purch",
      "end": "arter, the Corporation did not issue or sell any unregistered equity securities."
     },
@@ -649,9 +639,8 @@
      "end": "idend is payable September 10, 2025 to stockholders of record on August 8, 2025."
     },
     "part_i_item_2": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 2. MANAGEMENT’S DISCUSSION AND ANALYSIS OF RESULTS OF OPERATIONS AND FINANC",
      "end": "ompany assumes no obligation to update or revise any forward-looking statements."
     },
@@ -680,9 +669,8 @@
      "end": "ich is filed as Exhibit 3.2 to this report and incorporated by reference herein."
     },
     "part_ii_item_6": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 6. Exhibits Exhibit Number 3.2 The By-Laws of IBM, as amended through July ",
      "end": "ive Data File because its XBRL tags are embedded within the Inline XBRL document"
     }
@@ -699,16 +687,14 @@
      "end": "e $12,124 $9,988 Energy generation and storage 2,446 2,029 Total $14,570 $12,017"
     },
     "part_i_item_2": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 2. MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
      "end": "net of payment for related legal fees during the six months ended June 30, 2025."
     },
     "part_i_item_3": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 3. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Foreign Curre",
      "end": "25 and $1.15 billion at December 31, 2024, assuming no foreign currency hedging."
     },
@@ -1575,9 +1561,8 @@
      "end": "the URLs for these websites are intended to be inactive textual references only."
     },
     "part_i_item_1a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 1A. Risk Factors Certain factors may have a material adverse effect on our ",
      "end": "er approval; and •certain litigation against us can only be brought in Delaware."
     },
@@ -1600,9 +1585,8 @@
      "end": " which are used by both reportable segments, are adequate for our current needs."
     },
     "part_i_item_3": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 3.Legal Proceedings As a multinational company with a complex and evolving ",
      "end": "expect to be subject to additional legal proceedings and disputes in the future."
     },
@@ -1625,9 +1609,8 @@
      "end": "Item 6.[Reserved]"
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 7.Management's Discussion and Analysis of Financial Condition and Results o",
      "end": "Financial Statements and Supplementary Data\" of this Annual Report on Form 10-K."
     },
@@ -1638,16 +1621,14 @@
      "end": "s — Critical Accounting Estimates\" contained in this Annual Report on Form 10-K."
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 8.Financial Statements and Supplementary Data META PLATFORMS, INC. INDEX TO",
      "end": " information regarding revenue disaggregated by geography, see Note 2 — Revenue."
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 9.Changes in and Disagreements with Accountants on Accounting and Financial",
      "end": " and Disagreements with Accountants on Accounting and Financial Disclosure None."
     },
@@ -1664,9 +1645,8 @@
      "end": "subject to early termination for certain specified events set forth in the plan."
     },
     "part_ii_item_9c": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads and next Part header trails",
      "start": "Item 9C.Disclosure Regarding Foreign Jurisdictions that Prevent Inspections Not ",
      "end": "closure Regarding Foreign Jurisdictions that Prevent Inspections Not Applicable."
     },
@@ -1779,30 +1759,26 @@
      "end": "Item 6.[Reserved]"
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 7.Management’s Discussion and Analysis of Financial Condition and Results o",
      "end": "Products. 5Elimination of dividend activity between Financial Products and ME&T."
     },
     "part_ii_item_7a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 7A.Quantitative and Qualitative Disclosures About Market Risk. Information ",
      "end": "ent’s Discussion and Analysis of Financial Condition and Results of Operations.”"
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 8.Financial Statements and Supplementary Data. MANAGEMENT’S REPORT ON INTER",
      "end": " 2024, 2023 and 2022, all restructuring costs were excluded from segment profit."
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 9.Changes in and Disagreements with Accountants on Accounting and Financial",
      "end": "eements with Accountants on Accounting and Financial Disclosure. Not Applicable."
     },
@@ -1941,9 +1917,8 @@
      "end": " of Operations - Other Matters, Item 7. ****************************************"
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 8. Financial Statements and Supplementary Data Index to Consolidated Financ",
      "end": " TTX of $70 million and $60 million at December 31, 2024 and 2023, respectively."
     },
@@ -1954,16 +1929,14 @@
      "end": " and Disagreements with Accountants on Accounting and Financial Disclosure None."
     },
     "part_ii_item_9a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 9A. Controls and Procedures As of the end of the period covered by this rep",
      "end": "ures may deteriorate. /s/ Deloitte & Touche LLP Omaha, Nebraska February 7, 2025"
     },
     "part_ii_item_9b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 9B. Other Information None.",
      "end": "Item 9B. Other Information None."
     },
@@ -1986,9 +1959,8 @@
      "end": "ommittee segment of the Proxy Statement and is incorporated herein by reference."
     },
     "part_iii_item_12": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
      "end": "include the retention units or retention shares described above in footnote [1]."
     },
@@ -2100,16 +2072,14 @@
    "form": "10-K",
    "items": {
     "part_i_item_1": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Business Overview We are a global financial services firm that, through our subs",
      "end": "Structured Products (December 2012 to December 2014). December 2024 Form 10-K 12"
     },
     "part_i_item_1a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Risk Factors For a discussion of the risks and uncertainties that may affect our",
      "end": "rate, see also “Business—Supervision and Regulation.” December 2024 Form 10-K 24"
     },
@@ -2120,9 +2090,8 @@
      "end": "nd of the year to which this report relates that the Firm believes are material."
     },
     "part_i_item_1c": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Cybersecurity For a discussion of cybersecurity, see “Quantitative and Qualitati",
      "end": "tative and Qualitative Disclosures about Risk— Operational Risk— Cybersecurity.”"
     },
@@ -2157,23 +2126,20 @@
      "end": "d revisions to the G-SIB capital surcharge framework. December 2024 Form 10-K 54"
     },
     "part_ii_item_7a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Quantitative and Qualitative Disclosures about Risk Risk Management Overview Ris",
      "end": "elated risks in line with our overall risk framework. 75 December 2024 Form 10-K"
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Financial Statements and Supplementary Data REPORT OF INDEPENDENT REGISTERED PUB",
      "end": "eighted average cost of capital WM Wealth Management 151 December 2024 Form 10-K"
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Changes in and Disagreements with Accountants on Accounting and Financial Disclo",
      "end": " and Disagreements with Accountants on Accounting and Financial Disclosure None."
     },
@@ -2251,9 +2217,8 @@
      "end": "tion and cash flows could be adversely affected. Goldman Sachs 2024 Form 10-K 59"
     },
     "part_i_item_1b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
      "start": "Item 1B. Unresolved Staff Comments There are no material unresolved written comm",
      "end": " fiscal year relating to our periodic or current reports under the Exchange Act."
     },
@@ -2296,9 +2261,8 @@
      "end": " Factors” in Part I, Item 1A of this Form 10-K. 126 Goldman Sachs 2024 Form 10-K"
     },
     "part_ii_item_7a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
      "start": "Item 7A. Quantitative and Qualitative Disclosures About Market Risk Quantitative",
      "end": "d Results of Operations — Risk Management” in Part II, Item 7 of this Form 10-K."
     },
@@ -2309,9 +2273,8 @@
      "end": " primarily related to corporate loans for 2023. Goldman Sachs 2024 Form 10-K 239"
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
      "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
      "end": "th accountants on accounting and financial disclosure during the last two years."
     },
@@ -2346,9 +2309,8 @@
      "end": " in the 2025 Proxy Statement and is incorporated in this Form 10-K by reference."
     },
     "part_iii_item_12": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "page footer and running header lead the slice",
      "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
      "end": "t for certain changes in corporate structure as permitted under our current SIP."
     },
@@ -2384,16 +2346,14 @@
      "end": "cies, child care access and support, tuition assistance, and financial coaching."
     },
     "part_i_item_1a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running Part header leads the slice",
      "start": "Item 1A. Risk Factors. The following discussion sets forth the material risk fac",
      "end": "eed the amount of reserves that JPMorganChase has established for those matters."
     },
     "part_i_item_1b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running Part header leads the slice",
      "start": "Item 1B. Unresolved Staff Comments. None.",
      "end": "Item 1B. Unresolved Staff Comments. None."
     },
@@ -2688,9 +2648,8 @@
      "end": "hrough VII on pages 104 through 114 and Note 18 Properties, Plant and Equipment."
     },
     "part_i_item_3": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 3. Legal Proceedings The following is a description of legal proceedings th",
      "end": "Please see information related to other legal proceedings in Note 16 Litigation."
     },
@@ -2851,16 +2810,14 @@
      "end": "he fourth quarter, which on average has a slightly lower merchant discount rate."
     },
     "part_i_item_1a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 1A. RISK FACTORS This section highlights certain risks that could affect us",
      "end": "stment exposure, conduct business or have operations, could adversely affect us."
     },
     "part_i_item_1b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 1B. UNRESOLVED STAFF COMMENTS Not applicable.",
      "end": "ITEM 1B. UNRESOLVED STAFF COMMENTS Not applicable."
     },
@@ -2871,9 +2828,8 @@
      "end": "rnance” and “Risk Management —Operational Risk Management Process” under “MD&A.”"
     },
     "part_i_item_2": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 2. PROPERTIES Our principal executive offices are in a 2.2 million square f",
      "end": "a benefit for our Card Members, including in major U.S. and global hub airports."
     },
@@ -2902,16 +2858,14 @@
      "end": "ITEM 6. [RESERVED]"
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 7. MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
      "end": "r risks can be found in “Risk Factors” and our other reports filed with the SEC."
     },
     "part_ii_item_7a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Refer to “Ri",
      "end": "nt” under “MD&A” for quantitative and qualitative disclosures about market risk."
     },
@@ -2922,9 +2876,8 @@
      "end": "652 8,188 5,341 Cash and cash equivalents at end of year $ 7,293 $ 9,652 $ 8,188"
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
      "end": "REEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE Not applicable."
     },
@@ -2971,9 +2924,8 @@
      "end": "ppropriate corporate approvals) when engaging in transactions in our securities."
     },
     "part_iii_item_14": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads and next Part header trails",
      "start": "ITEM 14. PRINCIPAL ACCOUNTANT FEES AND SERVICES The information set forth under ",
      "end": " of Shareholders to be held April 29, 2025, is incorporated herein by reference."
     },
@@ -3003,9 +2955,8 @@
      "end": " by agreements with unions, with agreements expiring between 2026 and 2030. I-14"
     },
     "part_i_item_1a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumbs lead the slice",
      "start": "Item 1A. RISK FACTORS In addition to the other information in this Form 10-K, in",
      "end": "impairment charges at Southern Company, Alabama Power, and Southern Company Gas."
     },
@@ -3022,9 +2973,8 @@
      "end": "rm 10-K which should be read in conjunction with the foregoing information. I-31"
     },
     "part_i_item_2": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumbs lead the slice",
      "start": "Item 2. PROPERTIES Electric At December 31, 2025, the traditional electric opera",
      "end": " under \"Joint Ownership Agreements\" in Item 8 herein for additional information."
     },
@@ -3054,9 +3004,8 @@
      "end": "Item 6.RESERVED II-1"
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumbs lead the slice (7A inside it is deliberate: four-line cross-reference on MD&A's first page)",
      "start": "Item 7.MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS O",
      "end": ", commercially available credit reports, and audited financial statements. II-67"
     },
@@ -3067,16 +3016,14 @@
      "end": "ein. Also see Notes 13 and 14 to the financial statements in Item 8 herein. II-2"
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumbs lead the slice",
      "start": "Item 8.FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA Page The Southern Company and",
      "end": "2023. See Note 2 under \"Southern Company Gas\" for additional information. II-252"
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumbs lead the slice",
      "start": "Item 9.CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL",
      "end": " AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE None."
     },
@@ -3100,30 +3047,26 @@
      "end": null
     },
     "part_iii_item_10": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumbs and Part header lead the combined Items 10-13 stub",
      "start": "Items 10 (other than the information under \"Code of Ethics\" below), 11, 12, 13, ",
      "end": "strant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K. III-1"
     },
     "part_iii_item_11": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumbs and Part header lead the combined Items 10-13 stub",
      "start": "Items 10 (other than the information under \"Code of Ethics\" below), 11, 12, 13, ",
      "end": "strant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K. III-1"
     },
     "part_iii_item_12": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumbs and Part header lead the combined Items 10-13 stub",
      "start": "Items 10 (other than the information under \"Code of Ethics\" below), 11, 12, 13, ",
      "end": "strant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K. III-1"
     },
     "part_iii_item_13": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumbs and Part header lead the combined Items 10-13 stub",
      "start": "Items 10 (other than the information under \"Code of Ethics\" below), 11, 12, 13, ",
      "end": "strant are filed as Exhibits 19(a)-(f) to this Annual Report on Form 10-K. III-1"
     },
@@ -3155,16 +3098,14 @@
    "form": "10-K",
    "items": {
     "part_i_item_1": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
      "start": "Item 1. Business Overview Mastercard is a technology company in the global payme",
      "end": "ailable electronically from the SEC at www.sec.gov. 24 MASTERCARD 2024 FORM 10-K"
     },
     "part_i_item_1a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running page header leads the slice",
      "start": "Item 1A. Risk factors RISK HIGHLIGHTS Legal and Regulatory Business and Operatio",
      "end": " to approve a corporate action that may be favorable to, our other stockholders."
     },
@@ -3833,9 +3774,8 @@
      "end": "her Information in the MD&A and Note 9 to the Consolidated Financial Statements."
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "page footer leads the slice",
      "start": "Item 8. Financial Statements and Supplementary Data. MANAGEMENT'S REPORT ON INTE",
      "end": "nslation and other 98 CONFIRMED OBLIGATIONS OUTSTANDING AT JUNE 30, 2025 $ 5,790"
     },
@@ -3877,9 +3817,8 @@
      "end": "ompensation up to but not including the section entitled Pay Versus Performance."
     },
     "part_iii_item_12": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "page footer leads the slice",
      "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
      "end": "section entitled Security Ownership of Management and Certain Beneficial Owners."
     },
@@ -3927,9 +3866,8 @@
      "end": "on the social media channels and blogs listed on our investor relations website."
     },
     "part_i_item_1a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 1A.Risk Factors If any of the following risks actually occur, our business,",
      "end": "nts outside of our control may cause actual results to differ from our forecast."
     },
@@ -3946,9 +3884,8 @@
      "end": "of emerging risks, incidents and industry trends, and other areas of importance."
     },
     "part_i_item_2": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 2.Properties We have leased principal properties in both Los Gatos, Califor",
      "end": "ate any further physical expansion of operations and for any additional offices."
     },
@@ -3977,9 +3914,8 @@
      "end": "Item 6.[Reserved]"
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 7.Management’s Discussion and Analysis of Financial Condition and Results o",
      "end": "Summary of Significant Accounting Policies” is incorporated herein by reference."
     },
@@ -4002,9 +3938,8 @@
      "end": " and Disagreements with Accountants on Accounting and Financial Disclosure None."
     },
     "part_ii_item_9a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 9A.Controls and Procedures (a)Evaluation of Disclosure Controls and Procedu",
      "end": "res may deteriorate. /s/ Ernst & Young LLP San Jose, California January 27, 2025"
     },
@@ -4124,9 +4059,8 @@
      "end": "Item 6. [Reserved]"
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 7. Management's Discussion and Analysis of Financial Condition and Results ",
      "end": "r a discussion of adoption of new and recently issued accounting pronouncements."
     },
@@ -4155,9 +4089,8 @@
      "end": "control issues and instances of fraud, if any, within NVIDIA have been detected."
     },
     "part_ii_item_9b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 9B. Other Information The following members of our Board of Directors and/o",
      "end": "imate because the plan specifies a formulaic dollar amount of shares to be sold."
     },
@@ -4174,9 +4107,8 @@
      "end": "the heading “Information About the Board of Directors and Corporate Governance.”"
     },
     "part_iii_item_11": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 11. Executive Compensation Information regarding our executive compensation",
      "end": ",” and “Compensation Committee Report,” and is hereby incorporated by reference."
     },
@@ -4652,16 +4584,14 @@
      "end": " this 2024 Annual Report or any other report filed with or furnished to the SEC."
     },
     "part_i_item_1a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb and running header lead the slice",
      "start": "ITEM 1A. RISK FACTORS Our business is subject to significant risks and uncertain",
      "end": "e amendment or refinancing of our outstanding indebtedness or a portion thereof."
     },
     "part_i_item_1b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb and running header lead the slice",
      "start": "ITEM 1B. UNRESOLVED STAFF COMMENTS None.",
      "end": "ITEM 1B. UNRESOLVED STAFF COMMENTS None."
     },
@@ -4709,23 +4639,20 @@
      "end": "ssued Accounting Pronouncements,\" in Part II, Item 8 of this 2024 Annual Report."
     },
     "part_ii_item_7a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb and running header lead the slice",
      "start": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK RISK MANAGEM",
      "end": " on our overall operating costs will be greater for us than for our competitors."
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb and running header lead the slice",
      "start": "ITEM 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA Index Page Hertz Global Hold",
      "end": "rther information. (3) Activity represents the release of a valuation allowance."
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb and running header lead the slice",
      "start": "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
      "end": " AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE None."
     },
@@ -4755,9 +4682,8 @@
      "end": "ments under SEC rules and regulations for an “audit committee financial expert.”"
     },
     "part_iii_item_11": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb and running header lead the slice",
      "start": "ITEM 11. EXECUTIVE COMPENSATION Hertz Global The information required by Item 11",
      "end": "d of Hertz is not required to have, and does not have, a compensation committee."
     },
@@ -4847,9 +4773,8 @@
      "end": "n, Louisville Gas and Electric Company and Kentucky Utilities Company [Reserved]"
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 7. Combined Management's Discussion and Analysis of Financial Condition and",
      "end": "of offering documents and registration statements, and internal control reviews."
     },
@@ -4861,16 +4786,14 @@
      "end": null
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA CONSOLIDATED STATEMENTS OF I",
      "end": "e. The Registrants are currently assessing the impact of adopting this guidance."
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
      "end": "ration, Louisville Gas and Electric Company and Kentucky Utilities Company None."
     },
@@ -4911,9 +4834,8 @@
      "end": "the conditions set forth in General Instructions (I)(1)(a) and (b) of Form 10-K."
     },
     "part_iii_item_13": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 13. CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS, AND DIRECTOR INDEPENDEN",
      "end": "the conditions set forth in General Instructions (I)(1)(a) and (b) of Form 10-K."
     },
@@ -4936,23 +4858,20 @@
    "form": "10-K",
    "items": {
     "part_i_item_1": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 1. Business Regions Financial Corporation is a FHC headquartered in Birming",
      "end": "incorporated into, or otherwise made a part of, this Annual Report on Form 10-K."
     },
     "part_i_item_1a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 1A. Risk Factors An investment in the Company involves risks, some of which",
      "end": "ies could dilute the voting and economic interests of our existing shareholders."
     },
     "part_i_item_1b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 1B. Unresolved Staff Comments None.",
      "end": "Item 1B. Unresolved Staff Comments None."
     },
@@ -4988,9 +4907,8 @@
      "end": "Item 6. [Reserved]"
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 7. Management’s Discussion and Analysis of Financial Condition and Results ",
      "end": "rm 10-K for the year ended December 31, 2020, for comparisons of 2020 with 2019."
     },
@@ -5001,16 +4919,14 @@
      "end": "n the Risk Management section of Item 7 and is incorporated herein by reference."
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 8. Financial Statements and Supplementary Data REPORT OF MANAGEMENT ON INTE",
      "end": "526 1,935 1,863 Cash and cash equivalents at end of year $ 1,543 $ 1,526 $ 1,935"
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
      "end": "reements with Accountants on Accounting and Financial Disclosure Not Applicable."
     },
@@ -5039,9 +4955,8 @@
      "end": "“CORPORATE GOVERNANCE—Family Relationships” is incorporated herein by reference."
     },
     "part_iii_item_11": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "Item 11. Executive Compensation All information presented under the captions “CO",
      "end": "ctors compensated?” of the Proxy Statement are incorporated herein by reference."
     },
@@ -5271,9 +5186,8 @@
      "end": "ITEM 6. [RESERVED]"
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 7. MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
      "end": "-Balance Sheet Arrangements We currently have no off-balance sheet arrangements."
     },
@@ -5284,16 +5198,14 @@
      "end": "erage interest rate on borrowings of 5.72% for the year ended December 31, 2025."
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA (a) Documents included in th",
      "end": "iscounted future net cash flows at the end of the period $ 6,647 $ 3,320 $ 3,187"
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
      "end": " AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE None."
     },
@@ -5304,9 +5216,8 @@
      "end": "ay deteriorate. /s/ GRANT THORNTON LLP Oklahoma City, Oklahoma February 25, 2026"
     },
     "part_ii_item_9b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads the slice",
      "start": "ITEM 9B. OTHER INFORMATION None of our directors or officers adopted or terminat",
      "end": "-Rule 10b5-1 trading arrangement during our fiscal year ended December 31, 2025."
     },
@@ -5493,9 +5404,8 @@
      "end": null
     },
     "part_ii_item_5": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "Part header leads the slice",
      "start": "Item 5. Market for the Registrants' Common Equity, Related Stockholder Matters a",
      "end": "3 — — — — December 1 - December 31, 2023 2,941 61.80 — — Total 2,941 $ 61.80 — —"
     },
@@ -5542,9 +5452,8 @@
      "end": "y disclosed in applicable reports on Form 8-K during the fourth quarter of 2023."
     },
     "part_iii_item_10": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "Part header leads the slice",
      "start": "Item 10. Directors, Executive Officers and Corporate Governance Eversource Energ",
      "end": ")(c) to Form 10-K, Omission of Information by Certain Wholly Owned Subsidiaries."
     },
@@ -5573,9 +5482,8 @@
      "end": "luded that the Deloitte Entities were and are independent of us in all respects."
     },
     "part_iv_item_15": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "Part header leads the slice",
      "start": "Item 15. Exhibits and Financial Statement Schedules (a) 1. Financial Statements:",
      "end": "ons or are not applicable, and therefore have been omitted. 3. Exhibit Index E-1"
     },
