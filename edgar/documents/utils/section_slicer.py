@@ -75,7 +75,7 @@ _TABLE_INTERNAL_TAGS = {
 }
 
 # Tags that only style text. An anchor nested in these is still inside its
-# heading, so _start_block climbs through them to the block that holds it.
+# heading, so heading_block climbs through them to the block that holds it.
 _INLINE_TAGS = {
     'a', 'b', 'big', 'em', 'font', 'i', 'small', 'span', 'strong',
     'sub', 'sup', 'tt', 'u',
@@ -88,9 +88,11 @@ def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str],
 
     Collection turns on *after* the start anchor element and off *at* the
     end anchor element (the end anchor's content is excluded). When the start
-    anchor is nested inside the heading it marks, collection turns on *at*
-    the enclosing block instead, so the section keeps its own heading
-    (:func:`_start_block`, GH #1369). Returns the raw list of every element
+    anchor sits inside the heading it marks, collection turns on *at* the
+    enclosing block instead, so the section keeps its own heading, and an end
+    anchor inside its heading turns collection off at that block, so the next
+    item's heading stays out (:func:`heading_block`, GH #1369). Returns the
+    raw list of every element
     seen while in range — callers typically reduce this to top-level elements
     via :func:`top_level_elements`.
 
@@ -109,7 +111,11 @@ def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str],
     if start_element is None:
         targets = find_anchor_targets(tree, start_anchor)
         if targets:
-            start_element = _start_block(targets[0])
+            start_element = heading_block(targets[0])
+    if end_element is None and end_anchor:
+        end_targets = find_anchor_targets(tree, end_anchor)
+        if end_targets:
+            end_element = heading_block(end_targets[0])
 
     collected: List = []
     in_range = False
@@ -131,40 +137,72 @@ def collect_range_elements(tree, start_anchor: str, end_anchor: Optional[str],
     return collected
 
 
-def _start_block(anchor):
-    """The heading block a nested start anchor sits in, or ``None`` if there is none.
+# Longest run of heading text an anchor may trail. Measured over 1,478 TOC
+# anchors in the offline corpus (2026-10-11): the 70 anchors with text before
+# them in their block all carry 6 to ~90 chars of item heading; nothing longer
+# exists. A longer prefix is body text the anchor was dropped at the end of,
+# and moving the start there would pull the previous section in.
+_HEADING_PREFIX_MAX = 200
 
-    Collection normally turns on *after* the start anchor. Some filings nest
-    the anchor inside the heading it marks, as in
-    ``<p><b><a name="item2"></a>ITEM 2. PROPERTIES</b></p>``. The heading's
-    block has already started when the walk reaches the anchor, so it was
-    never collected and the section came back without its own heading
-    (GH #1369).
 
-    Only loose text is dropped that way, so return ``None`` unless there is
-    text directly inside the anchor or right after it. Otherwise climb while
-    the anchor is the first content of each enclosing element, through
-    inline wrappers only, and stop at the first block reached: that block is
-    where collection should start. An anchor that is itself a block, or that
-    has content before it, leaves collection unchanged.
+def heading_block(anchor):
+    """The heading block an anchor sits inside, or ``None`` if it sits in none.
+
+    Collection normally turns on *after* a start anchor and off *at* an end
+    anchor. That is right when the anchor is a block of its own or an empty
+    sibling placed before its heading, which is how modern filings mark items.
+    Two older shapes put the anchor *inside* the heading:
+
+    * nested first, ``<p><b><a name="item2"></a>ITEM 2. PROPERTIES</b></p>``
+      (GH #1369): the heading's block has already started when the walk
+      reaches the anchor, so the section lost its own heading;
+    * trailing or mid-word, ``<h2>ITEM 2. PROPERTIES.<a name="item2"></a></h2>``
+      and ``Prope<a name="2">rties</a>`` (2010 Bowne-style filings): the same
+      loss at the start, and at the END the next item's heading was collected
+      before its anchor was met, so every slice ended one heading too late.
+
+    In both shapes the boundary belongs on the block, not the anchor. Climb
+    through inline wrappers (and table cells, for a heading split across
+    cells) to the first block, and return it when text would otherwise be
+    lost: heading text before the anchor, or text in the anchor or its tail.
+    An anchor that is itself a block, or an empty one with nothing before it,
+    returns ``None`` so those layouts are unchanged. A prefix longer than
+    ``_HEADING_PREFIX_MAX`` is body text, not a heading, and also returns
+    ``None``.
     """
-
-    anchor_path = list(anchor.iterancestors())
-    el = anchor
-    starting_block = None
-
-    if not ((anchor.text or '').strip() or (anchor.tail or '').strip()):
-        return None 
-    for parent in anchor_path:
+    if not isinstance(anchor.tag, str) or anchor.tag not in _INLINE_TAGS:
+        return None
+    block = None
+    for parent in anchor.iterancestors():
         if parent.tag in ('body', 'html'):
             break
-        if (parent.text or '').strip() or el.getprevious() is not None:
+        block = parent
+        if parent.tag not in _INLINE_TAGS and parent.tag not in _TABLE_INTERNAL_TAGS:
             break
-        if el.tag not in _INLINE_TAGS and el.tag not in _TABLE_INTERNAL_TAGS:
+    if block is None:
+        return None
+
+    prefix = _text_before(block, anchor).strip()
+    in_anchor = (anchor.text or '').strip() or (anchor.tail or '').strip()
+    if not prefix and not in_anchor:
+        return None
+    if len(prefix) > _HEADING_PREFIX_MAX:
+        return None
+    return block
+
+
+def _text_before(block, anchor) -> str:
+    """Text of ``block``'s subtree that precedes ``anchor`` in document order."""
+    parts = [block.text or '']
+    for el in block.iter():
+        if el is block:
+            continue
+        if el is anchor:
             break
-        el = parent
-        starting_block = parent
-    return starting_block
+        if isinstance(el.tag, str):
+            parts.append(el.text or '')
+        parts.append(el.tail or '')
+    return ''.join(parts)
 
 
 def _truncated_clone(el, stop, stop_path: List):
