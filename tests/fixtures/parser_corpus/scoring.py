@@ -18,7 +18,7 @@ import json
 import re
 from functools import lru_cache
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from edgar.documents.config import ParserConfig
 from edgar.documents.parser import HTMLParser
@@ -210,6 +210,28 @@ def embeds_later_heading(text: str, own_items, form: str) -> List[str]:
     return sorted(found)
 
 
+# Per-document facts recorded by measure_consistency as a side effect, so the
+# overlap check needs no second parse: (path, form) -> {doc_text_len,
+# section_lens, methods}. Read through document_measure().
+_DOCUMENT_MEASURES: Dict[tuple, dict] = {}
+
+
+def document_measure(path: str, form: str) -> dict:
+    """``{doc_text_len, section_lens, methods}`` for one fixture.
+
+    ``section_lens`` is the text length of every item section (a 10-Q's two
+    Item 1s count separately), ``methods`` the set of detection methods seen.
+    Parses through :func:`measure_consistency`, so the two share one parse.
+    """
+    measure_consistency(path, form)
+    return _DOCUMENT_MEASURES[(path, form)]
+
+
+def overlap_ratio_of(measure: dict) -> float:
+    """Sum of item section text over document text, as :func:`overlap_ratio`."""
+    return sum(measure["section_lens"]) / (measure["doc_text_len"] or 1)
+
+
 @lru_cache(maxsize=None)
 def measure_consistency(path: str, form: str) -> Dict[str, dict]:
     """Per-item self-consistency of one fixture through the live pipeline.
@@ -223,6 +245,8 @@ def measure_consistency(path: str, form: str) -> Dict[str, dict]:
     html = Path(path).read_text(errors="ignore")
     doc = HTMLParser(ParserConfig(form=form, detect_sections=True)).parse(html)
     out: Dict[str, dict] = {}
+    section_lens: List[int] = []
+    methods = set()
     for name, section in doc.sections.items():
         key = item_key(name)
         if key is None:
@@ -238,6 +262,8 @@ def measure_consistency(path: str, form: str) -> Dict[str, dict]:
             text = ""
         embeds = embeds_later_heading(text, own, form)
         opens = opens_on_heading(text, own)
+        section_lens.append(len(text))
+        methods.add(getattr(section, "detection_method", None))
         prev = out.get(key)
         if prev is None:
             out[key] = {
@@ -248,6 +274,11 @@ def measure_consistency(path: str, form: str) -> Dict[str, dict]:
             prev["embeds"] = sorted(set(prev["embeds"]) | set(embeds))
             prev["opens"] = prev["opens"] or opens
             prev["text_len"] = max(prev["text_len"], len(text))
+    _DOCUMENT_MEASURES[(path, form)] = {
+        "doc_text_len": len(doc.text() or ""),
+        "section_lens": section_lens,
+        "methods": methods,
+    }
     return out
 
 
@@ -316,3 +347,79 @@ if __name__ == "__main__":  # pragma: no cover — the report behind EMBED_BASEL
         note = "" if tracked else "  # era corpus (gitignored)"
         print(f"    ({label!r}, {form!r}): {{{', '.join(repr(i) for i in items)}}},{note}")  # noqa: T201
     print("}")  # noqa: T201
+
+
+# ---------------------------------------------------------------------------
+# Boundary truth set (edgartools-llmp.11, deliverable 2)
+# ---------------------------------------------------------------------------
+# ``boundary_truth.json`` records, per fixture and item, the first and last
+# TRUTH_CHARS characters of the correct slice, whitespace-collapsed. Unlike
+# the pipeline-captured lengths in test_section_boundary_corpus.py these are
+# independent: each item was read against the rendered filing (``verified``
+# says how: "eye" for a boundary a person checked, "wrong" for one known to be
+# wrong today, with the correct text where it could be established). The
+# scorer reports start-exact and end-exact per form, which is the number the
+# detector work is gated on.
+
+TRUTH_CHARS = 80
+_TRUTH_PATH = _CORPUS_DIR / "boundary_truth.json"
+
+
+def collapse(text: str) -> str:
+    """Whitespace-collapsed text, the form boundaries are compared in."""
+    return re.sub(r"\s+", " ", text or "").strip()
+
+
+def head_tail(text: str) -> Tuple[str, str]:
+    c = collapse(text)
+    return c[:TRUTH_CHARS], c[-TRUTH_CHARS:]
+
+
+@lru_cache(maxsize=None)
+def load_truth() -> dict:
+    return json.loads(_TRUTH_PATH.read_text())
+
+
+@lru_cache(maxsize=None)
+def measure_sections(path: str, form: str) -> Dict[str, dict]:
+    """``{section_name: {head, tail, text_len, method, item, part}}`` through the live pipeline."""
+    html = Path(path).read_text(errors="ignore")
+    doc = HTMLParser(ParserConfig(form=form, detect_sections=True)).parse(html)
+    out: Dict[str, dict] = {}
+    for name, section in doc.sections.items():
+        if item_key(name) is None:
+            continue
+        try:
+            text = section.text() or ""
+        except Exception:  # noqa: BLE001
+            text = ""
+        head, tail = head_tail(text)
+        out[name] = {
+            "head": head, "tail": tail, "text_len": len(text),
+            "method": getattr(section, "detection_method", None),
+            "item": getattr(section, "item", None), "part": getattr(section, "part", None),
+        }
+    return out
+
+
+def score_truth(truth_entry: dict, live: Dict[str, dict]) -> Dict[str, dict]:
+    """Score one fixture's truth items against the live sections.
+
+    Returns ``{section_name: {start, end, found}}`` with booleans. An item whose
+    truth is recorded as wrong-with-no-correct-text scores False on the side
+    that is unknown; a section the pipeline no longer emits scores False on both.
+    """
+    result: Dict[str, dict] = {}
+    for name, want in truth_entry["items"].items():
+        got = live.get(name)
+        if got is None:
+            result[name] = {"found": False, "start": False, "end": False}
+            continue
+        start = want.get("start")
+        end = want.get("end")
+        result[name] = {
+            "found": True,
+            "start": start is not None and got["head"] == start,
+            "end": end is not None and got["tail"] == end,
+        }
+    return result
