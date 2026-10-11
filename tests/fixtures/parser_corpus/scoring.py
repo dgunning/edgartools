@@ -154,6 +154,7 @@ CANONICAL_ITEMS = {
 
 OPENING_CHARS = 300
 _HEADING_LINE_MAX = 160
+_INDEX_RUN_MIN = 3
 
 _OWN_LABEL_RE = re.compile(r"ITEM\s*(\d+[A-Z]?)", re.IGNORECASE)
 # "Item 2." at line start is a heading. Two things are not: "Item 2.03", an
@@ -182,13 +183,28 @@ def embeds_later_heading(text: str, own_items, form: str) -> List[str]:
     after the opening. Sorted, de-duplicated; empty means consistent."""
     canon = CANONICAL_ITEMS.get(form, set())
     own = {k.upper() for k in own_items}
-    found = set()
+    # Group matches into runs of consecutive non-blank lines. A run of three
+    # or more is an index listing (GE's cross-reference index, Mastercard's
+    # per-Part contents, a pattern section that caught the TOC itself), which
+    # is content, not a leaked boundary, so it is skipped.
+    runs: List[List[str]] = []
+    run: List[str] = []
     for line in text[OPENING_CHARS:].splitlines():
-        if len(line) > _HEADING_LINE_MAX:
+        if not line.strip():
             continue
-        m = _HEADING_LINE_RE.match(line)
+        m = _HEADING_LINE_RE.match(line) if len(line) <= _HEADING_LINE_MAX else None
         if m:
-            item = m.group(1).upper()
+            run.append(m.group(1).upper())
+        elif run:
+            runs.append(run)
+            run = []
+    if run:
+        runs.append(run)
+    found = set()
+    for run in runs:
+        if len(run) >= _INDEX_RUN_MIN:
+            continue
+        for item in run:
             if item in canon and item not in own:
                 found.add(item)
     return sorted(found)

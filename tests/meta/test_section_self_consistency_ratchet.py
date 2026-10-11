@@ -51,49 +51,49 @@ pytestmark = pytest.mark.slow
 
 # Measured 2026-10-11 on main (7338aa33): 47 of 1,276 10-K item sections and
 # 3 of 179 10-Q item sections embedded a later heading, across 20 fixtures.
-# Re-measured the same day after the anchor-inside-heading fix
-# (section_slicer.heading_block, edgartools-llmp.12 phase B): 19 of 1,276 and
-# 3 of 179, across 16 fixtures. Keyed by fixture file stem so a ticker
-# directory holding two fixtures measures both.
+# Re-measured the same day after each phase-B fix (edgartools-llmp.12):
+#   anchor inside its heading (section_slicer.heading_block)   47 -> 19
+#   unlisted / open-ended successor bound                       19 -> 11
+# and 10-Q 3 -> 2. Keyed by fixture file stem so a ticker directory holding
+# two fixtures measures both.
 #
-# Mechanisms, so a fix knows which entries it should clear:
+# What remains, so a fix knows which entries it should clear:
 #
-#   shared anchor, identical slices  so Items 11/12/13 (one 2,917-char slice
-#       embedding Item 10), so Item 7 embedding 7A. The audit's R2 class.
-#   missing end anchor, run-on       ma Item 4 (5,502 chars, embeds 5-9C: ran
-#       into Part III), ma Item 9C, 0001193125-21-101193 Items 5 and 10.
-#   last item swallows what follows  Item 15 embedding Item 16 on axp, cvx,
-#       jnj, onds, 0001193125-21-101902; ge, 0001047469-03-011363 and
-#       0001140361-10-014238 Item 15 embedding the exhibit / financial
-#       statement index that follows it.
-#   incorporation by reference       cvx Item 8 (embeds 15, 16), the shape
-#       edgartools-gegs recovered; the end still overruns.
-#   pattern path, pre-2002           0000950153-99-001234 Item 5.
-#   10-Q                             msft Item 6 (Part II) embedding a Part I
-#       Item 3 heading; pg Item 4 embedding Item 1; 0001193125-21-082408.
+#   shared anchor, deliberate         so Items 7 (keeps 7A, a four-line
+#       cross-reference set inside MD&A's first page, by design of the
+#       heading-position split) and 11/12/13 (one 2,917-char Part III stub
+#       the split cannot separate: no headings). The audit's R2 class.
+#   last item, no successor heading   Item 15 on ge, 0001047469-03-011363
+#       and 0001140361-10-014238 runs into the exhibit / financial statement
+#       index that follows it; there is no Item 16 heading to stop at.
+#   two-row contents list             ma Item 9C holds a two-row Part III
+#       listing, below the three-row index threshold.
+#   cross-reference at line start     0001193125-10-073212 Item 7 quotes
+#       "ITEM 1A. Risk Factors - ..."; msft 10-Q Item 6 ends on "Items 3
+#       and 4 are not applicable and have been omitted."
+#   pattern path                      0001193125-21-101193 Item 10 (a
+#       pattern section that caught part of the TOC), 0000950153-99-001234
+#       Item 5 (pre-2002, no anchors), 0001193125-21-082408 10-Q.
 #
-# CLEARED by heading_block (anchor placed after the heading text, or inside
-# its last word, 2010 Bowne-style): 0001104659-10-017649 (13 items),
-# 0001140361-10-014238 (12 of 13), 0001354488-16-006842 (2). Two further
-# entries (915358 Item 9B, pg 10-K Item 15) were regex false positives on
-# "Item 1.01"-style 8-K references and lowercase cross-references, excluded
-# when _HEADING_LINE_RE was tightened.
+# CLEARED by heading_block (anchor after the heading text or inside its last
+# word): 0001104659-10-017649 (13 items), 0001140361-10-014238 (12 of 13),
+# 0001354488-16-006842 (2). CLEARED by the unlisted-successor bound: Item 15
+# on axp, cvx, jnj, onds and 0001193125-21-101902 (Item 16 absent from the
+# TOC), cvx Item 8 (open-ended after the incorporated-financials rescue), pg
+# 10-Q Part I Item 4 (Part II Item 1 absent from the TOC). CLEARED by the
+# ratchet's index-run exclusion: ma Item 4, 0001193125-21-101193 Item 5. Two
+# further entries (915358 Item 9B, pg 10-K Item 15) were regex false
+# positives on "Item 1.01"-style references and lowercase cross-references.
 EMBED_BASELINE = {
     ("0000950153-99-001234", "10-K"): {"5"},
     ("0001047469-03-011363", "10-K"): {"15"},
     ("0001140361-10-014238", "10-K"): {"15"},
     ("0001193125-10-073212", "10-K"): {"7"},
     ("0001193125-21-082408", "10-Q"): {"1"},
-    ("0001193125-21-101193", "10-K"): {"5", "10"},
-    ("0001193125-21-101902", "10-K"): {"15"},
-    ("axp-10-k-2025-02-07", "10-K"): {"15"},
-    ("cvx-10-k-2025-02-21", "10-K"): {"8", "15"},
+    ("0001193125-21-101193", "10-K"): {"10"},
     ("ge-10-k-2026-01-29", "10-K"): {"15"},
-    ("jnj-10-k-2025-02-13", "10-K"): {"15"},
-    ("ma-10-k-2025-02-12", "10-K"): {"4", "9C"},
+    ("ma-10-k-2025-02-12", "10-K"): {"9C"},
     ("msft-10-q-2025-04-30", "10-Q"): {"6"},
-    ("onds-10-k-2026-03-30", "10-K"): {"15"},
-    ("pg-10-q-2025-04-24", "10-Q"): {"4"},
     ("so-10-k-2026-02-19", "10-K"): {"7", "11", "12", "13"},
 }
 
@@ -101,8 +101,7 @@ EMBED_BASELINE = {
 # else in EMBED_BASELINE is tracked, and if one of those is absent the checkout
 # is broken, not fixed.
 ERA_ONLY_FIXTURES = {
-    "0001047469-03-011363", "0001140361-10-014238",
-    "0001193125-21-082408", "0001193125-21-101902",
+    "0001047469-03-011363", "0001140361-10-014238", "0001193125-21-082408",
 }
 TRACKED_BASELINE_FIXTURES = {k for k in EMBED_BASELINE if k[0] not in ERA_ONLY_FIXTURES}
 
