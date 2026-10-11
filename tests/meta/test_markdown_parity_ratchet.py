@@ -82,9 +82,7 @@ pytestmark = pytest.mark.slow
 # ONLY thing left on unh/10k rather than a guess about most of it.
 BASELINE_NUMBER_LOSS = {
     ("8-K", "0000887919-21-000012"): 2,
-    ("20-F", "0001062993-16-008650"): 42,
     ("20-F", "0001062993-21-003193"): 22,
-    ("10-Q", "aapl/10q"): 10,
     ("10-Q", "ba/10q"): 1,
     ("10-Q", "gbdc/10q"): 24,
     ("10-Q", "gs/10q"): 6,
@@ -96,11 +94,8 @@ BASELINE_NUMBER_LOSS = {
     ("10-Q", "msft/10q"): 8,
     ("10-Q", "nflx/10q"): 6,
     ("10-Q", "nvda/10q"): 2,
-    ("10-Q", "pg/10q"): 24,
-    ("10-Q", "tsla/10q"): 4,
     ("10-Q", "unp/10q"): 2,
     ("10-K", "915358/10k"): 25,
-    ("10-K", "abbv/10k"): 4,
     ("10-K", "adbe/10k"): 16,
     ("10-K", "amzn/10k"): 13,
     ("10-K", "axp/10k"): 18,
@@ -119,21 +114,16 @@ BASELINE_NUMBER_LOSS = {
     ("10-K", "cvx/10k"): 4,
     ("10-K", "gbdc/10k"): 67,
     ("10-K", "gs/10k"): 9,
-    ("10-K", "hd/10k"): 32,
     ("10-K", "hubs/10k"): 24,
     ("10-K", "jnj/10k"): 7,
     ("10-K", "jpm/10k"): 1,
     ("10-K", "ko/10k"): 3,
-    ("10-K", "ma/10k"): 2,
     ("10-K", "meta/10k"): 39,
     ("10-K", "ms/10k"): 6,
     ("10-K", "msft/10k"): 15,
     ("10-K", "nflx/10k"): 21,
-    ("10-K", "nke/10k"): 7,
     ("10-K", "nvda/10k"): 16,
     ("10-K", "orcl/10k"): 7,
-    ("10-K", "pfe/10k"): 3,
-    ("10-K", "rf/10k"): 4,
     ("10-K", "tsla/10k"): 22,
     # Was 186 until the two-up maturity-row fix (edgartools-v3ec) restored
     # the long-term debt schedule. Re-banked rather than left at 186: the
@@ -151,7 +141,6 @@ BASELINE_NUMBER_LOSS = {
     ("10-K", "v/10k"): 13,
     ("10-K", "wfc/10k"): 15,
     ("10-K", "wmt/10k"): 14,
-    ("10-K", "xom/10k"): 1,
 }
 
 # Tracked filings that already lose nothing. Kept as a separate set rather than
@@ -171,6 +160,20 @@ CLEAN_FILINGS = {
     ("10-Q", "xom/10q"),
     ("10-K", "ibm/10k"),
     ("10-K", "pg/10k"),
+    # Reached zero via GH #1474 (PR #1480, 2026-10-08), which kept grouped
+    # table header paths instead of dropping the header rows that carried them.
+    # Total banked: 133 numbers across these eleven.
+    ("20-F", "0001062993-16-008650"),
+    ("10-Q", "aapl/10q"),
+    ("10-Q", "pg/10q"),
+    ("10-Q", "tsla/10q"),
+    ("10-K", "abbv/10k"),
+    ("10-K", "hd/10k"),
+    ("10-K", "ma/10k"),
+    ("10-K", "nke/10k"),
+    ("10-K", "pfe/10k"),
+    ("10-K", "rf/10k"),
+    ("10-K", "xom/10k"),
 }
 
 TRACKED = set(BASELINE_NUMBER_LOSS) | CLEAN_FILINGS
