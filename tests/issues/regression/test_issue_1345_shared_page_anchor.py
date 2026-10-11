@@ -69,7 +69,7 @@ def test_southern_item7a_is_its_own_cross_reference(southern):
     item7 = southern["part_ii_item_7"].text()
     item7a = southern["part_ii_item_7a"].text()
     assert item7a != item7
-    assert len(item7a) == 347  # was 282,239 — all of Item 7
+    assert len(item7a) == 341  # was 282,239 — all of Item 7; then 347 before the trailing page number "II-2" left the slice
     assert item7a.startswith("Item 7A.QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK")
     assert '"Market Price Risk" in Item 7 herein' in item7a
     # 7A stops at the end of its page block; MD&A's body is not in it.
@@ -80,7 +80,7 @@ def test_southern_item7_keeps_its_mda(southern):
     item7 = southern["part_ii_item_7"].text()
     # Owner's span is unchanged: the displaced 7A text sits inside Item 7's
     # first page and the MD&A resumes after it.
-    assert len(item7) == 283_145  # was 283,225: the leading "Table of Contents / Index to Financial Statements" crumb line is no longer in the slice
+    assert len(item7) == 283_138  # was 283,225: the leading crumb line (283,145), then the trailing page number "II-67", left the slice
     assert "COMBINED MANAGEMENT'S DISCUSSION AND ANALYSIS" in item7
     assert "Southern Company is a holding company that owns all of the common stock" in item7
 
@@ -91,8 +91,8 @@ def test_southern_other_shared_pages_are_separated(southern):
     item9a = southern["part_ii_item_9a"].text()
     item9b = southern["part_ii_item_9b"].text()
     # Items 5 and 6 tile their page: Item 5 now ends at Item 6's heading.
-    assert (len(item5), len(item6)) == (1393, 21)  # both were 1,416
-    assert item6 == "Item 6.RESERVED\n\nII-1"
+    assert (len(item5), len(item6)) == (1393, 15)  # both were 1,416; Item 6 was 21 before its trailing page number "II-1" left the slice
+    assert item6 == "Item 6.RESERVED"  # the trailing page number "II-1" left the slice (llmp.12 step 6)
     assert "Item 6." not in item5
     # 9B continues onto the next page (the trading-arrangement table) and
     # still stops at Item 9C.
@@ -110,7 +110,7 @@ def test_southern_combined_part_iii_is_left_alone(southern):
     deliberately left as one span rather than guessed at."""
     texts = {k: southern[k].text() for k in
              ("part_iii_item_10", "part_iii_item_11", "part_iii_item_12", "part_iii_item_13")}
-    assert {len(t) for t in texts.values()} == {2827}  # was 2917: the leading crumb line and "PART III" divider are no longer in the slice
+    assert {len(t) for t in texts.values()} == {2820}  # was 2917: the leading crumb line and "PART III" divider (2827), then the trailing page number "III-1", left the slice
 
 
 # --- Eversource: three consecutive items on one page -------------------------

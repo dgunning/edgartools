@@ -131,7 +131,7 @@ def test_hertz_item_1_stops_at_item_1a(hertz_sections):
 def test_ppl_item_7a_stops_at_item_8(ppl_sections):
     item7a = ppl_sections["part_ii_item_7a"].text()
     # Before: 58,912 chars, running through the ITEM 8 heading at offset 27,490.
-    assert len(item7a) == 27_483
+    assert len(item7a) == 27_439  # was 27,483 before the trailing page number and "(THIS PAGE LEFT BLANK INTENTIONALLY.)" left the slice (llmp.12 step 6)
     assert item7a.startswith("ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK")
     assert "FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA" not in item7a
 

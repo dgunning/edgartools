@@ -130,11 +130,12 @@ def test_the_9at_section_is_detected():
     # Item 9 ends where 9A(T) begins. Until edgartools-llmp.12 the TOC
     # section ran through the 9A(T) heading (the TOC never listed it, so no
     # anchor ended Item 9) and this pin held 2,236 characters, 2,142 of
-    # which were 9A(T) itself; Item 9 is "None." plus the index line that
-    # follows it. 9B, on the other side, is untouched.
-    assert len(doc.sections["part_ii_item_9"].text()) == 134
+    # which were 9A(T) itself; Item 9 is "None." (134 with the "Index to
+    # Financial Statements" backlink that followed it, until llmp.12 step 6
+    # dropped trailing furniture). 9B, on the other side, is untouched.
+    assert len(doc.sections["part_ii_item_9"].text()) == 102
     assert "9A(T)" not in doc.sections["part_ii_item_9"].text()
-    assert len(doc.sections["part_ii_item_9b"].text()) == 67  # was 78: the trailing "PART III" divider is no longer in the slice
+    assert len(doc.sections["part_ii_item_9b"].text()) == 35  # was 78, then 67: the trailing "PART III" divider, then the "Index to Financial Statements" backlink, left the slice
 
 
 def test_item_9a_resolves_without_the_legacy_parser():
