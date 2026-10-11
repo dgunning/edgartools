@@ -134,7 +134,7 @@ def test_the_9at_section_is_detected():
     # follows it. 9B, on the other side, is untouched.
     assert len(doc.sections["part_ii_item_9"].text()) == 134
     assert "9A(T)" not in doc.sections["part_ii_item_9"].text()
-    assert len(doc.sections["part_ii_item_9b"].text()) == 78
+    assert len(doc.sections["part_ii_item_9b"].text()) == 67  # was 78: the trailing "PART III" divider is no longer in the slice
 
 
 def test_item_9a_resolves_without_the_legacy_parser():
