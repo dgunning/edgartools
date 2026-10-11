@@ -251,6 +251,7 @@ class SECSectionExtractor:
         self._bound_sections_at_unlisted_item_headings(tree)
         self._bound_sections_at_part_dividers(tree)
         self._advance_starts_past_page_furniture(tree)
+        self._bound_item_4_at_executive_officers(tree)
         self._retreat_ends_before_page_furniture(tree)
 
     # A block that is an item heading: "Item 16.", "ITEM 7A -", "Items 1 and 2."
@@ -720,6 +721,66 @@ class SECSectionExtractor:
                 continue
             boundary.end_element = target
             logger.info("Section %s ends before %d page-furniture block(s)", name, len(trail))
+
+
+    # The unnumbered executive-officer section a 10-K may carry at the end
+    # of Part I (Regulation S-K Item 401(b), Instruction 3) opens on one of
+    # a few headings; Coca-Cola labels it "ITEM X.".
+    _EXECUTIVE_OFFICERS_RE = re.compile(
+        r'^(?:ITEM\s+X\.?\s*)?(?:INFORMATION\s+(?:ABOUT|CONCERNING|REGARDING)\s+(?:OUR|THE)\s+EXECUTIVE\s+OFFICERS'
+        r'|EXECUTIVE\s+OFFICERS\s+OF\s+(?:THE\s+)?(?:REGISTRANT|COMPANY)|OUR\s+EXECUTIVE\s+OFFICERS)\b', re.IGNORECASE)
+
+    def _bound_item_4_at_executive_officers(self, tree) -> None:
+        """End 10-K Item 4 at the unnumbered executive-officer section.
+
+        Instruction 3 to Item 401(b) of Regulation S-K lets a filer print the
+        executive officers in Part I instead of the proxy statement, and the
+        section is unnumbered, so no TOC anchor ends Item 4 before it: "Not
+        applicable." ran on through the officer table on eight of the tracked
+        10-Ks (Coca-Cola, J&J, P&G, Exxon, Regions, Hertz, Union Pacific,
+        Eversource), the largest end failure left in the truth set after the
+        page-furniture passes. The heading is in the body, so read it: walk
+        Item 4's range past its own heading for a short block whose text
+        opens on one of the heading shapes, and end the section there. The
+        furniture pass that follows drops any page furniture left before it.
+        """
+        schema = self.toc_analyzer.schema
+        if schema.title_based or schema.repeating_parts or not self.section_boundaries:
+            return
+        boundary = self.section_boundaries.get('part_i_item_4')
+        if boundary is None:
+            return
+        starts = find_anchor_targets(tree, boundary.anchor_id)
+        if not starts:
+            return
+        start_el = boundary.start_element if boundary.start_element is not None else starts[0]
+        end_el = boundary.end_element
+        end_id = boundary.end_element_id
+        for event, el in iterwalk_from(start_el):
+            if event != 'start' or not isinstance(el.tag, str):
+                continue
+            if el is not start_el:
+                if end_el is not None and el is end_el:
+                    break
+                if end_id and is_anchor_match(el, end_id):
+                    break
+            if el.tag in _INLINE_TAGS or el is start_el:
+                continue
+            text = ' '.join(el.text_content().split())
+            if not text or len(text) > self._FURNITURE_MAX_CHARS:
+                continue
+            if self._EXECUTIVE_OFFICERS_RE.match(text) and not text.endswith('.'):
+                tables = [a for a in el.iterancestors() if a.tag == 'table']
+                if tables:
+                    # The heading opens the officer table itself (Exxon): the
+                    # whole table belongs to the section that follows.
+                    first = next((c for c in tables[-1].iter('td', 'th') if c.text_content().strip()), None)
+                    if first is None or not self._EXECUTIVE_OFFICERS_RE.match(' '.join(first.text_content().split())):
+                        continue
+                    el = tables[-1]
+                boundary.end_element = el
+                logger.info("Section part_i_item_4 ends at the executive-officer heading")
+                break
 
     _PART_RANK = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5}
 

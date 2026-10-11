@@ -1294,11 +1294,10 @@
      "end": "to the claims. The Company removed the action to federal court in December 2024."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "swallows the unnumbered 'ITEM X. Information about our executive officers' and the Part II header",
-     "start": "ITEM 4. MINE SAFETY DISCLOSURES Not applicable. 31 ITEM X. INFORMATION ABOUT OUR",
-     "end": null
+     "start": "ITEM 4. MINE SAFETY DISCLOSURES Not applicable.",
+     "end": "ITEM 4. MINE SAFETY DISCLOSURES Not applicable."
     },
     "part_ii_item_5": {
      "verified": "eye",
@@ -1878,11 +1877,10 @@
      "end": " effect on any of our results of operations, financial condition, and liquidity."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumb leads; swallows executive officers and the Part II header",
-     "start": "Item 4. Mine Safety Disclosures Not applicable. Information About Our Executive ",
-     "end": null
+     "start": "Item 4. Mine Safety Disclosures Not applicable.",
+     "end": "Item 4. Mine Safety Disclosures Not applicable."
     },
     "part_ii_item_5": {
      "verified": "eye",
@@ -2233,11 +2231,10 @@
      "end": "possible aggregate loss estimate and judicial, regulatory and legal proceedings."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "running header and next Part header trail the slice",
-     "start": "Item 4. Mine Safety Disclosures Not applicable. 60 Goldman Sachs 2024 Form 10-K",
-     "end": "Item 4. Mine Safety Disclosures Not applicable. 60 Goldman Sachs 2024 Form 10-K"
+     "start": "Item 4. Mine Safety Disclosures Not applicable.",
+     "end": "Item 4. Mine Safety Disclosures Not applicable."
     },
     "part_ii_item_5": {
      "verified": "eye",
@@ -2502,11 +2499,10 @@
      "end": "inancial Section of this report for additional information on legal proceedings."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "swallows 'Information about our Executive Officers' and the Part II header",
-     "start": "ITEM 4. MINE SAFETY DISCLOSURES Not applicable. 25 Information about our Executi",
-     "end": null
+     "start": "ITEM 4. MINE SAFETY DISCLOSURES Not applicable.",
+     "end": "ITEM 4. MINE SAFETY DISCLOSURES Not applicable."
     },
     "part_ii_item_5": {
      "verified": "eye",
@@ -2975,11 +2971,10 @@
      "end": "nmental authority where potential monetary sanctions are involved is $1 million."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "nav crumbs lead; nav crumbs and Part header trail",
-     "start": "Item 4.MINE SAFETY DISCLOSURES Not applicable. I-39 Table of Contents Index to F",
-     "end": "the annual meeting) or until his or her successor is elected and qualified. I-41"
+     "start": "Item 4.MINE SAFETY DISCLOSURES Not applicable.",
+     "end": "Item 4.MINE SAFETY DISCLOSURES Not applicable."
     },
     "part_ii_item_5": {
      "verified": "eye",
@@ -3420,11 +3415,10 @@
      "end": "he Notes to Consolidated Financial Statements included in Item 8 of this Report."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "swallows executive officers and the Part II header",
-     "start": "Item 4. Mine safety disclosures Not applicable. 18 Executive officers of the reg",
-     "end": null
+     "start": "Item 4. Mine safety disclosures Not applicable.",
+     "end": "Item 4. Mine safety disclosures Not applicable."
     },
     "part_ii_item_5": {
      "verified": "eye",
@@ -3709,11 +3703,10 @@
      "end": "n with the Company's Risk Factors in Part I, Item 1A for additional information."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "swallows executive officers and the Part II header",
-     "start": "Item 4. Mine Safety Disclosure. Not applicable. The Procter & Gamble Company 11 ",
-     "end": null
+     "start": "Item 4. Mine Safety Disclosure. Not applicable.",
+     "end": "Item 4. Mine Safety Disclosure. Not applicable."
     },
     "part_i_item_5": {
      "verified": "wrong",
@@ -4595,11 +4588,10 @@
      "end": "d Off-Balance Sheet Commitments,\" in Part II, Item 8 of this 2024 Annual Report."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "swallows the running header, executive officers and the Part II header",
-     "start": "ITEM 4. MINE SAFETY DISCLOSURES Not applicable. HERTZ GLOBAL HOLDINGS, INC. AND ",
-     "end": null
+     "start": "ITEM 4. MINE SAFETY DISCLOSURES Not applicable.",
+     "end": "ITEM 4. MINE SAFETY DISCLOSURES Not applicable."
     },
     "part_ii_item_5": {
      "verified": "eye",
@@ -4867,11 +4859,10 @@
      "end": "al Statements, which are included in Item 8. of this Annual Report on Form 10-K."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "swallows executive officers and the Part II header",
-     "start": "Item 4. Mine Safety Disclosures. Not applicable. Information About Our Executive",
-     "end": null
+     "start": "Item 4. Mine Safety Disclosures. Not applicable.",
+     "end": "Item 4. Mine Safety Disclosures. Not applicable."
     },
     "part_ii_item_5": {
      "verified": "eye",
@@ -5375,11 +5366,10 @@
      "end": " Item 1A, Risk Factors, for general information about several significant risks."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "swallows executive officers",
-     "start": "Item 4. Mine Safety Disclosures Not applicable. INFORMATION ABOUT OUR EXECUTIVE ",
-     "end": null
+     "start": "Item 4. Mine Safety Disclosures Not applicable.",
+     "end": "Item 4. Mine Safety Disclosures Not applicable."
     },
     "part_ii_item_5": {
      "verified": "eye",
