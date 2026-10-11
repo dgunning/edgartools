@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [5.62.0] - 2026-10-11
+
+### Added
+
+- **`Effect.effective_time` returns the time of day a registration became effective.** `Effect.from_xml()` dropped the notice's `finalEffectivenessDispTime`: Lyntris Inc.'s S-1 notice (`9999999995-26-002694`) gave only `2026-08-18`, and now also gives `15:30:00`. The property is `None` when the notice has no time, as on Fitness Fanatics' POS AM notice. `effective_date` now documents that SEC publishes the notice at about 00:15 ET on the next business day. (GH #1499)
+- **`get_place_country_code()` returns the ISO 3166-1 alpha-2 country for an EDGAR place code.** `place_codes.csv` gains an `ISO` column for all 309 known codes. Accelerant Holdings (CIK 1997350) files its business address as `E9`, which now reads as `KY` (Cayman Islands). The unknown code `XX` returns `None`. (GH #1495)
+
+### Changed
+
+- **`acceptance_datetime` from `get_filings()` is now documented as unreliable for precise times.** SEC's submissions JSON labels it UTC, but Apple's 10-Q `0000320193-26-000020` read 14:01:02 on 2026-10-08 for a 10:01:02 UTC acceptance. The docstring and filing guide point to `filing.header.acceptance_datetime`, which matches SEC's index page. (GH #1501)
+
+### Fixed
+
+- **BDC portfolios no longer drop a loan as the "total" of a sibling worth the same.** A row that states its own cost is kept even when one row extending its identifier matches its fair value. ARCC's 10-Q `0001628280-26-050307` dropped a $50.5M Proofpoint second-lien loan and two $100k loans, leaving the portfolio $50.7M below its reported total; it now reconciles exactly. (GH #1505)
+- **`edgar_read` dropped the 13F-HR `summary` section when requested by name.** "summary" was treated as the metadata-only inspection mode across all forms, filtering it out from 13F requests. It is now extracted whenever requested on forms that define a summary section. (GH #1415)
+- **`tests._offline_harness` blocked Windows asyncio startup and the audit mislabeled a no-data test as SEC-dependent.** On Windows 11/Python 3.14.4, the probe passed normally but errored before its body with the harness. Internal socketpair connections now work while external TCP, DNS and ordinary loopback connections stay blocked. (GH #1490)
+- **`scripts/check_offline_audit.py` truncated failed parameter IDs containing spaces.** A selector ending in `[Net sales]` became `[Net`; audit runs now retain native pytest IDs, keep distinct parameters separate, and quote complete rerun selectors. Ambiguous legacy reports fail before changing the baseline. (GH #1476)
+- **`Document.to_markdown()` loses duration/date headers on grouped tables.** In Apple's 10-Q (0000320193-25-000057), $90,753 million of comparative net sales appeared under "Mar. 29, 2025"; it now appears under "3 Months Ended Mar. 30, 2024". Eaton's blank header rows retain Shares/Dollars placement. Column placement in some equity-table `to_dataframe()` and `text()` outputs also changes. Markdown bytes change in 76 of 79 measured filings, so rebuild RAG indexes built from it. (GH #1474)
+- **`Statement.render()` misstated share units in monetary captions.** Intuit's 2026 10-K (`0000896878-26-000037`) displays 276 for 276,000,000 shares; its note now says "In millions, except per share data" instead of excluding shares. Recognized share cells use one consistent scale, keeping the finest existing whole share display. Raw facts, DataFrames, getters and existing per-share formatting are unchanged. (GH #1470)
+- **MCP `earnings_analysis`, `industry_overview`, and `filing_comparison` prompts requested rejected inputs.** Peer comparisons now request `margins` instead of `net_margin`; across-period financial trends request `total_assets` instead of `assets`. These templates guide clients and do not execute tools. (GH #1488)
+- **`edgar_notes(detail="full")` returned bare `NaN` for missing table metadata, which strict JSON parsers rejected.** For Apple's 10-Q (`0000320193-26-000020`), Note 6 Debt, the output used `NaN` instead of `null` in `balance` and `weight`. Missing cells now become `null` across every exported record field, preserving the other recorded values. (GH #1489)
+- **`XBRL.element_catalog` called every us-gaap, dei and srt concept a duration.** Entries for concepts declared outside the filing carried `period_type='duration'`, `data_type=''` and `balance=None` whatever the concept, so on Oracle's 10-Q (0001193125-26-389274) 108 instant concepts with facts, `us-gaap_Assets` among them, read "duration". The period type now comes from the concept's facts; what the filing does not say is `None`. (GH #1425)
+- **Documented XBRL calls such as `FactQuery.by_statement()` and `Statement.get_concept_value()` do not exist.** The docs now use `by_statement_type()`, chained `by_dimension()`, `to_dataframe()` lookups, `xbrl.facts.query()` and `SynonymGroups.export_to_json()`, and `menucat` holds `Statements`, not `S`. They also say `to_dataframe()` defaults to the detailed view: 45 rows on NVIDIA's FY2026 10-K (`0001045810-26-000021`), where printing shows the 29-row standard view. (GH #1424)
+- **`XBRL.entity_info` named a co-registrant as the filer of a combined filing.** The last of the cover's registrant names won, so Duke Energy's FY2025 10-K (0001326160-26-000014) reported `PIEDMONT NATURAL GAS COMPANY, INC.` beside Duke Energy's own CIK, 1326160; it now reports `DUKE ENERGY CORPORATION`. The filer's facts win over those tagged with a `dei:LegalEntityAxis` member, so `ticker` is also the filer's own symbol whenever it lists one. (GH #1420)
+- **`SynonymGroups.identify_concepts()` gave one XBRL element different answers in its `prefix:Name` and `prefix_Name` spellings.** Statement frames use the underscore spelling, so on TSMC's FY2025 20-F (0001628280-26-025362) it returned `[]` for all 22 income-statement rows with a builtin synonym, such as `ifrs-full_CostOfSales`. Both spellings now drop only a standard prefix (`us-gaap`, `ifrs-full`, `dei`, `srt`); an extension such as `onto:NetIncome` no longer matches by local name. (GH #1418)
+- **`Filing.html()` returns an inline XBRL document as filed, without fetching the filing's index page.** A primary document that opens with an XML declaration was treated as XML and re-downloaded through the index page, which costs a request and returns SEC's served copy: on JPM's 8-K that copy ends in a 109-character injected bot-detection `<script>`. `html()` now reads the document from the submission, so it also no longer depends on the index page being reachable. (GH #1421)
+
 ## [5.61.1] - 2026-10-06
 
 ### Security
