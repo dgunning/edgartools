@@ -6,7 +6,7 @@ from a BDC's Schedule of Investments (SOI).
 """
 import logging
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from decimal import Decimal, InvalidOperation
 from datetime import date
 from functools import lru_cache
@@ -2205,6 +2205,22 @@ def _rounding_tolerance(value: Decimal) -> Decimal:
     return unit / 2
 
 
+def _type_coupon_suffixed(inv: PortfolioInvestment, member_candidates: tuple[str, ...] = ()) -> PortfolioInvestment:
+    """Type a row left Unknown only because its identifier ends in a bracketed percent.
+
+    The suffix marks a category roll-up ("Debt Investments Software (52.80%)",
+    HTGC) or a position's own coupon ("... Delayed Draw Term Loan (14.00%)",
+    PFX). A position states a principal amount; none of HTGC's roll-ups does,
+    though they state cost (GH #1504).
+    """
+    if (inv.investment_type != "Unknown" or inv.principal_amount is None
+            or not re.search(r'\(\d+\.\d+%\)\s*$', inv.identifier)):
+        return inv
+    stripped = re.sub(r'\s*\(\d+\.\d+%\)\s*$', '', inv.identifier)
+    _, company_name, investment_type = _parse_investment_identifier(stripped, member_candidates)
+    return replace(inv, company_name=company_name, investment_type=investment_type)
+
+
 def _exclude_restated_rows(rows: list[PortfolioInvestment]):
     """Split identifier rows into holdings and rows that restate holdings already counted.
 
@@ -3144,6 +3160,7 @@ class PortfolioInvestments:
         # parents of their own tranches, and a second schedule's copy of a row.
         # Before this every BDC measured summed 2-48% above its own balance sheet.
         portfolio, excluded = _exclude_restated_rows(portfolio)
+        portfolio = [_type_coupon_suffixed(inv, member_candidates) for inv in portfolio]
 
         # Filter out Unknown types unless include_untyped is True
         if not include_untyped:
