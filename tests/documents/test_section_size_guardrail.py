@@ -112,8 +112,8 @@ CROSS_REFERENCE_ITEM8 = {
     "orcl": "Item 8.\tFinancial Statements and Supplementary Data\n\nThe response to this "
             "item is submitted as a separate section of this Annual Report. See Part IV, "
             "Item 15.",
-    "cik915358": "FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA\n\nThe response to this item "
-                 "is included in Item 15(a) of this Report.",
+    "cik915358": "ITEM 8.  FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA\n\nThe response to this "
+                 "item is included in Item 15(a) of this Report.",
 }
 
 
@@ -283,7 +283,8 @@ def test_gs_business_correctly_bounded():
     ("nflx", "nflx/10k/nflx-10-k-2025-01-27.html", "10-K", "part_ii_item_8", 268),
     ("ibm", "ibm/10k/ibm-10-k-2025-02-25.html", "10-K", "part_ii_item_8", 250),
     ("orcl", "orcl/10k/orcl-10-k-2025-06-18.html", "10-K", "part_ii_item_8", 158),
-    ("cik915358", "915358/10k/915358-10-k-2025-08-27.html", "10-K", "part_ii_item_8", 112),
+    # 121 since #1512: the anchor sits inside the heading, so the slice now opens on "ITEM 8."
+    ("cik915358", "915358/10k/915358-10-k-2025-08-27.html", "10-K", "part_ii_item_8", 121),
     # The deferral pattern is not Item-8-specific: IBM also incorporates MD&A
     # by reference.
     ("ibm", "ibm/10k/ibm-10-k-2025-02-25.html", "10-K", "part_ii_item_7", 212),
