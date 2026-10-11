@@ -156,8 +156,16 @@ OPENING_CHARS = 300
 _HEADING_LINE_MAX = 160
 
 _OWN_LABEL_RE = re.compile(r"ITEM\s*(\d+[A-Z]?)", re.IGNORECASE)
+# "Item 2." at line start is a heading. Two things are not: "Item 2.03", an
+# 8-K item reference ("the information set forth under Item 1.01 is
+# incorporated by reference", inside a 10-K Item 9B), so a dotted decimal
+# after the number is excluded; and "Item 7 below, we agreed to ...", a
+# cross-reference that line-wrapping put at line start, so a lowercase word
+# right after the number is excluded (a heading's title is capitalised),
+# except "and", which joins a combined heading ("Items 1 and 2. Business").
 _HEADING_LINE_RE = re.compile(
-    r"^\s*(?:PART\s+[IVX]+\s*[,.\-–—:]?\s*)?ITEMS?\s*(\d+[A-Z]?)\s*(?:[.:\-–—]|\s)",
+    r"^\s*(?:PART\s+[IVX]+\s*[,.\-\u2013\u2014:]?\s*)?ITEMS?\s*(\d+[A-Z]?)"
+    r"(?:\s*[:\-\u2013\u2014]|\s*\.(?!\d)|\s)\s*(?:(?=and\b)|(?!(?-i:[a-z])))",
     re.IGNORECASE,
 )
 

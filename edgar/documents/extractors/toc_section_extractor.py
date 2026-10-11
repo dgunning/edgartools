@@ -12,14 +12,14 @@ import re
 from dataclasses import dataclass
 from typing import Dict, List, Optional
 
-from lxml import etree
 from lxml import html as lxml_html
 
 from edgar.documents.document import Document
 from edgar.documents.nodes import Node
 from edgar.documents.utils.anchor_targets import find_anchor_targets, is_anchor_match
-from edgar.documents.utils.tree_traversal import document_order_path, iterwalk_from, precedes
+from edgar.documents.utils.section_slicer import heading_block
 from edgar.documents.utils.toc_analyzer import TOCAnalyzer
+from edgar.documents.utils.tree_traversal import document_order_path, iterwalk_from, precedes
 
 logger = logging.getLogger(__name__)
 
@@ -892,7 +892,21 @@ class SECSectionExtractor:
         # ever inverts a pair, silence is still the answer we want over text
         # that runs to the end of the filing at confidence 0.95.
         # A heading-element start (GH #1345) replaces the anchor as the point
-        # the walk begins at; the anchor only has to exist.
+        # the walk begins at; the anchor only has to exist. Failing that, an
+        # anchor that sits inside its heading moves the start to the heading's
+        # block, and an end anchor inside ITS heading moves the end to that
+        # block, so neither heading is lost or leaked. One rule, shared with
+        # the markdown slicer (section_slicer.heading_block).
+        start_element = boundary.start_element
+        if start_element is None:
+            start_element = heading_block(start_elements[0])
+        end_element = boundary.end_element
+        if end_element is None and boundary.end_element_id:
+            end_targets = find_anchor_targets(tree, boundary.end_element_id)
+            if end_targets:
+                end_element = heading_block(end_targets[0])
+        if start_element is not boundary.start_element or end_element is not boundary.end_element:
+            boundary = dataclasses.replace(boundary, start_element=start_element, end_element=end_element)
         start_el = boundary.start_element if boundary.start_element is not None else start_elements[0]
 
         if boundary.end_element_id:
