@@ -10,14 +10,14 @@ import dataclasses
 import logging
 import re
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Tuple
 
 from lxml import html as lxml_html
 
 from edgar.documents.document import Document
 from edgar.documents.nodes import Node
 from edgar.documents.utils.anchor_targets import find_anchor_targets, is_anchor_match
-from edgar.documents.utils.section_slicer import heading_block
+from edgar.documents.utils.section_slicer import _INLINE_TAGS, heading_block
 from edgar.documents.utils.toc_analyzer import TOCAnalyzer
 from edgar.documents.utils.tree_traversal import document_order_path, iterwalk_from, precedes
 
@@ -248,6 +248,153 @@ class SECSectionExtractor:
         self._rescue_boundaries()
 
         self._bound_open_sections_at_signatures(tree)
+        self._bound_sections_at_unlisted_item_headings(tree)
+
+    # A block that is an item heading: "Item 16.", "ITEM 7A -", "Items 1 and 2."
+    _ITEM_HEADING_RE = re.compile(r'^\s*ITEMS?\s*(\d+[A-Z]?)(?![.\d]*\d)\b', re.IGNORECASE)
+    _ITEM_HEADING_MAX = 200
+    _SECTION_KEY_RE = re.compile(r'^part_([ivx]+)_item_(\d+[a-z]?)$', re.IGNORECASE)
+
+    def _bound_sections_at_unlisted_item_headings(self, tree) -> None:
+        """End a section at the heading of an item its TOC never listed.
+
+        A section's end is the next TOC anchor in document order, so an item
+        the TOC omits (Item 16, which filers may skip and many TOCs leave out;
+        a 10-Q's Part II Item 1 on P&G) or whose anchor never resolved has no
+        anchor to stop at, and the preceding section runs through it: AmEx,
+        J&J, Chevron and Ondas all returned Item 15 with "Item 16. Form 10-K
+        Summary" inside it, and Chevron's rescued Item 8 ran on through Items
+        15 and 16 to the end of the filing. The pattern tier later finds those
+        items and adds them, but the TOC section never learns where they
+        begin (edgartools-llmp.12).
+
+        The heading is in the body, so read it: walk each section's range for
+        the first short block whose text opens on "Item N" where N is a
+        canonical item that resolved to no section in this Part or a later one
+        and comes after this section's own item, and end the section there.
+        Two guards keep this to headings. A block inside a table that holds
+        two or more such blocks is an index row (GE's cross-reference index,
+        Mastercard's per-Part contents list), not a heading. And on a form
+        whose items are unique (10-K) the item must be later than the
+        section's own, so an index listing earlier items cannot cut it.
+        """
+        schema = self.toc_analyzer.schema
+        if schema.title_based or not self.section_boundaries:
+            return
+        resolved: Dict[Tuple[str, str], str] = {}
+        for name in self.section_boundaries:
+            m = self._SECTION_KEY_RE.match(name)
+            if m:
+                resolved[(m.group(1).upper(), m.group(2).upper())] = name
+        if not resolved:
+            return
+        part_rank = {p: i for i, p in enumerate(('I', 'II', 'III', 'IV', 'V'))}
+        unique_items = not schema.repeating_parts
+        parts_order = tuple(p.upper() for p in schema.repeating_parts) or ('I', 'II', 'III', 'IV')
+
+        def item_rank(item: str) -> Tuple[int, str]:
+            m = re.match(r'(\d+)([A-Z]?)', item)
+            return (int(m.group(1)), m.group(2)) if m else (0, '')
+
+        def stops_here(own_part: str, own_item: str, item: str, open_ended: bool) -> bool:
+            """Whether a heading for ``item`` ends a section for ``own_item``.
+
+            The heading must belong to a later item. On a unique-item form
+            (10-K) that is a higher item number. On a repeating-parts form
+            (10-Q) it is a higher number in this Part, or any number when a
+            later Part exists, since Part I Item 4 is followed by Part II
+            Item 1; a number no higher than the section's own, with no later
+            Part to belong to, is the section's own heading or a cross-reference
+            and never ends it. Then either the section is open-ended (no end
+            anchor at all, as a rescued Item 8 re-pointed at the financial
+            section is), so any later heading ends it, or the item resolved to
+            no section where it would have to be, so no anchor was ever going
+            to.
+            """
+            own_rank = part_rank.get(own_part, 0)
+            later_same_part = item_rank(item) > item_rank(own_item)
+            if later_same_part:
+                if open_ended:
+                    return True
+                return not any(it == item and part_rank.get(part, 9) >= own_rank
+                               for part, it in resolved)
+            if unique_items:
+                return False
+            later_parts = [p for p in parts_order if part_rank.get(p, 9) > own_rank]
+            if not later_parts:
+                return False
+            if open_ended:
+                return True
+            return not any((p, item) in resolved for p in later_parts)
+
+        index_tables: Dict[int, bool] = {}
+
+        def in_index_table(el) -> bool:
+            table = next((a for a in el.iterancestors() if a.tag == 'table'), None)
+            if table is None:
+                return False
+            key = id(table)
+            if key not in index_tables:
+                hits = 0
+                for cell in table.iter('td', 'th'):
+                    first = next(cell.itertext(), '').lstrip()
+                    if first[:4].lower() == 'item' and self._ITEM_HEADING_RE.match(cell.text_content()):
+                        hits += 1
+                        if hits >= 2:
+                            break
+                index_tables[key] = hits >= 2
+            return index_tables[key]
+
+        for name, boundary in self.section_boundaries.items():
+            m = self._SECTION_KEY_RE.match(name)
+            if not m:
+                continue
+            own_part, own_item = m.group(1).upper(), m.group(2).upper()
+            starts = find_anchor_targets(tree, boundary.anchor_id)
+            if not starts:
+                continue
+            start_el = boundary.start_element if boundary.start_element is not None else starts[0]
+            end_el = boundary.end_element
+            end_id = boundary.end_element_id
+            open_ended = end_el is None and not end_id
+            # The walk starts at the anchor, and the section's own heading
+            # usually follows it: the first block carrying the section's own
+            # item number is that heading, never a later Part's item, and the
+            # blocks nested inside it repeat its text.
+            own_block = None
+            for event, el in iterwalk_from(start_el):
+                if event != 'start' or not isinstance(el.tag, str):
+                    continue
+                if el is start_el:
+                    continue
+                if end_el is not None and el is end_el:
+                    break
+                if end_id and is_anchor_match(el, end_id):
+                    break
+                if el.tag in _INLINE_TAGS:
+                    continue
+                first = next(el.itertext(), '').lstrip()
+                if first[:4].lower() != 'item':
+                    continue
+                text = el.text_content()
+                if len(text) > self._ITEM_HEADING_MAX:
+                    continue
+                hm = self._ITEM_HEADING_RE.match(text)
+                if not hm:
+                    continue
+                item = hm.group(1).upper()
+                if own_block is None and item == own_item:
+                    own_block = el
+                    continue
+                if own_block is not None and any(a is own_block for a in el.iterancestors()):
+                    continue  # a block nested inside the section's own heading
+                if not stops_here(own_part, own_item, item, open_ended):
+                    continue
+                if in_index_table(el):
+                    continue
+                boundary.end_element = el
+                logger.info("Section %s ends at the unlisted Item %s heading", name, item)
+                break
 
     def _bound_open_sections_at_signatures(self, tree) -> None:
         """End a section with no end boundary at the next bare SIGNATURES line.

@@ -127,9 +127,13 @@ def test_the_9at_section_is_detected():
 
     assert len(section.text()) == 2142
     assert section.text().startswith("ITEM 9A(T).")
-    # Its neighbours are unchanged — the fix adds a section, it does not
-    # re-cut the ones on either side.
-    assert len(doc.sections["part_ii_item_9"].text()) == 2236
+    # Item 9 ends where 9A(T) begins. Until edgartools-llmp.12 the TOC
+    # section ran through the 9A(T) heading (the TOC never listed it, so no
+    # anchor ended Item 9) and this pin held 2,236 characters, 2,142 of
+    # which were 9A(T) itself; Item 9 is "None." plus the index line that
+    # follows it. 9B, on the other side, is untouched.
+    assert len(doc.sections["part_ii_item_9"].text()) == 134
+    assert "9A(T)" not in doc.sections["part_ii_item_9"].text()
     assert len(doc.sections["part_ii_item_9b"].text()) == 78
 
 
