@@ -125,3 +125,170 @@ def auto_markers(measured: dict, form: str) -> List[str]:
         if floor is not None and 0 <= info["text_len"] < floor:
             markers.append(f"undersized:item_{key}")
     return markers
+
+
+# ---------------------------------------------------------------------------
+# Self-consistency scores (edgartools-llmp.11)
+# ---------------------------------------------------------------------------
+# Two necessary conditions for a correct slice that need no ground truth:
+#
+#   embeds_later_heading  a later canonical item's heading appears at the start
+#                         of a line after the section's own opening. STRONG: on
+#                         the 2026-10-11 sweep every hit inspected was a real
+#                         end-boundary defect (the next item's anchor missing or
+#                         placed after its heading, two items sharing an anchor,
+#                         the last item running into the exhibit index).
+#   opens_on_heading      the section's own item label appears in its first
+#                         300 chars. WEAK: title-only body headings ("Business",
+#                         "PROPERTIES") and cross-reference-index slices
+#                         legitimately fail it. Reported, never ratcheted.
+#
+# Only canonical items count, and only ones this section does not itself cover
+# (a combined "Items 1 and 2" section may contain the Item 2 heading).
+
+CANONICAL_ITEMS = {
+    "10-K": {"1", "1A", "1B", "1C", "2", "3", "4", "5", "6", "7", "7A", "8", "9",
+             "9A", "9B", "9C", "10", "11", "12", "13", "14", "15", "16"},
+    "10-Q": {"1", "1A", "2", "3", "4", "5", "6"},
+}
+
+OPENING_CHARS = 300
+_HEADING_LINE_MAX = 160
+
+_OWN_LABEL_RE = re.compile(r"ITEM\s*(\d+[A-Z]?)", re.IGNORECASE)
+_HEADING_LINE_RE = re.compile(
+    r"^\s*(?:PART\s+[IVX]+\s*[,.\-–—:]?\s*)?ITEMS?\s*(\d+[A-Z]?)\s*(?:[.:\-–—]|\s)",
+    re.IGNORECASE,
+)
+
+
+def opens_on_heading(text: str, own_items) -> bool:
+    """True if one of ``own_items`` is labelled within the section's opening."""
+    own = {k.upper() for k in own_items}
+    head = text[:OPENING_CHARS]
+    return any(m.group(1).upper() in own for m in _OWN_LABEL_RE.finditer(head))
+
+
+def embeds_later_heading(text: str, own_items, form: str) -> List[str]:
+    """Canonical items (not in ``own_items``) whose heading sits at line start
+    after the opening. Sorted, de-duplicated; empty means consistent."""
+    canon = CANONICAL_ITEMS.get(form, set())
+    own = {k.upper() for k in own_items}
+    found = set()
+    for line in text[OPENING_CHARS:].splitlines():
+        if len(line) > _HEADING_LINE_MAX:
+            continue
+        m = _HEADING_LINE_RE.match(line)
+        if m:
+            item = m.group(1).upper()
+            if item in canon and item not in own:
+                found.add(item)
+    return sorted(found)
+
+
+@lru_cache(maxsize=None)
+def measure_consistency(path: str, form: str) -> Dict[str, dict]:
+    """Per-item self-consistency of one fixture through the live pipeline.
+
+    ``path`` is absolute (the fixture may live outside ``html/``: parity_gate or
+    the gitignored era corpus). Returns ``{item_key: {"embeds": [...],
+    "opens": bool, "method": str, "text_len": int}}``. When an item key appears
+    under several parts the embed sets are unioned and ``opens`` is any-of, so a
+    10-Q's two Item 1s are one row.
+    """
+    html = Path(path).read_text(errors="ignore")
+    doc = HTMLParser(ParserConfig(form=form, detect_sections=True)).parse(html)
+    out: Dict[str, dict] = {}
+    for name, section in doc.sections.items():
+        key = item_key(name)
+        if key is None:
+            continue
+        own = {key}
+        for covered in (getattr(section, "covered_items", None) or []):
+            ck = item_key(str(covered)) or item_key(f"item_{covered}")
+            if ck:
+                own.add(ck)
+        try:
+            text = section.text() or ""
+        except Exception:  # noqa: BLE001 — a broken section measures as empty
+            text = ""
+        embeds = embeds_later_heading(text, own, form)
+        opens = opens_on_heading(text, own)
+        prev = out.get(key)
+        if prev is None:
+            out[key] = {
+                "embeds": embeds, "opens": opens, "text_len": len(text),
+                "method": getattr(section, "detection_method", None),
+            }
+        else:
+            prev["embeds"] = sorted(set(prev["embeds"]) | set(embeds))
+            prev["opens"] = prev["opens"] or opens
+            prev["text_len"] = max(prev["text_len"], len(text))
+    return out
+
+
+def embed_set(measured: Dict[str, dict]) -> frozenset:
+    """The item keys of ``measured`` whose slice embeds a later heading."""
+    return frozenset(k for k, v in measured.items() if v["embeds"])
+
+
+_GATE_ROOT = _CORPUS_DIR.parent / "parity_gate"
+_ERA_ROOT = _CORPUS_DIR.parent / "text_boundary_corpus"
+_FORM_DIR = {"10-K": "10k", "10-Q": "10q"}
+
+
+def consistency_corpus() -> List[dict]:
+    """Every 10-K / 10-Q fixture available for the self-consistency ratchet.
+
+    Three sources, in the order the parity benchmark uses them: every filing
+    under the tracked ``html/<ticker>/{10k,10q}/`` tree (not just the manifest,
+    which is a stale snapshot), the tracked ``parity_gate`` slice, and the
+    gitignored era corpus, which exists on developer machines only. The label
+    is the file stem, so a ticker directory holding two fixtures (Citi's two
+    10-Ks) measures both rather than silently one. Each entry is
+    ``{label, form, path, tracked}``; a caller must treat a baseline entry whose
+    fixture is absent as *unmeasured*, never as fixed.
+    """
+    entries: List[dict] = []
+    seen = set()
+
+    def add(label: str, form: str, path: Path, tracked: bool) -> None:
+        if (label, form) in seen or not path.exists():
+            return
+        seen.add((label, form))
+        entries.append({"label": label, "form": form, "path": str(path), "tracked": tracked})
+
+    for form, subdir in _FORM_DIR.items():
+        for path in sorted(_HTML_ROOT.glob(f"*/{subdir}/*.html")):
+            add(path.stem, form, path, True)
+        for path in sorted(_GATE_ROOT.glob(f"{form}/*.html")):
+            add(path.stem, form, path, True)
+        for path in sorted(_ERA_ROOT.glob(f"*/{form}/*.html")):
+            add(path.stem, form, path, False)
+    return entries
+
+
+if __name__ == "__main__":  # pragma: no cover — the report behind EMBED_BASELINE
+    import time
+
+    t0 = time.time()
+    totals: Dict[str, List[int]] = {}
+    rows = []
+    for entry in consistency_corpus():
+        measured = measure_consistency(entry["path"], entry["form"])
+        embeds = embed_set(measured)
+        t = totals.setdefault(entry["form"], [0, 0, 0])
+        t[0] += len(measured)
+        t[1] += len(embeds)
+        t[2] += sum(1 for v in measured.values() if not v["opens"])
+        if embeds:
+            rows.append((entry["label"], entry["form"], sorted(embeds), entry["tracked"]))
+    for form, (n, emb, no_open) in sorted(totals.items()):
+        line = (f"{form}: {n} item sections, {emb} embed a later heading, "
+                f"{no_open} do not open on their own label")
+        print(line)  # noqa: T201
+    print(f"({time.time() - t0:.0f}s)\n\nEMBED_BASELINE = {{")  # noqa: T201
+    for label, form, items, tracked in sorted(rows):
+        note = "" if tracked else "  # era corpus (gitignored)"
+        print(f"    ({label!r}, {form!r}): {{{', '.join(repr(i) for i in items)}}},{note}")  # noqa: T201
+    print("}")  # noqa: T201
