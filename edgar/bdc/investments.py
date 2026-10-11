@@ -2270,6 +2270,11 @@ def _exclude_restated_rows(rows: list[PortfolioInvestment]):
         parts = [o for o in kept if o is not inv and o.identifier.startswith(ident)
                  and len(o.identifier) > len(ident) and not o.identifier[len(ident)].isalnum()]
         if parts and abs(sum(map(fv, parts)) - fv(inv)) <= tolerance(len(parts)):
+            # A row with its own cost is a holding, not a header over one row:
+            # ARCC's "Proofpoint, Inc. | Second lien senior secured loan" (cost
+            # 52.6M) and "... loan 1" (cost 51.6M) are both worth 50.5M (GH #1505)
+            if inv.cost is not None and len(parts) == 1:
+                continue
             drop(inv, f"total of {len(parts)} row(s) that extend it")
 
     # One identifier spelled two ways
