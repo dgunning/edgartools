@@ -102,6 +102,9 @@ class SECSectionExtractor:
         self.section_boundaries = {}  # Maps section names to boundaries
         self.toc_analyzer = TOCAnalyzer(form=form)
         self._tree = None  # Cached parsed lxml tree (set by _analyze_sections)
+        # Sections whose start a rescue placed on a heading the furniture pass
+        # must not move (edgartools-llmp.12).
+        self._pinned_starts: set = set()
         self._clean_html = None  # HTML with XML declaration stripped
         self._analyze_sections()
 
@@ -248,6 +251,7 @@ class SECSectionExtractor:
         self._rescue_boundaries()
 
         self._bound_open_sections_at_signatures(tree)
+        self._rescue_item_8_pointer_to_trailing_statements(tree)
         self._bound_sections_at_unlisted_item_headings(tree)
         self._bound_sections_at_part_dividers(tree)
         self._advance_starts_past_page_furniture(tree)
@@ -478,6 +482,8 @@ class SECSectionExtractor:
         collapsed, is_own_heading, is_furniture = self._page_furniture_rules(tree)
 
         for name, boundary in self.section_boundaries.items():
+            if name in self._pinned_starts:
+                continue
             m = self._SECTION_KEY_RE.match(name)
             if not m:
                 continue
@@ -970,6 +976,146 @@ class SECSectionExtractor:
                     continue
                 start_el = targets[0]
             boundary.end_element = next((h for h in headers if precedes(start_el, h)), None)
+
+    # Item 8 text that points at statements filed elsewhere in the document
+    # rather than carrying them ("immediately following Part IV hereof",
+    # "included in Part IV, Item 15", "beginning on page F-1").
+    _ITEM_8_POINTER_RE = re.compile(
+        r'immediately\s+follow|follow(?:s|ing)\s+(?:the\s+)?(?:signature|part\s+iv|item\s+15)'
+        r'|included\s+in\s+(?:part\s+iv|item\s+15)|item\s+15\s*\(a\)|(?:beginning\s+)?on\s+pages?\s+F-\s?\d'
+        r'|see\s+(?:the\s+)?(?:index\s+to\s+(?:the\s+)?)?(?:consolidated\s+)?financial\s+statements',
+        re.IGNORECASE)
+    # The statements must be substantial before Item 8 is moved onto them.
+    _TRAILING_STATEMENTS_MIN_CHARS = 10_000
+
+    def _rescue_item_8_pointer_to_trailing_statements(self, tree) -> None:
+        """Give Item 8 the financial statements a 10-K files at its back.
+
+        Some 10-Ks answer Item 8 with a pointer ("The consolidated financial
+        statements ... immediately following Part IV hereof", Netflix; "See the
+        Consolidated Financial Statements ... included in Part IV, Item 15",
+        Talos) and file the statements after the last item, often after the
+        signature page. The last section then held them (or the TOC's own
+        Signatures section, on 915358 and a 2016 10-K, or Item 15 on a 2010
+        one): Netflix's Item 16
+        ("Form 10-K Summary None.") ran 96k characters, Talos's 172k, and Item 8
+        was 267 and 319. #1525 left them there because cutting them would put
+        the statements in no section at all.
+
+        When Item 8 is such a pointer (at most ``_STUB_MAX_CHARS``, matching
+        ``_ITEM_8_POINTER_RE``), find the first financial-statements heading
+        (``_FS_BLOCK_HEADING_RE``: an index to the statements or the auditor's
+        report) after the start of the last section, and move Item 8 onto it,
+        keeping the end that section had, so nothing that followed the
+        statements is orphaned. An item that held them now ends at its own
+        SIGNATURES header, when one sits before the statements (Talos), or at
+        the statements heading (Netflix); a Signatures section keeps its
+        signature block and ends at the statements heading. The registrant's
+        name set as a title line over the index comes along, and the start is
+        pinned, since the furniture pass reads "Index to Financial Statements"
+        as a contents backlink. The ``original_html`` pointer text
+        is checked with the same extraction the incorporated-financials
+        rescue uses.
+        """
+        from edgar.documents.extractors.pattern_section_extractor import _SIGNATURES_HEADER
+
+        if self._base_form() != '10-K' or not self.section_boundaries:
+            return
+        b8 = self.section_boundaries.get('part_ii_item_8')
+        if b8 is None or b8.detection_method == 'toc-reattributed':
+            return
+        html = getattr(self.document.metadata, 'original_html', None)
+        if not html:
+            return
+        try:
+            text8 = self._extract_section_content(html, b8, include_subsections=True, clean=True) or ''
+        except Exception:
+            logger.warning("Item 8 pointer gate extraction failed; skipping trailing-statements rescue",
+                           exc_info=True)
+            return
+        if len(text8.strip()) > self._STUB_MAX_CHARS or not self._ITEM_8_POINTER_RE.search(text8):
+            return
+
+        def start_of(boundary):
+            if boundary.start_element is not None:
+                return boundary.start_element
+            targets = find_anchor_targets(tree, boundary.anchor_id)
+            return targets[0] if targets else None
+
+        starts = [(name, b, start_of(b)) for name, b in self.section_boundaries.items()]
+        starts = [s for s in starts if s[2] is not None]
+        if not starts:
+            return
+        last_name, last, last_start = max(starts, key=lambda s: document_order_path(s[2]))
+        if last_name == 'part_ii_item_8':
+            return
+
+        def collapsed(el) -> str:
+            return ' '.join(el.text_content().split())
+
+        # Walk the last section for its own SIGNATURES header and the first
+        # statements heading, then measure how much follows the heading.
+        signatures = fs = title = previous = None
+        chars = 0
+        end_el, end_id = last.end_element, last.end_element_id
+        for event, el in iterwalk_from(last_start):
+            if event != 'start' or not isinstance(el.tag, str):
+                continue
+            if el is not last_start:
+                if end_el is not None and el is end_el:
+                    break
+                if end_id and is_anchor_match(el, end_id):
+                    break
+            if el.tag not in self._BLOCK_TAGS or next(el.iterdescendants(*self._BLOCK_TAGS), None) is not None:
+                continue
+            text = collapsed(el)
+            if not text:
+                continue
+            if fs is None:
+                if len(text) <= self._FURNITURE_MAX_CHARS:
+                    if signatures is None and _SIGNATURES_HEADER.match(text):
+                        signatures = el
+                    elif self._FS_BLOCK_HEADING_RE.match(text):
+                        fs = el
+                        title = previous
+                previous = (el, text)
+                continue
+            chars += len(text) + 1
+            if chars >= self._TRAILING_STATEMENTS_MIN_CHARS:
+                break
+        if fs is None or chars < self._TRAILING_STATEMENTS_MIN_CHARS:
+            return
+
+        tables = [a for a in fs.iterancestors() if a.tag == 'table']
+        fs_start = tables[-1] if tables else fs
+        # The registrant's name set as a title line over the index ("NETFLIX,
+        # INC." / "INDEX TO FINANCIAL STATEMENTS") belongs with the statements.
+        if title is not None and not tables:
+            t_el, t_text = title
+            letters = [c for c in t_text if c.isalpha()]
+            if (len(t_text) <= 80 and letters and all(c.isupper() for c in letters)
+                    and not any(c.isdigit() for c in t_text)
+                    and not any(a.tag == 'table' for a in t_el.iterancestors())
+                    and not _SIGNATURES_HEADER.match(t_text)):
+                fs_start = t_el
+        # The furniture pass would read the index heading as a contents
+        # backlink ("Index to Financial Statements") and skip it; this start
+        # is a heading, so it is kept as placed.
+        self._pinned_starts.add('part_ii_item_8')
+        self.section_boundaries['part_ii_item_8'] = dataclasses.replace(
+            b8, start_element=fs_start, end_element=last.end_element,
+            end_element_id=last.end_element_id,
+            confidence=min(b8.confidence, 0.9), detection_method='toc-reattributed')
+        # An item ends at its own SIGNATURES header; a Signatures section (the
+        # TOC's own row, 915358) keeps its signature block and ends at the
+        # statements.
+        if not self._SECTION_KEY_RE.match(last_name):
+            signatures = None
+        cut = signatures if signatures is not None else fs_start
+        sig_tables = [a for a in cut.iterancestors() if a.tag == 'table']
+        last.end_element = sig_tables[-1] if sig_tables and cut is signatures else cut
+        last.end_element_id = None
+        logger.info("Item 8 re-pointed at the financial statements filed after %s", last_name)
 
     # --- Boundary rescue (edgartools-llmp.1 / D3) -------------------------------
     #
