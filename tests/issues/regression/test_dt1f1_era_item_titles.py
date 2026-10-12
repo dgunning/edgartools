@@ -150,7 +150,9 @@ def test_both_era_sections_are_detected(doc_1999):
     # ones on either side. Item 4's header was already a boundary candidate even
     # while it matched no pattern, which is why Item 3 does not shrink here.
     assert len(sections["legal_proceedings"].text()) == 994
-    assert len(sections["part_ii_item_5"].text()) == 489
+    # 489 until edgartools-llmp.12.2: Item 5 ran through the Item 6 pointer,
+    # whose "Item 6:" header parses at a deeper heading level than "Item 5:".
+    assert len(sections["part_ii_item_5"].text()) == 300
     assert len(sections["part_iii_item_13"].text()) == 269
 
 

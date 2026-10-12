@@ -825,11 +825,10 @@
      "end": "of the security holders of the Company during the fourth quarter of fiscal 1999."
     },
     "part_ii_item_5": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "pattern",
-     "why": "runs through Item 6 (pattern path, pre-2002)",
      "start": "Item 5: Market for Registrant’s Common Equity and Related Stockholder Matters Th",
-     "end": null
+     "end": "d by reference from page 39 of the Company’s 1999 Annual Report to Shareholders."
     },
     "part_ii_item_6": {
      "verified": "eye",
@@ -895,11 +894,10 @@
      "end": "that any person may have to the Company under the GenDerm acquisition agreement."
     },
     "part_ii_item_7": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "pattern",
      "start": "Item 7: Management’s Discussion and Analysis of Financial Condition and Results ",
-     "end": "orporated by reference on pages 14-21 of the 1999 Annual Report to Shareholders.",
-     "why": "pattern 'mda' section runs through the Item 7A and Item 8 headings; correct end is the Item 7 pointer sentence"
+     "end": "orporated by reference on pages 14-21 of the 1999 Annual Report to Shareholders."
     },
     "part_ii_item_7a": {
      "verified": "eye",

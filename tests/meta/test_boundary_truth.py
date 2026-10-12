@@ -84,7 +84,9 @@ PINNED = {
     # 2026-10-12 (llmp.12.2): GE's missing items come from its cross-reference
     # index, not the pattern pass: 1/1C/9A wrong -> title, +2/10 title, +5 and
     # +7A wrong (page-granular index slices open mid-page).
-    "10-K": (777, 750, 718, 713),   # 96.5% / 92.4% / 91.8%
+    # 2026-10-12 (llmp.12.2): another item's header ends a pattern item at any
+    # heading level; 0000950153-99-001234 Items 5 and 7 wrong -> eye.
+    "10-K": (777, 750, 720, 715),   # 96.5% / 92.7% / 92.0%
     "10-Q": (111, 110, 107, 106),   # 99.1% / 96.4% / 95.5%
 }
 
