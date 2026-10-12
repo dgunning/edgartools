@@ -259,7 +259,7 @@ def test_headerless_body_rendering_is_unchanged():
         "<html><body><table><tr><td>Cloud</td><td>10</td><td>8</td></tr><tr><td>Other</td><td>3</td><td>4</td></tr></table></body></html>"
     )
     assert first_table(document).headers == []
-    assert document.to_markdown() == "| Cloud | 10 | 8 |\n| Other | 3 | 4 |"
+    assert document.to_markdown() == "|  |  |  |\n| --- | --- | --- |\n| Cloud | 10 | 8 |\n| Other | 3 | 4 |"
 
 
 def test_empty_table_does_not_create_markdown_columns():
@@ -378,9 +378,9 @@ def test_single_header_row_retains_original_markdown_bytes(header_html, data_htm
     [
         (
             '<tr><td colspan="2">Cloud   team</td><td>10</td><td>8</td></tr><tr><td>Other</td><td>3</td><td>4</td><td>5</td></tr>',
-            "| Cloud team |  | 10 | 8 |\n| Other | 3 | 4 | 5 |",
+            "|  |  |  |  |\n| --- | --- | --- | --- |\n| Cloud team |  | 10 | 8 |\n| Other | 3 | 4 | 5 |",
         ),
-        ('<tr><td>Cloud</td><td colspan="2">10</td></tr><tr><td>Other</td><td>3</td><td>4</td></tr>', "| Cloud | 10 |  |\n| Other | 3 | 4 |"),
+        ('<tr><td>Cloud</td><td colspan="2">10</td></tr><tr><td>Other</td><td>3</td><td>4</td></tr>', "|  |  |  |\n| --- | --- | --- |\n| Cloud | 10 |  |\n| Other | 3 | 4 |"),
     ],
     ids=["headerless-span-and-whitespace", "headerless-ragged-spans"],
 )

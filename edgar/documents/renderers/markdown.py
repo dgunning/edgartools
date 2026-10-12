@@ -293,6 +293,12 @@ class MarkdownRenderer:
             # Add separator
             separator = "| " + " | ".join(["---"] * len(filtered_headers)) + " |"
             rows.append(separator)
+        else:
+            # A headerless table still needs a blank header row and a delimiter
+            # row so the pipe table renders with a proper column separator.
+            n = len(content_columns)
+            rows.append("| " + " | ".join([""] * n) + " |")
+            rows.append("| " + " | ".join(["---"] * n) + " |")
 
         # Render data rows
         for expanded_row in expanded_data_rows:
