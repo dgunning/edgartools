@@ -79,6 +79,11 @@ pytestmark = pytest.mark.slow
 #   pattern path                      0001193125-21-101193 Item 10 (a
 #       pattern section that caught part of the TOC), 0000950153-99-001234
 #       Item 5 (pre-2002, no anchors), 0001193125-21-082408 10-Q.
+#   semantic-named pattern sections   invisible to the ratchet until it keyed
+#       on section.item (llmp.11.2): ge Item 1 (the FORM 10-K CROSS REFERENCE
+#       INDEX table itself), 0000950153-99-001234 Item 7 ('mda' runs through
+#       the 7A and 8 headings), 0000927356-01-000369 Item 7 ('mda' runs through
+#       Items 8-14 to the end of the document).
 #
 # CLEARED by heading_block (anchor after the heading text or inside its last
 # word): 0001104659-10-017649 (13 items), 0001140361-10-014238 (12 of 13),
@@ -90,13 +95,14 @@ pytestmark = pytest.mark.slow
 # further entries (915358 Item 9B, pg 10-K Item 15) were regex false
 # positives on "Item 1.01"-style references and lowercase cross-references.
 EMBED_BASELINE = {
-    ("0000950153-99-001234", "10-K"): {"5"},
+    ("0000927356-01-000369", "10-K"): {"7"},
+    ("0000950153-99-001234", "10-K"): {"5", "7"},
     ("0001047469-03-011363", "10-K"): {"15"},
     ("0001140361-10-014238", "10-K"): {"8"},
     ("0001193125-10-073212", "10-K"): {"7"},
     ("0001193125-21-082408", "10-Q"): {"1"},
     ("0001193125-21-101193", "10-K"): {"10"},
-    ("ge-10-k-2026-01-29", "10-K"): {"15"},
+    ("ge-10-k-2026-01-29", "10-K"): {"1", "15"},
     ("msft-10-q-2025-04-30", "10-Q"): {"6"},
     ("so-10-k-2026-02-19", "10-K"): {"7", "11", "12", "13"},
 }
@@ -184,6 +190,10 @@ OVERLAP_MAX = 1.10
 OVERLAP_BASELINE = {
     ("0001047469-03-011363", "10-K"),   # 1.24: pattern+toc, Item 15 runs into the F-pages
     ("0001193125-21-082408", "10-Q"),   # 1.11: pattern+toc
+    # 1.27: pattern sections for Items 1, 1C and 9A on a cross-reference-index
+    # filer (the index table; 68k and 276k of mid-sentence slices), invisible
+    # until the harness keyed on section.item (llmp.11.2).
+    ("ge-10-k-2026-01-29", "10-K"),
 }
 
 

@@ -875,6 +875,43 @@
      "method": "pattern",
      "start": "Item 14: Exhibits, Financial Statement Schedules and Reports on Form 8-K Item 14",
      "end": " substitute or substitutes may lawfully do or cause to be done by virtue hereof."
+    },
+    "part_i_item_1": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "Item 1: Business The Company Medicis is the leading independent pharmaceutical c",
+     "end": "ate success of the acquisition or development could be substantially diminished."
+    },
+    "part_i_item_2": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "Item 2: Properties The Company presently occupies approximately 29,000 square fe",
+     "end": " St-Laurent, Quebec, Canada, under a lease agreement that expires in April 2000."
+    },
+    "part_i_item_3": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "Item 3: Legal Proceedings The Company and certain of its subsidiaries are partie",
+     "end": "that any person may have to the Company under the GenDerm acquisition agreement."
+    },
+    "part_ii_item_7": {
+     "verified": "wrong",
+     "method": "pattern",
+     "start": "Item 7: Management’s Discussion and Analysis of Financial Condition and Results ",
+     "end": "orporated by reference on pages 14-21 of the 1999 Annual Report to Shareholders.",
+     "why": "pattern 'mda' section runs through the Item 7A and Item 8 headings; correct end is the Item 7 pointer sentence"
+    },
+    "part_ii_item_7a": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "Item 7A: Quantitative and Qualitative Disclosures about Market Risk Information ",
+     "end": "d Risk Management Policies on page 21 of the 1999 Annual Report to Shareholders."
+    },
+    "part_ii_item_8": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "Item 8: Financial Statements and Supplementary Data Information required by this",
+     "end": "and Supplementary Data on pages 23-40 of the 1999 Annual Report to Shareholders."
     }
    }
   },
@@ -995,6 +1032,12 @@
      "method": "toc",
      "start": "ITEM 15. EXHIBITS AND FINANCIAL STATEMENT SCHEDULES (a) Documents filed as part ",
      "end": "ission income. (2) Net of the amortization of deferred ceding commission income."
+    },
+    "part_ii_item_9a": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 9A(T). CONTROLS AND PROCEDURES ────────────────────────────────────────────",
+     "end": "nably likely to materially affect our internal control over financial reporting."
     }
    }
   },
@@ -1033,6 +1076,20 @@
      "method": "pattern",
      "start": "Item 16. Form 10-K Summary None. Supplemental information to be Furnished With R",
      "end": " contemplate sending any such materials subsequent to the filing of this report."
+    },
+    "part_i_item_1": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "Item 1: Business Item 1A: Risk Factors Item 2: Properties Item 3: Legal Proceedi",
+     "end": "edings Item 4: Mine Safety Disclosures ─────────────────────────────────────────",
+     "why": "General Instruction J omitted-items heading line ('Item 1: Business Item 1A: ... Item 4'); the slice is that combined heading"
+    },
+    "part_i_item_1b": {
+     "verified": "wrong",
+     "method": "pattern",
+     "start": "Item 1B. Unresolved Staff Comments Nothing to report. Substitute information pro",
+     "end": "Item 1B. Unresolved Staff Comments Nothing to report.",
+     "why": "Reg AB (ABS) filing: the slice ends on the General Instruction J lead-in; the substitute Reg AB items after it belong to no standard item, so 1B ends at 'Nothing to report.'"
     }
    }
   },
@@ -1105,6 +1162,60 @@
      "method": "pattern",
      "start": "ITEM 15: EXHIBITS, FINANCIAL STATEMENT SCHEDULES AND REPORTS ON FORM 10-K (a) (1",
      "end": "bott Commonwealth Income & Growth Fund, Inc. Commonwealth Income & Growth Fund V"
+    },
+    "part_i_item_1": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 1: BUSINESS GENERAL Commonwealth Income & Growth Fund V (the “Partnership” ",
+     "end": "vices from a related party, CCC, which had 45 employees as of December 31, 2015."
+    },
+    "part_i_item_1a": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 1A: RISK FACTORS NOT APPLICABLE",
+     "end": "ITEM 1A: RISK FACTORS NOT APPLICABLE"
+    },
+    "part_i_item_1b": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 1B: UNRESOLVED STAFF COMMENTS NONE",
+     "end": "ITEM 1B: UNRESOLVED STAFF COMMENTS NONE"
+    },
+    "part_i_item_2": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 2: PROPERTIES NONE",
+     "end": "ITEM 2: PROPERTIES NONE"
+    },
+    "part_i_item_3": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 3: LEGAL PROCEEDINGS Investor Complaint On November 10, 2015, certain inves",
+     "end": " the Funds, but no assurance can be provided until the FINRA matter is resolved."
+    },
+    "part_ii_item_7": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 7: MANAGEMENT DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS OF",
+     "end": "oss were attributable to the changes in revenue and expenses as discussed above."
+    },
+    "part_ii_item_7a": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 7A: QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK NOT APPLICAB",
+     "end": "EM 7A: QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK NOT APPLICABLE"
+    },
+    "part_ii_item_8": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 8: FINANCIAL STATEMENTS Our financial statements for the fiscal years ended",
+     "end": "independent registered public accounting firm is included in this annual report."
+    },
+    "part_ii_item_9a": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 9A: CONTROLS AND PROCEDURES Our management, under the supervision and with ",
+     "end": "ermit the Partnership to provide only management's report in this annual report."
     }
    }
   },
@@ -2457,6 +2568,12 @@
      "why": "ends on page 49 inside the Financial section; true end not established",
      "start": "Item 15. Exhibits, Financial Statement Schedules. 1 Financial statements The Con",
      "end": null
+    },
+    "part_i_item_1c": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "Item 1C. Cybersecurity. Refer to the Operational Risk Management section of Mana",
+     "end": "scussion and analysis on pages 153 - 156 for a discussion of cybersecurity risk."
     }
    }
   },
@@ -2784,6 +2901,27 @@
      "method": "toc",
      "start": "EXHIBITS AND FINANCIAL STATEMENT SCHEDULES (a)1. Financial Statements Included i",
      "end": null
+    },
+    "part_i_item_1c": {
+     "verified": "wrong",
+     "method": "pattern",
+     "start": null,
+     "end": null,
+     "why": "pattern section on a cross-reference-index filer: 68k chars from 'CYBERSECURITY GOVERNANCE' ending mid-sentence in the ICFR report"
+    },
+    "part_ii_item_9a": {
+     "verified": "wrong",
+     "method": "pattern",
+     "start": null,
+     "end": null,
+     "why": "pattern section on a cross-reference-index filer: 276k chars starting mid-sentence ('Internal Control - Integrated Framework (2013)') and running to the end"
+    },
+    "part_i_item_1": {
+     "verified": "wrong",
+     "method": "pattern",
+     "start": null,
+     "end": null,
+     "why": "pattern section on a cross-reference-index filer: the slice is the FORM 10-K CROSS REFERENCE INDEX table itself, not Item 1 content"
     }
    }
   },
@@ -4399,6 +4537,12 @@
      "method": "toc",
      "start": "Item 16. Form 10-K Summary Not applicable.",
      "end": "Item 16. Form 10-K Summary Not applicable."
+    },
+    "part_i_item_1c": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "Item 1C. Cybersecurity See Compliance and Operational Risk Management in the MD&",
+     "end": "ent in the MD&A beginning on page 80, which is incorporated herein by reference."
     }
    }
   },
@@ -5319,6 +5463,66 @@
      "method": "pattern",
      "start": "ITEM 16. FORM 10-K SUMMARY ─────────────────────────────────── Not applicable.",
      "end": "ITEM 16. FORM 10-K SUMMARY ─────────────────────────────────── Not applicable."
+    },
+    "part_i_item_1": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 1. BUSINESS ───────────────────────── Wells Fargo & Company is a corporatio",
+     "end": "ncial Statements.” That information is incorporated into this item by reference."
+    },
+    "part_i_item_1a": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 1A. RISK FACTORS ────────────────────────────── Information in response to ",
+     "end": "w - Risk Factors.” That information is incorporated into this item by reference."
+    },
+    "part_i_item_1b": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 1B. UNRESOLVED STAFF COMMENTS ─────────────────────────────────────────── N",
+     "end": "OLVED STAFF COMMENTS ─────────────────────────────────────────── Not applicable."
+    },
+    "part_i_item_1c": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 1C. CYBERSECURITY ─────────────────────────────── Information in response t",
+     "end": " Risk Management.” That information is incorporated into this item by reference."
+    },
+    "part_i_item_2": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 2. PROPERTIES ─────────────────────────── December 31, 2024 Approximate squ",
+     "end": "ispositions, which could be material to our operating results in a given period."
+    },
+    "part_i_item_3": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 3. LEGAL PROCEEDINGS ────────────────────────────────── Information in resp",
+     "end": " (Legal Actions).” That information is incorporated into this item by reference."
+    },
+    "part_ii_item_7": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 7. MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
+     "end": "Financial Review.” That information is incorporated into this item by reference."
+    },
+    "part_ii_item_7a": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK ────────────",
+     "end": "ility Management.” That information is incorporated into this item by reference."
+    },
+    "part_ii_item_8": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA ────────────────────────────",
+     "end": "y Financial Data.” That information is incorporated into this item by reference."
+    },
+    "part_ii_item_9a": {
+     "verified": "eye",
+     "method": "pattern",
+     "start": "ITEM 9A. CONTROLS AND PROCEDURES ───────────────────────────────────────── Infor",
+     "end": "s and Procedures.” That information is incorporated into this item by reference."
     }
    }
   },
