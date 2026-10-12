@@ -153,21 +153,15 @@ text = filing.text()
 
 Returns formatted text suitable for reading or analysis.
 
-#### markdown(include_page_breaks=False, start_page_number=0)
+#### markdown()
 
-Convert filing to markdown format.
+Convert filing to markdown format. Images keep absolute SEC archive URLs;
+page-break markers are not rendered (the `include_page_breaks` and
+`start_page_number` arguments were removed in 6.0).
 
 ```python
-# Basic conversion
 md = filing.markdown()
-
-# With page breaks
-md = filing.markdown(include_page_breaks=True, start_page_number=1)
 ```
-
-**Parameters:**
-- `include_page_breaks` - Include page break markers
-- `start_page_number` - Starting page number for breaks
 
 #### full_text_submission()
 

@@ -1,8 +1,7 @@
 """Form 8-K and 6-K current report classes."""
 import re
-import warnings
 from datetime import date, datetime
-from functools import cached_property, partial
+from functools import cached_property
 from typing import List, Optional
 
 from rich import box, print
@@ -14,9 +13,8 @@ from edgar._filings import Attachments
 from edgar.company_reports._base import CompanyReport, report_lookup_miss
 from edgar.company_reports._structures import ItemOnlyFilingStructure, extract_items_from_sections
 from edgar.documents import HTMLParser, ParserConfig
-from edgar.files.html import Document
-from edgar.files.htmltools import ChunkedDocument, adjust_for_empty_items, chunks2df, detect_decimal_items
 from edgar.richtools import repr_rich, rich_to_text
+from edgar.sgml.text_extraction import attachment_html_to_text
 
 __all__ = ['CurrentReport', 'EightK']
 
@@ -182,7 +180,7 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
 
     This is a fallback extraction method for legacy SGML filings (1999-2001)
     where HTML is unavailable but text content exists. Used by __getitem__ when
-    document parser and chunked_document strategies fail.
+    the document parser finds nothing.
 
     Handles:
     - Input normalization: "Item 9", "9", "item 9" -> "Item 9"
@@ -658,51 +656,6 @@ class CurrentReport(CompanyReport):
         if press_release_results:
             return PressReleases(press_release_results)
 
-    @cached_property
-    def _chunked_document(self):
-        # Construction only; the deprecation lives on the public property in
-        # CompanyReport. See the note there.
-        html = self._filing.html()
-        if not html:
-            return None
-        decimal_chunk_fn = partial(chunks2df,
-                                   item_detector=detect_decimal_items,
-                                   item_adjuster=adjust_for_empty_items,
-                                   item_structure=self.structure)
-
-        return ChunkedDocument(html,
-                               chunk_fn=decimal_chunk_fn)
-
-    @property
-    def doc(self):
-        """The legacy chunked document.
-
-        .. deprecated:: 5.56
-            Use :attr:`document` instead. Removed in v6.0 with ``edgar.files``.
-
-        This override is the reason the property carries its own warning rather
-        than inheriting one. ``CompanyReport.doc`` returns ``self.document`` —
-        the *new* parser's document — and every other report class means that by
-        ``.doc``. ``CurrentReport`` alone returns the legacy ``ChunkedDocument``,
-        so the same attribute name hands back two unrelated types depending on
-        the form, and only this one stands on a package 6.0 deletes.
-
-        A plain ``warnings.warn`` rather than the frame-gated
-        ``warn_legacy_html_usage``: nothing inside edgartools reads ``.doc``
-        (measured 2026-09-02 across ``edgar/``), so there is no internal caller
-        to stay quiet for, and this matches the sibling ``chunked_document``
-        property in ``CompanyReport``.
-        """
-        warnings.warn(
-            "CurrentReport.doc returns the legacy ChunkedDocument and is "
-            "deprecated; it will be removed in edgartools 6.0 along with the "
-            "edgar.files package. Use .document for the edgar.documents parser, "
-            "or .items / report[item] for item access.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        return self._chunked_document
-
     @property
     def items(self) -> List[str]:
         """
@@ -837,8 +790,9 @@ class CurrentReport(CompanyReport):
         else:
             html_content = exhibit.download()
             if html_content:
-                document = Document.parse(html_content)
-                return repr_rich(document, width=200, force_terminal=False)
+                # The same rule Attachment.text() and Filing.text() apply, so an
+                # exhibit reads the same here as it does from the attachment.
+                return attachment_html_to_text(html_content)
 
     def _content_renderables(self):
         """Get the content of the exhibits as renderables"""
