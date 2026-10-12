@@ -31,6 +31,8 @@ from pathlib import Path
 from statistics import median
 from typing import Dict, List, Optional
 
+from scoring import section_item_key  # one item-key rule for the manifest and the harness
+
 from edgar.documents.agents import detect_filing_agent
 from edgar.documents.config import ParserConfig
 from edgar.documents.parser import HTMLParser
@@ -74,13 +76,6 @@ def _date_from_name(name: str) -> Optional[str]:
     return m.group(1) if m else None
 
 
-def _item_key(section_name: str) -> Optional[str]:
-    """Collapse a section name to its bare item key ('1A', '7'), or None."""
-    stripped = re.sub(r"^part_[ivx]+_", "", section_name, flags=re.IGNORECASE)
-    m = re.match(r"^item[_\s]*(\d+[a-z]?)$", stripped, re.IGNORECASE)
-    return m.group(1).upper() if m else None
-
-
 def measure_fixture(path: Path) -> Optional[dict]:
     """Parse one fixture and return its manifest entry, or None if unparseable."""
     form = _form_from_path(path)
@@ -103,7 +98,7 @@ def measure_fixture(path: Path) -> Optional[dict]:
     # Per-item text length + table count, keyed by bare item key.
     items: Dict[str, dict] = {}
     for name, section in sections.items():
-        key = _item_key(name)
+        key = section_item_key(name, section)
         if key is None:
             continue
         try:

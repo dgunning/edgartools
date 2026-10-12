@@ -78,7 +78,10 @@ def _rates(truth, scored, form):
 # as a detector change that moves them, and say which items moved.
 PINNED = {
     # form: (items, start_exact, end_exact, both)
-    "10-K": (740, 715, 684, 680),   # 96.6% / 92.4% / 91.9%
+    # 2026-10-12 (llmp.11.2): +33 pattern-path items the harness could not see
+    # while it keyed on section names ('mda', 'business'): 28 eye, 5 wrong
+    # (ge 1/1C/9A, 0000950153-99-001234 7, 0001193125-21-101193 1B).
+    "10-K": (773, 745, 712, 708),   # 96.4% / 92.1% / 91.6%
     "10-Q": (111, 110, 107, 106),   # 99.1% / 96.4% / 95.5%
 }
 

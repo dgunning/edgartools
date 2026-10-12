@@ -40,6 +40,36 @@ def item_key(section_name: str) -> Optional[str]:
     return m.group(1).upper() if m else None
 
 
+_BARE_ITEM_RE = re.compile(r"^\d+[A-Z]?$", re.IGNORECASE)
+
+
+def section_item_key(section_name: str, section) -> Optional[str]:
+    """The item key of a live section, whatever the pipeline named it.
+
+    TOC sections are named ``part_i_item_1``; pattern sections can carry a
+    semantic name ('business', 'mda', 'risk_factors') with the item on
+    ``section.item``. Keying on the name alone skipped every semantic-named
+    section, so the truth set and the self-consistency ratchet never saw them
+    (edgartools-llmp.11.2).
+    """
+    key = item_key(section_name)
+    if key is not None:
+        return key
+    item = getattr(section, "item", None)
+    return str(item).upper() if item and _BARE_ITEM_RE.match(str(item)) else None
+
+
+def canonical_section_name(section_name: str, section) -> str:
+    """``part_<part>_item_<item>`` for a semantic-named section, so truth keys survive a rename."""
+    if item_key(section_name) is not None:
+        return section_name
+    key = section_item_key(section_name, section)
+    part = getattr(section, "part", None)
+    if key is None or not part:
+        return section_name
+    return f"part_{str(part).lower()}_item_{key.lower()}"
+
+
 @lru_cache(maxsize=None)
 def load_manifest() -> dict:
     return json.loads(_MANIFEST.read_text())
@@ -59,7 +89,7 @@ def measure_fixture(fixture_rel: str, form: str) -> dict:
     sections = doc.sections
     items: Dict[str, dict] = {}
     for name, section in sections.items():
-        key = item_key(name)
+        key = section_item_key(name, section)
         if key is None:
             continue
         try:
@@ -248,7 +278,7 @@ def measure_consistency(path: str, form: str) -> Dict[str, dict]:
     section_lens: List[int] = []
     methods = set()
     for name, section in doc.sections.items():
-        key = item_key(name)
+        key = section_item_key(name, section)
         if key is None:
             continue
         own = {key}
@@ -387,7 +417,10 @@ def measure_sections(path: str, form: str) -> Dict[str, dict]:
     doc = HTMLParser(ParserConfig(form=form, detect_sections=True)).parse(html)
     out: Dict[str, dict] = {}
     for name, section in doc.sections.items():
-        if item_key(name) is None:
+        if section_item_key(name, section) is None:
+            continue
+        name = canonical_section_name(name, section)
+        if name in out:
             continue
         try:
             text = section.text() or ""

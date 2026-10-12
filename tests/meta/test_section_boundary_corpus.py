@@ -90,6 +90,10 @@ ANOMALY_BASELINE = {
     ("gbdc", "10-K"), ("gbdc", "10-Q"), ("gs", "10-K"), ("gs", "10-Q"),
     ("ibm", "10-K"), ("jpm", "10-K"), ("jpm", "10-Q"), ("ms", "10-K"),
     ("nflx", "10-K"), ("nvda", "10-K"), ("orcl", "10-K"), ("xom", "10-Q"),
+    # Items 1A/1C/7/8 are one-paragraph pointers to the Annual Report, which is
+    # correct. Their pattern sections are named 'risk_factors', 'mda', ... and
+    # were invisible to the harness until it keyed on section.item (llmp.11.2).
+    ("wfc", "10-K"),
 }
 
 OVERLAP_MAX = 1.10  # healthy filings cap at ~0.95; >1.0 means sections overlap.

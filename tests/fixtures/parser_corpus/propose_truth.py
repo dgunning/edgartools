@@ -25,7 +25,8 @@ def main(labels):
         e = corpus[label]
         html = Path(e["path"]).read_text(errors="ignore")
         doc = HTMLParser(ParserConfig(form=e["form"], detect_sections=True)).parse(html)
-        secs = [(n, s) for n, s in doc.sections.items() if scoring.item_key(n)]
+        secs = [(scoring.canonical_section_name(n, s), s) for n, s in doc.sections.items()
+                if scoring.section_item_key(n, s)]
         # Document order: TOC sections carry no offsets, so order by the
         # position of the first 200 chars of their text in the document text.
         full = scoring.collapse(doc.text() or "")
