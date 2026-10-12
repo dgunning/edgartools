@@ -1,0 +1,1 @@
+- **10-K items missing from a partial TOC now come from the filer's cross-reference index** — on index filers such as GE, the gaps used to go to keyword matching, which returned the index table as Item 1 and a 276k-character mid-sentence slice as Item 9A. Item 9A is now its 3.3k-character page, and GE's 10-K resolves 12 items instead of 8.

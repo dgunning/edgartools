@@ -2903,25 +2903,46 @@
      "end": null
     },
     "part_i_item_1c": {
-     "verified": "wrong",
-     "method": "pattern",
-     "start": null,
-     "end": null,
-     "why": "pattern section on a cross-reference-index filer: 68k chars from 'CYBERSECURITY GOVERNANCE' ending mid-sentence in the ICFR report"
+     "verified": "title",
+     "method": "index",
+     "start": "CYBERSECURITY CYBERSECURITY RISK MANAGEMENT AND STRATEGY. GE Aerospace has devel",
+     "end": "ources to inform our cybersecurity technologies and processes. 2025 FORM 10-K 23"
     },
     "part_ii_item_9a": {
-     "verified": "wrong",
-     "method": "pattern",
-     "start": null,
-     "end": null,
-     "why": "pattern section on a cross-reference-index filer: 276k chars starting mid-sentence ('Internal Control - Integrated Framework (2013)') and running to the end"
+     "verified": "title",
+     "method": "index",
+     "start": "MANAGEMENT AND AUDITOR’S REPORTS MANAGEMENT’S DISCUSSION OF FINANCIAL RESPONSIBI",
+     "end": "erially affect, its internal control over financial reporting. 32 2025 FORM 10-K"
     },
     "part_i_item_1": {
+     "verified": "title",
+     "method": "index",
+     "start": "ABOUT GE AEROSPACE. General Electric Company operates as GE Aerospace (GE Aerosp",
+     "end": "liabilities $32,513 $23,868 Noncontrolling interests $336 $200 2025 FORM 10-K 73"
+    },
+    "part_i_item_2": {
+     "verified": "title",
+     "method": "index",
+     "start": "ABOUT GE AEROSPACE. General Electric Company operates as GE Aerospace (GE Aerosp",
+     "end": "orcraft engines and the LM2500 for mobility and marine engines. 4 2025 FORM 10-K"
+    },
+    "part_ii_item_5": {
      "verified": "wrong",
-     "method": "pattern",
+     "method": "index",
      "start": null,
-     "end": null,
-     "why": "pattern section on a cross-reference-index filer: the slice is the FORM 10-K CROSS REFERENCE INDEX table itself, not Item 1 content"
+     "end": " Total 6,404 $ 313.29 6,404 $2,698 *Non-GAAP Financial Measure 22 2025 FORM 10-K"
+    },
+    "part_ii_item_7a": {
+     "verified": "wrong",
+     "method": "index",
+     "start": null,
+     "end": null
+    },
+    "part_iii_item_10": {
+     "verified": "title",
+     "method": "index",
+     "start": "DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE Information about our Exe",
+     "end": "iscal year ended December 31, 2025 (the 2026 Proxy Statement). 74 2025 FORM 10-K"
     }
    }
   },
