@@ -291,6 +291,9 @@ _TEN_K_RULES: Tuple[TextItemRule, ...] = (
     TextItemRule("Item 7",  ("management", "discussion")),
     TextItemRule("Item 8",  ("financial statements",), ("index",)),
     TextItemRule("Item 15", ("exhibits",)),
+    # A title-only TOC lists Item 16 as "Form 10-K Summary" (Morgan Stanley);
+    # unmapped, its anchor ended nothing and Item 15 ran on through it.
+    TextItemRule("Item 16", ("form 10-k summary",)),
 )
 
 # 10-Q keeps only the safe overlap with 10-K: Risk Factors is Part II Item 1A on
