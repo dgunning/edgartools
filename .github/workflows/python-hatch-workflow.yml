@@ -143,11 +143,13 @@ jobs:
         set -euo pipefail
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           # The API, not `git diff`: this checkout is shallow, so no merge base
-          # with the target branch exists to diff against.
+          # with the target branch exists to diff against. Only test modules
+          # (pytest's test_*.py / *_test.py): a helper under tests/ collects
+          # nothing, and the audit reads an empty run as a broken one (#1527).
           CHANGED=$(gh api --paginate \
             "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
             --jq '.[] | select(.status != "removed") | .filename' \
-            | grep -E '^tests/.*\.py$' | tr '\n' ' ' || true)
+            | grep -E '^tests/(.*/)?(test_[^/]*|[^/]*_test)\.py$' | tr '\n' ' ' || true)
           if [ -z "$CHANGED" ]; then
             echo "No test files changed; nothing to audit."
             exit 0
