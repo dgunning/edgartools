@@ -2,7 +2,6 @@ from decimal import Decimal
 from pathlib import Path
 
 import pandas as pd
-from bs4 import BeautifulSoup
 from rich import print
 import pytest
 from edgar._filings import Filing
@@ -11,6 +10,7 @@ from edgar.ownership.core import (
     compute_average_price, compute_total_value, format_amount, is_numeric, safe_numeric, detect_10b5_1_plan
 )
 from edgar.core import has_html_content
+from edgar.xmltools import find_all_elements
 
 pd.options.display.max_columns = None
 
@@ -263,8 +263,7 @@ def test_derivative_transaction_get_item(snow_form4):
 
 
 def test_parse_reporting_owners_from_xml():
-    soup = BeautifulSoup(Path('data/form3.snow.nonderiv.xml').read_text(), 'xml')
-    reporting_owner_tags = soup.find_all("reportingOwner")
+    reporting_owner_tags = find_all_elements(Path('data/form3.snow.nonderiv.xml').read_text(), "reportingOwner")
     reporting_owners: ReportingOwners = ReportingOwners.from_reporting_owner_tags(reporting_owner_tags, remarks='')
     assert reporting_owners
     assert len(reporting_owners) == 2

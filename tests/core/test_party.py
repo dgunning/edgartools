@@ -12,8 +12,8 @@ below are on values, so that silence shows up as a failure.
 
 See tests/test_xmltools_semantics.py for the helper-level contract.
 """
-from bs4 import BeautifulSoup
 
+from edgar.xmltools import find_element
 from edgar._party import (
     Address,
     Contact,
@@ -57,9 +57,9 @@ ISSUER_XML = """<?xml version="1.0"?>
 def _issuer_element(xml: str = ISSUER_XML):
     """Parse a `<primaryIssuer>` block the way `FormD.from_xml` does.
 
-    THE ONE LINE THAT CHANGES when `_party` moves to lxml (edgartools-07lk.11.3).
+    On lxml since 6.0 dropped bs4 (edgartools-07lk.11 phase 6).
     """
-    return BeautifulSoup(xml, features="xml").find("primaryIssuer")
+    return find_element(xml, "primaryIssuer")
 
 
 # ------------------------------------------------------------ Issuer.from_xml
