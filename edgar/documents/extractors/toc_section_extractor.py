@@ -414,6 +414,9 @@ class SECSectionExtractor:
     # A running header made of Part or item numbers alone: "Parts III and IV"
     # (JPMorgan), "PART II, III" over "Item 9B, 9C, 10, 11, 12, 13" (Microsoft).
     _PARTS_HEADER_RE = re.compile(r'^Parts?\s+[IVX]+(?:\s*(?:,|and|&)\s*[IVX]+)+$', re.IGNORECASE)
+    # A line that is only the form's name ("Form 10-K", Caterpillar's header on
+    # its signature page) is a running header even when it prints once.
+    _FORM_NAME_LINE_RE = re.compile(r'^(?:Annual\s+Report\s+on\s+|Quarterly\s+Report\s+on\s+)?Form\s+10-[KQ](?:/A)?$', re.IGNORECASE)
     _ITEM_LIST_RE = re.compile(r'^Items?\s+\d{1,2}[A-C]?(?:\s*(?:,|and|&)\s*\d{1,2}[A-C]?)+$', re.IGNORECASE)
     # A date line ("February 20, 2025") closes an auditor's report or a
     # signature; it repeats through a filing but is never furniture.
@@ -587,6 +590,8 @@ class SECSectionExtractor:
             if self._CRUMB_LINE_RE.match(text) or self._PAGE_NUM_RE.match(text):
                 return True
             if self._PARTS_HEADER_RE.match(text) or self._ITEM_LIST_RE.match(text):
+                return True
+            if self._FORM_NAME_LINE_RE.match(text):
                 return True
             pm = divider_re.match(text)
             if pm and self._PART_RANK.get(pm.group(1).upper(), 9) <= own_rank:
@@ -871,6 +876,21 @@ class SECSectionExtractor:
                 boundary.end_element = stop
                 logger.info("Section %s ends at the Part %s divider", name, part)
 
+    # Headings of content a 10-K files after its signature page and that must
+    # not be cut away with the signature block: the financial statements, the
+    # schedules and the exhibit index.
+    _TRAILING_CONTENT_RE = re.compile(
+        r'^(?:INDEX\s+TO\s+(?:THE\s+)?(?:CONSOLIDATED\s+)?FINANCIAL\s+STATEMENTS'
+        r'|REPORT\s+OF\s+INDEPENDENT\s+REGISTERED'
+        r'|CONSOLIDATED\s+(?:BALANCE\s+SHEETS?|STATEMENTS?\s+OF)'
+        r'|SCHEDULE\s+[IVX]+\b'
+        r'|(?:EXHIBIT\s+INDEX|INDEX\s+TO\s+EXHIBITS|EXHIBITS?\s+INDEX)\b'
+        # An exhibit list with no index heading: a bare "Exhibits" line or the
+        # table's column header (a 2003 10-K lists its exhibits after the
+        # signature table this way).
+        r'|EXHIBITS?\.?$|EXHIBIT\s+(?:NO\.?|NUMBER|DESCRIPTION)\b'
+        r'|F-\s?1$)', re.IGNORECASE)
+
     def _bound_open_sections_at_signatures(self, tree) -> None:
         """End a section with no end boundary at the next bare SIGNATURES line.
 
@@ -882,13 +902,24 @@ class SECSectionExtractor:
         TOC-detected with GH #1347, and its Item 6 took in "SIGNATURE ... Len M.
         Fox" until this bound was added.
 
-        10-Q only, the scope Strategy 3b gives SIGNATURES on the pattern path. A
-        10-K routinely files its financial statements after the signature page,
-        so the same bound cut a modern 10-K's Item 15 from 153,840 chars to 1,051.
+        A 10-K routinely files its financial statements after the signature
+        page, so a bare SIGNATURES bound once cut a modern 10-K's Item 15 from
+        153,840 chars to 1,051. On a 10-K the header is therefore used only
+        when nothing of substance follows it: no financial-statement index,
+        auditor's report, F-page, schedule or exhibit index between it and the
+        end of the document (``_TRAILING_CONTENT_RE``). Then the signature
+        block is all that trails the last item, and it belongs to no item:
+        Apple, Caterpillar, Bank of America, FirstEnergy and Regions ended
+        Item 16 on the signature table, Goldman its Item 15. When financial
+        statements do follow (Talos's F-pages after the signatures), the
+        header is passed over, since cutting there would leave the statements
+        in no section at all; the next header with nothing after it is taken
+        instead (Netflix's, after its F-pages and exhibit index).
         """
         from edgar.documents.extractors.pattern_section_extractor import _SIGNATURES_HEADER
 
-        if self._base_form() != '10-Q':
+        base_form = self._base_form()
+        if base_form not in ('10-Q', '10-K'):
             return
 
         open_ended = [b for b in self.section_boundaries.values()
@@ -914,6 +945,22 @@ class SECSectionExtractor:
         if not headers:
             return
         headers.sort(key=document_order_path)
+
+        if base_form == '10-K':
+            # Keep only headers that no substantive content follows.
+            landmarks = []
+            for el in tree.iter(*self._BLOCK_TAGS):
+                if next(el.iterdescendants(*self._BLOCK_TAGS), None) is not None:
+                    continue
+                text = ' '.join(el.text_content().split())
+                if text and len(text) <= self._FURNITURE_MAX_CHARS and self._TRAILING_CONTENT_RE.match(text):
+                    landmarks.append(el)
+            if landmarks:
+                last = landmarks[-1]
+                headers = [h for h in headers if not precedes(h, last)
+                           and not any(a is h for a in last.iterancestors())]
+            if not headers:
+                return
 
         for boundary in open_ended:
             start_el = boundary.start_element

@@ -1245,11 +1245,10 @@
      "end": " undertakes to furnish to the SEC, upon request, copies of any such instruments."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "last item runs through SIGNATURES",
-     "start": "Item 16. Form 10-K Summary None. Apple Inc. | 2024 Form 10-K | 56 SIGNATURES Pur",
-     "end": null
+     "start": "Item 16. Form 10-K Summary None.",
+     "end": "Item 16. Form 10-K Summary None."
     }
    }
   },
@@ -1828,11 +1827,10 @@
      "end": " the actual state of affairs as of the date they were made or at any other time."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "last item runs through SIGNATURES",
-     "start": "Item 16. Form 10-K Summary. None. Form 10-K SIGNATURES Pursuant to the requireme",
-     "end": null
+     "start": "Item 16. Form 10-K Summary. None.",
+     "end": "Item 16. Form 10-K Summary. None."
     }
    }
   },
@@ -2320,11 +2318,10 @@
      "end": " in the 2025 Proxy Statement and is incorporated in this Form 10-K by reference."
     },
     "part_iv_item_15": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "runs through the signature block",
      "start": "Item 15. Exhibit and Financial Statement Schedules (a) Documents filed as part o",
-     "end": null
+     "end": ". † This exhibit is a management contract or a compensatory plan or arrangement."
     }
    }
   },
@@ -3224,7 +3221,7 @@
     "part_iv_item_16": {
      "verified": "wrong",
      "method": "toc",
-     "why": "runs through the exhibit index and signatures",
+     "why": "runs through the exhibit index (Item 15 content printed after Item 16; cutting it would leave it in no section)",
      "start": "Item 16. Form 10-K summary None. 113 MASTERCARD 2024 FORM 10-K EXHIBIT INDEX Exh",
      "end": null
     }
@@ -3972,7 +3969,7 @@
     "part_iv_item_16": {
      "verified": "wrong",
      "method": "toc",
-     "why": "runs through the financial statements and signatures (98k chars)",
+     "why": "runs through the financial statements and exhibit index that follow it (Item 8 is a pointer; cutting them would leave them in no section)",
      "start": "Item 16. Form 10–K Summary None. NETFLIX, INC. INDEX TO FINANCIAL STATEMENTS Pag",
      "end": null
     }
@@ -4398,11 +4395,10 @@
      "end": "ve data file because its XBRL tags are embedded within the inline XBRL document."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "runs through Signatures",
-     "start": "Item 16. Form 10-K Summary Not applicable. Bank of America 178 Signatures Pursua",
-     "end": null
+     "start": "Item 16. Form 10-K Summary Not applicable.",
+     "end": "Item 16. Form 10-K Summary Not applicable."
     }
    }
   },
@@ -4543,11 +4539,10 @@
      "end": "al assets, but hereby agree to furnish to the SEC on request any such documents."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "runs through SIGNATURES",
-     "start": "ITEM 16. FORM 10-K SUMMARY None. 179 SIGNATURES Pursuant to the requirements of ",
-     "end": null
+     "start": "ITEM 16. FORM 10-K SUMMARY None.",
+     "end": "ITEM 16. FORM 10-K SUMMARY None."
     }
    }
   },
@@ -4959,11 +4954,10 @@
      "end": "ial Corporation 1900 Fifth Avenue North Birmingham, Alabama 35203 (205) 264-7040"
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "runs through SIGNATURES",
-     "start": "Item 16. Form 10-K Summary Not applicable. SIGNATURES Pursuant to the requiremen",
-     "end": null
+     "start": "Item 16. Form 10-K Summary Not applicable.",
+     "end": "Item 16. Form 10-K Summary Not applicable."
     }
    }
   },
