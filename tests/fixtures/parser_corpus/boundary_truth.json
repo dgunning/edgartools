@@ -2182,11 +2182,16 @@
      "end": "ervices in Morgan Stanley’s proxy statement is incorporated by reference herein."
     },
     "part_iv_item_15": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "swallows Item 16 ('Form 10-K Summary None.')",
      "start": "Exhibits and Financial Statement Schedules Documents filed as part of this repor",
-     "end": ".S. Securities and Exchange Commission upon request. December 2024 Form 10-K 158"
+     "end": "f these instruments to the U.S. Securities and Exchange Commission upon request."
+    },
+    "part_iv_item_16": {
+     "verified": "eye",
+     "method": "toc",
+     "start": "Form 10-K Summary None.",
+     "end": "Form 10-K Summary None."
     }
    }
   },
@@ -2922,9 +2927,8 @@
      "end": "ge Interactive Data File (formatted as inline XBRL and contained in Exhibit 101)"
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "pattern",
-     "why": "nav crumb trails the slice",
      "start": "ITEM 16. FORM 10-K SUMMARY Not applicable.",
      "end": "ITEM 16. FORM 10-K SUMMARY Not applicable."
     }
