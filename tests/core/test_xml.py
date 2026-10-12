@@ -1,59 +1,52 @@
-from bs4 import BeautifulSoup
 from pathlib import Path
 from edgar.xmltools import child_value, child_text, value_or_footnote, get_footnote_ids, value_with_footnotes, find_element, \
-    optional_decimal
+    optional_decimal, parse_xml, local_name
 from decimal import Decimal
 
 
 def test_child_value():
-    soup = BeautifulSoup(
-        """
+    root = parse_xml("""
         <root>
             <child>
             <value>Music</value>
             </child>
         </root>   
-        """, features="xml"
-    )
-    root = soup.find("root")
+        """)
     assert child_value(root, "child") == "Music"
     assert child_text(root, "child").strip() == "Music"
 
 
 def test_value_or_footnote():
-    soup = BeautifulSoup(
-        """
+    root = parse_xml("""
         <root>
             <child>
             <footnote id="F1"/>
             </child>
         </root>   
-        """, features="xml"
-    )
-    root = soup.find("root")
+        """)
     child = root.find("child")
     assert value_or_footnote(child) == "F1"
 
 
 holding_xml = Path("data/derivative_holding.xml").read_text()
-holding_soup = BeautifulSoup(holding_xml, "xml")
+holding_root = parse_xml(holding_xml)
 
 
 def test_get_footnote_ids():
-    tag = holding_soup.find('underlyingSecurityTitle')
+    tag = find_element(holding_root, 'underlyingSecurityTitle')
     assert "F2,F3" == get_footnote_ids(tag)
     assert "F2|F3" == get_footnote_ids(tag, sep="|")
     assert "F2\nF3" == get_footnote_ids(tag, sep="\n")
 
 
 def test_get_value_with_footnotes():
-    tag = holding_soup.find("securityTitle")
+    tag = find_element(holding_root, "securityTitle")
     assert value_with_footnotes(tag) == "Series E Preferred Stock"
 
-    tag = holding_soup.find('expirationDate')
+    tag = find_element(holding_root, 'expirationDate')
     assert value_with_footnotes(tag) == "[F1]"
 
-    tag = holding_soup.find('underlyingSecurityTitle')
+    tag = find_element(holding_root, 'underlyingSecurityTitle')
     assert value_with_footnotes(tag) == "Class B Common Stock [F2,F3]"
 
 
@@ -66,8 +59,8 @@ def test_find_element():
         </root>   
         """
     root = find_element(xml_string, 'root')
-    assert root
-    assert root.name == "root"
+    assert root is not None
+    assert local_name(root) == "root"
 
 
 def test_optional_decimal():
@@ -91,7 +84,6 @@ def test_optional_decimal():
       <liquidPref>0</liquidPref>
     </fundInfo>
     """
-    fund_info_tag = BeautifulSoup(xml_string, features="xml").find("fundInfo")
-    print(fund_info_tag)
+    fund_info_tag = parse_xml(xml_string)
     assert optional_decimal(fund_info_tag, "amtPayAftOneYrBanksBorr") == Decimal("0.018")
     assert optional_decimal(fund_info_tag, "NOT_THERE") is None

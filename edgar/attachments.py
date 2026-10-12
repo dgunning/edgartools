@@ -6,7 +6,6 @@ import signal
 import socketserver
 import tempfile
 import time
-import warnings
 import webbrowser
 import zipfile
 
@@ -305,26 +304,22 @@ def _first_by_class(element, tag: str, class_name: str):
 
 
 def _as_lxml_root(root, api: str):
-    """Accept the BeautifulSoup this API used to take, for one more major version.
+    """Reject the BeautifulSoup this API took until 6.0, with the call that replaces it.
 
-    `Attachments` and `FilingHomepage` are both exported from `edgar`, so the
-    tree they are handed is part of a public signature; it was a BeautifulSoup
-    until this release. Duck-typed on ``xpath`` rather than isinstance, so that
-    checking does not re-import the bs4 this module no longer depends on.
+    `Attachments` and `FilingHomepage` are both exported from `edgar`, so the tree
+    they are handed is part of a public signature. 5.x re-parsed a soup with a
+    DeprecationWarning; 6.0 dropped bs4, so a soup fails here rather than inside a
+    selector with "'NoneType' object is not callable".
 
     ``callable``, not ``hasattr``: a BeautifulSoup answers any unknown attribute
     with the first child tag of that name, or None -- so ``hasattr(soup,
-    "xpath")`` is True, and the soup would sail past the check and fail later
-    inside a selector with "'NoneType' object is not callable".
+    "xpath")`` is True.
     """
     if root is None or callable(getattr(root, "xpath", None)):
         return root
-    warnings.warn(
-        f"Passing a BeautifulSoup to {api} is deprecated and will be removed in v6.0; "
-        f"it is re-parsed with lxml, which costs a second parse. Pass "
-        f"edgar.attachments.parse_homepage_html(html) instead.",
-        DeprecationWarning, stacklevel=3)
-    return parse_homepage_html(str(root))
+    raise TypeError(
+        f"{api} takes an lxml tree, not {type(root).__name__}. BeautifulSoup is no "
+        f"longer accepted as of 6.0; pass edgar.attachments.parse_homepage_html(html).")
 
 
 class FilerInfo(BaseModel):
@@ -1143,19 +1138,7 @@ class FilingHomepage:
     def __init__(self,
                  url: str,
                  root: lxml.html.HtmlElement = None,
-                 attachments: Attachments = None,
-                 *,
-                 soup=None):
-        # The second argument was named `soup` and typed BeautifulSoup until
-        # this release. Both halves of the old call keep working -- the keyword
-        # spelling here, the old type in _as_lxml_root -- and both warn; both go
-        # in 6.0.
-        if soup is not None:
-            warnings.warn(
-                "FilingHomepage(soup=...) is deprecated and will be removed in v6.0. "
-                "Pass the tree as `root`.",
-                DeprecationWarning, stacklevel=2)
-            root = soup
+                 attachments: Attachments = None):
         self.attachments = attachments
         self.url = url
         self._root = _as_lxml_root(root, "FilingHomepage")

@@ -1,4 +1,4 @@
-"""The one contract `edgar.xmltools` owes its callers, asserted on both backends.
+"""The one contract `edgar.xmltools` owes its callers.
 
 `edgar/xmltools.py` is the shared XML helper layer for 12 parsers (Form D, Form 144,
 Form 3/4/5 ownership, 13F, Schedule 13D/G, muni advisors, EFFECT, filing summaries),
@@ -6,10 +6,10 @@ and roughly 350 call sites reach it. Bead edgartools-07lk.11.2 made it dual-back
 those dependents can move from BeautifulSoup to lxml one at a time
 (edgartools-07lk.11.3) rather than in a single commit.
 
-Every test below runs against BOTH backends, via the `parse` fixture. That is the
-point: the two halves of the adapter are held to one contract instead of drifting
-apart during the migration, and a value that only survives on one backend is a
-failure rather than a surprise three weeks later.
+Until 6.0 every test below ran against BOTH backends, via the `parse` fixture, so
+the two halves of the adapter were held to one contract during the migration. 6.0
+dropped bs4 (edgartools-07lk.11 phase 6); the values pinned here are the bs4
+behavior the lxml half was proven against, and they stay the contract.
 
 The four differences the adapter exists to absorb — each verified against the bs4 and
 lxml versions installed here, and each one silent, returning `None` or `""` where a
@@ -29,13 +29,10 @@ value used to be:
                 single character. The adapter reproduces that exactly; it is the one
                 place the port is more than a translation.
 
-When the bs4 half is deleted in the 6.0 window, drop the "bs4" param from `parse` —
-what remains is still the full contract.
 """
 from decimal import Decimal
 
 import pytest
-from bs4 import BeautifulSoup, Tag
 from lxml import etree
 
 from edgar.xmltools import (
@@ -83,24 +80,14 @@ ISSUER_XML = """<?xml version="1.0"?>
 
 
 def _text_of(el):
-    """Backend-neutral text read, for assertions about elements themselves."""
-    return el.text if isinstance(el, Tag) else "".join(el.itertext())
+    """Text read for assertions about elements themselves."""
+    return "".join(el.itertext())
 
 
-@pytest.fixture(params=["bs4", "lxml"])
-def parse(request):
-    """Parse `xml` and return the element named `name`, on each backend in turn.
-
-    This is what makes the dual-backend adapter honest: every assertion below runs
-    against BOTH a BeautifulSoup tree and an lxml tree, so the two halves of
-    `edgar/xmltools.py` are held to one contract rather than drifting apart while
-    the twelve dependents migrate one at a time (edgartools-07lk.11.3).
-
-    When the bs4 half is deleted in the 6.0 window, drop the "bs4" param.
-    """
+@pytest.fixture
+def parse():
+    """Parse `xml` with lxml and return the element named `name`."""
     def _parse(xml: str, name: str):
-        if request.param == "bs4":
-            return BeautifulSoup(xml, features="xml").find(name)
         # Resolved by hand rather than through `find_element`, so that the tests do
         # not obtain their starting node from the code they are checking. `iter()`
         # yields the root first, and the local-name compare is what lets a
@@ -116,16 +103,6 @@ def parse(request):
 @pytest.fixture
 def issuer(parse):
     return parse(ISSUER_XML, "primaryIssuer")
-
-
-def test_the_fixture_really_produces_both_backends(parse, request):
-    """Guard against the suite quietly running bs4 twice and calling it agreement."""
-    node = parse(ISSUER_XML, "primaryIssuer")
-    if request.node.callspec.params["parse"] == "bs4":
-        assert isinstance(node, Tag)
-    else:
-        assert isinstance(node, etree._Element)
-        assert not isinstance(node, Tag)
 
 
 # ---------------------------------------------------------------- child_text
@@ -443,7 +420,7 @@ def test_find_all_elements_accepts_a_raw_xml_string():
 
 # `parse_xml` is the lxml-only document entry point the `from_xml(xml: str)`
 # classmethods call instead of `BeautifulSoup(xml, "xml")`, so it is not run through
-# the dual-backend `parse` fixture. What it owes them is everything bs4 absorbed
+# the `parse` fixture. What it owes them is everything bs4 absorbed
 # without being asked (edgartools-07lk.11.3).
 
 

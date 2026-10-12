@@ -57,7 +57,7 @@ def test_footnote_ids_are_deduped_within_a_transaction():
 
 def test_get_footnotes_dedupes_preserving_order():
     """Unit check on the shared helper used by table extraction."""
-    from bs4 import BeautifulSoup
+    from edgar.xmltools import parse_xml
 
     xml = (
         "<root>"
@@ -66,6 +66,6 @@ def test_get_footnotes_dedupes_preserving_order():
         "<transactionPricePerShare><footnoteId id='F1'/></transactionPricePerShare>"
         "</root>"
     )
-    tag = BeautifulSoup(xml, 'xml').find('root')
+    tag = parse_xml(xml)
 
     assert get_footnotes(tag) == 'F1\nF2'
