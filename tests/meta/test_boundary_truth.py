@@ -81,7 +81,10 @@ PINNED = {
     # 2026-10-12 (llmp.11.2): +33 pattern-path items the harness could not see
     # while it keyed on section names ('mda', 'business'): 28 eye, 5 wrong
     # (ge 1/1C/9A, 0000950153-99-001234 7, 0001193125-21-101193 1B).
-    "10-K": (773, 745, 712, 708),   # 96.4% / 92.1% / 91.6%
+    # 2026-10-12 (llmp.12.2): GE's missing items come from its cross-reference
+    # index, not the pattern pass: 1/1C/9A wrong -> title, +2/10 title, +5 and
+    # +7A wrong (page-granular index slices open mid-page).
+    "10-K": (777, 750, 718, 713),   # 96.5% / 92.4% / 91.8%
     "10-Q": (111, 110, 107, 106),   # 99.1% / 96.4% / 95.5%
 }
 
