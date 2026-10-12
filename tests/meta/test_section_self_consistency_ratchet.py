@@ -63,9 +63,14 @@ pytestmark = pytest.mark.slow
 #       cross-reference set inside MD&A's first page, by design of the
 #       heading-position split) and 11/12/13 (one 2,917-char Part III stub
 #       the split cannot separate: no headings). The audit's R2 class.
-#   last item, no successor heading   Item 15 on ge, 0001047469-03-011363
-#       and 0001140361-10-014238 runs into the exhibit / financial statement
-#       index that follows it; there is no Item 16 heading to stop at.
+#   last item, no successor heading   Item 15 on ge and 0001047469-03-011363
+#       runs into the exhibit / financial statement index that follows it;
+#       there is no Item 16 heading to stop at.
+#   filer's own header in the F-pages 0001140361-10-014238 prints "PART I.
+#       FINANCIAL INFORMATION / Item 1. Financial Statements" over its
+#       statements. It was an Item 15 embed until the Item 8 trailing-
+#       statements rescue gave the statements to Item 8 (llmp.12), and it
+#       moved with them.
 #   two-row contents list             ma Item 9C holds a two-row Part III
 #       listing, below the three-row index threshold.
 #   cross-reference at line start     0001193125-10-073212 Item 7 quotes
@@ -87,7 +92,7 @@ pytestmark = pytest.mark.slow
 EMBED_BASELINE = {
     ("0000950153-99-001234", "10-K"): {"5"},
     ("0001047469-03-011363", "10-K"): {"15"},
-    ("0001140361-10-014238", "10-K"): {"15"},
+    ("0001140361-10-014238", "10-K"): {"8"},
     ("0001193125-10-073212", "10-K"): {"7"},
     ("0001193125-21-082408", "10-Q"): {"1"},
     ("0001193125-21-101193", "10-K"): {"10"},

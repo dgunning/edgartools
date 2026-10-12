@@ -280,11 +280,12 @@ def test_gs_business_correctly_bounded():
 @pytest.mark.slow
 @pytest.mark.parametrize("filer,path,form,key,length", [
     ("nvda", "nvda/10k/nvda-10-k-2025-02-26.html", "10-K", "part_ii_item_8", 207),
-    ("nflx", "nflx/10k/nflx-10-k-2025-01-27.html", "10-K", "part_ii_item_8", 268),
     ("ibm", "ibm/10k/ibm-10-k-2025-02-25.html", "10-K", "part_ii_item_8", 250),
     ("orcl", "orcl/10k/orcl-10-k-2025-06-18.html", "10-K", "part_ii_item_8", 158),
-    # 121 since #1512: the anchor sits inside the heading, so the slice now opens on "ITEM 8."
-    ("cik915358", "915358/10k/915358-10-k-2025-08-27.html", "10-K", "part_ii_item_8", 121),
+    # Netflix (268) and SigmaTron (915358, 121) were here too. Both file their
+    # statements at the back of the same document, after the last item, and
+    # Item 8 now holds them (edgartools-llmp.12, the trailing-statements
+    # rescue); see test_a_pointer_to_statements_filed_at_the_back_is_rescued.
     # The deferral pattern is not Item-8-specific: IBM also incorporates MD&A
     # by reference.
     ("ibm", "ibm/10k/ibm-10-k-2025-02-25.html", "10-K", "part_ii_item_7", 212),
@@ -309,6 +310,22 @@ def test_undersized_pointer_section_is_flagged_as_a_cross_reference(filer, path,
     assert "incorporation by reference" in section.warnings[0]
     assert "truncated" not in section.warnings[0]
     assert section.confidence <= 0.5
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize("filer,path,length", [
+    ("nflx", "nflx/10k/nflx-10-k-2025-01-27.html", 95_320),
+    ("cik915358", "915358/10k/915358-10-k-2025-08-27.html", 114_607),
+])
+def test_a_pointer_to_statements_filed_at_the_back_is_rescued(filer, path, length):
+    """GH #927 left a pointer Item 8 in place with an incorporation-by-reference
+    warning. When the statements it points to are filed in the same document,
+    after the last item, Item 8 now holds them (edgartools-llmp.12): the full
+    statements, with no size warning."""
+    section = _sections(path, "10-K")["part_ii_item_8"]
+    assert len(section.text()) == length, f"{filer} Item 8 length drifted from ground truth"
+    assert "INDEX TO FINANCIAL STATEMENTS" in section.text()[:200]
+    assert not section.warnings, f"{filer} rescued Item 8 unexpectedly flagged: {section.warnings}"
 
 
 @pytest.mark.slow

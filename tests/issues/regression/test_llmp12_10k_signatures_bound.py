@@ -14,9 +14,9 @@ The bound now applies to a 10-K too, but only at a SIGNATURES header that
 nothing of substance follows: no financial-statement index, auditor's report,
 F-page, schedule or exhibit list between it and the end of the document.
 Talos files its F-pages after its signatures, so its header is passed over
-and Item 16 keeps the statements, which no other section holds (Item 8 is a
-pointer). Netflix files its statements and exhibit index after Item 16 and its
-signatures last, so Item 16 loses only the signature block.
+rather than leave the statements in no section; the Item 8 rescue that runs
+next gives them to Item 8. Netflix files its signatures last, after its
+statements and exhibit index, so only the signature block is cut.
 """
 
 from edgar.documents import HTMLParser, ParserConfig
@@ -103,17 +103,16 @@ def test_bank_of_america_item_16_is_the_summary_alone():
     assert text == "Item 16. Form 10-K Summary Not applicable.", text
 
 
-def test_talos_item_16_keeps_the_financial_statements_filed_after_its_signatures():
+def test_talos_statements_filed_after_the_signatures_are_never_left_in_no_section():
+    # The signatures bound passes over this header; the statements then move to
+    # Item 8 (test_llmp12_item8_trailing_statements), never to no section.
     doc = _parse((FIXTURES_DIR / "html" / "talo" / "10k" / "talo-10-k-2026-02-25.html").read_text())
-    assert len(doc.sections["part_ii_item_8"].text()) < 1_000  # a pointer to Item 15
-    text = doc.sections["part_iv_item_16"].text()
-    assert "Report of Independent Registered Public Accounting Firm" in text
-    assert len(text) > 150_000
+    owners = [k for k, s in doc.sections.items() if "Report of Independent Registered Public Accounting Firm" in s.text()]
+    assert owners == ["part_ii_item_8"], owners
 
 
-def test_netflix_item_16_keeps_its_statements_and_loses_only_the_signatures():
+def test_netflix_signature_block_is_in_no_item():
     doc = _parse((FIXTURES_DIR / "html" / "nflx" / "10k" / "nflx-10-k-2025-01-27.html").read_text())
-    text = " ".join(doc.sections["part_iv_item_16"].text().split())
-    assert "INDEX TO FINANCIAL STATEMENTS" in text and "EXHIBIT INDEX" in text
-    assert "SIGNATURES" not in text
-    assert "/S/ ANNE SWEENEY" not in text
+    for key in ("part_ii_item_8", "part_iv_item_16"):
+        text = " ".join(doc.sections[key].text().split())
+        assert "/S/ ANNE SWEENEY" not in text, key

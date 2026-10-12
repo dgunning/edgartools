@@ -3303,8 +3303,8 @@
     "part_ii_item_8": {
      "verified": "eye",
      "method": "toc",
-     "start": "ITEM 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA The response to this item is",
-     "end": "MENTARY DATA The response to this item is included in Item 15(a) of this Report."
+     "start": "INDEX TO FINANCIAL STATEMENTS Page SigmaTron International, Inc. and Subsidiarie",
+     "end": "act on its future consolidated financial position or results of operations. F-45"
     },
     "part_ii_item_9": {
      "verified": "eye",
@@ -3901,10 +3901,11 @@
      "end": "f foreign-currency denominated balances during the year ended December 31, 2024."
     },
     "part_ii_item_8": {
-     "verified": "eye",
+     "verified": "wrong",
      "method": "toc",
-     "start": "Item 8.Financial Statements and Supplementary Data The consolidated financial st",
-     "end": "luded immediately following Part IV hereof and incorporated by reference herein."
+     "start": "NETFLIX, INC. INDEX TO FINANCIAL STATEMENTS Page Report of Independent Registere",
+     "end": null,
+     "why": "the statements are right; the tail runs through the exhibit index filed after them (Item 15 content, kept rather than left in no section)"
     },
     "part_ii_item_9": {
      "verified": "eye",
@@ -3967,11 +3968,10 @@
      "end": "dex immediately following the signature page of this Annual Report on Form 10-K."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "runs through the financial statements and exhibit index that follow it (Item 8 is a pointer; cutting them would leave them in no section)",
-     "start": "Item 16. Form 10–K Summary None. NETFLIX, INC. INDEX TO FINANCIAL STATEMENTS Pag",
-     "end": null
+     "start": "Item 16. Form 10–K Summary None.",
+     "end": "Item 16. Form 10–K Summary None."
     }
    }
   },
@@ -5028,8 +5028,8 @@
     "part_ii_item_8": {
      "verified": "eye",
      "method": "toc",
-     "start": "Item 8. Financial Statements and Supplementary Data See the Consolidated Financi",
-     "end": "2023, included in Part IV, Item 15. Exhibits and Financial Statements Schedules."
+     "start": "Index to Consolidated Financial Statements Reports of Independent Registered Pub",
+     "end": "Item 15. Exhibits and Financial Statement Schedules in this Annual Report. F- 46"
     },
     "part_ii_item_9": {
      "verified": "eye",
@@ -5092,11 +5092,10 @@
      "end": "of Regulation S-K, but will be furnished supplementally to the SEC upon request."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "runs through SIGNATURES and the F-pages (175k chars)",
-     "start": "Item 16. Form 10-K Summary None. SIGNATURES Pursuant to the requirements of the ",
-     "end": null
+     "start": "Item 16. Form 10-K Summary None.",
+     "end": "Item 16. Form 10-K Summary None."
     }
    }
   },
