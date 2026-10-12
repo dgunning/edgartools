@@ -11,11 +11,18 @@ Item 9A was 276k characters starting mid-sentence and running to the end.
 
 ``HybridSectionDetector._augment_with_pattern_sections`` now fills missing
 items from the filer's index first; the pattern pass only sees what is left.
+
+The same bead's second case is in the pattern extractor itself. A 1999 10-K
+(0000950153-99-001234, Medicis) parses "Item 7:" as a paragraph and "Item 7A:"
+and "Item 8:" as headings, and a section ended only at a header of the same or
+higher heading level, so Item 7 ran through both pointers to Item 9 and Item 5
+ran through Item 6. Another item's header now ends an item at any level.
 """
 
 from edgar.documents import HTMLParser, ParserConfig
 from tests.paths import FIXTURES_DIR
 
+MEDICIS = FIXTURES_DIR / "parity_gate" / "10-K" / "0000950153-99-001234.html"
 GE = FIXTURES_DIR / "html" / "ge" / "10k" / "ge-10-k-2026-01-29.html"
 BAC = FIXTURES_DIR / "html" / "bac" / "10k"
 
@@ -59,3 +66,21 @@ def test_a_filing_without_an_index_still_gets_pattern_sections():
     doc = _parse(next(BAC.glob("*.htm*")))
     item_1c = [s for s in doc.sections.values() if s.item == "1C"]
     assert [s.detection_method for s in item_1c] == ["pattern"]
+
+
+def test_a_pattern_item_ends_at_the_next_item_header_at_any_heading_level():
+    sections = _parse(MEDICIS).sections
+    mda = sections["mda"].text()
+    assert len(mda) == 215  # was 784, through the Item 7A and Item 8 pointers
+    assert mda.rstrip().endswith("incorporated by reference on pages 14-21 of the 1999 Annual Report to Shareholders.")
+    assert "Item 7A" not in mda and "Item 8" not in mda
+    item_5 = sections["part_ii_item_5"].text()
+    assert len(item_5) == 300  # was 489, through Item 6
+    assert "Item 6" not in item_5
+
+
+def test_an_items_own_sub_headers_still_do_not_end_it():
+    # "Item 14(a)(1):" and "Item 14 (a)(2):" divide Item 14; they are not other items.
+    item_14 = _parse(MEDICIS).sections["part_iii_item_14"].text()
+    assert len(item_14) == 16609
+    assert "Item 14 (a)(3):" in item_14

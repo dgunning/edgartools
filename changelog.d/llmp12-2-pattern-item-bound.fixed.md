@@ -1,0 +1,1 @@
+- **Pattern-detected 10-K items end at the next item's header whatever its heading level** — a 1999 10-K parsed "Item 7:" as a paragraph and "Item 7A:"/"Item 8:" as headings, so Item 7 ran through both pointers to Item 9. Item 7 is now its 215-character pointer, down from 784.
