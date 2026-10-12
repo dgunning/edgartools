@@ -77,12 +77,12 @@ pytestmark = pytest.mark.slow
 #       "ITEM 1A. Risk Factors - ..."; msft 10-Q Item 6 ends on "Items 3
 #       and 4 are not applicable and have been omitted."
 #   pattern path                      0001193125-21-101193 Item 10 (a
-#       pattern section that caught part of the TOC), 0000950153-99-001234
-#       Item 5 (pre-2002, no anchors), 0001193125-21-082408 10-Q.
+#       pattern section that caught part of the TOC), 0001193125-21-082408
+#       10-Q.
 #   semantic-named pattern sections   invisible to the ratchet until it keyed
-#       on section.item (llmp.11.2): 0000950153-99-001234 Item 7 ('mda'
-#       runs through the 7A and 8 headings), 0000927356-01-000369 Item 7
-#       ('mda' runs through Items 8-14 to the end of the document).
+#       on section.item (llmp.11.2): 0000927356-01-000369 Item 7 ('mda'
+#       runs through Items 8-14 to the end of the document; the filing is
+#       plain text, and those headings sit inside one 76k-char text node).
 #
 # CLEARED by heading_block (anchor after the heading text or inside its last
 # word): 0001104659-10-017649 (13 items), 0001140361-10-014238 (12 of 13),
@@ -92,12 +92,13 @@ pytestmark = pytest.mark.slow
 # 10-Q Part I Item 4 (Part II Item 1 absent from the TOC). CLEARED by the
 # ratchet's index-run exclusion: ma Item 4, 0001193125-21-101193 Item 5.
 # CLEARED by filling a partial TOC from the cross-reference index before the
-# pattern pass (llmp.12.2): ge Item 1, which was the index table itself. Two
+# pattern pass (llmp.12.2): ge Item 1, which was the index table itself.
+# CLEARED by ending a pattern item at another item's header whatever its
+# heading level (llmp.12.2): 0000950153-99-001234 Items 5 and 7. Two
 # further entries (915358 Item 9B, pg 10-K Item 15) were regex false
 # positives on "Item 1.01"-style references and lowercase cross-references.
 EMBED_BASELINE = {
     ("0000927356-01-000369", "10-K"): {"7"},
-    ("0000950153-99-001234", "10-K"): {"5", "7"},
     ("0001047469-03-011363", "10-K"): {"15"},
     ("0001140361-10-014238", "10-K"): {"8"},
     ("0001193125-10-073212", "10-K"): {"7"},
