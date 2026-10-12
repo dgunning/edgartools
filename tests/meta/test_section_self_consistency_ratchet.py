@@ -75,14 +75,12 @@ pytestmark = pytest.mark.slow
 #       listing, below the three-row index threshold.
 #   cross-reference at line start     0001193125-10-073212 Item 7 quotes
 #       "ITEM 1A. Risk Factors - ..."; msft 10-Q Item 6 ends on "Items 3
-#       and 4 are not applicable and have been omitted."
+#       and 4 are not applicable and have been omitted."; the plain-text
+#       0000845875-03-000003 Item 1 hard-wraps "Items 11 and 13. In
+#       addition, the Registrant reimburses ..." onto a line of its own.
 #   pattern path                      0001193125-21-101193 Item 10 (a
 #       pattern section that caught part of the TOC), 0001193125-21-082408
 #       10-Q.
-#   semantic-named pattern sections   invisible to the ratchet until it keyed
-#       on section.item (llmp.11.2): 0000927356-01-000369 Item 7 ('mda'
-#       runs through Items 8-14 to the end of the document; the filing is
-#       plain text, and those headings sit inside one 76k-char text node).
 #
 # CLEARED by heading_block (anchor after the heading text or inside its last
 # word): 0001104659-10-017649 (13 items), 0001140361-10-014238 (12 of 13),
@@ -94,11 +92,14 @@ pytestmark = pytest.mark.slow
 # CLEARED by filling a partial TOC from the cross-reference index before the
 # pattern pass (llmp.12.2): ge Item 1, which was the index table itself.
 # CLEARED by ending a pattern item at another item's header whatever its
-# heading level (llmp.12.2): 0000950153-99-001234 Items 5 and 7. Two
+# heading level (llmp.12.2): 0000950153-99-001234 Items 5 and 7. CLEARED by
+# building a plain-text filing's blank-line blocks as paragraphs (llmp.12.1):
+# 0000927356-01-000369 Item 7, whose 'mda' ran through Items 8-14 because
+# their headings sat inside one 76k-char text node. Two
 # further entries (915358 Item 9B, pg 10-K Item 15) were regex false
 # positives on "Item 1.01"-style references and lowercase cross-references.
 EMBED_BASELINE = {
-    ("0000927356-01-000369", "10-K"): {"7"},
+    ("0000845875-03-000003", "10-K"): {"1"},
     ("0001047469-03-011363", "10-K"): {"15"},
     ("0001140361-10-014238", "10-K"): {"8"},
     ("0001193125-10-073212", "10-K"): {"7"},
@@ -113,7 +114,8 @@ EMBED_BASELINE = {
 # else in EMBED_BASELINE is tracked, and if one of those is absent the checkout
 # is broken, not fixed.
 ERA_ONLY_FIXTURES = {
-    "0001047469-03-011363", "0001140361-10-014238", "0001193125-21-082408",
+    "0000845875-03-000003", "0001047469-03-011363", "0001140361-10-014238",
+    "0001193125-21-082408",
 }
 TRACKED_BASELINE_FIXTURES = {k for k in EMBED_BASELINE if k[0] not in ERA_ONLY_FIXTURES}
 

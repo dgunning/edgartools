@@ -1,0 +1,1 @@
+- **Plain-text filings now get their item sections** — the parser built each run of a plain-text filing's text between two tables as a single node, so item headings inside it were invisible and pre-2002 10-Ks and 20-Fs got 0-1 sections. Blank-line blocks are now paragraphs, with rendered text unchanged; a 2001 20-F now yields 16 items instead of 1.

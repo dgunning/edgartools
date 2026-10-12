@@ -337,8 +337,13 @@ class TextExtractor:
             first_child_text = node.children[0].text() if hasattr(node.children[0], 'text') else ""
             second_child_text = node.children[1].text() if hasattr(node.children[1], 'text') else ""
 
-            # First child is very short (likely bullet), second is longer (content)
-            if len(first_child_text.strip()) <= 3 and len(second_child_text.strip()) > 10:
+            # First child is the bullet glyph alone, second is longer (content).
+            # Glyph characters only, not any short text: "-1-", a plain-text
+            # filing's first page number, made a whole 20-F one bullet joined by
+            # spaces once its blank-line blocks became paragraphs (llmp.12.1).
+            bullet = first_child_text.strip()
+            if (bullet and len(bullet) <= 3 and all(c in bullet_chars for c in bullet)
+                    and len(second_child_text.strip()) > 10):
                 return True
 
         return False
