@@ -681,9 +681,10 @@ class XBRL:
             - `concept_taxonomy` is the prefix before the first `_` in the
               element ID (`us-gaap`, `dei`, `srt`, or the filer's own prefix
               like `jpm`, `tsla`).
-            - `menucat` is the SEC FilingSummary report tier when available
-              (`S`=Statement, `D`=Details, `N`=Notes, `T`=Tables, `P`=Policies,
-              `C`=Cover). May be None for older filings without FilingSummary.
+            - `menucat` is the SEC FilingSummary report tier when available,
+              as the full `MenuCategory` name (`Statements`, `Details`, `Notes`,
+              `Tables`, `Policies`, `Cover`), not a single letter. May be None
+              for older filings without FilingSummary.
 
         Example:
             >>> from edgar import Company

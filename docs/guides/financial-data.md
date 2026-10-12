@@ -128,10 +128,10 @@ Financial statements can show different levels of detail. Use the `view` paramet
 ```python
 financials = company.get_financials()
 
-# Summary: Matches SEC Viewer (~15-20 rows)
+# Summary: Non-dimensional totals only (~15-20 rows)
 income = financials.income_statement(view="summary")
 
-# Standard: Matches the filing document (default)
+# Standard: Matches the filing document (default when printed)
 income = financials.income_statement(view="standard")
 
 # Detailed: All dimensional breakdowns
@@ -148,7 +148,7 @@ income = financials.income_statement(view="detailed")
 
 | View | Shows | Typical Rows | Best For |
 |------|-------|--------------|----------|
-| `"summary"` | Matches SEC Viewer | ~15-20 | Quick overview, validation |
+| `"summary"` | Non-dimensional totals only | ~15-20 | Quick overview, validation |
 | `"standard"` | Matches filing document | ~25-35 | Display, full context |
 | `"detailed"` | All dimensional breakdowns | ~50+ | Data extraction, segment analysis |
 
@@ -179,7 +179,7 @@ Revenue:
 
 ### Views with DataFrames
 
-The `view` parameter also works when exporting to DataFrame:
+The `view` parameter also works when exporting to DataFrame. Without it, `to_dataframe()` returns the `"detailed"` view, not the `"standard"` view a printed statement shows:
 
 ```python
 income = financials.income_statement()
@@ -191,7 +191,7 @@ df_detailed = income.to_dataframe(view="detailed")
 
 ### When to Use Each View
 
-- **Summary**: Quick checks, matches SEC Viewer, comparing many companies
+- **Summary**: Quick checks, non-dimensional totals only, comparing many companies
 - **Standard**: Matches the filing document, full context with face-level dimensions
 - **Detailed**: Data extraction, segment analysis, complete dimensional breakdowns
 
@@ -314,8 +314,8 @@ print(xbrl.reporting_periods)
 
 | Method | Description |
 |--------|-------------|
-| `statement.to_dataframe()` | Convert to pandas DataFrame |
-| `statement.to_dataframe(view="summary")` | Matches SEC Viewer |
+| `statement.to_dataframe()` | Convert to pandas DataFrame (detailed view by default) |
+| `statement.to_dataframe(view="summary")` | Non-dimensional totals only |
 | `statement.to_dataframe(view="standard")` | Matches filing document |
 | `statement.to_dataframe(view="detailed")` | All dimensional breakdowns |
 

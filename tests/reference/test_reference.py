@@ -192,3 +192,17 @@ def test_get_cik_tickers_uses_bundled_data():
         # Verify no network calls were made (bundled data was used)
         mock_download_file.assert_not_called()
         mock_download_json.assert_not_called()
+
+
+def test_get_place_country_code():
+    from edgar.reference import get_place_country_code
+
+    assert get_place_country_code("DE") == "US"
+    assert get_place_country_code("PR") == "PR"
+    assert get_place_country_code("A6") == "CA"
+    assert get_place_country_code("X0") == "GB"
+    assert get_place_country_code("E9") == "KY"
+    assert get_place_country_code("2Q") == "GE"  # Georgia the country, not the US state "GA"
+    assert get_place_country_code("T6") == "NA"  # Namibia, not a missing value
+    assert get_place_country_code("XX") is None
+    assert get_place_country_code("ZZ") is None

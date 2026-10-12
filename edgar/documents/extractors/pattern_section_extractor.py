@@ -1278,6 +1278,8 @@ class SectionExtractor:
         if section_index + 1 < len(headers):
             current_node = headers[section_index][0]
             current_level = current_node.level if isinstance(current_node, HeadingNode) else 1
+            current_item = _ITEM_HEADER_START.match(headers[section_index][1])
+            current_item = current_item.group(1).upper() if current_item else None
 
             for i in range(section_index + 1, len(headers)):
                 next_node = headers[i][0]
@@ -1317,6 +1319,15 @@ class SectionExtractor:
                 # signature block to the end of the document — which is what the
                 # 1999 10-K does once its Item 14 sub-headers stop closing it.
                 if _SIGNATURES_HEADER.match(next_text.strip()):
+                    return headers[i][2]
+
+                # Another item's header ends this item whatever its level, for
+                # the same reason. The 1999 10-K 0000950153-99-001234 parses
+                # "Item 7:" as a paragraph (level 1) and "Item 7A:" and "Item
+                # 8:" as headings (level 3), so Item 7 skipped both and ran
+                # through their text to Item 9 (edgartools-llmp.12.2).
+                next_item = _ITEM_HEADER_START.match(next_text)
+                if current_item and next_item and next_item.group(1).upper() != current_item:
                     return headers[i][2]
 
                 # If next header is at same or higher level, that's our end

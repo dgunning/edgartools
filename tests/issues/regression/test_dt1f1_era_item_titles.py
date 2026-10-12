@@ -150,7 +150,9 @@ def test_both_era_sections_are_detected(doc_1999):
     # ones on either side. Item 4's header was already a boundary candidate even
     # while it matched no pattern, which is why Item 3 does not shrink here.
     assert len(sections["legal_proceedings"].text()) == 994
-    assert len(sections["part_ii_item_5"].text()) == 489
+    # 489 until edgartools-llmp.12.2: Item 5 ran through the Item 6 pointer,
+    # whose "Item 6:" header parses at a deeper heading level than "Item 5:".
+    assert len(sections["part_ii_item_5"].text()) == 300
     assert len(sections["part_iii_item_13"].text()) == 269
 
 
@@ -211,7 +213,7 @@ def test_a_modern_filing_keeps_the_modern_meanings():
         GATE_2010.read_text(encoding="utf-8", errors="replace")
     )
 
-    assert len(doc.sections["part_iii_item_14"].text()) == 262
+    assert len(doc.sections["part_iii_item_14"].text()) == 220  # was 262, then 252: the trailing "PART IV" divider, then the "Index to Financial Statements" backlink, left the slice
     assert "PRINCIPAL ACCOUNTANT FEES" in doc.sections["part_iii_item_14"].text()
     assert len(doc.sections["part_iv_item_15"].text()) == 150265  # tables rendered cell by cell (edgartools-wzgu)
 

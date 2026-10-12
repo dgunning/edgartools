@@ -108,14 +108,20 @@ class SynonymGroup:
 
     @staticmethod
     def _strip_namespace(tag: str) -> str:
-        """Remove namespace prefix from tag (e.g., 'us-gaap:Revenue' -> 'Revenue')."""
+        """Remove a standard taxonomy prefix from tag (e.g., 'us-gaap:Revenue' -> 'Revenue').
+
+        Only us-gaap, ifrs-full, dei and srt prefixes are removed, from the QName (us-gaap:Revenue)
+        and element id (us-gaap_Revenue) spellings alike. Any other prefix, such as a filer's
+        extension (orcl:Revenues), names a different concept, so the tag is returned unchanged.
+        """
         if ':' in tag:
-            return tag.split(':', 1)[1]
-        # Handle underscore format (us-gaap_Revenue)
-        if '_' in tag:
-            parts = tag.split('_', 1)
-            if parts[0].replace('-', '') in ('usgaap', 'dei', 'srt', 'ifrs'):
-                return parts[1]
+            prefix, local_name = tag.split(':', 1)
+        elif '_' in tag:
+            prefix, local_name = tag.split('_', 1)
+        else:
+            return tag
+        if prefix.replace('-', '').lower() in ('usgaap', 'dei', 'srt', 'ifrs', 'ifrsfull'):
+            return local_name
         return tag
 
     def get_tags_with_namespace(self, namespace: Optional[str] = None) -> List[str]:

@@ -58,7 +58,7 @@ class TableMatrix:
         # as if it described the rows now being measured.
         self.matrix = []
 
-        # Store header row count for later use
+        # Set before placement so numeric alignment can distinguish header and data rows.
         self.header_row_count = len(header_rows)
 
         # Combine all rows for processing
@@ -167,7 +167,8 @@ class TableMatrix:
                                     not any(month in cell_text.lower() for month in
                                            ['jan', 'feb', 'mar', 'apr', 'may', 'jun',
                                             'jul', 'aug', 'sep', 'oct', 'nov', 'dec']) and
-                                    row_idx > 1)  # Not a header row (allow for multi-row headers)
+                                    row_idx > 1 and
+                                    row_idx >= self.header_row_count)  # Never shift actual header cells
 
                 # Spans can only ever reach the edge of the grid, so bound the
                 # loops rather than iterating a corrupt span and discarding it

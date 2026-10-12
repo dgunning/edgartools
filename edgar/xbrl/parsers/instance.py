@@ -779,8 +779,17 @@ class InstanceParser(BaseParser):
                 if ident and ident.isdigit():
                     identifier = ident.lstrip('0')
 
-            # Collect all DEI facts into a dict: concept -> Fact
+            # Collect all DEI facts into a dict: concept -> Fact.
+            #
+            # A fact whose context has a dei:LegalEntityAxis member describes
+            # another legal entity: in a combined filing, a co-registrant. The
+            # filer's own cover facts carry no such member, so they win, and a
+            # co-registrant's fact is used only for a concept the filer does not
+            # report. Keeping whichever fact came last named Duke Energy's
+            # combined 10-K after Piedmont Natural Gas, the last of its seven
+            # co-registrants, beside Duke Energy's own CIK (GH #1420).
             self.dei_facts: Dict[str, Fact] = {}
+            co_registrant_facts: Dict[str, Fact] = {}
             for fact in self.facts.values():
                 eid = fact.element_id
                 if eid.startswith('dei:'):
@@ -789,7 +798,13 @@ class InstanceParser(BaseParser):
                     concept = eid.split('_', 1)[1]
                 else:
                     continue
-                self.dei_facts[concept] = fact
+                context = self.contexts.get(fact.context_ref)
+                if context is not None and 'dei:LegalEntityAxis' in context.dimensions:
+                    co_registrant_facts[concept] = fact
+                else:
+                    self.dei_facts[concept] = fact
+            for concept, fact in co_registrant_facts.items():
+                self.dei_facts.setdefault(concept, fact)
 
             # Helper: get the first available DEI fact value
             def get_dei(*names):

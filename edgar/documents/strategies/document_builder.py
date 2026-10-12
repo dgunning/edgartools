@@ -28,6 +28,8 @@ from edgar.documents.types import ParseContext, SemanticType, Style
 # HTML's "ASCII whitespace". Deliberately excludes \xa0: a non-breaking space is content.
 _ASCII_WHITESPACE_RUN = re.compile(r'[ \t\n\r\f]+')
 _PRE_WHITE_SPACE = re.compile(r'white-space\s*:\s*(pre|break-spaces)', re.IGNORECASE)
+# A blank line (only spaces or tabs on it) in preformatted text: a paragraph break.
+_BLANK_LINE = re.compile(r'\n[ \t\r\f]*\n\s*')
 
 
 class DocumentBuilder:
@@ -139,6 +141,43 @@ class DocumentBuilder:
             stripped = _ASCII_WHITESPACE_RUN.sub(' ', stripped)
         return (' ' if text[:1].isspace() else '') + stripped + (' ' if text[-1:].isspace() else '')
 
+    def _add_text(self, target: Node, raw: str, context: Optional[HtmlElement]) -> None:
+        """Append ``raw`` to ``target`` as text, one paragraph per blank-line block when preformatted.
+
+        A plain-text filing reaches the builder as one pre-wrap <div>, and every
+        run of text between two <TABLE>s became a single TextNode: BriteSmile's
+        2001 10-K (0000927356-01-000369) holds Items 8-14 in one 76k-character
+        node. Section detection bounds items at node edges and finds headers
+        among nodes, so it could neither see those headings nor end Item 7
+        before them, and the filing got one section (edgartools-llmp.12.1).
+        Blank lines are that format's paragraph breaks, so each block becomes a
+        paragraph, as <p> would in HTML. Rendered text is unchanged: the text
+        extractor joins siblings with the same blank line. Not anywhere inside a
+        paragraph, which renders its children without that separator: an
+        unclosed SGML <PAGE> marker nests the rest of a filing in an inline
+        element, and the wrapper <div> then builds as a paragraph.
+        """
+        text = self._collapse_edges(raw, context)
+        if not text:
+            return
+        if (_BLANK_LINE.search(text) and self._is_preformatted(context)
+                and not self._inside_paragraph(target)):
+            for block in _BLANK_LINE.split(text):
+                if block.strip():
+                    paragraph = ParagraphNode()
+                    paragraph.add_child(TextNode(content=block))
+                    target.add_child(paragraph)
+            return
+        target.add_child(TextNode(content=text))
+
+    @staticmethod
+    def _inside_paragraph(node: Optional[Node]) -> bool:
+        while node is not None:
+            if isinstance(node, ParagraphNode):
+                return True
+            node = node.parent
+        return False
+
     def _process_element(self, element: HtmlElement, parent: Node) -> Optional[Node]:
         """
         Process HTML element into node.
@@ -160,8 +199,7 @@ class DocumentBuilder:
                     parent.add_child(text_node)
                 else:
                     if element.tail.strip():
-                        text_node = TextNode(content=self._collapse_edges(element.tail, element.getparent()))
-                        parent.add_child(text_node)
+                        self._add_text(parent, element.tail, element.getparent())
             return None
 
         # Skip page number containers
@@ -208,8 +246,7 @@ class DocumentBuilder:
                                 node.add_child(text_node)
                         else:
                             if element.text.strip():
-                                text_node = TextNode(content=self._collapse_edges(element.text, element))
-                                node.add_child(text_node)
+                                self._add_text(node, element.text, element)
 
                     # Process child elements
                     for child in element:
@@ -222,8 +259,7 @@ class DocumentBuilder:
                             parent.add_child(text_node)
                         else:
                             if element.tail.strip():
-                                text_node = TextNode(content=self._collapse_edges(element.tail, element.getparent()))
-                                parent.add_child(text_node)
+                                self._add_text(parent, element.tail, element.getparent())
                             elif element.tail.isspace():
                                 # Even if tail is just whitespace, preserve the spacing info
                                 # This helps with inline element spacing decisions
@@ -237,8 +273,7 @@ class DocumentBuilder:
                             parent.add_child(text_node)
                         else:
                             if element.tail.strip():
-                                text_node = TextNode(content=self._collapse_edges(element.tail, element.getparent()))
-                                parent.add_child(text_node)
+                                self._add_text(parent, element.tail, element.getparent())
                             elif element.tail.isspace():
                                 # Even if tail is just whitespace, preserve the spacing info
                                 if hasattr(node, 'set_metadata'):
@@ -255,8 +290,7 @@ class DocumentBuilder:
                         parent.add_child(text_node)
                     else:
                         if element.tail.strip():
-                            text_node = TextNode(content=self._collapse_edges(element.tail, element.getparent()))
-                            parent.add_child(text_node)
+                            self._add_text(parent, element.tail, element.getparent())
 
             # Exit XBRL context
             if element.tag.startswith('{'):

@@ -212,7 +212,7 @@ def test_iterate_filings(filings_2021_q1_xbrl):
 @pytest.mark.fast
 @pytest.mark.vcr
 def test_filing_homepage_url(carbo_10k_filing):
-    assert carbo_10k_filing.homepage_url == "https://www.sec.gov/Archives/edgar/data/1009672/0001564590-18-004771-index.html"
+    assert carbo_10k_filing.homepage_url == "https://www.sec.gov/Archives/edgar/data/1009672/000156459018004771/0001564590-18-004771-index.html"
     r = httpx.get(carbo_10k_filing.homepage_url, headers={'User-Agent': 'Mike Banton mb@yahoo.com'})
     assert r.status_code == 200
 
@@ -222,7 +222,7 @@ def test_filing_primary_document():
     four37_capital_staff_filing = Filing(form='SEC STAFF ACTION', company='437 CAPITAL Fund Corp', cik=1805559,
                          filing_date='2022-03-24', accession_no='9999999997-22-001189')
     homepage_url = four37_capital_staff_filing.homepage_url
-    assert homepage_url == 'https://www.sec.gov/Archives/edgar/data/1805559/9999999997-22-001189-index.html'
+    assert homepage_url == 'https://www.sec.gov/Archives/edgar/data/1805559/999999999722001189/9999999997-22-001189-index.html'
     homepage: FilingHomepage = four37_capital_staff_filing.homepage
     assert homepage
     primary_document = four37_capital_staff_filing.document

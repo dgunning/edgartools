@@ -1263,6 +1263,57 @@ def _format_period_labels(
     return formatted_periods, fiscal_period_indicator
 
 
+def _determine_shares_scale(rows: List[StatementRow]) -> Optional[int]:
+    """Choose the finest share display scale used by the populated cells.
+
+    Read the same concept, value type and period decimals as each formatter.
+    Exact, missing or unscaled precision contributes 0. Empty and nonfinite
+    cells do not describe a share quantity and cannot choose its display unit.
+    """
+    shares_scale = None
+    for row in rows:
+        for cell in row.cells:
+            formatter = cell.formatter
+            if not isinstance(formatter, CellFormatter):
+                continue
+            concept = formatter.item.get('concept', '')
+            if concept not in share_concepts or concept in eps_concepts:
+                continue
+            value = cell.value
+            if type(value) not in (int, float) or not value:
+                continue
+            if type(value) is float and not math.isfinite(value):
+                continue
+            fact_decimals = 0
+            decimals = formatter.item.get('decimals', {})
+            if formatter.period_key and decimals:
+                fact_decimals = decimals_for_scaling(decimals.get(formatter.period_key))
+            scale = fact_decimals if fact_decimals <= -3 else 0
+            shares_scale = scale if shares_scale is None else max(shares_scale, scale)
+    return shares_scale
+
+
+def _format_shares_scale(shares_scale: Optional[int]) -> str:
+    """Describe the display unit used for share quantities."""
+    shares_scale_text = ""
+    if shares_scale is not None:
+        if shares_scale == -3:
+            shares_scale_text = "thousands"
+        elif shares_scale == -6:
+            shares_scale_text = "millions"
+        elif shares_scale == -9:
+            shares_scale_text = "billions"
+        elif shares_scale == 0:
+            shares_scale_text = "actual amounts"
+        else:
+            # For other negative scales (like -4, -5, -7, etc.)
+            # Use a more generic description based on the scale
+            scale_factor = 10 ** (-shares_scale)
+            if scale_factor >= 1000:
+                shares_scale_text = f"units of {scale_factor:,}"
+    return shares_scale_text
+
+
 def _create_units_note(
     is_monetary_statement: bool,
     dominant_scale: int,
@@ -1290,30 +1341,16 @@ def _create_units_note(
     elif dominant_scale == -9:
         monetary_scale_text = "billions"
 
-    shares_scale_text = ""
-    if shares_scale is not None:
-        if shares_scale == -3:
-            shares_scale_text = "thousands"
-        elif shares_scale == -6:
-            shares_scale_text = "millions"
-        elif shares_scale == -9:
-            shares_scale_text = "billions"
-        elif shares_scale == 0:
-            shares_scale_text = "actual amounts"
-        else:
-            # For other negative scales (like -4, -5, -7, etc.)
-            # Use a more generic description based on the scale
-            scale_factor = 10 ** (-shares_scale)
-            if scale_factor >= 1000:
-                shares_scale_text = f"scaled by {scale_factor:,}"
+    shares_scale_text = _format_shares_scale(shares_scale)
 
     # Construct appropriate units note
-    if monetary_scale_text and shares_scale_text and shares_scale != dominant_scale:
-        return f"[italic](In {monetary_scale_text}, except shares in {shares_scale_text} and per share data)[/italic]"
-    elif monetary_scale_text:
-        return f"[italic](In {monetary_scale_text}, except shares and per share data)[/italic]"
-    else:
+    if not monetary_scale_text:
         return ""
+    if not shares_scale_text:
+        return f"[italic](In {monetary_scale_text}, except shares and per share data)[/italic]"
+    if shares_scale == dominant_scale:
+        return f"[italic](In {monetary_scale_text}, except per share data)[/italic]"
+    return f"[italic](In {monetary_scale_text}, except shares in {shares_scale_text} and per share data)[/italic]"
 
 
 # The statements whose SEC-displayed sign differs from the filed sign.
@@ -1441,9 +1478,10 @@ def _format_value_for_display_as_string(
                 return formatted
         # Handle share values with a specialized path
         elif is_share_value:
-            if fact_decimals <= -3:
+            scale = shares_scale if shares_scale is not None else fact_decimals
+            if scale <= -3:
                 # Efficiently apply scaling
-                scale_factor = 10 ** (-fact_decimals)
+                scale_factor = 10 ** (-scale)
                 scaled_value = value / scale_factor
                 return f"{scaled_value:,.0f}"
             else:
@@ -1689,30 +1727,8 @@ def render_statement(
     # Determine the dominant scale for monetary values in this statement
     dominant_scale = determine_dominant_scale(statement_data, periods_to_display)
 
-    # Determine the scale used for share amounts if present
+    # Resolve the share scale after the cells' period/value fallbacks below.
     shares_scale = None
-    # Look for share-related concepts to determine their scaling from the decimals attribute
-    for item in statement_data:
-        concept = item.get('concept', '')
-        if concept in share_concepts:
-            # Check decimals attribute to determine proper scaling.
-            # A share count filed with decimals='INF' is exact, which is the
-            # same "do not scale" signal as 0 (GH #1229) -- reading the
-            # sentinel as "unknown" here scaled AEON's 38,818,536 dilutive
-            # securities down to 39.
-            for period_key, _ in periods_to_display:
-                item_decimals = item.get('decimals', {})
-                if period_key not in item_decimals:
-                    continue
-                decimals = decimals_for_scaling(item_decimals[period_key])
-                if decimals <= 0:
-                    # Use the decimals attribute to determine the scale
-                    # For shares, decimals is typically negative
-                    # -3 means thousands, -6 means millions, etc.
-                    shares_scale = decimals
-                    break
-            if shares_scale is not None:
-                break
 
     # Create the units note
     units_note = _create_units_note(is_monetary_statement, dominant_scale, shares_scale)
@@ -2073,6 +2089,16 @@ def render_statement(
 
         # Add the row to the statement
         rendered_statement.rows.append(row)
+
+    shares_scale = _determine_shares_scale(rendered_statement.rows)
+    rendered_statement.header.metadata['shares_scale'] = shares_scale
+    rendered_statement.units_note = _create_units_note(
+        is_monetary_statement, dominant_scale, shares_scale
+    )
+    for row in rendered_statement.rows:
+        for cell in row.cells:
+            if isinstance(cell.formatter, CellFormatter):
+                cell.formatter.shares_scale = shares_scale
 
     return rendered_statement
 
