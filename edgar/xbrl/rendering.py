@@ -7,6 +7,7 @@ This module provides functions for formatting and displaying XBRL data.
 import math
 from dataclasses import dataclass, field
 from datetime import datetime
+from decimal import Decimal
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
@@ -22,6 +23,7 @@ from edgar.display.formatting import cik_text
 from edgar.richtools import repr_rich, rich_to_text
 from edgar.xbrl import standardization
 from edgar.xbrl.core import (
+    INFINITE_PRECISION,
     PERIOD_END_LABEL,
     PERIOD_START_LABEL,
     decimals_for_scaling,
@@ -849,6 +851,7 @@ eps_concepts = [
     'us-gaap_CommonStockDividendsPerShareDeclared',
     'us-gaap_CommonStockDividendsPerShareCashPaid',
     'us-gaap_CommonStockParOrStatedValuePerShare',
+    'us-gaap_PreferredStockParOrStatedValuePerShare',
 ]
 
 
@@ -1389,6 +1392,13 @@ def apply_presentation_sign(
     return value * preferred_sign
 
 
+def _filed_decimal_places(value: Union[int, float], decimals: Union[int, str, None]) -> int:
+    """Decimal places a value was filed with: all of its digits when exact ('INF')."""
+    if decimals == INFINITE_PRECISION and math.isfinite(value):
+        return max(0, -Decimal(repr(value)).as_tuple().exponent)
+    return decimals_for_scaling(decimals)
+
+
 def _format_value_for_display_as_string(
     value: Any,
     item: Dict[str, Any],
@@ -1448,10 +1458,12 @@ def _format_value_for_display_as_string(
     # A statement stores the filed accuracy, which may be the sentinel 'INF'
     # (GH #1229); scaling needs a number, and an exact value implies no scale.
     fact_decimals = 0
+    filed_decimals = None
     if period_key:
         decimals_dict = item.get('decimals', {})
         if decimals_dict:
-            fact_decimals = decimals_for_scaling(decimals_dict.get(period_key))
+            filed_decimals = decimals_dict.get(period_key)
+            fact_decimals = decimals_for_scaling(filed_decimals)
 
     # Apply presentation logic for display (Issue #463)
     value = apply_presentation_sign(
@@ -1470,8 +1482,11 @@ def _format_value_for_display_as_string(
                 # For EPS values >= 10, use 2 decimal places
                 return f"{value:.2f}"
             else:
-                # For typical EPS values < 10, use up to 3 decimal places but remove trailing zeros
-                formatted = f"{value:.3f}".rstrip('0').rstrip('.')
+                # For typical EPS values < 10, use up to 3 decimal places but remove trailing zeros.
+                # Keep any finer precision the value was filed with, so an exact
+                # $0.00001 par value does not round to zero (GH #1475).
+                places = max(3, _filed_decimal_places(value, filed_decimals))
+                formatted = f"{value:.{places}f}".rstrip('0').rstrip('.')
                 # Ensure at least 2 decimal places for EPS
                 if '.' not in formatted or len(formatted.split('.')[1]) < 2:
                     return f"{value:.2f}"

@@ -63,6 +63,7 @@ EXPECTED_EPS_CONCEPTS = (
     "us-gaap_CommonStockDividendsPerShareDeclared",
     "us-gaap_CommonStockDividendsPerShareCashPaid",
     "us-gaap_CommonStockParOrStatedValuePerShare",
+    "us-gaap_PreferredStockParOrStatedValuePerShare",
 )
 
 
