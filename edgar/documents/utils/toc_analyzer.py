@@ -1085,9 +1085,13 @@ class TOCAnalyzer:
             if not isinstance(tag, str):
                 continue
             # Track the most recent element carrying an id; for a body heading
-            # this is the empty anchor div placed immediately before it.
+            # this is the empty anchor div placed immediately before it. Not an
+            # inline-XBRL fact's generated id (see _own_anchor_id): Southern's
+            # Item 16 heading has no anchor, and the fact tagging the auditor's
+            # PCAOB ID in Item 15's last paragraph became its start, cutting
+            # Item 15 mid-sentence (edgartools-llmp.12).
             eid = el.get('id')
-            if eid:
+            if eid and not tag.lower().startswith('ix:'):
                 last_anchor_id = eid
             if windows is not None and not any(lo <= idx < hi for lo, hi in windows):
                 continue
@@ -2698,6 +2702,10 @@ class TOCAnalyzer:
         named_match = re.match(r'(?:part_([ivx]+)_)?([a-z_]+)$', text_lower)
         if named_match and self._is_known_named_section(named_match.group(2)):
             part_roman = named_match.group(1)
+            if named_match.group(2) == 'exhibit_index':
+                # Split from the end of Part IV Item 16, it sits after it and
+                # before any Part IV Signatures.
+                return 'section', self._roman_to_int(part_roman or 'iv') * 100000 + 98000
             if part_roman:
                 return 'section', self._roman_to_int(part_roman) * 100000 + 99000
             return 'section', 9_900_000
@@ -2750,7 +2758,7 @@ class TOCAnalyzer:
 
     # Named sections that legitimately carry no item number but should still be
     # exposed. Everything else without an item number is descriptive free-text noise.
-    _KNOWN_NAMED_SECTIONS = frozenset({'signatures'})
+    _KNOWN_NAMED_SECTIONS = frozenset({'signatures', 'exhibit_index'})
     # A canonical section key: item, optionally part-prefixed (part_ii_item_7).
     # The single-letter suffix admits standard items (1A, 7A, 9A–9C) and
     # legitimate company-specific ones (Caterpillar's Item 1D), not just a–c.

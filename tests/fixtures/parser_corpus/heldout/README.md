@@ -89,3 +89,10 @@ Of the 94 items the pipeline does not emit, 91 are in six 2001-2006 filings
 where it emits nothing or almost nothing. On the 676 items it does emit, 90.1%
 are exact on both sides (TOC path 91.5%, pattern path 80.2%). Labels:
 586 agreed, 90 adjudicated, 94 single.
+
+**Label change, 2026-10-13.** The Item 16 exception in `LABELING.md` was
+decided after v1 was labelled. Two Item 16 labels that ran through a schedule
+and exhibit index printed after Item 16 were cut back to Item 16's own text
+from the recorded lines (Calavo 0001558370-17-009444, Madison Square Garden
+Sports 0001636519-24-000015; `verified: "relabelled"`). This applies a policy;
+it is not a fix built from those filings, so neither is retired.

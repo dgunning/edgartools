@@ -2708,9 +2708,8 @@
      "end": "l Section of this report. (b)(3) Exhibits: See Index to Exhibits of this report."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "page number and the Financial Section header trail the slice",
      "start": "ITEM 16. FORM 10-K SUMMARY None.",
      "end": "ITEM 16. FORM 10-K SUMMARY None."
     }
@@ -2856,9 +2855,8 @@
      "end": "652) Balance at December 31 $ 21,313 $ 20,416 $ 19,532 * See also Note 17 Taxes."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "pattern",
-     "why": "nav crumb trails the slice",
      "start": "Item 16. Form 10-K Summary Not applicable.",
      "end": "Item 16. Form 10-K Summary Not applicable."
     }
@@ -3221,18 +3219,16 @@
      "end": "ted fees were approved in advance by the Southern Company Audit Committee. III-2"
     },
     "part_iv_item_15": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "cut mid-sentence at 1,019 chars ('PCAOB ID:')",
      "start": "Item 15.EXHIBITS AND FINANCIAL STATEMENT SCHEDULES (a)The following documents ar",
-     "end": null
+     "end": "ibits: Exhibits for the Registrants are listed in the Exhibit Index at page E-1."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "opens mid-sentence inside the exhibit section, 44k chars",
-     "start": null,
-     "end": null
+     "start": "Item 16.FORM 10-K SUMMARY None.",
+     "end": "Item 16.FORM 10-K SUMMARY None."
     }
    }
   },
@@ -3376,11 +3372,10 @@
      "end": "re hereby incorporated by reference: Refer to the Exhibit Index included herein."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "runs through the exhibit index (Item 15 content printed after Item 16; cutting it would leave it in no section)",
-     "start": "Item 16. Form 10-K summary None. 113 MASTERCARD 2024 FORM 10-K EXHIBIT INDEX Exh",
-     "end": null
+     "start": "Item 16. Form 10-K summary None.",
+     "end": "Item 16. Form 10-K summary None."
     }
    }
   },
@@ -3524,11 +3519,10 @@
      "end": " Exhibits filed as part of this Annual Report on Form 10-K beginning on Page 56."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "runs through the exhibit index",
-     "start": "ITEM 16. FORM 10-K SUMMARY None. ‎ 55 Index to Exhibits 2.1 Agreement and Plan o",
-     "end": null
+     "start": "ITEM 16. FORM 10-K SUMMARY None. ‎",
+     "end": "ITEM 16. FORM 10-K SUMMARY None. ‎"
     }
    }
   },
@@ -4413,11 +4407,10 @@
      "end": "t in losses that are materially in excess of amounts already recognized, if any."
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "runs through the exhibit index",
-     "start": "Item 16. Form 10-K Summary None. ORACLE CORPORATION INDEX OF EXHIBITS The follow",
-     "end": null
+     "start": "Item 16. Form 10-K Summary None.",
+     "end": "Item 16. Form 10-K Summary None."
     }
    }
   },
@@ -5676,11 +5669,10 @@
      "end": "ons or are not applicable, and therefore have been omitted. 3. Exhibit Index E-1"
     },
     "part_iv_item_16": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "why": "runs through the schedules and exhibit index (38k chars)",
-     "start": "Item 16. Form 10-K Summary Not applicable. 147 SCHEDULE I EVERSOURCE ENERGY (PAR",
-     "end": null
+     "start": "Item 16. Form 10-K Summary Not applicable.",
+     "end": "Item 16. Form 10-K Summary Not applicable."
     }
    }
   }

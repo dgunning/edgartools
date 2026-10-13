@@ -71,9 +71,14 @@ def test_signatures_after_the_financial_statements_are_still_cut():
     assert "Jane Roe" not in text
 
 
-def test_an_exhibit_index_after_the_signatures_keeps_the_last_item_open():
+def test_an_exhibit_index_after_the_signatures_is_its_own_section():
+    # Item 16 kept the index open until edgartools-llmp.12 gave an index printed
+    # after Item 16 its own section; Item 16 now ends at its SIGNATURES.
     doc = _parse(_ten_k(SIGNATURES + "<p><b>EXHIBIT INDEX</b></p><p>3.1 Restated Certificate of Incorporation</p>"))
-    assert "Restated Certificate of Incorporation" in doc.sections["part_iv_item_16"].text()
+    item_16 = doc.sections["part_iv_item_16"].text()
+    assert "Body of item 16." in item_16
+    assert "Jane Roe" not in item_16
+    assert "Restated Certificate of Incorporation" in doc.sections["exhibit_index"].text()
 
 
 def test_an_exhibit_list_with_no_index_heading_also_keeps_the_last_item_open():

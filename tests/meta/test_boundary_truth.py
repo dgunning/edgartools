@@ -86,7 +86,14 @@ PINNED = {
     # +7A wrong (page-granular index slices open mid-page).
     # 2026-10-12 (llmp.12.2): another item's header ends a pattern item at any
     # heading level; 0000950153-99-001234 Items 5 and 7 wrong -> eye.
-    "10-K": (777, 750, 720, 715),   # 96.5% / 92.7% / 92.0%
+    # 2026-10-13 (llmp.12): an exhibit index or schedule printed after Item 16
+    # is its own exhibit_index section and Item 16 ends at its own text, a
+    # policy decision that relabelled ma, orcl, es and 915358 Item 16 from
+    # wrong (they ran through the index) to eye; Southern's Item 16 no longer
+    # anchors on an inline-XBRL fact id in Item 15 (Items 15, 16 wrong -> eye);
+    # ExxonMobil's "FINANCIAL SECTION" divider is trailing furniture and cvx's
+    # index is split off (Item 16 wrong -> eye on both).
+    "10-K": (777, 753, 728, 723),   # 96.9% / 93.7% / 93.1%
     "10-Q": (111, 110, 107, 106),   # 99.1% / 96.4% / 95.5%
 }
 

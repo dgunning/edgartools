@@ -5302,17 +5302,14 @@
      "verified": "agreed"
     },
     "16": {
-     "start": "Item 16. Form 10-K Summary None SCHEDULE II CALAVO GROWERS, INC. VALUATION AND Q",
-     "end": "it to the Registrant’s Report on Form 10-K and incorporated herein by reference.",
+     "start": "Item 16. Form 10-K Summary None",
+     "end": "Item 16. Form 10-K Summary None",
      "lines": [
       2145,
-      2276
+      2147
      ],
-     "verified": "adjudicated",
-     "note": "policy-open: exhibit index after last item; Schedule II and exhibit index follow Item 16, signatures after",
-     "why": {
-      "end": "labeller: The Schedule II (2149) and the EXHIBIT INDEX (2170-2275) after the Item 16 heading (2145) are content printed before SIGNATURES (2278), so Item 16 runs through the exhibit index's last row at 2275 (policy-open: exhibit index after last item). A would leave the exhibit index in no section."
-     }
+     "verified": "relabelled",
+     "note": "policy (2026-10-13): an exhibit index or schedule printed after Item 16 is its own exhibit_index section, so Item 16 ends at its own text; was kept in Item 16 to avoid orphaning it"
     }
    },
    "absent": [
@@ -7908,13 +7905,13 @@
     },
     "16": {
      "start": "Item 16. Form 10-K Summary The Company has elected not to provide summary inform",
-     "end": "ounts $ - $ - $ $ $ - Deferred tax valuation allowance - - - - - $ - $ - $ $ $ -",
+     "end": "6. Form 10-K Summary The Company has elected not to provide summary information.",
      "lines": [
       1412,
-      1444
+      1414
      ],
-     "verified": "agreed",
-     "note": "Item 16 text ends 1414; Schedule II (1417-1444) printed before SIGNATURES (1447) is kept in Item 16 so it is not left in no section; judgement call, could instead belong to Item 15"
+     "verified": "relabelled",
+     "note": "policy (2026-10-13): an exhibit index or schedule printed after Item 16 is its own exhibit_index section, so Item 16 ends at its own text; was kept in Item 16 to avoid orphaning it"
     }
    },
    "absent": [],
