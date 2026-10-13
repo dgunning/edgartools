@@ -414,6 +414,10 @@ _TEN_K_SECTION_PATTERNS = {
         ('^Business Overview', 'Business Overview'),
         ('^Our Business', 'Our Business'),
         ('^Company Overview', 'Company Overview'),
+        # Small-business filers (Regulation S-B, until 2008) title Items 1 and 2
+        # "Description of Business" and "Description of Property". Item-numbered
+        # only, like Items 4 and 14's older titles (edgartools-llmp.12.1).
+        (f'^(Item|ITEM)\\s+1{_ITEM_SEP}Description\\s+of\\s+Business', 'Item 1 - Business'),
     ),
     'risk_factors': (
         (f'^(Item|ITEM)\\s+1A{_ITEM_SEP}Risk\\s+Factors', 'Item 1A - Risk Factors'),
@@ -433,6 +437,7 @@ _TEN_K_SECTION_PATTERNS = {
         (f'^(Item|ITEM)\\s+2{_ITEM_SEP}Properties', 'Item 2 - Properties'),
         ('^Properties', 'Properties'),
         ('^Real\\s+Estate', 'Real Estate'),
+        (f'^(Item|ITEM)\\s+2{_ITEM_SEP}Description\\s+of\\s+Propert(?:y|ies)', 'Item 2 - Properties'),
     ),
     'legal_proceedings': (
         (f'^(Item|ITEM)\\s+3{_ITEM_SEP}Legal\\s+Proceedings', 'Item 3 - Legal Proceedings'),

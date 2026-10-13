@@ -46,6 +46,9 @@ design mandates *before* the move:
     same mechanical check as above was run first and showed every pre-existing
     pattern, label and ordering byte-identical, with the diff confined to those
     two additions.
+    Re-snapshotted the same way on 2026-10-13 for edgartools-llmp.12.1: the
+    Regulation S-B titles "Description of Business" and "Description of
+    Property" were APPENDED to Items 1 and 2, item-numbered only.
   * The data must actually live on the schema now (``FormSchema.section_patterns``),
     not only on the extractor — that is what lets the Phase 3 routing flip
     (edgartools-llmp.3) feed prospectus section text through the TOC engine using
