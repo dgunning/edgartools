@@ -55,7 +55,11 @@ def test_the_flag_produces_standardization(cash_flow):
     df = cash_flow.render(standard=True).to_dataframe()
 
     assert "standard_concept" in df.columns
-    assert df["standard_concept"].notna().sum() >= 20
+    # A floor, not a target: the synfonia mapping fixes (#1435, #1440) unmapped four
+    # Apple lines that were mapped wrongly (other investing/financing activities to
+    # the section totals, taxes and interest paid to the expense concepts), taking
+    # this from 22 to 18. The test is that the flag produces standardization at all.
+    assert df["standard_concept"].notna().sum() >= 15
 
 
 def test_standard_false_carries_no_standard_column(cash_flow):
