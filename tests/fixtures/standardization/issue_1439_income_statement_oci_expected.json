@@ -1,0 +1,109 @@
+{
+  "InformationTechnologyAndDataProcessing": [
+    "CommunicationAndTechnologyExpense"
+  ],
+  "ProvisionForOtherCreditLosses": [
+    "ProvisionForCreditLosses"
+  ],
+  "ExplorationExpense": [
+    "OtherOperatingExpense"
+  ],
+  "PensionExpense": [
+    "PensionExpense"
+  ],
+  "OtherPostretirementBenefitExpense": [
+    "PensionExpense"
+  ],
+  "DefinedContributionPlanCostRecognized": [
+    "PensionExpense"
+  ],
+  "LicenseAndMaintenanceRevenue": [
+    "LicensingRevenue"
+  ],
+  "IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest": [
+    "IncomeLossContinuingOperations"
+  ],
+  "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToNoncontrollingInterest": null,
+  "ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest": null,
+  "OtherRecurringIncome": [
+    "OtherIncomeIS"
+  ],
+  "FiniteLivedIntangibleAssetsAmortizationExpenseRemainderOfFiscalYear": null,
+  "GainsLossesOnExtinguishmentOfDebt": [
+    "LossOnDebtExtinguishment"
+  ],
+  "InterestIncomeExpenseNonoperatingNet": [
+    "NetInterestIncome"
+  ],
+  "WriteOffOfDeferredDebtIssuanceCost": [
+    "LossOnDebtExtinguishment"
+  ],
+  "GainsLossesOnExtinguishmentOfDebtBeforeWriteOffOfDeferredDebtIssuanceCost": [
+    "LossOnDebtExtinguishment"
+  ],
+  "InterestCostsCapitalized": null,
+  "InterestRevenueExpenseNet": [
+    "NetInterestIncome"
+  ],
+  "LitigationSettlementInterest": [
+    "OtherOperatingExpense"
+  ],
+  "InterestCostsIncurredCapitalized": null,
+  "DefinedBenefitPlanInterestCost": [
+    "PensionExpense"
+  ],
+  "StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities": null,
+  "StockIssuedDuringPeriodSharesRestrictedStockAwardGross": null,
+  "MinorityInterestDecreaseFromRedemptions": null,
+  "TemporaryEquityAccretionToRedemptionValue": null,
+  "NoncontrollingInterestDecreaseFromDeconsolidation": null,
+  "ConversionOfStockSharesConverted1": null,
+  "StockIssuedDuringPeriodSharesEmployeeBenefitPlan": null,
+  "LicenseMember": null,
+  "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationReclassificationAdjustmentFromAOCIRealizedUponSaleOrLiquidationNetOfTax": [
+    "AOCIReclassifications"
+  ],
+  "TemporaryEquityNetIncome": [
+    "MinorityInterestIncomeExpense"
+  ],
+  "MinorityInterestPeriodIncreaseDecrease": null,
+  "MinorityInterestChangeInRedemptionValue": null,
+  "DebtConversionConvertedInstrumentSharesIssued1": null,
+  "TemporaryEquityForeignCurrencyTranslationAdjustments": null,
+  "ProceedsFromLegalSettlements": null,
+  "PaymentsForOtherTaxes": null,
+  "EquitySecuritiesWithoutReadilyDeterminableFairValueDownwardPriceAdjustmentCumulativeAmount": null,
+  "EquitySecuritiesWithoutReadilyDeterminableFairValueImpairmentLossCumulativeAmount": null,
+  "OtherComprehensiveIncomeLossCashFlowHedgeGainLossReclassificationAfterTax": [
+    "HedgingGainsLosses"
+  ],
+  "OtherComprehensiveIncomeDefinedBenefitPlansNetUnamortizedGainLossArisingDuringPeriodNetOfTax": [
+    "PensionAndRetirementAdjustments"
+  ],
+  "OtherComprehensiveIncomeLossCashFlowHedgeGainLossBeforeReclassificationTax": [
+    "HedgingGainsLosses"
+  ],
+  "OtherComprehensiveIncomeLossCashFlowHedgeGainLossReclassificationTax": [
+    "HedgingGainsLosses"
+  ],
+  "OtherComprehensiveIncomeLossBeforeTax": null,
+  "OtherComprehensiveIncomeDefinedBenefitPlansNetUnamortizedGainLossArisingDuringPeriodTax": [
+    "PensionAndRetirementAdjustments"
+  ],
+  "OtherComprehensiveIncomeLossTaxPortionAttributableToParent1": null,
+  "OtherComprehensiveIncomeLossBeforeTaxPortionAttributableToParent": null,
+  "OtherComprehensiveIncomeLossAvailableForSaleSecuritiesTax": [
+    "UnrealizedGainsLossesSecurities"
+  ],
+  "IncomeLossFromContinuingOperationsBeforeIncomeTaxesDomestic": null,
+  "NetIncomeLossAvailableToCommonStockholdersDiluted": [
+    "NetIncomeToCommonShareholders"
+  ],
+  "NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest": [
+    "ProfitLoss"
+  ],
+  "OtherComprehensiveIncomeLossAvailableForSaleSecuritiesAdjustmentNetOfTax": [
+    "UnrealizedGainsLossesSecurities"
+  ],
+  "OtherComprehensiveIncomeLossTax": null
+}
