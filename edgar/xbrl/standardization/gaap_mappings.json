@@ -31607,12 +31607,12 @@
   },
   "OtherOperatingIncomeExpense": {
     "standard_tags": [
-      "OperatingIncomeLoss"
+      "OtherOperatingIncomeExpenseNet"
     ],
-    "display_name": "Operating Income",
+    "display_name": "Other Operating Income (Expense), Net",
     "statement": "IncomeStatement",
-    "section": "Operating Income",
-    "is_total": true,
+    "section": "Operating Expenses",
+    "is_total": false,
     "confidence": 0.318,
     "company_count": 271,
     "occurrence_rate": 0.03,
@@ -43377,6 +43377,11 @@
   "ifrs-full_OtherNoncurrentLiabilities": {
     "standard_tags": [
       "OtherOperatingNonCurrentLiabilities"
+    ]
+  },
+  "ifrs-full_OtherOperatingIncomeExpense": {
+    "standard_tags": [
+      "OtherOperatingIncomeExpenseNet"
     ]
   },
   "ifrs-full_OtherReserves": {
