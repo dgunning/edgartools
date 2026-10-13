@@ -16,6 +16,7 @@ Two bodies are covered, both as EFTS served them on 2026-10-08:
 GitHub Issue: https://github.com/dgunning/edgartools/issues/1497
 """
 
+from datetime import date, datetime
 from types import SimpleNamespace
 
 import pytest
@@ -72,6 +73,15 @@ def test_malformed_date_is_rejected_before_the_request(efts_body, bad):
     with pytest.raises(InvalidDateError, match="YYYY-MM-DD"):
         efts.search_filings("apple", **bad)
     assert requests == []
+
+
+@pytest.mark.parametrize("given, sent", [(date(2024, 1, 1), "2024-01-01"),
+                                         (datetime(2024, 1, 1, 9, 30), "2024-01-01"),
+                                         ("", None)])
+def test_date_objects_and_empty_strings_still_work(efts_body, given, sent):
+    requests = efts_body(EMPTY_BODY)
+    efts.search_filings("apple", start_date=given)
+    assert requests[0].get("startdt") == sent
 
 
 def test_next_stops_before_the_page_efts_refuses(efts_body):

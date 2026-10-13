@@ -22,7 +22,7 @@ import random
 import re
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime
 from typing import List, Optional, Union
 
 from edgar.exceptions import InvalidDateError, TransportError
@@ -600,8 +600,8 @@ def search_filings(
         )
 
     limit = min(max(limit, 1), 100)
-    _check_date("start_date", start_date)
-    _check_date("end_date", end_date)
+    start_date = _check_date("start_date", start_date)
+    end_date = _check_date("end_date", end_date)
 
     # Build request parameters. EFTS accepts q="" when other filters are set.
     params: dict = {"q": query}
@@ -649,20 +649,25 @@ def search_filings(
     )
 
 
-def _check_date(name: str, value: Optional[str]) -> None:
-    """Raise `InvalidDateError` unless `value` is None or a YYYY-MM-DD date.
+def _check_date(name: str, value) -> Optional[str]:
+    """Return `value` as a YYYY-MM-DD string, or None when no date was given.
 
-    EFTS answers a malformed date with an error body, which `_efts_payload` would
-    report as a failed request; a malformed date is the caller's mistake, so it
-    is rejected here before any request is made.
+    A `date` or `datetime` is formatted; an empty string counts as no date, as it
+    did before this check. Anything else that is not a YYYY-MM-DD date raises
+    `InvalidDateError`: EFTS answers a malformed date with an error body, which
+    `_efts_payload` would report as a failed request, but a malformed date is the
+    caller's mistake, so it is rejected here before any request is made.
     """
-    if value is None:
-        return
+    if value is None or value == "":
+        return None
+    if isinstance(value, date):
+        return (value.date() if isinstance(value, datetime) else value).isoformat()
     try:
         datetime.strptime(value, "%Y-%m-%d")
     except (TypeError, ValueError) as e:
         raise InvalidDateError(f"{name} must be a YYYY-MM-DD date, got {value!r}",
                                parameter=name, invalid_value=value) from e
+    return value
 
 
 def _resolve_cik_from_ticker(ticker: str) -> str:
