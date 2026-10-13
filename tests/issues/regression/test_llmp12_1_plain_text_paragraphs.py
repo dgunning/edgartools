@@ -8,7 +8,8 @@ headings buried in those runs were invisible and nothing could end an item
 before them. BriteSmile's 2001 10-K held Items 8-14 in one 76k-character node
 and got a single section, 'mda', which ran to the end of the filing. Blank
 lines are that format's paragraph breaks; each block is now a paragraph, and
-the rendered text is unchanged.
+the rendered text is unchanged. The same holds for a filing with no <TABLE>
+and one marked with SGML <PAGE> tags, which the first fix could not split.
 """
 
 from edgar.documents import HTMLParser, ParserConfig
@@ -55,9 +56,13 @@ def _parse(html, form="10-K"):
 
 def test_britesmile_items_end_at_the_next_items_heading():
     sections = _parse(BRITESMILE.read_text(errors="ignore")).sections
-    assert len(sections) == 12  # was 1
+    # 12 when the paragraph split landed; Items 1 and 2 joined once their
+    # Regulation S-B titles were matched.
+    assert len(sections) == 14  # was 1
     mda = sections["mda"].text()
-    assert len(mda) == 73326  # was 218,348, through Items 8-14 to page F-25
+    # Was 218,348, through Items 8-14 to page F-25; 73,326 until each SGML
+    # table stopped printing twice, once as its never-closed <CAPTION>.
+    assert len(mda) == 68634
     assert mda.startswith("ITEM 7. MANAGEMENT'S DISCUSSION AND ANALYSIS")
     assert "ITEM 8." not in mda
     item_8 = sections["financial_statements"].text()
@@ -83,12 +88,50 @@ def test_blank_line_blocks_become_paragraphs_and_the_text_is_unchanged():
         "The financial statements follow page F-1.")
 
 
-def test_a_page_marker_paragraph_is_not_split():
-    # An unclosed SGML <PAGE> nests the rest of the filing in an inline element
-    # and the wrapper builds as a paragraph, which renders its children without
-    # a blank line between them: splitting there would lose every paragraph break.
-    doc = _parse("<html><body><div><page>\nFIRST BLOCK\n\nSECOND BLOCK\n", form="N-CSR")
-    assert "FIRST BLOCK\n\nSECOND BLOCK" in doc.text()
+def test_a_page_marker_no_longer_nests_the_filing():
+    # An unclosed SGML <PAGE> nested the rest of the filing in an inline element,
+    # the wrapper built as a paragraph, and nothing in it could split. The parser
+    # drops the marker from plain text, so the blocks after it are paragraphs.
+    doc = _parse("<html><body><div><page>\nFIRST BLOCK\n\nSECOND BLOCK\n<PAGE>\n\nTHIRD BLOCK\n",
+                 form="N-CSR")
+    blocks = [p.text().strip() for p in doc.root.walk() if isinstance(p, ParagraphNode)]
+    assert blocks == ["FIRST BLOCK", "SECOND BLOCK", "THIRD BLOCK"]
+    assert doc.text() == "FIRST BLOCK\n\nSECOND BLOCK\n\nTHIRD BLOCK"
+
+
+def test_a_plain_text_filing_with_no_table_is_split():
+    # With no <TABLE> the wrapper <div> holds only text and built as one
+    # paragraph; the 2004 8-K below got no items from its section tree.
+    doc = _parse("<html><body><div>FORM 8-K\n\nItem 1.01  Entry into an Agreement\n\n"
+                 "The Company signed it.\n", form="8-K")
+    blocks = [p.text().strip() for p in doc.root.walk() if isinstance(p, ParagraphNode)]
+    assert blocks == ["FORM 8-K", "Item 1.01 Entry into an Agreement", "The Company signed it."]
+    assert doc.text() == "FORM 8-K\n\nItem 1.01 Entry into an Agreement\n\nThe Company signed it."
+
+    eight_k = FIXTURES_DIR / "html" / "1100748" / "8k" / "1100748-8-k-2004-09-30.html"
+    sections = _parse(eight_k.read_text(errors="ignore"), form="8-K").sections
+    assert sorted(sections) == ["item_101", "item_502", "item_901", "signatures"]  # was []
+
+
+def test_a_table_caption_prints_once():
+    # Both table renderers open with the caption, and the text extractor added it
+    # again. An SGML <CAPTION> is never closed, so it holds the whole table,
+    # which printed twice (edgartools-2f4l0).
+    sgml = ("<html><body><div>Intro.\n\n<TABLE>\n<CAPTION>\n        2000     1999\n"
+            "<S>     <C>      <C>\nRevenue alpha   12,857   11,000\n</TABLE>\n\nAfter.\n")
+    assert _parse(sgml).text().count("12,857") == 1
+    html = ("<html><body><p>Intro.</p><table><caption>Unique Caption Words</caption>"
+            "<tr><td>Revenue</td><td>12,857</td></tr></table><p>After.</p></body></html>")
+    text = _parse(html).text()
+    assert text.count("Unique Caption Words") == 1
+    assert text.count("12,857") == 1
+
+    # The source prints this head count twice, both times in a captioned table;
+    # doc.text() printed it four times.
+    twenty_f = FIXTURES_DIR / "parity_gate" / "20-F" / "0000928385-01-500187.html"
+    source = twenty_f.read_text(errors="ignore")
+    assert source.count("12,857") == 2
+    assert _parse(source, form="20-F").text().count("12,857") == 2
 
 
 def test_a_short_first_paragraph_is_a_bullet_only_when_it_is_a_glyph():

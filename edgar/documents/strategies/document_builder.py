@@ -153,9 +153,7 @@ class DocumentBuilder:
         Blank lines are that format's paragraph breaks, so each block becomes a
         paragraph, as <p> would in HTML. Rendered text is unchanged: the text
         extractor joins siblings with the same blank line. Not anywhere inside a
-        paragraph, which renders its children without that separator: an
-        unclosed SGML <PAGE> marker nests the rest of a filing in an inline
-        element, and the wrapper <div> then builds as a paragraph.
+        paragraph, which renders its children without that separator.
         """
         text = self._collapse_edges(raw, context)
         if not text:
@@ -414,6 +412,12 @@ class DocumentBuilder:
             # Normal block behavior
             # Check if this is just a text container with only inline elements
             if self._is_text_only_container(element):
+                # A plain-text filing with no <TABLE> is one pre-wrap <div> of bare
+                # text; as a paragraph its blank-line blocks could not split
+                # (edgartools-llmp.12.1, see _add_text).
+                if (len(element) == 0 and _BLANK_LINE.search(element.text or '')
+                        and self._is_preformatted(element)):
+                    return ContainerNode(tag_name=tag, style=style)
                 # Create ParagraphNode for divs containing only inline elements
                 # This ensures proper text concatenation for spans, etc.
                 return ParagraphNode(style=style)

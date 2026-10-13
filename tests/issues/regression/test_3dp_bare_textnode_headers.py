@@ -118,8 +118,8 @@ def test_2001_10k_finds_item_7_without_the_legacy_parser():
     filing = FixtureFiling(TRACKED_10K, "10-K")
 
     # Items 1 and 2 are titled "DESCRIPTION OF BUSINESS" and "DESCRIPTION OF
-    # PROPERTY", which the 10-K title patterns do not match.
-    items = ["Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9",
+    # PROPERTY", the Regulation S-B titles, matched since llmp.12.1.
+    items = ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9",
              "Item 10", "Item 11", "Item 12", "Item 13", "Item 14"]
     assert TenK(filing).items == items  # ["Item 7"] before llmp.12.1
     assert _without_legacy(TenK)(filing).items == items
