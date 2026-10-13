@@ -25,7 +25,7 @@ from _thread import interrupt_main
 from dataclasses import dataclass
 from pathlib import Path
 
-import httpx
+import httpx2
 from rich.prompt import Prompt
 
 log = logging.getLogger(__name__)
@@ -56,7 +56,7 @@ default_page_size = 50
 default_max_connections = 10
 default_retries = 3
 
-limits = httpx.Limits(max_connections=default_max_connections)
+limits = httpx2.Limits(max_connections=default_max_connections)
 
 
 @dataclass
@@ -169,7 +169,7 @@ def set_identity(user_identity: str):
     log.info("Identity of the Edgar REST client set to [%s]", user_identity)
 
     from edgar.httpclient import close_clients
-    close_clients() # close any httpx clients, to reset the identity.
+    close_clients() # close any httpx2 clients, to reset the identity.
 
 
 identity_prompt = """

@@ -24,7 +24,7 @@ GitHub Issue: https://github.com/dgunning/edgartools/issues/1421
 
 from pathlib import Path
 
-import httpx
+import httpx2
 import pytest
 
 from edgar import Filing
@@ -61,7 +61,7 @@ def refused_index_page(monkeypatch):
     """Every index page request gets SEC's 403 Access Denied page."""
 
     def get_with_retry(url, *args, **kwargs):
-        return httpx.Response(403, content=ACCESS_DENIED, request=httpx.Request("GET", url))
+        return httpx2.Response(403, content=ACCESS_DENIED, request=httpx2.Request("GET", url))
 
     monkeypatch.setattr("edgar.attachments.get_with_retry", get_with_retry)
 

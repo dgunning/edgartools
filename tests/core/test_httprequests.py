@@ -2,7 +2,7 @@ import asyncio
 import os
 from unittest.mock import patch, MagicMock
 
-import httpx
+import httpx2
 import pytest
 
 from edgar.httpclient import (
@@ -35,13 +35,13 @@ from edgar.httprequests import (
 
 @pytest.mark.parametrize("status_code", [200, 429])
 def test_get_with_retry(status_code, monkeypatch):
-    mock_response = httpx.Response(status_code=status_code)
+    mock_response = httpx2.Response(status_code=status_code)
 
     # Set the Location header for status codes 301 and 302
     if status_code in [301, 302]:
         mock_response.headers["Location"] = "http://example.com/redirected"
 
-    with patch("httpx.Client.get", return_value=mock_response):
+    with patch("httpx2.Client.get", return_value=mock_response):
         if status_code == 429:
             with pytest.raises(TooManyRequestsError):
                 get_with_retry("http://example.com")
@@ -52,13 +52,13 @@ def test_get_with_retry(status_code, monkeypatch):
 
 @pytest.mark.parametrize("status_code", [301, 302])
 def test_get_with_retry_for_redirect(status_code, monkeypatch):
-    mock_response = httpx.Response(status_code=status_code)
+    mock_response = httpx2.Response(status_code=status_code)
 
     # Set the Location header for status codes 301 and 302
     if status_code in [301, 302]:
         mock_response.headers["Location"] = "http://example.com/redirected"
 
-    with patch("httpx.Client.get", return_value=mock_response):
+    with patch("httpx2.Client.get", return_value=mock_response):
         with patch("edgar.httprequests.get_with_retry") as mock_retry:
             get_with_retry(url="http://example.com")
             mock_retry.assert_called_once_with(
@@ -72,7 +72,7 @@ def test_get_with_retry_for_redirect(status_code, monkeypatch):
 @pytest.mark.parametrize(
     "location,expected",
     [
-        # SEC's own form: a bare path, which has no scheme for httpx to dial.
+        # SEC's own form: a bare path, which has no scheme for httpx2 to dial.
         ("/data-research/investment-company", "https://www.sec.gov/data-research/investment-company"),
         ("sibling", "https://www.sec.gov/about/sibling"),
         ("//data.sec.gov/submissions", "https://data.sec.gov/submissions"),
@@ -80,22 +80,22 @@ def test_get_with_retry_for_redirect(status_code, monkeypatch):
     ],
 )
 def test_redirect_url_resolves_against_the_request_url(location, expected):
-    response = httpx.Response(status_code=301, headers={"Location": location})
+    response = httpx2.Response(status_code=301, headers={"Location": location})
     assert redirect_url("https://www.sec.gov/about/opendatasets", response) == expected
 
 
 @pytest.mark.parametrize("status_code", [301, 302])
 def test_get_with_retry_follows_a_relative_location(status_code):
-    """A relative Location must be resolved, not handed to httpx as-is.
+    """A relative Location must be resolved, not handed to httpx2 as-is.
 
     SEC 301s ``/about/opendatasetsshtmlinvestment_company`` to a bare path;
     requesting that path verbatim raises UnsupportedProtocol, which broke fund
     reference data (class names silently degraded to class IDs).
     """
-    mock_response = httpx.Response(status_code=status_code)
+    mock_response = httpx2.Response(status_code=status_code)
     mock_response.headers["Location"] = "/data-research/investment-company"
 
-    with patch("httpx.Client.get", return_value=mock_response):
+    with patch("httpx2.Client.get", return_value=mock_response):
         with patch("edgar.httprequests.get_with_retry") as mock_retry:
             get_with_retry(url="https://www.sec.gov/about/opendatasets")
             assert mock_retry.call_args.kwargs["url"] == "https://www.sec.gov/data-research/investment-company"
@@ -103,10 +103,10 @@ def test_get_with_retry_follows_a_relative_location(status_code):
 
 @pytest.mark.parametrize("status_code", [301, 302])
 def test_post_with_retry_follows_a_relative_location(status_code):
-    mock_response = httpx.Response(status_code=status_code)
+    mock_response = httpx2.Response(status_code=status_code)
     mock_response.headers["Location"] = "/redirected"
 
-    with patch("httpx.Client.post", return_value=mock_response):
+    with patch("httpx2.Client.post", return_value=mock_response):
         with patch("edgar.httprequests.post_with_retry") as mock_retry:
             post_with_retry(url="https://www.sec.gov/cgi-bin/browse-edgar", data={"key": "value"})
             assert mock_retry.call_args.args[0] == "https://www.sec.gov/redirected"
@@ -116,8 +116,8 @@ def test_post_with_retry_follows_a_relative_location(status_code):
 @pytest.mark.parametrize("status_code", [200, 429])
 async def test_get_with_retry_async(status_code):
     async with async_http_client() as client:
-        mock_response = httpx.Response(status_code=status_code)
-        with patch("httpx.AsyncClient.get", return_value=mock_response):
+        mock_response = httpx2.Response(status_code=status_code)
+        with patch("httpx2.AsyncClient.get", return_value=mock_response):
             if status_code == 429:
                 with pytest.raises(TooManyRequestsError):
                     await get_with_retry_async(client=client, url="http://example.com")
@@ -133,12 +133,12 @@ async def test_get_with_retry_async(status_code):
 @pytest.mark.asyncio
 @pytest.mark.parametrize("status_code", [301, 302])
 async def test_get_with_retry_async_for_redirect(status_code):
-    mock_response = httpx.Response(status_code=status_code)
+    mock_response = httpx2.Response(status_code=status_code)
     # Set the Location header for status codes 301 and 302
     if status_code in [301, 302]:
         mock_response.headers["Location"] = "http://example.com/redirected"
 
-    with patch("httpx.Client.get", return_value=mock_response):
+    with patch("httpx2.Client.get", return_value=mock_response):
         with patch("edgar.httprequests.get_with_retry") as mock_retry:
             get_with_retry(url="http://example.com")
             mock_retry.assert_called_once_with(
@@ -150,8 +150,8 @@ async def test_get_with_retry_async_for_redirect(status_code):
 
 
 def test_post_with_retry():
-    mock_response = httpx.Response(status_code=200)
-    with patch("httpx.Client.post", return_value=mock_response):
+    mock_response = httpx2.Response(status_code=200)
+    with patch("httpx2.Client.post", return_value=mock_response):
         response = post_with_retry(url="http://example.com", data={"key": "value"})
         assert response == mock_response
 
@@ -159,8 +159,8 @@ def test_post_with_retry():
 @pytest.mark.asyncio
 async def test_post_with_retry_async():
     async with async_http_client() as client:
-        mock_response = httpx.Response(status_code=200)
-        with patch("httpx.AsyncClient.post", return_value=mock_response):
+        mock_response = httpx2.Response(status_code=200)
+        with patch("httpx2.AsyncClient.post", return_value=mock_response):
             response = await post_with_retry_async(client=client, url="http://example.com", json={"key": "value"})
             assert response == mock_response
 
@@ -173,16 +173,16 @@ def test_identity_not_set_exception(monkeypatch):
 
 
 def test_identity_from_parameter():
-    mock_response = httpx.Response(status_code=200)
-    with patch("httpx.Client.get", return_value=mock_response) as mock_get:
+    mock_response = httpx2.Response(status_code=200)
+    with patch("httpx2.Client.get", return_value=mock_response) as mock_get:
         get_with_retry("http://example.com", identity="test-identity")
         mock_get.assert_called_once_with("http://example.com", headers={"User-Agent": "test-identity"})
 
 
 def test_identity_from_callable():
-    mock_response = httpx.Response(status_code=200)
+    mock_response = httpx2.Response(status_code=200)
     identity_callable = MagicMock(return_value="test-identity")
-    with patch("httpx.Client.get", return_value=mock_response) as mock_get:
+    with patch("httpx2.Client.get", return_value=mock_response) as mock_get:
         get_with_retry("http://example.com", identity_callable=identity_callable)
         mock_get.assert_called_once_with("http://example.com", headers={"User-Agent": "test-identity"})
         identity_callable.assert_called_once()
@@ -190,8 +190,8 @@ def test_identity_from_callable():
 
 def test_identity_from_environment_variable(monkeypatch):
     monkeypatch.setenv("EDGAR_IDENTITY", "test-identity")
-    mock_response = httpx.Response(status_code=200)
-    with patch("httpx.Client.get", return_value=mock_response) as mock_get:
+    mock_response = httpx2.Response(status_code=200)
+    with patch("httpx2.Client.get", return_value=mock_response) as mock_get:
         get_with_retry("http://example.com")
         mock_get.assert_called_once_with("http://example.com", headers={"User-Agent": "test-identity"})
 
@@ -309,7 +309,7 @@ def test_default_http_timeout_is_set(monkeypatch):
     http_mgr = get_http_mgr()
     timeout = http_mgr.httpx_params.get("timeout")
     assert timeout is not None, "HTTP_MGR must have a default timeout"
-    assert isinstance(timeout, httpx.Timeout)
+    assert isinstance(timeout, httpx2.Timeout)
     # Every phase must be bounded — None on any phase is the bug.
     for phase in ("connect", "read", "write", "pool"):
         assert getattr(timeout, phase) is not None, (
@@ -334,10 +334,10 @@ def test_default_http_timeout_env_opt_out(monkeypatch, value):
     """
     EDGAR_HTTP_TIMEOUT routes empty / "none" / "unlimited" / non-positive
     values through the unlimited path. The HTTP_MGR is constructed with
-    no "timeout" key in httpx_params, so httpx falls back to its built-in
+    no "timeout" key in httpx_params, so httpx2 falls back to its built-in
     default behaviour (no enforced read timeout from edgar's side).
-    Critically, EDGAR_HTTP_TIMEOUT=0 must NOT produce httpx.Timeout(0.0),
-    which httpx interprets as immediate-timeout on every I/O phase.
+    Critically, EDGAR_HTTP_TIMEOUT=0 must NOT produce httpx2.Timeout(0.0),
+    which httpx2 interprets as immediate-timeout on every I/O phase.
     """
     monkeypatch.setenv("EDGAR_HTTP_TIMEOUT", value)
     assert get_edgar_http_timeout() is None
@@ -386,17 +386,17 @@ def test_is_ssl_error_detection():
 
     # Create mock SSL error wrapped in ConnectError
     ssl_error = ssl.SSLCertVerificationError("certificate verify failed")
-    connect_error = httpx.ConnectError("SSL error")
+    connect_error = httpx2.ConnectError("SSL error")
     connect_error.__cause__ = ssl_error
 
     assert is_ssl_error(connect_error)
 
     # Test non-SSL ConnectError
-    non_ssl_error = httpx.ConnectError("Connection refused")
+    non_ssl_error = httpx2.ConnectError("Connection refused")
     assert not is_ssl_error(non_ssl_error)
 
     # Test error message based detection
-    ssl_msg_error = httpx.ConnectError("[SSL: CERTIFICATE_VERIFY_FAILED]")
+    ssl_msg_error = httpx2.ConnectError("[SSL: CERTIFICATE_VERIFY_FAILED]")
     assert is_ssl_error(ssl_msg_error)
 
 
@@ -406,9 +406,9 @@ def test_ssl_error_message_enhancement(monkeypatch):
 
     ssl_error = ssl.SSLCertVerificationError("self signed certificate")
 
-    with patch("httpx.Client.get") as mock_get:
+    with patch("httpx2.Client.get") as mock_get:
         # Make it raise ConnectError wrapping SSL error
-        connect_err = httpx.ConnectError("SSL error")
+        connect_err = httpx2.ConnectError("SSL error")
         connect_err.__cause__ = ssl_error
         mock_get.side_effect = connect_err
 
@@ -430,8 +430,8 @@ def test_post_with_retry_ssl_error():
 
     ssl_error = ssl.SSLCertVerificationError("certificate verify failed")
 
-    with patch("httpx.Client.post") as mock_post:
-        connect_err = httpx.ConnectError("SSL error")
+    with patch("httpx2.Client.post") as mock_post:
+        connect_err = httpx2.ConnectError("SSL error")
         connect_err.__cause__ = ssl_error
         mock_post.side_effect = connect_err
 
@@ -451,8 +451,8 @@ async def test_post_with_retry_async_ssl_error():
     ssl_error = ssl.SSLCertVerificationError("certificate verify failed")
 
     async with async_http_client() as client:
-        with patch("httpx.AsyncClient.post") as mock_post:
-            connect_err = httpx.ConnectError("SSL error")
+        with patch("httpx2.AsyncClient.post") as mock_post:
+            connect_err = httpx2.ConnectError("SSL error")
             connect_err.__cause__ = ssl_error
             mock_post.side_effect = connect_err
 
@@ -465,12 +465,12 @@ async def test_post_with_retry_async_ssl_error():
 
 
 def test_httpcore_network_error_ssl_detection():
-    """Test that httpcore.NetworkError wrapping SSL is detected"""
+    """Test that httpcore2.NetworkError wrapping SSL is detected"""
     import ssl
-    import httpcore
+    import httpcore2
 
     ssl_error = ssl.SSLError("SSL handshake failed")
-    network_error = httpcore.NetworkError()
+    network_error = httpcore2.NetworkError()
     network_error.__cause__ = ssl_error
 
     assert is_ssl_error(network_error)
@@ -482,14 +482,14 @@ def test_should_retry_predicate_ssl_errors():
 
     # Create SSL error wrapped in ConnectError
     ssl_error = ssl.SSLCertVerificationError("certificate verify failed")
-    connect_err = httpx.ConnectError("SSL error")
+    connect_err = httpx2.ConnectError("SSL error")
     connect_err.__cause__ = ssl_error
 
     # should_retry should return False for SSL errors
     assert not should_retry(connect_err)
 
     # should_retry should return True for non-SSL ConnectError
-    non_ssl_err = httpx.ConnectError("Connection refused")
+    non_ssl_err = httpx2.ConnectError("Connection refused")
     assert should_retry(non_ssl_err)
 
 
@@ -634,7 +634,7 @@ def test_configure_http_proxy():
 def test_configure_http_timeout():
     """Test that configure_http can set timeout at runtime"""
     from edgar.httpclient import configure_http, HTTP_MGR
-    from httpx import Timeout
+    from httpx2 import Timeout
 
     # Store original value
     original_timeout = HTTP_MGR.httpx_params.get("timeout")

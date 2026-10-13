@@ -62,20 +62,20 @@ class TestHomepageFallback:
 
     def test_sgml_does_not_fallback_on_network_error(self):
         """Network errors should propagate, not fall back (preserves local-storage error messages)."""
-        import httpx
+        import httpx2
         filing = self._make_filing()
 
-        with patch.object(FilingSGML, 'from_filing', side_effect=httpx.ConnectError("connection refused")):
-            with pytest.raises(httpx.ConnectError):
+        with patch.object(FilingSGML, 'from_filing', side_effect=httpx2.ConnectError("connection refused")):
+            with pytest.raises(httpx2.ConnectError):
                 filing.sgml()
 
     def test_sgml_does_not_fallback_on_timeout(self):
         """Timeout errors should propagate, not fall back."""
-        import httpx
+        import httpx2
         filing = self._make_filing()
 
-        with patch.object(FilingSGML, 'from_filing', side_effect=httpx.TimeoutException("timed out")):
-            with pytest.raises(httpx.TimeoutException):
+        with patch.object(FilingSGML, 'from_filing', side_effect=httpx2.TimeoutException("timed out")):
+            with pytest.raises(httpx2.TimeoutException):
                 filing.sgml()
 
     def test_from_homepage_creates_minimal_filing_sgml(self):

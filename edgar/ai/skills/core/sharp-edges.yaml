@@ -114,11 +114,14 @@ sharp_edges:
       print(filing.to_context())    # Shows available methods
 
   - id: catching-httpx-types
-    summary: Catch TransportError, never httpx exception types
+    summary: Catch TransportError, never httpx or httpx2 exception types
     severity: high
     solution: |
-      # WRONG - httpx types reach you by accident, not by contract:
+      # WRONG - HTTP-library types reach you by accident, not by contract.
+      # edgartools 6.0 runs on httpx2, so this one never fires any more:
       #   except httpx.ReadTimeout: ...
+      # and this one breaks again if the HTTP library ever changes:
+      #   except httpx2.ReadTimeout: ...
       # RIGHT:
       from edgar.exceptions import TransportError
       try:
@@ -128,8 +131,8 @@ sharp_edges:
               ...   # never got an answer: connection, DNS, timeout
           elif e.status_code == 429:
               ...   # rate limited: wait ~10 min, do NOT retry immediately
-          # e.__cause__ holds the original httpx exception for debugging
-    detection_pattern: 'except\s+httpx\.|httpx\.(ReadTimeout|ConnectError|HTTPStatusError|HTTPError)'
+          # e.__cause__ holds the original httpx2 exception for debugging
+    detection_pattern: 'except\s+\(?httpx2?\.|httpx2?\.(ReadTimeout|ConnectError|HTTPStatusError|HTTPError)'
 
   - id: none-treated-as-failure
     summary: None means documented absence, never failure — failures raise

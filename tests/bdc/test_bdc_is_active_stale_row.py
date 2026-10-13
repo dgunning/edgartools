@@ -10,7 +10,7 @@ The clock is frozen at 2026-12-01, past the flip.
 """
 from datetime import date
 
-import httpx
+import httpx2
 import pandas as pd
 import pytest
 
@@ -91,7 +91,7 @@ def test_a_row_inside_the_window_needs_no_request(december_2026, monkeypatch):
 
 @pytest.mark.fast
 def test_an_unreachable_sec_falls_back_to_the_report_row(december_2026, monkeypatch, caplog):
-    _own_latest_filing(monkeypatch, httpx.ConnectError("connection refused"))
+    _own_latest_filing(monkeypatch, httpx2.ConnectError("connection refused"))
     assert _entity(in_latest_report=False).is_active is False
     assert "Could not check ARES CAPITAL CORP's own filings" in caplog.text
 

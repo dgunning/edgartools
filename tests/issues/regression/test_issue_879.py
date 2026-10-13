@@ -211,13 +211,13 @@ def _parse_filing_html(cassette_name: str, filing_html_uri: str, form: str):
 
     This bypasses `get_by_accession_number` (which needs the full quarterly
     index) and directly downloads the filing's primary document using VCR
-    to replay the recorded response. Uses httpx (the same transport edgar uses)
+    to replay the recorded response. Uses httpx2 (the same transport edgar uses)
     so VCR intercepts the request correctly.
     """
-    import httpx
+    import httpx2
 
     with _my_vcr.use_cassette(cassette_name):
-        with httpx.Client() as client:
+        with httpx2.Client() as client:
             resp = client.get(filing_html_uri, headers={"User-Agent": "EdgarTools test"})
         html = resp.text
 

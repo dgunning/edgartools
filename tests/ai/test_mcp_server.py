@@ -228,12 +228,12 @@ class TestErrorClassification:
         assert result["error_code"] == "FILING_NOT_FOUND"
 
     def test_timeout_exception(self):
-        from httpx import ReadTimeout
+        from httpx2 import ReadTimeout
         result = classify_error(ReadTimeout("timed out"))
         assert result["error_code"] == "NETWORK_TIMEOUT"
 
     def test_connect_error(self):
-        from httpx import ConnectError
+        from httpx2 import ConnectError
         result = classify_error(ConnectError("connection refused"))
         assert result["error_code"] == "NETWORK_CONNECTION"
 

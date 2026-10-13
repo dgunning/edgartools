@@ -30,7 +30,7 @@ SEC_PORT = 443
 
 def get_environment_info() -> EnvironmentInfo:
     """Gather environment information."""
-    import httpx
+    import httpx2
 
     from edgar.__about__ import __version__ as edgartools_version
 
@@ -69,7 +69,7 @@ def get_environment_info() -> EnvironmentInfo:
         python_version=f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         platform=platform_info,
         edgartools_version=edgartools_version,
-        httpx_version=httpx.__version__,
+        httpx_version=httpx2.__version__,
         certifi_version=certifi_version,
         cryptography_version=cryptography_version,
         truststore_version=truststore_version,
@@ -346,14 +346,14 @@ def test_http_request_raw() -> Tuple[bool, Optional[int], Optional[str]]:
     Returns: (success, status_code, error_message)
     """
     try:
-        import httpx
+        import httpx2
 
         from edgar.settings import get_identity
 
         # Quick request to SEC.gov robots.txt (small file)
-        # Uses default httpx settings (SSL verification enabled)
+        # Uses default httpx2 settings (SSL verification enabled)
         headers = {"User-Agent": get_identity()}
-        response = httpx.get(
+        response = httpx2.get(
             f"https://{SEC_HOST}/robots.txt",
             timeout=10.0,
             follow_redirects=True,
@@ -372,7 +372,7 @@ def test_http_request_configured() -> Tuple[bool, Optional[int], Optional[str]]:
     Returns: (success, status_code, error_message)
     """
     try:
-        import httpx
+        import httpx2
 
         from edgar.settings import get_identity
         from edgar.httpclient import HTTP_MGR
@@ -385,7 +385,7 @@ def test_http_request_configured() -> Tuple[bool, Optional[int], Optional[str]]:
         headers = {"User-Agent": get_identity()}
 
         # Build request with user's settings
-        response = httpx.get(
+        response = httpx2.get(
             f"https://{SEC_HOST}/robots.txt",
             timeout=timeout,
             follow_redirects=True,

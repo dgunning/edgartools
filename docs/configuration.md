@@ -125,7 +125,7 @@ export EDGAR_VERIFY_SSL="true"
 ```
 
 **Values:**
-- `"true"` (default) - Verify SSL certificates (recommended)
+- `"true"` (default) - Verify SSL certificates (recommended). From 6.0 they are checked against your operating system's trust store; set `SSL_CERT_FILE` to use a specific CA file instead
 - `"false"`, `"0"`, `"no"`, `"n"`, `"off"` - Disable SSL verification
 
 **⚠️ Security Warning:** Only disable SSL verification in controlled environments. This reduces security by allowing man-in-the-middle attacks.
@@ -150,7 +150,7 @@ export EDGAR_USE_HTTP2="false"
 TCP connection, so a mid-stream connection reset fails *all* in-flight requests
 at once — surfacing from cloud egress as intermittent
 `h2.exceptions.InvalidBodyLengthError` (truncated body) or
-`httpx.RemoteProtocolError: ConnectionTerminated` that crash long fan-out jobs.
+`httpx2.RemoteProtocolError: ConnectionTerminated` that crash long fan-out jobs.
 Because EdgarTools fetches a small number of large documents under SEC's ~9
 req/s rate limit, HTTP/2's multiplexing offers no real throughput benefit, while
 HTTP/1.1's one-request-per-connection model lets the retry layer recover from a
@@ -226,7 +226,7 @@ export EDGAR_HTTP_TIMEOUT="30"
 - `none`, `unlimited`, `0`, or empty - no timeout is set on the client
 
 Zero and negative values route to the unlimited path rather than being passed
-through, because httpx treats a `0.0` read timeout as immediate-timeout.
+through, because httpx2 treats a `0.0` read timeout as immediate-timeout.
 
 Pass an explicit `timeout` to `configure_http()` to change it at runtime instead.
 

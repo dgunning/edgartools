@@ -4,7 +4,7 @@ import re
 from contextlib import asynccontextmanager, contextmanager
 from typing import AsyncGenerator, Generator, Literal, Optional
 
-import httpx
+import httpx2
 
 # Fix for issue #457: Force C locale for httpxthrottlecache to avoid locale-dependent date parsing
 # httpxthrottlecache uses time.strptime() which is locale-dependent. On non-English systems
@@ -24,7 +24,23 @@ except (locale.Error, ValueError):
 # now extracts 'verify' itself, so the patch was redundant — and worse than redundant,
 # since shadowing an upstream method silently reverts any future fix to it.
 # test_verify_reaches_the_transport_params pins the behaviour the patch protected.
+from httpxthrottlecache import HTTPX_IMPL as _THROTTLECACHE_HTTPX_IMPL
 from httpxthrottlecache import HttpxThrottleCache
+
+# httpxthrottlecache chooses its HTTP library once, at import: httpx2 when it can
+# import it, plain httpx otherwise, whichever extra was installed. Every except
+# clause, isinstance check and Timeout in edgartools names httpx2 types, so a
+# client built from the other library raises exceptions none of them recognise:
+# no retries, no TransportError wrap, and the "unreachable" fallbacks stop
+# firing. That mismatch was live in 5.x the other way round, whenever httpx2
+# happened to be installed. We depend on httpx2 and imported it above, so the two
+# can only disagree again if httpxthrottlecache changes its preference — fail at
+# import rather than at the first network error.
+if _THROTTLECACHE_HTTPX_IMPL != "httpx2":
+    raise ImportError(
+        f"httpxthrottlecache is using {_THROTTLECACHE_HTTPX_IMPL!r}, but edgartools "
+        "requires httpx2. Reinstall with: pip install 'httpxthrottlecache[httpx2]'"
+    )
 
 from edgar.core import log, strtobool
 from edgar.settings import get_edgar_data_directory, get_identity
@@ -55,7 +71,7 @@ def _host_key(url: str) -> str:
       reached — the same shape as the bug this fixes, moved from sec.gov to
       mirrors.
     * **The host must come from the same parser that produces it at match time.**
-      ``httpx.URL(...).host`` lowercases, drops ``user@`` and the port, and
+      ``httpx2.URL(...).host`` lowercases, drops ``user@`` and the port, and
       normalises IDNA; a hand-rolled ``https?://([^/]+)`` regex does none of
       those, so ``EDGAR_DATA_URL=https://DATA.mirror.example.org`` (or a URL
       carrying a port or credentials) yields a key no real request can match.
@@ -64,7 +80,7 @@ def _host_key(url: str) -> str:
     goes uncached, which is slow, rather than borrowing another host's rules,
     which would be wrong.
     """
-    host = httpx.URL(url).host
+    host = httpx2.URL(url).host
     if not host:
         log.warning("No host in %r; requests to it will not be cached.", url)
         return r"(?!)"  # matches nothing
@@ -141,7 +157,7 @@ def get_edgar_use_system_certs() -> bool:
 
 def get_edgar_use_http2() -> bool:
     """
-    Returns True if the internal httpx client should negotiate HTTP/2.
+    Returns True if the internal httpx2 client should negotiate HTTP/2.
 
     Defaults to False (HTTP/1.1). EdgarTools talks to SEC EDGAR with a small
     number of large, rate-limited (~9 req/s) requests, so HTTP/2's stream
@@ -149,7 +165,7 @@ def get_edgar_use_http2() -> bool:
     transient reset into a correlated failure across every in-flight request.
     From cloud egress this surfaces as intermittent
     ``h2.exceptions.InvalidBodyLengthError`` (truncated body) and
-    ``httpx.RemoteProtocolError: ConnectionTerminated`` mid-download, crashing
+    ``httpx2.RemoteProtocolError: ConnectionTerminated`` mid-download, crashing
     long fan-out jobs. HTTP/1.1 isolates each request to its own connection so
     the retry layer can recover. Set EDGAR_USE_HTTP2=true to opt back into HTTP/2.
 
@@ -170,7 +186,7 @@ def get_truststore_context():
 
 def get_edgar_http_timeout() -> Optional[float]:
     """
-    Default request timeout in seconds for the internal httpx client.
+    Default request timeout in seconds for the internal httpx2 client.
 
     Without an explicit timeout, a stalled upstream or slow TLS handshake
     can cause a blocking socket read that never returns — the process is
@@ -181,8 +197,8 @@ def get_edgar_http_timeout() -> Optional[float]:
     Returns None for "unlimited" (no timeout set on the client), which is
     signalled by the env var being empty or one of "none"/"unlimited"/"0"
     (case-insensitive). Non-positive numerics also route through the
-    unlimited path so EDGAR_HTTP_TIMEOUT=0 cannot configure httpx with
-    a 0.0 read timeout (which httpx treats as immediate-timeout).
+    unlimited path so EDGAR_HTTP_TIMEOUT=0 cannot configure httpx2 with
+    a 0.0 read timeout (which httpx2 treats as immediate-timeout).
     """
     raw = os.environ.get("EDGAR_HTTP_TIMEOUT", "30.0")
     if raw.strip() == "" or raw.strip().lower() in ("none", "unlimited"):
@@ -251,7 +267,7 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
 
     # Increase keepalive from default 5s to 30s for better connection reuse
     # This reduces TCP+TLS handshake overhead (~100ms) for interactive use
-    http_mgr.httpx_params["limits"] = httpx.Limits(keepalive_expiry=30)
+    http_mgr.httpx_params["limits"] = httpx2.Limits(keepalive_expiry=30)
 
     # Set a non-None default timeout so a stalled upstream cannot wedge
     # a worker indefinitely. Override via EDGAR_HTTP_TIMEOUT env var or
@@ -259,18 +275,18 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
     # disable_http_timeout() at runtime) to opt out entirely.
     timeout = get_edgar_http_timeout()
     if timeout is not None:
-        http_mgr.httpx_params["timeout"] = httpx.Timeout(timeout, connect=10.0)
+        http_mgr.httpx_params["timeout"] = httpx2.Timeout(timeout, connect=10.0)
     return http_mgr
 
 
 @asynccontextmanager
-async def async_http_client(client: Optional[httpx.AsyncClient] = None, **kwargs) -> AsyncGenerator[httpx.AsyncClient, None]:
+async def async_http_client(client: Optional[httpx2.AsyncClient] = None, **kwargs) -> AsyncGenerator[httpx2.AsyncClient, None]:
     async with HTTP_MGR.async_http_client(client=client, **kwargs) as client:
         yield client
 
 
 @contextmanager
-def http_client(**kwargs) -> Generator[httpx.Client, None, None]:
+def http_client(**kwargs) -> Generator[httpx2.Client, None, None]:
     with HTTP_MGR.http_client(**kwargs) as client:
         yield client
 
@@ -359,7 +375,7 @@ def configure_http(
         settings_changed = True
 
     if proxy is not None:
-        # Configure proxy for httpx
+        # Configure proxy for httpx2
         HTTP_MGR.httpx_params["proxy"] = proxy
         settings_changed = True
 
@@ -368,7 +384,7 @@ def configure_http(
         settings_changed = True
 
     if timeout is not None:
-        from httpx import Timeout
+        from httpx2 import Timeout
         HTTP_MGR.httpx_params["timeout"] = Timeout(timeout, connect=10.0)
         settings_changed = True
 

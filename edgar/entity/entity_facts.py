@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 from typing import Union
 
-import httpx
+import httpx2
 import orjson as json
 import pandas as pd
 from pandas.core.interchange.dataframe_protocol import DataFrame
@@ -62,7 +62,7 @@ def download_company_facts_from_sec(cik: int) -> Dict[str, Any]:
     company_facts_url = build_company_facts_url(cik)
     try:
         return download_json(company_facts_url)
-    except (httpx.HTTPStatusError, TransportError) as err:
+    except (httpx2.HTTPStatusError, TransportError) as err:
         # The model for domain translation across both error eras: a 404 is
         # something this layer understands, so it becomes the domain's own
         # NotFoundError. Everything else propagates as a transport failure,

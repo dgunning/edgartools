@@ -32,14 +32,14 @@ class TestTransportFailuresAreRecognised:
     """What counts as "SEC did not give us the filing"."""
 
     def test_httpx_transport_and_status_errors(self):
-        import httpx
+        import httpx2
 
-        request = httpx.Request("GET", "https://www.sec.gov/x")
-        assert _is_transport_failure(httpx.ConnectError("refused", request=request))
-        assert _is_transport_failure(httpx.ReadTimeout("timed out", request=request))
-        assert _is_transport_failure(httpx.RemoteProtocolError("reset", request=request))
-        assert _is_transport_failure(httpx.HTTPStatusError(
-            "429", request=request, response=httpx.Response(429, request=request)))
+        request = httpx2.Request("GET", "https://www.sec.gov/x")
+        assert _is_transport_failure(httpx2.ConnectError("refused", request=request))
+        assert _is_transport_failure(httpx2.ReadTimeout("timed out", request=request))
+        assert _is_transport_failure(httpx2.RemoteProtocolError("reset", request=request))
+        assert _is_transport_failure(httpx2.HTTPStatusError(
+            "429", request=request, response=httpx2.Response(429, request=request)))
 
     def test_builtin_connection_and_timeout_errors(self):
         assert _is_transport_failure(ConnectionResetError("peer reset"))

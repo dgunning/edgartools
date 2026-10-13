@@ -8,8 +8,8 @@ from datetime import datetime
 from pathlib import Path
 from unittest.mock import Mock
 
-import httpcore
-import httpx
+import httpcore2
+import httpx2
 import pytest
 
 from edgar import Filing
@@ -66,18 +66,18 @@ def test_http_error_leaves_filing_retryable(
     accessor,
     status,
 ):
-    request = httpx.Request("GET", filing.text_url)
+    request = httpx2.Request("GET", filing.text_url)
     if status == 429:
         # The streaming boundary raises this domain error in both modes.
         error = TooManyRequestsError(filing.text_url, retry_after=120)
         expected_error = TooManyRequestsError
     else:
-        error = httpx.HTTPStatusError(
+        error = httpx2.HTTPStatusError(
             "SEC HTTP failure",
             request=request,
-            response=httpx.Response(status, request=request),
+            response=httpx2.Response(status, request=request),
         )
-        expected_error = TransportError if strict_errors else httpx.HTTPStatusError
+        expected_error = TransportError if strict_errors else httpx2.HTTPStatusError
     read = Mock(side_effect=[error, submission_text])
 
     @wrap_transport_errors
@@ -116,7 +116,7 @@ def test_http_error_leaves_filing_retryable(
     homepage.assert_not_called()
 
 
-@pytest.mark.parametrize("error_type", [httpx.ConnectError, httpx.ReadTimeout])
+@pytest.mark.parametrize("error_type", [httpx2.ConnectError, httpx2.ReadTimeout])
 def test_unreachable_error_propagates_in_both_modes(
     filing,
     homepage,
@@ -137,7 +137,7 @@ def test_unreachable_error_propagates_in_both_modes(
     homepage.assert_not_called()
 
 
-@pytest.mark.parametrize("error_type", [httpcore.ConnectError, httpcore.ReadTimeout])
+@pytest.mark.parametrize("error_type", [httpcore2.ConnectError, httpcore2.ReadTimeout])
 def test_httpcore_errors_still_propagate(filing, homepage, monkeypatch, error_type):
     error = error_type("SEC unreachable")
     monkeypatch.setattr(sgml_common, "read_content_as_string", Mock(side_effect=error))

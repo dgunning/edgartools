@@ -20,7 +20,7 @@ import logging
 
 import pandas as pd
 import pytest
-from httpx import ConnectError, TimeoutException
+from httpx2 import ConnectError, TimeoutException
 
 import edgar.funds.data as fund_data
 

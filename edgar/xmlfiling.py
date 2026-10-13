@@ -268,11 +268,11 @@ class XmlFiling:
             return None
 
         try:
-            import httpx
+            import httpx2
             acc = self._filing.accession_no.replace('-', '')
             cik = self._filing.cik
             url = f'https://www.sec.gov/Archives/edgar/data/{cik}/{acc}/{prefix}/primary_doc.xml'
-            resp = httpx.get(
+            resp = httpx2.get(
                 url,
                 headers={'User-Agent': 'EdgarTools support@edgartools.io'},
                 follow_redirects=True,

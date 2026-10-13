@@ -17,7 +17,10 @@ from edgar import Company
 company = Company("AAPL")
 ```
 
-This works because corporate networks add their CA certificates to your operating system's trust store. The `truststore` library (included with edgartools) lets Python use those certificates instead of its own bundled ones.
+This works because corporate networks add their CA certificates to your operating system's trust store. The `truststore` library (included with edgartools) lets Python use those certificates instead of a bundled CA list.
+
+!!! note "From 6.0 the OS store is the default"
+    edgartools 6.0 makes its requests with `httpx2`, which verifies against your operating system's trust store by default; earlier releases used the `certifi` bundle unless you opted in. On 6.0, `use_system_certs=True` therefore matches what you already get, and stays available so existing code keeps working. `SSL_CERT_FILE` still overrides it with a CA file of your choice. See [the upgrade guide](../upgrade/6.0.md#the-http-client-moved-from-httpx-to-httpx2).
 
 ## Understanding SSL Issues
 
@@ -229,8 +232,8 @@ import logging
 
 # Enable HTTP debug logging
 logging.basicConfig(level=logging.DEBUG)
-logging.getLogger("httpx").setLevel(logging.DEBUG)
-logging.getLogger("httpcore").setLevel(logging.DEBUG)
+logging.getLogger("httpx2").setLevel(logging.DEBUG)
+logging.getLogger("httpcore2").setLevel(logging.DEBUG)
 
 from edgar import Company
 company = Company("AAPL")  # Will show detailed HTTP logs
@@ -250,7 +253,7 @@ Disabling SSL verification makes connections vulnerable to man-in-the-middle att
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `EDGAR_USE_SYSTEM_CERTS` | `false` | Use OS native certificate store |
+| `EDGAR_USE_SYSTEM_CERTS` | `false` | Use OS native certificate store (already the default from 6.0) |
 | `EDGAR_VERIFY_SSL` | `true` | Enable/disable SSL verification |
 | `EDGAR_RATE_LIMIT_PER_SEC` | `9` | Request rate limit |
 
@@ -287,7 +290,7 @@ def get_http_config() -> dict
 
 Returns current HTTP configuration as a dictionary with keys:
 - `verify_ssl`: Current SSL verification setting
-- `use_system_certs`: Whether OS certificate store is active
+- `use_system_certs`: Whether the OS certificate store was requested explicitly. From 6.0 the default also verifies against the OS store, and this still reads `False` then
 - `proxy`: Current proxy URL (or None)
 - `timeout`: Current timeout setting
 

@@ -201,9 +201,9 @@ def _is_transport_failure(ex: BaseException) -> bool:
     extractor that raises TypeError on a real response is still an ``error``,
     which is the thing this eval exists to catch.
     """
-    import httpx
+    import httpx2
 
-    if isinstance(ex, (httpx.HTTPError, ConnectionError, TimeoutError)):
+    if isinstance(ex, (httpx2.HTTPError, ConnectionError, TimeoutError)):
         return True
     # edgar wraps some fetch failures in its own types; match on the SEC-facing
     # ones by name so this does not depend on their import path staying put.

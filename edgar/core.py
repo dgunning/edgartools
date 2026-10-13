@@ -521,8 +521,13 @@ def initialize_rich_logging():
 
 
 # Suppress noisy third-party loggers by default.
-# Users can override after import: logging.getLogger("httpx").setLevel(logging.DEBUG)
+# Users can override after import: logging.getLogger("httpx2").setLevel(logging.DEBUG)
 _NOISY_LOGGERS = {
+    # Our HTTP client. httpx2 logs every request at INFO under its own name, so
+    # quieting "httpx" alone stopped applying when we moved off httpx.
+    "httpx2": logging.WARNING,
+    # Plain httpx is no longer ours, but edgartools[ai] still installs it (the
+    # MCP SDK depends on it), and its request log is just as noisy.
     "httpx": logging.WARNING,
     "httpxthrottlecache": logging.WARNING,
     "pyrate_limiter": logging.CRITICAL,  # Emits spurious "async" messages at WARNING
