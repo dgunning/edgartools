@@ -57,6 +57,7 @@
   "DepreciationExpense": "Depreciation Expense",
   "AmortizationOfIntangibles": "Amortization of Intangibles",
   "OtherOperatingExpense": "Other Operating Expense",
+  "OtherOperatingIncomeExpenseNet": "Other Operating Income (Expense), Net",
   "TotalOperatingExpenses": "Total Operating Expenses",
   "RestructuringExpenseBenefit": "Restructuring Expense",
   "GoodwillWriteoffs": "Goodwill Impairment",
