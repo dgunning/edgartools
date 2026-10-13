@@ -256,6 +256,7 @@ class SECSectionExtractor:
         self._bound_sections_at_part_dividers(tree)
         self._advance_starts_past_page_furniture(tree)
         self._bound_item_4_at_executive_officers(tree)
+        self._split_exhibit_index_from_item_16(tree)
         self._retreat_ends_before_page_furniture(tree)
 
     # A block that is an item heading: "Item 16.", "ITEM 7A -", "Items 1 and 2."
@@ -422,6 +423,9 @@ class SECSectionExtractor:
     # its signature page) is a running header even when it prints once.
     _FORM_NAME_LINE_RE = re.compile(r'^(?:Annual\s+Report\s+on\s+|Quarterly\s+Report\s+on\s+)?Form\s+10-[KQ](?:/A)?$', re.IGNORECASE)
     _ITEM_LIST_RE = re.compile(r'^Items?\s+\d{1,2}[A-C]?(?:\s*(?:,|and|&)\s*\d{1,2}[A-C]?)+$', re.IGNORECASE)
+    # The divider page of a 10-K's financial section (ExxonMobil prints it after
+    # Item 16, ahead of the MD&A): like a Part divider, it opens what follows.
+    _FINANCIAL_SECTION_RE = re.compile(r'^Financial\s+Section$', re.IGNORECASE)
     # A date line ("February 20, 2025") closes an auditor's report or a
     # signature; it repeats through a filing but is never furniture.
     _DATE_LINE_RE = re.compile(
@@ -597,7 +601,7 @@ class SECSectionExtractor:
                 return True
             if self._PARTS_HEADER_RE.match(text) or self._ITEM_LIST_RE.match(text):
                 return True
-            if self._FORM_NAME_LINE_RE.match(text):
+            if self._FORM_NAME_LINE_RE.match(text) or self._FINANCIAL_SECTION_RE.match(text):
                 return True
             pm = divider_re.match(text)
             if pm and self._PART_RANK.get(pm.group(1).upper(), 9) <= own_rank:
@@ -643,10 +647,14 @@ class SECSectionExtractor:
 
         for name, boundary in self.section_boundaries.items():
             m = self._SECTION_KEY_RE.match(name)
-            if not m:
+            if m:
+                own_rank = self._PART_RANK.get(m.group(1).upper(), 0)
+                own_item = m.group(2).upper()
+            elif name == 'exhibit_index':
+                # Split from Item 16, it ends where Item 16 used to (Mastercard's footer).
+                own_rank, own_item = self._PART_RANK['IV'], ''
+            else:
                 continue
-            own_rank = self._PART_RANK.get(m.group(1).upper(), 0)
-            own_item = m.group(2).upper()
             end_el = boundary.end_element
             end_id = boundary.end_element_id
             if end_el is None and not end_id:
@@ -792,6 +800,96 @@ class SECSectionExtractor:
                 boundary.end_element = el
                 logger.info("Section part_i_item_4 ends at the executive-officer heading")
                 break
+
+    # The back matter a filer prints after Item 16: the exhibit index, or the
+    # financial statement schedules ahead of it.
+    _BACK_MATTER_RE = re.compile(
+        r'^(?:exhibits?\s+index|index\s+(?:to|of)\s+exhibits|list\s+of\s+exhibits'
+        r'|schedule\s+[IVX]{1,4}\b)', re.IGNORECASE)
+
+    def _split_exhibit_index_from_item_16(self, tree) -> None:
+        """End 10-K Item 16 at an exhibit index printed after it, and give the index its own section.
+
+        Item 16, the optional Form 10-K Summary, is usually one line ("None."),
+        but many filers print Item 15's exhibit index (and its schedules) after
+        it, so the index has no item heading of its own and Item 16 ran through
+        it: 10-21k characters on Mastercard, Oracle, Chevron and 915358, 38k on
+        Eversource. Cutting the index away would leave it in no section, so it
+        becomes the ``exhibit_index`` section, from its heading (or the
+        registrant-name line printed above it) to where Item 16 used to end
+        (edgartools-llmp.12). An index printed before Item 16 belongs to Item 15
+        already and is left alone.
+        """
+        schema = self.toc_analyzer.schema
+        if schema.title_based or schema.repeating_parts or 'exhibit_index' in self.section_boundaries:
+            return
+        boundary = self.section_boundaries.get('part_iv_item_16')
+        if boundary is None:
+            return
+        starts = find_anchor_targets(tree, boundary.anchor_id)
+        if not starts:
+            return
+        start_el = boundary.start_element if boundary.start_element is not None else starts[0]
+        end_el = boundary.end_element
+        end_id = boundary.end_element_id
+        # The anchor often sits inside Item 16's heading (915358's <span>), where
+        # the walk never visits the heading block itself.
+        block = heading_block(start_el)
+        if block is None:  # an empty anchor <span> beside the heading text
+            block = next((a for a in start_el.iterancestors() if a.tag not in _INLINE_TAGS), None)
+        own_heading = block is not None and bool(self._ITEM_HEADING_RE.match(
+            ' '.join(block.text_content().split())))
+        from edgar.documents.extractors.pattern_section_extractor import _SIGNATURES_HEADER
+        previous = signatures = None
+        for event, el in iterwalk_from(start_el):
+            if event != 'start' or not isinstance(el.tag, str):
+                continue
+            if el is not start_el:
+                if end_el is not None and el is end_el:
+                    return
+                if end_id and is_anchor_match(el, end_id):
+                    return
+            if el.tag in _INLINE_TAGS:
+                continue
+            text = ' '.join(el.text_content().split())
+            if not text or len(text) > self._FURNITURE_MAX_CHARS:
+                continue
+            if any(a.tag == 'table' for a in el.iterancestors()):
+                continue
+            if own_heading and signatures is None and _SIGNATURES_HEADER.match(text):
+                # An index after the signature page: Item 16 ends at its own
+                # SIGNATURES, as a last item with nothing after it does.
+                signatures = el
+                continue
+            if not own_heading:
+                # Only what follows Item 16's own heading is back matter.
+                own_heading = bool(self._ITEM_HEADING_RE.match(text))
+                continue
+            if not self._BACK_MATTER_RE.match(text):
+                if not any(c is el for c in (previous.iterdescendants() if previous is not None else ())):
+                    previous = el
+                continue
+            # A heading nests in its own blocks ("<div><b>EXHIBIT INDEX</b></div>"):
+            # start at the outermost one.
+            while el.getparent() is not None and ' '.join(el.getparent().text_content().split()) == text:
+                el = el.getparent()
+            start = el
+            # The registrant's name printed directly above it is part of the heading.
+            if previous is not None:
+                above = ' '.join(previous.text_content().split())
+                letters = [c for c in above if c.isalpha()]
+                if (letters and all(c.isupper() for c in letters) and len(above) <= 80
+                        and not any(c.isdigit() for c in above)
+                        and not self._ITEM_HEADING_RE.match(above)):
+                    start = previous
+            self.section_boundaries['exhibit_index'] = dataclasses.replace(
+                boundary, name='exhibit_index', start_element=start,
+                confidence=min(boundary.confidence, 0.9))
+            self._pinned_starts.add('exhibit_index')
+            boundary.end_element = signatures if signatures is not None else start
+            boundary.end_element_id = None
+            logger.info("Item 16 ends at the exhibit index printed after it")
+            return
 
     _PART_RANK = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5}
 

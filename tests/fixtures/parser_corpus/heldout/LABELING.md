@@ -52,8 +52,14 @@ On the last line of its own content, which is the line before the first of these
   auditor's report, a financial-statement schedule or an exhibit index follow
   the signatures, the last item runs through them to the end of that content
   (excluding trailing furniture): content is never left in no section.
-  Mark an exhibit index printed after the last item `note: "policy-open:
-  exhibit index after last item"`.
+  Exception, decided 2026-10-13: **Item 16** (the Form 10-K Summary) ends at
+  its own text. An exhibit index or financial statement schedule printed
+  after it is Item 15's material with no heading of its own, and the
+  pipeline gives it a non-item `exhibit_index` section, so it is still in a
+  section. When Item 15 (or a pre-2003 Item 14) is the last item, the index
+  is that item's own content and the rule above stands. Mark an exhibit
+  index printed after the last item `note: "policy-open: exhibit index after
+  last item"` only in that Item 15/14 case.
 
 ## Item 8 that only points elsewhere
 
