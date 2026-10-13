@@ -33,13 +33,11 @@ Assets" that way. IFRS entries are stored WITH their prefix (161 of them), so
 the strip-and-retry could only ever cross taxonomies. The prefix spelling is
 still canonicalised, so `ifrs-full:Assets` and `ifrs-full_Assets` both resolve.
 
-WHAT THIS DOES NOT FIX. Entries marked `is_total=True` that are fuzzy matches
-remain wrong — `DebtSecuritiesHeldToMaturityExcludingAccruedInterestAfterAllowanceForCreditLoss`
-still resolves to "Total Assets" at confidence 0.309, so CFG still shows two
-rows claiming total assets rather than three. That is a data defect in the
-generated `gaap_mappings.json` and belongs upstream in edgar-storage; no
-consumer-side rule separates it from `MembersEquity` without discarding
-legitimate totals.
+LIMIT OF THE ORIGINAL GUARD. Incorrect mappings marked `is_total=True` were
+unaffected. Before #1436 corrected its mapping,
+`DebtSecuritiesHeldToMaturityExcludingAccruedInterestAfterAllowanceForCreditLoss`
+still resolved to "Total Assets". A guard based only on `is_total` cannot repair
+incorrect metadata without risking legitimate totals such as `MembersEquity`.
 """
 
 import pytest
@@ -118,9 +116,7 @@ class TestIfrsTagsDoNotFallBackToGaap:
     def test_ifrs_entries_still_resolve(self, store, tag, expected):
         assert store.get_standard_concept(tag) == expected
 
-    @pytest.mark.parametrize(
-        "tag", ["ifrs-full:Assets", "ifrs-full:Liabilities", "ifrs-full:CurrentAssets"]
-    )
+    @pytest.mark.parametrize("tag", ["ifrs-full:Assets", "ifrs-full:Liabilities", "ifrs-full:CurrentAssets"])
     def test_the_colon_spelling_resolves_too(self, store, tag):
         """
         The index is keyed on `ifrs-full_`, and the colon form used to resolve
