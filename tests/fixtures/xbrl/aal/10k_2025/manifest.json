@@ -1,0 +1,161 @@
+{
+  "accession": "0000006201-26-000014",
+  "form": "10-K",
+  "company": "American Airlines Group Inc.",
+  "cik": 6201,
+  "period_of_report": "2025-12-31",
+  "filing_date": "2026-02-18",
+  "captured_at": "2026-10-07T09:27:05.435609+00:00",
+  "source_git_commit": "6f1f9cd1e446f6f7d84cc3873fe9746a63475d41",
+  "source_manifest_git_path": "tests/fixtures/xbrl/aal/10k_2025/manifest.json",
+  "source_manifest_sha256": "c157918f867734ab731e501637ba2851875eccba14025c137bef22f550af51d0",
+  "derivation": "Whole original balance-sheet role blocks and exact original facts, contexts, units, labels and declarations; only container whitespace changes. Other filing roles and unrelated facts are omitted. All original unique period signatures remain.",
+  "original_attachments": [
+    {
+      "document": "aal-20251231.xsd",
+      "document_type": "EX-101.SCH",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000014/aal-20251231.xsd",
+      "bytes": 115143,
+      "sha256": "d7fa9dccd66ddd352eebc7cc77a3c2abe651fe47a36d1431c4496f0e2a476832",
+      "lines": 974,
+      "git_path": "tests/fixtures/xbrl/aal/10k_2025/aal-20251231.xsd",
+      "git_blob": "69ddfca2e62da90cf422f09b5d3a695f92c2251f"
+    },
+    {
+      "document": "aal-20251231_pre.xml",
+      "document_type": "EX-101.PRE",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000014/aal-20251231_pre.xml",
+      "bytes": 1348173,
+      "sha256": "eec72010106f5bbf4ae6b423c6ad599144f26e8aa03282ed4ba337cf4c6c8c1d",
+      "lines": 4813,
+      "git_path": "tests/fixtures/xbrl/aal/10k_2025/aal-20251231_pre.xml",
+      "git_blob": "f5a74e7ee0ad4002cfd43d6bb26ec9678be23247"
+    },
+    {
+      "document": "aal-20251231_def.xml",
+      "document_type": "EX-101.DEF",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000014/aal-20251231_def.xml",
+      "bytes": 1222685,
+      "sha256": "f81b53aad17a2eb96439ce91971242af0c2fef669d209432cc45d70ab3356131",
+      "lines": 4765,
+      "git_path": "tests/fixtures/xbrl/aal/10k_2025/aal-20251231_def.xml",
+      "git_blob": "e346c0fce35d19c99058c418de494a036c30c20e"
+    },
+    {
+      "document": "aal-20251231_cal.xml",
+      "document_type": "EX-101.CAL",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000014/aal-20251231_cal.xml",
+      "bytes": 143126,
+      "sha256": "50de04b64293c07dd59ec8fae5399805ae6933cf7f3712081e1eed53c54588ec",
+      "lines": 541,
+      "git_path": "tests/fixtures/xbrl/aal/10k_2025/aal-20251231_cal.xml",
+      "git_blob": "6441ed7509a6feebd1b23d1f6e726ca3c9eb31e2"
+    },
+    {
+      "document": "aal-20251231_lab.xml",
+      "document_type": "EX-101.LAB",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000014/aal-20251231_lab.xml",
+      "bytes": 1244165,
+      "sha256": "1bcb1a855a0c503b0ee7006c7fa8e2324f47e9ecf78d40f9034e9bf44c894ca3",
+      "lines": 4544,
+      "git_path": "tests/fixtures/xbrl/aal/10k_2025/aal-20251231_lab.xml",
+      "git_blob": "3318c1de87c76a0184c9506849c2cbe599e18767"
+    },
+    {
+      "document": "aal-20251231_htm.xml",
+      "document_type": "XML",
+      "url": "https://www.sec.gov/Archives/edgar/data/4515/000000620126000014/aal-20251231_htm.xml",
+      "bytes": 4833342,
+      "sha256": "3b31e1261255ec19898b6e4e71385ca6ade99d3ba896c34ef97bcea2e0282fda",
+      "lines": 17301,
+      "git_path": "tests/fixtures/xbrl/aal/10k_2025/aal-20251231_htm.xml",
+      "git_blob": "de7f5fabed61136bf0d2bf6e316261561faf5ea8"
+    }
+  ],
+  "retained_presentation_roles": [
+    "http://www.aa.com/role/ConsolidatedBalanceSheetsAmericanAirlinesGroupInc",
+    "http://www.aa.com/role/ConsolidatedBalanceSheetsAmericanAirlinesInc"
+  ],
+  "retained_definition_roles": [
+    "http://www.aa.com/role/ConsolidatedBalanceSheetsAmericanAirlinesGroupInc",
+    "http://www.aa.com/role/ConsolidatedBalanceSheetsAmericanAirlinesInc"
+  ],
+  "retained_calculation_roles": [
+    "http://www.aa.com/role/ConsolidatedBalanceSheetsAmericanAirlinesGroupInc"
+  ],
+  "fact_count": 419,
+  "context_count": 195,
+  "unit_count": 3,
+  "original_period_count": 54,
+  "retained_period_count": 54,
+  "static_xml_checks": {
+    "aal-20251231_htm.xml": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 1209,
+      "qname_value_bindings_checked": 738
+    },
+    "aal-20251231_pre.xml": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 244,
+      "qname_value_bindings_checked": 0
+    },
+    "aal-20251231_def.xml": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 255,
+      "qname_value_bindings_checked": 0
+    },
+    "aal-20251231_cal.xml": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 90,
+      "qname_value_bindings_checked": 0
+    },
+    "aal-20251231_lab.xml": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 593,
+      "qname_value_bindings_checked": 0
+    },
+    "aal-20251231.xsd": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 49,
+      "qname_value_bindings_checked": 70
+    }
+  },
+  "generated_files": [
+    {
+      "filename": "aal-20251231_htm.xml",
+      "bytes": 169195,
+      "lines": 2784,
+      "sha256": "b5500b032449f76db77f4dde1781e1f5de3774d022650176afe937299cbfb43b"
+    },
+    {
+      "filename": "aal-20251231_pre.xml",
+      "bytes": 72709,
+      "lines": 255,
+      "sha256": "a131852fa3aae8b84cf448460ba257aa0167acb9f3a566c52fa5d98ae4088018"
+    },
+    {
+      "filename": "aal-20251231_def.xml",
+      "bytes": 67941,
+      "lines": 266,
+      "sha256": "9a826e7165614c987d9d93f4724e68fd46be24e6747584bdbce94c5eec0f81cd"
+    },
+    {
+      "filename": "aal-20251231_cal.xml",
+      "bytes": 25745,
+      "lines": 99,
+      "sha256": "6ee24809b5937cb36c8e685a51e9d87c930052221460aee6dd03d77c445fb398"
+    },
+    {
+      "filename": "aal-20251231_lab.xml",
+      "bytes": 148377,
+      "lines": 602,
+      "sha256": "46448b879cc906dcaa3f1b8929d22dc9714476ab6bdd8a731fdd78f181889ec0"
+    },
+    {
+      "filename": "aal-20251231.xsd",
+      "bytes": 10140,
+      "lines": 64,
+      "sha256": "173d21dd38ed2b05c6bb4aea2b5c181d3cf6ca265a55219c7108883a9a3ecdf8"
+    }
+  ]
+}

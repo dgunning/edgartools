@@ -42,6 +42,12 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
     Returns:
         List of (period_key, period_label) tuples, most recent first
     """
+    # A balance-sheet parenthetical annotates the same instant comparison.
+    # This affects period choice only; the selected role and sign rules retain
+    # their parenthetical classification.
+    if statement_type == 'BalanceSheetParenthetical':
+        statement_type = 'BalanceSheet'
+
     # Step 1: Always filter by document date first (prevents future date bugs)
     all_periods = xbrl.reporting_periods
     document_end_date = xbrl.period_of_report

@@ -1,0 +1,1880 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xbrl
+  xml:lang="en-US"
+  xmlns="http://www.xbrl.org/2003/instance"
+  xmlns:aal="http://www.aa.com/20260630"
+  xmlns:dei="http://xbrl.sec.gov/dei/2026"
+  xmlns:ecd="http://xbrl.sec.gov/ecd/2026"
+  xmlns:iso4217="http://www.xbrl.org/2003/iso4217"
+  xmlns:link="http://www.xbrl.org/2003/linkbase"
+  xmlns:srt="http://fasb.org/srt/2026"
+  xmlns:us-gaap="http://fasb.org/us-gaap/2026"
+  xmlns:xbrldi="http://xbrl.org/2006/xbrldi"
+  xmlns:xhtml="http://www.w3.org/1999/xhtml"
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<link:schemaRef xlink:href="aal-20260630.xsd" xlink:type="simple"/>
+<context id="c-1">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <startDate>2026-01-01</startDate>
+            <endDate>2026-06-30</endDate>
+        </period>
+    </context>
+<context id="c-2">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2026-01-01</startDate>
+            <endDate>2026-06-30</endDate>
+        </period>
+    </context>
+<context id="c-3">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2026-01-01</startDate>
+            <endDate>2026-06-30</endDate>
+        </period>
+    </context>
+<context id="c-4">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">us-gaap:WarrantMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2026-01-01</startDate>
+            <endDate>2026-06-30</endDate>
+        </period>
+    </context>
+<context id="c-5">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <instant>2027-07-17</instant>
+        </period>
+    </context>
+<context id="c-6">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2027-07-17</instant>
+        </period>
+    </context>
+<context id="c-19">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <startDate>2026-04-01</startDate>
+            <endDate>2026-06-30</endDate>
+        </period>
+    </context>
+<context id="c-20">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <startDate>2025-04-01</startDate>
+            <endDate>2025-06-30</endDate>
+        </period>
+    </context>
+<context id="c-21">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-06-30</endDate>
+        </period>
+    </context>
+<context id="c-22">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-23">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-24">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ProductOrServiceAxis">aal:AirTrafficMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-25">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ProductOrServiceAxis">aal:AirTrafficMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-26">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ProductOrServiceAxis">aal:LoyaltyProgramMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-27">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ProductOrServiceAxis">aal:LoyaltyProgramMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-28">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+<context id="c-29">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+<context id="c-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-31">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-32">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-33">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-35">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <startDate>2026-01-01</startDate>
+            <endDate>2026-03-31</endDate>
+        </period>
+    </context>
+<context id="c-38">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-03-31</instant>
+        </period>
+    </context>
+<context id="c-39">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-03-31</instant>
+        </period>
+    </context>
+<context id="c-40">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-03-31</instant>
+        </period>
+    </context>
+<context id="c-41">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-03-31</instant>
+        </period>
+    </context>
+<context id="c-42">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <instant>2026-03-31</instant>
+        </period>
+    </context>
+<context id="c-46">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-47">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-48">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-49">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-50">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+<context id="c-51">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+<context id="c-52">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+<context id="c-53">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+<context id="c-55">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-03-31</endDate>
+        </period>
+    </context>
+<context id="c-58">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+<context id="c-59">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+<context id="c-60">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+<context id="c-61">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+<context id="c-62">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+<context id="c-66">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+<context id="c-67">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+<context id="c-68">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+<context id="c-69">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+<context id="c-83">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:DebtInstrumentAxis">aal:SeniorNotes6.50Due2025Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:LongtermDebtTypeAxis">us-gaap:SeniorNotesMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-27</instant>
+        </period>
+    </context>
+<context id="c-175">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:CreditFacilityAxis">us-gaap:SecuredDebtMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:DebtInstrumentAxis">aal:CreditFacility20142026RefinancingTermLoansMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:LongtermDebtTypeAxis">us-gaap:LineOfCreditMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-05-31</instant>
+        </period>
+    </context>
+<context id="c-177">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:CreditFacilityAxis">us-gaap:SecuredDebtMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:DebtInstrumentAxis">aal:CreditFacility2014TermLoansMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:LongtermDebtTypeAxis">us-gaap:LineOfCreditMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:VariableRateAxis">us-gaap:BaseRateMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2026-05-01</startDate>
+            <endDate>2026-05-31</endDate>
+        </period>
+    </context>
+<context id="c-181">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:CreditFacilityAxis">us-gaap:SecuredDebtMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:DebtInstrumentAxis">aal:AAdvantageTermLoanFacilityFourthAmendmentMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:LongtermDebtTypeAxis">us-gaap:LineOfCreditMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:VariableRateAxis">us-gaap:BaseRateMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2026-02-01</startDate>
+            <endDate>2026-02-28</endDate>
+        </period>
+    </context>
+<context id="c-183">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:DebtInstrumentAxis">aal:A20261ClassBRAircraftEnhancedEquipmentTrustCertificateEETCsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:LongtermDebtTypeAxis">us-gaap:EnhancedEquipmentTrustCertificateMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2026-03-01</startDate>
+            <endDate>2026-03-31</endDate>
+        </period>
+    </context>
+<context id="c-185">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:DebtInstrumentAxis">aal:A20251AircraftEnhancedEquipmentTrustCertificateEETCsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:LongtermDebtTypeAxis">us-gaap:EnhancedEquipmentTrustCertificateMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-11-01</startDate>
+            <endDate>2025-11-30</endDate>
+        </period>
+    </context>
+<context id="c-186">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:DebtInstrumentAxis">aal:A20251AircraftEnhancedEquipmentTrustCertificateEETCsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:LongtermDebtTypeAxis">us-gaap:EnhancedEquipmentTrustCertificateMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-11-30</instant>
+        </period>
+    </context>
+<context id="c-187">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:DebtInstrumentAxis">aal:A20251AircraftEnhancedEquipmentTrustCertificateEETCsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:LongtermDebtTypeAxis">us-gaap:EnhancedEquipmentTrustCertificateMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-12-31</endDate>
+        </period>
+    </context>
+<context id="c-195">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:DebtInstrumentAxis">aal:A2026EngineEnhancedEquipmentTrustCertificateEETCsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:LongtermDebtTypeAxis">us-gaap:EnhancedEquipmentTrustCertificateMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2026-06-01</startDate>
+            <endDate>2026-06-30</endDate>
+        </period>
+    </context>
+<context id="c-208">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:MoneyMarketFundsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-209">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:MoneyMarketFundsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-210">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:MoneyMarketFundsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-211">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:MoneyMarketFundsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-212">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:CorporateDebtSecuritiesMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-213">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:CorporateDebtSecuritiesMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-214">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:CorporateDebtSecuritiesMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-215">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:CorporateDebtSecuritiesMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-216">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:BankTimeDepositsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-217">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:BankTimeDepositsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-218">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:BankTimeDepositsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-219">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:BankTimeDepositsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-220">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:RepurchaseAgreementsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-221">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:RepurchaseAgreementsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-222">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:RepurchaseAgreementsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-223">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:RepurchaseAgreementsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-224">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-225">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-226">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-278">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:LitigationCaseAxis">aal:PrivatePartyAntitrustActionsRelatedToTheNortheastAllianceMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2022-12-07</instant>
+        </period>
+    </context>
+<context id="c-279">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:LitigationCaseAxis">aal:PrivatePartyAntitrustActionsRelatedToTheNortheastAllianceMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2023-02-15</instant>
+        </period>
+    </context>
+<context id="c-295">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-296">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-297">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ProductOrServiceAxis">aal:AirTrafficMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-298">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ProductOrServiceAxis">aal:AirTrafficMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-299">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ProductOrServiceAxis">aal:LoyaltyProgramMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-300">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ProductOrServiceAxis">aal:LoyaltyProgramMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-301">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+<context id="c-302">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+<context id="c-303">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-304">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-305">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-306">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-311">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-03-31</instant>
+        </period>
+    </context>
+<context id="c-312">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-03-31</instant>
+        </period>
+    </context>
+<context id="c-313">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-03-31</instant>
+        </period>
+    </context>
+<context id="c-314">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-03-31</instant>
+        </period>
+    </context>
+<context id="c-315">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-03-31</instant>
+        </period>
+    </context>
+<context id="c-319">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-320">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-321">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-322">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-323">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+<context id="c-324">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+<context id="c-325">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+<context id="c-326">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+<context id="c-331">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+<context id="c-332">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+<context id="c-333">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+<context id="c-334">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+<context id="c-335">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+<context id="c-339">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+<context id="c-340">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+<context id="c-341">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+<context id="c-342">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+<context id="c-425">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:MoneyMarketFundsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-426">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:MoneyMarketFundsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-427">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:MoneyMarketFundsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-428">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:MoneyMarketFundsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-429">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:CorporateDebtSecuritiesMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-430">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:CorporateDebtSecuritiesMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-431">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:CorporateDebtSecuritiesMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-432">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:CorporateDebtSecuritiesMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-433">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:BankTimeDepositsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-434">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:BankTimeDepositsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-435">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:BankTimeDepositsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-436">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:BankTimeDepositsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-437">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:RepurchaseAgreementsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-438">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:RepurchaseAgreementsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-439">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:RepurchaseAgreementsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-440">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:RepurchaseAgreementsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-441">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-442">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-443">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-497">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:RelatedPartyTransactionsByRelatedPartyAxis">us-gaap:SubsidiaryOfCommonParentMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-498">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:RelatedPartyTransactionsByRelatedPartyAxis">us-gaap:SubsidiaryOfCommonParentMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<context id="c-499">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:RelatedPartyTransactionsByRelatedPartyAxis">us-gaap:RelatedPartyMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+<context id="c-500">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000006201</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:RelatedPartyTransactionsByRelatedPartyAxis">us-gaap:RelatedPartyMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">aal:AmericanAirlinesIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-12-31</instant>
+        </period>
+    </context>
+<unit id="shares">
+        <measure>shares</measure>
+    </unit>
+<unit id="usd">
+        <measure>iso4217:USD</measure>
+    </unit>
+<dei:EntityCentralIndexKey contextRef="c-1" id="f-43">0000006201</dei:EntityCentralIndexKey>
+<dei:CurrentFiscalYearEndDate contextRef="c-1" id="f-44">--12-31</dei:CurrentFiscalYearEndDate>
+<dei:DocumentFiscalYearFocus contextRef="c-1" id="f-45">2026</dei:DocumentFiscalYearFocus>
+<dei:DocumentFiscalPeriodFocus contextRef="c-1" id="f-46">Q2</dei:DocumentFiscalPeriodFocus>
+<dei:AmendmentFlag contextRef="c-1" id="f-47">false</dei:AmendmentFlag>
+<dei:EntityCentralIndexKey contextRef="c-2" id="f-48">0000004515</dei:EntityCentralIndexKey>
+<dei:DocumentType contextRef="c-1" id="f-1">10-Q</dei:DocumentType>
+<dei:DocumentQuarterlyReport contextRef="c-1" id="f-2">true</dei:DocumentQuarterlyReport>
+<dei:DocumentPeriodEndDate contextRef="c-1" id="f-3">2026-06-30</dei:DocumentPeriodEndDate>
+<dei:DocumentTransitionReport contextRef="c-1" id="f-4">false</dei:DocumentTransitionReport>
+<dei:EntityFileNumber contextRef="c-1" id="f-5">1-8400</dei:EntityFileNumber>
+<dei:EntityRegistrantName contextRef="c-1" id="f-6">American Airlines Group Inc.</dei:EntityRegistrantName>
+<dei:EntityIncorporationStateCountryCode contextRef="c-1" id="f-7">DE</dei:EntityIncorporationStateCountryCode>
+<dei:EntityTaxIdentificationNumber contextRef="c-1" id="f-8">75-1825172</dei:EntityTaxIdentificationNumber>
+<dei:EntityAddressAddressLine1 contextRef="c-1" id="f-9">1 Skyview Drive,</dei:EntityAddressAddressLine1>
+<dei:EntityAddressCityOrTown contextRef="c-1" id="f-10">Fort Worth,</dei:EntityAddressCityOrTown>
+<dei:EntityAddressStateOrProvince contextRef="c-1" id="f-11">TX</dei:EntityAddressStateOrProvince>
+<dei:EntityAddressPostalZipCode contextRef="c-1" id="f-12">76155</dei:EntityAddressPostalZipCode>
+<dei:CityAreaCode contextRef="c-1" id="f-13">(682)</dei:CityAreaCode>
+<dei:LocalPhoneNumber contextRef="c-1" id="f-14">278-9000</dei:LocalPhoneNumber>
+<dei:EntityFileNumber contextRef="c-2" id="f-15">1-2691</dei:EntityFileNumber>
+<dei:EntityRegistrantName contextRef="c-2" id="f-16">American Airlines, Inc.</dei:EntityRegistrantName>
+<dei:EntityIncorporationStateCountryCode contextRef="c-2" id="f-17">DE</dei:EntityIncorporationStateCountryCode>
+<dei:EntityTaxIdentificationNumber contextRef="c-2" id="f-18">13-1502798</dei:EntityTaxIdentificationNumber>
+<dei:EntityAddressAddressLine1 contextRef="c-2" id="f-19">1 Skyview Drive,</dei:EntityAddressAddressLine1>
+<dei:EntityAddressCityOrTown contextRef="c-2" id="f-20">Fort Worth,</dei:EntityAddressCityOrTown>
+<dei:EntityAddressStateOrProvince contextRef="c-2" id="f-21">TX</dei:EntityAddressStateOrProvince>
+<dei:EntityAddressPostalZipCode contextRef="c-2" id="f-22">76155</dei:EntityAddressPostalZipCode>
+<dei:CityAreaCode contextRef="c-2" id="f-23">(682)</dei:CityAreaCode>
+<dei:LocalPhoneNumber contextRef="c-2" id="f-24">278-9000</dei:LocalPhoneNumber>
+<dei:Security12bTitle contextRef="c-3" id="f-25">Common Stock, $0.01 par value per share</dei:Security12bTitle>
+<dei:TradingSymbol contextRef="c-3" id="f-26">AAL</dei:TradingSymbol>
+<dei:SecurityExchangeName contextRef="c-3" id="f-27">NASDAQ</dei:SecurityExchangeName>
+<dei:Security12bTitle contextRef="c-4" id="f-28">Preferred Stock Purchase Rights</dei:Security12bTitle>
+<dei:EntityCurrentReportingStatus contextRef="c-1" id="f-29">Yes</dei:EntityCurrentReportingStatus>
+<dei:EntityCurrentReportingStatus contextRef="c-2" id="f-30">Yes</dei:EntityCurrentReportingStatus>
+<dei:EntityInteractiveDataCurrent contextRef="c-1" id="f-31">Yes</dei:EntityInteractiveDataCurrent>
+<dei:EntityInteractiveDataCurrent contextRef="c-2" id="f-32">Yes</dei:EntityInteractiveDataCurrent>
+<dei:EntityFilerCategory contextRef="c-1" id="f-33">Large Accelerated Filer</dei:EntityFilerCategory>
+<dei:EntitySmallBusiness contextRef="c-1" id="f-34">false</dei:EntitySmallBusiness>
+<dei:EntityEmergingGrowthCompany contextRef="c-1" id="f-35">false</dei:EntityEmergingGrowthCompany>
+<dei:EntityFilerCategory contextRef="c-2" id="f-36">Non-accelerated Filer</dei:EntityFilerCategory>
+<dei:EntitySmallBusiness contextRef="c-2" id="f-37">false</dei:EntitySmallBusiness>
+<dei:EntityEmergingGrowthCompany contextRef="c-2" id="f-38">false</dei:EntityEmergingGrowthCompany>
+<dei:EntityShellCompany contextRef="c-1" id="f-39">false</dei:EntityShellCompany>
+<dei:EntityShellCompany contextRef="c-2" id="f-40">false</dei:EntityShellCompany>
+<dei:EntityCommonStockSharesOutstanding contextRef="c-5" decimals="INF" id="f-41" unitRef="shares">661969951</dei:EntityCommonStockSharesOutstanding>
+<dei:EntityCommonStockSharesOutstanding contextRef="c-6" decimals="INF" id="f-42" unitRef="shares">1000</dei:EntityCommonStockSharesOutstanding>
+<us-gaap:Cash contextRef="c-22" decimals="-6" id="f-177" unitRef="usd">1028000000</us-gaap:Cash>
+<us-gaap:Cash contextRef="c-23" decimals="-6" id="f-178" unitRef="usd">954000000</us-gaap:Cash>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-22" decimals="-6" id="f-179" unitRef="usd">6742000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-23" decimals="-6" id="f-180" unitRef="usd">4882000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:RestrictedCashAndInvestmentsCurrent contextRef="c-22" decimals="-6" id="f-181" unitRef="usd">709000000</us-gaap:RestrictedCashAndInvestmentsCurrent>
+<us-gaap:RestrictedCashAndInvestmentsCurrent contextRef="c-23" decimals="-6" id="f-182" unitRef="usd">735000000</us-gaap:RestrictedCashAndInvestmentsCurrent>
+<us-gaap:AccountsReceivableNetCurrent contextRef="c-22" decimals="-6" id="f-183" unitRef="usd">1893000000</us-gaap:AccountsReceivableNetCurrent>
+<us-gaap:AccountsReceivableNetCurrent contextRef="c-23" decimals="-6" id="f-184" unitRef="usd">2075000000</us-gaap:AccountsReceivableNetCurrent>
+<us-gaap:AirlineRelatedInventoryNet contextRef="c-22" decimals="-6" id="f-185" unitRef="usd">3107000000</us-gaap:AirlineRelatedInventoryNet>
+<us-gaap:AirlineRelatedInventoryNet contextRef="c-23" decimals="-6" id="f-186" unitRef="usd">2792000000</us-gaap:AirlineRelatedInventoryNet>
+<us-gaap:PrepaidExpenseAndOtherAssetsCurrent contextRef="c-22" decimals="-6" id="f-187" unitRef="usd">797000000</us-gaap:PrepaidExpenseAndOtherAssetsCurrent>
+<us-gaap:PrepaidExpenseAndOtherAssetsCurrent contextRef="c-23" decimals="-6" id="f-188" unitRef="usd">767000000</us-gaap:PrepaidExpenseAndOtherAssetsCurrent>
+<us-gaap:AssetsCurrent contextRef="c-22" decimals="-6" id="f-189" unitRef="usd">14276000000</us-gaap:AssetsCurrent>
+<us-gaap:AssetsCurrent contextRef="c-23" decimals="-6" id="f-190" unitRef="usd">12205000000</us-gaap:AssetsCurrent>
+<us-gaap:FlightEquipmentGross contextRef="c-22" decimals="-6" id="f-191" unitRef="usd">47908000000</us-gaap:FlightEquipmentGross>
+<us-gaap:FlightEquipmentGross contextRef="c-23" decimals="-6" id="f-192" unitRef="usd">46597000000</us-gaap:FlightEquipmentGross>
+<aal:GroundPropertyAndEquipmentGross contextRef="c-22" decimals="-6" id="f-193" unitRef="usd">10701000000</aal:GroundPropertyAndEquipmentGross>
+<aal:GroundPropertyAndEquipmentGross contextRef="c-23" decimals="-6" id="f-194" unitRef="usd">10479000000</aal:GroundPropertyAndEquipmentGross>
+<us-gaap:DepositsOnFlightEquipment contextRef="c-22" decimals="-6" id="f-195" unitRef="usd">571000000</us-gaap:DepositsOnFlightEquipment>
+<us-gaap:DepositsOnFlightEquipment contextRef="c-23" decimals="-6" id="f-196" unitRef="usd">656000000</us-gaap:DepositsOnFlightEquipment>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization contextRef="c-22" decimals="-6" id="f-197" unitRef="usd">59180000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization contextRef="c-23" decimals="-6" id="f-198" unitRef="usd">57732000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization contextRef="c-22" decimals="-6" id="f-199" unitRef="usd">26098000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization contextRef="c-23" decimals="-6" id="f-200" unitRef="usd">25192000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization contextRef="c-22" decimals="-6" id="f-201" unitRef="usd">33082000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization contextRef="c-23" decimals="-6" id="f-202" unitRef="usd">32540000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization>
+<us-gaap:OperatingLeaseRightOfUseAsset contextRef="c-22" decimals="-6" id="f-203" unitRef="usd">6919000000</us-gaap:OperatingLeaseRightOfUseAsset>
+<us-gaap:OperatingLeaseRightOfUseAsset contextRef="c-23" decimals="-6" id="f-204" unitRef="usd">7091000000</us-gaap:OperatingLeaseRightOfUseAsset>
+<us-gaap:Goodwill contextRef="c-22" decimals="-6" id="f-205" unitRef="usd">4091000000</us-gaap:Goodwill>
+<us-gaap:Goodwill contextRef="c-23" decimals="-6" id="f-206" unitRef="usd">4091000000</us-gaap:Goodwill>
+<us-gaap:IntangibleAssetsNetExcludingGoodwill contextRef="c-22" decimals="-6" id="f-209" unitRef="usd">2069000000</us-gaap:IntangibleAssetsNetExcludingGoodwill>
+<us-gaap:IntangibleAssetsNetExcludingGoodwill contextRef="c-23" decimals="-6" id="f-210" unitRef="usd">2066000000</us-gaap:IntangibleAssetsNetExcludingGoodwill>
+<us-gaap:DeferredIncomeTaxAssetsNet contextRef="c-22" decimals="-6" id="f-211" unitRef="usd">2417000000</us-gaap:DeferredIncomeTaxAssetsNet>
+<us-gaap:DeferredIncomeTaxAssetsNet contextRef="c-23" decimals="-6" id="f-212" unitRef="usd">2368000000</us-gaap:DeferredIncomeTaxAssetsNet>
+<us-gaap:OtherAssetsMiscellaneousNoncurrent contextRef="c-22" decimals="-6" id="f-213" unitRef="usd">1379000000</us-gaap:OtherAssetsMiscellaneousNoncurrent>
+<us-gaap:OtherAssetsMiscellaneousNoncurrent contextRef="c-23" decimals="-6" id="f-214" unitRef="usd">1413000000</us-gaap:OtherAssetsMiscellaneousNoncurrent>
+<us-gaap:OtherAssetsNoncurrent contextRef="c-22" decimals="-6" id="f-215" unitRef="usd">9956000000</us-gaap:OtherAssetsNoncurrent>
+<us-gaap:OtherAssetsNoncurrent contextRef="c-23" decimals="-6" id="f-216" unitRef="usd">9938000000</us-gaap:OtherAssetsNoncurrent>
+<us-gaap:Assets contextRef="c-22" decimals="-6" id="f-217" unitRef="usd">64233000000</us-gaap:Assets>
+<us-gaap:Assets contextRef="c-23" decimals="-6" id="f-218" unitRef="usd">61774000000</us-gaap:Assets>
+<us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent contextRef="c-22" decimals="-6" id="f-219" unitRef="usd">3094000000</us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent>
+<us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent contextRef="c-23" decimals="-6" id="f-220" unitRef="usd">3753000000</us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent>
+<us-gaap:AccountsPayableCurrent contextRef="c-22" decimals="-6" id="f-221" unitRef="usd">3637000000</us-gaap:AccountsPayableCurrent>
+<us-gaap:AccountsPayableCurrent contextRef="c-23" decimals="-6" id="f-222" unitRef="usd">2840000000</us-gaap:AccountsPayableCurrent>
+<us-gaap:EmployeeRelatedLiabilitiesCurrent contextRef="c-22" decimals="-6" id="f-223" unitRef="usd">2012000000</us-gaap:EmployeeRelatedLiabilitiesCurrent>
+<us-gaap:EmployeeRelatedLiabilitiesCurrent contextRef="c-23" decimals="-6" id="f-224" unitRef="usd">2128000000</us-gaap:EmployeeRelatedLiabilitiesCurrent>
+<us-gaap:ContractWithCustomerLiabilityCurrent contextRef="c-24" decimals="-6" id="f-225" unitRef="usd">9551000000</us-gaap:ContractWithCustomerLiabilityCurrent>
+<us-gaap:ContractWithCustomerLiabilityCurrent contextRef="c-25" decimals="-6" id="f-226" unitRef="usd">7158000000</us-gaap:ContractWithCustomerLiabilityCurrent>
+<us-gaap:ContractWithCustomerLiabilityCurrent contextRef="c-26" decimals="-6" id="f-227" unitRef="usd">4353000000</us-gaap:ContractWithCustomerLiabilityCurrent>
+<us-gaap:ContractWithCustomerLiabilityCurrent contextRef="c-27" decimals="-6" id="f-228" unitRef="usd">3725000000</us-gaap:ContractWithCustomerLiabilityCurrent>
+<us-gaap:OperatingLeaseLiabilityCurrent contextRef="c-22" decimals="-6" id="f-229" unitRef="usd">1052000000</us-gaap:OperatingLeaseLiabilityCurrent>
+<us-gaap:OperatingLeaseLiabilityCurrent contextRef="c-23" decimals="-6" id="f-230" unitRef="usd">1058000000</us-gaap:OperatingLeaseLiabilityCurrent>
+<us-gaap:ShortTermBankLoansAndNotesPayable contextRef="c-22" decimals="-6" id="f-231" unitRef="usd">0</us-gaap:ShortTermBankLoansAndNotesPayable>
+<us-gaap:ShortTermBankLoansAndNotesPayable contextRef="c-23" decimals="-6" id="f-232" unitRef="usd">914000000</us-gaap:ShortTermBankLoansAndNotesPayable>
+<us-gaap:OtherAccruedLiabilitiesCurrent contextRef="c-22" decimals="-6" id="f-233" unitRef="usd">3057000000</us-gaap:OtherAccruedLiabilitiesCurrent>
+<us-gaap:OtherAccruedLiabilitiesCurrent contextRef="c-23" decimals="-6" id="f-234" unitRef="usd">2916000000</us-gaap:OtherAccruedLiabilitiesCurrent>
+<us-gaap:LiabilitiesCurrent contextRef="c-22" decimals="-6" id="f-235" unitRef="usd">26756000000</us-gaap:LiabilitiesCurrent>
+<us-gaap:LiabilitiesCurrent contextRef="c-23" decimals="-6" id="f-236" unitRef="usd">24492000000</us-gaap:LiabilitiesCurrent>
+<us-gaap:LongTermDebtAndCapitalLeaseObligations contextRef="c-22" decimals="-6" id="f-237" unitRef="usd">25833000000</us-gaap:LongTermDebtAndCapitalLeaseObligations>
+<us-gaap:LongTermDebtAndCapitalLeaseObligations contextRef="c-23" decimals="-6" id="f-238" unitRef="usd">25254000000</us-gaap:LongTermDebtAndCapitalLeaseObligations>
+<us-gaap:PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent contextRef="c-22" decimals="-6" id="f-239" unitRef="usd">1160000000</us-gaap:PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent>
+<us-gaap:PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent contextRef="c-23" decimals="-6" id="f-240" unitRef="usd">1568000000</us-gaap:PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent>
+<us-gaap:ContractWithCustomerLiabilityNoncurrent contextRef="c-22" decimals="-6" id="f-241" unitRef="usd">7220000000</us-gaap:ContractWithCustomerLiabilityNoncurrent>
+<us-gaap:ContractWithCustomerLiabilityNoncurrent contextRef="c-23" decimals="-6" id="f-242" unitRef="usd">6839000000</us-gaap:ContractWithCustomerLiabilityNoncurrent>
+<us-gaap:OperatingLeaseLiabilityNoncurrent contextRef="c-22" decimals="-6" id="f-243" unitRef="usd">5750000000</us-gaap:OperatingLeaseLiabilityNoncurrent>
+<us-gaap:OperatingLeaseLiabilityNoncurrent contextRef="c-23" decimals="-6" id="f-244" unitRef="usd">5905000000</us-gaap:OperatingLeaseLiabilityNoncurrent>
+<us-gaap:OtherLiabilitiesNoncurrent contextRef="c-22" decimals="-6" id="f-245" unitRef="usd">1486000000</us-gaap:OtherLiabilitiesNoncurrent>
+<us-gaap:OtherLiabilitiesNoncurrent contextRef="c-23" decimals="-6" id="f-246" unitRef="usd">1443000000</us-gaap:OtherLiabilitiesNoncurrent>
+<us-gaap:LiabilitiesNoncurrent contextRef="c-22" decimals="-6" id="f-247" unitRef="usd">41449000000</us-gaap:LiabilitiesNoncurrent>
+<us-gaap:LiabilitiesNoncurrent contextRef="c-23" decimals="-6" id="f-248" unitRef="usd">41009000000</us-gaap:LiabilitiesNoncurrent>
+<us-gaap:CommitmentsAndContingencies contextRef="c-22" id="f-249" unitRef="usd" xsi:nil="true"/>
+<us-gaap:CommitmentsAndContingencies contextRef="c-23" id="f-250" unitRef="usd" xsi:nil="true"/>
+<us-gaap:CommonStockValue contextRef="c-22" decimals="-6" id="f-259" unitRef="usd">7000000</us-gaap:CommonStockValue>
+<us-gaap:CommonStockValue contextRef="c-23" decimals="-6" id="f-260" unitRef="usd">7000000</us-gaap:CommonStockValue>
+<us-gaap:AdditionalPaidInCapitalCommonStock contextRef="c-22" decimals="-6" id="f-261" unitRef="usd">7421000000</us-gaap:AdditionalPaidInCapitalCommonStock>
+<us-gaap:AdditionalPaidInCapitalCommonStock contextRef="c-23" decimals="-6" id="f-262" unitRef="usd">7387000000</us-gaap:AdditionalPaidInCapitalCommonStock>
+<us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="c-22" decimals="-6" id="f-263" unitRef="usd">-4357000000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+<us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="c-23" decimals="-6" id="f-264" unitRef="usd">-4389000000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+<us-gaap:RetainedEarningsAccumulatedDeficit contextRef="c-22" decimals="-6" id="f-265" unitRef="usd">-7043000000</us-gaap:RetainedEarningsAccumulatedDeficit>
+<us-gaap:RetainedEarningsAccumulatedDeficit contextRef="c-23" decimals="-6" id="f-266" unitRef="usd">-6732000000</us-gaap:RetainedEarningsAccumulatedDeficit>
+<us-gaap:StockholdersEquity contextRef="c-22" decimals="-6" id="f-267" unitRef="usd">-3972000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-23" decimals="-6" id="f-268" unitRef="usd">-3727000000</us-gaap:StockholdersEquity>
+<us-gaap:LiabilitiesAndStockholdersEquity contextRef="c-22" decimals="-6" id="f-269" unitRef="usd">64233000000</us-gaap:LiabilitiesAndStockholdersEquity>
+<us-gaap:LiabilitiesAndStockholdersEquity contextRef="c-23" decimals="-6" id="f-270" unitRef="usd">61774000000</us-gaap:LiabilitiesAndStockholdersEquity>
+<us-gaap:Cash contextRef="c-22" decimals="-6" id="f-313" unitRef="usd">1028000000</us-gaap:Cash>
+<us-gaap:Cash contextRef="c-29" decimals="-6" id="f-314" unitRef="usd">833000000</us-gaap:Cash>
+<us-gaap:StockholdersEquity contextRef="c-30" decimals="-6" id="f-319" unitRef="usd">7000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-31" decimals="-6" id="f-320" unitRef="usd">7387000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-32" decimals="-6" id="f-321" unitRef="usd">-4389000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-33" decimals="-6" id="f-322" unitRef="usd">-6732000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-23" decimals="-6" id="f-323" unitRef="usd">-3727000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-38" decimals="-6" id="f-333" unitRef="usd">7000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-39" decimals="-6" id="f-334" unitRef="usd">7402000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-40" decimals="-6" id="f-335" unitRef="usd">-4372000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-41" decimals="-6" id="f-336" unitRef="usd">-7114000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-42" decimals="-6" id="f-337" unitRef="usd">-4077000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-46" decimals="-6" id="f-347" unitRef="usd">7000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-47" decimals="-6" id="f-348" unitRef="usd">7421000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-48" decimals="-6" id="f-349" unitRef="usd">-4357000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-49" decimals="-6" id="f-350" unitRef="usd">-7043000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-22" decimals="-6" id="f-351" unitRef="usd">-3972000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-50" decimals="-6" id="f-352" unitRef="usd">7000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-51" decimals="-6" id="f-353" unitRef="usd">7424000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-52" decimals="-6" id="f-354" unitRef="usd">-4565000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-53" decimals="-6" id="f-355" unitRef="usd">-6843000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-28" decimals="-6" id="f-356" unitRef="usd">-3977000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-58" decimals="-6" id="f-368" unitRef="usd">7000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-59" decimals="-6" id="f-369" unitRef="usd">7348000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-60" decimals="-6" id="f-370" unitRef="usd">-4547000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-61" decimals="-6" id="f-371" unitRef="usd">-7316000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-62" decimals="-6" id="f-372" unitRef="usd">-4508000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-66" decimals="-6" id="f-382" unitRef="usd">7000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-67" decimals="-6" id="f-383" unitRef="usd">7370000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-68" decimals="-6" id="f-384" unitRef="usd">-4530000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-69" decimals="-6" id="f-385" unitRef="usd">-6717000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-29" decimals="-6" id="f-386" unitRef="usd">-3870000000</us-gaap:StockholdersEquity>
+<us-gaap:ContractWithCustomerLiabilityCurrent contextRef="c-26" decimals="-8" id="f-543" unitRef="usd">4400000000</us-gaap:ContractWithCustomerLiabilityCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-208" decimals="-6" id="f-687" unitRef="usd">364000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-209" decimals="-6" id="f-688" unitRef="usd">364000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-210" decimals="-6" id="f-689" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-211" decimals="-6" id="f-690" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-212" decimals="-6" id="f-691" unitRef="usd">4036000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-213" decimals="-6" id="f-692" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-214" decimals="-6" id="f-693" unitRef="usd">4036000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-215" decimals="-6" id="f-694" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-216" decimals="-6" id="f-695" unitRef="usd">1992000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-217" decimals="-6" id="f-696" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-218" decimals="-6" id="f-697" unitRef="usd">1992000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-219" decimals="-6" id="f-698" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-220" decimals="-6" id="f-699" unitRef="usd">350000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-221" decimals="-6" id="f-700" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-222" decimals="-6" id="f-701" unitRef="usd">350000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-223" decimals="-6" id="f-702" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-22" decimals="-6" id="f-703" unitRef="usd">6742000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-224" decimals="-6" id="f-704" unitRef="usd">364000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-225" decimals="-6" id="f-705" unitRef="usd">6378000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-226" decimals="-6" id="f-706" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:StockholdersEquity contextRef="c-32" decimals="-6" id="f-801" unitRef="usd">-4389000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-48" decimals="-6" id="f-817" unitRef="usd">-4357000000</us-gaap:StockholdersEquity>
+<us-gaap:Cash contextRef="c-295" decimals="-6" id="f-960" unitRef="usd">1017000000</us-gaap:Cash>
+<us-gaap:Cash contextRef="c-296" decimals="-6" id="f-961" unitRef="usd">936000000</us-gaap:Cash>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-295" decimals="-6" id="f-962" unitRef="usd">6739000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-296" decimals="-6" id="f-963" unitRef="usd">4880000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:RestrictedCashAndInvestmentsCurrent contextRef="c-295" decimals="-6" id="f-964" unitRef="usd">709000000</us-gaap:RestrictedCashAndInvestmentsCurrent>
+<us-gaap:RestrictedCashAndInvestmentsCurrent contextRef="c-296" decimals="-6" id="f-965" unitRef="usd">735000000</us-gaap:RestrictedCashAndInvestmentsCurrent>
+<us-gaap:AccountsReceivableNetCurrent contextRef="c-295" decimals="-6" id="f-966" unitRef="usd">1857000000</us-gaap:AccountsReceivableNetCurrent>
+<us-gaap:AccountsReceivableNetCurrent contextRef="c-296" decimals="-6" id="f-967" unitRef="usd">2041000000</us-gaap:AccountsReceivableNetCurrent>
+<us-gaap:OtherReceivablesNetCurrent contextRef="c-295" decimals="-6" id="f-968" unitRef="usd">10203000000</us-gaap:OtherReceivablesNetCurrent>
+<us-gaap:OtherReceivablesNetCurrent contextRef="c-296" decimals="-6" id="f-969" unitRef="usd">9896000000</us-gaap:OtherReceivablesNetCurrent>
+<us-gaap:AirlineRelatedInventoryNet contextRef="c-295" decimals="-6" id="f-970" unitRef="usd">2886000000</us-gaap:AirlineRelatedInventoryNet>
+<us-gaap:AirlineRelatedInventoryNet contextRef="c-296" decimals="-6" id="f-971" unitRef="usd">2596000000</us-gaap:AirlineRelatedInventoryNet>
+<us-gaap:PrepaidExpenseAndOtherAssetsCurrent contextRef="c-295" decimals="-6" id="f-972" unitRef="usd">673000000</us-gaap:PrepaidExpenseAndOtherAssetsCurrent>
+<us-gaap:PrepaidExpenseAndOtherAssetsCurrent contextRef="c-296" decimals="-6" id="f-973" unitRef="usd">645000000</us-gaap:PrepaidExpenseAndOtherAssetsCurrent>
+<us-gaap:AssetsCurrent contextRef="c-295" decimals="-6" id="f-974" unitRef="usd">24084000000</us-gaap:AssetsCurrent>
+<us-gaap:AssetsCurrent contextRef="c-296" decimals="-6" id="f-975" unitRef="usd">21729000000</us-gaap:AssetsCurrent>
+<us-gaap:FlightEquipmentGross contextRef="c-295" decimals="-6" id="f-976" unitRef="usd">47517000000</us-gaap:FlightEquipmentGross>
+<us-gaap:FlightEquipmentGross contextRef="c-296" decimals="-6" id="f-977" unitRef="usd">46226000000</us-gaap:FlightEquipmentGross>
+<aal:GroundPropertyAndEquipmentGross contextRef="c-295" decimals="-6" id="f-978" unitRef="usd">10148000000</aal:GroundPropertyAndEquipmentGross>
+<aal:GroundPropertyAndEquipmentGross contextRef="c-296" decimals="-6" id="f-979" unitRef="usd">9954000000</aal:GroundPropertyAndEquipmentGross>
+<us-gaap:DepositsOnFlightEquipment contextRef="c-295" decimals="-6" id="f-980" unitRef="usd">571000000</us-gaap:DepositsOnFlightEquipment>
+<us-gaap:DepositsOnFlightEquipment contextRef="c-296" decimals="-6" id="f-981" unitRef="usd">656000000</us-gaap:DepositsOnFlightEquipment>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization contextRef="c-295" decimals="-6" id="f-982" unitRef="usd">58236000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization contextRef="c-296" decimals="-6" id="f-983" unitRef="usd">56836000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization contextRef="c-295" decimals="-6" id="f-984" unitRef="usd">25511000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization contextRef="c-296" decimals="-6" id="f-985" unitRef="usd">24621000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization contextRef="c-295" decimals="-6" id="f-986" unitRef="usd">32725000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization>
+<us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization contextRef="c-296" decimals="-6" id="f-987" unitRef="usd">32215000000</us-gaap:PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAfterAccumulatedDepreciationAndAmortization>
+<us-gaap:OperatingLeaseRightOfUseAsset contextRef="c-295" decimals="-6" id="f-988" unitRef="usd">6871000000</us-gaap:OperatingLeaseRightOfUseAsset>
+<us-gaap:OperatingLeaseRightOfUseAsset contextRef="c-296" decimals="-6" id="f-989" unitRef="usd">7038000000</us-gaap:OperatingLeaseRightOfUseAsset>
+<us-gaap:Goodwill contextRef="c-295" decimals="-6" id="f-990" unitRef="usd">4091000000</us-gaap:Goodwill>
+<us-gaap:Goodwill contextRef="c-296" decimals="-6" id="f-991" unitRef="usd">4091000000</us-gaap:Goodwill>
+<us-gaap:IntangibleAssetsNetExcludingGoodwill contextRef="c-295" decimals="-6" id="f-994" unitRef="usd">2069000000</us-gaap:IntangibleAssetsNetExcludingGoodwill>
+<us-gaap:IntangibleAssetsNetExcludingGoodwill contextRef="c-296" decimals="-6" id="f-995" unitRef="usd">2066000000</us-gaap:IntangibleAssetsNetExcludingGoodwill>
+<us-gaap:DeferredIncomeTaxAssetsNet contextRef="c-295" decimals="-6" id="f-996" unitRef="usd">1817000000</us-gaap:DeferredIncomeTaxAssetsNet>
+<us-gaap:DeferredIncomeTaxAssetsNet contextRef="c-296" decimals="-6" id="f-997" unitRef="usd">1832000000</us-gaap:DeferredIncomeTaxAssetsNet>
+<us-gaap:OtherAssetsMiscellaneousNoncurrent contextRef="c-295" decimals="-6" id="f-998" unitRef="usd">1231000000</us-gaap:OtherAssetsMiscellaneousNoncurrent>
+<us-gaap:OtherAssetsMiscellaneousNoncurrent contextRef="c-296" decimals="-6" id="f-999" unitRef="usd">1276000000</us-gaap:OtherAssetsMiscellaneousNoncurrent>
+<us-gaap:OtherAssetsNoncurrent contextRef="c-295" decimals="-6" id="f-1000" unitRef="usd">9208000000</us-gaap:OtherAssetsNoncurrent>
+<us-gaap:OtherAssetsNoncurrent contextRef="c-296" decimals="-6" id="f-1001" unitRef="usd">9265000000</us-gaap:OtherAssetsNoncurrent>
+<us-gaap:Assets contextRef="c-295" decimals="-6" id="f-1002" unitRef="usd">72888000000</us-gaap:Assets>
+<us-gaap:Assets contextRef="c-296" decimals="-6" id="f-1003" unitRef="usd">70247000000</us-gaap:Assets>
+<us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent contextRef="c-295" decimals="-6" id="f-1004" unitRef="usd">3088000000</us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent>
+<us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent contextRef="c-296" decimals="-6" id="f-1005" unitRef="usd">3750000000</us-gaap:LongTermDebtAndCapitalLeaseObligationsCurrent>
+<us-gaap:AccountsPayableCurrent contextRef="c-295" decimals="-6" id="f-1006" unitRef="usd">3492000000</us-gaap:AccountsPayableCurrent>
+<us-gaap:AccountsPayableCurrent contextRef="c-296" decimals="-6" id="f-1007" unitRef="usd">2717000000</us-gaap:AccountsPayableCurrent>
+<us-gaap:EmployeeRelatedLiabilitiesCurrent contextRef="c-295" decimals="-6" id="f-1008" unitRef="usd">1841000000</us-gaap:EmployeeRelatedLiabilitiesCurrent>
+<us-gaap:EmployeeRelatedLiabilitiesCurrent contextRef="c-296" decimals="-6" id="f-1009" unitRef="usd">1957000000</us-gaap:EmployeeRelatedLiabilitiesCurrent>
+<us-gaap:ContractWithCustomerLiabilityCurrent contextRef="c-297" decimals="-6" id="f-1010" unitRef="usd">9551000000</us-gaap:ContractWithCustomerLiabilityCurrent>
+<us-gaap:ContractWithCustomerLiabilityCurrent contextRef="c-298" decimals="-6" id="f-1011" unitRef="usd">7158000000</us-gaap:ContractWithCustomerLiabilityCurrent>
+<us-gaap:ContractWithCustomerLiabilityCurrent contextRef="c-299" decimals="-6" id="f-1012" unitRef="usd">4353000000</us-gaap:ContractWithCustomerLiabilityCurrent>
+<us-gaap:ContractWithCustomerLiabilityCurrent contextRef="c-300" decimals="-6" id="f-1013" unitRef="usd">3725000000</us-gaap:ContractWithCustomerLiabilityCurrent>
+<us-gaap:OperatingLeaseLiabilityCurrent contextRef="c-295" decimals="-6" id="f-1014" unitRef="usd">1044000000</us-gaap:OperatingLeaseLiabilityCurrent>
+<us-gaap:OperatingLeaseLiabilityCurrent contextRef="c-296" decimals="-6" id="f-1015" unitRef="usd">1048000000</us-gaap:OperatingLeaseLiabilityCurrent>
+<us-gaap:ShortTermBankLoansAndNotesPayable contextRef="c-295" decimals="-6" id="f-1016" unitRef="usd">0</us-gaap:ShortTermBankLoansAndNotesPayable>
+<us-gaap:ShortTermBankLoansAndNotesPayable contextRef="c-296" decimals="-6" id="f-1017" unitRef="usd">914000000</us-gaap:ShortTermBankLoansAndNotesPayable>
+<us-gaap:OtherAccruedLiabilitiesCurrent contextRef="c-295" decimals="-6" id="f-1018" unitRef="usd">2881000000</us-gaap:OtherAccruedLiabilitiesCurrent>
+<us-gaap:OtherAccruedLiabilitiesCurrent contextRef="c-296" decimals="-6" id="f-1019" unitRef="usd">2768000000</us-gaap:OtherAccruedLiabilitiesCurrent>
+<us-gaap:LiabilitiesCurrent contextRef="c-295" decimals="-6" id="f-1020" unitRef="usd">26250000000</us-gaap:LiabilitiesCurrent>
+<us-gaap:LiabilitiesCurrent contextRef="c-296" decimals="-6" id="f-1021" unitRef="usd">24037000000</us-gaap:LiabilitiesCurrent>
+<us-gaap:LongTermDebtAndCapitalLeaseObligations contextRef="c-295" decimals="-6" id="f-1022" unitRef="usd">22076000000</us-gaap:LongTermDebtAndCapitalLeaseObligations>
+<us-gaap:LongTermDebtAndCapitalLeaseObligations contextRef="c-296" decimals="-6" id="f-1023" unitRef="usd">21509000000</us-gaap:LongTermDebtAndCapitalLeaseObligations>
+<us-gaap:PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent contextRef="c-295" decimals="-6" id="f-1024" unitRef="usd">1159000000</us-gaap:PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent>
+<us-gaap:PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent contextRef="c-296" decimals="-6" id="f-1025" unitRef="usd">1566000000</us-gaap:PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent>
+<us-gaap:ContractWithCustomerLiabilityNoncurrent contextRef="c-295" decimals="-6" id="f-1026" unitRef="usd">7220000000</us-gaap:ContractWithCustomerLiabilityNoncurrent>
+<us-gaap:ContractWithCustomerLiabilityNoncurrent contextRef="c-296" decimals="-6" id="f-1027" unitRef="usd">6839000000</us-gaap:ContractWithCustomerLiabilityNoncurrent>
+<us-gaap:OperatingLeaseLiabilityNoncurrent contextRef="c-295" decimals="-6" id="f-1028" unitRef="usd">5708000000</us-gaap:OperatingLeaseLiabilityNoncurrent>
+<us-gaap:OperatingLeaseLiabilityNoncurrent contextRef="c-296" decimals="-6" id="f-1029" unitRef="usd">5860000000</us-gaap:OperatingLeaseLiabilityNoncurrent>
+<us-gaap:OtherLiabilitiesNoncurrent contextRef="c-295" decimals="-6" id="f-1030" unitRef="usd">1451000000</us-gaap:OtherLiabilitiesNoncurrent>
+<us-gaap:OtherLiabilitiesNoncurrent contextRef="c-296" decimals="-6" id="f-1031" unitRef="usd">1408000000</us-gaap:OtherLiabilitiesNoncurrent>
+<us-gaap:LiabilitiesNoncurrent contextRef="c-295" decimals="-6" id="f-1032" unitRef="usd">37614000000</us-gaap:LiabilitiesNoncurrent>
+<us-gaap:LiabilitiesNoncurrent contextRef="c-296" decimals="-6" id="f-1033" unitRef="usd">37182000000</us-gaap:LiabilitiesNoncurrent>
+<us-gaap:CommitmentsAndContingencies contextRef="c-295" id="f-1034" unitRef="usd" xsi:nil="true"/>
+<us-gaap:CommitmentsAndContingencies contextRef="c-296" id="f-1035" unitRef="usd" xsi:nil="true"/>
+<us-gaap:CommonStockValue contextRef="c-295" decimals="-6" id="f-1044" unitRef="usd">0</us-gaap:CommonStockValue>
+<us-gaap:CommonStockValue contextRef="c-296" decimals="-6" id="f-1045" unitRef="usd">0</us-gaap:CommonStockValue>
+<us-gaap:AdditionalPaidInCapitalCommonStock contextRef="c-295" decimals="-6" id="f-1046" unitRef="usd">17512000000</us-gaap:AdditionalPaidInCapitalCommonStock>
+<us-gaap:AdditionalPaidInCapitalCommonStock contextRef="c-296" decimals="-6" id="f-1047" unitRef="usd">17468000000</us-gaap:AdditionalPaidInCapitalCommonStock>
+<us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="c-295" decimals="-6" id="f-1048" unitRef="usd">-4475000000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+<us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="c-296" decimals="-6" id="f-1049" unitRef="usd">-4507000000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+<us-gaap:RetainedEarningsAccumulatedDeficit contextRef="c-295" decimals="-6" id="f-1050" unitRef="usd">-4013000000</us-gaap:RetainedEarningsAccumulatedDeficit>
+<us-gaap:RetainedEarningsAccumulatedDeficit contextRef="c-296" decimals="-6" id="f-1051" unitRef="usd">-3933000000</us-gaap:RetainedEarningsAccumulatedDeficit>
+<us-gaap:StockholdersEquity contextRef="c-295" decimals="-6" id="f-1052" unitRef="usd">9024000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-296" decimals="-6" id="f-1053" unitRef="usd">9028000000</us-gaap:StockholdersEquity>
+<us-gaap:LiabilitiesAndStockholdersEquity contextRef="c-295" decimals="-6" id="f-1054" unitRef="usd">72888000000</us-gaap:LiabilitiesAndStockholdersEquity>
+<us-gaap:LiabilitiesAndStockholdersEquity contextRef="c-296" decimals="-6" id="f-1055" unitRef="usd">70247000000</us-gaap:LiabilitiesAndStockholdersEquity>
+<us-gaap:Cash contextRef="c-295" decimals="-6" id="f-1098" unitRef="usd">1017000000</us-gaap:Cash>
+<us-gaap:Cash contextRef="c-302" decimals="-6" id="f-1099" unitRef="usd">824000000</us-gaap:Cash>
+<us-gaap:StockholdersEquity contextRef="c-303" decimals="-6" id="f-1104" unitRef="usd">0</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-304" decimals="-6" id="f-1105" unitRef="usd">17468000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-305" decimals="-6" id="f-1106" unitRef="usd">-4507000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-306" decimals="-6" id="f-1107" unitRef="usd">-3933000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-296" decimals="-6" id="f-1108" unitRef="usd">9028000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-311" decimals="-6" id="f-1115" unitRef="usd">0</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-312" decimals="-6" id="f-1116" unitRef="usd">17490000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-313" decimals="-6" id="f-1117" unitRef="usd">-4490000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-314" decimals="-6" id="f-1118" unitRef="usd">-4207000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-315" decimals="-6" id="f-1119" unitRef="usd">8793000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-319" decimals="-6" id="f-1126" unitRef="usd">0</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-320" decimals="-6" id="f-1127" unitRef="usd">17512000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-321" decimals="-6" id="f-1128" unitRef="usd">-4475000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-322" decimals="-6" id="f-1129" unitRef="usd">-4013000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-295" decimals="-6" id="f-1130" unitRef="usd">9024000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-323" decimals="-6" id="f-1131" unitRef="usd">0</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-324" decimals="-6" id="f-1132" unitRef="usd">17408000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-325" decimals="-6" id="f-1133" unitRef="usd">-4677000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-326" decimals="-6" id="f-1134" unitRef="usd">-4497000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-301" decimals="-6" id="f-1135" unitRef="usd">8234000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-331" decimals="-6" id="f-1144" unitRef="usd">0</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-332" decimals="-6" id="f-1145" unitRef="usd">17424000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-333" decimals="-6" id="f-1146" unitRef="usd">-4659000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-334" decimals="-6" id="f-1147" unitRef="usd">-4881000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-335" decimals="-6" id="f-1148" unitRef="usd">7884000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-339" decimals="-6" id="f-1157" unitRef="usd">0</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-340" decimals="-6" id="f-1158" unitRef="usd">17447000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-341" decimals="-6" id="f-1159" unitRef="usd">-4642000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-342" decimals="-6" id="f-1160" unitRef="usd">-4163000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-302" decimals="-6" id="f-1161" unitRef="usd">8642000000</us-gaap:StockholdersEquity>
+<us-gaap:ContractWithCustomerLiabilityCurrent contextRef="c-299" decimals="-8" id="f-1265" unitRef="usd">4400000000</us-gaap:ContractWithCustomerLiabilityCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-425" decimals="-6" id="f-1398" unitRef="usd">362000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-426" decimals="-6" id="f-1399" unitRef="usd">362000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-427" decimals="-6" id="f-1400" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-428" decimals="-6" id="f-1401" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-429" decimals="-6" id="f-1402" unitRef="usd">4036000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-430" decimals="-6" id="f-1403" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-431" decimals="-6" id="f-1404" unitRef="usd">4036000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-432" decimals="-6" id="f-1405" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-433" decimals="-6" id="f-1406" unitRef="usd">1991000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-434" decimals="-6" id="f-1407" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-435" decimals="-6" id="f-1408" unitRef="usd">1991000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-436" decimals="-6" id="f-1409" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-437" decimals="-6" id="f-1410" unitRef="usd">350000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-438" decimals="-6" id="f-1411" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-439" decimals="-6" id="f-1412" unitRef="usd">350000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-440" decimals="-6" id="f-1413" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-295" decimals="-6" id="f-1414" unitRef="usd">6739000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-441" decimals="-6" id="f-1415" unitRef="usd">362000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-442" decimals="-6" id="f-1416" unitRef="usd">6377000000</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent contextRef="c-443" decimals="-6" id="f-1417" unitRef="usd">0</us-gaap:AvailableForSaleSecuritiesDebtSecuritiesCurrent>
+<us-gaap:StockholdersEquity contextRef="c-305" decimals="-6" id="f-1512" unitRef="usd">-4507000000</us-gaap:StockholdersEquity>
+<us-gaap:StockholdersEquity contextRef="c-321" decimals="-6" id="f-1528" unitRef="usd">-4475000000</us-gaap:StockholdersEquity>
+<us-gaap:AccountsPayableCurrent contextRef="c-497" decimals="-6" id="f-1560" unitRef="usd">2055000000</us-gaap:AccountsPayableCurrent>
+<us-gaap:AccountsPayableCurrent contextRef="c-498" decimals="-6" id="f-1561" unitRef="usd">2042000000</us-gaap:AccountsPayableCurrent>
+<us-gaap:OtherReceivablesNetCurrent contextRef="c-499" decimals="-6" id="f-1562" unitRef="usd">10203000000</us-gaap:OtherReceivablesNetCurrent>
+<us-gaap:OtherReceivablesNetCurrent contextRef="c-500" decimals="-6" id="f-1563" unitRef="usd">9896000000</us-gaap:OtherReceivablesNetCurrent>
+</xbrl>

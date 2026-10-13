@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--XBRL Document Created with the Workiva Platform-->
+<!--Copyright 2026 Workiva-->
+<!--r:019e3bca-79ee-7885-8219-237584d0ba95,g:49b28a2d-6ba5-4147-92f5-1bd485bc07dd-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:amzn="http://www.amazon.com/20260630" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2024-01-31" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.amazon.com/20260630">
+<xs:import namespace="http://fasb.org/srt/2026" schemaLocation="https://xbrl.fasb.org/srt/2026/elts/srt-2026.xsd"/>
+<xs:import namespace="http://fasb.org/us-gaap/2026" schemaLocation="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd"/>
+<xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+<xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+<xs:import namespace="http://www.xbrl.org/dtr/type/2024-01-31" schemaLocation="https://www.xbrl.org/dtr/type/2024-01-31/types.xsd"/>
+<xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+<xs:import namespace="http://xbrl.sec.gov/dei/2026" schemaLocation="https://xbrl.sec.gov/dei/2026/dei-2026.xsd"/>
+<xs:import namespace="http://xbrl.sec.gov/ecd/2026" schemaLocation="https://xbrl.sec.gov/ecd/2026/ecd-2026.xsd"/>
+<xs:annotation>
+<xs:appinfo>
+<link:roleType id="ConsolidatedBalanceSheets" roleURI="http://www.amazon.com/role/ConsolidatedBalanceSheets">
+        <link:definition>9952155 - Statement - Consolidated Balance Sheets</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+<link:roleType id="StockholdersEquityScheduleofAccumulatedOtherComprehensiveIncomeLossDetails" roleURI="http://www.amazon.com/role/StockholdersEquityScheduleofAccumulatedOtherComprehensiveIncomeLossDetails">
+        <link:definition>9955545 - Disclosure - Stockholders' Equity - Schedule of Accumulated Other Comprehensive Income (Loss) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+</xs:appinfo>
+</xs:annotation>
+<xs:element id="amzn_FloatingRateNotesDue2028Member" abstract="true" name="FloatingRateNotesDue2028Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_A2.800NotesDue2028Member" abstract="true" name="A2.800NotesDue2028Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_A3.100NotesDue2030Member" abstract="true" name="A3.100NotesDue2030Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_A3.350NotesDue2032Member" abstract="true" name="A3.350NotesDue2032Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_A3.700NotesDue2035Member" abstract="true" name="A3.700NotesDue2035Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_A4.050NotesDue2039Member" abstract="true" name="A4.050NotesDue2039Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_A4.450NotesDue2045Member" abstract="true" name="A4.450NotesDue2045Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_A4.850NotesDue2064Member" abstract="true" name="A4.850NotesDue2064Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_LeaseLiabilityNoncurrent" abstract="false" name="LeaseLiabilityNoncurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+<xs:element id="amzn_VendorAccountsReceivableMember" abstract="true" name="VendorAccountsReceivableMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_OtherReceivablesMember" abstract="true" name="OtherReceivablesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_OpenAIGroupPBCMember" abstract="true" name="OpenAIGroupPBCMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_GlobalstarInc.Member" abstract="true" name="GlobalstarInc.Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_July2026USDollarDenominatedNotesMember" abstract="true" name="July2026USDollarDenominatedNotesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_TermLoanMember" abstract="true" name="TermLoanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_March2022ShareRepurchaseProgramMember" abstract="true" name="March2022ShareRepurchaseProgramMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_AOCINetInvestmentHedgeParentMember" abstract="true" name="AOCINetInvestmentHedgeParentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_AOCIOtherParentMember" abstract="true" name="AOCIOtherParentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_NorthAmericaSegmentMember" abstract="true" name="NorthAmericaSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_InternationalSegmentMember" abstract="true" name="InternationalSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+<xs:element id="amzn_AmazonWebServicesSegmentMember" abstract="true" name="AmazonWebServicesSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+</xs:schema>
