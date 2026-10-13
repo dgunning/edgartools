@@ -17,15 +17,13 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from edgar.xbrl.standardization import (
-    StandardConcept, MappingStore, ConceptMapper,
-    standardize_statement, initialize_default_mappings
-)
+from edgar.xbrl.standardization import StandardConcept, MappingStore, ConceptMapper, standardize_statement, initialize_default_mappings
 from edgar.xbrl.standardization.core import _assign_sections_bottom_up
 from edgar.xbrl.statement_resolver import statement_registry
 
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
+
 
 @pytest.fixture
 def temp_mapping_store():
@@ -44,11 +42,8 @@ def temp_standardization_dir():
     company_mappings_dir = os.path.join(standardization_dir, "company_mappings")
     os.makedirs(company_mappings_dir)
 
-    core_mappings = {
-        "Revenue": ["us-gaap_Revenue", "us-gaap_Revenues"],
-        "Net Income": ["us-gaap_NetIncome", "us-gaap_NetIncomeLoss"]
-    }
-    with open(os.path.join(standardization_dir, "concept_mappings.json"), 'w') as f:
+    core_mappings = {"Revenue": ["us-gaap_Revenue", "us-gaap_Revenues"], "Net Income": ["us-gaap_NetIncome", "us-gaap_NetIncomeLoss"]}
+    with open(os.path.join(standardization_dir, "concept_mappings.json"), "w") as f:
         json.dump(core_mappings, f)
 
     tesla_mappings = {
@@ -56,11 +51,11 @@ def temp_standardization_dir():
         "concept_mappings": {
             "Automotive Revenue": ["tsla:AutomotiveRevenue"],
             "Automotive Leasing Revenue": ["tsla:AutomotiveLeasing"],
-            "Energy Revenue": ["tsla:EnergyGenerationAndStorageRevenue"]
+            "Energy Revenue": ["tsla:EnergyGenerationAndStorageRevenue"],
         },
-        "hierarchy_rules": {"Revenue": {"children": ["Automotive Revenue", "Energy Revenue"]}}
+        "hierarchy_rules": {"Revenue": {"children": ["Automotive Revenue", "Energy Revenue"]}},
     }
-    with open(os.path.join(company_mappings_dir, "tsla_mappings.json"), 'w') as f:
+    with open(os.path.join(company_mappings_dir, "tsla_mappings.json"), "w") as f:
         json.dump(tesla_mappings, f)
 
     yield standardization_dir
@@ -68,6 +63,7 @@ def temp_standardization_dir():
 
 
 # ── StandardConcept enum ─────────────────────────────────────────────────────
+
 
 def test_standard_concepts():
     """Core enum values are defined correctly."""
@@ -88,6 +84,7 @@ def test_hierarchical_standard_concepts():
 
 # ── MappingStore ──────────────────────────────────────────────────────────────
 
+
 def test_mapping_store_add_get(temp_mapping_store):
     """Add and retrieve mappings, including reverse lookup."""
     store = temp_mapping_store
@@ -105,9 +102,12 @@ def test_initialize_default_mappings():
     assert store.get_standard_concept("us-gaap_Revenue") == "Revenue"
     assert store.get_standard_concept("us-gaap_NetIncome") == "Net Income"
     assert store.get_standard_concept("us-gaap_Assets") == "Total Assets"
-    assert store.get_standard_concept(
-        "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
-    ) == "Net Change in Cash"
+    assert (
+        store.get_standard_concept(
+            "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"
+        )
+        == "Net Change in Cash"
+    )
 
 
 def test_hierarchy_mappings_are_distinct():
@@ -126,7 +126,10 @@ def test_hierarchy_mappings_are_distinct():
 
     # Net income hierarchy: distinct labels for different concepts
     assert store.get_standard_concept("us-gaap_NetIncomeLoss") == "Net Income"
-    assert store.get_standard_concept("us-gaap_NetIncomeLossAttributableToNoncontrollingInterest") == "Net Income Attributable to Noncontrolling Interest"
+    assert (
+        store.get_standard_concept("us-gaap_NetIncomeLossAttributableToNoncontrollingInterest")
+        == "Net Income Attributable to Noncontrolling Interest"
+    )
     assert store.get_standard_concept("us-gaap_ProfitLoss") == "Profit or Loss"
 
     # Cost concepts all map to "Cost of Revenue"
@@ -140,6 +143,7 @@ def test_hierarchy_mappings_are_distinct():
 
 # ── ConceptMapper ─────────────────────────────────────────────────────────────
 
+
 def test_concept_mapper_direct_mapping(temp_mapping_store):
     """ConceptMapper returns correct standard concept for a known mapping."""
     store = temp_mapping_store
@@ -151,13 +155,12 @@ def test_concept_mapper_direct_mapping(temp_mapping_store):
 
 # ── standardize_statement() ──────────────────────────────────────────────────
 
+
 def test_standardize_statement():
     """Original labels preserved, standard_concept metadata added."""
     statement_data = [
-        {"concept": "us-gaap_Revenues", "label": "Revenue",
-         "statement_type": "IncomeStatement", "is_abstract": False},
-        {"concept": "us-gaap_CostOfGoodsAndServicesSold", "label": "Cost of Sales",
-         "statement_type": "IncomeStatement", "is_abstract": False}
+        {"concept": "us-gaap_Revenues", "label": "Revenue", "statement_type": "IncomeStatement", "is_abstract": False},
+        {"concept": "us-gaap_CostOfGoodsAndServicesSold", "label": "Cost of Sales", "statement_type": "IncomeStatement", "is_abstract": False},
     ]
     mapper = MagicMock()
     result = standardize_statement(statement_data, mapper)
@@ -169,6 +172,7 @@ def test_standardize_statement():
 
 
 # ── Company-specific mappings (Tesla) ─────────────────────────────────────────
+
 
 def test_tesla_specific_mapping_priority(temp_standardization_dir):
     """Tesla-specific concept maps correctly; core US-GAAP still works."""
@@ -198,15 +202,16 @@ def test_hierarchy_rules_loading(temp_standardization_dir):
 def test_error_handling_missing_company_mapping_file(temp_standardization_dir):
     """Invalid JSON in company_mappings dir doesn't crash store init."""
     invalid_file = os.path.join(temp_standardization_dir, "company_mappings", "invalid_mappings.json")
-    with open(invalid_file, 'w') as f:
+    with open(invalid_file, "w") as f:
         f.write("{ invalid json")
 
     path = os.path.join(temp_standardization_dir, "concept_mappings.json")
     store = MappingStore(source=path, read_only=True)
-    assert 'tsla' in store.company_mappings
+    assert "tsla" in store.company_mappings
 
 
 # ── Bottom-up section assignment ──────────────────────────────────────────────
+
 
 def test_bottom_up_section_assignment_balance_sheet():
     """Balance sheet items grouped into Current Assets, Non-Current Assets, Current Liabilities."""
@@ -306,42 +311,62 @@ def test_bottom_up_handles_empty_items():
 
 # ── Industry overrides ──────────────────────────────────────────────────────
 
-def test_industry_override_resolves_ambiguous_tag():
+
+@pytest.fixture
+def industry_override_index(tmp_path):
+    """Use an independent mapping to exercise industry resolution."""
+    from edgar.xbrl.standardization.reverse_index import ReverseIndex
+
+    mapping_path = tmp_path / "industry_mappings.json"
+    mapping_path.write_text(
+        json.dumps(
+            {
+                "IndustryOverrideExample": {
+                    "standard_tags": ["OtherOperatingNonCurrentLiabilities", "TradePayables"],
+                    "ambiguous": True,
+                    "is_total": False,
+                    "industry_overrides": {"Banks": {"standard_tags": ["TradePayables"], "ambiguous": False}},
+                }
+            }
+        )
+    )
+    return ReverseIndex(gaap_mappings_path=str(mapping_path))
+
+
+def test_industry_override_resolves_ambiguous_tag(industry_override_index):
     """Industry override narrows ambiguous tag to single concept."""
-    from edgar.xbrl.standardization.reverse_index import get_reverse_index
-    idx = get_reverse_index()
+    idx = industry_override_index
 
     # Without industry: ambiguous
-    result = idx.lookup("DeferredIncomeTaxLiabilitiesNet")
+    result = idx.lookup("IndustryOverrideExample")
+    assert result is not None
     assert result.is_ambiguous
-    assert len(result.standard_concepts) == 2
+    assert result.standard_concepts == ["OtherOperatingNonCurrentLiabilities", "TradePayables"]
 
     # With Banks industry: resolved to single concept
-    result_banks = idx.lookup("DeferredIncomeTaxLiabilitiesNet", industry="Banks")
+    result_banks = idx.lookup("IndustryOverrideExample", industry="Banks")
+    assert result_banks is not None
     assert not result_banks.is_ambiguous
-    assert len(result_banks.standard_concepts) == 1
-    assert result_banks.standard_concepts[0] == "DeferredTaxCurrentLiabilities"
+    assert result_banks.standard_concepts == ["TradePayables"]
 
 
-def test_industry_override_unknown_industry_returns_base():
+def test_industry_override_unknown_industry_returns_base(industry_override_index):
     """Unknown industry code falls back to base entry."""
-    from edgar.xbrl.standardization.reverse_index import get_reverse_index
-    idx = get_reverse_index()
+    idx = industry_override_index
 
-    result_base = idx.lookup("DeferredIncomeTaxLiabilitiesNet")
-    result_unknown = idx.lookup("DeferredIncomeTaxLiabilitiesNet", industry="FakeIndustry")
-    assert result_unknown.standard_concepts == result_base.standard_concepts
-    assert result_unknown.is_ambiguous == result_base.is_ambiguous
+    result_base = idx.lookup("IndustryOverrideExample")
+    result_unknown = idx.lookup("IndustryOverrideExample", industry="FakeIndustry")
+    assert result_base is not None and result_unknown is not None
+    assert result_unknown.standard_concepts == result_base.standard_concepts == ["OtherOperatingNonCurrentLiabilities", "TradePayables"]
+    assert result_unknown.is_ambiguous is result_base.is_ambiguous is True
 
 
-def test_industry_override_via_get_standard_concept():
+def test_industry_override_via_get_standard_concept(industry_override_index):
     """get_standard_concept passes industry through to lookup."""
-    from edgar.xbrl.standardization.reverse_index import get_reverse_index
-    idx = get_reverse_index()
+    idx = industry_override_index
 
-    # AccountsPayableCurrentAndNoncurrent is ambiguous: TradePayables vs OtherOperatingNonCurrentLiabilities
-    # Banks override resolves to TradePayables
-    concept = idx.get_standard_concept("AccountsPayableCurrentAndNoncurrent", industry="Banks")
+    assert idx.get_standard_concept("IndustryOverrideExample") == "OtherOperatingNonCurrentLiabilities"
+    concept = idx.get_standard_concept("IndustryOverrideExample", industry="Banks")
     assert concept == "TradePayables"
 
 
@@ -411,6 +436,7 @@ def test_ifrs_tag_standardization():
 
 # ── IFRS ordering templates ──────────────────────────────────────────────────
 
+
 def test_ifrs_concepts_in_ordering_templates():
     """IFRS concepts are recognized by ordering templates for correct statement positioning."""
     from edgar.xbrl.stitching.ordering import FinancialStatementTemplates
@@ -460,6 +486,7 @@ def test_ifrs_labels_skip_in_label_matching():
 
 # ── Industry threading through stitching ──────────────────────────────────────
 
+
 def test_stitch_statements_auto_detects_industry():
     """stitch_statements auto-detects industry from XBRL standardization cache."""
     from unittest.mock import MagicMock, patch
@@ -471,7 +498,7 @@ def test_stitch_statements_auto_detects_industry():
     mock_xbrl.get_statement_by_type.return_value = None
     mock_xbrl.find_statement.return_value = None
 
-    with patch('edgar.xbrl.stitching.core.determine_optimal_periods', return_value=[]):
+    with patch("edgar.xbrl.stitching.core.determine_optimal_periods", return_value=[]):
         result = stitch_statements([mock_xbrl], statement_type="IncomeStatement")
 
     # Result should be empty since no statements found, but industry was detected
@@ -487,9 +514,11 @@ def test_stitch_statements_explicit_industry_overrides_auto():
     mock_xbrl.standardization.industry = "Banks"
 
     # Patch StatementStitcher to capture the industry it receives
-    with patch.object(StatementStitcher, '__init__', return_value=None) as mock_init, \
-         patch.object(StatementStitcher, 'stitch_statements', return_value={'periods': [], 'statement_data': []}), \
-         patch('edgar.xbrl.stitching.core.determine_optimal_periods', return_value=[]):
+    with (
+        patch.object(StatementStitcher, "__init__", return_value=None) as mock_init,
+        patch.object(StatementStitcher, "stitch_statements", return_value={"periods": [], "statement_data": []}),
+        patch("edgar.xbrl.stitching.core.determine_optimal_periods", return_value=[]),
+    ):
         stitch_statements([mock_xbrl], industry="Chips")
         # When explicit industry is provided, it should be used
         mock_init.assert_called_once_with(industry="Chips")
@@ -497,12 +526,14 @@ def test_stitch_statements_explicit_industry_overrides_auto():
 
 # ── IFRS Classification Tests (Issue #673) ────────────────────────────────────
 
+
 class TestIFRSClassification:
     """Issue #673: IFRS concepts must be correctly classified in Phase 1."""
 
     def test_ifrs_profit_or_loss_classified_as_income_statement(self):
         """ifrs-full_StatementOfProfitOrLossAbstract → IncomeStatement."""
         from edgar.xbrl.xbrl import XBRL
+
         # The IFRS mapping dict is defined inline in get_all_statements;
         # verify the concept is recognized by the xbrl module.
         _IFRS_CONCEPT_TO_TYPE = {
