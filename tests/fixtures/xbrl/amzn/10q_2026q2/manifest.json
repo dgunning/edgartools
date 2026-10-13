@@ -1,0 +1,162 @@
+{
+  "accession": "0001018724-26-000026",
+  "form": "10-Q",
+  "company": "AMAZON COM INC",
+  "cik": 1018724,
+  "period_of_report": "2026-06-30",
+  "filing_date": "2026-07-31",
+  "captured_at": "2026-10-07T09:41:27.349735+00:00",
+  "source_git_commit": "6f1f9cd1e446f6f7d84cc3873fe9746a63475d41",
+  "source_manifest_git_path": "tests/fixtures/xbrl/amzn/10q_2026q2/manifest.json",
+  "source_manifest_sha256": "0ec73fbb2980fbf6d0f330f0da681254224b21354c5dc1991e8818cdcac4730a",
+  "derivation": "Whole original balance-sheet role blocks and exact original facts, contexts, units, labels and declarations; only container whitespace changes. Other filing roles and unrelated facts are omitted. All original unique period signatures remain. The original AOCI member-hierarchy definition role is retained as metadata for balance-sheet row depth; its unrelated facts are not added.",
+  "original_attachments": [
+    {
+      "document": "amzn-20260630.xsd",
+      "document_type": "EX-101.SCH",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630.xsd",
+      "bytes": 66633,
+      "sha256": "8ba9a32616b4b6435fe12f93541af634e42d0be49838dc8357e8b795975ed299",
+      "lines": 531,
+      "git_path": "tests/fixtures/xbrl/amzn/10q_2026q2/amzn-20260630.xsd",
+      "git_blob": "a2a59c427b38304a7601c1233209872558e642c7"
+    },
+    {
+      "document": "amzn-20260630_pre.xml",
+      "document_type": "EX-101.PRE",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630_pre.xml",
+      "bytes": 544813,
+      "sha256": "0753e315209d8203035edc5561d6bbf8dbc27d3fa69991d276cca9adec775554",
+      "lines": 1965,
+      "git_path": "tests/fixtures/xbrl/amzn/10q_2026q2/amzn-20260630_pre.xml",
+      "git_blob": "19064ea39c15089fe8b6ed01924e5d9c40f2e3eb"
+    },
+    {
+      "document": "amzn-20260630_def.xml",
+      "document_type": "EX-101.DEF",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630_def.xml",
+      "bytes": 337445,
+      "sha256": "15b8f13e90e99cf04fa518b02cde12a00eb1275b573b0f1818ccd611bdc58805",
+      "lines": 1283,
+      "git_path": "tests/fixtures/xbrl/amzn/10q_2026q2/amzn-20260630_def.xml",
+      "git_blob": "3bdb1df23dad40cd687dda22f66d4f6fc2fc9123"
+    },
+    {
+      "document": "amzn-20260630_cal.xml",
+      "document_type": "EX-101.CAL",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630_cal.xml",
+      "bytes": 148074,
+      "sha256": "acd3997b82b6696353668c954dcd6cedfb275fec8fd26448277cb9f4ca1ab9ee",
+      "lines": 546,
+      "git_path": "tests/fixtures/xbrl/amzn/10q_2026q2/amzn-20260630_cal.xml",
+      "git_blob": "55b6d7f515f4d72c766b67d8aeab5a327eec0dcd"
+    },
+    {
+      "document": "amzn-20260630_lab.xml",
+      "document_type": "EX-101.LAB",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630_lab.xml",
+      "bytes": 809439,
+      "sha256": "b9f086c96b076324eabb477596512fd78e907bbf54e639efc7f1e029574328b3",
+      "lines": 3020,
+      "git_path": "tests/fixtures/xbrl/amzn/10q_2026q2/amzn-20260630_lab.xml",
+      "git_blob": "d58465199598398fe9f1facff5caaa89b21d950d"
+    },
+    {
+      "document": "amzn-20260630_htm.xml",
+      "document_type": "XML",
+      "url": "https://www.sec.gov/Archives/edgar/data/1018724/000101872426000026/amzn-20260630_htm.xml",
+      "bytes": 1628033,
+      "sha256": "28cbec6d6a191a9cd561ede66f9c7d373884dc580550f147ab6e1d31d2c4a50a",
+      "lines": 6002,
+      "git_path": "tests/fixtures/xbrl/amzn/10q_2026q2/amzn-20260630_htm.xml",
+      "git_blob": "13bb0524a790383d0d396e3af41acc31f613ce0b"
+    }
+  ],
+  "retained_presentation_roles": [
+    "http://www.amazon.com/role/ConsolidatedBalanceSheets"
+  ],
+  "retained_definition_roles": [
+    "http://www.amazon.com/role/StockholdersEquityScheduleofAccumulatedOtherComprehensiveIncomeLossDetails"
+  ],
+  "retained_calculation_roles": [
+    "http://www.amazon.com/role/ConsolidatedBalanceSheets"
+  ],
+  "fact_count": 223,
+  "context_count": 103,
+  "unit_count": 2,
+  "original_period_count": 26,
+  "retained_period_count": 26,
+  "static_xml_checks": {
+    "amzn-20260630_htm.xml": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 554,
+      "qname_value_bindings_checked": 196
+    },
+    "amzn-20260630_pre.xml": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 64,
+      "qname_value_bindings_checked": 0
+    },
+    "amzn-20260630_def.xml": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 36,
+      "qname_value_bindings_checked": 0
+    },
+    "amzn-20260630_cal.xml": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 55,
+      "qname_value_bindings_checked": 0
+    },
+    "amzn-20260630_lab.xml": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 384,
+      "qname_value_bindings_checked": 0
+    },
+    "amzn-20260630.xsd": {
+      "same_original_root_header": true,
+      "exact_original_leaf_fragments": 37,
+      "qname_value_bindings_checked": 48
+    }
+  },
+  "generated_files": [
+    {
+      "filename": "amzn-20260630_htm.xml",
+      "bytes": 72515,
+      "lines": 1364,
+      "sha256": "6a78fdde93c4bd4f55f7e5c603962c5af2de5f0ff68307db06d8a8d45cd97417"
+    },
+    {
+      "filename": "amzn-20260630_pre.xml",
+      "bytes": 19132,
+      "lines": 73,
+      "sha256": "6de1ba7e3b6f615c8aa06263a2405d6bdc47f78cd3715d9e5cd6e63f1e02e04e"
+    },
+    {
+      "filename": "amzn-20260630_def.xml",
+      "bytes": 10322,
+      "lines": 45,
+      "sha256": "aafabbd2eb763b7070866a3dc059c61aa0542217d555ec57d297fcb959e5176c"
+    },
+    {
+      "filename": "amzn-20260630_cal.xml",
+      "bytes": 14753,
+      "lines": 64,
+      "sha256": "8f7be747fbd565e50755e039442568a7ffb89b00ac13f0f21e7398b792a74c93"
+    },
+    {
+      "filename": "amzn-20260630_lab.xml",
+      "bytes": 92604,
+      "lines": 393,
+      "sha256": "a524840869c912c933a48ac2231fe4ef17728bf47375b7805a66a67eeec6f71e"
+    },
+    {
+      "filename": "amzn-20260630.xsd",
+      "bytes": 6995,
+      "lines": 52,
+      "sha256": "1723aba96b7eb2db3ee029d3735a62025c49d18036d91d551eda31d2773867e5"
+    }
+  ],
+  "metadata_only_definition_roles": [
+    "http://www.amazon.com/role/StockholdersEquityScheduleofAccumulatedOtherComprehensiveIncomeLossDetails"
+  ]
+}
