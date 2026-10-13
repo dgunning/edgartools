@@ -46133,14 +46133,14 @@
   },
   "EquitySecuritiesFvNiCurrentAndNoncurrent": {
     "standard_tags": [
-      "CashAndMarketableSecurities",
+      "ShortTermInvestments",
       "LongtermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Short-Term Investments",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 97,
     "occurrence_rate": 0.011,
     "temporal_consistency": 0.417,
