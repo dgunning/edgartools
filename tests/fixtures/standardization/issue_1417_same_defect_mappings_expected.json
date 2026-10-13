@@ -1,0 +1,177 @@
+{
+  "CostOfGoodsAndServicesSoldAmortization": [
+    "AmortizationOfIntangibles"
+  ],
+  "LaborAndRelatedExpense": [
+    "LaborExpenses"
+  ],
+  "RevenueNotFromContractWithCustomer": [
+    "Revenue"
+  ],
+  "GoodwillImpairmentLoss": [
+    "GoodwillWriteoffs"
+  ],
+  "GoodwillAndIntangibleAssetImpairment": [
+    "AssetImpairmentChargesIS"
+  ],
+  "AdjustmentForAmortization": [
+    "DepreciationAmortizationCF"
+  ],
+  "ImpairmentOfIntangibleAssetsFinitelived": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ImpairmentOfIntangibleAssetsExcludingGoodwill": [
+    "AssetImpairmentChargesIS"
+  ],
+  "OperatingLeaseImpairmentLoss": [
+    "AssetImpairmentChargesIS"
+  ],
+  "OtherAssetImpairmentCharges": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ImpairmentOfIntangibleAssetsIndefinitelivedExcludingGoodwill": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ImpairmentOfRealEstate": [
+    "AssetImpairmentChargesIS"
+  ],
+  "TangibleAssetImpairmentCharges": [
+    "AssetImpairmentChargesIS"
+  ],
+  "EquityMethodInvestmentOtherThanTemporaryImpairment": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ImpairmentOfOilAndGasProperties": [
+    "AssetImpairmentChargesIS"
+  ],
+  "AmortizationOfAcquisitionCosts": [
+    "DepreciationExpense"
+  ],
+  "ImpairmentLossRecognisedInProfitOrLoss": [
+    "AssetImpairmentChargesIS"
+  ],
+  "DisposalGroupNotDiscontinuedOperationLossGainOnWriteDown": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ImpairmentOfLeasehold": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ExplorationAbandonmentAndImpairmentExpense": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ImpairmentOfOngoingProject": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ImpairmentChargeOnReclassifiedAssets": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ImpairmentLossesRelatedToRealEstatePartnerships": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ResultsOfOperationsImpairmentOfOilAndGasProperties": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ImpairmentOfRetainedInterest": [
+    "AssetImpairmentChargesIS"
+  ],
+  "UnamortizedCostsCapitalizedLessRelatedDeferredIncomeTaxesExceedCeilingLimitationExpense": [
+    "AssetImpairmentChargesIS"
+  ],
+  "CapitalizedComputerSoftwareImpairments": [
+    "AssetImpairmentChargesIS"
+  ],
+  "ifrs-full_ImpairmentLossRecognisedInProfitOrLoss": [
+    "AssetImpairmentChargesIS"
+  ],
+  "EmployeeBenefitsAndShareBasedCompensation": [
+    "LaborExpenses"
+  ],
+  "CompensationExpenseExcludingCostOfGoodAndServiceSold": [
+    "LaborExpenses"
+  ],
+  "DeferredCompensationArrangementWithIndividualCompensationExpense": [
+    "LaborExpenses"
+  ],
+  "InventoryWriteDown": [
+    "CostOfGoodsAndServicesSold"
+  ],
+  "DeconsolidationGainOrLossAmount": [
+    "NonoperatingIncomeExpense"
+  ],
+  "RestructuringReserveTranslationAndOtherAdjustment": null,
+  "GainLossOnDispositionOfAssets1": [
+    "GainLossOnDispositions"
+  ],
+  "OtherCostAndExpenseOperating": [
+    "OtherOperatingExpense"
+  ],
+  "OtherExpenses": [
+    "OtherOperatingExpense"
+  ],
+  "GainLossOnSaleOfOtherAssets": [
+    "GainLossOnDispositions"
+  ],
+  "InterestIncomeDepositsWithFinancialInstitutions": [
+    "InterestIncome"
+  ],
+  "LegalFees": [
+    "ProfessionalFees"
+  ],
+  "OtherOperatingIncome": [
+    "Revenue"
+  ],
+  "GainLossOnDispositionOfIntangibleAssets": [
+    "GainLossOnDispositions"
+  ],
+  "LitigationSettlementExpense": [
+    "OtherOperatingExpense"
+  ],
+  "OtherGeneralExpense": [
+    "OtherOperatingExpense"
+  ],
+  "NetPeriodicDefinedBenefitsExpenseReversalOfExpenseExcludingServiceCostComponent": [
+    "NonoperatingIncomeExpense"
+  ],
+  "SaleAndLeasebackTransactionGainLossNet": [
+    "GainLossOnDispositions"
+  ],
+  "ForeignCurrencyTransactionLossBeforeTax": [
+    "ForeignCurrencyGainLoss"
+  ],
+  "GainLossOnSaleOfProperty": [
+    "GainLossOnDispositions"
+  ],
+  "RevenueNotFromContractWithCustomerOther": [
+    "Revenue"
+  ],
+  "OtherNonrecurringIncomeExpense": [
+    "SpecialItemsIncomeExpense(Pretax)"
+  ],
+  "InsuranceRecoveries": [
+    "OtherOperatingExpense"
+  ],
+  "AccretionExpenseIncludingAssetRetirementObligations": [
+    "OtherOperatingExpense"
+  ],
+  "LossContingencyLossInPeriod": [
+    "OtherOperatingExpense"
+  ],
+  "OtherNonrecurringExpense": [
+    "SpecialItemsIncomeExpense(Pretax)"
+  ],
+  "OtherNonrecurringIncome": [
+    "SpecialItemsIncomeExpense(Pretax)"
+  ],
+  "InventoryRecallExpense": [
+    "OtherOperatingExpense"
+  ],
+  "CapitalLeasesIncomeStatementLeaseRevenue": [
+    "RentalAndLeasingRevenue"
+  ],
+  "DefinedBenefitPlanServiceCost": [
+    "PensionExpense"
+  ],
+  "MalpracticeLossContingencyClaimsIncurredNet": [
+    "OtherOperatingExpense"
+  ]
+}
