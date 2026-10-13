@@ -178,6 +178,7 @@
       "OccupancyExpense",
       "OperatingLeaseExpense",
       "OtherOperatingExpense",
+      "OtherOperatingIncomeExpenseNet",
       "PensionExpense",
       "ProfessionalFees",
       "ResearchAndDevelopmentExpenses",

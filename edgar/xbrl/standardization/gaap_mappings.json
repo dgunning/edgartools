@@ -31623,12 +31623,12 @@
   },
   "OtherOperatingIncomeExpenseNet": {
     "standard_tags": [
-      "OtherIncomeIS"
+      "OtherOperatingIncomeExpenseNet"
     ],
-    "display_name": "Other Income",
+    "display_name": "Other Operating Income (Expense), Net",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
+    "section": "Operating Expenses",
+    "is_total": false,
     "confidence": 0.991,
     "company_count": 704,
     "occurrence_rate": 0.078,
