@@ -297,6 +297,11 @@ class MarkdownRenderer:
         # Render data rows
         for expanded_row in expanded_data_rows:
             filtered_row = [expanded_row[i] if i < len(expanded_row) else "" for i in content_columns]
+            # A pipe-table row must stay on one line, so join a cell's lines
+            # (from <br> or several paragraphs) with a space.
+            filtered_row = [" ".join(line.strip() for line in cell.splitlines() if line.strip())
+                            if "\n" in cell else cell
+                            for cell in filtered_row]
 
             # Only add rows with meaningful content
             if any(cell.strip() for cell in filtered_row):
