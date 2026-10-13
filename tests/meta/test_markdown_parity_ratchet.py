@@ -24,6 +24,13 @@ here. Briefly: characters cannot distinguish compaction from loss, word counts
 are dominated by legacy's repeated table headers, and numbers are the only
 signal a reformat cannot move.
 
+SINCE 6.0 THE LEGACY COLUMN IS FROZEN. The legacy renderer went with
+``edgar.files``; ``markdown_parity.measure_markdown`` reads its numbers, words and
+structure counts from ``parser_corpus/legacy_frozen/markdown.json.gz``, written
+from main immediately before the deletion, and renders only the new side.
+Re-measured through the frozen file, all 128 fixtures gave results identical to
+the live comparison.
+
 WHAT IS AND IS NOT MEASURED IN CI. Same split as the section ratchet.
 ``tests/fixtures/html`` and ``tests/fixtures/parity_gate`` are tracked (61 of the
 115 fixtures); ``tests/fixtures/text_boundary_corpus`` is gitignored, so the
@@ -82,9 +89,7 @@ pytestmark = pytest.mark.slow
 # ONLY thing left on unh/10k rather than a guess about most of it.
 BASELINE_NUMBER_LOSS = {
     ("8-K", "0000887919-21-000012"): 2,
-    ("20-F", "0001062993-16-008650"): 42,
     ("20-F", "0001062993-21-003193"): 22,
-    ("10-Q", "aapl/10q"): 10,
     ("10-Q", "ba/10q"): 1,
     ("10-Q", "gbdc/10q"): 24,
     ("10-Q", "gs/10q"): 6,
@@ -96,11 +101,8 @@ BASELINE_NUMBER_LOSS = {
     ("10-Q", "msft/10q"): 8,
     ("10-Q", "nflx/10q"): 6,
     ("10-Q", "nvda/10q"): 2,
-    ("10-Q", "pg/10q"): 24,
-    ("10-Q", "tsla/10q"): 4,
     ("10-Q", "unp/10q"): 2,
     ("10-K", "915358/10k"): 25,
-    ("10-K", "abbv/10k"): 4,
     ("10-K", "adbe/10k"): 16,
     ("10-K", "amzn/10k"): 13,
     ("10-K", "axp/10k"): 18,
@@ -119,21 +121,16 @@ BASELINE_NUMBER_LOSS = {
     ("10-K", "cvx/10k"): 4,
     ("10-K", "gbdc/10k"): 67,
     ("10-K", "gs/10k"): 9,
-    ("10-K", "hd/10k"): 32,
     ("10-K", "hubs/10k"): 24,
     ("10-K", "jnj/10k"): 7,
     ("10-K", "jpm/10k"): 1,
     ("10-K", "ko/10k"): 3,
-    ("10-K", "ma/10k"): 2,
     ("10-K", "meta/10k"): 39,
     ("10-K", "ms/10k"): 6,
     ("10-K", "msft/10k"): 15,
     ("10-K", "nflx/10k"): 21,
-    ("10-K", "nke/10k"): 7,
     ("10-K", "nvda/10k"): 16,
     ("10-K", "orcl/10k"): 7,
-    ("10-K", "pfe/10k"): 3,
-    ("10-K", "rf/10k"): 4,
     ("10-K", "tsla/10k"): 22,
     # Was 186 until the two-up maturity-row fix (edgartools-v3ec) restored
     # the long-term debt schedule. Re-banked rather than left at 186: the
@@ -151,7 +148,6 @@ BASELINE_NUMBER_LOSS = {
     ("10-K", "v/10k"): 13,
     ("10-K", "wfc/10k"): 15,
     ("10-K", "wmt/10k"): 14,
-    ("10-K", "xom/10k"): 1,
 }
 
 # Tracked filings that already lose nothing. Kept as a separate set rather than
@@ -171,6 +167,20 @@ CLEAN_FILINGS = {
     ("10-Q", "xom/10q"),
     ("10-K", "ibm/10k"),
     ("10-K", "pg/10k"),
+    # Reached zero via GH #1474 (PR #1480, 2026-10-08), which kept grouped
+    # table header paths instead of dropping the header rows that carried them.
+    # Total banked: 133 numbers across these eleven.
+    ("20-F", "0001062993-16-008650"),
+    ("10-Q", "aapl/10q"),
+    ("10-Q", "pg/10q"),
+    ("10-Q", "tsla/10q"),
+    ("10-K", "abbv/10k"),
+    ("10-K", "hd/10k"),
+    ("10-K", "ma/10k"),
+    ("10-K", "nke/10k"),
+    ("10-K", "pfe/10k"),
+    ("10-K", "rf/10k"),
+    ("10-K", "xom/10k"),
 }
 
 TRACKED = set(BASELINE_NUMBER_LOSS) | CLEAN_FILINGS
@@ -302,11 +312,11 @@ class TestTheCorpusItselfIsIntact:
         assert not errors, f"renderer raised on: {errors}"
 
     def test_the_legacy_pipeline_still_produces_markdown(self, measured):
-        """No fixture may newly fall back to the ``<pre>`` escape hatch.
+        """No fixture is scored against the ``<pre>`` escape hatch.
 
-        Zero today. A filing joining this set is not a parity finding — it means
-        ``get_clean_html`` stopped rooting HTML it used to handle, which would
-        silently remove that filing from every rate above.
+        Zero when the legacy side was frozen. The flag now comes from the frozen
+        record, so a filing joining this set means the frozen file was edited,
+        which would silently remove that filing from every rate above.
         """
         results, _present = measured
         degraded = sorted(k for k, r in results.items() if r["legacy_degraded"])

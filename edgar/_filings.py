@@ -2,7 +2,6 @@ import itertools
 import json
 import pickle
 import re
-import warnings
 import webbrowser
 from contextlib import nullcontext
 from dataclasses import dataclass
@@ -41,6 +40,7 @@ from edgar.core import (
     YearAndQuarters,
     Years,
     cache_except_none,
+    has_html_content,
     is_probably_html,
     listify,
     log,
@@ -54,9 +54,6 @@ from edgar.documents import HTMLParser, ParserConfig
 from edgar.documents.exceptions import ParsingError
 from edgar.documents.extractors.chunk_extractor import chunk_html
 from edgar.exceptions import TransportError, http_status
-from edgar.files._deprecation import PAGE_BREAK_DEPRECATION as _PAGE_BREAK_DEPRECATION
-from edgar.files.html_documents import get_clean_html
-from edgar.files.markdown import to_markdown
 from edgar.filesystem import EdgarPath
 from edgar.filtering import filter_by_accession_number, filter_by_cik, filter_by_date, filter_by_exchange, filter_by_form, filter_by_ticker
 from edgar.headers import FilingDirectory, IndexHeaders
@@ -1613,7 +1610,9 @@ class Filing:
             return document.download()
         if html.endswith("</PDF>"):
             return None
-        if html.startswith("<?xml"):
+        # Inline XBRL is XHTML, often opened with an XML declaration, and is already
+        # the HTML. Only a primary document that is XML needs rendering (GH #1421).
+        if html.startswith("<?xml") and not has_html_content(html):
             if self.form in ['3', '3/A', '4', '4/A', '5', '5/A']:
                 from edgar.ownership import Ownership
                 ownership: Ownership = self.obj()
@@ -1764,7 +1763,7 @@ class Filing:
         assert downloaded is not None
         return str(downloaded)
 
-    def markdown(self, include_page_breaks: bool = False, start_page_number: int = 0) -> str:
+    def markdown(self) -> str:
         """
         Return the markdown version of this filing html
 
@@ -1772,40 +1771,23 @@ class Filing:
         (GH #886) and tables render through the same pipeline as ``text()``,
         ``view()`` and the section extractors. Relative image ``src`` values are
         resolved against the filing's SEC archive directory, so the markdown is
-        a self-contained document with working image links.
-
-        Args:
-            include_page_breaks: If True, include ``{N}----`` page break
-                delimiters in the markdown. **Deprecated.** Page breaks exist
-                only in the legacy ``edgar.files`` renderer, so passing True
-                routes the whole document through it and forfeits images and
-                the newer table rendering. Removed in 6.0.
-            start_page_number: Starting page number for page break markers
-                (default: 0). Only meaningful with ``include_page_breaks=True``.
+        a self-contained document with working image links. Page-break markers
+        are not rendered: the parser treats page-break rules and page-number
+        footers as print layout and drops them.
         """
         html = self.html()
         if html:
-            if include_page_breaks:
-                warnings.warn(_PAGE_BREAK_DEPRECATION.format(cls="Filing"),
-                              DeprecationWarning, stacklevel=2)
-                clean_html = get_clean_html(html)
-                if clean_html:
-                    markdown_result = to_markdown(clean_html, include_page_breaks=True,
-                                                  start_page_number=start_page_number)
-                    if markdown_result:
-                        return markdown_result
-            else:
-                try:
-                    document = HTMLParser(ParserConfig(form=self.form)).parse(html)
-                    # Base for resolving relative image src. Trailing slash matters:
-                    # urljoin() drops the last path segment without it. base_dir is a
-                    # pure string property, so this costs no request.
-                    document.metadata.url = f"{self.base_dir}/"
-                    markdown_result = document.to_markdown()
-                except ParsingError:
-                    markdown_result = None
-                if markdown_result:
-                    return markdown_result
+            try:
+                document = HTMLParser(ParserConfig(form=self.form)).parse(html)
+                # Base for resolving relative image src. Trailing slash matters:
+                # urljoin() drops the last path segment without it. base_dir is a
+                # pure string property, so this costs no request.
+                document.metadata.url = f"{self.base_dir}/"
+                markdown_result = document.to_markdown()
+            except ParsingError:
+                markdown_result = None
+            if markdown_result:
+                return markdown_result
         text_content = self.text()
         # Return empty string for empty content (e.g., XML-only filings)
         if not text_content:
@@ -2288,7 +2270,9 @@ class Filing:
 
     @property
     def homepage_url(self) -> str:
-        return f"{SEC_ARCHIVE_URL}/data/{self.cik}/{self.accession_no}-index.html"
+        # The index page inside the accession folder. SEC answers the shorter
+        # /data/<cik>/<accession>-index.html with a 403 "Access Denied" (GH #1421).
+        return f"{self.base_dir}/{self.accession_no}-index.html"
 
     @property
     def text_url(self) -> str:

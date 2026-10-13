@@ -17,13 +17,13 @@ TransactionType=None instead of crashing.
 GitHub Issue: https://github.com/dgunning/edgartools/issues/887
 """
 import pytest
-from bs4 import BeautifulSoup
+from edgar.xmltools import parse_xml
 
 from edgar.ownership.table_containers import DerivativeTable, NonDerivativeTable
 
 
 def _table(xml: str):
-    return BeautifulSoup(xml, "xml").find(True)  # first (root) tag
+    return parse_xml(xml)
 
 
 # --- Offline: non-derivative table with NO transactionCoding (the crash case) ---

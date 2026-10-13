@@ -20,6 +20,10 @@
       [
         "^Company Overview",
         "Company Overview"
+      ],
+      [
+        "^(Item|ITEM)\\s+1(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Description\\s+of\\s+Business",
+        "Item 1 - Business"
       ]
     ],
     "risk_factors": [
@@ -72,6 +76,10 @@
       [
         "^Real\\s+Estate",
         "Real Estate"
+      ],
+      [
+        "^(Item|ITEM)\\s+2(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Description\\s+of\\s+Propert(?:y|ies)",
+        "Item 2 - Properties"
       ]
     ],
     "legal_proceedings": [

@@ -1,0 +1,1 @@
+- **More plain-text filings get their item sections** — a plain-text filing with no table, or one marked with SGML `<PAGE>` tags, still built as one paragraph and could not be split. Regulation S-B 10-Ks now get Items 1 and 2 ("Description of Business", "Description of Property"). A 2004 plain-text 8-K now yields Items 1.01, 5.02 and 9.01 from its sections.

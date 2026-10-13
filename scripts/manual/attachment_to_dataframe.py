@@ -1,6 +1,5 @@
 from edgar import *
 from edgar.sgml.filing_summary import Report
-from edgar.files.html import TableNode
 from rich import print
 import pandas as pd
 pd.options.display.max_columns = 20

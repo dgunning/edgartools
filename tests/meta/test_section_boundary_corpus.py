@@ -45,14 +45,20 @@ pytestmark = pytest.mark.slow
 # If an intended parser change moves one, update the number in the same commit.
 # edgartools-wzgu re-pinned every table-bearing item: TOC sections now render
 # tables cell by cell; every letter and digit of the old text is still present.
+# Re-pinned for the page-furniture start (edgartools-llmp.12): Caterpillar Items 7
+# and 8, Meta Items 1A, 7 and 8 and Union Pacific Item 8 each lost the leading
+# "Table of Contents" backlink line (19 or 24 chars); nothing else moved.
+# Re-pinned for the page-furniture end (llmp.12 step 6): Apple 10-K Items 7 and 8
+# (15563, 61021) and 10-Q Item 1 (25844) each lost the trailing "Apple Inc. | ...
+# Form 10-K | NN" footer line (34 or 37 chars); nothing else moved.
 GROUND_TRUTH = {
-    ("aapl", "10-K"): {"1": 15767, "1A": 68887, "7": 15563, "8": 61021},
+    ("aapl", "10-K"): {"1": 15767, "1A": 68887, "7": 15529, "8": 60987},
     ("ko",   "10-K"): {"1": 54971, "1A": 90883, "7": 115072, "8": 237859},
     ("msft", "10-K"): {"1": 48674, "1A": 68824, "7": 48069, "8": 102166},
-    ("meta", "10-K"): {"1": 40273, "1A": 188466, "7": 61502, "8": 125841},
-    ("cat",  "10-K"): {"1": 39269, "1A": 53487, "7": 104445, "8": 185361},
-    ("unp",  "10-K"): {"1": 27521, "1A": 32791, "7": 57241, "8": 97022},
-    ("aapl", "10-Q"): {"1": 25844, "2": 20053},
+    ("meta", "10-K"): {"1": 40273, "1A": 188447, "7": 61483, "8": 125822},
+    ("cat",  "10-K"): {"1": 39269, "1A": 53487, "7": 104421, "8": 185337},
+    ("unp",  "10-K"): {"1": 27521, "1A": 32791, "7": 57241, "8": 97003},
+    ("aapl", "10-Q"): {"1": 25807, "2": 20053},
     ("nvda", "10-Q"): {"1": 53892, "2": 32956},
     ("ko",   "10-Q"): {"1": 103213, "2": 77610},
 }
@@ -84,6 +90,10 @@ ANOMALY_BASELINE = {
     ("gbdc", "10-K"), ("gbdc", "10-Q"), ("gs", "10-K"), ("gs", "10-Q"),
     ("ibm", "10-K"), ("jpm", "10-K"), ("jpm", "10-Q"), ("ms", "10-K"),
     ("nflx", "10-K"), ("nvda", "10-K"), ("orcl", "10-K"), ("xom", "10-Q"),
+    # Items 1A/1C/7/8 are one-paragraph pointers to the Annual Report, which is
+    # correct. Their pattern sections are named 'risk_factors', 'mda', ... and
+    # were invisible to the harness until it keyed on section.item (llmp.11.2).
+    ("wfc", "10-K"),
 }
 
 OVERLAP_MAX = 1.10  # healthy filings cap at ~0.95; >1.0 means sections overlap.

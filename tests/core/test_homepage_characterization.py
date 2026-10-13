@@ -147,21 +147,24 @@ def test_a_class_is_matched_by_token_not_by_substring():
     assert filers[0].addresses == [], "class='mailerAddress' must not match 'mailer'"
 
 
-def test_a_soup_is_still_accepted_and_says_so():
-    """`FilingHomepage` and `Attachments` are exported from `edgar`, and took a
-    BeautifulSoup until this release. The old call keeps working through 5.x."""
-    from bs4 import BeautifulSoup
+class BeautifulSoup:
+    """Stands in for a bs4 soup, which 6.0 no longer installs. The trait that matters
+    is the one `_as_lxml_root` guards against: a soup answers ANY unknown attribute
+    with a child tag or None, so `hasattr(soup, "xpath")` is True."""
 
-    html = (HOMEPAGE_DIR / "aapl-10k-2024.html").read_text()
-    soup = BeautifulSoup(html, "html.parser")
+    def __getattr__(self, name):
+        return None
 
-    with pytest.warns(DeprecationWarning, match="removed in v6.0"):
-        attachments = Attachments.load(soup)
-    with pytest.warns(DeprecationWarning, match="removed in v6.0"):
-        homepage = FilingHomepage("http://example/x", soup, attachments)
-    with pytest.warns(DeprecationWarning, match="soup="):
-        FilingHomepage(url="http://example/x", soup=soup, attachments=attachments)
 
-    # And produces the same answer as the supported call, not a degraded one.
-    assert [f.model_dump() for f in homepage.get_filers()] == \
-        _capture(HOMEPAGE_DIR / "aapl-10k-2024.html")["filers"]
+def test_a_soup_is_rejected_with_the_call_that_replaces_it():
+    """`FilingHomepage` and `Attachments` are exported from `edgar` and took a
+    BeautifulSoup through 5.x with a DeprecationWarning. 6.0 raises, and the
+    message names the replacement rather than failing inside a selector."""
+    soup = BeautifulSoup()
+
+    with pytest.raises(TypeError, match=r"Attachments\.load takes an lxml tree, not BeautifulSoup.*parse_homepage_html"):
+        Attachments.load(soup)
+    with pytest.raises(TypeError, match=r"FilingHomepage takes an lxml tree, not BeautifulSoup.*parse_homepage_html"):
+        FilingHomepage("http://example/x", soup, None)
+    with pytest.raises(TypeError, match="soup"):
+        FilingHomepage(url="http://example/x", soup=soup)

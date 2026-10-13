@@ -104,6 +104,8 @@ print(f"Is XBRL: {filing.is_xbrl}")
 print(f"Is Inline XBRL: {filing.is_inline_xbrl}")
 ```
 
+`acceptance_datetime` comes from SEC's submissions JSON, which labels it UTC but for some filers is hours off, by an amount that varies by filer and by day. When the exact time matters, for example in point-in-time backtests, use `filing.header.acceptance_datetime`. It reads the filing's own SGML header, matches the "Accepted" time on SEC's index page, and is naive Eastern time. It costs one extra request per filing.
+
 ## Viewing Filings
 
 ### Open in Browser
@@ -178,13 +180,9 @@ Images are rendered as Markdown image links with absolute SEC archive URLs, so
 charts that exist only as images — a 10-K's stock performance graph, for example
 — survive into the export and stay viewable.
 
-!!! warning "`include_page_breaks` is deprecated"
-
-    `filing.markdown(include_page_breaks=True, start_page_number=1)` inserts
-    `{N}----` delimiters, but page-break rendering exists only in the legacy
-    renderer, so the flag routes the whole document through it — and that
-    renderer drops every image and formats tables differently. It will be
-    removed in 6.0. Prefer `filing.markdown()`.
+Page-break markers are not rendered: the `include_page_breaks` and
+`start_page_number` arguments were removed in 6.0 (see the
+[upgrade guide](../upgrade/6.0.md#page-breaks-are-not-rendered-any-more)).
 
 ### Get XML
 

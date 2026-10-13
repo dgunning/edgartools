@@ -1,16 +1,14 @@
 """XML element helpers shared by twelve SEC form parsers.
 
-Dual-backend for the duration of the bs4 to lxml migration (edgartools-07lk.11.2).
-Every helper here accepts *either* a BeautifulSoup ``Tag`` or an ``lxml.etree``
-element and behaves identically on both, so the twelve dependents can switch their
-parse entry point one at a time (edgartools-07lk.11.3) instead of in one commit. The
-bs4 half of each adapter below is deleted in the 6.0 window once the last dependent
-has moved, along with the dependency itself (edgartools-07lk.11 phase 6).
+Every helper takes an ``lxml.etree`` element. Until 6.0 they also accepted a
+BeautifulSoup ``Tag`` while the dependents moved off bs4 one at a time
+(edgartools-07lk.11.2/.11.3); 6.0 deleted that half along with the dependency
+(edgartools-07lk.11 phase 6).
 
-bs4's behavior is the contract, because ~350 call sites were written against it.
-Reproducing it on lxml takes more than renaming methods — the two libraries differ
-on four axes, and every difference fails *silently*, returning None or "" where a
-value used to be:
+bs4's behavior is still the contract, because ~350 call sites were written against
+it. Reproducing it on lxml takes more than renaming methods — the two libraries
+differ on four axes, and every difference fails *silently*, returning None or ""
+where a value used to be:
 
   truthiness  ``bool(Tag)`` is True even for a childless ``<c/>``; ``bool(Element)``
               is False even for ``<b>text</b>``. Guards here test ``is not None``.
@@ -22,13 +20,11 @@ value used to be:
               single character. ``_collapse`` reproduces that exactly; it is the one
               place the port is more than a translation.
 
-tests/test_xmltools_semantics.py runs the whole contract against both backends and
-asserts they agree, so a regression in either half is a failure, not a surprise.
+tests/core/test_xmltools_semantics.py pins each of those behaviors.
 """
 from decimal import Decimal
 from typing import Iterator, List, Optional, Tuple, Union
 
-from bs4 import BeautifulSoup, Tag
 from lxml import etree
 
 __all__ = [
@@ -49,18 +45,14 @@ __all__ = [
     'value_with_footnotes',
 ]
 
-# Either backend's element type. `BeautifulSoup` is a `Tag` subclass, so a whole
-# parsed document is a valid node too.
-XmlNode = Union[Tag, etree._Element]
+# The element type every helper takes. Kept as a name because dependents annotate
+# with it; it was `Union[Tag, etree._Element]` until 6.0 dropped bs4.
+XmlNode = etree._Element
 
 
 # ---------------------------------------------------------------------------
-# Backend adapter. Nothing below this block touches a backend directly.
+# lxml adapter: bs4 semantics on lxml elements.
 # ---------------------------------------------------------------------------
-
-def _is_bs4(node: XmlNode) -> bool:
-    return isinstance(node, Tag)
-
 
 def _local_name(tag: str) -> str:
     """`{http://www.sec.gov/edgar}cik` -> `cik`."""
@@ -83,16 +75,12 @@ def _namespace_of(node) -> str:
 
 def _is_element(node) -> bool:
     """lxml comments and processing instructions are nodes too; their tag is a
-    callable rather than a string. bs4 does not surface them from a name search."""
+    callable rather than a string. bs4 did not surface them from a name search."""
     return isinstance(node.tag, str)
 
 
 def _find(node: XmlNode, name: str) -> Optional[XmlNode]:
     """The first DESCENDANT element named `name`, or None — bs4 `.find()` semantics."""
-    if _is_bs4(node):
-        found = node.find(name)
-        return found if isinstance(found, Tag) else None
-
     found = node.find(f'.//{name}')
     if found is not None:
         return found
@@ -112,9 +100,6 @@ def _find(node: XmlNode, name: str) -> Optional[XmlNode]:
 
 def _find_all(node: XmlNode, name: str) -> List[XmlNode]:
     """Every DESCENDANT element named `name`, in document order."""
-    if _is_bs4(node):
-        return [el for el in node.find_all(name) if isinstance(el, Tag)]
-
     found = node.findall(f'.//{name}')
     if found:
         return found
@@ -156,14 +141,12 @@ def _iter_text(element: etree._Element) -> Iterator[str]:
 
 def _text(node: XmlNode) -> str:
     """All descendant text, concatenated — bs4 `.text` semantics."""
-    if _is_bs4(node):
-        return node.text
     return ''.join(_collapse(chunk) for chunk in _iter_text(node))
 
 
 def _attrib(node: XmlNode):
     """The attribute mapping, for the callers that require a key to be present."""
-    return node.attrs if _is_bs4(node) else node.attrib
+    return node.attrib
 
 
 # ---------------------------------------------------------------------------
@@ -222,6 +205,21 @@ def parse_xml(xml: Union[str, bytes]) -> etree._Element:
     return root
 
 
+def _parse_string(xml: str) -> Optional[XmlNode]:
+    """The root of a raw XML string, or None when there is no markup to recover.
+
+    `find_element` and `find_all_elements` have always accepted a string and
+    returned None or [] for one that is not XML; they parsed it with bs4 until 6.0.
+    In-tree callers parse once with `parse_xml` and pass the element.
+    """
+    if "<" not in xml:
+        return None
+    try:
+        return parse_xml(xml)
+    except etree.XMLSyntaxError:
+        return None
+
+
 def find_element(
         xml_tag_or_string: Union[str, XmlNode],
         element_name: str) -> Optional[XmlNode]:
@@ -232,16 +230,14 @@ def find_element(
     :return: An element
     """
     if isinstance(xml_tag_or_string, str):
-        # A raw string is still parsed with bs4, so this returns the same backend it
-        # always has. Its last in-tree caller (thirteenf/parsers/primary_xml.py) moved
-        # to `parse_xml` under edgartools-07lk.11.3, leaving this branch and the one
-        # in `find_all_elements` as the only BeautifulSoup construction in the module.
-        # Both are kept for callers outside the repo and go in the 6.0 window with
-        # the dependency (edgartools-07lk.11 phase 6). New code should call
-        # `parse_xml` and pass the element.
-        if "<" not in xml_tag_or_string:
+        root = _parse_string(xml_tag_or_string)
+        if root is None:
             return None
-        return _find(BeautifulSoup(xml_tag_or_string, features="xml"), element_name)
+        # bs4 searched the whole document, so the root itself could match; `_find`
+        # starts below the element it is given.
+        if _local_name(root.tag) == element_name:
+            return root
+        return _find(root, element_name)
     return _find(xml_tag_or_string, element_name)
 
 
@@ -263,9 +259,11 @@ def find_all_elements(
     :return: A list of elements, empty if there are none
     """
     if isinstance(xml_tag_or_string, str):
-        if "<" not in xml_tag_or_string:
+        root = _parse_string(xml_tag_or_string)
+        if root is None:
             return []
-        return _find_all(BeautifulSoup(xml_tag_or_string, features="xml"), element_name)
+        found = _find_all(root, element_name)
+        return [root] + found if _local_name(root.tag) == element_name else found
     return _find_all(xml_tag_or_string, element_name)
 
 
@@ -278,7 +276,7 @@ def local_name(node: XmlNode) -> str:
     on lxml, so comparing `.tag` directly is a name check that fails on exactly the
     documents the local-name matching elsewhere in this module exists to handle.
     """
-    return node.name if _is_bs4(node) else _local_name(node.tag)
+    return _local_name(node.tag)
 
 
 def element_text(node: XmlNode) -> str:

@@ -234,16 +234,6 @@ class TextExtractor:
         if self.preserve_structure:
             parts.append("[TABLE START]")
 
-        # Add table caption if present
-        if table.caption:
-            caption_text = table.caption
-            if self.clean:
-                caption_text = self._clean_text_content(caption_text)  # Clean caption but not table content
-            if self.preserve_structure:
-                parts.append(f"Caption: {caption_text}")
-            else:
-                parts.append(caption_text)
-
         # Extract table text - PRESERVE FORMATTING (like old parser's TableBlock.get_text())
         # Use custom max_col_width if specified for AI-friendly rendering
         if self.table_max_col_width is not None:
@@ -254,6 +244,20 @@ class TextExtractor:
             table_text = renderer.render_table_node(table)
         else:
             table_text = table.text()
+
+        # Add table caption if present. Both table renderers already open with
+        # the caption, so it is added only when the rendered text does not: an
+        # SGML <CAPTION> is never closed and holds a whole plain-text table,
+        # which printed twice in doc.text() (edgartools-2f4l0).
+        if table.caption and not ' '.join((table_text or '').split()).startswith(
+                ' '.join(table.caption.split())):
+            caption_text = table.caption
+            if self.clean:
+                caption_text = self._clean_text_content(caption_text)  # Clean caption but not table content
+            if self.preserve_structure:
+                parts.append(f"Caption: {caption_text}")
+            else:
+                parts.append(caption_text)
 
         if table_text:
             # Tables render their own formatting - don't apply text cleaning to preserve alignment
@@ -337,8 +341,13 @@ class TextExtractor:
             first_child_text = node.children[0].text() if hasattr(node.children[0], 'text') else ""
             second_child_text = node.children[1].text() if hasattr(node.children[1], 'text') else ""
 
-            # First child is very short (likely bullet), second is longer (content)
-            if len(first_child_text.strip()) <= 3 and len(second_child_text.strip()) > 10:
+            # First child is the bullet glyph alone, second is longer (content).
+            # Glyph characters only, not any short text: "-1-", a plain-text
+            # filing's first page number, made a whole 20-F one bullet joined by
+            # spaces once its blank-line blocks became paragraphs (llmp.12.1).
+            bullet = first_child_text.strip()
+            if (bullet and len(bullet) <= 3 and all(c in bullet_chars for c in bullet)
+                    and len(second_child_text.strip()) > 10):
                 return True
 
         return False

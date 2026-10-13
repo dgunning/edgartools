@@ -120,7 +120,10 @@ def test_both_surviving_strategies_are_load_bearing():
     subset of another, and that is exactly the shape of argument that deleted the
     chunked parser. These two do not have that relationship: the 2008 and 2025
     fixtures are carried by the section tree with the text extractor silent, and
-    the 2001 and 2004 ones the other way round.
+    the 2001 one the other way round. The 2004 one was text-only too until
+    edgartools-llmp.12.1: it is a plain-text filing with no <TABLE>, which built
+    as a single paragraph, and since its blank-line blocks became paragraphs
+    both strategies find all three of its items.
 
     (On these fixtures the text extractor reads ``FixtureFiling.text()``, which
     returns the raw HTML rather than extracted text, so it is quieter here than
@@ -129,7 +132,11 @@ def test_both_surviving_strategies_are_load_bearing():
     ``0001493152-21-030832``, whose Item 5.07 no text pattern finds.)
     """
     by_stem = {p.stem: p for p in EIGHT_K}
-    text_only = by_stem["1013243-8-k-2001-03-30"], by_stem["1100748-8-k-2004-09-30"]
+    text_only = (by_stem["1013243-8-k-2001-03-30"],)
+    both = by_stem["1100748-8-k-2004-09-30"]
+    expected = ITEM_SETS_BEFORE_DELETION[both.stem]
+    assert set(_only_section_tree(CurrentReport)(FixtureFiling(both, "8-K")).items) == expected
+    assert set(_only_text(CurrentReport)(FixtureFiling(both, "8-K")).items) == expected
     sections_only = by_stem["786947-8-k-2008-06-30"], by_stem["744452-8-k-2025-06-30"]
 
     for path in text_only:

@@ -398,7 +398,13 @@ def test_obj_still_returns_none_for_a_form_we_do_not_model(strict):
     thing being protected.
     """
     class _Unmodelled:
-        form = "SC 14D9"
+        # Was "SC 14D9" until that form got a data object (Schedule14D9, GH
+        # #922). Any form here must be one `obj()` genuinely does not route:
+        # once it is modelled, `obj()` builds the object and this test fails
+        # on whatever that constructor touches, not on the None it is about.
+        # "SC 14D1" is the withdrawn tender-offer form, adjacent in subject and
+        # unlikely to be modelled.
+        form = "SC 14D1"
         accession_no = "0000320193-23-000999"
 
         def xbrl(self):

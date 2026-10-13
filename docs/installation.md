@@ -4,7 +4,7 @@ Get started with edgartools in minutes. This guide covers all installation metho
 
 ## System Requirements
 
-- **Python**: 3.10 or higher
+- **Python**: 3.11 or higher from EdgarTools 6.0. Python 3.10 is supported by the 5.x releases, and pip installs the last of them automatically on 3.10; see [Upgrading to 6.0](upgrade/6.0.md#python-311-or-newer-is-required).
 
 ## Quick Installation
 
@@ -159,7 +159,7 @@ If you encounter issues:
 
 For isolated development, use virtual environments:
 
-### Using venv (Python 3.10+)
+### Using venv (Python 3.11+)
 
 ```bash
 # Create virtual environment

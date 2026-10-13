@@ -28,7 +28,6 @@ sys.path.insert(0, str(FIXTURES_DIR / "parser_corpus"))
 import parity_benchmark  # noqa: E402
 
 normalise_new = parity_benchmark.normalise_new
-normalise_legacy = parity_benchmark.normalise_legacy
 
 
 @pytest.mark.fast
@@ -86,8 +85,21 @@ class TestEightKGranularity:
     def test_subitems_compare_at_the_major_number(self):
         assert normalise_new("item_801", "8-K") == "8"
         assert normalise_new("item_502", "8-K") == "5"
-        assert normalise_legacy("Item 8", "8-K") == "8"
-        assert normalise_legacy("Item 8.01", "8-K") == "8"
+
+    def test_the_frozen_legacy_side_is_at_the_major_number_too(self):
+        """The legacy column is frozen data now; it must already be coarse.
+
+        It was normalised to the major number when it was frozen (legacy wrote
+        'Item 8' or 'Item 8.01' for the same item). A record carrying a decimal
+        would never match the new side's major number and would read as a gap.
+        """
+        import json
+        records = json.loads(parity_benchmark.LEGACY_FROZEN.read_text())
+        eight_k = {k: v for k, v in records.items() if k.startswith("8-K|")}
+        assert len(eight_k) >= 3, "the frozen 8-K records are missing"
+        keys = {item for record in eight_k.values() for item in record["legacy"]}
+        assert keys, "no frozen 8-K record carries any item"
+        assert all(item.isdigit() for item in keys), sorted(keys)
 
     def test_the_precision_is_still_recoverable(self):
         assert parity_benchmark.subitem_of("item_801", "8-K") == "8.01"

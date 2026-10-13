@@ -37,15 +37,12 @@ import pytest
 import edgar
 
 # Public names deliberately NOT in __all__. Each is either stdlib that leaked in
-# through an annotation import, part of `edgar.files` (removed in 6.0, bead
-# edgartools-07lk.3), or internal plumbing with a supported entry point in front
+# through an annotation import, or internal plumbing with a supported entry point in front
 # of it. Moving a name OUT of this set and into __all__ is a promise; moving one
 # in is a decision to make it private in 6.0. Either way, do it deliberately.
 INTERNAL = {
     # stdlib, imported in __init__.py for annotations
     "List", "Optional", "Union", "lru_cache", "partial",
-    # edgar.files — removed in 6.0
-    "Document", "detect_page_breaks", "mark_page_breaks",
     # filesystem/config plumbing
     "get_anchor_cache_directory", "get_cache_directory", "get_claude_skills_directory",
     "get_data_directory", "get_search_cache_directory", "get_test_directory",
@@ -156,23 +153,20 @@ def test_stdlib_does_not_leak_through_star_import():
         )
 
 
-def test_the_exported_document_class_is_not_the_legacy_one():
-    """`edgar.Document` is `edgar.files.html.Document` — the parser 6.0 removes.
+def test_the_legacy_document_class_is_gone_and_says_where_to_go():
+    """`edgar.Document` was `edgar.files.html.Document`, which 6.0 removed.
 
-    It is a different class from `edgar.documents.Document`, which is the one
-    the guides teach. Exporting it under a name that collides with its own
-    replacement is why it is not in __all__.
+    It was a different class from `edgar.documents.Document`, the one the guides
+    teach, under a name that collided with its own replacement — which is why it
+    was never in __all__. Reaching for it now has to fail with directions, not a
+    bare "no attribute".
     """
-    from edgar.documents import Document as ModernDocument
-
     assert "Document" not in edgar.__all__, (
-        "edgar.Document is the legacy edgar.files parser, removed in 6.0. If it "
-        "is ever exported again it should be the edgar.documents one."
+        "if edgar.Document is ever exported again it should be the "
+        "edgar.documents one, added deliberately"
     )
-    assert edgar.Document is not ModernDocument, (
-        "edgar.Document now IS edgar.documents.Document — that is a change worth "
-        "making deliberately, and this test and __all__ should follow it."
-    )
+    with pytest.raises(AttributeError, match=r"edgar\.documents\.Document"):
+        edgar.Document  # noqa: B018
 
 
 def test_report_the_current_surface(capsys):

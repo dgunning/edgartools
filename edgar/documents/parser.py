@@ -36,6 +36,10 @@ logger = logging.getLogger(__name__)
 _PLAIN_TEXT_WRAPPER = '<html><body><div>'
 _PREFORMATTED_WRAPPER = '<html><body><div style="white-space: pre-wrap">'
 _COMMENT = re.compile(r'<!--.*?-->', re.DOTALL)
+# The SGML page marker a plain-text filing carries between printed pages. It
+# is never closed, so lxml nests the rest of the filing inside the first one,
+# and the builder could not split that text into paragraphs (edgartools-llmp.12.1).
+_SGML_PAGE_MARKER = re.compile(r'</?page>', re.IGNORECASE)
 
 
 class HTMLParser:
@@ -144,12 +148,12 @@ class HTMLParser:
             original_html = html
 
             if html.startswith(_PLAIN_TEXT_WRAPPER):
-                html = _PREFORMATTED_WRAPPER + html[len(_PLAIN_TEXT_WRAPPER):]
+                html = _PREFORMATTED_WRAPPER + _SGML_PAGE_MARKER.sub('', html[len(_PLAIN_TEXT_WRAPPER):])
             elif not is_probably_html(html) and _COMMENT.sub('', html).strip():
                 # A raw .txt primary document handed straight to the parser
                 # (Filing.parsed_items on a 1999 8-K) is plain text too. Input with
                 # nothing but comments is not a document; it still fails to parse.
-                html = f"{_PREFORMATTED_WRAPPER}{html}</div></body></html>"
+                html = f"{_PREFORMATTED_WRAPPER}{_SGML_PAGE_MARKER.sub('', html)}</div></body></html>"
 
             # Preprocessing (will remove ix:hidden for rendering)
             html = self.preprocessor.process(html)

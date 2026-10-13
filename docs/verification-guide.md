@@ -48,14 +48,14 @@ Assert a specific value from a real SEC filing, confirmed by hand against the so
 ```python
 # GOOD — verifies data correctness
 def test_apple_2024_revenue():
-    financials = Company("AAPL").get_financials()
-    revenue = financials.income_statement.get_value("Revenues")
+    financials = find("0000320193-24-000123").obj().financials  # AAPL FY2024 10-K
+    revenue = financials.get_revenue()
     assert revenue == 391035000000  # FY2024, verified against 10-K
 
 # BAD — verifies existence only
 def test_apple_has_revenue():
     financials = Company("AAPL").get_financials()
-    revenue = financials.income_statement.get_value("Revenues")
+    revenue = financials.get_revenue()
     assert revenue is not None  # Could be any number
 ```
 
@@ -258,10 +258,10 @@ When fixing a bug:
 
 def test_cost_of_goods_sold_positive():
     """Regression for #451: COGS must be positive in income statement."""
-    filing = Filing(accession_number="0000320193-20-000096")
+    filing = find("0000320193-20-000096")
     xbrl = filing.xbrl()
-    income = xbrl.statements.income_statement
-    cogs = income.get_value("CostOfGoodsAndServicesSold", period="2020-09-26")
+    df = xbrl.statements.income_statement().to_dataframe()
+    cogs = df[df["concept"] == "us-gaap_CostOfGoodsAndServicesSold"].iloc[0]["2020-09-26 (FY)"]
     assert cogs == pytest.approx(169559000000.0)
     assert cogs > 0  # Sign must be positive
 ```

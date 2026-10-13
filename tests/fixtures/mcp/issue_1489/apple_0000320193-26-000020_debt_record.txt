@@ -1,0 +1,22 @@
+{
+                "concept": "aapl_CommercialPaperCashFlowSummaryTableTextBlock",
+                "label": "Summary of Cash Flows Associated with Commercial Paper",
+                "standard_concept": null,
+                "2026-06-27 (Q3)": null,
+                "2025-06-28 (Q3)": null,
+                "2026-06-27 (YTD)": "The following table provides a summary of cash flows associated with commercial \npaper for the nine months ended June 27, 2026 and June 28, 2025 (in millions):\n\n                                                           Nine Months Ended\n \u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\u2500\n                                                           June 27,             \nJune 28,\n\n\n                                                           2026                 \n2025\n  Maturities 90 days or less:\n  Repayments of commercial paper, net                      $                    \n(2,123)      $             (5,690)\n  Maturities greater than 90 days:\n  Proceeds from commercial paper                           \u2014                    \n5,625\n  Repayments of commercial paper                                                \n(3,788)      \u2014\n  Proceeds from/(Repayments of) commercial paper, net                           \n(3,788)                      5,625\n  Total repayments of commercial paper, net                $                    \n(5,911)      $                (65)\n",
+                "2025-06-28 (YTD)": null,
+                "level": 1,
+                "abstract": false,
+                "dimension": false,
+                "is_breakdown": false,
+                "dimension_axis": null,
+                "dimension_member": null,
+                "dimension_member_label": null,
+                "dimension_label": null,
+                "balance": NaN,
+                "weight": NaN,
+                "preferred_sign": 1,
+                "parent_concept": null,
+                "parent_abstract_concept": "us-gaap_DebtDisclosureAbstract"
+              }

@@ -27,6 +27,7 @@ Offline (local fixtures):
   Ondas Inc. 10-K        0001213900-26-035981  tests/fixtures/html/onds/10k/
   20-F page-anchor TOC   0001062993-21-003193  tests/fixtures/parity_gate/20-F/
 """
+import re
 from pathlib import Path
 
 import pytest
@@ -68,7 +69,7 @@ def test_southern_item7a_is_its_own_cross_reference(southern):
     item7 = southern["part_ii_item_7"].text()
     item7a = southern["part_ii_item_7a"].text()
     assert item7a != item7
-    assert len(item7a) == 347  # was 282,239 — all of Item 7
+    assert len(item7a) == 341  # was 282,239 — all of Item 7; then 347 before the trailing page number "II-2" left the slice
     assert item7a.startswith("Item 7A.QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK")
     assert '"Market Price Risk" in Item 7 herein' in item7a
     # 7A stops at the end of its page block; MD&A's body is not in it.
@@ -79,7 +80,7 @@ def test_southern_item7_keeps_its_mda(southern):
     item7 = southern["part_ii_item_7"].text()
     # Owner's span is unchanged: the displaced 7A text sits inside Item 7's
     # first page and the MD&A resumes after it.
-    assert len(item7) == 283_225  # tables rendered cell by cell (edgartools-wzgu)
+    assert len(item7) == 283_138  # was 283,225: the leading crumb line (283,145), then the trailing page number "II-67", left the slice
     assert "COMBINED MANAGEMENT'S DISCUSSION AND ANALYSIS" in item7
     assert "Southern Company is a holding company that owns all of the common stock" in item7
 
@@ -90,8 +91,8 @@ def test_southern_other_shared_pages_are_separated(southern):
     item9a = southern["part_ii_item_9a"].text()
     item9b = southern["part_ii_item_9b"].text()
     # Items 5 and 6 tile their page: Item 5 now ends at Item 6's heading.
-    assert (len(item5), len(item6)) == (1393, 21)  # both were 1,416
-    assert item6 == "Item 6.RESERVED\n\nII-1"
+    assert (len(item5), len(item6)) == (1393, 15)  # both were 1,416; Item 6 was 21 before its trailing page number "II-1" left the slice
+    assert item6 == "Item 6.RESERVED"  # the trailing page number "II-1" left the slice (llmp.12 step 6)
     assert "Item 6." not in item5
     # 9B continues onto the next page (the trading-arrangement table) and
     # still stops at Item 9C.
@@ -109,7 +110,7 @@ def test_southern_combined_part_iii_is_left_alone(southern):
     deliberately left as one span rather than guessed at."""
     texts = {k: southern[k].text() for k in
              ("part_iii_item_10", "part_iii_item_11", "part_iii_item_12", "part_iii_item_13")}
-    assert {len(t) for t in texts.values()} == {2917}
+    assert {len(t) for t in texts.values()} == {2820}  # was 2917: the leading crumb line and "PART III" divider (2827), then the trailing page number "III-1", left the slice
 
 
 # --- Eversource: three consecutive items on one page -------------------------
@@ -147,20 +148,27 @@ def test_ondas_item1_ends_at_item1a(ondas):
 
 # Re-pinned for edgartools-wzgu: tables now render cell by cell, which drops the
 # blank lines the old walk emitted per cell; no letter or digit changed.
+# Re-pinned for the page-furniture start (edgartools-llmp.12): a section whose
+# anchor is a page start no longer opens on that page's number, so each
+# page-keyed item lost its page number and a line break (Item 12 also lost its
+# trailing "PART II" divider in #1515). The other eleven lost 16 chars of
+# cell padding: a heading laid out as a table row is now rendered as a table
+# ("ITEM 2.  OFFER STATISTICS") instead of walked cell by cell; the collapsed
+# text is unchanged.
 _20F_EXPECTED = {
     # page_6
-    "part_i_item_1": 2988, "part_i_item_2": 124, "part_i_item_3": 65447,
+    "part_i_item_1": 2981, "part_i_item_2": 108, "part_i_item_3": 65431,
     # page_29
-    "part_i_item_4a": 1077, "part_i_item_5": 10291,
+    "part_i_item_4a": 1069, "part_i_item_5": 10275,
     # page_59
-    "part_i_item_12": 1413, "part_ii_item_13": 94, "part_ii_item_14": 123,
-    "part_ii_item_15": 4888,
+    "part_i_item_12": 1392, "part_ii_item_13": 78, "part_ii_item_14": 107,
+    "part_ii_item_15": 4872,
     # page_61
-    "part_ii_item_16a": 2615, "part_ii_item_16b": 428, "part_ii_item_16c": 474,
+    "part_ii_item_16a": 2607, "part_ii_item_16b": 412, "part_ii_item_16c": 458,
     # page_62
-    "part_ii_item_16d": 1564, "part_ii_item_16e": 118, "part_ii_item_16f": 671,
+    "part_ii_item_16d": 1556, "part_ii_item_16e": 102, "part_ii_item_16f": 655,
     # page_63
-    "part_ii_item_17": 2478, "part_ii_item_18": 151598,
+    "part_ii_item_17": 2470, "part_ii_item_18": 151582,
 }
 
 
@@ -172,6 +180,10 @@ def test_20f_page_anchor_collision_groups_are_resolved(page_anchor_20f):
     assert len(set(texts.values())) == len(texts)
     assert texts["part_ii_item_16e"].startswith("ITEM 16E.")
     assert "ITEM 18." not in texts["part_ii_item_17"]
+    # The TOC keys Item 17 to Part II, but on a 20-F its heading sits under
+    # "PART III": the Part-divider bound must not cut a section before its
+    # own heading.
+    assert re.search(r"ITEM 17\.\s+FINANCIAL STATEMENTS", texts["part_ii_item_17"])
 
 
 def test_ondas_risk_factors_friendly_name_still_resolves(ondas):
@@ -258,7 +270,10 @@ def test_prospectus_trailing_section_markdown_stops_at_financial_statements():
     section = sections["where_you_can_find_more_information"]
     assert len(section.text()) == 1910
     md = section.markdown()
-    assert len(md) == 1934
+    # GH #1369: markdown() now keeps the section's own heading,
+    # "**Where You Can Find Additional Information **" (48 characters with its blank line).
+    assert md.startswith("**Where You Can Find Additional Information **")
+    assert len(md) == 1982
     assert "Index to Consolidated Financial Statements".upper() not in md.upper()
     # The section has no table of its own; the F-pages index no longer leaks in.
     assert section.tables() == []

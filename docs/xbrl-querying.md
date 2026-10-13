@@ -113,7 +113,7 @@ Combine multiple filters using method chaining:
 ```python
 # Complex query with multiple filters
 complex_query = (xbrl.query()
-                 .by_statement("IncomeStatement")
+                 .by_statement_type("IncomeStatement")
                  .by_label("Revenue")
                  .by_value(lambda x: x > 1_000_000)
                  .sort_by('value', ascending=False)
@@ -188,11 +188,10 @@ any_product_dim = xbrl.query().by_dimension("ProductOrServiceAxis")
 # Facts with NO dimensions (undimensioned facts)
 undimensioned_facts = xbrl.query().by_dimension(None)
 
-# Multiple dimensions
-multi_dim = xbrl.query().by_dimensions({
-    "ProductOrServiceAxis": "ProductMember",
-    "GeographyAxis": "USMember"
-})
+# Multiple dimensions: chain one by_dimension() per axis
+multi_dim = (xbrl.query()
+             .by_dimension("ProductOrServiceAxis", "ProductMember")
+             .by_dimension("GeographyAxis", "USMember"))
 ```
 
 
@@ -206,7 +205,7 @@ multi_dim = xbrl.query().by_dimensions({
 ```python
 # Efficient query pattern
 efficient_query = (xb.query()
-                   .by_statement("IncomeStatement")  # Filter first
+                   .by_statement_type("IncomeStatement")  # Filter first
                    .by_value(lambda x: x > 0)        # Remove zeros
                    .limit(100)                       # Limit results
                    .to_dataframe('concept', 'value')) # Select columns
@@ -245,7 +244,7 @@ print(quarterly_revenue)
 ```python
 # Major balance sheet items
 balance_items = (xb.query()
-                 .by_statement("BalanceSheet")
+                 .by_statement_type("BalanceSheet")
                  .by_value(lambda x: x > 1_000_000_000)  # > $1B
                  .sort_by('value', ascending=False)
                  .to_dataframe('label', 'value'))

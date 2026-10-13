@@ -133,8 +133,8 @@ data_objects = [filing.obj() for filing in filings]
 revenues = []
 for obj in data_objects:
     if hasattr(obj, "income_statement"):
-        period_end = obj.period_end_date
-        revenue = obj.income_statement.get_value("Revenues")
+        period_end = obj.period_of_report
+        revenue = obj.financials.get_revenue()
         revenues.append((period_end, revenue))
 
 # Sort by date and analyze trend
@@ -216,13 +216,9 @@ if hasattr(tenk, "risk_factors") and tenk.risk_factors:
 else:
     print("No risk factors section found")
 
-# For financial data
-try:
-    revenue = income_stmt.get_value("Revenues")
-except ValueError:
-    revenue = income_stmt.get_value("RevenueFromContractWithCustomerExcludingAssessedTax")
-except:
-    revenue = None
+# For financial data: get_revenue() tries the common revenue concepts
+# and returns None when the filing reports none of them
+revenue = tenk.financials.get_revenue()
 ```
 
 ### Challenge: Handling Format Changes
@@ -232,14 +228,17 @@ SEC filing formats evolve over time:
 ```python
 # Version-aware code
 tenk = filing.obj()
-filing_year = tenk.period_end_date.year
+filing_year = int(tenk.period_of_report[:4])
+df = tenk.income_statement.to_dataframe()
+period = max(c for c in df.columns if c.startswith("20"))  # most recent year
 
 if filing_year >= 2021:
     # Use newer XBRL taxonomy concepts
-    revenue = income_stmt.get_value("RevenueFromContractWithCustomerExcludingAssessedTax")
+    concept = "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax"
 else:
     # Use older concepts
-    revenue = income_stmt.get_value("Revenues")
+    concept = "us-gaap_Revenues"
+revenue = df[df["concept"] == concept].iloc[0][period]
 ```
 
 ### Challenge: Processing Large Filings
