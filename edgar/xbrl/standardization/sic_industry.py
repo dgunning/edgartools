@@ -2,19 +2,31 @@
 SIC code to Fama-French 48 industry classification.
 
 Maps 4-digit SIC codes to the 48 industry codes used by the
-Fama-French industry classification system. These codes match the
-industry_overrides keys in gaap_mappings.json.
+Fama-French industry classification system. These are the codes that
+industry_overrides entries in gaap_mappings.json are keyed on (none ship
+since GH #1419).
 
 Source: Kenneth French's Data Library
 https://mba.tuck.dartmouth.edu/pages/faculty/ken.french/Data_Library/det_48_ind_port.html
+
+A deliberate departure from French's table: SIC 6798 (real estate investment
+trusts) is RlEst here, not Fin. French files REITs under 47 Trading with brokers,
+holding companies and blank-check shells, but a REIT reports real-estate
+statements: the US GAAP taxonomy's REIT income statement is a real-estate format,
+next to the one for real estate companies that are not REITs, and not the
+securities-based format of brokers and dealers.
 """
 
 from functools import lru_cache
 from typing import Optional
 
-
-# Each entry: (start_sic, end_sic, ff48_code)
-# Sorted by SIC range for binary search
+# Each entry: (start_sic, end_sic, ff48_code), grouped by industry in French's
+# order, not sorted by SIC. sic_to_fama_french() scans the list in order and
+# returns the first range that contains the code, so the ranges must not
+# overlap: an overlapping code silently goes to whichever industry is listed
+# first. That is how 3570-3579 (computers, including Apple's 3571) used to land
+# in Mach rather than Comps, 3622 in ElcEq rather than Chips and 3647 in ElcEq
+# rather than Autos.
 _FF48_SIC_RANGES = [
     # 1 Agric - Agriculture
     (100, 299, "Agric"), (700, 799, "Agric"), (910, 919, "Agric"),
@@ -78,12 +90,13 @@ _FF48_SIC_RANGES = [
     (3350, 3357, "Steel"), (3360, 3379, "Steel"), (3380, 3399, "Steel"),
     # 20 FabPr - Fabricated Products
     (3400, 3400, "FabPr"), (3443, 3444, "FabPr"), (3460, 3479, "FabPr"),
-    # 21 Mach - Machinery
-    (3510, 3536, "Mach"), (3538, 3599, "Mach"),
-    # 22 ElcEq - Electrical Equipment
-    (3600, 3600, "ElcEq"), (3610, 3613, "ElcEq"), (3620, 3629, "ElcEq"),
-    (3640, 3644, "ElcEq"), (3645, 3645, "ElcEq"), (3646, 3649, "ElcEq"),
-    (3660, 3660, "ElcEq"), (3690, 3692, "ElcEq"), (3699, 3699, "ElcEq"),
+    # 21 Mach - Machinery (3570-3579 are Comps)
+    (3510, 3536, "Mach"), (3538, 3569, "Mach"), (3580, 3599, "Mach"),
+    # 22 ElcEq - Electrical Equipment (3622 is Chips, 3647 is Autos)
+    (3600, 3600, "ElcEq"), (3610, 3613, "ElcEq"), (3620, 3621, "ElcEq"),
+    (3623, 3629, "ElcEq"), (3640, 3644, "ElcEq"), (3645, 3645, "ElcEq"),
+    (3646, 3646, "ElcEq"), (3648, 3649, "ElcEq"), (3660, 3660, "ElcEq"),
+    (3690, 3692, "ElcEq"), (3699, 3699, "ElcEq"),
     # 23 Autos - Automobiles and Trucks
     (2296, 2296, "Autos"), (2396, 2396, "Autos"), (3010, 3011, "Autos"),
     (3537, 3537, "Autos"), (3647, 3647, "Autos"), (3694, 3694, "Autos"),
@@ -189,13 +202,13 @@ _FF48_SIC_RANGES = [
     (6500, 6500, "RlEst"), (6510, 6510, "RlEst"), (6512, 6515, "RlEst"),
     (6517, 6519, "RlEst"), (6520, 6532, "RlEst"), (6550, 6553, "RlEst"),
     (6590, 6599, "RlEst"), (6610, 6611, "RlEst"),
+    (6798, 6798, "RlEst"),  # REITs; French has them in Fin (see module docstring)
     # 47 Fin - Trading
     (6200, 6200, "Fin"), (6210, 6211, "Fin"), (6220, 6221, "Fin"),
     (6230, 6231, "Fin"), (6240, 6241, "Fin"), (6250, 6252, "Fin"),
     (6260, 6261, "Fin"), (6280, 6282, "Fin"), (6290, 6299, "Fin"),
     (6700, 6700, "Fin"), (6710, 6726, "Fin"), (6730, 6733, "Fin"),
-    (6740, 6779, "Fin"), (6790, 6795, "Fin"), (6798, 6798, "Fin"),
-    (6799, 6799, "Fin"),
+    (6740, 6779, "Fin"), (6790, 6795, "Fin"), (6799, 6799, "Fin"),
     # 48 Other - Almost Nothing
     (4950, 4959, "Other"), (4960, 4961, "Other"), (4970, 4971, "Other"),
     (4990, 4991, "Other"),

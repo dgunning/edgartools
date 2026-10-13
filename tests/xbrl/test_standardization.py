@@ -310,6 +310,12 @@ def test_bottom_up_handles_empty_items():
 
 
 # ── Industry overrides ──────────────────────────────────────────────────────
+#
+# The shipped gaap_mappings.json carries no industry_overrides since GH #1419:
+# every record restated its base entry, narrowed it to its first candidate or
+# swapped it, so they were removed (the invariant that no industry loses a base
+# mapping is in tests/issues/regression/test_issue_1419_industry_overrides.py).
+# The override mechanism is exercised here on a one-entry mapping file.
 
 
 @pytest.fixture
