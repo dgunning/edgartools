@@ -83,8 +83,7 @@
   ],
   "Interest Expense": [
     "us-gaap_InterestAndDebtExpense",
-    "us-gaap_InterestExpense",
-    "us-gaap_InterestIncomeExpenseNet"
+    "us-gaap_InterestExpense"
   ],
   "Interest Expense (operating)": [
     "us-gaap_InterestExpenseOperating"
@@ -193,7 +192,6 @@
     "us-gaap_Goodwill"
   ],
   "Intangible Assets": [
-    "us-gaap_IntangibleAssetsNetIncludingGoodwill",
     "us-gaap_IntangibleAssetsNetExcludingGoodwill",
     "us-gaap_FiniteLivedIntangibleAssetsNet"
   ],
@@ -274,7 +272,6 @@
   "Total Stockholders' Equity": [
     "us-gaap_EquityAttributableToParent",
     "us-gaap_StockholdersEquity",
-    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
     "us-gaap_StockholdersEquityAttributableToParent"
   ],
   "Total Liabilities and Stockholders' Equity": [
