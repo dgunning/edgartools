@@ -494,14 +494,30 @@ class ReverseIndex:
                         )
                         return candidate
 
-            # Phase 3+: Use tag name hints for current/noncurrent disambiguation
+            # The statement section, when the caller knows it, decides first.
+            # A ...CurrentAndNoncurrent element can sit in either section, so
+            # its name must not override where the filer actually put it (#1434).
+            # A role URI is not a section_membership key, so fall back to the
+            # untyped lookup instead of treating the section as unknown.
+            if section:
+                for candidate in candidates:
+                    candidate_section = (
+                        get_section_for_concept(candidate, statement_type)
+                        or get_section_for_concept(candidate)
+                    )
+                    if candidate_section and self._sections_match(section, candidate_section):
+                        return candidate
+
+            # Phase 3+: Use tag name hints for current/noncurrent disambiguation.
+            # 'nonoperating' is not 'noncurrent': OtherNonOperatingCurrentAssets is current.
             tag_lower = xbrl_tag.lower()
-            if any(hint in tag_lower for hint in ('noncurrent', 'longterm', 'long_term')):
+            unclassified = 'currentandnoncurrent' in tag_lower
+            if not unclassified and any(hint in tag_lower for hint in ('noncurrent', 'longterm', 'long_term')):
                 for candidate in candidates:
                     cl = candidate.lower()
-                    if 'noncurrent' in cl or 'nonoperating' in cl or 'longterm' in cl:
+                    if 'noncurrent' in cl or 'longterm' in cl:
                         return candidate
-            elif 'current' in tag_lower and 'noncurrent' not in tag_lower:
+            elif not unclassified and 'current' in tag_lower and 'noncurrent' not in tag_lower:
                 for candidate in candidates:
                     cl = candidate.lower()
                     if 'current' in cl and 'noncurrent' not in cl:
@@ -518,15 +534,25 @@ class ReverseIndex:
                 if candidate_section and self._sections_match(effective_section, candidate_section):
                     return candidate
 
-            # Secondary: check if section name is in concept name
+            # Secondary: check if section name is in concept name.
+            # 'non-current' contains 'current', so the noncurrent spellings
+            # have to be tested first. 'long-term' / 'longterm' are noncurrent.
             section_lower = effective_section.lower()
+            section_compact = section_lower.replace('-', '').replace(' ', '').replace('_', '')
+            section_is_noncurrent = (
+                'non-current' in section_lower
+                or 'noncurrent' in section_lower
+                or 'non current' in section_lower
+                or 'long-term' in section_lower
+                or 'longterm' in section_compact
+            )
             for candidate in candidates:
                 candidate_lower = candidate.lower()
-                if 'current' in section_lower and 'noncurrent' not in section_lower:
-                    if 'current' in candidate_lower and 'noncurrent' not in candidate_lower:
+                if section_is_noncurrent:
+                    if 'noncurrent' in candidate_lower or 'longterm' in candidate_lower:
                         return candidate
-                elif 'noncurrent' in section_lower or 'non-current' in section_lower:
-                    if 'noncurrent' in candidate_lower or 'nonoperating' in candidate_lower:
+                elif 'current' in section_lower:
+                    if 'current' in candidate_lower and 'noncurrent' not in candidate_lower:
                         return candidate
 
         except Exception as e:
@@ -547,12 +573,34 @@ class ReverseIndex:
         if ctx == cpt:
             return True
 
-        # Determine if sections are current vs non-current
-        ctx_is_current = 'current' in ctx and 'non' not in ctx.split('current')[0]
-        ctx_is_noncurrent = 'non current' in ctx or 'noncurrent' in ctx or ('non' in ctx and 'current' in ctx)
+        # Determine if sections are current vs non-current.
+        # 'long term' / 'longterm' name the noncurrent side. Hyphens and
+        # underscores are already spaces, so 'long-term' is 'long term'.
+        ctx_is_noncurrent = (
+            'non current' in ctx
+            or 'noncurrent' in ctx
+            or ('non' in ctx and 'current' in ctx)
+            or 'long term' in ctx
+            or 'longterm' in ctx.replace(' ', '')
+        )
+        ctx_is_current = (
+            'current' in ctx
+            and 'non' not in ctx.split('current')[0]
+            and not ctx_is_noncurrent
+        )
 
-        cpt_is_current = 'current' in cpt and 'non' not in cpt.split('current')[0]
-        cpt_is_noncurrent = 'non current' in cpt or 'noncurrent' in cpt or ('non' in cpt and 'current' in cpt)
+        cpt_is_noncurrent = (
+            'non current' in cpt
+            or 'noncurrent' in cpt
+            or ('non' in cpt and 'current' in cpt)
+            or 'long term' in cpt
+            or 'longterm' in cpt.replace(' ', '')
+        )
+        cpt_is_current = (
+            'current' in cpt
+            and 'non' not in cpt.split('current')[0]
+            and not cpt_is_noncurrent
+        )
 
         # Current vs Non-Current must match
         if ctx_is_current != cpt_is_current:
