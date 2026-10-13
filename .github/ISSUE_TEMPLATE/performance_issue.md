@@ -17,7 +17,7 @@ assignees: ''
 
 ## Environment
 **EdgarTools Version:** (e.g., 4.9.0)
-**Python Version:** (e.g., 3.10.5)  
+**Python Version:** (e.g., 3.12.5)  
 **Operating System:** (e.g., macOS 14.0, Windows 11, Ubuntu 22.04)
 **Available RAM:** (e.g., 16GB)
 **CPU:** (e.g., Intel i7, Apple M1, AMD Ryzen 7)

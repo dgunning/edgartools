@@ -516,12 +516,12 @@ python3 -m edgar.ai
 
 **Issue:** Server starts but tools don't work
 
-**Solution:** MCP requires Python 3.10+. Check your version:
+**Solution:** EdgarTools 6.0 requires Python 3.11+. Check your version:
 ```bash
 python --version
 ```
 
-If using Python 3.9 or earlier, upgrade Python:
+If using Python 3.10 or earlier, upgrade Python:
 ```bash
 # macOS with Homebrew
 brew install python@3.11
