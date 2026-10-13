@@ -31,7 +31,6 @@ the archive directory follows from the accession number. Verified against the
 live filing 2026-08-08: both URLs return HTTP 200 image/jpeg.
 """
 import re
-import warnings
 from pathlib import Path
 from urllib.parse import urljoin
 
@@ -119,46 +118,6 @@ class TestImagesSurviveIntoMarkdown:
         )
 
 
-@pytest.mark.fast
-class TestThePageBreakEscapeHatch:
-    """``include_page_breaks=True`` still works, and says it is going away.
-
-    The new pipeline has no page-break rendering — ``DocumentBuilder`` drops
-    page-break ``<hr>``s and page-number containers as print chrome — so the
-    flag keeps routing to the legacy renderer until 6.0. That is a deliberate
-    trade, and the warning is the part users actually see.
-    """
-
-    def test_the_flag_warns_about_removal(self):
-        from edgar.files._deprecation import PAGE_BREAK_DEPRECATION
-
-        message = PAGE_BREAK_DEPRECATION.format(cls="Filing")
-        assert "6.0" in message, "the warning must name the removal release"
-        assert "images" in message, (
-            "the warning must say what the caller gives up, not just that the "
-            "flag is deprecated"
-        )
-
-    def test_the_legacy_renderer_still_emits_page_break_markers(self):
-        """Guards the fallback itself, not just the warning."""
-        from edgar.files.markdown import to_markdown
-
-        html = (
-            "<html><body>"
-            "<div>Page one body text that is long enough to be a text block.</div>"
-            "<hr style='page-break-after:always'/>"
-            "<div>Page two body text that is long enough to be a text block.</div>"
-            "</body></html>"
-        )
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            markdown = to_markdown(html, include_page_breaks=True, start_page_number=1)
-        assert markdown is not None
-        assert re.search(r"\{\d+\}-{10,}", markdown), (
-            f"no page break delimiter in legacy output:\n{markdown}"
-        )
-
-
 @pytest.mark.network
 class TestEndToEndThroughFilingMarkdown:
     """The offline tests above cannot see ``Filing.markdown()``'s URL wiring.
@@ -185,16 +144,3 @@ class TestEndToEndThroughFilingMarkdown:
         assert all(filing.accession_no.replace("-", "") in src for src in sources), (
             f"image URLs do not point at this filing's archive directory: {sources}"
         )
-
-    def test_the_deprecated_path_warns_and_still_renders(self):
-        from edgar import Company
-
-        filing = Company("NVDA").get_filings(form="10-K").latest()
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
-            markdown = filing.markdown(include_page_breaks=True, start_page_number=1)
-
-        assert re.search(r"\{\d+\}-{10,}", markdown), "page break markers missing"
-        deprecations = [w for w in caught if issubclass(w.category, DeprecationWarning)]
-        assert deprecations, "include_page_breaks=True must emit a DeprecationWarning"
-        assert "6.0" in str(deprecations[0].message)

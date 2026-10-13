@@ -157,16 +157,12 @@ a placeholder there is nothing to show the reader anything was there.
 
 #### markdown()
 ```python
-def markdown(
-    include_page_breaks: bool = False,
-    start_page_number: int = 0
-) -> str
+def markdown() -> str
 ```
-Convert filing to Markdown format.
-
-**Parameters:**
-- `include_page_breaks` (bool): Include page break markers
-- `start_page_number` (int): Starting page number for page breaks
+Convert filing to Markdown format. Images keep absolute SEC archive URLs.
+Page-break markers are not rendered; the `include_page_breaks` and
+`start_page_number` arguments were removed in 6.0 (see the
+[upgrade guide](../upgrade/6.0.md#page-breaks-are-not-rendered-any-more)).
 
 **Returns:** Markdown formatted content
 
@@ -626,11 +622,6 @@ md = filing.markdown()
 with open("filing_for_analysis.md", "w") as f:
     f.write(md)
 ```
-
-!!! warning "`include_page_breaks` is deprecated"
-
-    It routes the document through the legacy renderer, which drops images.
-    Removed in 6.0.
 
 ## Error Handling
 

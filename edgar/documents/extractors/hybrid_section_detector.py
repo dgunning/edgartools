@@ -210,6 +210,24 @@ class HybridSectionDetector:
         if not canonical or canonical <= found_part_items:
             return toc_sections  # The TOC named everything the form defines.
 
+        # A FILER'S CROSS-REFERENCE INDEX OUTRANKS THE PATTERN EXTRACTOR. On an
+        # index filer the TOC detector can read part of the index as a TOC and
+        # succeed with a handful of items, so the index path below never runs
+        # and the gaps went to keyword matching, which has no idea where an item
+        # lives in a filing that publishes items out of order. GE's 10-K got
+        # five TOC items and three pattern sections: Item 1 was the index table
+        # itself, Item 9A was 276k chars starting mid-sentence, Item 1C 68k,
+        # while the index located 9A at 3.3k and 1C at 6.6k (edgartools-llmp.12.2).
+        # The index fills the gaps first; the TOC still wins every item it named.
+        index_extras = self._index_sections_for_missing(found_part_items)
+        if index_extras:
+            for sec in index_extras.values():
+                found_items.add(sec.item)
+                found_part_items.add((sec.part, sec.item))
+            toc_sections = {**toc_sections, **index_extras}
+            if canonical <= found_part_items:
+                return toc_sections
+
         # Run pattern extractor against the same document.
         pattern_sections = self._try_pattern_detection()
         if not pattern_sections:
@@ -266,6 +284,19 @@ class HybridSectionDetector:
         merged = dict(toc_sections)
         merged.update(extras)
         return merged
+
+    def _index_sections_for_missing(self, found_part_items) -> Dict[str, Section]:
+        """Index-detected sections for the (part, item) pairs not in ``found_part_items``."""
+        index_sections = self._try_index_detection()
+        if not index_sections:
+            return {}
+        missing = {
+            key: sec for key, sec in index_sections.items()
+            if sec.item and (sec.part, sec.item) not in found_part_items
+        }
+        if not missing:
+            return {}
+        return self._validate_pipeline(missing, enable_cross_validation=False)
 
     def _validate_pipeline(
         self,

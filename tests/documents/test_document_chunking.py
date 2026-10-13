@@ -1,7 +1,7 @@
 """Structural chunking — what `Filing.sections()` and `Filing.search()` stand on.
 
 Bead: edgartools-07lk.3 leg C. `Filing.sections()` used to call
-`edgar.files.htmltools.html_sections`, whose `HtmlDocument` backend 6.0 deletes.
+`edgar.files.htmltools.html_sections`, whose `HtmlDocument` backend 6.0 deleted.
 It is public, and it backs `Filing.search()` through `BM25Search` and
 `RegexSearch`, so it needed a replacement rather than a deprecation — there was
 nothing to deprecate it toward.
@@ -145,22 +145,28 @@ def test_uncapped_chunking_is_still_reachable():
 
 
 # --------------------------------------------------------------------------
-# Coverage against the legacy chunker, while it still exists to compare against
+# Coverage against the document's own text
 # --------------------------------------------------------------------------
 
 @pytest.mark.parametrize("path", [MODERN_10K, ARCHAIC_10K], ids=["2016", "1999"])
-def test_indexes_the_same_words_as_the_legacy_chunker(path):
-    """Word multisets, not lengths — see the module docstring."""
-    from edgar.files.htmltools import html_sections
+def test_indexes_the_same_words_as_the_document_text(path):
+    """Word multisets, not lengths — see the module docstring.
+
+    The reference used to be the legacy chunker, which went with ``edgar.files``
+    in 6.0. The document's own plain text is the stricter reference: on the day
+    of the switch the chunks lost 21 of 27,955 legacy word occurrences on the
+    2016 fixture but only 1 of 27,486 against the text, and 0 of 17,411 on 1999.
+    """
+    from edgar.sgml.text_extraction import html_to_text
 
     html = path.read_text(encoding="utf-8", errors="replace")
-    legacy = collections_counter(html_sections(html))
+    reference = collections_counter([html_to_text(html, form="10-K")])
     new = collections_counter(chunk_html(html, form="10-K"))
 
-    lost = legacy - new
-    lost_n, total = sum(lost.values()), sum(legacy.values())
+    lost = reference - new
+    lost_n, total = sum(lost.values()), sum(reference.values())
     assert total > 10_000, "fixture is too small to say anything"
-    assert lost_n / total < 0.01, (
+    assert lost_n / total < 0.001, (
         f"{lost_n}/{total} word occurrences lost; most common: {lost.most_common(10)}"
     )
 

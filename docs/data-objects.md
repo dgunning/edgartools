@@ -96,6 +96,21 @@ schedule.items.item4_purpose_of_transaction  # activist intent (13D only)
 
 ---
 
+## Tender Offer Recommendations (Schedule 14D-9)
+
+See whether a target company's board told shareholders to accept, reject, or stay neutral on a tender offer.
+
+```python
+schedule = filing.obj()                    # Schedule14D9
+schedule.recommendation                    # 'accept', 'reject', 'neutral' or None
+schedule.recommendation_text               # the board's statement from Item 4
+schedule.is_amendment                      # True for SC 14D9/A
+```
+
+`recommendation` is `None` when the board's wording is hedged or not recognised; `recommendation_text` then shows what it said. Most amendments do not restate Item 4, and for those `item4_text` is `None` as well, so look at the original SC 14D9 for the board's position.
+
+---
+
 ## Institutional Portfolios (13F)
 
 Explore hedge fund and institutional investor holdings.

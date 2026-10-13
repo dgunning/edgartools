@@ -164,7 +164,7 @@ def test_item_3_is_the_market_risk_stub(tenq):
 
 def test_item_4_is_controls_and_stops_before_part_ii(tenq):
     item4 = tenq["PART I, Item 4"]
-    assert len(item4) == 1493
+    assert len(item4) == 1474  # was 1493: the leading "Table of Contents" backlink is no longer in the slice
     assert "Disclosure Controls and Procedures" in item4
     assert "LEGAL PROCEEDINGS" not in item4
 
@@ -172,6 +172,6 @@ def test_item_4_is_controls_and_stops_before_part_ii(tenq):
 def test_item_2_no_longer_swallows_the_financial_statements(tenq):
     """The pattern-extracted Item 2 was 346,454 chars and ran into Item 1's statements."""
     item2 = tenq["PART I, Item 2"]
-    assert len(item2) == 90_410  # tables rendered cell by cell (edgartools-wzgu)
+    assert len(item2) == 90_391  # was 90,410: the leading "Table of Contents" backlink is no longer in the slice
     assert item2.rstrip().endswith('Summary of Significant Accounting Policies—New Accounting Guidance."')
     assert "QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK" not in item2

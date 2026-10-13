@@ -75,8 +75,8 @@ patterns:
       # Children of a specific parent — e.g., bank revenue components
       noninterest = calc[calc.parent_concept == 'NoninterestIncome']
 
-      # Filter to face statements only (S=Statement, D=Details, N=Notes, ...)
-      face = calc[calc.menucat == 'S']
+      # Filter to face statements only (Statements, Details, Notes, Tables, Policies, Cover)
+      face = calc[calc.menucat == 'Statements']
 
   - name: Extension Facts Dropped From a Statement
     when: A filer has extension concepts in the calc linkbase that are missing from render() output

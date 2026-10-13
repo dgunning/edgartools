@@ -105,8 +105,10 @@ def test_combined_items_7_and_7a_resolve_7a():
     assert "part_ii_item_7a" not in freeport.sections
     assert freeport["Item 7A"] == freeport["Item 7"]
     # A running header precedes the heading
+    # The "Table of Contents" backlink that used to lead the slice is page
+    # furniture and is skipped since edgartools-llmp.12.
     assert freeport["Item 7A"].startswith(
-        "Table of Contents\n\nItems 7. and 7A.\xa0\xa0Management’s Discussion and Analysis")
+        "Items 7. and 7A.\xa0\xa0Management’s Discussion and Analysis")
 
 
 @pytest.mark.fast

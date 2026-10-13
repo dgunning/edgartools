@@ -189,10 +189,12 @@ Clients connect with a URL instead of launching a subprocess:
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--transport` | `stdio` | `stdio` or `streamable-http` |
-| `--host` | `0.0.0.0` | Bind address |
+| `--host` | `127.0.0.1` | Bind address. Use `0.0.0.0` to accept connections from other machines, e.g. in a container |
 | `--port` | `8000` | Listen port |
 
 The server is stateless -- no database, no session storage. Safe to run multiple instances behind a load balancer.
+
+The HTTP endpoint has no authentication. On the default `127.0.0.1` it only accepts requests addressed to this machine, which blocks DNS-rebinding attacks from web pages. Bound to `0.0.0.0` it accepts any caller that can reach the port, so put it behind an authenticating proxy or keep it on a trusted network.
 
 Docker with HTTP transport:
 
@@ -200,7 +202,7 @@ Docker with HTTP transport:
 FROM python:3.12-slim
 RUN pip install "edgartools[ai]"
 ENV EDGAR_IDENTITY="Your Name your.email@example.com"
-ENTRYPOINT ["edgartools-mcp", "--transport", "streamable-http"]
+ENTRYPOINT ["edgartools-mcp", "--transport", "streamable-http", "--host", "0.0.0.0"]
 EXPOSE 8000
 ```
 

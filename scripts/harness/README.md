@@ -22,30 +22,30 @@ The test harness requires the optional `test-harness` dependency group:
 pip install "edgartools[test-harness]"
 ```
 
-This installs the `edgar-test` CLI command along with the required dependencies.
+This installs the harness dependencies. Run the CLI from the repository root with `python -m scripts.harness.cli`.
 
 ### Basic Usage
 
 ```bash
 # Run validation tests on 10 random 10-K filings from 2024
-edgar-test run --form 10-K --sample 10 --year 2024
+python -m scripts.harness.cli run --form 10-K --sample 10 --year 2024
 
 # Show all test sessions
-edgar-test show
+python -m scripts.harness.cli show
 
 # Show results from a specific run
-edgar-test show --run 1
+python -m scripts.harness.cli show --run 1
 
 # Compare two test runs
-edgar-test compare --run1 1 --run2 2
+python -m scripts.harness.cli compare --run1 1 --run2 2
 
 # Analyze trends for a test
-edgar-test trends --test-name "10-K validation"
+python -m scripts.harness.cli trends --test-name "10-K validation"
 ```
 
 ## CLI Commands
 
-### `edgar-test run`
+### `python -m scripts.harness.cli run`
 
 Run tests on selected SEC filings.
 
@@ -63,19 +63,19 @@ Run tests on selected SEC filings.
 
 ```bash
 # Test 20 random 10-K filings from 2024
-edgar-test run --form 10-K --sample 20 --year 2024
+python -m scripts.harness.cli run --form 10-K --sample 20 --year 2024
 
 # Test specific companies
-edgar-test run --form 10-Q --companies AAPL,MSFT,GOOGL
+python -m scripts.harness.cli run --form 10-Q --companies AAPL,MSFT,GOOGL
 
 # Test filings in a date range
-edgar-test run --form 8-K --date-range 2024-01-01:2024-03-31 --sample 50
+python -m scripts.harness.cli run --form 8-K --date-range 2024-01-01:2024-03-31 --sample 50
 
 # Run performance tests
-edgar-test run --form 10-K --sample 10 --test-type performance
+python -m scripts.harness.cli run --form 10-K --sample 10 --test-type performance
 ```
 
-### `edgar-test show`
+### `python -m scripts.harness.cli show`
 
 Display test results, runs, or sessions.
 
@@ -89,16 +89,16 @@ Display test results, runs, or sessions.
 
 ```bash
 # Show all sessions
-edgar-test show
+python -m scripts.harness.cli show
 
 # Show runs in session 1
-edgar-test show --session 1
+python -m scripts.harness.cli show --session 1
 
 # Show detailed results for run 5
-edgar-test show --run 5 --limit 100
+python -m scripts.harness.cli show --run 5 --limit 100
 ```
 
-### `edgar-test compare`
+### `python -m scripts.harness.cli compare`
 
 Compare two test runs side-by-side.
 
@@ -111,10 +111,10 @@ Compare two test runs side-by-side.
 
 ```bash
 # Compare runs 5 and 6
-edgar-test compare --run1 5 --run2 6
+python -m scripts.harness.cli compare --run1 5 --run2 6
 ```
 
-### `edgar-test trends`
+### `python -m scripts.harness.cli trends`
 
 Show historical trends for a specific test.
 
@@ -127,7 +127,7 @@ Show historical trends for a specific test.
 
 ```bash
 # Analyze trends for 10-K validation tests
-edgar-test trends --test-name "10-K validation" --limit 30
+python -m scripts.harness.cli trends --test-name "10-K validation" --limit 30
 ```
 
 ## Programmatic Usage
@@ -386,7 +386,7 @@ Default database location: `~/.edgar_test/harness.db`
 
 Custom database:
 ```bash
-edgar-test run --form 10-K --sample 10 --db-path /path/to/custom.db
+python -m scripts.harness.cli run --form 10-K --sample 10 --db-path /path/to/custom.db
 ```
 
 ## Architecture

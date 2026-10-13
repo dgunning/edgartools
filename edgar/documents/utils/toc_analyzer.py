@@ -2553,6 +2553,13 @@ class TOCAnalyzer:
             if re.search(pattern, text, re.IGNORECASE):
                 return True
 
+        # A title the form's text rules map to an item is a section link by
+        # definition ("Form 10-K Summary" -> Item 16 on a title-only TOC, which
+        # the keyword list below never admitted, so Morgan Stanley's Item 15
+        # ran on through its Item 16).
+        if self.schema.match_text(text.lower(), use_exclusions=True):
+            return True
+
         # Also consider links with section keywords
         if len(text) < 100 and any(keyword in text.lower() for keyword in
                                    ['item', 'part', 'business', 'risk', 'properties', 'legal',

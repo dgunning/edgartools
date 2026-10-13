@@ -58,9 +58,20 @@ USAGE
     python tests/fixtures/parser_corpus/parity_benchmark.py --form 8-K --form 20-F
     python tests/fixtures/parser_corpus/parity_benchmark.py --json out.json
 
-``tests/test_section_parity_ratchet.py`` imports ``measure``/``build_corpus``
+``tests/meta/test_section_parity_ratchet.py`` imports ``measure``/``build_corpus``
 from here and pins the result, so a regression fails a test rather than waiting
 for someone to re-run the benchmark by hand.
+
+THE LEGACY SIDE IS FROZEN. ``edgar.files`` was deleted in 6.0, so the legacy
+parser can no longer be run. Before the deletion, every corpus fixture was put
+through ``ChunkedDocument(html).list_items()`` once and the normalised item keys
+were written to ``legacy_frozen/sections.json`` — 128 fixtures, including the 48
+from the gitignored era corpus, all with no legacy error. ``measure`` reads the
+legacy column from that file, so the differential still means "an item the old
+parser found and the surviving one does not", and the ratchet keeps guarding the
+surviving parser against regressing below it. A fixture added after the deletion
+has no frozen record: it is measured on the new side only and reported as
+unreferenced, never scored as gap-free.
 """
 from __future__ import annotations
 
@@ -81,14 +92,24 @@ FIXTURES = _CORPUS_DIR.parent
 _REPO_ROOT = FIXTURES.parent.parent
 sys.path.insert(0, str(_REPO_ROOT))
 
-# The legacy parser warns on every construction by design (it is deprecated and
-# this benchmark exists to retire it). Silence it so the report stays readable.
 warnings.filterwarnings("ignore")
 
 from edgar.documents.config import ParserConfig  # noqa: E402
 from edgar.documents.form_schema import get_form_schema  # noqa: E402
 from edgar.documents.parser import HTMLParser  # noqa: E402
-from edgar.files.htmltools import ChunkedDocument  # noqa: E402
+
+# What the deleted legacy parser found on each fixture, keyed "<form>|<label>".
+# See "THE LEGACY SIDE IS FROZEN" in the module docstring.
+LEGACY_FROZEN = _CORPUS_DIR / "legacy_frozen" / "sections.json"
+_legacy_records: Optional[Dict[str, dict]] = None
+
+
+def legacy_record(form: str, label: str) -> Optional[dict]:
+    """The frozen legacy result for one fixture, or None if it has none."""
+    global _legacy_records
+    if _legacy_records is None:
+        _legacy_records = json.loads(LEGACY_FROZEN.read_text())
+    return _legacy_records.get(f"{form}|{label}")
 
 HTML_CORPUS = FIXTURES / "html"
 ERA_CORPUS = FIXTURES / "text_boundary_corpus"
@@ -129,7 +150,6 @@ NON_ITEM_SECTIONS = {"signatures", "cover", "cover_page", "exhibits", "toc"}
 # ---------------------------------------------------------------------------
 
 _NEW_ITEM_RE = re.compile(r"^(?:part_[ivx]+_)?item[_\s]*(\d+)([a-z]?)$", re.IGNORECASE)
-_LEGACY_ITEM_RE = re.compile(r"^item\s*(\d+)(?:\.(\d+))?\s*([a-z]?)$", re.IGNORECASE)
 
 
 def normalise_new(section_name: str, form: str) -> Optional[str]:
@@ -191,21 +211,6 @@ def subitem_of(section_name: str, form: str) -> Optional[str]:
         return None
     d = m.group(1)
     return f"{d[0]}.{d[1:]}"
-
-
-def normalise_legacy(item_name: str, form: str) -> Optional[str]:
-    """Map a legacy ``list_items()`` entry to the same canonical item key.
-
-    ``'Item 7A'`` -> ``7A``. Legacy occasionally emits a decimal for 8-K; take
-    the major number so both sides land on the same granularity.
-    """
-    m = _LEGACY_ITEM_RE.match(item_name.strip())
-    if not m:
-        return None
-    major, _minor, suffix = m.group(1), m.group(2), m.group(3)
-    if form == "8-K":
-        return major
-    return f"{major}{suffix}".upper()
 
 
 # ---------------------------------------------------------------------------
@@ -304,15 +309,9 @@ def measure(entry: dict) -> dict:
     except Exception as exc:  # noqa: BLE001 — a crash is a result, not a stop
         new_error = f"{type(exc).__name__}: {exc}"[:200]
 
-    legacy_items: Set[str] = set()
-    legacy_error = None
-    try:
-        for name in ChunkedDocument(html).list_items():
-            key = normalise_legacy(name, form)
-            if key:
-                legacy_items.add(key)
-    except Exception as exc:  # noqa: BLE001
-        legacy_error = f"{type(exc).__name__}: {exc}"[:200]
+    record = legacy_record(form, entry["label"])
+    legacy_items: Set[str] = set(record["legacy"]) if record else set()
+    legacy_error = record["legacy_error"] if record else None
 
     return {
         "form": form,
@@ -325,9 +324,10 @@ def measure(entry: dict) -> dict:
         "both": sorted(new_items & legacy_items),
         "new_only": sorted(new_items - legacy_items),
         "legacy_only": sorted(legacy_items - new_items),
-        "both_blind": not new_items and not legacy_items,
+        "both_blind": record is not None and not new_items and not legacy_items,
         "new_error": new_error,
         "legacy_error": legacy_error,
+        "legacy_frozen": record is not None,
     }
 
 
@@ -345,7 +345,7 @@ def report(results: List[dict]) -> None:
         by_form[r["form"]].append(r)
 
     print("\n" + "=" * 78)
-    print("SECTION-EXTRACTION PARITY — new HTMLParser vs legacy ChunkedDocument")
+    print("SECTION-EXTRACTION PARITY — HTMLParser vs frozen legacy ChunkedDocument")
     print("=" * 78)
 
     print("\n## Differential (the deletion gate)\n")
@@ -418,6 +418,14 @@ def report(results: List[dict]) -> None:
         for r in errors:
             who = "new" if r["new_error"] else "legacy"
             print(f"  [{r['form']} {r['label']}] {who}: {r['new_error'] or r['legacy_error']}")
+
+    unreferenced = [r for r in results if not r["legacy_frozen"]]
+    if unreferenced:
+        print("\n## Fixtures with no frozen legacy record\n")
+        print("  Added after edgar.files was deleted, so there is nothing to compare")
+        print("  against. Measured on the new side only; never scored as gap-free.")
+        for r in unreferenced:
+            print(f"      [{r['form']}] {r['label']}: {len(r['new'])} items")
 
     print("\n## Both-blind filings\n")
     blind = [r for r in results if r["both_blind"]]

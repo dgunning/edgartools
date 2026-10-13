@@ -52,11 +52,11 @@ All methods start the MCP server using stdio transport by default. The server is
 edgartools-mcp --transport streamable-http --port 8000
 ```
 
-This starts the server on `http://0.0.0.0:8000/mcp` using the MCP Streamable HTTP transport. Use this for remote deployments, team servers, or registry-listed instances.
+This starts the server on `http://127.0.0.1:8000/mcp` using the MCP Streamable HTTP transport. For remote deployments or team servers, add `--host 0.0.0.0` so other machines can connect. The endpoint has no authentication, so put it behind an authenticating proxy or keep it on a trusted network.
 
 **CLI flags:**
 - `--transport stdio` (default) or `--transport streamable-http`
-- `--host 0.0.0.0` (default) — bind address
+- `--host 127.0.0.1` (default) — bind address; `0.0.0.0` accepts connections from other machines
 - `--port 8000` (default) — listen port
 
 ## Client Configuration

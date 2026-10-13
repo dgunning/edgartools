@@ -33,14 +33,3 @@ print("\n--- Testing Item 1 extraction ---")
 item1 = tenk['Item 1']
 print(f"Item 1 result: '{item1[:200] if item1 else 'EMPTY/NONE'}'")
 print(f"Item 1 length: {len(item1) if item1 else 0}")
-
-# Check chunked_document
-print("\n--- ChunkedDocument fallback ---")
-chunked_items = tenk.chunked_document.list_items()
-print(f"ChunkedDocument items: {chunked_items}")
-
-if 'Item 1' in chunked_items:
-    item1_chunked = tenk.chunked_document['Item 1']
-    print(f"Item 1 from chunked: {len(item1_chunked) if item1_chunked else 0} chars")
-    if item1_chunked:
-        print(f"  Content: {item1_chunked[:200]}")

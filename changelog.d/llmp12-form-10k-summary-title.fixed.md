@@ -1,0 +1,1 @@
+- **A title-only TOC's "Form 10-K Summary" row now maps to Item 16.** The row was never admitted as a section link, so its anchor ended nothing and Item 15 ran on through Item 16 on Morgan Stanley's 10-K; a title the form's text rules map to an item is now a section link, Item 16 is emitted, and Item 15 ends before it.

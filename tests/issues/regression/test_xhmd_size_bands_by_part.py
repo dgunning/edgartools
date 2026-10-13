@@ -103,7 +103,7 @@ def test_the_warning_names_the_part(part, expected):
 # re-pinned for edgartools-wzgu (tables rendered cell by cell; no letter or
 # digit changed).
 TEN_Q_GROUND_TRUTH = [
-    ("aapl/10q/aapl-10-q-2025-08-01.html", 5_534, 1_491),   # real litigation prose
+    ("aapl/10q/aapl-10-q-2025-08-01.html", 5_497, 1_491),   # real litigation prose; was 5,534 before the trailing page footer left the slice (llmp.12 step 6)
     ("ibm/10q/ibm-10-q-2025-07-24.html", 80, 1_324),        # a one-line pointer
     ("ko/10q/ko-10-q-2025-07-24.html", 12_718, 1_671),      # the corpus maximum
     ("tsla/10q/tsla-10-q-2025-07-24.html", 237, 74),        # the corpus minimum
@@ -123,7 +123,7 @@ def test_ten_q_part_ii_items_are_not_judged_by_part_i_bands(rel, len_item_1, len
 
 # Re-pinned for edgartools-wzgu (tables rendered cell by cell).
 @pytest.mark.parametrize("rel,expected", [
-    ("aapl/10q/aapl-10-q-2025-08-01.html", 25_844),
+    ("aapl/10q/aapl-10-q-2025-08-01.html", 25_807),  # was 25,844 before the trailing page footer left the slice (llmp.12 step 6)
     ("ibm/10q/ibm-10-q-2025-07-24.html", 118_852),
     ("ko/10q/ko-10-q-2025-07-24.html", 103_213),
     ("tsla/10q/tsla-10-q-2025-07-24.html", 65_475),

@@ -124,8 +124,8 @@ from edgar import Company
 filing = Company("AAPL").get_filings(form="10-K").latest()
 xbrl = filing.xbrl()
 
-# Find revenue statement with segments
-revenue_stmt = xbrl.statements.get("Revenues")
+# The income statement with its segment breakdowns
+revenue_stmt = xbrl.statements.income_statement(view="detailed")
 print(revenue_stmt)  # Shows dimensional breakdown
 ```
 
@@ -146,9 +146,10 @@ filing = Company("AAPL").get_filings(form="10-K").latest()
 xbrl = filing.xbrl()
 
 # Access footnotes
-for fact in xbrl.facts:
-    if "Debt" in fact.concept and fact.footnote:
-        print(f"{fact.concept}: {fact.footnote}")
+for fact in xbrl.get_facts_with_footnotes().values():
+    if "Debt" in fact.element_id:
+        for footnote in xbrl.get_footnotes_for_fact(fact.fact_id):
+            print(f"{fact.element_id}: {footnote.text}")
 ```
 
 **Why this API?**

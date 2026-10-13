@@ -18,6 +18,11 @@ This was the last thing keeping the legacy fallback load-bearing. Measured acros
 121 corpus fixtures, it was the only remaining behavioural difference between
 ``.items`` with the legacy path and without it.
 
+Strategy 5c could only see a heading that STARTS a TextNode, so each filing
+yielded Item 7 alone; every other heading sat mid-node. Since edgartools-llmp.12.1
+the builder makes each blank-line block of preformatted text a paragraph, and
+both filings yield their full item lists.
+
 CORPUS NOTE. Both filings asserted here live in ``tests/fixtures/parity_gate``,
 which is tracked, so this test runs in CI. The 10-K twin (``0000927356-01-000369``)
 was copied there from the gitignored ``text_boundary_corpus`` on 2026-10-02: while
@@ -79,14 +84,21 @@ def test_the_tracked_fixture_is_present():
 def test_2001_20f_finds_item_7_without_the_legacy_parser():
     filing = FixtureFiling(TRACKED_20F, "20-F")
 
-    assert TwentyF(filing).items == ["Item 7"]
+    items = ["Item 1", "Item 2", "Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8",
+             "Item 9", "Item 10", "Item 11", "Item 12", "Item 13", "Item 14", "Item 16", "Item 18"]
+    assert TwentyF(filing).items == items  # ["Item 7"] before llmp.12.1
     # The point of the fix: the same answer with the legacy path gone.
-    assert TwentyF.__mro__ and _without_legacy(TwentyF)(filing).items == ["Item 7"]
+    assert TwentyF.__mro__ and _without_legacy(TwentyF)(filing).items == items
 
 
-def test_the_20f_document_really_has_no_block_structure():
+def test_the_20f_document_has_paragraphs_but_no_headings():
     """Pins the precondition, so a parser change that starts emitting headings
-    here does not leave this test passing for a different reason."""
+    here does not leave this test passing for a different reason.
+
+    It had no ParagraphNode at all until llmp.12.1 split preformatted text at
+    blank lines; it still has no HeadingNode, and no text node holds two items'
+    headings, which is what kept every heading but Item 7 out of reach."""
+    import re
     from edgar.documents.config import ParserConfig
     from edgar.documents.nodes import HeadingNode, ParagraphNode
     from edgar.documents.parser import HTMLParser
@@ -96,11 +108,18 @@ def test_the_20f_document_really_has_no_block_structure():
     )
     nodes = list(doc.root.walk())
     assert not [n for n in nodes if isinstance(n, HeadingNode)]
-    assert not [n for n in nodes if isinstance(n, ParagraphNode)]
+    assert len([n for n in nodes if isinstance(n, ParagraphNode)]) > 1000
+    heading = re.compile(r"^\s*Item\s+\d+", re.IGNORECASE | re.MULTILINE)
+    assert not [n for n in nodes
+                if type(n).__name__ == "TextNode" and len(heading.findall(n.text() or "")) > 1]
 
 
 def test_2001_10k_finds_item_7_without_the_legacy_parser():
     filing = FixtureFiling(TRACKED_10K, "10-K")
 
-    assert TenK(filing).items == ["Item 7"]
-    assert _without_legacy(TenK)(filing).items == ["Item 7"]
+    # Items 1 and 2 are titled "DESCRIPTION OF BUSINESS" and "DESCRIPTION OF
+    # PROPERTY", which the 10-K title patterns do not match.
+    items = ["Item 3", "Item 4", "Item 5", "Item 6", "Item 7", "Item 8", "Item 9",
+             "Item 10", "Item 11", "Item 12", "Item 13", "Item 14"]
+    assert TenK(filing).items == items  # ["Item 7"] before llmp.12.1
+    assert _without_legacy(TenK)(filing).items == items

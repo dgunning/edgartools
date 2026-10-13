@@ -15,10 +15,11 @@ import logging
 from typing import Any, Optional
 
 from edgar.ai.mcp.tools.base import (
-    tool,
-    success,
+    _cell_missing,
     error,
     resolve_company,
+    success,
+    tool,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,7 +57,10 @@ def _build_note_data(note, detail: str = 'standard') -> dict:
                         table_info['rows'] = len(df)
                         table_info['columns'] = list(df.columns[:10])
                         # Include first few rows as records
-                        table_info['data'] = df.head(10).to_dict(orient='records')
+                        table_info['data'] = [
+                            {key: None if _cell_missing(value) else value for key, value in record.items()}
+                            for record in df.head(10).to_dict(orient='records')
+                        ]
                 except Exception:
                     pass
             tables.append(table_info)

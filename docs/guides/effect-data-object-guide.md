@@ -49,6 +49,7 @@ Columns: `cik`, `entity`, `source` (the source form type), `live` (True for prod
 |----------|------|-------------|---------|
 | `submission_type` | `str` | Always `"EFFECT"` | `"EFFECT"` |
 | `effective_date` | `str` | Date the registration was declared effective | `"2024-06-15"` |
+| `effective_time` | `str \| None` | Time of day it became effective (Eastern), when the notice gives one | `"15:30:00"` |
 | `cik` | `str` | CIK of the registrant | `"0000038723"` |
 | `entity` | `str` | Entity name | `"ACME CORP"` |
 | `source_submission_type` | `str` | Form type that was made effective | `"S-1"`, `"POS AM"`, `"S-3"` |
@@ -67,6 +68,8 @@ Columns: `cik`, `entity`, `source` (the source form type), `live` (True for prod
 `source_accession_no` is `None` on some older EFFECT filings. In that case, `get_source_filing()` falls back to a file number + form type search.
 
 The `effective_date` is returned as a string in `YYYY-MM-DD` format, not a `datetime` object.
+
+An EFFECT notice is not public on its filing date. Its `filing_date` equals `effective_date`, but SEC accepts and publishes the notice at about 00:15 ET on the next business day (Lyntris Inc.: filed 2026-08-18, accepted 2026-08-19 00:15:13). For point-in-time work, use `filing.header.acceptance_datetime`.
 
 ## Related
 

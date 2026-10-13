@@ -16,7 +16,6 @@ from edgar.display.formatting import datefmt
 from edgar.documents import HTMLParser, ParserConfig, parse_html
 from edgar.documents.form_schema import TEN_K_FRIENDLY_ITEMS
 from edgar.exceptions import strict_errors_enabled
-from edgar.files.htmltools import ChunkedDocument
 
 __all__ = ['TenK']
 
@@ -246,9 +245,8 @@ class TenK(CompanyReport):
             log.warning("HTMLParser failed for 10-K filing %s: %s",
                         self._filing.accession_number, e)
             warnings.warn(
-                f"HTMLParser raised {type(e).__name__} on a 10-K "
-                f"(falling back to ChunkedDocument); the filing and the parser "
-                f"message are in the log.\n"
+                f"HTMLParser raised {type(e).__name__} on a 10-K; the filing "
+                f"and the parser message are in the log.\n"
                 f"This returns None today and raises in edgartools 6.0. Set "
                 f"EDGARTOOLS_STRICT_ERRORS=1 to get the 6.0 behaviour now.",
                 FutureWarning,
@@ -281,8 +279,7 @@ class TenK(CompanyReport):
         """
         List of detected item names in standard "Item X" format.
 
-        Uses new parser's section detection for improved accuracy.
-        Falls back to old chunked_document if new parser returns no sections.
+        Uses the parser's section detection.
 
         Returns:
             List of unique item titles in canonical SEC order
@@ -375,13 +372,6 @@ class TenK(CompanyReport):
                 subs = parse_subsidiaries(content)
                 return SubsidiaryList(subs)
         return None
-
-    @cached_property
-    def _chunked_document(self):
-        # Construction only — the deprecation lives on the public
-        # `chunked_document` in CompanyReport. Overriding that one here is what
-        # previously cost TenK users their warning entirely.
-        return ChunkedDocument(self._filing.html(), prefix_src=self._filing.base_dir)
 
     @cached_property
     def _cross_reference_index(self):
@@ -545,7 +535,7 @@ class TenK(CompanyReport):
         - Short format: '1', '1A', '7', '7A'
         - Friendly names: 'business', 'risk_factors', 'mda'
 
-        Falls back to old chunked_document and Cross Reference Index for backward compatibility.
+        Falls back to the Cross Reference Index for filings that use one.
 
         Args:
             item_or_part: Section identifier in various formats
@@ -670,7 +660,7 @@ class TenK(CompanyReport):
                         if text and text.strip():
                             return text
 
-        # If Cross Reference Index format is detected, prefer it over chunked_document
+        # If Cross Reference Index format is detected, use it
         # (Some filings like GE, Henry Schein use Cross Reference Index - issue #107)
         if self._cross_reference_index is not None:
             item_id = _CROSS_REF_ITEM_MAP.get(item_or_part)

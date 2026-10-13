@@ -328,6 +328,7 @@ valid_dims = xbrl.get_valid_dimensions_for_role(role_uri)
 | Version | Change |
 |---------|--------|
 | v5.21.1 | Member hierarchy support — sub-members nested under parent members in `to_dataframe(view="detailed")` using definition linkbase hierarchy |
+| v5.8.0 | `view` parameter replaces `include_dimensions`: printing defaults to `"standard"`, `to_dataframe()` to `"detailed"` |
 | v5.7.4 | Definition linkbase-based dimension filtering (GH-577 fix) |
 | v5.7.2 | Initial dimension handling with hardcoded lists (GH-569) |
 | v5.7.0 | Changed default to `include_dimensions=False` |

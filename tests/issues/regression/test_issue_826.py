@@ -63,7 +63,7 @@ def test_section_tables_no_duplication_aapl_10k():
     assert len({id(t) for t in tables}) == len(tables)
 
     # The fix only removes redundant serialization — it must not drop content.
-    assert len(section.text()) == 62223  # tables rendered cell by cell (edgartools-wzgu); same letters and digits
+    assert len(section.text()) == 62189  # was 62223 before the trailing "Apple Inc. | 2024 Form 10-K | 50" footer left the slice (llmp.12 step 6)
 
 
 @pytest.mark.network
