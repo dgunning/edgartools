@@ -8,7 +8,6 @@ the cell and the following cells outside the table.
 """
 
 import pytest
-from markdown_it import MarkdownIt
 
 from edgar.documents import HTMLParser, ParserConfig
 
@@ -23,20 +22,20 @@ def _markdown(cell_html: str) -> str:
     return HTMLParser(ParserConfig()).parse(html).to_markdown()
 
 
-def _table_cells(markdown: str) -> list[str]:
-    """The text of every table cell, as a Markdown parser sees it."""
-    tokens = MarkdownIt().enable("table").parse(markdown)
-    return [token.content for previous, token in zip(tokens, tokens[1:])
-            if previous.type in ("th_open", "td_open") and token.type == "inline"]
-
-
 @pytest.mark.parametrize("cell_html", [
     "First<br>second",
     "First<br/><br/>second",
     "<p>First</p><p>second</p>",
 ])
 def test_multiline_body_cell_stays_in_its_row(cell_html):
-    markdown = _markdown(cell_html)
+    lines = [line for line in _markdown(cell_html).splitlines() if line.strip()]
 
-    assert "| First second | 10 |" in markdown
-    assert _table_cells(markdown) == ["Item", "Value", "First second", "10"]
+    # header, separator and one body row, each a complete two-cell pipe row
+    assert lines == [
+        "| Item | Value |",
+        "| --- | --- |",
+        "| First second | 10 |",
+    ]
+    for line in lines:
+        assert line.startswith("|") and line.endswith("|")
+        assert len(line.strip("|").split("|")) == 2
