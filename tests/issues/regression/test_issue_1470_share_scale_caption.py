@@ -49,6 +49,10 @@ EXPECTED_SHARE_CONCEPTS = (
     "us-gaap_WeightedAverageNumberOfSharesOutstandingDiluted",
     "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding",
     "us-gaap_CommonStockSharesIssued",
+    "us-gaap_CommonStockSharesAuthorized",
+    "us-gaap_PreferredStockSharesAuthorized",
+    "us-gaap_PreferredStockSharesIssued",
+    "us-gaap_PreferredStockSharesOutstanding",
 )
 EXPECTED_EPS_CONCEPTS = (
     "us-gaap_EarningsPerShareBasic",

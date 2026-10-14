@@ -836,6 +836,10 @@ share_concepts = [
     'us-gaap_WeightedAverageNumberOfSharesOutstandingDiluted',
     'us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding',
     'us-gaap_CommonStockSharesIssued',
+    'us-gaap_CommonStockSharesAuthorized',
+    'us-gaap_PreferredStockSharesAuthorized',
+    'us-gaap_PreferredStockSharesIssued',
+    'us-gaap_PreferredStockSharesOutstanding',
 ]
 
 eps_concepts = [
