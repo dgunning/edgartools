@@ -12,8 +12,10 @@ two-column and single-column tables.
 """
 
 import pytest
+from lxml import html as lxml_html
+from markdown_it import MarkdownIt
 
-from edgar.documents import Document
+from edgar.documents import Document, HTMLParser, ParserConfig
 from edgar.documents.table_nodes import Cell, Row, TableNode
 
 pytestmark = pytest.mark.fast
@@ -53,3 +55,29 @@ def test_headerless_table_skips_blank_leading_rows_when_promoting():
     )
     document = Document(root=table)
     assert document.to_markdown() == "| 10 | 20 |\n| --- | --- |"
+
+
+def _parsed_cells(document):
+    markdown = document.to_markdown()
+    parser = MarkdownIt().enable("table")
+    assert sum(token.type == "table_open" for token in parser.parse(markdown)) == 1
+    rendered = lxml_html.fromstring(parser.render(markdown))
+    return [cell.text_content() for cell in rendered.xpath("//th | //td")]
+
+
+@pytest.mark.parametrize("backslashes", range(5))
+def test_promoted_literal_pipe_preserves_backslash_parity(backslashes):
+    label = "alpha " + '\\' * backslashes + "| beta"
+    table = TableNode(headers=[], rows=[Row([Cell(label), Cell("10")]), Row([Cell("Other"), Cell("20")])])
+
+    assert _parsed_cells(Document(root=table)) == [label, "10", "Other", "20"]
+
+
+@pytest.mark.parametrize("cell_html", ["First<br>second", "First<br/><br/>second", "<p>First</p><p>second</p>"])
+def test_promoted_multiline_cell_remains_one_complete_header(cell_html):
+    document = HTMLParser(ParserConfig()).parse(
+        f"<html><body><table><tr><td>{cell_html}</td><td>10</td></tr>"
+        "<tr><td>Other</td><td>20</td></tr></table></body></html>"
+    )
+
+    assert _parsed_cells(document) == ["First second", "10", "Other", "20"]

@@ -307,6 +307,11 @@ class MarkdownRenderer:
                 promoted_row = expanded_data_rows[promoted_index]
                 promoted = [promoted_row[column] if column < len(promoted_row) else ""
                             for column in content_columns]
+                # Promoted labels must stay on one line, and literal pipes
+                # must not create header columns. Escape backslashes first.
+                promoted = [" ".join(line.strip() for line in cell.splitlines() if line.strip())
+                            for cell in promoted]
+                promoted = [cell.replace('\\', '\\\\').replace('|', '\\|') for cell in promoted]
                 rows.append("| " + " | ".join(promoted) + " |")
                 rows.append("| " + " | ".join(["---"] * len(content_columns)) + " |")
                 expanded_data_rows = expanded_data_rows[promoted_index + 1:]
