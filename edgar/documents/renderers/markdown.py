@@ -293,12 +293,23 @@ class MarkdownRenderer:
             # Add separator
             separator = "| " + " | ".join(["---"] * len(filtered_headers)) + " |"
             rows.append(separator)
-        else:
-            # A headerless table still needs a blank header row and a delimiter
-            # row so the pipe table renders with a proper column separator.
-            n = len(content_columns)
-            rows.append("| " + " | ".join([""] * n) + " |")
-            rows.append("| " + " | ".join(["---"] * n) + " |")
+        elif expanded_data_rows:
+            # GH #1484: a headerless table has no labels of its own. Promote the
+            # first non-empty data row to the header, so the output is a valid
+            # pipe table with a delimiter row and real column labels instead of
+            # a blank header bar on every layout table (GH #1524 review).
+            promoted_index = next(
+                (index for index, row in enumerate(expanded_data_rows)
+                 if any(row[column].strip() for column in content_columns if column < len(row))),
+                None,
+            )
+            if promoted_index is not None:
+                promoted_row = expanded_data_rows[promoted_index]
+                promoted = [promoted_row[column] if column < len(promoted_row) else ""
+                            for column in content_columns]
+                rows.append("| " + " | ".join(promoted) + " |")
+                rows.append("| " + " | ".join(["---"] * len(content_columns)) + " |")
+                expanded_data_rows = expanded_data_rows[promoted_index + 1:]
 
         # Render data rows
         for expanded_row in expanded_data_rows:
