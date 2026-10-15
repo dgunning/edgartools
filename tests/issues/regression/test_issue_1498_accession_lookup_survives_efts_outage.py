@@ -14,15 +14,22 @@ regression tests failed that way across three PRs in two days.
 
 ``resolve_accession`` still raises; ``_filing_from_efts``, the caller that has
 a correct fallback, now logs a warning and returns None so the index is asked.
+
+Only when the search backend is what broke: an error body, a 5xx, or no answer
+at all. A 429, a 4xx, an SSL failure or a missing identity re-raise without
+touching the index, which sits on the same SEC (GH PR #1554 review). A 429
+answered with a 41 MB index download is the worst reply to "slow down".
+GitHub PR: https://github.com/dgunning/edgartools/pull/1554
 """
 
 import logging
 
+import httpx2
 import pytest
 
 from edgar import _filings
 from edgar._filings import _filing_from_efts, get_filing_by_accession
-from edgar.exceptions import TransportError
+from edgar.exceptions import IdentityNotSetError, TooManyRequestsError, TransportError
 from edgar.search.efts import resolve_accession
 
 pytestmark = pytest.mark.fast
@@ -53,14 +60,23 @@ def test_resolve_accession_still_raises_on_the_error_body(efts_error_body):
         resolve_accession("0000746601-18-000009")
 
 
-@pytest.mark.parametrize("failure", ["error-body", "transport-error"])
+def _raising(exc):
+    def fail(*_args, **_kwargs):
+        raise exc
+    return fail
+
+
+EFTS_IS_DOWN = {
+    "error-body": lambda *a, **k: _efts_response(EFTS_ERROR_BODY),
+    "unreachable-wrapped": _raising(TransportError("could not reach efts.sec.gov")),
+    "unreachable-httpx": _raising(httpx2.ConnectError("no route to host")),
+    "server-error": _raising(TransportError("EFTS returned 503", status_code=503)),
+}
+
+
+@pytest.mark.parametrize("failure", list(EFTS_IS_DOWN))
 def test_filing_from_efts_is_a_miss_with_a_warning(monkeypatch, caplog, failure):
-    if failure == "error-body":
-        monkeypatch.setattr("edgar.httprequests.get_with_retry", lambda *a, **k: _efts_response(EFTS_ERROR_BODY))
-    else:
-        def fail(*_args, **_kwargs):
-            raise TransportError("could not reach efts.sec.gov")
-        monkeypatch.setattr("edgar.httprequests.get_with_retry", fail)
+    monkeypatch.setattr("edgar.httprequests.get_with_retry", EFTS_IS_DOWN[failure])
 
     with caplog.at_level(logging.WARNING):
         assert _filing_from_efts("0000746601-18-000009") is None
@@ -90,3 +106,24 @@ def test_accession_lookup_falls_back_to_the_quarterly_index(efts_error_body, mon
 
     assert get_filing_by_accession(accession, 2018) is found
     assert asked == [(2018, 1), (2018, 2)]
+
+
+SEC_ANSWERED = {
+    "rate-limited": TooManyRequestsError(url="https://efts.sec.gov/LATEST/search-index"),
+    "not-found": TransportError("EFTS returned 404", status_code=404),
+    "no-identity": IdentityNotSetError(),
+}
+
+
+@pytest.mark.parametrize("failure", list(SEC_ANSWERED))
+def test_an_answer_from_sec_reraises_without_asking_the_index(monkeypatch, failure):
+    exc = SEC_ANSWERED[failure]
+    monkeypatch.setattr("edgar.httprequests.get_with_retry", _raising(exc))
+
+    def index_must_not_be_read(*_args, **_kwargs):
+        raise AssertionError("the quarterly index was read after SEC answered")
+
+    monkeypatch.setattr(_filings, "_get_cached_filings", index_must_not_be_read)
+
+    with pytest.raises(type(exc)):
+        get_filing_by_accession("0009999999-18-000002", 2018)
