@@ -51,6 +51,13 @@ class TestTransportFailuresAreRecognised:
                      "IdentityNotSetException"):
             assert _is_transport_failure(type(name, (Exception,), {})("boom")), name
 
+    def test_an_efts_outage_is_unavailable(self):
+        """find(accession) resolves through EFTS, which raises edgar's TransportError on an outage."""
+        from edgar.exceptions import TransportError
+
+        outage = TransportError("EFTS search failed: getaddrinfo EBUSY vpc-efts-prod-opensearchservice")
+        assert _is_transport_failure(outage)
+
 
 class TestExtractorFailuresAreStillDefects:
     """The silence check: the partition must not become a blanket amnesty."""
