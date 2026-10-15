@@ -2708,9 +2708,10 @@ def _filing_from_efts(accession_number: str):
     41 MB to parse (bead edgartools-vx29).
 
     None means "ask the quarterly index" — EFTS indexes 2001 onward, so older
-    filings legitimately miss here, and a network failure is deliberately also a
-    miss rather than an error. The index route stays correct for everything;
-    this only makes the common case cheap.
+    filings legitimately miss here. An outage is not a miss: ``resolve_accession``
+    raises ``TransportError`` (edgartools-07lk.10), so the caller sees it rather
+    than scanning the index for a filing that was there all along. The index
+    route stays correct for everything; this only makes the common case cheap.
     """
     from edgar.search.efts import resolve_accession
 

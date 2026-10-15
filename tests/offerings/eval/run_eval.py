@@ -207,8 +207,13 @@ def _is_transport_failure(ex: BaseException) -> bool:
         return True
     # edgar wraps some fetch failures in its own types; match on the SEC-facing
     # ones by name so this does not depend on their import path staying put.
+    # TransportError is edgar's "we could not get an answer from SEC EDGAR":
+    # find(accession) resolves through full-text search, which raises it on an
+    # outage (#1498), and an EFTS backend error ("getaddrinfo EBUSY") scored five
+    # entries as extractor errors, failing whichever facet they fell in.
     return type(ex).__name__ in {
         "SECFilingNotFoundError", "SECHTMLResponseError", "IdentityNotSetException",
+        "TransportError",
     }
 
 
