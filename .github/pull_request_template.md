@@ -21,11 +21,16 @@ Fixes #
 
 CI fails a PR that stages a 6.0 change without touching the upgrade guide. If it flags something that isn't a 6.0 change, add the `no-upgrade-guide` label, say why here, and re-run the job.
 
+## AI assistance
+
+- [ ] None
+- [ ] Assisted. Tool and model: 
+
 ## Working context (optional)
 
 <!--
 If you worked with an AI assistant, paste its plan and the evidence it
-checked: commands run, values compared, what it ruled out. This isn't a
-disclosure requirement. It's the fastest way to get a review, because the
-reviewer can start from what you already know.
+checked: commands run, values compared, what it ruled out. Naming the tool
+above is enough; this box is optional. It's the fastest way to get a review,
+because the reviewer can start from what you already know.
 -->

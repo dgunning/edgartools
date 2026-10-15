@@ -8,12 +8,25 @@ There are many ways to contribute, from reporting bugs and suggesting features t
 
 *   **Report Bugs:** If you encounter a bug, please check if it has already been reported in the [GitHub Issues](https://github.com/dgunning/edgartools/issues). If not, please [open a new issue](https://github.com/dgunning/edgartools/issues/new/choose). Include a clear title, a detailed description of the bug, steps to reproduce it, expected behavior, actual behavior, and your environment details (OS, Python version, Edgartools version).
 *   **Suggest Enhancements:** Have an idea for a new feature or an improvement to an existing one? Open an issue using the "Feature request" template. Describe your idea clearly, why it would be beneficial, and any potential implementation details you've considered.
-*   **Improve Documentation:** See a typo, something unclear, or an area that needs more explanation in the [documentation](https://dgunning.github.io/edgartools/) or docstrings? Submit a pull request with your improvements!
+*   **Improve Documentation:** See a typo, something unclear, or an area that needs more explanation in the [documentation](https://edgartools.readthedocs.io/) or docstrings? Submit a pull request with your improvements!
 *   **Write Code:** If you want to fix a bug or implement a new feature:
     1.  Find an issue you want to work on (or open one).
     2.  Discuss your plan in the issue comments if it's a significant change.
     3.  Follow the development setup and contribution workflow below.
 *   **Share Expertise:** If you have experience with SEC filings, XBRL, financial data analysis, or related areas, your insights are valuable! Participate in discussions on issues or share your knowledge.
+
+## Using AI Assistants
+
+AI-assisted contributions are welcome. Most of this project is built with AI assistants, and we expect yours will be too. The rules are the ones every contribution follows, plus two:
+
+*   **You own the change.** You understand every line you submit, you ran it, and you can answer a reviewer's questions about it without asking the assistant.
+*   **Say what you used.** Name the tool and model in the pull request (the template has a place for it), and paste the assistant's plan and the evidence it checked if you have them. That is not a confession. It tells the reviewer where to start, which gets you a faster review.
+
+Everything else is the normal bar, and it is the same for code written by hand. At least one assertion checks a specific value against a real SEC filing you looked up yourself. Tests are never weakened to make them pass. Cassettes are recorded, never edited. An assistant cannot vouch for a number; you can.
+
+**Point your assistant at [AGENTS.md](AGENTS.md).** Codex, Cursor, Copilot and Gemini CLI read it automatically, and this repository's CLAUDE.md imports it for Claude Code. It carries the commands, the map, the hazards the code does not reveal (generated files, frozen contracts), and what to check before opening a pull request.
+
+**Batches.** Assistants make it easy to find ten bugs in an afternoon, and we want those reports. Open one issue per bug. Before sending more than three related pull requests, open one umbrella issue that lists them and proposes a merge order. Keep at most three of your pull requests open at a time. Send only one pull request at a time that touches a shared data file such as `edgar/xbrl/standardization/gaap_mappings.json`, because parallel edits to it conflict with each other and each one waits on the last.
 
 ## Development Setup
 
@@ -49,14 +62,15 @@ This project uses [Hatch](https://hatch.pypa.io/) for environment and project ma
     hatch run lint
     ```
     Fix any reported issues.
-4.  **Test:** Run the test suite to ensure your changes haven't introduced regressions:
+4.  **Test:** Run the offline suite, then the network tests that cover what you changed, one file at a time:
     ```bash
-    hatch run cov
+    hatch run test-fast
+    hatch run test-network tests/path/to/test_file.py
     ```
-    Make sure all tests pass and coverage doesn't significantly decrease. Consider adding new tests for your changes if applicable.
+    Do not run network tests in parallel or across the whole tree: SEC rate-limits every client to 10 requests per second, and the full suite takes hours. Add a test for every change, with at least one assertion of a specific value from a real filing.
 5.  **Commit:** Commit your changes with a clear and descriptive commit message. Follow conventional commit message formats if possible (e.g., `fix: Resolve issue with date parsing in Form 4`, `feat: Add support for 8-K item retrieval`).
     ```bash
-    git add .
+    git add path/to/changed_file.py tests/path/to/test_file.py
     git commit -m "feat: Describe your change here"
     ```
 6.  **Push:** Push your branch to your fork:
@@ -66,7 +80,8 @@ This project uses [Hatch](https://hatch.pypa.io/) for environment and project ma
 7.  **Open Pull Request:** Go to the original `edgartools` repository on GitHub and open a pull request from your branch to the `main` branch.
     *   Provide a clear title and description for your PR.
     *   Reference any relevant issues (e.g., "Closes #123").
-    *   Explain the changes you made and why.
+    *   Explain the changes you made and why, and fill in the template's Verification section.
+    *   If you are sending several related pull requests, link the umbrella issue (see [Using AI Assistants](#using-ai-assistants)).
 8.  **Review:** A maintainer will review your PR. Be prepared to discuss your changes and make further adjustments based on feedback.
 
 ## Test Cassettes (VCR)
@@ -146,9 +161,10 @@ from a real filing, verified by hand.
 
 `CHANGELOG.md` is read by someone deciding whether an upgrade affects them. An
 entry is the compiled short view of a change, not the record of the
-investigation behind it. New entries go under `## [Unreleased]`, in the
-`### Added` / `### Changed` / `### Fixed` / `### Performance` / `### Removed`
-section they belong to, and are folded into a dated version at release.
+investigation behind it. **Do not edit `CHANGELOG.md` in a pull request.** Add a
+fragment file, `changelog.d/<issue>.<section>.md`; [changelog.d/README.md](changelog.d/README.md)
+has the format and the 500-character limit. Fragments are folded into a dated
+version at release. The guidance below is about what goes inside the fragment.
 
 **Symptom first, in a bold sentence-case lead that names the public symbol in
 backticks** — what a user saw go wrong, not what the code did. Then one to three
@@ -217,47 +233,9 @@ Nothing in the first version was wrong; all of it is still on record, in the PR
 and the regression test. The standard applies from adoption forward — existing
 entries are not rewritten.
 
-## Documentation Structure
+## Documentation
 
-EdgarTools uses a three-tier documentation system:
-
-### External Documentation (`docs/`)
-- **Purpose**: User-facing documentation published to edgartools.readthedocs.com
-- **Content**: API reference, user guides, tutorials, installation, configuration
-- **Standards**: Must be maintained, versioned, and follow consistent style
-- **Audience**: End users and developers using EdgarTools
-
-### Internal Documentation (`docs-internal/`)
-- **Purpose**: Internal planning, research, and development documentation
-- **Content**: Architecture decisions, feature proposals, research analysis, runbooks
-- **Standards**: Can include sensitive details, work-in-progress, more informal
-- **Audience**: EdgarTools maintainers and contributors
-
-### AI Documentation (`ai_docs/`)
-- **Purpose**: Documentation for AI agents working with the codebase
-- **Content**: Agent instructions, API context, code patterns, generated docs
-- **Standards**: CLAUDE.md is source of truth, context should be accurate and concise
-- **Audience**: AI assistants and automated tools
-
-### Local Documentation Management
-
-To avoid conflicts over temporary documentation, use **local exclusions** instead of global .gitignore:
-
-```bash
-# Setup local exclusions (run once per developer)
-cat >> .git/info/exclude << 'EOF'
-# AI-generated documentation
-ai_docs/generated/
-
-# Module-specific ephemeral docs
-edgar/**/.docs/
-
-# Personal temporary docs
-**/TEMP_*.md
-**/WIP_*.md
-**/LOCAL_*.md
-EOF
-```
+User documentation lives in `docs/` and is published to [edgartools.readthedocs.io](https://edgartools.readthedocs.io/). Every Markdown file under `docs/` is built into the public site, so put nothing internal there. A documented example is a promise: if your change touches one, make sure it still runs.
 
 ## Building Documentation Locally
 

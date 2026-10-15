@@ -128,3 +128,9 @@ Write `Fixes #N` in the PR body so the merge closes the GitHub issue.
 ## Version
 
 Check `edgar/__about__.py`
+
+## Shared agent instructions
+
+The commands, hazards, definition of done and pull-request rules for every AI tool live in AGENTS.md. Keep them there, not here.
+
+@AGENTS.md
