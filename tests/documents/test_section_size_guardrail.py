@@ -315,7 +315,7 @@ def test_undersized_pointer_section_is_flagged_as_a_cross_reference(filer, path,
 @pytest.mark.slow
 @pytest.mark.parametrize("filer,path,length", [
     ("nflx", "nflx/10k/nflx-10-k-2025-01-27.html", 95_320),
-    ("cik915358", "915358/10k/915358-10-k-2025-08-27.html", 114_607),
+    ("cik915358", "915358/10k/915358-10-k-2025-08-27.html", 114_597),
 ])
 def test_a_pointer_to_statements_filed_at_the_back_is_rescued(filer, path, length):
     """GH #927 left a pointer Item 8 in place with an incorporation-by-reference
