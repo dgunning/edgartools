@@ -135,3 +135,27 @@ Security Group, South State) and a last Item 15 that stops short of the
 schedule or exhibit index after its signatures (Interstate Power & Light,
 Hormel, South State, Woodward). Global Cornerstone prints its Unresolved
 Staff Comments heading as a second "Item 1A"; it is labelled 1B.
+
+**Label change, 2026-10-14.** A second last-item exception (`LABELING.md`):
+when the TOC lists SIGNATURES, the last item ends before them, and an index
+or schedule after the signature block is the `exhibit_index` section. Three
+v2 Item 15 labels that ran through the signatures were cut back from the
+recorded lines (Interstate Power & Light 0001193125-12-081622, Hormel
+0001104659-14-087276, Woodward 0000108312-14-000037; `verified:
+"relabelled"`). South State's TOC lists no SIGNATURES, so its label stands.
+This applies a policy; it is not a fix built from those filings, so none is
+retired. The same policy relabelled three retired filings' Item 15 in
+`boundary_truth.json` (Intuit, Sanmina, Tetra Tech). Six v1 labels
+(Schlumberger, Marvell, Quad/Graphics, Donaldson, Allied World, Aegion) were
+relabelled the same way; three plain-text v1 filings whose document text has
+changed since labelling were left, since their recorded lines no longer sit on
+the text.
+
+| v2, 2026-10-14 | both-exact | recall |
+|---|---|---|
+| main at 6565466c, labels as drawn | 87.9% | 98.1% |
+| same code, labels after the policy | 88.9% | 98.1% |
+| with #1551 (page furniture) and the Signatures split | 91.5% [87.5, 94.8] | 98.1% |
+
+The page-furniture fixes were built on the eight retired filings; the 20
+items they gain here are on filings no rule was developed against.

@@ -5915,11 +5915,11 @@
      "end": "roxy Statement to be filed for our December 2007 Annual Meeting of Stockholders."
     },
     "part_iv_item_15": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
      "start": "ITEM 15 EXHIBITS AND FINANCIAL STATEMENT SCHEDULES (a) The following documents a",
-     "end": null,
-     "note": "held-out v1 label (lines 3404-3890 of the document text): end '934, except to the extent that Intuit specifically incorporates it by reference.'"
+     "end": " Item 15(a)(3) above. (d) Financial Statement Schedules See Item 15(a)(2) above.",
+     "note": "policy 2026-10-14: the TOC lists SIGNATURES, so Item 15 ends before them and the index or schedule after the signature block is the exhibit_index section"
     }
    }
   },
@@ -6253,11 +6253,11 @@
      "end": "for by Item 401(b) of Regulation S-K has been included in Part I of this report."
     },
     "part_iv_item_15": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
      "start": "Item 15. Exhibits and Financial Statement Schedules (a) (1) Financial Statements",
-     "end": null,
-     "note": "held-out v1 label (lines 2369-2573 of the document text): end '9 $1,642 $ $15,081 Fiscal year ended September 30, 2017 $15,081 $(747) $ $14,334'"
+     "end": "SEC on May 20, 2015. (c) Financial Statement Schedules. See Item 15(a)(2) above.",
+     "note": "policy 2026-10-14: the TOC lists SIGNATURES, so Item 15 ends before them and the index or schedule after the signature block is the exhibit_index section"
     }
    }
   },
@@ -6381,11 +6381,11 @@
      "end": "ted to the 2016 Annual Meeting of Stockholders and is incorporated by reference."
     },
     "part_iv_item_15": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
      "start": "Item 15. Exhibits, Financial Statement Schedules (a.) 1. Financial Statements Th",
-     "end": null,
-     "note": "held-out v1 label (lines 3335-3491 of the document text): end 't, except as shall be expressly set forth by specific reference in such filings.'"
+     "end": "ts valuation allowance adjustments related to net operating loss carry-forwards.",
+     "note": "policy 2026-10-14: the TOC lists SIGNATURES, so Item 15 ends before them and the index or schedule after the signature block is the exhibit_index section"
     }
    }
   },
