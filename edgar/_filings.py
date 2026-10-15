@@ -2699,6 +2699,20 @@ def summarize_files(data: pd.DataFrame) -> pd.DataFrame:
             )
 
 
+def _efts_is_down(exc: BaseException) -> bool:
+    """True when EFTS failed in a way the quarterly index can route around.
+
+    That is the search backend being broken while SEC's archive may be fine: an
+    HTTP 200 error body (``getaddrinfo EBUSY`` on 2026-10-14), a 5xx, or no
+    answer at all (``is_unreachable``). Anything else is an answer the index
+    route would get too -- a 429, a 4xx, SSL, a missing identity.
+    """
+    if is_unreachable(exc):
+        return True
+    status = http_status(exc)
+    return status == 200 or (status is not None and status >= 500)
+
+
 def _filing_from_efts(accession_number: str):
     """Resolve an accession through EDGAR full-text search, or None.
 
@@ -2714,9 +2728,13 @@ def _filing_from_efts(accession_number: str):
     An EFTS outage is also None here, with a warning. ``resolve_accession``
     raises it (edgartools-07lk.10), but for this caller EFTS is a shortcut with
     a correct fallback, and SEC's search backend fails on its own (an HTTP 200
-    error body) while the archive answers. Raising made ``find(accession)`` fail
-    for a filing the index would have found. If SEC itself is unreachable, the
-    index fetch raises the same transport error.
+    error body, a 5xx) while the archive answers. Raising made
+    ``find(accession)`` fail for a filing the index would have found.
+
+    Only that kind of failure falls back (see ``_efts_is_down``). A 429, an SSL
+    failure or a missing identity re-raises: the index fetch goes to the same
+    SEC, so it would hit the same wall after a 41 MB detour, and a 429 answered
+    with that download is the worst reply to "slow down" (GH #1554 review).
     """
     from edgar.httprequests import TRANSPORT_ERRORS
     from edgar.search.efts import resolve_accession
@@ -2724,8 +2742,11 @@ def _filing_from_efts(accession_number: str):
     try:
         fields = resolve_accession(accession_number)
     except TRANSPORT_ERRORS as exc:
-        log.warning("EDGAR full-text search could not resolve %s (%s); "
-                    "looking it up in the quarterly filing index instead", accession_number, exc)
+        if not _efts_is_down(exc):
+            raise
+        log.warning("EDGAR full-text search could not resolve %s (%s: %s); "
+                    "looking it up in the quarterly filing index instead",
+                    accession_number, type(exc).__name__, str(exc)[:120])
         return None
     if not fields:
         return None
