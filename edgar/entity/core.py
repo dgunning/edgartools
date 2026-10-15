@@ -38,6 +38,7 @@ from edgar.financials import Financials
 from edgar.display.formatting import cik_text, datefmt, reverse_name
 from edgar.reference.tickers import find_cik
 from edgar.richtools import Docs, repr_rich
+from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
 
 if TYPE_CHECKING:
     from edgar.enums import FormType
@@ -643,15 +644,14 @@ class Company(Entity):
         but with quarterly data instead of annual.
 
         Returns:
-            Financials object, or None — and None means exactly one thing: this
-            company has filed no 10-Q or 6-K that we can see. It is never how a
-            failure is reported; a transport or parsing failure raises.
+            Financials object, or None — which means this company has filed no
+            10-Q, and either no 6-K or a latest 6-K without XBRL statements
+            (most 6-Ks have none). It is never how a failure is reported; a
+            transport or parsing failure raises.
 
         Raises:
-            XBRLFilingWithNoXbrlData: the latest quarterly report carries no
-                XBRL. Most 6-Ks don't, so a foreign private issuer whose latest
-                6-K is a press release raises here. In 5.x this returned a
-                ``Financials`` whose every accessor answered None.
+            XBRLFilingWithNoXbrlData: the latest 10-Q carries no XBRL. In 5.x
+                this returned a ``Financials`` whose every accessor answered None.
 
         Example::
 
@@ -665,7 +665,11 @@ class Company(Entity):
         # Fall back to 6-K (foreign private issuers)
         filing = self.get_filings(form='6-K', amendments=False, trigger_full_load=False).latest()
         if filing is not None:
-            return Financials.extract(filing)
+            # Most 6-Ks carry no XBRL, and for that form it is not a failure.
+            try:
+                return Financials.extract(filing)
+            except XBRLFilingWithNoXbrlData:
+                return None
         return None
 
     @property

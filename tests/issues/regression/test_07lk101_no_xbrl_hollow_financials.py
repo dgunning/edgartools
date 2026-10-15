@@ -169,3 +169,48 @@ def test_filing_with_xbrl_is_untouched():
         warnings.simplefilter("error", FutureWarning)
         financials = Financials.extract(filing)
     assert financials.get_revenue() == 383_285_000_000
+
+
+# --------------------------------------------------------------------------
+# 6-K: no XBRL is the usual answer, not a failure — offline
+# --------------------------------------------------------------------------
+
+class _SixKFiling:
+    form = "6-K"
+    accession_no = "0001628280-26-065813"
+
+
+def _no_xbrl(filing):
+    raise no_xbrl_attachments(filing)
+
+
+def test_six_k_financials_is_none_without_xbrl(monkeypatch):
+    """Most 6-Ks carry no XBRL, so `SixK.financials` answers None rather than
+    raising like the other report types (ASML's 6-K 0001628280-26-065813 is one)."""
+    from edgar.company_reports import SixK
+
+    monkeypatch.setattr(Financials, "extract", classmethod(lambda cls, filing: _no_xbrl(filing)))
+    report = object.__new__(SixK)
+    report._filing = _SixKFiling()
+
+    assert report.financials is None
+
+
+def test_get_quarterly_financials_is_none_when_the_6k_has_no_xbrl(monkeypatch):
+    """The 6-K fallback of `get_quarterly_financials()` answers None the same way."""
+    from edgar.entity import core
+
+    class _Filings:
+        def latest(self):
+            return _SixKFiling()
+
+    class _ForeignFiler:
+        latest_tenq = None
+
+        def get_filings(self, **kwargs):
+            assert kwargs["form"] == "6-K"
+            return _Filings()
+
+    monkeypatch.setattr(core.Financials, "extract", classmethod(lambda cls, filing: _no_xbrl(filing)))
+
+    assert core.Company.get_quarterly_financials(_ForeignFiler()) is None
