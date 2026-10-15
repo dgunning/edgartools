@@ -165,13 +165,12 @@ sharp_edges:
       except EdgarError:
           ...   # anything else edgartools raises
 
-  - id: getitem-will-raise-in-6
+  - id: getitem-raises-on-a-missing-item
     summary: Use report.get(item, default) when an absent item is acceptable
     severity: medium
     solution: |
-      tenk["Item 7"]              # the item you expect — raises in 6.0 if absent
-      tenk.get("Item 16", "")     # the item that may not be there; never warns
-      # tenk["Item 99"] emits a FutureWarning today and raises
-      # SectionNotFoundError in 6.0. Set EDGARTOOLS_STRICT_ERRORS=1 to get that
-      # behaviour now — including in a test suite, to find out what breaks.
+      tenk["Item 7"]              # the item you expect — raises if absent
+      tenk.get("Item 16", "")     # the item that may not be there; never raises
+      # tenk["Item 99"] raises SectionNotFoundError (a KeyError), listing the
+      # items the filing does have.
     detection_pattern: 'tenk\[|tenq\[|report\[.Item'

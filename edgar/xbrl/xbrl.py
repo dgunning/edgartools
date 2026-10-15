@@ -336,11 +336,6 @@ class XBRLFilingWithNoXbrlData(NotFoundError):
 def no_xbrl_attachments(filing) -> XBRLFilingWithNoXbrlData:
     """The error for a filing that carries no XBRL attachments at all.
 
-    Built as a value rather than raised, so `warn_will_raise` decides — and so
-    the frame between the warning and the user is not one of ours, which is
-    what keeps `stacklevel` pointing at the line the reader has to change. Same
-    shape as `_no_xml_to_parse` in `edgar/__init__.py`, for the same reasons.
-
     Lives here, next to the class and the condition it describes, but is raised
     from `Financials.extract` rather than from `from_filing`: `filing.xbrl()`
     answering `None` is a documented true absence, while a truthy `Financials`
@@ -349,16 +344,8 @@ def no_xbrl_attachments(filing) -> XBRLFilingWithNoXbrlData:
     error = XBRLFilingWithNoXbrlData(
         f"Filing {filing.accession_no} ({filing.form}) has no XBRL attachments, "
         f"so there are no financial statements to read from it. This is a "
-        f"property of the filing, not of the form — SEC phased XBRL in between "
-        f"2009 and 2011, and filings from before then carry none."
-    )
-    # Stable across filings so a walk through a company's whole filing history
-    # warns once, not once per pre-2009 filing — see warn_will_raise.
-    error.warning_summary = (
-        "This filing has no XBRL attachments, so there are no financial "
-        "statements to read from it. This is a property of the filing, not of "
-        "the form — SEC phased XBRL in between 2009 and 2011, and filings from "
-        "before then carry none."
+        f"property of the filing: filings from before SEC's 2009-2011 XBRL "
+        f"phase-in carry none, and most 6-Ks never do."
     )
     return error
 

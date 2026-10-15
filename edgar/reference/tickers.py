@@ -639,8 +639,8 @@ def get_icon_from_ticker(ticker: str) -> Optional[bytes]:
         # the installed httpx build the raised type may not be our imported
         # HTTPStatusError (e.g. CI environments surface it under a different module
         # identity such as httpx2), so matching on isinstance is fragile. It is
-        # also why this reads the status through http_status() — under
-        # EDGARTOOLS_STRICT_ERRORS the boundary raises a TransportError, which
+        # also why this reads the status through http_status() — the
+        # boundary raises a TransportError, which
         # carries `.status_code` and no `.response` at all, and a check written
         # against `.response` silently stops recognising the 404 and starts
         # raising for every ticker without an icon. Anything that isn't a 404 is

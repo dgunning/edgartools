@@ -611,12 +611,10 @@ class Company(Entity):
             ``TransportError`` propagates; if the filing was there but would not
             parse, a ``ParsingError`` does.
 
-            One case is neither: an annual report that predates SEC's 2009-2011
-            XBRL phase-in carries no XBRL, so there is nothing to build
-            statements from. You get a ``Financials`` back — not None, so the
-            guard above passes — whose every accessor answers None. That path
-            now warns, and raises ``XBRLFilingWithNoXbrlData`` in 6.0. Set
-            ``EDGARTOOLS_STRICT_ERRORS=1`` for the 6.0 behaviour today.
+        Raises:
+            XBRLFilingWithNoXbrlData: the latest annual report carries no XBRL,
+                as one predating SEC's 2009-2011 phase-in does. In 5.x this
+                returned a ``Financials`` whose every accessor answered None.
 
         Example::
 
@@ -649,10 +647,11 @@ class Company(Entity):
             company has filed no 10-Q or 6-K that we can see. It is never how a
             failure is reported; a transport or parsing failure raises.
 
-            As with ``get_financials()``, a quarterly report with no XBRL is
-            neither: it returns a ``Financials`` whose accessors all answer
-            None. That path warns, and raises ``XBRLFilingWithNoXbrlData`` in
-            6.0.
+        Raises:
+            XBRLFilingWithNoXbrlData: the latest quarterly report carries no
+                XBRL. Most 6-Ks don't, so a foreign private issuer whose latest
+                6-K is a press release raises here. In 5.x this returned a
+                ``Financials`` whose every accessor answered None.
 
         Example::
 

@@ -749,18 +749,13 @@ def test_as_company_filing(carbo_10k_filing):
 
 @pytest.mark.fast
 @pytest.mark.vcr
-def test_10K_filing_with_no_financial_data(monkeypatch):
-    """An ABS trust's 10-K carries no XBRL, and both lanes of that are pinned here.
+def test_10K_filing_with_no_financial_data():
+    """An ABS trust's 10-K carries no XBRL.
 
-    This test asserted the hollow `Financials` alone until edgartools-07lk.10.1
-    gave that path a voice, at which point it failed in the strict lane — which
-    is the lane doing its job: it exists to find OUR code still relying on the
-    pre-6.0 behaviour. The repair is to say which lane each claim belongs to,
-    not to drop the claim.
-
-    The env var is set explicitly in both directions rather than inherited, so
-    the two halves assert the same things wherever the suite runs, and the flag
-    itself is what the test shows to be the switch.
+    In 5.x `tenk.financials` was a hollow `Financials` whose statements were all
+    None, with a FutureWarning; since 6.0 it raises (edgartools-07lk.10). The
+    report itself must still display: its rich panel says there is no financial
+    data instead of raising.
     """
     from edgar.financials import Financials
     from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
@@ -769,20 +764,16 @@ def test_10K_filing_with_no_financial_data(monkeypatch):
                     accession_no='0001779026-23-000027')
     tenk: TenK = filing.obj()
 
-    # 5.x: the hollow object stays, and now says so once, on first access.
-    monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
-    with pytest.warns(FutureWarning, match="no XBRL"):
-        assert tenk.financials
-    assert not tenk.balance_sheet
-    assert not tenk.income_statement
-    assert not tenk.cash_flow_statement
-    print(tenk)
-
-    # 6.0, today, under the flag. Reuses the same filing: `Financials.extract`
-    # is the line that changes, and `tenk.financials` has cached its answer.
-    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
+    with pytest.raises(XBRLFilingWithNoXbrlData, match="0001779026-23-000027"):
+        tenk.financials
+    with pytest.raises(XBRLFilingWithNoXbrlData):
+        tenk.balance_sheet
     with pytest.raises(XBRLFilingWithNoXbrlData):
         Financials.extract(filing)
+
+    assert "No financial data available" in repr(tenk)
+    assert tenk.auditor is None
+
 
 @pytest.mark.fast
 def test_text_url_for_filing(carbo_10k_filing):

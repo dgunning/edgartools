@@ -38,7 +38,6 @@ from edgar.exceptions import (
     TooManyRequestsError,
     TransportError,
     ValidationError,
-    warn_will_raise,
 )
 from edgar.current_filings import CurrentFilings, get_all_current_filings, get_current_filings, iter_current_filings_pages
 
@@ -310,9 +309,9 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
     elif re.match(r"^\d{6,}-", search_id):
         # It looks like an accession number and is not one. Every other branch
         # above answers a well-formed identifier; this one only fires on input
-        # that is malformed, so None here means "you typed it wrong" — which is
-        # the one thing a return value cannot say.
-        malformed = ValidationError(
+        # that is malformed, and "you typed it wrong" is the one thing a return
+        # value cannot say (edgartools-07lk.10: a FutureWarning and None in 5.x).
+        raise ValidationError(
             f"'{search_id}' is not a valid accession number.",
             parameter="search_id",
             invalid_value=search_id,
@@ -321,16 +320,6 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
                 "dashes are optional — 000032019323000106 also works",
             ],
         )
-        # The offending value stays on the error — which strict mode raises and
-        # 6.0 will raise — but must stay out of the warning, or a script
-        # validating a list of accessions warns once per bad entry.
-        malformed.warning_summary = (
-            "find() was given something shaped like an accession number that is "
-            "not a valid accession number. The format is 10 digits, 2 digits, "
-            "6 digits: 0000320193-23-000106; dashes are optional."
-        )
-        warn_will_raise(malformed)
-        return None
     else:
         return find_company(search_id)
 
@@ -484,10 +473,8 @@ def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
 def _no_xml_to_parse(sec_filing: Filing) -> DataObjectError:
     """The error for a form we model whose XML we could not get.
 
-    Built as a value rather than raised, so `warn_will_raise` can decide. It is
-    also why this is not a function that *does* the warning: an extra frame
-    between the warning and the user would land the `stacklevel` on our own
-    source instead of on the line the reader has to change.
+    Raised by `obj()` for Form 3, 4, 5, EFFECT and D (edgartools-07lk.10); in
+    5.x it was a `FutureWarning` and `None`.
     """
     error = DataObjectError(
         f"Form {sec_filing.form} filing {sec_filing.accession_no} has no XML document, "
@@ -496,13 +483,6 @@ def _no_xml_to_parse(sec_filing: Filing) -> DataObjectError:
         f"predate the XML requirement.",
         form=sec_filing.form,
         accession_no=sec_filing.accession_no,
-    )
-    # Stable across filings so a walk through a company's whole ownership
-    # history warns once, not once per pre-2003 filing — see warn_will_raise.
-    error.warning_summary = (
-        f"Form {sec_filing.form} filings without an XML document cannot build a "
-        f"data object. This is a property of the filing, not of the form — "
-        f"ownership forms filed before roughly 2003 predate the XML requirement."
     )
     return error
 
@@ -520,9 +500,7 @@ def obj(sec_filing: Filing) -> Optional[object]:
         about the filing.
 
         It is NOT how failure is reported. A form we *do* model whose data we
-        could not read is a `DataObjectError` — today that path emits a
-        `FutureWarning` and still returns `None`, and in 6.0 it raises. Set
-        `EDGARTOOLS_STRICT_ERRORS=1` to get the 6.0 behaviour now.
+        could not read raises `DataObjectError`.
 
     :param sec_filing: The filing
     :return:
@@ -571,17 +549,17 @@ def obj(sec_filing: Filing) -> Optional[object]:
         xml = sec_filing.xml()
         if xml:
             return Form3(**Ownership.parse_xml(xml))
-        warn_will_raise(_no_xml_to_parse(sec_filing), stacklevel=4)
+        raise _no_xml_to_parse(sec_filing)
     elif matches_form(sec_filing, "4"):
         xml = sec_filing.xml()
         if xml:
             return Form4(**Ownership.parse_xml(xml))
-        warn_will_raise(_no_xml_to_parse(sec_filing), stacklevel=4)
+        raise _no_xml_to_parse(sec_filing)
     elif matches_form(sec_filing, "5"):
         xml = sec_filing.xml()
         if xml:
             return Form5(**Ownership.parse_xml(xml))
-        warn_will_raise(_no_xml_to_parse(sec_filing), stacklevel=4)
+        raise _no_xml_to_parse(sec_filing)
     elif matches_form(sec_filing, ["SCHEDULE 13D", "SC 13D"]):
         return Schedule13D.from_filing(sec_filing)
     elif matches_form(sec_filing, ["SCHEDULE 13G", "SC 13G"]):
@@ -592,12 +570,12 @@ def obj(sec_filing: Filing) -> Optional[object]:
         xml = sec_filing.xml()
         if xml:
             return Effect.from_xml(xml)
-        warn_will_raise(_no_xml_to_parse(sec_filing), stacklevel=4)
+        raise _no_xml_to_parse(sec_filing)
     elif matches_form(sec_filing, "D"):
         xml = sec_filing.xml()
         if xml:
             return FormD.from_xml(xml)
-        warn_will_raise(_no_xml_to_parse(sec_filing), stacklevel=4)
+        raise _no_xml_to_parse(sec_filing)
     elif matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
         return FormC.from_filing(sec_filing)
 

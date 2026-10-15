@@ -48,18 +48,6 @@ GATE_10K = FIXTURES / "parity_gate" / "10-K" / "0000950153-99-001234.html"
 GATE_20F = FIXTURES / "parity_gate" / "20-F" / "0001062993-16-008650.html"
 
 
-@pytest.fixture
-def strict(monkeypatch):
-    """6.0 error behaviour: a lookup miss raises instead of answering None."""
-    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
-
-
-@pytest.fixture
-def lenient(monkeypatch):
-    """Today's behaviour, regardless of how the lane invoking us is configured."""
-    monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
-
-
 class FixtureFiling:
     """The minimum surface the report classes touch, backed by a local file."""
 
@@ -203,7 +191,7 @@ class TestGetitemFallbackIsGoneToo:
             f"{item} should now come from edgar.documents with no legacy fallback"
         )
 
-    def test_a_missing_item_returns_none_from_every_report_type(self, lenient):
+    def test_a_missing_item_get_returns_none_from_every_report_type(self):
         """The wiring, on an item the filing genuinely does not have.
 
         A 1999 10-K has no Item 16 — Form 10-K Summary was added in 2016 — and a
@@ -212,46 +200,24 @@ class TestGetitemFallbackIsGoneToo:
         This used to assert an ASYMMETRY, and pinning it is what made the
         asymmetry safe to remove. TenK dereferenced ``self._chunked_document``
         unguarded, so a missing item raised ``TypeError`` once the fallback was
-        nulled, while TwentyF guarded the same call and returned None. That
-        difference was described here as "the part 07lk.3 has to handle at both
-        call sites".
+        nulled, while TwentyF guarded the same call and returned None.
+        edgartools-3dp Group B deleted both call sites, so the two behaviours
+        converged by deletion rather than by being reconciled.
 
-        edgartools-3dp Group B deleted both call sites, which is how it gets
-        handled: there is nothing left to dereference, so every report type now
-        returns None for an item it does not have. The two behaviours converged
-        by deletion rather than by being reconciled.
-
-        Pinned under an explicit ``lenient`` rather than under whatever the
-        invoking lane happens to set. This assertion is only true with
-        ``EDGARTOOLS_STRICT_ERRORS`` off, and saying so in the signature is what
-        stopped it from passing in one lane and failing in the other -- see
-        ``test_a_missing_item_raises_from_every_report_type_under_strict``.
-
-        "Every report type" is now literally true, which it was not when this
-        test was written: TwentyF used to answer None in SILENCE here, because
-        it overrode ``__getitem__`` and reimplemented the miss path without the
-        ``report_lookup_miss`` call the base class makes (edgartools-sx7y).
+        Since 6.0 ``report[item]`` raises on a miss (next test), so the None half
+        is asserted through ``.get()``, which reaches the miss the same way.
         """
-        with pytest.warns(FutureWarning, match="raises SectionNotFoundError in edgartools 6.0"):
-            assert _without_legacy(TenK)(FixtureFiling(GATE_10K, "10-K"))["Item 16"] is None
-        with pytest.warns(FutureWarning, match="raises SectionNotFoundError in edgartools 6.0"):
-            assert _without_legacy(TwentyF)(FixtureFiling(GATE_20F, "20-F"))["Item 20"] is None
+        assert _without_legacy(TenK)(FixtureFiling(GATE_10K, "10-K")).get("Item 16") is None
+        assert _without_legacy(TwentyF)(FixtureFiling(GATE_20F, "20-F")).get("Item 20") is None
 
-    def test_a_missing_item_raises_from_every_report_type_under_strict(self, strict):
-        """The same wiring under the error behaviour 6.0 ships.
+    def test_a_missing_item_raises_from_every_report_type(self):
+        """The same wiring, as 6.0 behaves.
 
         ``report[item]`` raises in 6.0 because the caller named a specific thing
         and ``.get()`` exists for callers who would rather have None; ten_k.py
         says exactly that at its property block, and ``report_lookup_miss``
         implements it.
 
-        Both halves are asserted in both lanes deliberately. The assertion these
-        two replace pinned only the None half and named no error mode, so it
-        passed under ``test-fast`` and failed under ``test-strict-errors`` --
-        red across at least five consecutive merges to main, reported into #1033
-        every time and read as noise every time. A permanently red lane cannot
-        warn about anything else, so a genuine strict-mode break would have
-        landed invisibly behind it.
         """
         with pytest.raises(SectionNotFoundError, match="Item 16"):
             _without_legacy(TenK)(FixtureFiling(GATE_10K, "10-K"))["Item 16"]

@@ -2,20 +2,17 @@
 
 Bead: edgartools-07lk.10, PR3 of 3. Design §4.
 
-Four calls answered `None` for something that was really a failure, so the
+Calls that answered `None` for something that was really a failure, so the
 caller could not tell "there is no such thing" from "we could not tell you".
-Each now warns, names what it will raise, and raises it under
-EDGARTOOLS_STRICT_ERRORS.
+In 5.x each warned and named what it would raise; since 6.0 each raises.
 
 WHAT THESE TESTS PROTECT, in order of how quietly each could break:
 
-  1. **`.get()` stays silent.** It is the migration target we point people at,
-     and it reaches the miss through the same `__getitem__`. If the suppression
-     regresses, everyone who took our advice gets warned for taking it — and
-     the warning would look correct to anyone reading the code that emits it.
-  2. **The warning names the exception it becomes.** A `FutureWarning` that says
-     "this will change" without naming what to catch leaves the reader to go and
-     find out, which is the step nobody takes. These assert message CONTENT.
+  1. **`.get()` never raises.** It is the migration target we point people at,
+     and it reaches the miss through the same `__getitem__` that raises. If the
+     suppression regresses, everyone who took our advice gets the exception.
+  2. **The error says what to do.** A miss that does not list what the filing
+     does have sends the reader back to the filing. These assert message CONTENT.
   3. **The legitimate `None`s still return `None`.** The point of the change is
      the distinction; a flip that also swallowed the true absences would destroy
      it while every "does it raise?" test still passed.
@@ -30,29 +27,16 @@ from pathlib import Path
 import pytest
 
 import edgar
-from edgar import _no_xml_to_parse
 from edgar.company_reports import TenK, TenQ
-from edgar.company_reports._base import CompanyReport, section_not_found
+from edgar.company_reports._base import CompanyReport
 from edgar.exceptions import (
     DataObjectError,
     EdgarError,
     SectionNotFoundError,
     ValidationError,
-    strict_errors_enabled,
-    warn_will_raise,
 )
 
 GUIDE = Path(__file__).parents[3] / "docs" / "guides" / "error-handling.md"
-
-
-@pytest.fixture
-def strict(monkeypatch):
-    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
-
-
-@pytest.fixture
-def lenient(monkeypatch):
-    monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
 
 
 class _Filing:
@@ -94,138 +78,11 @@ class _Report(TenK):
         return _Empty()
 
 
-def _report_filed_as(accession: str) -> _Report:
-    """A `_Report` whose filing carries a specific accession number.
-
-    The dedup tests need many reports that differ only in the identifier the
-    message interpolates, which is exactly the axis a corpus loop varies along.
-    """
-    report = _Report()
-    report._filing = _Filing()
-    report._filing.accession_number = accession
-    report._filing.accession_no = accession
-    return report
-
-
-# ---------------------------------------------------------------------------
-# warn_will_raise, the primitive under all four sites
-# ---------------------------------------------------------------------------
-
-def test_warn_will_raise_warns_by_default(lenient):
-    with pytest.warns(FutureWarning, match="raises ValidationError in edgartools 6.0"):
-        warn_will_raise(ValidationError("bad input"))
-
-
-def test_warn_will_raise_raises_under_strict(strict):
-    with pytest.raises(ValidationError, match="bad input"):
-        warn_will_raise(ValidationError("bad input"))
-
-
-def test_the_warning_carries_the_error_message_not_just_a_notice(lenient):
-    """The text a user reads while porting must be the text they will catch."""
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        warn_will_raise(ValidationError("'123456-99' is not a valid accession number."))
-    message = str(caught[0].message)
-    assert "'123456-99' is not a valid accession number." in message
-    assert "EDGARTOOLS_STRICT_ERRORS" in message, (
-        "the warning must say how to get the new behaviour now — otherwise the "
-        "only way to test the 6.0 path is to wait for 6.0"
-    )
-
-
-def test_a_corpus_loop_warns_once_not_once_per_filing(lenient):
-    """The warning text must not vary per filing, or the dedup silently dies.
-
-    Python suppresses a repeat only when the rendered text matches exactly, so
-    an accession number interpolated into the *warning* turns one warning into
-    one per filing. A user looping over a few thousand 10-Ks would get a few
-    thousand stderr lines, which reads as a broken library rather than a
-    considerate one — and the flood scales with corpus size, so the people hit
-    hardest are the bulk users we most want to keep.
-
-    `simplefilter("default")` is what a real interpreter applies to
-    FutureWarning; `"always"` (used by the tests above, to inspect a single
-    warning) would defeat the very dedup under test.
-    """
-    errors = [
-        section_not_found(_report_filed_as(f"0000320193-24-{i:06d}"), "Item 99")
-        for i in range(500)
-    ]
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("default")
-        for error in errors:
-            warn_will_raise(error)          # one call site, 500 filings
-    assert len(caught) == 1, (
-        f"500 filings produced {len(caught)} warnings; the warning text is "
-        f"varying per filing. Keep per-filing detail on the error (which strict "
-        f"mode raises) and out of error.warning_summary."
-    )
-
-
-def test_the_error_still_names_the_filing_even_though_the_warning_does_not(lenient):
-    """Deduping the warning must not cost the detail 6.0 raises."""
-    error = section_not_found(_report_filed_as("0000320193-24-000106"), "Item 99")
-    assert "0000320193-24-000106" in str(error), (
-        "the exception is what strict mode raises and what the user debugs "
-        "against; it keeps the accession"
-    )
-    assert "0000320193-24-000106" not in error.warning_summary, (
-        "the warning text is what Python dedups on; it must not"
-    )
-
-
-def test_the_obj_site_dedups_too(lenient):
-    """`filing.obj()` has the same exposure as `report[item]`.
-
-    Walking a company's whole ownership history crosses every Form 3/4/5 filed
-    before roughly 2003, none of which has XML. That is a loop over filings
-    hitting one line, so the accession has to stay out of the warning here for
-    the same reason it does there.
-    """
-    filings = []
-    for i in range(500):
-        filing = _Filing()
-        filing.accession_no = f"0000320193-98-{i:06d}"
-        filing.form = "4"
-        filings.append(filing)
-
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("default")
-        for filing in filings:
-            warn_will_raise(_no_xml_to_parse(filing))
-    assert len(caught) == 1, (
-        f"500 pre-XML ownership filings produced {len(caught)} warnings"
-    )
-    assert "0000320193-98-000000" in str(_no_xml_to_parse(filings[0])), (
-        "the error still names the filing for whoever turns strict mode on"
-    )
-
-
-def test_it_is_a_futurewarning_not_a_deprecationwarning(lenient):
-    """DeprecationWarning is hidden outside __main__ by default.
-
-    That would silence this for exactly the users who most need it: the ones
-    whose own code is a library. Nothing here is deprecated either — the calls
-    stay, they just stop answering None.
-    """
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        warn_will_raise(ValidationError("x"))
-    assert caught[0].category is FutureWarning
-
-
 # ---------------------------------------------------------------------------
 # find() — a malformed accession number
 # ---------------------------------------------------------------------------
 
-def test_find_warns_on_a_malformed_accession_number(lenient):
-    edgar.find.cache_clear()
-    with pytest.warns(FutureWarning, match="not a valid accession number"):
-        assert edgar.find("123456-99") is None
-
-
-def test_find_raises_a_validation_error_under_strict(strict):
+def test_find_raises_a_validation_error():
     edgar.find.cache_clear()
     with pytest.raises(ValidationError) as excinfo:
         edgar.find("123456-99")
@@ -237,7 +94,7 @@ def test_find_raises_a_validation_error_under_strict(strict):
     )
 
 
-def test_the_validation_error_is_still_a_value_error(strict):
+def test_the_validation_error_is_still_a_value_error():
     """The reason this conversion is additive rather than a break."""
     edgar.find.cache_clear()
     with pytest.raises(ValueError):
@@ -249,19 +106,13 @@ def test_the_validation_error_is_still_a_value_error(strict):
 # report[item] — a section that is not there
 # ---------------------------------------------------------------------------
 
-def test_getitem_warns_and_still_returns_none(lenient):
-    report = _Report()
-    with pytest.warns(FutureWarning, match="raises SectionNotFoundError"):
-        assert report["Item 99"] is None
-
-
-def test_getitem_raises_under_strict(strict):
+def test_getitem_raises():
     report = _Report()
     with pytest.raises(SectionNotFoundError, match="has no 'Item 99'"):
         report["Item 99"]
 
 
-def test_the_miss_message_lists_what_the_filing_does_have(strict):
+def test_the_miss_message_lists_what_the_filing_does_have():
     """Items are optional in ways that surprise people — 10-K Item 16 is a
     summary a filer may simply omit. "Not found" without "here is what is" sends
     the reader back to the filing to find out."""
@@ -274,14 +125,14 @@ def test_the_miss_message_lists_what_the_filing_does_have(strict):
     assert any(".get(" in s for s in exc.suggestions)
 
 
-def test_section_not_found_is_still_a_keyerror(strict):
+def test_section_not_found_is_still_a_keyerror():
     """`except KeyError:` around item access keeps working after the flip."""
     report = _Report()
     with pytest.raises(KeyError):
         report["Item 99"]
 
 
-def test_a_miss_message_survives_a_report_that_cannot_list_its_items(strict):
+def test_a_miss_message_survives_a_report_that_cannot_list_its_items():
     """An error message must not raise a different error on its way out."""
     class _Broken(_Report):
         @property
@@ -297,42 +148,30 @@ def test_a_miss_message_survives_a_report_that_cannot_list_its_items(strict):
 # .get() — the migration target, which must be silent
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize("flag", ["1", None])
-def test_get_never_warns_and_never_raises(monkeypatch, flag):
+def test_get_never_raises():
     """THE test in this file.
 
     `.get()` is what we tell people to move to, and it reaches the miss through
-    the same `__getitem__` that warns. If the suppression regresses, every user
-    who took our advice is warned for taking it — and nothing about the code
-    emitting the warning would look wrong.
+    the same `__getitem__` that raises. If the suppression regresses, every user
+    who took our advice gets the exception for taking it.
     """
-    if flag:
-        monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", flag)
-    else:
-        monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
-
     report = _Report()
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
         assert report.get("Item 99") is None
         assert report.get("Item 99", "") == ""
         assert report.get("Item 99", default="fallback") == "fallback"
-    flip_warnings = [w for w in caught if w.category is FutureWarning]
-    assert not flip_warnings, (
-        f"`.get()` emitted {[str(w.message)[:60] for w in flip_warnings]} — the "
-        f"migration target must be quieter than the thing it replaces"
-    )
 
 
-def test_get_suppression_does_not_leak_past_the_call(lenient):
+def test_get_suppression_does_not_leak_past_the_call():
     """The context flag has to be reset, or one `.get()` silences the process."""
     report = _Report()
     report.get("Item 99")
-    with pytest.warns(FutureWarning):
+    with pytest.raises(SectionNotFoundError):
         report["Item 99"]
 
 
-def test_get_suppression_is_reset_even_when_the_lookup_raises(lenient):
+def test_get_suppression_is_reset_even_when_the_lookup_raises():
     class _Exploding(_Report):
         def __getitem__(self, item):
             raise RuntimeError("boom")
@@ -340,17 +179,17 @@ def test_get_suppression_is_reset_even_when_the_lookup_raises(lenient):
     with pytest.raises(RuntimeError):
         _Exploding().get("Item 1")
 
-    with pytest.warns(FutureWarning):
+    with pytest.raises(SectionNotFoundError):
         _Report()["Item 99"]
 
 
 def test_get_exists_on_every_report_class():
-    """Shipped on the base, so the flip does not arrive somewhere without it."""
+    """Shipped on the base, so no report class raises without offering it."""
     for cls in (CompanyReport, TenK, TenQ):
         assert callable(getattr(cls, "get", None)), f"{cls.__name__} has no .get()"
 
 
-def test_get_returns_the_value_when_the_item_is_present(lenient):
+def test_get_returns_the_value_when_the_item_is_present():
     class _Present(_Report):
         def __getitem__(self, item):
             return "Item 1 - Business ..."
@@ -376,12 +215,7 @@ class _OwnershipFiling:
         return None
 
 
-def test_obj_warns_when_a_modelled_form_has_no_data(lenient):
-    with pytest.warns(FutureWarning, match="raises DataObjectError"):
-        assert edgar.obj(_OwnershipFiling()) is None
-
-
-def test_obj_raises_under_strict(strict):
+def test_obj_raises_when_a_modelled_form_has_no_data():
     with pytest.raises(DataObjectError) as excinfo:
         edgar.obj(_OwnershipFiling())
     exc = excinfo.value
@@ -390,8 +224,8 @@ def test_obj_raises_under_strict(strict):
     assert "no XML document" in str(exc)
 
 
-def test_obj_still_returns_none_for_a_form_we_do_not_model(strict):
-    """The legitimate None, and it must survive strict mode.
+def test_obj_still_returns_none_for_a_form_we_do_not_model():
+    """The legitimate None, and it must survive the flip.
 
     This is the distinction the whole change exists for. A flip that made every
     None into a raise would pass every "does it raise?" test and destroy the
@@ -410,9 +244,7 @@ def test_obj_still_returns_none_for_a_form_we_do_not_model(strict):
         def xbrl(self):
             return None
 
-    with warnings.catch_warnings():
-        warnings.simplefilter("error", FutureWarning)
-        assert edgar.obj(_Unmodelled()) is None
+    assert edgar.obj(_Unmodelled()) is None
 
 
 # ---------------------------------------------------------------------------
@@ -442,7 +274,7 @@ def test_every_exception_the_guide_names_exists():
     modules = [importlib.import_module(name) for name in (
         "edgar.exceptions", "edgar", "edgar.httprequests", "edgar.dates",
         "edgar.core", "edgar.xbrl.exceptions", "edgar.sgml.sgml_parser",
-        "edgar.entity.entity_facts",
+        "edgar.entity.entity_facts", "edgar.xbrl",
     )]
 
     named = set(re.findall(r"\b([A-Z][A-Za-z]*(?:Error|Warning|Exception))\b", GUIDE.read_text()))
@@ -482,10 +314,6 @@ def test_the_guide_is_wired_into_the_docs_nav():
     """A guide nothing links to is a guide nobody reads."""
     mkdocs = (Path(__file__).parents[3] / "mkdocs.yml").read_text()
     assert "guides/error-handling.md" in mkdocs
-
-
-def test_strict_flag_helper_is_importable_as_the_guide_says():
-    assert strict_errors_enabled() in (True, False)
 
 
 def test_edgar_error_is_the_outer_net_the_guide_promises():

@@ -7,13 +7,15 @@ the documented `if financials is not None:` guard passed — whose every accesso
 then answered `None`, with no warning at any level. The only signal was a
 `log.debug`, which is off for every normal user.
 
-WHERE THE WARNING GOES, AND WHY NOT ONE LEVEL DOWN. `XBRL.from_filing` is the
-shared choke point and warning there would have caught every path in one edit.
+5.x warned there; since 6.0 `Financials.extract` raises `XBRLFilingWithNoXbrlData`.
+
+WHERE THE ERROR GOES, AND WHY NOT ONE LEVEL DOWN. `XBRL.from_filing` is the
+shared choke point and raising there would have caught every path in one edit.
 It is the wrong place: `filing.xbrl()` answering `None` for a filing without
 XBRL is a TRUE ABSENCE, and docs/upgrade/6.0.md commits in writing to it staying
 quiet in 6.0 — "those are answers, not failures, and that distinction is the
-point of the whole change". Asking for financial statements and silently getting
-an object that has none is the failure. So `Financials.extract` warns and
+point of the whole change". Asking for financial statements and getting an
+object that has none is the failure. So `Financials.extract` raises and
 `filing.xbrl()` does not, and the tests below pin BOTH halves — the second is
 the one a future choke-point refactor would quietly break.
 
@@ -22,18 +24,12 @@ WHAT THESE TESTS PROTECT, in order of how quietly each could break:
   1. **`filing.xbrl()` stays silent.** Nothing about it is asserted anywhere
      else, so moving the warning down to `from_filing` would look like a tidy
      simplification and pass every other test in this file.
-  2. **Strict mode actually raises.** `XBRLFilingWithNoXbrlData` was never
-     raised ANYWHERE before this change, so the two `except` clauses written
-     for it — in `Financials.extract` and in `Filing.xbrl` — were dead code
-     that looked like handling. Re-adding one would restore the silent `None`
-     under strict while every lenient test still passed, and it would read as
-     conscientious error handling to whoever added it.
-  3. **The warning dedups.** Its text must not carry the accession number.
-     Python's filter compares rendered text, so a per-filing message turns a
-     sweep over a company's history into one warning per pre-2009 filing, which
-     reads as a broken library. This is the trap `_no_xml_to_parse` already hit.
-  4. **Filings WITH XBRL stay silent.** A guard that warned on the healthy path
-     would be worse than the bug: it would train users to filter the warning.
+  2. **It actually raises.** `XBRLFilingWithNoXbrlData` was never raised
+     ANYWHERE before 07lk.10.1, so the two `except` clauses written for it —
+     in `Financials.extract` and in `Filing.xbrl` — were dead code that looked
+     like handling. Re-adding one would restore the silent `None`, and it would
+     read as conscientious error handling to whoever added it.
+  3. **Filings WITH XBRL are untouched.**
 """
 import warnings
 
@@ -55,16 +51,6 @@ CIRCUIT_CITY_10K = dict(
 )
 
 
-@pytest.fixture
-def strict(monkeypatch):
-    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
-
-
-@pytest.fixture
-def lenient(monkeypatch):
-    monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
-
-
 class _Filing:
     """The smallest thing `no_xbrl_attachments` reads."""
     form = "10-K"
@@ -76,7 +62,7 @@ class _Filing:
 # --------------------------------------------------------------------------
 
 def test_error_is_built_not_raised():
-    """The helper returns the error as a value, so warn_will_raise can decide."""
+    """The helper returns the error as a value; `Financials.extract` raises it."""
     assert isinstance(no_xbrl_attachments(_Filing()), XBRLFilingWithNoXbrlData)
 
 
@@ -87,22 +73,9 @@ def test_error_message_names_the_filing():
     assert "10-K" in str(error)
 
 
-def test_warning_summary_is_dedup_stable():
-    """The warning text must NOT vary per filing.
-
-    Python suppresses a repeat only on an exact text match, so an accession
-    number here turns a corpus loop into one warning per filing.
-    """
-    error = no_xbrl_attachments(_Filing())
-    assert error.warning_summary is not None
-    assert "0001193125-08-093063" not in error.warning_summary
-    # Still has to say what happened, not merely that something did.
-    assert "no XBRL" in error.warning_summary
-
-
-def test_warning_summary_explains_that_this_is_the_filing_not_the_form():
+def test_error_explains_that_this_is_the_filing_not_the_form():
     """A user seeing this on a 10-K must not conclude 10-Ks are unsupported."""
-    assert "property of the filing" in no_xbrl_attachments(_Filing()).warning_summary
+    assert "property of the filing" in str(no_xbrl_attachments(_Filing()))
 
 
 # --------------------------------------------------------------------------
@@ -160,63 +133,27 @@ def test_the_handler_probe_can_actually_see_a_handler():
 # --------------------------------------------------------------------------
 
 @pytest.mark.network
-def test_filing_xbrl_stays_silent(lenient):
-    """`filing.xbrl()` answering None is a true absence and must NOT warn.
+def test_filing_xbrl_stays_silent():
+    """`filing.xbrl()` answering None is a true absence: no raise, no warning.
 
-    docs/upgrade/6.0.md commits to this staying quiet in 6.0. Moving the
-    warning down to `XBRL.from_filing` would break this and nothing else.
-    """
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        result = Filing(**CIRCUIT_CITY_10K).xbrl()
-    assert result is None
-    assert not [w for w in caught if issubclass(w.category, FutureWarning)]
-
-
-@pytest.mark.network
-def test_filing_xbrl_stays_silent_under_strict(strict):
-    """Not even strict mode makes `filing.xbrl()` raise — it is not a failure."""
-    assert Filing(**CIRCUIT_CITY_10K).xbrl() is None
-
-
-@pytest.mark.network
-def test_financials_extract_warns(lenient):
-    """The ground truth: asking for statements that cannot exist says so."""
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        Financials.extract(Filing(**CIRCUIT_CITY_10K))
-    messages = [str(w.message) for w in caught if issubclass(w.category, FutureWarning)]
-    assert messages, "a filing with no XBRL must not go quiet"
-    # The warning names what to catch, so the reader does not have to go find out.
-    assert "XBRLFilingWithNoXbrlData" in messages[0]
-
-
-@pytest.mark.network
-def test_financials_still_returns_the_hollow_object_in_5x(lenient):
-    """5.x behaviour is UNCHANGED apart from the warning.
-
-    Removing the hollow object is the breaking half and lands in 6.0. Staging
-    the warning without the flip is the whole point of edgartools-07lk.23.
+    docs/upgrade/6.0.md commits to this. Moving the error down to
+    `XBRL.from_filing` would break this and nothing else.
     """
     with warnings.catch_warnings():
-        warnings.simplefilter("ignore")
-        financials = Financials.extract(Filing(**CIRCUIT_CITY_10K))
-    assert financials is not None
-    assert financials.income_statement() is None
-    assert financials.balance_sheet() is None
-    assert financials.cash_flow_statement() is None
+        warnings.simplefilter("error")
+        assert Filing(**CIRCUIT_CITY_10K).xbrl() is None
 
 
 @pytest.mark.network
-def test_strict_mode_raises_through_financials_extract(strict):
-    """Under strict the error reaches the caller — the 6.0 behaviour."""
-    with pytest.raises(XBRLFilingWithNoXbrlData):
+def test_financials_extract_raises():
+    """The ground truth: asking for statements that cannot exist says so."""
+    with pytest.raises(XBRLFilingWithNoXbrlData, match="0001193125-08-093063"):
         Financials.extract(Filing(**CIRCUIT_CITY_10K))
 
 
 @pytest.mark.network
-def test_strict_mode_raises_through_get_financials(strict):
-    """The whole point: the public entry point users actually call."""
+def test_get_financials_raises():
+    """The public entry point users actually call."""
     from edgar import Company
 
     with pytest.raises(XBRLFilingWithNoXbrlData):
@@ -224,24 +161,11 @@ def test_strict_mode_raises_through_get_financials(strict):
 
 
 @pytest.mark.network
-def test_repeated_calls_warn_once(lenient):
-    """A sweep over many pre-2009 filings must not emit one warning per filing."""
-    filing = Filing(**CIRCUIT_CITY_10K)
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("default")  # Python's real default filter
-        for _ in range(5):
-            Financials.extract(filing)
-    assert len([w for w in caught if issubclass(w.category, FutureWarning)]) == 1
-
-
-@pytest.mark.network
-def test_filing_with_xbrl_is_untouched_and_silent(lenient):
-    """The healthy path must not warn — a warning here would train users to filter it."""
-    from edgar import Company
-
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        financials = Company("AAPL").get_financials()
-        income = financials.income_statement()
-    assert income is not None
-    assert not [w for w in caught if issubclass(w.category, FutureWarning)]
+def test_filing_with_xbrl_is_untouched():
+    """Apple's FY2023 10-K (0000320193-23-000106): revenue $383,285M."""
+    filing = Filing(form="10-K", filing_date="2023-11-03", company="Apple Inc.",
+                    cik=320193, accession_no="0000320193-23-000106")
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", FutureWarning)
+        financials = Financials.extract(filing)
+    assert financials.get_revenue() == 383_285_000_000

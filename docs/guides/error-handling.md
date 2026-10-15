@@ -87,52 +87,31 @@ The rule, if you are reading our source or writing a handler:
 | for a specific named thing (`filing["Item 7A"]`, `Company("AAPL")`) | a `NotFoundError` | a raise |
 | whether something exists (`filing.xbrl()`, `company.get_financials()`) | `None`, documented | a raise |
 
-## Migrating before 6.0
+## What changed in 6.0
 
-A few calls still return `None` for something that is really a failure. Each of them now emits a `FutureWarning` naming what it will raise in 6.0:
+These calls used to return `None` for something that was really a failure. In 5.x each emitted a `FutureWarning` naming what it would raise; since 6.0 they raise it:
 
-| Call | Today | edgartools 6.0 |
+| Call | edgartools 5.x | edgartools 6.0 |
 |---|---|---|
-| `tenk["Item 99"]` (no such item) | warns, returns `None` | raises `SectionNotFoundError` |
-| `find("123456-99")` (malformed accession) | warns, returns `None` | raises `ValidationError` |
-| `filing.obj()` on a modelled form with unreadable data | warns, returns `None` | raises `DataObjectError` |
-| `tenk.document` when the parser fails | warns, returns `None` | raises the parser's `ParsingError` |
-| any HTTP failure out of the network layer | propagates as an `httpx2` type | raises `TransportError` |
+| `tenk["Item 99"]` (no such item) | warned, returned `None` | raises `SectionNotFoundError` |
+| `find("123456-99")` (malformed accession) | warned, returned `None` | raises `ValidationError` |
+| `filing.obj()` on a modelled form with unreadable data | warned, returned `None` | raises `DataObjectError` |
+| `tenk.document` when the parser fails | warned, returned `None` | raises the parser's `ParsingError` |
+| `company.get_financials()`, `tenk.financials` on a filing with no XBRL | warned, returned a `Financials` whose statements were all `None` | raises `XBRLFilingWithNoXbrlData` |
+| any HTTP failure out of the network layer | propagated as an `httpx2` type | raises `TransportError` |
 
-Where the raising form is the only form, there is now a non-raising one beside it. `report.get(item, default)` is to `report[item]` what `dict.get` is to `dict[...]`, and it never warns:
+`XBRLFilingWithNoXbrlData` is a `NotFoundError`, so `except NotFoundError` catches it; to name it, import it from `edgar.xbrl`.
+
+Where the raising form is the only form, there is a non-raising one beside it. `report.get(item, default)` is to `report[item]` what `dict.get` is to `dict[...]`:
 
 ```python
 tenk = filing.obj()
 
-tenk["Item 7"]                      # the item you expect; raises in 6.0 if absent
+tenk["Item 7"]                      # the item you expect; raises if absent
 tenk.get("Item 16", "")             # the item that may not be there
 ```
 
-### If you process filings in bulk
-
-Each of these warns **once per line of your code, not once per filing** — Python suppresses the repeats. A loop over ten thousand 10-Ks where some omit the item you asked for produces one warning, not ten thousand. The detail about *which* filing (and what items it does have) is on the exception rather than in the warning, so you see it when you turn strict mode on:
-
-```bash
-EDGARTOOLS_STRICT_ERRORS=1 python your_script.py   # raises, with the accession named
-```
-
-If an absent item is a normal outcome for your corpus rather than a problem, `report.get(item, default)` is the call you want — it is silent by design, today and in 6.0.
-
-### Get the 6.0 behaviour now
-
-Set `EDGARTOOLS_STRICT_ERRORS=1` and every row of that table raises today. Run your test suite with it to find out what breaks while there is still a 5.x release to fix it in:
-
-```bash
-EDGARTOOLS_STRICT_ERRORS=1 pytest
-```
-
-```python
-from edgar.exceptions import strict_errors_enabled
-
-strict_errors_enabled()   # True when the variable is set
-```
-
-We run our own suite this way in CI, for exactly the same reason.
+If an absent item is a normal outcome for your corpus rather than a problem, `report.get(item, default)` is the call you want.
 
 ## Writing errors that help
 

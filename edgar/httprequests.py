@@ -30,7 +30,6 @@ from edgar.exceptions import (
     IdentityNotSetError,
     TooManyRequestsError,
     TransportError,
-    strict_errors_enabled,
 )
 from edgar.httpclient import async_http_client, http_client
 
@@ -554,11 +553,10 @@ Details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verifi
 # despite no request being made, because "no request can be made at all"
 # reported as "not found" is the same lie in a different costume.
 #
-# Both families stay listed through 6.0 on purpose. `TransportError` is what the
-# boundary wrap raises under strict; `HTTPError` is what still comes through
-# unwrapped when it is off. Keeping both means a call site written against this
-# tuple behaves identically in either era — cheap insurance, and the reason the
-# strict CI job can prove the internal code is ready before the flip lands.
+# Both families stay listed. `TransportError` is what the boundary wrap raises
+# (unconditionally since 6.0); `HTTPError` still comes from any request made
+# outside the six wrapped boundary functions. Keeping both means a call site
+# written against this tuple does not depend on which path raised.
 TRANSPORT_ERRORS = (
     HTTPError,        # httpx2 base: connect, read, timeout, protocol, status
     TransportError,   # ours: the wrapped era, plus 429 / SSL / identity always
@@ -579,8 +577,8 @@ UNREACHABLE_ERRORS = (
 def is_unreachable(exc: BaseException) -> bool:
     """True when the request never reached SEC, in either error era.
 
-    The pre-wrap era raises httpx2 and httpcore2 types; under the strict wrap the
-    same failure arrives as a `TransportError` carrying no status. Asking this
+    Outside the boundary wrap a failure is an httpx2 or httpcore2 type; through
+    it, the same failure arrives as a `TransportError` carrying no status. Asking this
     function instead of naming types is what lets one `except` clause mean the
     same thing before and after the 6.0 flip.
 
@@ -662,9 +660,9 @@ def wrap_transport_errors(func):
     notice. Outside the decorator, the translation only ever sees the exception
     that survived every attempt.
 
-    Gated on `strict_errors_enabled()` because user code may be catching
-    `httpx2.HTTPError` around our calls; the wrap becomes unconditional in 6.0.
-    The original is always the `__cause__`, so `raise ... from e` keeps it
+    Unconditional since 6.0 (edgartools-07lk.10); in 5.x it was gated on
+    `EDGARTOOLS_STRICT_ERRORS`, because user code may have been catching
+    `httpx2.HTTPError` around our calls. The original is always the `__cause__`, so `raise ... from e` keeps it
     reachable for debugging without putting an httpx2 type in any signature.
     """
     # inspect must see through stamina's and with_identity's wrappers.
@@ -680,8 +678,6 @@ def wrap_transport_errors(func):
             try:
                 return await func(*args, **kwargs)
             except HTTPError as e:
-                if not strict_errors_enabled():
-                    raise
                 raise _as_transport_error(e, _called_url(args, kwargs)) from e
         return wrapper
 
@@ -691,8 +687,6 @@ def wrap_transport_errors(func):
             try:
                 yield from func(*args, **kwargs)
             except HTTPError as e:
-                if not strict_errors_enabled():
-                    raise
                 raise _as_transport_error(e, _called_url(args, kwargs)) from e
         return wrapper
 
@@ -701,8 +695,6 @@ def wrap_transport_errors(func):
         try:
             return func(*args, **kwargs)
         except HTTPError as e:
-            if not strict_errors_enabled():
-                raise
             raise _as_transport_error(e, _called_url(args, kwargs)) from e
     return wrapper
 
@@ -856,9 +848,9 @@ def get_with_retry(url, identity=None, identity_callable=None, **kwargs):
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
         SSLVerificationError: If SSL certificate verification fails.
-        TransportError: Under EDGARTOOLS_STRICT_ERRORS (unconditional in 6.0),
+        TransportError:
             any other httpx2 failure that survived every retry, with the original
-            as its ``__cause__``. Without the flag those propagate as httpx2 types.
+            as its ``__cause__``.
     """
     return _get(get_with_retry, url, identity=identity, identity_callable=identity_callable, **kwargs)
 
@@ -924,9 +916,9 @@ async def get_with_retry_async(client: AsyncClient, url, identity=None, identity
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
         SSLVerificationError: If SSL certificate verification fails.
-        TransportError: Under EDGARTOOLS_STRICT_ERRORS (unconditional in 6.0),
+        TransportError:
             any other httpx2 failure that survived every retry, with the original
-            as its ``__cause__``. Without the flag those propagate as httpx2 types.
+            as its ``__cause__``.
     """
     with _ssl_errors_as_verification_error(url):
         response = await client.get(url, **kwargs)
@@ -966,9 +958,9 @@ def stream_with_retry(url, identity=None, identity_callable=None, bypass_cache=F
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
         SSLVerificationError: If SSL certificate verification fails.
-        TransportError: Under EDGARTOOLS_STRICT_ERRORS (unconditional in 6.0),
+        TransportError:
             any other httpx2 failure that survived every retry, with the original
-            as its ``__cause__``. Without the flag those propagate as httpx2 types.
+            as its ``__cause__``.
     """
     try:
         with http_client(bypass_cache=bypass_cache) as client:
@@ -1014,9 +1006,9 @@ def post_with_retry(url, data=None, json=None, identity=None, identity_callable=
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
         SSLVerificationError: If SSL certificate verification fails.
-        TransportError: Under EDGARTOOLS_STRICT_ERRORS (unconditional in 6.0),
+        TransportError:
             any other httpx2 failure that survived every retry, with the original
-            as its ``__cause__``. Without the flag those propagate as httpx2 types.
+            as its ``__cause__``.
     """
     with _ssl_errors_as_verification_error(url):
         with http_client() as client:
@@ -1057,9 +1049,9 @@ async def post_with_retry_async(client: AsyncClient, url, data=None, json=None, 
     Raises:
         TooManyRequestsError: If the response status code is 429 (Too Many Requests).
         SSLVerificationError: If SSL certificate verification fails.
-        TransportError: Under EDGARTOOLS_STRICT_ERRORS (unconditional in 6.0),
+        TransportError:
             any other httpx2 failure that survived every retry, with the original
-            as its ``__cause__``. Without the flag those propagate as httpx2 types.
+            as its ``__cause__``.
     """
     with _ssl_errors_as_verification_error(url):
         response = await client.post(url, data=data, json=json, **kwargs)
@@ -1087,8 +1079,6 @@ def inspect_response(response: Response):
         try:
             response.raise_for_status()
         except HTTPError as e:
-            if not strict_errors_enabled():
-                raise
             raise _as_transport_error(e, str(response.url)) from e
 
 

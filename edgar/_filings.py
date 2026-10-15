@@ -450,8 +450,8 @@ def fetch_filing_index(year_and_quarter: YearAndQuarter,
         index_table = fetch_filing_index_at_url(url, index)
         return (year, quarter), index_table
     except (httpx2.HTTPStatusError, TransportError) as e:
-        # Dual-era: httpx2 raises the status error today, TransportError under the
-        # strict wrap and in 6.0. http_status() reads either.
+        # The boundary wrap raises TransportError; an unwrapped path would raise
+        # the httpx2 status error. http_status() reads either.
         if is_start_of_quarter() and http_status(e) == 403:
             # Return an empty filing index
             return (year, quarter), _empty_filing_index()

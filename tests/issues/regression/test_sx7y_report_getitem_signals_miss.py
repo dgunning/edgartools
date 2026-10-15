@@ -2,19 +2,15 @@
 
 Bead: edgartools-sx7y
 
-`CompanyReport.__getitem__` ends with `report_lookup_miss(...)` before returning
-None, so asking for an item a filing does not have warns today and raises
-`SectionNotFoundError` under `EDGARTOOLS_STRICT_ERRORS` -- which is what 6.0
-ships. Three subclasses overrode `__getitem__`, reimplemented the miss path and
-dropped that call: TwentyF, CurrentReport and FortyF. All three returned a
-silent None in both error modes.
+`CompanyReport.__getitem__` ends with `report_lookup_miss(...)`, so asking for
+an item a filing does not have raises `SectionNotFoundError` (in 5.x it warned).
+Three subclasses overrode `__getitem__`, reimplemented the miss path and dropped
+that call: TwentyF, CurrentReport and FortyF. All three returned a silent None.
 
 TwentyF and CurrentReport are pinned OFFLINE against the committed fixture
 corpus in `test_3dp_groupb_fixture_corpus.py`, so they gate every pull request.
 There is no 40-F in that corpus, so FortyF is pinned here against a real filing
-and marked `network` -- deliberately, rather than letting it ride in the `fast`
-lane, because `test-strict-errors` runs that lane and exists to check 6.0 error
-behaviour "without a second pass over the SEC endpoint".
+and marked `network`.
 
 Those behavioural tests pin the five report types that exist today. A SIXTH
 would slip straight through them, which is the failure this bug already
@@ -51,16 +47,6 @@ FORTY_F = dict(form='40-F', filing_date='2024-03-27',
 MISSING = "Nonexistent Section"
 
 
-@pytest.fixture
-def strict(monkeypatch):
-    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
-
-
-@pytest.fixture
-def lenient(monkeypatch):
-    monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
-
-
 @contextmanager
 def _no_warnings():
     """Record warnings without making their ABSENCE the failure.
@@ -75,17 +61,7 @@ def _no_warnings():
 
 
 @pytest.mark.network
-def test_a_missing_forty_f_section_warns_today(lenient):
-    """The user is told what 6.0 will do, rather than getting a bare None."""
-    report = Filing(**FORTY_F).obj()
-
-    with pytest.warns(FutureWarning, match="raises SectionNotFoundError in edgartools 6.0"):
-        assert report[MISSING] is None
-
-
-@pytest.mark.network
-def test_a_missing_forty_f_section_raises_under_strict(strict):
-    """Under the 6.0 error behaviour the same lookup raises."""
+def test_a_missing_forty_f_section_raises():
     report = Filing(**FORTY_F).obj()
 
     with pytest.raises(SectionNotFoundError, match=MISSING):
@@ -93,28 +69,17 @@ def test_a_missing_forty_f_section_raises_under_strict(strict):
 
 
 @pytest.mark.network
-def test_get_stays_silent_in_both_modes(monkeypatch):
+def test_get_stays_silent():
     """`.get()` is the migration target, so it must neither warn nor raise.
 
     The mechanism is a ContextVar set by `CompanyReport.get()` and read inside
-    `report_lookup_miss`; an override that calls the helper inherits the
-    silence. Asserted in both modes because a subclass that also overrode
-    `.get()` would break it in only one.
+    `report_lookup_miss`; an override that calls the helper inherits it.
     """
-    for strict_mode in (False, True):
-        if strict_mode:
-            monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
-        else:
-            monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
+    report = Filing(**FORTY_F).obj()
+    with _no_warnings() as caught:
+        assert report.get(MISSING, "DEFAULT") == "DEFAULT"
 
-        report = Filing(**FORTY_F).obj()
-        with _no_warnings() as caught:
-            assert report.get(MISSING, "DEFAULT") == "DEFAULT"
-
-        assert not [w for w in caught if issubclass(w.category, FutureWarning)], (
-            f".get() warned with strict={strict_mode}; it promises a default, "
-            f"so it stays quiet in both modes"
-        )
+    assert not [w for w in caught if issubclass(w.category, FutureWarning)]
 
 
 def _all_report_subclasses():
@@ -162,9 +127,8 @@ def _reaches_the_miss(method) -> bool:
 def test_every_getitem_override_announces_a_miss():
     """A report type that overrides __getitem__ must still announce a miss.
 
-    `CompanyReport.__getitem__` calls `report_lookup_miss` before returning
-    None, so `report[item]` on an absent item warns today and raises under
-    EDGARTOOLS_STRICT_ERRORS. That call is invisible at the override site, and
+    `CompanyReport.__getitem__` calls `report_lookup_miss`, so `report[item]` on
+    an absent item raises `SectionNotFoundError`. That call is invisible at the override site, and
     three subclasses reimplemented the miss path without it -- independently,
     which is what makes this worth guarding rather than remembering.
 
@@ -189,9 +153,8 @@ def test_every_getitem_override_announces_a_miss():
     assert not offenders, (
         f"Overrides __getitem__ without ever reaching report_lookup_miss: "
         f"{', '.join(offenders)}. A lookup for an absent item answers None in "
-        f"silence there -- no FutureWarning today, and no SectionNotFoundError "
-        f"under EDGARTOOLS_STRICT_ERRORS, so report[item] will not raise in 6.0 "
-        f"for that form. See edgartools-sx7y."
+        f"silence there instead of raising SectionNotFoundError. "
+        f"See edgartools-sx7y."
     )
 
 

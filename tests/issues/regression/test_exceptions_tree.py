@@ -73,8 +73,7 @@ def _instance(name):
     return getattr(ex, name)(*CONSTRUCTOR_ARGS[name])
 
 
-# `__all__` also exports the two helpers the dual-era call sites use
-# (strict_errors_enabled, http_status), which are functions rather than classes.
+# `__all__` also exports `http_status`, a function rather than a class.
 # Everything below is about the tree, so it enumerates the classes only.
 EXCEPTION_NAMES = sorted(
     name for name in ex.__all__

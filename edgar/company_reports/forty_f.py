@@ -781,7 +781,7 @@ class FortyF(CompanyReport):
                 Padding(" ", (1, 0, 0, 0)),
                 self.get_structure(),
                 Padding(" ", (1, 0, 0, 0)),
-                self.financials or Text("No financial data available", style="italic"),
+                self._financials_or_none() or Text("No financial data available", style="italic"),
             ),
             title=title,
             box=box.ROUNDED,
