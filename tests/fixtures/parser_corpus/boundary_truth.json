@@ -578,9 +578,8 @@
    "form": "10-Q",
    "items": {
     "part_i_item_1": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "pattern",
-     "why": "ends on the nav crumb 'Table of Contents' (pattern path)",
      "start": "ITEM 1. FINANCIAL STATEMENTS ──────────────────────────────── CONDENSED CONSOLID",
      "end": "nconventional assets in the United States, as well as other smaller divestments."
     },
@@ -3456,7 +3455,7 @@
      "verified": "eye",
      "method": "toc",
      "start": "INDEX TO FINANCIAL STATEMENTS Page SigmaTron International, Inc. and Subsidiarie",
-     "end": "act on its future consolidated financial position or results of operations. F-45"
+     "end": "e impact on its future consolidated financial position or results of operations."
     },
     "part_ii_item_9": {
      "verified": "eye",
@@ -5706,18 +5705,16 @@
      "end": "ts that would be material to the business or financial condition of the Company."
     },
     "part_i_item_4": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "pattern",
      "start": "Item 4. Submission of Matters to a Vote of Security Holders There were no matter",
-     "end": null,
-     "note": "held-out v1 label (lines 748-750 of the document text): end 'lders during the fourth quarter of the Company’s fiscal year ended May 25, 2008.'"
+     "end": "lders during the fourth quarter of the Company’s fiscal year ended May 25, 2008."
     },
     "part_ii_item_5": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "pattern",
      "start": "Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and I",
-     "end": null,
-     "note": "held-out v1 label (lines 756-788 of the document text): end ' no shares repurchased by the Company during the quarter ending on May 25, 2008.'"
+     "end": " no shares repurchased by the Company during the quarter ending on May 25, 2008."
     },
     "part_ii_item_6": {
      "verified": "eye",
@@ -5744,11 +5741,10 @@
      "end": "nancial Statements and Supplementary Data See Item 15 of Part IV of this report."
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "pattern",
      "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
-     "end": null,
-     "note": "held-out v1 label (lines 1393-1395 of the document text): end 'reements with Accountants on Accounting and Financial Disclosure Not applicable.'"
+     "end": "reements with Accountants on Accounting and Financial Disclosure Not applicable."
     },
     "part_ii_item_9a": {
      "verified": "eye",
@@ -5757,11 +5753,10 @@
      "end": " opinion thereon. /s/ ERNST & YOUNG LLP San Francisco, California August 7, 2008"
     },
     "part_ii_item_9b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "pattern",
-     "start": "Item 9B. Other Information None - 41 -",
-     "end": null,
-     "note": "held-out v1 label (lines 1441-1443 of the document text): end 'Item 9B. Other Information None'"
+     "start": "Item 9B. Other Information None",
+     "end": "Item 9B. Other Information None"
     },
     "part_iii_item_10": {
      "verified": "eye",
@@ -5788,18 +5783,16 @@
      "end": "fiscal year end covered by this Report) and is incorporated herein by reference."
     },
     "part_iii_item_14": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "pattern",
      "start": "Item 14. Principal Accountant Fees and Services This information required by thi",
-     "end": null,
-     "note": "held-out v1 label (lines 1465-1467 of the document text): end 'fiscal year end covered by this Report) and is incorporated herein by reference.'"
+     "end": "fiscal year end covered by this Report) and is incorporated herein by reference."
     },
     "part_iv_item_15": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "pattern",
      "start": "Item 15. Exhibits and Financial Statement Schedules (a) 1. Consolidated Financia",
-     "end": null,
-     "note": "held-out v1 label (lines 1473-3180 of the document text): end '2.2 CFO Certification pursuant to section 906 of the Sarbanes-Oxley Act of 2002.'"
+     "end": "2.2 CFO Certification pursuant to section 906 of the Sarbanes-Oxley Act of 2002."
     }
    }
   },
@@ -5989,11 +5982,10 @@
      "end": "es reconciling items not allocated to segments for financial reporting purposes."
     },
     "part_ii_item_7a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "start": null,
-     "end": " of January 2, 2013, all of the borrowings under our line of credit were repaid.",
-     "note": "held-out v1 label (lines 1849-1892 of the document text): start 'ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Interest Rat'"
+     "start": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Interest Rat",
+     "end": " of January 2, 2013, all of the borrowings under our line of credit were repaid."
     },
     "part_ii_item_8": {
      "verified": "eye",
@@ -6014,11 +6006,10 @@
      "end": "red public accounting firm, as stated in their report, which is included herein."
     },
     "part_ii_item_9b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "start": "ITEM 9B. OTHER INFORMATION None. PLUM CREEK 2012 FORM 10-K | 143 Table of Conten",
-     "end": null,
-     "note": "held-out v1 label (lines 5067-5069 of the document text): end 'ITEM 9B. OTHER INFORMATION None.'"
+     "start": "ITEM 9B. OTHER INFORMATION None.",
+     "end": "ITEM 9B. OTHER INFORMATION None."
     },
     "part_iii_item_10": {
      "verified": "eye",
@@ -6045,11 +6036,10 @@
      "end": "ard of Directors and Corporate Governance – Board Committees – Audit Committee”."
     },
     "part_iii_item_14": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
      "start": "ITEM 14. PRINCIPAL ACCOUNTING FEES AND SERVICES Information under the following ",
-     "end": null,
-     "note": "held-out v1 label (lines 5094-5096 of the document text): end 'ce: “Independent Auditors - Fees to the Independent Auditors for 2011 and 2012.”'"
+     "end": "ce: “Independent Auditors – Fees to the Independent Auditors for 2011 and 2012.”"
     },
     "part_iv_item_15": {
      "verified": "eye",
@@ -6064,11 +6054,10 @@
    "form": "10-K",
    "items": {
     "part_i_item_1": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "start": null,
-     "end": "ibute or represent are capable of meeting our demand for the foreseeable future.",
-     "note": "held-out v1 label (lines 104-442 of the document text): start 'ITEM 1 - BUSINESS Except for historical information contained in this report, th'"
+     "start": "ITEM 1 – BUSINESS Except for historical information contained in this report, th",
+     "end": "ibute or represent are capable of meeting our demand for the foreseeable future."
     },
     "part_i_item_1a": {
      "verified": "eye",
@@ -6394,7 +6383,7 @@
     "part_iv_item_15": {
      "verified": "wrong",
      "method": "toc",
-     "start": "Item 15. Exhibits, Financial Statement Schedules (a.) 1. Financial Statements CO",
+     "start": "Item 15. Exhibits, Financial Statement Schedules (a.) 1. Financial Statements Th",
      "end": null,
      "note": "held-out v1 label (lines 3335-3491 of the document text): end 't, except as shall be expressly set forth by specific reference in such filings.'"
     }
@@ -6405,11 +6394,10 @@
    "form": "10-K",
    "items": {
     "part_i_item_1": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "start": null,
-     "end": ", the SEC. These reports are also available at the SEC’s website at www.sec.gov.",
-     "note": "held-out v1 label (lines 126-279 of the document text): start 'Item 1. Business. Our Business We are a manufacturer of precision, large-scale f'"
+     "start": "Item 1. Business. Our Business We are a manufacturer of precision, large-scale f",
+     "end": ", the SEC. These reports are also available at the SEC’s website at www.sec.gov."
     },
     "part_i_item_1a": {
      "verified": "eye",
@@ -6448,11 +6436,10 @@
      "end": "Item 4. Mine Safety Disclosures Not applicable to the registrant."
     },
     "part_ii_item_5": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "start": null,
-     "end": "ompensation plans can be found under Item 12 of this Annual Report on Form 10-K.",
-     "note": "held-out v1 label (lines 575-585 of the document text): start 'Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and I'"
+     "start": "Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and I",
+     "end": "ompensation plans can be found under Item 12 of this Annual Report on Form 10-K."
     },
     "part_ii_item_6": {
      "verified": "eye",
@@ -6479,18 +6466,16 @@
      "end": "uating the impact of the Act will have on our consolidated financial statements."
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
      "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
-     "end": null,
-     "note": "held-out v1 label (lines 1745-1747 of the document text): end 'and Disagreements with Accountants on Accounting and Financial Disclosure. None.'"
+     "end": "and Disagreements with Accountants on Accounting and Financial Disclosure. None."
     },
     "part_ii_item_9a": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "start": null,
-     "end": " are reasonably likely to affect, our internal control over financial reporting.",
-     "note": "held-out v1 label (lines 1749-1820 of the document text): start 'Item 9A. Controls and Procedures. Disclosure controls and procedures (as defined'"
+     "start": "Item 9A. Controls and Procedures. Disclosure controls and procedures (as defined",
+     "end": " are reasonably likely to affect, our internal control over financial reporting."
     },
     "part_ii_item_9b": {
      "verified": "eye",
@@ -6505,11 +6490,10 @@
      "end": "closure Regarding Foreign Jurisdictions that Prevent Inspection. Not Applicable."
     },
     "part_iii_item_10": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "start": null,
-     "end": "an exhibit to this Annual Report on Form 10-K for the year ended March 31, 2025.",
-     "note": "held-out v1 label (lines 1833-1898 of the document text): start 'Item 10. Directors, Executive Officers and Corporate Governance a) Directors of '"
+     "start": "Item 10. Directors, Executive Officers and Corporate Governance a) Directors of ",
+     "end": "an exhibit to this Annual Report on Form 10-K for the year ended March 31, 2025."
     },
     "part_iii_item_11": {
      "verified": "eye",
@@ -6536,11 +6520,10 @@
      "end": "ng firm in fiscal 2025 and fiscal 2024 were pre-approved by the Audit Committee."
     },
     "part_iv_item_15": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "start": null,
-     "end": ")(6) of Regulation S-K and marked by means of brackets and asterisks (“[****]”).",
-     "note": "held-out v1 label (lines 2199-2345 of the document text): start 'Item 15. Exhibits and Financial Statement Schedules. The following documents are'"
+     "start": "Item 15. Exhibits and Financial Statement Schedules. The following documents are",
+     "end": ")(6) of Regulation S-K and marked by means of brackets and asterisks (“[****]”)."
     },
     "part_iv_item_16": {
      "verified": "eye",
@@ -6567,11 +6550,10 @@
      "end": "ilutive effect, which could lead to a decrease in the price of our common stock."
     },
     "part_i_item_1b": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
-     "start": "Item 1B. Unresolved Staff Comments. Not Applicable. Field: Sequence; Type: Arabi",
-     "end": null,
-     "note": "held-out v1 label (lines 1150-1152 of the document text): end 'Item 1B. Unresolved Staff Comments. Not Applicable.'"
+     "start": "Item 1B. Unresolved Staff Comments. Not Applicable.",
+     "end": "Item 1B. Unresolved Staff Comments. Not Applicable."
     },
     "part_i_item_2": {
      "verified": "eye",
@@ -6616,18 +6598,16 @@
      "end": " 7A. Quantitative and Qualitative Disclosures about Market Risk. Not Applicable."
     },
     "part_ii_item_8": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
      "start": "INDEX TO FINANCIAL STATEMENTS Report of Independent Registered Public Accounting",
-     "end": null,
-     "note": "held-out v1 label (lines 2116-2881 of the document text): end 'ention to acquire the remaining issued and outstanding common stock of Alterola.'"
+     "end": "ention to acquire the remaining issued and outstanding common stock of Alterola."
     },
     "part_ii_item_9": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
      "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
-     "end": null,
-     "note": "held-out v1 label (lines 1385-1387 of the document text): end 'eements with Accountants on Accounting and Financial Disclosure. Not Applicable.'"
+     "end": "eements with Accountants on Accounting and Financial Disclosure. Not Applicable."
     },
     "part_ii_item_9a": {
      "verified": "eye",
@@ -6654,11 +6634,10 @@
      "end": "rs of certain provisions of our Code of Conduct in a Current Report on Form 8-K."
     },
     "part_iii_item_11": {
-     "verified": "wrong",
+     "verified": "eye",
      "method": "toc",
      "start": "Item 11. Executive Compensation. The following is a discussion and analysis of c",
-     "end": null,
-     "note": "held-out v1 label (lines 1621-1878 of the document text): end 'd Related Transactions, and Director Independence - Indemnification Agreements.”'"
+     "end": "d Related Transactions, and Director Independence - Indemnification Agreements.”"
     },
     "part_iii_item_12": {
      "verified": "eye",

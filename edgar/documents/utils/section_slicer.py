@@ -192,13 +192,31 @@ def heading_block(anchor):
 
 
 def _text_before(block, anchor) -> str:
-    """Text of ``block``'s subtree that precedes ``anchor`` in document order."""
+    """Text of ``block``'s subtree that precedes ``anchor`` on the anchor's own line.
+
+    A block element that closes before the anchor is a line of its own, not
+    heading text the anchor trails: TechPrecision (2025) places each empty
+    item anchor in one ``<div>`` after the previous lines, "PART I" before
+    Item 1 and "Item 9. ... None." before Item 9A, and counting those lines
+    started Item 1 on its Part divider and Item 9A on Item 9's heading.
+    """
     parts = [block.text or '']
+    ancestors = list(anchor.iterancestors())
+    skip_until = None
     for el in block.iter():
         if el is block:
             continue
         if el is anchor:
             break
+        if skip_until is not None:
+            if any(a is skip_until for a in el.iterancestors()):
+                continue
+            skip_until = None
+        if (isinstance(el.tag, str) and el.tag not in _INLINE_TAGS and el.tag not in _TABLE_INTERNAL_TAGS
+                and el.tag != 'br' and not any(a is el for a in ancestors)):
+            skip_until = el  # a preceding block: drop its text, keep its tail
+            parts.append(el.tail or '')
+            continue
         if isinstance(el.tag, str):
             parts.append(el.text or '')
         parts.append(el.tail or '')

@@ -415,7 +415,9 @@ class SECSectionExtractor:
         r'(?:(?:financial\s+)?table\s+of\s+contents|index\s+to\s+(?:consolidated\s+)?financial\s+statements'
         r'|(?:back|return)\s+to\s+(?:top|index|contents|table\s+of\s+contents)|\d{1,4})', re.IGNORECASE)
     _CRUMB_LINE_RE = re.compile(r'^(?:' + _CRUMB_RE.pattern + r'[\s.|•·]*)+$', re.IGNORECASE)
-    _PAGE_NUM_RE = re.compile(r'^(?:page\s+)?(?:\d{1,4}|[ivxlc]{1,6}|[A-Z]{1,3}-\d{1,3}|[IVX]{1,4}-\d{1,3})$', re.IGNORECASE)
+    # Dashes around the number are a page number too: "- 22 -" (Landec, 2008).
+    _PAGE_NUM_RE = re.compile(r'^[-\u2013\u2014]?\s*(?:page\s+)?(?:\d{1,4}|[ivxlc]{1,6}|[A-Z]{1,3}-\d{1,3}|[IVX]{1,4}-\d{1,3})'
+                              r'\s*[-\u2013\u2014]?$', re.IGNORECASE)
     # A running header made of Part or item numbers alone: "Parts III and IV"
     # (JPMorgan), "PART II, III" over "Item 9B, 9C, 10, 11, 12, 13" (Microsoft).
     _PARTS_HEADER_RE = re.compile(r'^Parts?\s+[IVX]+(?:\s*(?:,|and|&)\s*[IVX]+)+$', re.IGNORECASE)
@@ -423,6 +425,13 @@ class SECSectionExtractor:
     # its signature page) is a running header even when it prints once.
     _FORM_NAME_LINE_RE = re.compile(r'^(?:Annual\s+Report\s+on\s+|Quarterly\s+Report\s+on\s+)?Form\s+10-[KQ](?:/A)?$', re.IGNORECASE)
     _ITEM_LIST_RE = re.compile(r'^Items?\s+\d{1,2}[A-C]?(?:\s*(?:,|and|&)\s*\d{1,2}[A-C]?)+$', re.IGNORECASE)
+    # A Part-and-item breadcrumb with no title, "PART II / ITEM 7A" (Plum Creek,
+    # in a running-header table on every page). A heading carries its title;
+    # this line repeats only as often as its item has pages, so a one-page item
+    # never reaches the repeat count and the start pass took it for content.
+    _PART_ITEM_CRUMB_RE = re.compile(
+        r'^Part\s+[IVX]{1,4}\s*[/|,:\u2013\u2014-]\s*Items?\s+\d{1,2}[A-C]?'
+        r'(?:\s*(?:,|and|&|-|\u2013)\s*\d{1,2}[A-C]?)*$', re.IGNORECASE)
     # The divider page of a 10-K's financial section (ExxonMobil prints it after
     # Item 16, ahead of the MD&A): like a Part divider, it opens what follows.
     _FINANCIAL_SECTION_RE = re.compile(r'^Financial\s+Section$', re.IGNORECASE)
@@ -496,7 +505,14 @@ class SECSectionExtractor:
             starts = find_anchor_targets(tree, boundary.anchor_id)
             if not starts:
                 continue
-            start_el = boundary.start_element if boundary.start_element is not None else starts[0]
+            # Walk from where the text slice starts (heading_block): Vasomedical
+            # links Item 1 to an anchor wrapped around its "PART I" divider, so
+            # the slice opens on that block and a walk from the anchor missed it.
+            start_el = boundary.start_element
+            if start_el is None:
+                start_el = heading_block(starts[0])
+                if start_el is None:
+                    start_el = starts[0]
             end_el = boundary.end_element
             end_id = boundary.end_element_id
             seen: List[Tuple[object, str]] = []   # (block, 'furniture' | 'heading')
@@ -601,6 +617,8 @@ class SECSectionExtractor:
                 return True
             if self._PARTS_HEADER_RE.match(text) or self._ITEM_LIST_RE.match(text):
                 return True
+            if self._PART_ITEM_CRUMB_RE.match(text):
+                return True
             if self._FORM_NAME_LINE_RE.match(text) or self._FINANCIAL_SECTION_RE.match(text):
                 return True
             pm = divider_re.match(text)
@@ -637,7 +655,9 @@ class SECSectionExtractor:
         furniture budget, when it is the whole section, or when its first
         block sits inside a table that also holds content, since a slice
         must not cut a table in two. A section with no known end (the last
-        item of a 10-K) is not touched.
+        item, or Item 8 as the statements at the back) is walked to the end of
+        the document: the filing's last page number is furniture too (Bright
+        Green's "F-24").
         """
         schema = self.toc_analyzer.schema
         if schema.title_based or not self.section_boundaries:
@@ -657,9 +677,7 @@ class SECSectionExtractor:
                 continue
             end_el = boundary.end_element
             end_id = boundary.end_element_id
-            if end_el is None and not end_id:
-                continue
-            if end_el is None:
+            if end_el is None and end_id:
                 # The text walk ends at the heading block when the end anchor
                 # sits inside the next heading; stop where it stops.
                 end_targets = find_anchor_targets(tree, end_id)
@@ -1908,8 +1926,12 @@ class SECSectionExtractor:
                     in_range = False
                     break
 
-                # Collect text content from element's direct text
-                if in_range and el.text:
+                # Collect text content from element's direct text. A comment's
+                # .text is the comment itself: Word-converted filings wrap every
+                # page number in "<!-- Field: Sequence; ... PageNo -->"
+                # (Bright Green, 92 of them), and it printed in section text.
+                # Its tail is real text and is still collected.
+                if in_range and el.text and isinstance(el.tag, str):
                     all_text.append(el.text)
 
             elif event == 'end':
