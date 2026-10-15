@@ -299,8 +299,17 @@ class TableProcessor:
                         row_text = ' '.join(cell.text().strip() for cell in cells).strip()
                         row_text_lower = row_text.lower()
 
+                        # A lone cell spanning several columns is a title or group
+                        # row that labels the header rows below it, so it must not
+                        # end header detection. (#1485)
+                        non_empty = [c for c in cells if c.text().strip()]
+                        is_title_or_group_row = (
+                            len(non_empty) == 1 and non_empty[0].colspan > 1
+                        )
+
                         # Don't consider this as "data started" if it's likely a header-related row
                         is_header_related = (
+                            is_title_or_group_row or
                             # Unit descriptions
                             '(in millions)' in row_text_lower or
                             '(in thousands)' in row_text_lower or
