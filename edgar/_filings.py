@@ -2708,14 +2708,25 @@ def _filing_from_efts(accession_number: str):
     41 MB to parse (bead edgartools-vx29).
 
     None means "ask the quarterly index" — EFTS indexes 2001 onward, so older
-    filings legitimately miss here. An outage is not a miss: ``resolve_accession``
-    raises ``TransportError`` (edgartools-07lk.10), so the caller sees it rather
-    than scanning the index for a filing that was there all along. The index
-    route stays correct for everything; this only makes the common case cheap.
+    filings legitimately miss here. The index route stays correct for
+    everything; this only makes the common case cheap.
+
+    An EFTS outage is also None here, with a warning. ``resolve_accession``
+    raises it (edgartools-07lk.10), but for this caller EFTS is a shortcut with
+    a correct fallback, and SEC's search backend fails on its own (an HTTP 200
+    error body) while the archive answers. Raising made ``find(accession)`` fail
+    for a filing the index would have found. If SEC itself is unreachable, the
+    index fetch raises the same transport error.
     """
+    from edgar.httprequests import TRANSPORT_ERRORS
     from edgar.search.efts import resolve_accession
 
-    fields = resolve_accession(accession_number)
+    try:
+        fields = resolve_accession(accession_number)
+    except TRANSPORT_ERRORS as exc:
+        log.warning("EDGAR full-text search could not resolve %s (%s); "
+                    "looking it up in the quarterly filing index instead", accession_number, exc)
+        return None
     if not fields:
         return None
     return Filing(
