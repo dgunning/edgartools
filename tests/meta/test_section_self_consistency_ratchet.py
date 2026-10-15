@@ -105,6 +105,9 @@ EMBED_BASELINE = {
     ("0001193125-10-073212", "10-K"): {"7"},
     ("0001193125-21-082408", "10-Q"): {"1"},
     ("0001193125-21-101193", "10-K"): {"10"},
+    # Retired from the held-out set with its labels (llmp.12.1): TechPrecision's
+    # Item 9 runs into Item 9A, a miss the held-out report already recorded.
+    ("0001410578-25-001537", "10-K"): {"9"},
     ("ge-10-k-2026-01-29", "10-K"): {"15"},
     ("msft-10-q-2025-04-30", "10-Q"): {"6"},
     ("so-10-k-2026-02-19", "10-K"): {"7", "11", "12", "13"},

@@ -20,9 +20,9 @@ pins the rates as a ratchet: a detector change that moves a boundary that was
 right fails here, and one that fixes a "wrong" item must flip it to "eye" in
 the same commit (``test_fixed_items_are_relabelled``).
 
-Fixtures are the tracked ``html/`` and ``parity_gate/`` trees only, so every
-item here is measured on CI; the gitignored era corpus is deliberately
-absent.
+Fixtures are the tracked ``html/``, ``parity_gate/`` and ``heldout_retired/``
+trees only, so every item here is measured on CI; the gitignored era corpus
+is deliberately absent.
 """
 import sys
 
@@ -93,7 +93,9 @@ PINNED = {
     # anchors on an inline-XBRL fact id in Item 15 (Items 15, 16 wrong -> eye);
     # ExxonMobil's "FINANCIAL SECTION" divider is trailing furniture and cvx's
     # index is split off (Item 16 wrong -> eye on both).
-    "10-K": (777, 753, 728, 723),   # 96.9% / 93.7% / 93.1%
+    # 2026-10-14 (llmp.12.1): eight held-out 10-Ks retired to heldout_retired with
+    # their blind labels (+157 items: 131 eye, 26 wrong; heldout/README.md v2).
+    "10-K": (934, 901, 867, 854),   # 96.5% / 92.8% / 91.4%
     "10-Q": (111, 110, 107, 106),   # 99.1% / 96.4% / 95.5%
 }
 
