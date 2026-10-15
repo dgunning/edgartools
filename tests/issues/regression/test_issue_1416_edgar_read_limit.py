@@ -128,6 +128,19 @@ class TestHoldingsLimit:
         short = FakeThirteenF(_holdings_frame(3))
         assert (await _holdings(0, typed_obj=short)).splitlines()[0] == "Top holdings (3 of 3):"
 
+    async def test_header_counts_the_rows_actually_listed(self):
+        # A row with no usable cell is skipped, so it must not be counted as shown.
+        frame = _holdings_frame(3)
+        frame.loc[1] = {"Issuer": None, "SharesPrnAmount": None, "Value": None}
+
+        text = await _holdings(0, typed_obj=FakeThirteenF(frame))
+
+        assert text.splitlines() == [
+            "Top holdings (2 of 3):",
+            "  ISSUER 000 | 1,000 shares | $1,000,000",
+            "  ISSUER 002 | 1,002 shares | $998,000",
+        ]
+
     async def test_amended_13f_honours_limit(self):
         assert (await _holdings(0, form="13F-HR/A")).splitlines()[0] == "Top holdings (211 of 211):"
 

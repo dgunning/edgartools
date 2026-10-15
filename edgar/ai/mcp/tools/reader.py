@@ -113,7 +113,8 @@ Examples:
         },
         "limit": {
             "type": "integer",
-            "description": "Max rows in the 13F-HR 'holdings' section (default 30; 0 returns every row). "
+            "description": "Max rows in the 13F-HR 'holdings' section (default 30). 0 returns every row, "
+                           "which for large managers can be thousands of rows and a large payload. "
                            "Validated for all forms, applied only to 13F holdings.",
             "default": DEFAULT_HOLDINGS_LIMIT,
             "minimum": 0
@@ -532,17 +533,20 @@ def _extract_13f_section(obj, section: str, limit: int = DEFAULT_HOLDINGS_LIMIT)
             holdings = getattr(obj, 'holdings', None)
             if holdings is not None and not holdings.empty:
                 total = len(holdings)
-                # DataFrame.head(0) is empty, so 0 ("all") must become the row count.
-                shown = total if limit == 0 else min(limit, total)
+                # ``ThirteenF.holdings`` is sorted by Value descending, so the
+                # first rows are the top holdings. DataFrame.head(0) is empty,
+                # so 0 ("all") must become the row count.
+                wanted = total if limit == 0 else min(limit, total)
                 parts = []
-                for h in _holding_rows(holdings, shown):
+                for h in _holding_rows(holdings, wanted):
                     line = f"  {h.get('company', 'Unknown')}"
                     if "shares" in h:
                         line += f" | {h['shares']:,} shares"
                     if "value" in h:
                         line += f" | ${h['value']:,}"
                     parts.append(line)
-                header = f"Top holdings ({shown} of {total}):"
+                # ``_holding_rows`` skips rows with no usable cell, so count what was listed.
+                header = f"Top holdings ({len(parts)} of {total}):"
                 return header + "\n" + "\n".join(parts)
         except Exception as e:
             logger.warning(f"Could not extract 13F holdings: {e}")
