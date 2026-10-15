@@ -257,6 +257,7 @@ class SECSectionExtractor:
         self._advance_starts_past_page_furniture(tree)
         self._bound_item_4_at_executive_officers(tree)
         self._split_exhibit_index_from_item_16(tree)
+        self._split_exhibit_index_from_signatures(tree)
         self._retreat_ends_before_page_furniture(tree)
 
     # A block that is an item heading: "Item 16.", "ITEM 7A -", "Items 1 and 2."
@@ -670,8 +671,10 @@ class SECSectionExtractor:
             if m:
                 own_rank = self._PART_RANK.get(m.group(1).upper(), 0)
                 own_item = m.group(2).upper()
-            elif name == 'exhibit_index':
-                # Split from Item 16, it ends where Item 16 used to (Mastercard's footer).
+            elif name == 'exhibit_index' or name == 'signatures' or name.endswith('_signatures'):
+                # Split from Item 16, the index ends where Item 16 used to
+                # (Mastercard's footer); a Signatures section ended at an index
+                # split from it keeps the page furniture above it (Intuit).
                 own_rank, own_item = self._PART_RANK['IV'], ''
             else:
                 continue
@@ -908,6 +911,84 @@ class SECSectionExtractor:
             boundary.end_element_id = None
             logger.info("Item 16 ends at the exhibit index printed after it")
             return
+
+    def _split_exhibit_index_from_signatures(self, tree) -> None:
+        """End a TOC-listed Signatures section at an exhibit index or schedule printed after it.
+
+        When the TOC lists SIGNATURES, the signature block is its own section,
+        and whatever the filer prints after it ran on inside it: Intuit's
+        (2007) and Tetra Tech's (2015) exhibit indexes, Sanmina's (2017)
+        Schedule II. The policy decided on 2026-10-14 matches the one for an
+        index after Item 16 (``_split_exhibit_index_from_item_16``): the last
+        item ends where the Signatures section starts, the Signatures section
+        holds the signature block, and the index or schedule after it becomes
+        the non-item ``exhibit_index`` section, so it is in a section and
+        under a name that says what it is.
+        """
+        from edgar.documents.extractors.pattern_section_extractor import _SIGNATURES_HEADER
+
+        schema = self.toc_analyzer.schema
+        if schema.title_based or schema.repeating_parts or 'exhibit_index' in self.section_boundaries:
+            return
+        names = [n for n in self.section_boundaries if n == 'signatures' or n.endswith('_signatures')]
+        for name in names:
+            boundary = self.section_boundaries[name]
+            starts = find_anchor_targets(tree, boundary.anchor_id)
+            if not starts:
+                continue
+            start_el = boundary.start_element
+            if start_el is None:
+                start_el = heading_block(starts[0])
+                if start_el is None:
+                    start_el = starts[0]
+            end_el = boundary.end_element
+            end_id = boundary.end_element_id
+            has_content = False
+            previous = None
+            for event, el in iterwalk_from(start_el):
+                if event != 'start' or not isinstance(el.tag, str):
+                    continue
+                if el is not start_el:
+                    if end_el is not None and el is end_el:
+                        break
+                    if end_id and is_anchor_match(el, end_id):
+                        break
+                if el.tag in _INLINE_TAGS:
+                    continue
+                text = ' '.join(el.text_content().split())
+                if not text or len(text) > self._FURNITURE_MAX_CHARS:
+                    continue
+                if any(a.tag == 'table' for a in el.iterancestors()):
+                    continue
+                if not self._BACK_MATTER_RE.match(text):
+                    # The signature block itself. Tetra Tech's TOC anchor sits
+                    # after the SIGNATURES heading, so the heading need not be
+                    # seen; the section only has to keep something.
+                    if not _SIGNATURES_HEADER.match(text):
+                        has_content = True
+                    if not any(c is el for c in (previous.iterdescendants() if previous is not None else ())):
+                        previous = el
+                    continue
+                if not has_content:
+                    break  # the index would leave the Signatures section empty
+                while el.getparent() is not None and ' '.join(el.getparent().text_content().split()) == text:
+                    el = el.getparent()
+                start = el
+                if previous is not None:
+                    above = ' '.join(previous.text_content().split())
+                    letters = [c for c in above if c.isalpha()]
+                    if (letters and all(c.isupper() for c in letters) and len(above) <= 80
+                            and not any(c.isdigit() for c in above)
+                            and not self._ITEM_HEADING_RE.match(above)):
+                        start = previous
+                self.section_boundaries['exhibit_index'] = dataclasses.replace(
+                    boundary, name='exhibit_index', anchor_id=boundary.anchor_id, start_element=start,
+                    confidence=min(boundary.confidence, 0.9))
+                self._pinned_starts.add('exhibit_index')
+                boundary.end_element = start
+                boundary.end_element_id = None
+                logger.info("%s ends at the exhibit index printed after it", name)
+                return
 
     _PART_RANK = {'I': 1, 'II': 2, 'III': 3, 'IV': 4, 'V': 5}
 

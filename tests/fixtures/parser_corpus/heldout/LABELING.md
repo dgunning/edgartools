@@ -60,6 +60,11 @@ On the last line of its own content, which is the line before the first of these
   is that item's own content and the rule above stands. Mark an exhibit
   index printed after the last item `note: "policy-open: exhibit index after
   last item"` only in that Item 15/14 case.
+  Exception, decided 2026-10-14: when the **table of contents lists
+  SIGNATURES**, the signature block is a section of its own, so the last
+  item ends before the SIGNATURES heading whatever follows, and an exhibit
+  index or financial statement schedule printed after the signature block
+  is the non-item `exhibit_index` section.
 
 ## Item 8 that only points elsewhere
 

@@ -169,8 +169,13 @@ def test_allstate_2026_10k_item_1_present():
     signatures = secs.get("part_iv_signatures")
     assert signatures is not None
     sig_text = signatures.text()
-    assert len(sig_text) > 10_000
     assert "Pursuant to the requirements" in sig_text
+    # It held Schedules I-IV, printed after the signature block, until they
+    # became the exhibit_index section (policy 2026-10-14, edgartools-llmp.12):
+    # the signature block is all it holds now.
+    assert 1_000 < len(sig_text) < 3_000
+    assert "Schedule I" not in sig_text
+    assert secs["exhibit_index"].text().lstrip().startswith("Schedule I")
 
     # edgartools-nqzc Layer 1/2: the named-section API surface.
     assert signatures.kind == "named"

@@ -104,7 +104,11 @@ PINNED = {
     # 915358 Item 8 relabelled without "F-45"); pattern sections drop trailing
     # page numbers ("- 22 -", Landec) and backlinks (xom 10-Q Item 1 wrong ->
     # eye). Retired items: 26 wrong -> 6.
-    "10-K": (934, 908, 880, 874),   # 97.2% / 94.2% / 93.6%
+    # 2026-10-14 (llmp.12): policy, when the TOC lists SIGNATURES the last
+    # item ends before them and an index or schedule after the signature
+    # block is the exhibit_index section; Intuit, Sanmina and Tetra Tech
+    # Item 15 relabelled wrong -> eye (their ends did not move).
+    "10-K": (934, 908, 883, 877),   # 97.2% / 94.5% / 93.9%
     "10-Q": (111, 110, 108, 107),   # 99.1% / 97.3% / 96.4%
 }
 
