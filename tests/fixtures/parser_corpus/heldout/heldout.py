@@ -17,6 +17,8 @@ drives a fix.
     python tests/fixtures/parser_corpus/heldout/heldout.py compare OUT.json  # disagreements, A/B blind
     python tests/fixtures/parser_corpus/heldout/heldout.py resolve VERDICTS.json OUT.key.json
     python tests/fixtures/parser_corpus/heldout/heldout.py report   # recall, precision, exactness
+    python tests/fixtures/parser_corpus/heldout/heldout.py retire "WHY" ACC...  # to the dev corpus
+    python tests/fixtures/parser_corpus/heldout/heldout.py replace  # successors, same era and stratum
 
 Filings are fetched with ``Filing.html()`` and parsed exactly as
 ``TenK.document`` parses them, so plain-text filings go through the same
@@ -76,7 +78,8 @@ def _dev_corpus_exclusions():
         stem = Path(e["path"]).stem
         if _ACCESSION_RE.match(stem):
             accessions.add(stem)
-    for root in (_HERE.parents[1] / "parity_gate", _HERE.parents[1] / "text_boundary_corpus"):
+    for root in (_HERE.parents[1] / "parity_gate", _HERE.parents[1] / "heldout_retired",
+                 _HERE.parents[1] / "text_boundary_corpus"):
         for p in root.rglob("*.html"):
             if _ACCESSION_RE.match(p.stem):
                 accessions.add(p.stem)
@@ -112,19 +115,14 @@ def public_float(html):
     return int(max(amounts))
 
 
-def cmd_sample():
-    from edgar import Company, get_by_accession_number_enriched, get_filings
+def _draw(rng, quotas, ciks, accessions, seen_ciks, rejected):
+    """Draw filings until every {era: {stratum: n}} quota is met; the sample's rules."""
+    from edgar import Company, Filing, get_filings
 
-    if TRUTH_PATH.exists():
-        sys.exit(f"{TRUTH_PATH.name} exists; the draw is made once. Delete it to redraw.")
-    ciks, accessions = _dev_corpus_exclusions()
-    print(f"excluding {len(ciks)} dev-corpus CIKs, {len(accessions)} accessions")  # noqa: T201
     CACHE.mkdir(parents=True, exist_ok=True)
-    rng = random.Random(SEED)  # noqa: S311 - a reproducible draw, not security
-    picked, seen_ciks, indexes = [], set(), {}
-    rejected = {"dev_corpus": 0, "abs": 0, "no_html": 0, "float_unstated": 0, "stratum_full": 0}
+    picked, indexes = [], {}
     for era, (y0, y1) in ERAS.items():
-        quota = {"large": PER_ERA // 2, "small": PER_ERA - PER_ERA // 2}
+        quota = dict(quotas.get(era, {}))
         while any(quota.values()):
             year, quarter = rng.randint(y0, y1), rng.randint(1, 4)
             if (year, quarter) not in indexes:
@@ -147,8 +145,11 @@ def cmd_sample():
             if sic == ABS_SIC:
                 rejected["abs"] += 1
                 continue
-            filing = get_by_accession_number_enriched(acc)
-            html = filing.html() if filing is not None else None
+            # Built from the index row: an accession lookup goes through EFTS,
+            # which fails transiently and would make the draw unrepeatable.
+            filing = Filing(cik=cik, company=row["company"], form=row["form"],
+                            filing_date=str(row["filing_date"]), accession_no=acc)
+            html = filing.html()
             if not html:
                 rejected["no_html"] += 1
                 continue
@@ -157,7 +158,7 @@ def cmd_sample():
                 rejected["float_unstated"] += 1
                 continue
             stratum = "large" if flt >= LARGE_FLOAT else "small"
-            if not quota[stratum]:
+            if not quota.get(stratum):
                 rejected["stratum_full"] += 1
                 continue
             quota[stratum] -= 1
@@ -166,12 +167,85 @@ def cmd_sample():
                            "filing_date": str(row["filing_date"]), "era": era, "size": stratum,
                            "public_float": flt, "sic": sic, "items": {}})
             print(f"  {era} {stratum:5s} {acc} {row['company']} (float {flt:,})")  # noqa: T201
+    return picked
+
+
+def cmd_sample():
+    if TRUTH_PATH.exists():
+        sys.exit(f"{TRUTH_PATH.name} exists; the draw is made once. Delete it to redraw.")
+    ciks, accessions = _dev_corpus_exclusions()
+    print(f"excluding {len(ciks)} dev-corpus CIKs, {len(accessions)} accessions")  # noqa: T201
+    rng = random.Random(SEED)  # noqa: S311 - a reproducible draw, not security
+    rejected = {"dev_corpus": 0, "abs": 0, "no_html": 0, "float_unstated": 0, "stratum_full": 0}
+    quotas = {era: {"large": PER_ERA // 2, "small": PER_ERA - PER_ERA // 2} for era in ERAS}
+    picked = _draw(rng, quotas, ciks, accessions, set(), rejected)
     print(f"rejected: {rejected}")  # noqa: T201
     TRUTH_PATH.write_text(json.dumps({
         "seed": SEED, "per_era": PER_ERA, "eras": ERAS, "large_float": LARGE_FLOAT,
         "chars": scoring.TRUTH_CHARS, "rejected": rejected,
         "excluded_ciks": sorted(ciks), "retired": [], "filings": picked,
     }, indent=1, ensure_ascii=False) + "\n")
+
+
+def cmd_retire(reason, accessions):
+    """Move held-out filings to the development corpus (README rule 3).
+
+    Each filing is copied to ``heldout_retired/10-K/<accession>.html`` as a
+    tracked fixture (not ``parity_gate``, whose ratchets need a frozen legacy
+    record no filing can get now), and its entry, labels included, moves from ``filings`` to
+    ``retired`` so its labels can seed ``boundary_truth.json``. ``replace``
+    then draws its successor.
+    """
+    truth = load()
+    gate = _HERE.parents[1] / "heldout_retired" / "10-K"
+    gate.mkdir(parents=True, exist_ok=True)
+    keep = []
+    for f in truth["filings"]:
+        if f["accession"] not in accessions:
+            keep.append(f)
+            continue
+        src = cached_html(f["accession"])
+        if src is None:
+            sys.exit(f"{f['accession']} is not in the cache; run fetch first")
+        (gate / f"{f['accession']}.html").write_text(src.read_text(errors="ignore"))
+        truth["retired"].append({**f, "retired_in": truth.get("version", 1) + 1, "reason": reason})
+        print(f"  retired {f['accession']} {f['company']} -> heldout_retired/10-K")  # noqa: T201
+    missing = set(accessions) - {r["accession"] for r in truth["retired"]}
+    if missing:
+        sys.exit(f"not in the held-out set: {sorted(missing)}")
+    truth["filings"] = keep
+    save(truth)
+
+
+def cmd_replace():
+    """Draw a successor for every retired filing, from its era and size stratum.
+
+    A new version of the set: its own seed (``SEED:v<version>``), the same
+    exclusions as the first draw (the development corpus now holds the retired
+    filings), and no filer already in the set or retired from it.
+    """
+    truth = load()
+    version = truth.get("version", 1) + 1
+    quotas = {}
+    for era in ERAS:
+        for stratum, n in (("large", PER_ERA // 2), ("small", PER_ERA - PER_ERA // 2)):
+            have = sum(1 for f in truth["filings"] if f["era"] == era and f["size"] == stratum)
+            if n > have:
+                quotas.setdefault(era, {})[stratum] = n - have
+    if not quotas:
+        sys.exit("every era and stratum is full; nothing to replace")
+    ciks, accessions = _dev_corpus_exclusions()
+    used = {int(f["cik"]) for f in truth["filings"] + truth["retired"]}
+    rng = random.Random(f"{SEED}:v{version}")  # noqa: S311 - a reproducible draw, not security
+    rejected = {"dev_corpus": 0, "abs": 0, "no_html": 0, "float_unstated": 0, "stratum_full": 0}
+    picked = _draw(rng, quotas, ciks, accessions, set(used), rejected)
+    for f in picked:
+        f["added_in"] = version
+    truth["filings"].extend(picked)
+    truth["version"] = version
+    truth.setdefault("replacement_rejected", {})[str(version)] = rejected
+    save(truth)
+    print(f"v{version}: {len(picked)} replacements, rejected {rejected}")  # noqa: T201
 
 
 # ---------------------------------------------------------------------------
@@ -242,6 +316,8 @@ def cmd_dump(out_dir):
     out = Path(out_dir)
     out.mkdir(parents=True, exist_ok=True)
     for f in load()["filings"]:
+        if f["items"]:
+            continue  # labelled already; a replacement round dumps only its new filings
         doc = parse(f["accession"])
         if doc is None:
             continue
@@ -371,8 +447,8 @@ def cmd_compare(out_path):
     rng = random.Random(7)  # noqa: S311
     cases, key = [], {}
     for f in load()["filings"]:
-        if not f["items"]:
-            continue
+        if not any(it["verified"] == "blind" for it in f["items"].values()):
+            continue  # unlabelled, or settled in an earlier round
         lines = document_lines(parse(f["accession"]))
         full, owner = _line_index(lines)
         live = live_items(f["accession"])
@@ -558,7 +634,7 @@ def cmd_report():
         for r in rows:
             r["both"] = r["start"] and r["end"]
         scored.append((f, rows, spurious))
-    print(f"held-out 10-K: {len(scored)} labelled filings, "  # noqa: T201
+    print(f"held-out 10-K v{truth.get('version', 1)}: {len(scored)} labelled filings, "  # noqa: T201
           f"{sum(len(r) for _, r, _ in scored)} items\n")
 
     def block(title, group):
@@ -606,4 +682,5 @@ if __name__ == "__main__":
     {"sample": cmd_sample, "fetch": cmd_fetch, "report": cmd_report,
      "dump": lambda: cmd_dump(sys.argv[2]), "cut": lambda: cmd_cut(sys.argv[2]),
      "compare": lambda: cmd_compare(sys.argv[2]), "finalize": cmd_finalize,
-     "resolve": lambda: cmd_resolve(sys.argv[2], sys.argv[3])}[cmd]()
+     "resolve": lambda: cmd_resolve(sys.argv[2], sys.argv[3]),
+     "retire": lambda: cmd_retire(sys.argv[2], sys.argv[3:]), "replace": cmd_replace}[cmd]()

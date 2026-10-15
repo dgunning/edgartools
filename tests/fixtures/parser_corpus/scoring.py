@@ -319,16 +319,20 @@ def embed_set(measured: Dict[str, dict]) -> frozenset:
 
 _GATE_ROOT = _CORPUS_DIR.parent / "parity_gate"
 _ERA_ROOT = _CORPUS_DIR.parent / "text_boundary_corpus"
+# Held-out filings retired to development (heldout/README.md rule 3). Tracked,
+# but kept out of parity_gate: the parity ratchets compare against frozen
+# legacy-parser output, and these filings joined after that parser was deleted.
+_RETIRED_ROOT = _CORPUS_DIR.parent / "heldout_retired"
 _FORM_DIR = {"10-K": "10k", "10-Q": "10q"}
 
 
 def consistency_corpus() -> List[dict]:
     """Every 10-K / 10-Q fixture available for the self-consistency ratchet.
 
-    Three sources, in the order the parity benchmark uses them: every filing
-    under the tracked ``html/<ticker>/{10k,10q}/`` tree (not just the manifest,
-    which is a stale snapshot), the tracked ``parity_gate`` slice, and the
-    gitignored era corpus, which exists on developer machines only. The label
+    Four sources: every filing under the tracked ``html/<ticker>/{10k,10q}/``
+    tree (not just the manifest, which is a stale snapshot), the tracked
+    ``parity_gate`` slice, the tracked held-out filings retired to development
+    (``heldout_retired``), and the gitignored era corpus, which exists on developer machines only. The label
     is the file stem, so a ticker directory holding two fixtures (Citi's two
     10-Ks) measures both rather than silently one. Each entry is
     ``{label, form, path, tracked}``; a caller must treat a baseline entry whose
@@ -347,6 +351,8 @@ def consistency_corpus() -> List[dict]:
         for path in sorted(_HTML_ROOT.glob(f"*/{subdir}/*.html")):
             add(path.stem, form, path, True)
         for path in sorted(_GATE_ROOT.glob(f"{form}/*.html")):
+            add(path.stem, form, path, True)
+        for path in sorted(_RETIRED_ROOT.glob(f"{form}/*.html")):
             add(path.stem, form, path, True)
         for path in sorted(_ERA_ROOT.glob(f"*/{form}/*.html")):
             add(path.stem, form, path, False)

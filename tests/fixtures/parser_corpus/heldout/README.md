@@ -57,6 +57,14 @@ python tests/fixtures/parser_corpus/heldout/heldout.py fetch
 python tests/fixtures/parser_corpus/heldout/heldout.py report      # -v lists misses
 ```
 
+Retiring filings (rule 3 below): `retire "WHY" ACC...` copies each filing to
+`heldout_retired/10-K/` and moves its entry, labels included, to `retired`;
+`replace` draws successors from the same era and size stratum with the seed
+`20261012:v<version>`, excluding every filer already in or retired from the
+set. The new filings then go through the same `dump`, blind labelling, `cut`,
+`compare`, adjudication, `resolve` and `finalize` steps; `dump` and `compare`
+touch only filings that are unlabelled or still blind.
+
 The report gives item recall (labelled items the pipeline emits), precision
 (emitted items the filing has), and start-, end- and both-exact rates, with
 95% intervals from resampling filings (items in one filing fail together, so
@@ -96,3 +104,34 @@ and exhibit index printed after Item 16 were cut back to Item 16's own text
 from the recorded lines (Calavo 0001558370-17-009444, Madison Square Garden
 Sports 0001636519-24-000015; `verified: "relabelled"`). This applies a policy;
 it is not a fix built from those filings, so neither is retired.
+
+**v2, 2026-10-14** (main at bdcdb7d5): 40 filings, 776 items. Eight v1
+filings were retired to the development corpus for edgartools-llmp.12.1:
+the six its findings name (Landec 0001144204-08-044977, Plum Creek
+0000849213-13-000007, Vasomedical 0001201800-13-000006, Tetra Tech
+0001047469-15-008864, Bright Green 0001493152-23-012561, TechPrecision
+0001410578-25-001537) and two last-item Item 15 end misses (Intuit
+0000950134-07-020001, Sanmina 0000897723-17-000029). They are tracked under
+`heldout_retired/10-K/`, and their labels seeded 157 `boundary_truth.json` items
+(131 eye, 26 wrong, the same misses this set recorded). Their successors were
+drawn by `replace` (2 in 2007-12, 4 in 2013-18, 2 in 2019-25; strata kept),
+labelled blind by four Sonnet labellers, and 24 disagreeing sides were
+adjudicated blind by an Opus reader (22 for the labeller, 2 for the pipeline;
+143 items agreed).
+
+| | all | 2001-06 | 2007-12 | 2013-18 | 2019-25 |
+|---|---|---|---|---|---|
+| recall | 98.1% [96.5, 99.4] | 93.3% | 99.0% | 99.0% | 100% |
+| start-exact | 94.8% | 90.9% | 96.0% | 95.0% | 96.7% |
+| end-exact | 89.7% | 73.3% | 93.9% | 91.5% | 96.7% |
+| both-exact | 87.9% [83.9, 91.3] | 72.1% | 92.4% | 90.0% | 93.9% |
+| precision | 100% | | | | |
+
+v1 on the same code measured 86.8% both-exact. The eight new filings score
+87.3% (145 of 166 items), against 83.4% for the eight they replace, so the
+rise is the draw, not a fix. Their misses repeat the two shapes the retired
+filings carry: a Part divider kept at an item's start (Dorian LPG, National
+Security Group, South State) and a last Item 15 that stops short of the
+schedule or exhibit index after its signatures (Interstate Power & Light,
+Hormel, South State, Woodward). Global Cornerstone prints its Unresolved
+Staff Comments heading as a second "Item 1A"; it is labelled 1B.

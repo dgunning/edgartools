@@ -220,7 +220,1740 @@
   2026514,
   2074176
  ],
- "retired": [],
+ "retired": [
+  {
+   "accession": "0001144204-08-044977",
+   "cik": 1005286,
+   "company": "LANDEC CORP \\CA\\",
+   "filing_date": "2008-08-08",
+   "era": "2007-2012",
+   "size": "small",
+   "public_float": 291230000,
+   "sic": 2834,
+   "items": {
+    "1": {
+     "start": "Item 1. Business This report contains forward-looking statements within the mean",
+     "end": "s with the SEC. Information contained on our website is not part of this Report.",
+     "lines": [
+      162,
+      467
+     ],
+     "verified": "agreed"
+    },
+    "1A": {
+     "start": "Item 1A. Risk Factors Landec desires to take advantage of the “Safe Harbor” prov",
+     "end": "t be written-off, which could materially and adversely affect our profitability.",
+     "lines": [
+      469,
+      707
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "neither: Both candidates run 1A through the separate '1B. Unresolved Staff Comments' heading at line 709 (an item heading even though it has no 'Item' word), so 1A ends on the goodwill risk factor paragraph at line 707."
+     }
+    },
+    "2": {
+     "start": "Item 2. Properties As of May 25, 2008, the Company owned or leased properties in",
+     "end": "ere are no bank liens encumbering any of the Company’s owned land and buildings.",
+     "lines": [
+      715,
+      742
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "Item 3. Legal Proceedings The Company is involved in litigation arising in the n",
+     "end": "ts that would be material to the business or financial condition of the Company.",
+     "lines": [
+      744,
+      746
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "Item 4. Submission of Matters to a Vote of Security Holders There were no matter",
+     "end": "lders during the fourth quarter of the Company’s fiscal year ended May 25, 2008.",
+     "lines": [
+      748,
+      750
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "labeller: Line 750 is the last sentence of Item 4; line 752 '- 22 -' is a page number, which is trailing furniture."
+     }
+    },
+    "5": {
+     "start": "Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and I",
+     "end": " no shares repurchased by the Company during the quarter ending on May 25, 2008.",
+     "lines": [
+      756,
+      788
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "labeller: Line 788 is the last content of Item 5; line 790 '- 23 -' is a page number."
+     }
+    },
+    "6": {
+     "start": "Item 6. Selected Financial Data The information set forth below is not necessari",
+     "end": "ficit) Total $ 114,466 $ 110,228 $ 85,049 $ 72,060 $ 61,549 shareholders' equity",
+     "lines": [
+      792,
+      890
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "Item 7. Management’s Discussion and Analysis of Financial Condition and Results ",
+     "end": " to finance its operational and capital requirements for the foreseeable future.",
+     "lines": [
+      892,
+      1383
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "Item 7A. Quantitative and Qualitative Disclosures about Market Risk Not material",
+     "end": "tem 7A. Quantitative and Qualitative Disclosures about Market Risk Not material.",
+     "lines": [
+      1385,
+      1387
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "Item 8. Financial Statements and Supplementary Data See Item 15 of Part IV of th",
+     "end": "nancial Statements and Supplementary Data See Item 15 of Part IV of this report.",
+     "lines": [
+      1389,
+      1391
+     ],
+     "verified": "agreed",
+     "note": "pointer to Item 15; statements are inside Item 15, so Item 8 is the short pointer"
+    },
+    "9": {
+     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
+     "end": "reements with Accountants on Accounting and Financial Disclosure Not applicable.",
+     "lines": [
+      1393,
+      1395
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "labeller: 'Not applicable.' at line 1395 is the last content; line 1397 '- 39 -' is a page number."
+     }
+    },
+    "9A": {
+     "start": "Item 9A. Controls and Procedures Evaluation of Disclosure Controls and Procedure",
+     "end": " opinion thereon. /s/ ERNST & YOUNG LLP San Francisco, California August 7, 2008",
+     "lines": [
+      1399,
+      1439
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "Item 9B. Other Information None",
+     "end": "Item 9B. Other Information None",
+     "lines": [
+      1441,
+      1443
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: Both start on the heading at line 1441. A's slice leaves out the trailing '- 41 -' page number.",
+      "end": "labeller: 'None' at line 1443 is the last content; line 1445 '- 41 -' is a page number that comes before PART III."
+     }
+    },
+    "10": {
+     "start": "Item 10. Directors and Executive Officers of the Registrant This information req",
+     "end": "fiscal year end covered by this Report) and is incorporated herein by reference.",
+     "lines": [
+      1449,
+      1451
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "Item 11. Executive Compensation This information required by this item will be c",
+     "end": "fiscal year end covered by this Report) and is incorporated herein by reference.",
+     "lines": [
+      1453,
+      1455
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management This inf",
+     "end": "fiscal year end covered by this Report) and is incorporated herein by reference.",
+     "lines": [
+      1457,
+      1459
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "Item 13. Certain Relationships and Related Transactions and Director Independenc",
+     "end": "fiscal year end covered by this Report) and is incorporated herein by reference.",
+     "lines": [
+      1461,
+      1463
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "Item 14. Principal Accountant Fees and Services This information required by thi",
+     "end": "fiscal year end covered by this Report) and is incorporated herein by reference.",
+     "lines": [
+      1465,
+      1467
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "labeller: Line 1467 is the last sentence of Item 14; line 1469 '- 42 -' is a page number."
+     }
+    },
+    "15": {
+     "start": "Item 15. Exhibits and Financial Statement Schedules (a) 1. Consolidated Financia",
+     "end": "2.2 CFO Certification pursuant to section 906 of the Sarbanes-Oxley Act of 2002.",
+     "lines": [
+      1473,
+      3180
+     ],
+     "verified": "adjudicated",
+     "note": "runs through financial statements, SIGNATURES (3096) and EXHIBIT INDEX (3161-3180); policy-open: exhibit index after last item",
+     "why": {
+      "end": "labeller: The exhibit list ends with the 32.2 row at line 3180; line 3182 '- 79 -' is the final page number."
+     }
+    }
+   },
+   "absent": [
+    {
+     "item": "1B",
+     "note": "not in TOC or body (2008 filing)"
+    },
+    {
+     "item": "16",
+     "note": "not present in this filing"
+    }
+   ],
+   "notes": "Items 1B, 1C, 9C and 16 do not exist in this 2008 filing. Item 15 includes the financial statements and the signatures.",
+   "retired_in": 2,
+   "reason": "edgartools-llmp.12.1: page-furniture, field-code, own-PART, running-header, subheading and '2P' findings (2008 Landec, 2013 Plum Creek and Vasomedical, 2015 Tetra Tech, 2023 Bright Green, 2025 TechPrecision); last-item Item 15 end misses (2007 Intuit, 2017 Sanmina)"
+  },
+  {
+   "accession": "0000950134-07-020001",
+   "cik": 896878,
+   "company": "INTUIT INC",
+   "filing_date": "2007-09-14",
+   "era": "2007-2012",
+   "size": "large",
+   "public_float": 9960000000,
+   "sic": 7372,
+   "items": {
+    "1": {
+     "start": "ITEM 1 BUSINESS CORPORATE BACKGROUND General Intuit Inc. is a leading provider o",
+     "end": "loyees, and we expect to face continuing challenges in recruiting and retention.",
+     "lines": [
+      121,
+      454
+     ],
+     "verified": "agreed"
+    },
+    "1A": {
+     "start": "ITEM 1A RISK FACTORS Forward-Looking Statements and Risk Factors This Annual Rep",
+     "end": "harmed in the event of a major earthquake or other natural or man-made disaster.",
+     "lines": [
+      459,
+      850
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "ITEM 1B UNRESOLVED STAFF COMMENTS None.",
+     "end": "ITEM 1B UNRESOLVED STAFF COMMENTS None.",
+     "lines": [
+      855,
+      858
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "ITEM 2 PROPERTIES Our principal locations, their purposes and the expiration dat",
+     "end": "financial statements in Item 8 for more information about our lease commitments.",
+     "lines": [
+      860,
+      885
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "ITEM 3 LEGAL PROCEEDINGS Muriel Siebert & Co., Inc. v. Intuit Inc., Index No. 03",
+     "end": "arising out of intellectual property claims could adversely affect our business.",
+     "lines": [
+      890,
+      899
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "ITEM 4 SUBMISSION OF MATTERS TO A VOTE OF SECURITY HOLDERS None.",
+     "end": "ITEM 4 SUBMISSION OF MATTERS TO A VOTE OF SECURITY HOLDERS None.",
+     "lines": [
+      901,
+      904
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "ITEM 5 MARKET FOR REGISTRANT’S COMMON EQUITY, RELATED STOCKHOLDER MATTERS AND IS",
+     "end": "8 Morgan Stanley High Technology $100.00 $126.83 $144.82 $159.85 $147.46 $196.15",
+     "lines": [
+      911,
+      967
+     ],
+     "verified": "agreed"
+    },
+    "6": {
+     "start": "ITEM 6 SELECTED FINANCIAL DATA The following tables show Intuit’s selected finan",
+     "end": "265 Total stockholders’ equity 2,035,013 1,738,086 1,695,499 1,822,419 1,964,837",
+     "lines": [
+      972,
+      1017
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "ITEM 7 MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS O",
+     "end": "AS 159 will have on our financial position, results of operations or cash flows.",
+     "lines": [
+      1022,
+      1550
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "ITEM 7A QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Investment Po",
+     "end": "e. As of July 31, 2007 we did not engage in foreign currency hedging activities.",
+     "lines": [
+      1555,
+      1589
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: 7A starts on its heading at 1555. A starts at the same heading but its window could not be located."
+     }
+    },
+    "8": {
+     "start": "ITEM 8 FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA 1. INDEX TO CONSOLIDATED FINA",
+     "end": "ons to the reserves for product returns and rebates are charged against revenue.",
+     "lines": [
+      1594,
+      3277
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: Item 8 starts on its heading at 1594. A starts at the same heading but its window could not be located."
+     }
+    },
+    "9": {
+     "start": "ITEM 9 CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL",
+     "end": " AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE None.",
+     "lines": [
+      3282,
+      3284
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "ITEM 9A CONTROLS AND PROCEDURES Evaluation of Disclosure Controls and Procedures",
+     "end": "ably likely to materially affect, our internal control over financial reporting.",
+     "lines": [
+      3286,
+      3301
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "ITEM 9B OTHER INFORMATION On May 23, 2007, Intuit entered into Amendment No. 2 t",
+     "end": "are filed as Exhibits 10.71, 10.74 and 10.94 to this Annual Report on Form 10-K.",
+     "lines": [
+      3303,
+      3315
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "ITEM 10 DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE Except for the in",
+     "end": "stration - Accounting and Finance from the University of California at Berkeley.",
+     "lines": [
+      3319,
+      3377
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "ITEM 11 EXECUTIVE COMPENSATION The information required for this Item is incorpo",
+     "end": "roxy Statement to be filed for our December 2007 Annual Meeting of Stockholders.",
+     "lines": [
+      3379,
+      3382
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "ITEM 12 SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT AND RELAT",
+     "end": "roxy Statement to be filed for our December 2007 Annual Meeting of Stockholders.",
+     "lines": [
+      3384,
+      3387
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "ITEM 13 CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS, AND DIRECTOR INDEPENDENC",
+     "end": "roxy Statement to be filed for our December 2007 Annual Meeting of Stockholders.",
+     "lines": [
+      3389,
+      3392
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "ITEM 14 PRINCIPAL ACCOUNTANT FEES AND SERVICES The information required for this",
+     "end": "roxy Statement to be filed for our December 2007 Annual Meeting of Stockholders.",
+     "lines": [
+      3394,
+      3397
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "ITEM 15 EXHIBITS AND FINANCIAL STATEMENT SCHEDULES (a) The following documents a",
+     "end": "934, except to the extent that Intuit specifically incorporates it by reference.",
+     "lines": [
+      3404,
+      3890
+     ],
+     "verified": "adjudicated",
+     "note": "policy-open: exhibit index after last item",
+     "why": {
+      "end": "labeller: An EXHIBIT INDEX (3864-3890) follows the signatures and power of attorney, so the last item runs through its last line at 3890, before the page number '118' (note: policy-open: exhibit index after last item)."
+     }
+    }
+   },
+   "absent": [],
+   "notes": "Intuit FY2007 10-K. Item headings are printed as bare 'ITEM N' lines with the title on the next line, except Items 5, 9, 10 and 15 which carry the title on the same line. Item 8 includes the financial statements and the schedule (Note ending 3277). Item 15 runs through signatures and the exhibit index to line 3890.",
+   "retired_in": 2,
+   "reason": "edgartools-llmp.12.1: page-furniture, field-code, own-PART, running-header, subheading and '2P' findings (2008 Landec, 2013 Plum Creek and Vasomedical, 2015 Tetra Tech, 2023 Bright Green, 2025 TechPrecision); last-item Item 15 end misses (2007 Intuit, 2017 Sanmina)"
+  },
+  {
+   "accession": "0000849213-13-000007",
+   "cik": 849213,
+   "company": "PLUM CREEK TIMBER CO INC",
+   "filing_date": "2013-02-22",
+   "era": "2013-2018",
+   "size": "large",
+   "public_float": 6386084358,
+   "sic": 6798,
+   "items": {
+    "1": {
+     "start": "ITEM 1. BUSINESS Industry Overview General The timber industry possesses several",
+     "end": "ird Avenue, Suite 4300, Seattle, Washington 98104, or by calling (206) 467-3600.",
+     "lines": [
+      109,
+      386
+     ],
+     "verified": "agreed"
+    },
+    "1A": {
+     "start": "ITEM 1A. RISK FACTORS Business and Operating Risks The Cyclical Nature of Our Bu",
+     "end": "e to occur. The net income of our TRSs is subject to corporate-level income tax.",
+     "lines": [
+      393,
+      579
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "ITEM 1B. UNRESOLVED STAFF COMMENTS None.",
+     "end": "ITEM 1B. UNRESOLVED STAFF COMMENTS None.",
+     "lines": [
+      581,
+      583
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "ITEM 2. PROPERTIES We believe that our timberlands and manufacturing facilities ",
+     "end": " curtailed production at our Evergreen, MT sawmill and remanufacturing facility.",
+     "lines": [
+      590,
+      616
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "ITEM 3. LEGAL PROCEEDINGS Legal Proceedings. There is no individual pending or t",
+     "end": "e would intend to vigorously contest any re-characterization the IRS may assert.",
+     "lines": [
+      618,
+      631
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "ITEM 4. MINE SAFETY DISCLOSURES Not Applicable.",
+     "end": "ITEM 4. MINE SAFETY DISCLOSURES Not Applicable.",
+     "lines": [
+      633,
+      635
+     ],
+     "verified": "agreed",
+     "note": "Executive Officers of the Registrant (line 641 on) is unnumbered and belongs to no item"
+    },
+    "5": {
+     "start": "ITEM 5. MARKET FOR REGISTRANT'S COMMON EQUITY, RELATED STOCKHOLDER MATTERS AND I",
+     "end": "orated by reference into any future filings. Purchase of Equity Securities None.",
+     "lines": [
+      710,
+      763
+     ],
+     "verified": "agreed"
+    },
+    "6": {
+     "start": "ITEM 6. SELECTED FINANCIAL DATA Financial Highlights The following table summari",
+     "end": "hat were contributed to a timberland venture in exchange for an equity interest.",
+     "lines": [
+      770,
+      814
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "ITEM 7. MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
+     "end": "es reconciling items not allocated to segments for financial reporting purposes.",
+     "lines": [
+      821,
+      1842
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Interest Rat",
+     "end": " of January 2, 2013, all of the borrowings under our line of credit were repaid.",
+     "lines": [
+      1849,
+      1892
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: The heading is at line 1849. Line 1846 is a 'Table of Contents PART II / ITEM 7A' running header, which is furniture."
+     }
+    },
+    "8": {
+     "start": "ITEM 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA PLUM CREEK TIMBER COMPANY, I",
+     "end": "counting principles. /s/ Ernst & Young LLP Seattle, Washington February 22, 2013",
+     "lines": [
+      1899,
+      5034
+     ],
+     "verified": "agreed",
+     "note": "statements in place; heading repeated 'CONTINUED' at 3583"
+    },
+    "9": {
+     "start": "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
+     "end": " AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE None.",
+     "lines": [
+      5041,
+      5043
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "ITEM 9A. CONTROLS AND PROCEDURES Evaluation of Controls and Procedures Disclosur",
+     "end": "red public accounting firm, as stated in their report, which is included herein.",
+     "lines": [
+      5045,
+      5065
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "ITEM 9B. OTHER INFORMATION None.",
+     "end": "ITEM 9B. OTHER INFORMATION None.",
+     "lines": [
+      5067,
+      5069
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: Both start on the heading at line 5067. B's slice also takes in the footer and running header that follow.",
+      "end": "labeller: 'None.' at line 5069 is the last content; lines 5071-5073 are the 'PLUM CREEK 2012 FORM 10-K | 143' footer and the 'Table of Contents PART III / ITEM 10' header."
+     }
+    },
+    "10": {
+     "start": "ITEM 10. DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE Information abou",
+     "end": "ard of Directors and Corporate Governance - Board Committees - Audit Committee”.",
+     "lines": [
+      5078,
+      5080
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "ITEM 11. EXECUTIVE COMPENSATION Information under the following captions in the ",
+     "end": "ort”; and “Board of Directors and Corporate Governance - Director Compensation”.",
+     "lines": [
+      5082,
+      5084
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "ITEM 12. SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT AND RELA",
+     "end": "rmation”; and “ Security Ownership of Certain Beneficial Owners and Management”.",
+     "lines": [
+      5086,
+      5088
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "ITEM 13. CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS, AND DIRECTOR INDEPENDEN",
+     "end": "ard of Directors and Corporate Governance - Board Committees - Audit Committee”.",
+     "lines": [
+      5090,
+      5092
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "ITEM 14. PRINCIPAL ACCOUNTING FEES AND SERVICES Information under the following ",
+     "end": "ce: “Independent Auditors - Fees to the Independent Auditors for 2011 and 2012.”",
+     "lines": [
+      5094,
+      5096
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "labeller: Line 5096 is the last content; lines 5098-5100 are the page footer and the 'Table of Contents PART IV / ITEM 15' running header."
+     }
+    },
+    "15": {
+     "start": "ITEM 15. EXHIBITS, FINANCIAL STATEMENT SCHEDULES Documents filed as a part of th",
+     "end": "kbase Document. 101. PRE XBRL Taxonomy Extension Presentation Linkbase Document.",
+     "lines": [
+      5105,
+      5236
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "labeller: Item 15 ends at the last exhibit row '101. PRE ...' on line 5236, before the page footer and Signatures. Nothing of substance follows the signatures. A's text ('101.PRE', no space) does not match the document and was never located."
+     }
+    }
+   },
+   "absent": [
+    {
+     "item": "1C",
+     "note": "not in TOC or body"
+    },
+    {
+     "item": "9C",
+     "note": "not in TOC or body"
+    },
+    {
+     "item": "16",
+     "note": "not in TOC or body"
+    }
+   ],
+   "notes": "Plum Creek 2012. TOC lines 74-99. Page furniture is 'PLUM CREEK 2012 FORM 10-K | N' plus 'Table of Contents  PART x / ITEM n' back-links. Signatures at 5241 with nothing of substance after, so Item 15 ends at the exhibit list (5236).",
+   "retired_in": 2,
+   "reason": "edgartools-llmp.12.1: page-furniture, field-code, own-PART, running-header, subheading and '2P' findings (2008 Landec, 2013 Plum Creek and Vasomedical, 2015 Tetra Tech, 2023 Bright Green, 2025 TechPrecision); last-item Item 15 end misses (2007 Intuit, 2017 Sanmina)"
+  },
+  {
+   "accession": "0001201800-13-000006",
+   "cik": 839087,
+   "company": "VASOMEDICAL, INC",
+   "filing_date": "2013-04-01",
+   "era": "2013-2018",
+   "size": "small",
+   "public_float": 29336000,
+   "sic": 3845,
+   "items": {
+    "1": {
+     "start": "ITEM 1 - BUSINESS Except for historical information contained in this report, th",
+     "end": "ibute or represent are capable of meeting our demand for the foreseeable future.",
+     "lines": [
+      104,
+      442
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: The 'ITEM 1 - BUSINESS' heading is at line 104. B starts on the 'PART I' divider at 102, which is furniture."
+     }
+    },
+    "1A": {
+     "start": "ITEM 1A - RISK FACTORS Investing in our common stock involves risk. You should c",
+     "end": "s or furnished pursuant to Section 13(a) or 15(d) of the Securities Act of 1934.",
+     "lines": [
+      446,
+      597
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "ITEM 2 - PROPERTIES We lease an 18,000 square foot headquarters and manufacturin",
+     "end": " be difficulty in relocating the office should we decide not to renew the lease.",
+     "lines": [
+      599,
+      607
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "ITEM 5 - MARKET FOR REGISTRANT’S COMMON EQUITY, RELATED STOCKHOLDER MATTERS AND ",
+     "end": " common stock and do not intend to pay cash dividends in the foreseeable future.",
+     "lines": [
+      613,
+      630
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: The Item 5 heading is at line 613 with the text 'ITEM 5 - MARKET ...'. A's window has a different spacing ('ITEM 5 -MARKET') and could not be located in the document."
+     }
+    },
+    "7": {
+     "start": "ITEM 7 - MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS",
+     "end": " Company’s consolidated financial position, results of operations or cash flows.",
+     "lines": [
+      632,
+      898
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: The Item 7 heading is at line 632 and matches B. A's window ('ITEM 7 -MANAGEMENT'S') could not be located."
+     }
+    },
+    "8": {
+     "start": "Vasomedical, Inc. and Subsidiaries INDEX TO CONSOLIDATED FINANCIAL STATEMENTS Fo",
+     "end": "crease (decrease) in cash and cash equivalents $ 9,175 $ (806) $ (5,836) $ 2,619",
+     "lines": [
+      1387,
+      2619
+     ],
+     "verified": "adjudicated",
+     "note": "item 8 pointer -> back statements",
+     "why": {
+      "start": "labeller: Item 8 (900-902) only points to the statements in the 'accompanying Index'. Those statements are printed after SIGNATURES (1358), so Item 8 is that block and starts at the registrant title line 1387 directly above 'INDEX TO CONSOLIDATED FINANCIAL STATEMENTS' (1389).",
+      "end": "labeller: Item 8 here is the statements block at the back, which ends at line 2619. The line after it (2621) is the page number 'F-33', and the document ends there."
+     }
+    },
+    "9A": {
+     "start": "ITEM 9A - CONTROLS AND PROCEDURES Report on Disclosure Controls and Procedures D",
+     "end": "at permit the Company to provide only Management’s report in this Annual Report.",
+     "lines": [
+      904,
+      928
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "ITEM 10 - DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE Directors of th",
+     "end": "om SUNY at Albany, and a B.S. in Mechanical Engineering from Hofstra University.",
+     "lines": [
+      932,
+      1025
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "ITEM 11 - EXECUTIVE COMPENSATION The following table sets forth the annual and l",
+     "end": "except as otherwise disclosed, had any relationship requiring disclosure herein.",
+     "lines": [
+      1027,
+      1135
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "ITEM 12 - SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT AND REL",
+     "end": ", 2012, 866,560 shares remain available for future issuance under the 2010 Plan.",
+     "lines": [
+      1137,
+      1212
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "ITEM 13 - CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS AND DIRECTOR INDEPENDEN",
+     "end": " least 75% of the meetings of the Board and the committees on which they served.",
+     "lines": [
+      1214,
+      1250
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "ITEM 14 - PRINCIPAL ACCOUNTING FEES AND SERVICES Rothstein, Kass & Company, P.C.",
+     "end": "nths ended December 31, 2011 and the year ended December 31, 2012, respectively.",
+     "lines": [
+      1252,
+      1265
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "ITEM 15 - EXHIBITS AND FINANCIAL STATEMENT SCHEDULES Financial Statements and Fi",
+     "end": " 2011. (14) Incorporated by reference to Report on Form 8-K dated June 20, 2012.",
+     "lines": [
+      1271,
+      1354
+     ],
+     "verified": "agreed"
+    }
+   },
+   "absent": [
+    {
+     "item": "1B",
+     "note": "not in TOC or body"
+    },
+    {
+     "item": "3",
+     "note": "not in TOC or body"
+    },
+    {
+     "item": "4",
+     "note": "not in TOC or body"
+    },
+    {
+     "item": "6",
+     "note": "not in TOC or body"
+    },
+    {
+     "item": "7A",
+     "note": "not in TOC or body"
+    },
+    {
+     "item": "9",
+     "note": "not in TOC or body"
+    },
+    {
+     "item": "9B",
+     "note": "not in TOC or body"
+    },
+    {
+     "item": "1C",
+     "note": "not in filing (2013)"
+    },
+    {
+     "item": "9C",
+     "note": "not in filing"
+    },
+    {
+     "item": "16",
+     "note": "not in filing"
+    },
+    {
+     "item": "2P",
+     "note": "pipeline keyed 'ITEM 2 - PROPERTIES' as item 2P; the real Item 2 is labelled under '2' (pipeline bug: wrong item key)"
+    }
+   ],
+   "notes": "Item 8 body (900-902) only points to the Index to Consolidated Financial Statements; statements at the back start at registrant-name line 1387 (index 1389, auditor report 1410) and run to 2619 (F-33 at 2621 is furniture). No exhibit index at the back; Item 15 ends before the SIGNATURES heading at 1358.",
+   "retired_in": 2,
+   "reason": "edgartools-llmp.12.1: page-furniture, field-code, own-PART, running-header, subheading and '2P' findings (2008 Landec, 2013 Plum Creek and Vasomedical, 2015 Tetra Tech, 2023 Bright Green, 2025 TechPrecision); last-item Item 15 end misses (2007 Intuit, 2017 Sanmina)"
+  },
+  {
+   "accession": "0000897723-17-000029",
+   "cik": 897723,
+   "company": "SANMINA CORP",
+   "filing_date": "2017-11-13",
+   "era": "2013-2018",
+   "size": "large",
+   "public_float": 2966474443,
+   "sic": 3672,
+   "items": {
+    "1": {
+     "start": "Item 1. Business Overview Sanmina Corporation (“we” or “Sanmina”) is a leading g",
+     "end": "obal industrial gases and engineering company, from September 1986 to June 2000.",
+     "lines": [
+      112,
+      427
+     ],
+     "verified": "agreed",
+     "note": "includes Executive Officers of the Registrant subsection (line 407)"
+    },
+    "1A": {
+     "start": "Item 1A. Risk Factors Adverse changes in the key end markets we target could har",
+     "end": "tions, any of which may cause the market price of our common stock to fluctuate.",
+     "lines": [
+      430,
+      678
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "Item 1B. Unresolved Staff Comments None.",
+     "end": "Item 1B. Unresolved Staff Comments None.",
+     "lines": [
+      681,
+      683
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "Item 2. Properties Facilities. Our customers market numerous products throughout",
+     "end": "re, as applicable, certified to American Petroleum Institute (API) requirements.",
+     "lines": [
+      686,
+      740
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "Item 3. Legal Proceedings Two of our subsidiaries, Sanmina-SCI do Brasil Technol",
+     "end": "onably estimated. See also Note 7 of Notes to Consolidated Financial Statements.",
+     "lines": [
+      742,
+      755
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "Item 4. Mine Safety Disclosures. Not applicable.",
+     "end": "Item 4. Mine Safety Disclosures. Not applicable.",
+     "lines": [
+      757,
+      759
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "Item 5. Market for Registrant's Common Equity, Related Stockholder Matters and I",
+     "end": "$159.6 million for an average price per share of $36.69 (excluding commissions).",
+     "lines": [
+      764,
+      829
+     ],
+     "verified": "agreed"
+    },
+    "6": {
+     "start": "Item 6. Selected Financial Data The following selected financial data should be ",
+     "end": ",512 Stockholders' equity $1,647,684 $1,609,803 $1,520,471 $1,246,755 $1,091,564",
+     "lines": [
+      832,
+      867
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "Item 7. Management's Discussion and Analysis of Financial Condition and Results ",
+     "end": "utable to certain U.S. and foreign deferred tax assets and net operating losses.",
+     "lines": [
+      870,
+      1228
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "Item 7A. Quantitative and Qualitative Disclosures about Market Risk Interest Rat",
+     "end": "forecasts are materially inaccurate, we could incur significant gains or losses.",
+     "lines": [
+      1231,
+      1245
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "Item 8. Financial Statements and Supplementary Data The information required by ",
+     "end": " 2019 $4,169 2020 $3,960 2021 $4,276 2022 $4,273 Years 2023 through 2027 $21,377",
+     "lines": [
+      1247,
+      2335
+     ],
+     "verified": "agreed"
+    },
+    "9": {
+     "start": "Item 9. Changes In and Disagreements With Accountants on Accounting and Financia",
+     "end": " and Disagreements With Accountants on Accounting and Financial Disclosure None.",
+     "lines": [
+      2338,
+      2340
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "Item 9A. Controls and Procedures (a) Evaluation of Disclosure Controls and Proce",
+     "end": "ably likely to materially affect, our internal control over financial reporting.",
+     "lines": [
+      2342,
+      2355
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "Item 9B. Other Information None.",
+     "end": "Item 9B. Other Information None.",
+     "lines": [
+      2357,
+      2359
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "The information called for by Items 10, 11, 12, 13 and 14 of Part III are incorp",
+     "end": "for by Item 401(b) of Regulation S-K has been included in Part I of this report.",
+     "lines": [
+      2364,
+      2364
+     ],
+     "verified": "agreed",
+     "note": "combined 10-14; no item headings, only a sentence under PART III incorporating Items 10-14 from the proxy statement"
+    },
+    "11": {
+     "start": "The information called for by Items 10, 11, 12, 13 and 14 of Part III are incorp",
+     "end": "for by Item 401(b) of Regulation S-K has been included in Part I of this report.",
+     "lines": [
+      2364,
+      2364
+     ],
+     "verified": "agreed",
+     "note": "combined 10-14; see item 10"
+    },
+    "12": {
+     "start": "The information called for by Items 10, 11, 12, 13 and 14 of Part III are incorp",
+     "end": "for by Item 401(b) of Regulation S-K has been included in Part I of this report.",
+     "lines": [
+      2364,
+      2364
+     ],
+     "verified": "agreed",
+     "note": "combined 10-14; see item 10"
+    },
+    "13": {
+     "start": "The information called for by Items 10, 11, 12, 13 and 14 of Part III are incorp",
+     "end": "for by Item 401(b) of Regulation S-K has been included in Part I of this report.",
+     "lines": [
+      2364,
+      2364
+     ],
+     "verified": "agreed",
+     "note": "combined 10-14; see item 10"
+    },
+    "14": {
+     "start": "The information called for by Items 10, 11, 12, 13 and 14 of Part III are incorp",
+     "end": "for by Item 401(b) of Regulation S-K has been included in Part I of this report.",
+     "lines": [
+      2364,
+      2364
+     ],
+     "verified": "agreed",
+     "note": "combined 10-14; see item 10"
+    },
+    "15": {
+     "start": "Item 15. Exhibits and Financial Statement Schedules (a) (1) Financial Statements",
+     "end": "9 $1,642 $ $15,081 Fiscal year ended September 30, 2017 $15,081 $(747) $ $14,334",
+     "lines": [
+      2369,
+      2573
+     ],
+     "verified": "adjudicated",
+     "note": "runs through exhibit list, SIGNATURES (2509) and financial statement Schedule II (2560-2573); page number 89 at 2575 excluded",
+     "why": {
+      "end": "labeller: A Financial Statement Schedule (Schedule II, 2560-2573) follows the signatures, so Item 15 runs through it to 2573, before page number 89 at 2575."
+     }
+    }
+   },
+   "absent": [],
+   "notes": "Items 10-14 have no headings of their own; judgment call to list them as present via the Part III incorporation sentence at line 2364 (if that is not accepted, treat 10-14 as absent). Item 8 holds the statements inline. No Items 1C or 16.",
+   "retired_in": 2,
+   "reason": "edgartools-llmp.12.1: page-furniture, field-code, own-PART, running-header, subheading and '2P' findings (2008 Landec, 2013 Plum Creek and Vasomedical, 2015 Tetra Tech, 2023 Bright Green, 2025 TechPrecision); last-item Item 15 end misses (2007 Intuit, 2017 Sanmina)"
+  },
+  {
+   "accession": "0001047469-15-008864",
+   "cik": 831641,
+   "company": "TETRA TECH INC",
+   "filing_date": "2015-11-20",
+   "era": "2013-2018",
+   "size": "large",
+   "public_float": 1400000000,
+   "sic": 8711,
+   "items": {
+    "1": {
+     "start": "Item 1. Business General Tetra Tech, Inc. is a leading provider of consulting an",
+     "end": "tions, 3475 East Foothill Boulevard, Pasadena, California 91107, (626) 351-4664.",
+     "lines": [
+      141,
+      616
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: A starts at the Item 1 heading at 141 and keeps the 'General' subheading at 143; B's window skips that subheading and is not in the document."
+     }
+    },
+    "1A": {
+     "start": "Item 1A. Risk Factors We operate in a changing environment that involves numerou",
+     "end": "curities, the value of which is dependent on the performance of our stock price.",
+     "lines": [
+      621,
+      972
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "Item 1B. Unresolved Staff Comments None.",
+     "end": "Item 1B. Unresolved Staff Comments None.",
+     "lines": [
+      974,
+      976
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "Item 2. Properties At fiscal 2015 year-end, we owned three facilities located in",
+     "end": "r, BC, Canada Office Building WEI / RME Montréal, QC, Canada Office Building RME",
+     "lines": [
+      978,
+      995
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "Item 3. Legal Proceedings For a description of our material pending legal and re",
+     "end": "gencies\" of the \"Notes to Consolidated Financial Statements\" included in Item 8.",
+     "lines": [
+      1000,
+      1002
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "Item 4. Mine Safety Disclosures Section 1503 of the Dodd-Frank Wall Street Refor",
+     "end": " of the Dodd-Frank Act and Item 104 of Regulation S-K is included in Exhibit 95.",
+     "lines": [
+      1004,
+      1006
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "Item 5. Market for Registrant's Common Equity, Related Stockholder Matters and I",
+     "end": "16,042,830 August 24, 2015 - September 27, 2015 645,822 25.62 645,822 99,500,010",
+     "lines": [
+      1010,
+      1100
+     ],
+     "verified": "agreed"
+    },
+    "6": {
+     "start": "Item 6. Selected Financial Data The following selected financial data was derive",
+     "end": ",868 Tetra Tech stockholders' equity 856,325 1,012,079 997,763 1,018,970 854,725",
+     "lines": [
+      1102,
+      1121
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "Item 7. Management's Discussion and Analysis of Financial Condition and Results ",
+     "end": "aration\" of the \"Notes to Consolidated Financial Statements\" included in Item 8.",
+     "lines": [
+      1126,
+      1739
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "Item 7A. Quantitative and Qualitative Disclosures about Market Risk We do not en",
+     "end": "s were recognized as an adjustment to equity through other comprehensive income.",
+     "lines": [
+      1741,
+      1756
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "Item 8. Financial Statements and Supplementary Data INDEX TO FINANCIAL STATEMENT",
+     "end": "he sum of the quarterly EPS may not add up to the full-year EPS due to rounding.",
+     "lines": [
+      1761,
+      3268
+     ],
+     "verified": "agreed"
+    },
+    "9": {
+     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
+     "end": " and Disagreements with Accountants on Accounting and Financial Disclosure None.",
+     "lines": [
+      3273,
+      3275
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "Item 9A. Controls and Procedures Evaluation of disclosure controls and procedure",
+     "end": "ably likely to materially affect, our internal control over financial reporting.",
+     "lines": [
+      3277,
+      3293
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "Item 9B. Other Information None.",
+     "end": "Item 9B. Other Information None.",
+     "lines": [
+      3298,
+      3300
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "Item 10. Directors, Executive Officers and Corporate Governance The information ",
+     "end": "ny such information on our website, at the address and location specified above.",
+     "lines": [
+      3304,
+      3312
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "Item 11. Executive Compensation The information required by this item is include",
+     "end": "ted to the 2016 Annual Meeting of Stockholders and is incorporated by reference.",
+     "lines": [
+      3314,
+      3316
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
+     "end": "ted to the 2016 Annual Meeting of Stockholders and is incorporated by reference.",
+     "lines": [
+      3318,
+      3320
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "Item 13. Certain Relationships and Related Transactions, and Director Independen",
+     "end": "ted to the 2016 Annual Meeting of Stockholders and is incorporated by reference.",
+     "lines": [
+      3322,
+      3324
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "Item 14. Principal Accounting Fees and Services The information required by this",
+     "end": "ted to the 2016 Annual Meeting of Stockholders and is incorporated by reference.",
+     "lines": [
+      3326,
+      3328
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "Item 15. Exhibits, Financial Statement Schedules (a.) 1. Financial Statements Th",
+     "end": "t, except as shall be expressly set forth by specific reference in such filings.",
+     "lines": [
+      3335,
+      3491
+     ],
+     "verified": "adjudicated",
+     "note": "runs through Schedule II, signatures and exhibit index to end of document; policy-open: exhibit index after last item",
+     "why": {
+      "start": "labeller: A starts on the Item 15 heading at 3335 and its text matches the document; B's window ('CO...') is not in the document.",
+      "end": "labeller: An INDEX TO EXHIBITS (3430-3491) follows the signatures, so the last item runs through it and ends at the footnote at 3491, before page number 133. Policy-open: exhibit index after last item."
+     }
+    }
+   },
+   "absent": [],
+   "notes": "TOC at lines 76-130; body headings from 139. Item 8 holds the full financial statements inline. Item 15 includes Schedule II, SIGNATURES and the Index to Exhibits (ends at line 3491, before the trailing page number 133).",
+   "retired_in": 2,
+   "reason": "edgartools-llmp.12.1: page-furniture, field-code, own-PART, running-header, subheading and '2P' findings (2008 Landec, 2013 Plum Creek and Vasomedical, 2015 Tetra Tech, 2023 Bright Green, 2025 TechPrecision); last-item Item 15 end misses (2007 Intuit, 2017 Sanmina)"
+  },
+  {
+   "accession": "0001410578-25-001537",
+   "cik": 1328792,
+   "company": "TECHPRECISION CORP",
+   "filing_date": "2025-07-30",
+   "era": "2019-2025",
+   "size": "small",
+   "public_float": 25100000,
+   "sic": 3440,
+   "items": {
+    "1": {
+     "start": "Item 1. Business. Our Business We are a manufacturer of precision, large-scale f",
+     "end": ", the SEC. These reports are also available at the SEC’s website at www.sec.gov.",
+     "lines": [
+      126,
+      279
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: Item 1 starts on its heading at 126; the PART I divider at 124 belongs to neither item."
+     }
+    },
+    "1A": {
+     "start": "Item 1A. Risk Factors. Our business, results of operations and financial conditi",
+     "end": " sanctions or investigations by Nasdaq, the SEC or other regulatory authorities.",
+     "lines": [
+      281,
+      517
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "Item 1B. Unresolved Staff Comments. None.",
+     "end": "Item 1B. Unresolved Staff Comments. None.",
+     "lines": [
+      519,
+      521
+     ],
+     "verified": "agreed"
+    },
+    "1C": {
+     "start": "Item 1C. Cybersecurity. Cybersecurity Risk Management and Strategy We have proce",
+     "end": "it committee provides regular updates to the board of directors on such reports.",
+     "lines": [
+      523,
+      538
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "Item 2. Properties. We own approximately 145,000 square feet of office and manuf",
+     "end": "ire Bank is secured by a first lien on all personal and real property of Stadco.",
+     "lines": [
+      540,
+      544
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "Item 3. Legal Proceedings. We may from time to time be subject to various legal ",
+     "end": " settlement, which has not been finalized in a long-form agreement at this time.",
+     "lines": [
+      546,
+      551
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "Item 4. Mine Safety Disclosures Not applicable to the registrant.",
+     "end": "Item 4. Mine Safety Disclosures Not applicable to the registrant.",
+     "lines": [
+      553,
+      555
+     ],
+     "verified": "agreed",
+     "note": "Item 4A Executive Officers (line 557) excluded"
+    },
+    "5": {
+     "start": "Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and I",
+     "end": "ompensation plans can be found under Item 12 of this Annual Report on Form 10-K.",
+     "lines": [
+      575,
+      585
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: Item 5 starts on its heading at 575, not on the PART II divider at 573."
+     }
+    },
+    "6": {
+     "start": "Item 6. Reserved",
+     "end": "Item 6. Reserved",
+     "lines": [
+      587,
+      587
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "Item 7. Management’s Discussion and Analysis of Financial Condition and Results ",
+     "end": "67 EBITDA $ 587 $ (2,160) $ 2,747 (1) Includes amortization of debt issue costs.",
+     "lines": [
+      589,
+      975
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "Item 7A. Quantitative and Qualitative Disclosure About Market Risk. As a smaller",
+     "end": "g company, we have elected not to provide the information required by this Item.",
+     "lines": [
+      977,
+      979
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "Item 8. Financial Statements and Supplementary Data. REPORT OF INDEPENDENT REGIS",
+     "end": "uating the impact of the Act will have on our consolidated financial statements.",
+     "lines": [
+      982,
+      1742
+     ],
+     "verified": "agreed"
+    },
+    "9": {
+     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
+     "end": "and Disagreements with Accountants on Accounting and Financial Disclosure. None.",
+     "lines": [
+      1745,
+      1747
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "labeller: Item 9 ends with 'None.' at 1747; Item 9A's heading is at 1749."
+     }
+    },
+    "9A": {
+     "start": "Item 9A. Controls and Procedures. Disclosure controls and procedures (as defined",
+     "end": " are reasonably likely to affect, our internal control over financial reporting.",
+     "lines": [
+      1749,
+      1820
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: Item 9A's heading is at 1749; B's window starts at the Item 9 heading (1745)."
+     }
+    },
+    "9B": {
+     "start": "Item 9B. Other Information. During the fiscal quarter ended March 31, 2025, none",
+     "end": " trading arrangement,” as those terms are defined in Item 408 of Regulation S-K.",
+     "lines": [
+      1822,
+      1824
+     ],
+     "verified": "agreed"
+    },
+    "9C": {
+     "start": "Item 9C. Disclosure Regarding Foreign Jurisdictions that Prevent Inspection. Not",
+     "end": "closure Regarding Foreign Jurisdictions that Prevent Inspection. Not Applicable.",
+     "lines": [
+      1826,
+      1828
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "Item 10. Directors, Executive Officers and Corporate Governance a) Directors of ",
+     "end": "an exhibit to this Annual Report on Form 10-K for the year ended March 31, 2025.",
+     "lines": [
+      1833,
+      1898
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: Item 10 starts on its heading at 1833, not on the PART III divider at 1831."
+     }
+    },
+    "11": {
+     "start": "Item 11. Executive Compensation Summary Compensation Table The Company’s executi",
+     "end": "ereof and irrespective of any general incorporation language in any such filing.",
+     "lines": [
+      1900,
+      2097
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
+     "end": "c) Equity compensation plans approved by security holders 542,500 $ 1.53 204,327",
+     "lines": [
+      2099,
+      2154
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "Item 13. Certain Relationships and Related Transactions, and Director Independen",
+     "end": "tandards: Andrew A. Levy, Victor Renuart, Robert Straus, and Walter M. Schenker.",
+     "lines": [
+      2156,
+      2169
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "Item 14. Principal Accountant Fees and Services The following is a summary of fe",
+     "end": "ng firm in fiscal 2025 and fiscal 2024 were pre-approved by the Audit Committee.",
+     "lines": [
+      2172,
+      2194
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "Item 15. Exhibits and Financial Statement Schedules. The following documents are",
+     "end": ")(6) of Regulation S-K and marked by means of brackets and asterisks (“[****]”).",
+     "lines": [
+      2199,
+      2345
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: Item 15 starts on its heading at 2199, not on the 'Part IV' divider at 2197."
+     }
+    },
+    "16": {
+     "start": "Item 16. Form 10-K Summary. None.",
+     "end": "Item 16. Form 10-K Summary. None.",
+     "lines": [
+      2348,
+      2350
+     ],
+     "verified": "agreed"
+    }
+   },
+   "absent": [
+    {
+     "item": "4A",
+     "note": "4A is not a standard 10-K item key; executive-officer sections belong to no item (non-standard keys are excluded from scoring)"
+    }
+   ],
+   "notes": "All TOC items present in body. Item 4A (557-571) is unnumbered executive officers section, in no item. Item 6 is 'Reserved'. Item 16 is followed by SIGNATURES only.",
+   "retired_in": 2,
+   "reason": "edgartools-llmp.12.1: page-furniture, field-code, own-PART, running-header, subheading and '2P' findings (2008 Landec, 2013 Plum Creek and Vasomedical, 2015 Tetra Tech, 2023 Bright Green, 2025 TechPrecision); last-item Item 15 end misses (2007 Intuit, 2017 Sanmina)"
+  },
+  {
+   "accession": "0001493152-23-012561",
+   "cik": 1886799,
+   "company": "Bright Green Corp",
+   "filing_date": "2023-04-17",
+   "era": "2019-2025",
+   "size": "small",
+   "public_float": 141818084,
+   "sic": 2833,
+   "items": {
+    "1": {
+     "start": "Item 1. Business. Overview Our Mission & Vision Bright Green’s mission is to be ",
+     "end": "e or maintain their health status and encourage engagement in healthy behaviors.",
+     "lines": [
+      205,
+      523
+     ],
+     "verified": "agreed"
+    },
+    "1A": {
+     "start": "Item 1A. Risk Factors. Investing in our securities involves a high degree of ris",
+     "end": "ilutive effect, which could lead to a decrease in the price of our common stock.",
+     "lines": [
+      525,
+      1148
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "Item 1B. Unresolved Staff Comments. Not Applicable.",
+     "end": "Item 1B. Unresolved Staff Comments. Not Applicable.",
+     "lines": [
+      1150,
+      1152
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: 1B starts on its heading at 1150. A's window holds page-field furniture text and could not be located.",
+      "end": "labeller: 1B ends at 'Not Applicable.' on 1152. B takes in the page-number field for page 39."
+     }
+    },
+    "2": {
+     "start": "Item 2. Properties. The following table set forth the Company’s owned and leased",
+     "end": "vailable properties will be sufficient for its needs for the foreseeable future.",
+     "lines": [
+      1156,
+      1173
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "Item 3. Legal Proceedings From time to time, we may be involved in legal proceed",
+     "end": "otion. There are no claims for specific monetary liability against either party.",
+     "lines": [
+      1175,
+      1194
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "Item 4. Mine Safety Disclosures. Not Applicable.",
+     "end": "Item 4. Mine Safety Disclosures. Not Applicable.",
+     "lines": [
+      1196,
+      1198
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and I",
+     "end": "ur registered equity securities during the period covered by this Annual Report.",
+     "lines": [
+      1204,
+      1228
+     ],
+     "verified": "agreed"
+    },
+    "6": {
+     "start": "Item 6. [Reserved]. Not Applicable.",
+     "end": "Item 6. [Reserved]. Not Applicable.",
+     "lines": [
+      1230,
+      1232
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "Item 7. Management’s Discussion and Analysis of Financial Condition and Results ",
+     "end": "isclose the date on which we will adopt the recently issued accounting standard.",
+     "lines": [
+      1234,
+      1375
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "Item 7A. Quantitative and Qualitative Disclosures about Market Risk. Not Applica",
+     "end": " 7A. Quantitative and Qualitative Disclosures about Market Risk. Not Applicable.",
+     "lines": [
+      1377,
+      1379
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "INDEX TO FINANCIAL STATEMENTS Report of Independent Registered Public Accounting",
+     "end": "ention to acquire the remaining issued and outstanding common stock of Alterola.",
+     "lines": [
+      2116,
+      2881
+     ],
+     "verified": "adjudicated",
+     "note": "item 8 pointer -> back statements",
+     "why": {
+      "end": "labeller: The statements end with the last real sentence at 2881. B takes in the trailing 'F-24' page number, which is also the last line of the document."
+     }
+    },
+    "9": {
+     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
+     "end": "eements with Accountants on Accounting and Financial Disclosure. Not Applicable.",
+     "lines": [
+      1385,
+      1387
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "labeller: Item 9 ends at 'Not Applicable.' on 1387, before the page number '46'. A takes in that page-number field."
+     }
+    },
+    "9A": {
+     "start": "Item 9A. Controls and Procedures. Evaluation of Disclosure Controls and Procedur",
+     "end": "ably likely to materially affect, our internal control over financial reporting.",
+     "lines": [
+      1391,
+      1411
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "Item 9B. Other Information. None.",
+     "end": "Item 9B. Other Information. None.",
+     "lines": [
+      1413,
+      1415
+     ],
+     "verified": "agreed"
+    },
+    "9C": {
+     "start": "Item 9C. Disclosure Regarding Foreign Jurisdictions that Prevent Inspections. No",
+     "end": "losure Regarding Foreign Jurisdictions that Prevent Inspections. Not Applicable.",
+     "lines": [
+      1417,
+      1419
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "Item 10. Directors, Executive Officers and Corporate Governance Directors and Ex",
+     "end": "rs of certain provisions of our Code of Conduct in a Current Report on Form 8-K.",
+     "lines": [
+      1425,
+      1619
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "Item 11. Executive Compensation. The following is a discussion and analysis of c",
+     "end": "d Related Transactions, and Director Independence - Indemnification Agreements.”",
+     "lines": [
+      1621,
+      1878
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "labeller: Item 11 ends at line 1878, before the page number '61' at 1880. B takes in that page-number field."
+     }
+    },
+    "12": {
+     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
+     "end": "igned as Chief Executive Officer in June 2022 and as a director on July 1, 2022.",
+     "lines": [
+      1882,
+      1923
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "Item 13. Certain Relationships and Related Transactions, and Director Independen",
+     "end": "ansaction is in, or is not inconsistent with, the best interests of the Company.",
+     "lines": [
+      1925,
+      1971
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "Item 14. Principal Accounting Fees and Services. The Company’s independent regis",
+     "end": "ether such services are consistent with the SEC’s rules on auditor independence.",
+     "lines": [
+      1973,
+      1992
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "Item 15. Exhibits, Financial Statement Schedules. (1) For a list of the financia",
+     "end": "¥ Indicates a management contract or compensatory plan, contract or arrangement.",
+     "lines": [
+      1998,
+      2061
+     ],
+     "verified": "agreed"
+    },
+    "16": {
+     "start": "Item 16. Form 10-K Summary None.",
+     "end": "Item 16. Form 10-K Summary None.",
+     "lines": [
+      2063,
+      2065
+     ],
+     "verified": "agreed"
+    }
+   },
+   "absent": [
+    {
+     "item": "1C",
+     "note": "not listed in TOC or body"
+    }
+   ],
+   "notes": "TOC at lines 92-138 skipped. Item 8 says statements appear beginning on page F-1; statements block (INDEX TO FINANCIAL STATEMENTS at 2116 through notes ending 2881; F-24 at 2883 is furniture) follows SIGNATURES (2069-2112) which belongs to no item. Item 6 is [Reserved].",
+   "retired_in": 2,
+   "reason": "edgartools-llmp.12.1: page-furniture, field-code, own-PART, running-header, subheading and '2P' findings (2008 Landec, 2013 Plum Creek and Vasomedical, 2015 Tetra Tech, 2023 Bright Green, 2025 TechPrecision); last-item Item 15 end misses (2007 Intuit, 2017 Sanmina)"
+  }
+ ],
  "filings": [
   {
    "accession": "0000950129-04-000224",
@@ -2037,224 +3770,6 @@
    "notes": "Fiscal year ended Jan 31 2003. Pre-2005 filing, no 1A/1B/9A etc. Real TOC at lines 60-80; a duplicate QuickLinks index at 1984-2060 repeats the headings and is not body."
   },
   {
-   "accession": "0001144204-08-044977",
-   "cik": 1005286,
-   "company": "LANDEC CORP \\CA\\",
-   "filing_date": "2008-08-08",
-   "era": "2007-2012",
-   "size": "small",
-   "public_float": 291230000,
-   "sic": 2834,
-   "items": {
-    "1": {
-     "start": "Item 1. Business This report contains forward-looking statements within the mean",
-     "end": "s with the SEC. Information contained on our website is not part of this Report.",
-     "lines": [
-      162,
-      467
-     ],
-     "verified": "agreed"
-    },
-    "1A": {
-     "start": "Item 1A. Risk Factors Landec desires to take advantage of the “Safe Harbor” prov",
-     "end": "t be written-off, which could materially and adversely affect our profitability.",
-     "lines": [
-      469,
-      707
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "end": "neither: Both candidates run 1A through the separate '1B. Unresolved Staff Comments' heading at line 709 (an item heading even though it has no 'Item' word), so 1A ends on the goodwill risk factor paragraph at line 707."
-     }
-    },
-    "2": {
-     "start": "Item 2. Properties As of May 25, 2008, the Company owned or leased properties in",
-     "end": "ere are no bank liens encumbering any of the Company’s owned land and buildings.",
-     "lines": [
-      715,
-      742
-     ],
-     "verified": "agreed"
-    },
-    "3": {
-     "start": "Item 3. Legal Proceedings The Company is involved in litigation arising in the n",
-     "end": "ts that would be material to the business or financial condition of the Company.",
-     "lines": [
-      744,
-      746
-     ],
-     "verified": "agreed"
-    },
-    "4": {
-     "start": "Item 4. Submission of Matters to a Vote of Security Holders There were no matter",
-     "end": "lders during the fourth quarter of the Company’s fiscal year ended May 25, 2008.",
-     "lines": [
-      748,
-      750
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "end": "labeller: Line 750 is the last sentence of Item 4; line 752 '- 22 -' is a page number, which is trailing furniture."
-     }
-    },
-    "5": {
-     "start": "Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and I",
-     "end": " no shares repurchased by the Company during the quarter ending on May 25, 2008.",
-     "lines": [
-      756,
-      788
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "end": "labeller: Line 788 is the last content of Item 5; line 790 '- 23 -' is a page number."
-     }
-    },
-    "6": {
-     "start": "Item 6. Selected Financial Data The information set forth below is not necessari",
-     "end": "ficit) Total $ 114,466 $ 110,228 $ 85,049 $ 72,060 $ 61,549 shareholders' equity",
-     "lines": [
-      792,
-      890
-     ],
-     "verified": "agreed"
-    },
-    "7": {
-     "start": "Item 7. Management’s Discussion and Analysis of Financial Condition and Results ",
-     "end": " to finance its operational and capital requirements for the foreseeable future.",
-     "lines": [
-      892,
-      1383
-     ],
-     "verified": "agreed"
-    },
-    "7A": {
-     "start": "Item 7A. Quantitative and Qualitative Disclosures about Market Risk Not material",
-     "end": "tem 7A. Quantitative and Qualitative Disclosures about Market Risk Not material.",
-     "lines": [
-      1385,
-      1387
-     ],
-     "verified": "agreed"
-    },
-    "8": {
-     "start": "Item 8. Financial Statements and Supplementary Data See Item 15 of Part IV of th",
-     "end": "nancial Statements and Supplementary Data See Item 15 of Part IV of this report.",
-     "lines": [
-      1389,
-      1391
-     ],
-     "verified": "agreed",
-     "note": "pointer to Item 15; statements are inside Item 15, so Item 8 is the short pointer"
-    },
-    "9": {
-     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
-     "end": "reements with Accountants on Accounting and Financial Disclosure Not applicable.",
-     "lines": [
-      1393,
-      1395
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "end": "labeller: 'Not applicable.' at line 1395 is the last content; line 1397 '- 39 -' is a page number."
-     }
-    },
-    "9A": {
-     "start": "Item 9A. Controls and Procedures Evaluation of Disclosure Controls and Procedure",
-     "end": " opinion thereon. /s/ ERNST & YOUNG LLP San Francisco, California August 7, 2008",
-     "lines": [
-      1399,
-      1439
-     ],
-     "verified": "agreed"
-    },
-    "9B": {
-     "start": "Item 9B. Other Information None",
-     "end": "Item 9B. Other Information None",
-     "lines": [
-      1441,
-      1443
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: Both start on the heading at line 1441. A's slice leaves out the trailing '- 41 -' page number.",
-      "end": "labeller: 'None' at line 1443 is the last content; line 1445 '- 41 -' is a page number that comes before PART III."
-     }
-    },
-    "10": {
-     "start": "Item 10. Directors and Executive Officers of the Registrant This information req",
-     "end": "fiscal year end covered by this Report) and is incorporated herein by reference.",
-     "lines": [
-      1449,
-      1451
-     ],
-     "verified": "agreed"
-    },
-    "11": {
-     "start": "Item 11. Executive Compensation This information required by this item will be c",
-     "end": "fiscal year end covered by this Report) and is incorporated herein by reference.",
-     "lines": [
-      1453,
-      1455
-     ],
-     "verified": "agreed"
-    },
-    "12": {
-     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management This inf",
-     "end": "fiscal year end covered by this Report) and is incorporated herein by reference.",
-     "lines": [
-      1457,
-      1459
-     ],
-     "verified": "agreed"
-    },
-    "13": {
-     "start": "Item 13. Certain Relationships and Related Transactions and Director Independenc",
-     "end": "fiscal year end covered by this Report) and is incorporated herein by reference.",
-     "lines": [
-      1461,
-      1463
-     ],
-     "verified": "agreed"
-    },
-    "14": {
-     "start": "Item 14. Principal Accountant Fees and Services This information required by thi",
-     "end": "fiscal year end covered by this Report) and is incorporated herein by reference.",
-     "lines": [
-      1465,
-      1467
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "end": "labeller: Line 1467 is the last sentence of Item 14; line 1469 '- 42 -' is a page number."
-     }
-    },
-    "15": {
-     "start": "Item 15. Exhibits and Financial Statement Schedules (a) 1. Consolidated Financia",
-     "end": "2.2 CFO Certification pursuant to section 906 of the Sarbanes-Oxley Act of 2002.",
-     "lines": [
-      1473,
-      3180
-     ],
-     "verified": "adjudicated",
-     "note": "runs through financial statements, SIGNATURES (3096) and EXHIBIT INDEX (3161-3180); policy-open: exhibit index after last item",
-     "why": {
-      "end": "labeller: The exhibit list ends with the 32.2 row at line 3180; line 3182 '- 79 -' is the final page number."
-     }
-    }
-   },
-   "absent": [
-    {
-     "item": "1B",
-     "note": "not in TOC or body (2008 filing)"
-    },
-    {
-     "item": "16",
-     "note": "not present in this filing"
-    }
-   ],
-   "notes": "Items 1B, 1C, 9C and 16 do not exist in this 2008 filing. Item 15 includes the financial statements and the signatures."
-  },
-  {
    "accession": "0001437749-10-000526",
    "cik": 1258602,
    "company": "NELNET INC",
@@ -3696,210 +5211,6 @@
    "notes": "Item 4 is missing from both the TOC and the body. Unnumbered Executive Officers of the Registrant section (643-694) follows Item 3 and belongs to no item, so Item 3 ends at 641. Item 8 body heading (1485-1512) only points to the statements presented following Item 15, so Item 8 is the statements block: it starts at the 'COVIDIEN PLC' title line (1717), directly above the Index to Consolidated Financial Statements (1719), and ends at the last line of Schedule II (4252). 4254 is a page number."
   },
   {
-   "accession": "0000950134-07-020001",
-   "cik": 896878,
-   "company": "INTUIT INC",
-   "filing_date": "2007-09-14",
-   "era": "2007-2012",
-   "size": "large",
-   "public_float": 9960000000,
-   "sic": 7372,
-   "items": {
-    "1": {
-     "start": "ITEM 1 BUSINESS CORPORATE BACKGROUND General Intuit Inc. is a leading provider o",
-     "end": "loyees, and we expect to face continuing challenges in recruiting and retention.",
-     "lines": [
-      121,
-      454
-     ],
-     "verified": "agreed"
-    },
-    "1A": {
-     "start": "ITEM 1A RISK FACTORS Forward-Looking Statements and Risk Factors This Annual Rep",
-     "end": "harmed in the event of a major earthquake or other natural or man-made disaster.",
-     "lines": [
-      459,
-      850
-     ],
-     "verified": "agreed"
-    },
-    "1B": {
-     "start": "ITEM 1B UNRESOLVED STAFF COMMENTS None.",
-     "end": "ITEM 1B UNRESOLVED STAFF COMMENTS None.",
-     "lines": [
-      855,
-      858
-     ],
-     "verified": "agreed"
-    },
-    "2": {
-     "start": "ITEM 2 PROPERTIES Our principal locations, their purposes and the expiration dat",
-     "end": "financial statements in Item 8 for more information about our lease commitments.",
-     "lines": [
-      860,
-      885
-     ],
-     "verified": "agreed"
-    },
-    "3": {
-     "start": "ITEM 3 LEGAL PROCEEDINGS Muriel Siebert & Co., Inc. v. Intuit Inc., Index No. 03",
-     "end": "arising out of intellectual property claims could adversely affect our business.",
-     "lines": [
-      890,
-      899
-     ],
-     "verified": "agreed"
-    },
-    "4": {
-     "start": "ITEM 4 SUBMISSION OF MATTERS TO A VOTE OF SECURITY HOLDERS None.",
-     "end": "ITEM 4 SUBMISSION OF MATTERS TO A VOTE OF SECURITY HOLDERS None.",
-     "lines": [
-      901,
-      904
-     ],
-     "verified": "agreed"
-    },
-    "5": {
-     "start": "ITEM 5 MARKET FOR REGISTRANT’S COMMON EQUITY, RELATED STOCKHOLDER MATTERS AND IS",
-     "end": "8 Morgan Stanley High Technology $100.00 $126.83 $144.82 $159.85 $147.46 $196.15",
-     "lines": [
-      911,
-      967
-     ],
-     "verified": "agreed"
-    },
-    "6": {
-     "start": "ITEM 6 SELECTED FINANCIAL DATA The following tables show Intuit’s selected finan",
-     "end": "265 Total stockholders’ equity 2,035,013 1,738,086 1,695,499 1,822,419 1,964,837",
-     "lines": [
-      972,
-      1017
-     ],
-     "verified": "agreed"
-    },
-    "7": {
-     "start": "ITEM 7 MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS O",
-     "end": "AS 159 will have on our financial position, results of operations or cash flows.",
-     "lines": [
-      1022,
-      1550
-     ],
-     "verified": "agreed"
-    },
-    "7A": {
-     "start": "ITEM 7A QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Investment Po",
-     "end": "e. As of July 31, 2007 we did not engage in foreign currency hedging activities.",
-     "lines": [
-      1555,
-      1589
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: 7A starts on its heading at 1555. A starts at the same heading but its window could not be located."
-     }
-    },
-    "8": {
-     "start": "ITEM 8 FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA 1. INDEX TO CONSOLIDATED FINA",
-     "end": "ons to the reserves for product returns and rebates are charged against revenue.",
-     "lines": [
-      1594,
-      3277
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: Item 8 starts on its heading at 1594. A starts at the same heading but its window could not be located."
-     }
-    },
-    "9": {
-     "start": "ITEM 9 CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL",
-     "end": " AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE None.",
-     "lines": [
-      3282,
-      3284
-     ],
-     "verified": "agreed"
-    },
-    "9A": {
-     "start": "ITEM 9A CONTROLS AND PROCEDURES Evaluation of Disclosure Controls and Procedures",
-     "end": "ably likely to materially affect, our internal control over financial reporting.",
-     "lines": [
-      3286,
-      3301
-     ],
-     "verified": "agreed"
-    },
-    "9B": {
-     "start": "ITEM 9B OTHER INFORMATION On May 23, 2007, Intuit entered into Amendment No. 2 t",
-     "end": "are filed as Exhibits 10.71, 10.74 and 10.94 to this Annual Report on Form 10-K.",
-     "lines": [
-      3303,
-      3315
-     ],
-     "verified": "agreed"
-    },
-    "10": {
-     "start": "ITEM 10 DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE Except for the in",
-     "end": "stration - Accounting and Finance from the University of California at Berkeley.",
-     "lines": [
-      3319,
-      3377
-     ],
-     "verified": "agreed"
-    },
-    "11": {
-     "start": "ITEM 11 EXECUTIVE COMPENSATION The information required for this Item is incorpo",
-     "end": "roxy Statement to be filed for our December 2007 Annual Meeting of Stockholders.",
-     "lines": [
-      3379,
-      3382
-     ],
-     "verified": "agreed"
-    },
-    "12": {
-     "start": "ITEM 12 SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT AND RELAT",
-     "end": "roxy Statement to be filed for our December 2007 Annual Meeting of Stockholders.",
-     "lines": [
-      3384,
-      3387
-     ],
-     "verified": "agreed"
-    },
-    "13": {
-     "start": "ITEM 13 CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS, AND DIRECTOR INDEPENDENC",
-     "end": "roxy Statement to be filed for our December 2007 Annual Meeting of Stockholders.",
-     "lines": [
-      3389,
-      3392
-     ],
-     "verified": "agreed"
-    },
-    "14": {
-     "start": "ITEM 14 PRINCIPAL ACCOUNTANT FEES AND SERVICES The information required for this",
-     "end": "roxy Statement to be filed for our December 2007 Annual Meeting of Stockholders.",
-     "lines": [
-      3394,
-      3397
-     ],
-     "verified": "agreed"
-    },
-    "15": {
-     "start": "ITEM 15 EXHIBITS AND FINANCIAL STATEMENT SCHEDULES (a) The following documents a",
-     "end": "934, except to the extent that Intuit specifically incorporates it by reference.",
-     "lines": [
-      3404,
-      3890
-     ],
-     "verified": "adjudicated",
-     "note": "policy-open: exhibit index after last item",
-     "why": {
-      "end": "labeller: An EXHIBIT INDEX (3864-3890) follows the signatures and power of attorney, so the last item runs through its last line at 3890, before the page number '118' (note: policy-open: exhibit index after last item)."
-     }
-    }
-   },
-   "absent": [],
-   "notes": "Intuit FY2007 10-K. Item headings are printed as bare 'ITEM N' lines with the title on the next line, except Items 5, 9, 10 and 15 which carry the title on the same line. Item 8 includes the financial statements and the schedule (Note ending 3277). Item 15 runs through signatures and the exhibit index to line 3890."
-  },
-  {
    "accession": "0001193125-12-089119",
    "cik": 1163348,
    "company": "Allied World Assurance Co Holdings, AG",
@@ -4293,228 +5604,6 @@
    "notes": "Small shell company, no TOC. No Item 1B/1C/7A/9C/16 (pre-2020 style). Item 8 points to statements following the signature page; statements block starts at auditor letterhead (line 601, firm names; the report heading is at 609) and runs to F-9 (line 905 is furniture). Item 4 is titled 'MINING SAFTY DISCLOSURE' (sic). Items 1A content runs through line 199 (Employees subsection) directly before Item 2."
   },
   {
-   "accession": "0000849213-13-000007",
-   "cik": 849213,
-   "company": "PLUM CREEK TIMBER CO INC",
-   "filing_date": "2013-02-22",
-   "era": "2013-2018",
-   "size": "large",
-   "public_float": 6386084358,
-   "sic": 6798,
-   "items": {
-    "1": {
-     "start": "ITEM 1. BUSINESS Industry Overview General The timber industry possesses several",
-     "end": "ird Avenue, Suite 4300, Seattle, Washington 98104, or by calling (206) 467-3600.",
-     "lines": [
-      109,
-      386
-     ],
-     "verified": "agreed"
-    },
-    "1A": {
-     "start": "ITEM 1A. RISK FACTORS Business and Operating Risks The Cyclical Nature of Our Bu",
-     "end": "e to occur. The net income of our TRSs is subject to corporate-level income tax.",
-     "lines": [
-      393,
-      579
-     ],
-     "verified": "agreed"
-    },
-    "1B": {
-     "start": "ITEM 1B. UNRESOLVED STAFF COMMENTS None.",
-     "end": "ITEM 1B. UNRESOLVED STAFF COMMENTS None.",
-     "lines": [
-      581,
-      583
-     ],
-     "verified": "agreed"
-    },
-    "2": {
-     "start": "ITEM 2. PROPERTIES We believe that our timberlands and manufacturing facilities ",
-     "end": " curtailed production at our Evergreen, MT sawmill and remanufacturing facility.",
-     "lines": [
-      590,
-      616
-     ],
-     "verified": "agreed"
-    },
-    "3": {
-     "start": "ITEM 3. LEGAL PROCEEDINGS Legal Proceedings. There is no individual pending or t",
-     "end": "e would intend to vigorously contest any re-characterization the IRS may assert.",
-     "lines": [
-      618,
-      631
-     ],
-     "verified": "agreed"
-    },
-    "4": {
-     "start": "ITEM 4. MINE SAFETY DISCLOSURES Not Applicable.",
-     "end": "ITEM 4. MINE SAFETY DISCLOSURES Not Applicable.",
-     "lines": [
-      633,
-      635
-     ],
-     "verified": "agreed",
-     "note": "Executive Officers of the Registrant (line 641 on) is unnumbered and belongs to no item"
-    },
-    "5": {
-     "start": "ITEM 5. MARKET FOR REGISTRANT'S COMMON EQUITY, RELATED STOCKHOLDER MATTERS AND I",
-     "end": "orated by reference into any future filings. Purchase of Equity Securities None.",
-     "lines": [
-      710,
-      763
-     ],
-     "verified": "agreed"
-    },
-    "6": {
-     "start": "ITEM 6. SELECTED FINANCIAL DATA Financial Highlights The following table summari",
-     "end": "hat were contributed to a timberland venture in exchange for an equity interest.",
-     "lines": [
-      770,
-      814
-     ],
-     "verified": "agreed"
-    },
-    "7": {
-     "start": "ITEM 7. MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
-     "end": "es reconciling items not allocated to segments for financial reporting purposes.",
-     "lines": [
-      821,
-      1842
-     ],
-     "verified": "agreed"
-    },
-    "7A": {
-     "start": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Interest Rat",
-     "end": " of January 2, 2013, all of the borrowings under our line of credit were repaid.",
-     "lines": [
-      1849,
-      1892
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: The heading is at line 1849. Line 1846 is a 'Table of Contents PART II / ITEM 7A' running header, which is furniture."
-     }
-    },
-    "8": {
-     "start": "ITEM 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA PLUM CREEK TIMBER COMPANY, I",
-     "end": "counting principles. /s/ Ernst & Young LLP Seattle, Washington February 22, 2013",
-     "lines": [
-      1899,
-      5034
-     ],
-     "verified": "agreed",
-     "note": "statements in place; heading repeated 'CONTINUED' at 3583"
-    },
-    "9": {
-     "start": "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
-     "end": " AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE None.",
-     "lines": [
-      5041,
-      5043
-     ],
-     "verified": "agreed"
-    },
-    "9A": {
-     "start": "ITEM 9A. CONTROLS AND PROCEDURES Evaluation of Controls and Procedures Disclosur",
-     "end": "red public accounting firm, as stated in their report, which is included herein.",
-     "lines": [
-      5045,
-      5065
-     ],
-     "verified": "agreed"
-    },
-    "9B": {
-     "start": "ITEM 9B. OTHER INFORMATION None.",
-     "end": "ITEM 9B. OTHER INFORMATION None.",
-     "lines": [
-      5067,
-      5069
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: Both start on the heading at line 5067. B's slice also takes in the footer and running header that follow.",
-      "end": "labeller: 'None.' at line 5069 is the last content; lines 5071-5073 are the 'PLUM CREEK 2012 FORM 10-K | 143' footer and the 'Table of Contents PART III / ITEM 10' header."
-     }
-    },
-    "10": {
-     "start": "ITEM 10. DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE Information abou",
-     "end": "ard of Directors and Corporate Governance - Board Committees - Audit Committee”.",
-     "lines": [
-      5078,
-      5080
-     ],
-     "verified": "agreed"
-    },
-    "11": {
-     "start": "ITEM 11. EXECUTIVE COMPENSATION Information under the following captions in the ",
-     "end": "ort”; and “Board of Directors and Corporate Governance - Director Compensation”.",
-     "lines": [
-      5082,
-      5084
-     ],
-     "verified": "agreed"
-    },
-    "12": {
-     "start": "ITEM 12. SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT AND RELA",
-     "end": "rmation”; and “ Security Ownership of Certain Beneficial Owners and Management”.",
-     "lines": [
-      5086,
-      5088
-     ],
-     "verified": "agreed"
-    },
-    "13": {
-     "start": "ITEM 13. CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS, AND DIRECTOR INDEPENDEN",
-     "end": "ard of Directors and Corporate Governance - Board Committees - Audit Committee”.",
-     "lines": [
-      5090,
-      5092
-     ],
-     "verified": "agreed"
-    },
-    "14": {
-     "start": "ITEM 14. PRINCIPAL ACCOUNTING FEES AND SERVICES Information under the following ",
-     "end": "ce: “Independent Auditors - Fees to the Independent Auditors for 2011 and 2012.”",
-     "lines": [
-      5094,
-      5096
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "end": "labeller: Line 5096 is the last content; lines 5098-5100 are the page footer and the 'Table of Contents PART IV / ITEM 15' running header."
-     }
-    },
-    "15": {
-     "start": "ITEM 15. EXHIBITS, FINANCIAL STATEMENT SCHEDULES Documents filed as a part of th",
-     "end": "kbase Document. 101. PRE XBRL Taxonomy Extension Presentation Linkbase Document.",
-     "lines": [
-      5105,
-      5236
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "end": "labeller: Item 15 ends at the last exhibit row '101. PRE ...' on line 5236, before the page footer and Signatures. Nothing of substance follows the signatures. A's text ('101.PRE', no space) does not match the document and was never located."
-     }
-    }
-   },
-   "absent": [
-    {
-     "item": "1C",
-     "note": "not in TOC or body"
-    },
-    {
-     "item": "9C",
-     "note": "not in TOC or body"
-    },
-    {
-     "item": "16",
-     "note": "not in TOC or body"
-    }
-   ],
-   "notes": "Plum Creek 2012. TOC lines 74-99. Page furniture is 'PLUM CREEK 2012 FORM 10-K | N' plus 'Table of Contents  PART x / ITEM n' back-links. Signatures at 5241 with nothing of substance after, so Item 15 ends at the exhibit list (5236)."
-  },
-  {
    "accession": "0001008886-16-000285",
    "cik": 928658,
    "company": "COVENANT TRANSPORTATION GROUP INC",
@@ -4712,400 +5801,6 @@
    },
    "absent": [],
    "notes": "All items present with body headings. Item 8 body (1265-1267) only points to 'pages 61 through 89 elsewhere in this report'. The statements block starts at the auditor's report (line 1480), after Item 15 and the signature block (1440-1475), and runs to the end of the file (line 2444). Item 15 therefore ends at line 1435 (end of the exhibit-index footnotes), before the page number '59' and SIGNATURES. No exhibit index follows the last item."
-  },
-  {
-   "accession": "0001201800-13-000006",
-   "cik": 839087,
-   "company": "VASOMEDICAL, INC",
-   "filing_date": "2013-04-01",
-   "era": "2013-2018",
-   "size": "small",
-   "public_float": 29336000,
-   "sic": 3845,
-   "items": {
-    "1": {
-     "start": "ITEM 1 - BUSINESS Except for historical information contained in this report, th",
-     "end": "ibute or represent are capable of meeting our demand for the foreseeable future.",
-     "lines": [
-      104,
-      442
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: The 'ITEM 1 - BUSINESS' heading is at line 104. B starts on the 'PART I' divider at 102, which is furniture."
-     }
-    },
-    "1A": {
-     "start": "ITEM 1A - RISK FACTORS Investing in our common stock involves risk. You should c",
-     "end": "s or furnished pursuant to Section 13(a) or 15(d) of the Securities Act of 1934.",
-     "lines": [
-      446,
-      597
-     ],
-     "verified": "agreed"
-    },
-    "2": {
-     "start": "ITEM 2 - PROPERTIES We lease an 18,000 square foot headquarters and manufacturin",
-     "end": " be difficulty in relocating the office should we decide not to renew the lease.",
-     "lines": [
-      599,
-      607
-     ],
-     "verified": "agreed"
-    },
-    "5": {
-     "start": "ITEM 5 - MARKET FOR REGISTRANT’S COMMON EQUITY, RELATED STOCKHOLDER MATTERS AND ",
-     "end": " common stock and do not intend to pay cash dividends in the foreseeable future.",
-     "lines": [
-      613,
-      630
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: The Item 5 heading is at line 613 with the text 'ITEM 5 - MARKET ...'. A's window has a different spacing ('ITEM 5 -MARKET') and could not be located in the document."
-     }
-    },
-    "7": {
-     "start": "ITEM 7 - MANAGEMENT'S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS",
-     "end": " Company’s consolidated financial position, results of operations or cash flows.",
-     "lines": [
-      632,
-      898
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: The Item 7 heading is at line 632 and matches B. A's window ('ITEM 7 -MANAGEMENT'S') could not be located."
-     }
-    },
-    "8": {
-     "start": "Vasomedical, Inc. and Subsidiaries INDEX TO CONSOLIDATED FINANCIAL STATEMENTS Fo",
-     "end": "crease (decrease) in cash and cash equivalents $ 9,175 $ (806) $ (5,836) $ 2,619",
-     "lines": [
-      1387,
-      2619
-     ],
-     "verified": "adjudicated",
-     "note": "item 8 pointer -> back statements",
-     "why": {
-      "start": "labeller: Item 8 (900-902) only points to the statements in the 'accompanying Index'. Those statements are printed after SIGNATURES (1358), so Item 8 is that block and starts at the registrant title line 1387 directly above 'INDEX TO CONSOLIDATED FINANCIAL STATEMENTS' (1389).",
-      "end": "labeller: Item 8 here is the statements block at the back, which ends at line 2619. The line after it (2621) is the page number 'F-33', and the document ends there."
-     }
-    },
-    "9A": {
-     "start": "ITEM 9A - CONTROLS AND PROCEDURES Report on Disclosure Controls and Procedures D",
-     "end": "at permit the Company to provide only Management’s report in this Annual Report.",
-     "lines": [
-      904,
-      928
-     ],
-     "verified": "agreed"
-    },
-    "10": {
-     "start": "ITEM 10 - DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE Directors of th",
-     "end": "om SUNY at Albany, and a B.S. in Mechanical Engineering from Hofstra University.",
-     "lines": [
-      932,
-      1025
-     ],
-     "verified": "agreed"
-    },
-    "11": {
-     "start": "ITEM 11 - EXECUTIVE COMPENSATION The following table sets forth the annual and l",
-     "end": "except as otherwise disclosed, had any relationship requiring disclosure herein.",
-     "lines": [
-      1027,
-      1135
-     ],
-     "verified": "agreed"
-    },
-    "12": {
-     "start": "ITEM 12 - SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT AND REL",
-     "end": ", 2012, 866,560 shares remain available for future issuance under the 2010 Plan.",
-     "lines": [
-      1137,
-      1212
-     ],
-     "verified": "agreed"
-    },
-    "13": {
-     "start": "ITEM 13 - CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS AND DIRECTOR INDEPENDEN",
-     "end": " least 75% of the meetings of the Board and the committees on which they served.",
-     "lines": [
-      1214,
-      1250
-     ],
-     "verified": "agreed"
-    },
-    "14": {
-     "start": "ITEM 14 - PRINCIPAL ACCOUNTING FEES AND SERVICES Rothstein, Kass & Company, P.C.",
-     "end": "nths ended December 31, 2011 and the year ended December 31, 2012, respectively.",
-     "lines": [
-      1252,
-      1265
-     ],
-     "verified": "agreed"
-    },
-    "15": {
-     "start": "ITEM 15 - EXHIBITS AND FINANCIAL STATEMENT SCHEDULES Financial Statements and Fi",
-     "end": " 2011. (14) Incorporated by reference to Report on Form 8-K dated June 20, 2012.",
-     "lines": [
-      1271,
-      1354
-     ],
-     "verified": "agreed"
-    }
-   },
-   "absent": [
-    {
-     "item": "1B",
-     "note": "not in TOC or body"
-    },
-    {
-     "item": "3",
-     "note": "not in TOC or body"
-    },
-    {
-     "item": "4",
-     "note": "not in TOC or body"
-    },
-    {
-     "item": "6",
-     "note": "not in TOC or body"
-    },
-    {
-     "item": "7A",
-     "note": "not in TOC or body"
-    },
-    {
-     "item": "9",
-     "note": "not in TOC or body"
-    },
-    {
-     "item": "9B",
-     "note": "not in TOC or body"
-    },
-    {
-     "item": "1C",
-     "note": "not in filing (2013)"
-    },
-    {
-     "item": "9C",
-     "note": "not in filing"
-    },
-    {
-     "item": "16",
-     "note": "not in filing"
-    },
-    {
-     "item": "2P",
-     "note": "pipeline keyed 'ITEM 2 - PROPERTIES' as item 2P; the real Item 2 is labelled under '2' (pipeline bug: wrong item key)"
-    }
-   ],
-   "notes": "Item 8 body (900-902) only points to the Index to Consolidated Financial Statements; statements at the back start at registrant-name line 1387 (index 1389, auditor report 1410) and run to 2619 (F-33 at 2621 is furniture). No exhibit index at the back; Item 15 ends before the SIGNATURES heading at 1358."
-  },
-  {
-   "accession": "0000897723-17-000029",
-   "cik": 897723,
-   "company": "SANMINA CORP",
-   "filing_date": "2017-11-13",
-   "era": "2013-2018",
-   "size": "large",
-   "public_float": 2966474443,
-   "sic": 3672,
-   "items": {
-    "1": {
-     "start": "Item 1. Business Overview Sanmina Corporation (“we” or “Sanmina”) is a leading g",
-     "end": "obal industrial gases and engineering company, from September 1986 to June 2000.",
-     "lines": [
-      112,
-      427
-     ],
-     "verified": "agreed",
-     "note": "includes Executive Officers of the Registrant subsection (line 407)"
-    },
-    "1A": {
-     "start": "Item 1A. Risk Factors Adverse changes in the key end markets we target could har",
-     "end": "tions, any of which may cause the market price of our common stock to fluctuate.",
-     "lines": [
-      430,
-      678
-     ],
-     "verified": "agreed"
-    },
-    "1B": {
-     "start": "Item 1B. Unresolved Staff Comments None.",
-     "end": "Item 1B. Unresolved Staff Comments None.",
-     "lines": [
-      681,
-      683
-     ],
-     "verified": "agreed"
-    },
-    "2": {
-     "start": "Item 2. Properties Facilities. Our customers market numerous products throughout",
-     "end": "re, as applicable, certified to American Petroleum Institute (API) requirements.",
-     "lines": [
-      686,
-      740
-     ],
-     "verified": "agreed"
-    },
-    "3": {
-     "start": "Item 3. Legal Proceedings Two of our subsidiaries, Sanmina-SCI do Brasil Technol",
-     "end": "onably estimated. See also Note 7 of Notes to Consolidated Financial Statements.",
-     "lines": [
-      742,
-      755
-     ],
-     "verified": "agreed"
-    },
-    "4": {
-     "start": "Item 4. Mine Safety Disclosures. Not applicable.",
-     "end": "Item 4. Mine Safety Disclosures. Not applicable.",
-     "lines": [
-      757,
-      759
-     ],
-     "verified": "agreed"
-    },
-    "5": {
-     "start": "Item 5. Market for Registrant's Common Equity, Related Stockholder Matters and I",
-     "end": "$159.6 million for an average price per share of $36.69 (excluding commissions).",
-     "lines": [
-      764,
-      829
-     ],
-     "verified": "agreed"
-    },
-    "6": {
-     "start": "Item 6. Selected Financial Data The following selected financial data should be ",
-     "end": ",512 Stockholders' equity $1,647,684 $1,609,803 $1,520,471 $1,246,755 $1,091,564",
-     "lines": [
-      832,
-      867
-     ],
-     "verified": "agreed"
-    },
-    "7": {
-     "start": "Item 7. Management's Discussion and Analysis of Financial Condition and Results ",
-     "end": "utable to certain U.S. and foreign deferred tax assets and net operating losses.",
-     "lines": [
-      870,
-      1228
-     ],
-     "verified": "agreed"
-    },
-    "7A": {
-     "start": "Item 7A. Quantitative and Qualitative Disclosures about Market Risk Interest Rat",
-     "end": "forecasts are materially inaccurate, we could incur significant gains or losses.",
-     "lines": [
-      1231,
-      1245
-     ],
-     "verified": "agreed"
-    },
-    "8": {
-     "start": "Item 8. Financial Statements and Supplementary Data The information required by ",
-     "end": " 2019 $4,169 2020 $3,960 2021 $4,276 2022 $4,273 Years 2023 through 2027 $21,377",
-     "lines": [
-      1247,
-      2335
-     ],
-     "verified": "agreed"
-    },
-    "9": {
-     "start": "Item 9. Changes In and Disagreements With Accountants on Accounting and Financia",
-     "end": " and Disagreements With Accountants on Accounting and Financial Disclosure None.",
-     "lines": [
-      2338,
-      2340
-     ],
-     "verified": "agreed"
-    },
-    "9A": {
-     "start": "Item 9A. Controls and Procedures (a) Evaluation of Disclosure Controls and Proce",
-     "end": "ably likely to materially affect, our internal control over financial reporting.",
-     "lines": [
-      2342,
-      2355
-     ],
-     "verified": "agreed"
-    },
-    "9B": {
-     "start": "Item 9B. Other Information None.",
-     "end": "Item 9B. Other Information None.",
-     "lines": [
-      2357,
-      2359
-     ],
-     "verified": "agreed"
-    },
-    "10": {
-     "start": "The information called for by Items 10, 11, 12, 13 and 14 of Part III are incorp",
-     "end": "for by Item 401(b) of Regulation S-K has been included in Part I of this report.",
-     "lines": [
-      2364,
-      2364
-     ],
-     "verified": "agreed",
-     "note": "combined 10-14; no item headings, only a sentence under PART III incorporating Items 10-14 from the proxy statement"
-    },
-    "11": {
-     "start": "The information called for by Items 10, 11, 12, 13 and 14 of Part III are incorp",
-     "end": "for by Item 401(b) of Regulation S-K has been included in Part I of this report.",
-     "lines": [
-      2364,
-      2364
-     ],
-     "verified": "agreed",
-     "note": "combined 10-14; see item 10"
-    },
-    "12": {
-     "start": "The information called for by Items 10, 11, 12, 13 and 14 of Part III are incorp",
-     "end": "for by Item 401(b) of Regulation S-K has been included in Part I of this report.",
-     "lines": [
-      2364,
-      2364
-     ],
-     "verified": "agreed",
-     "note": "combined 10-14; see item 10"
-    },
-    "13": {
-     "start": "The information called for by Items 10, 11, 12, 13 and 14 of Part III are incorp",
-     "end": "for by Item 401(b) of Regulation S-K has been included in Part I of this report.",
-     "lines": [
-      2364,
-      2364
-     ],
-     "verified": "agreed",
-     "note": "combined 10-14; see item 10"
-    },
-    "14": {
-     "start": "The information called for by Items 10, 11, 12, 13 and 14 of Part III are incorp",
-     "end": "for by Item 401(b) of Regulation S-K has been included in Part I of this report.",
-     "lines": [
-      2364,
-      2364
-     ],
-     "verified": "agreed",
-     "note": "combined 10-14; see item 10"
-    },
-    "15": {
-     "start": "Item 15. Exhibits and Financial Statement Schedules (a) (1) Financial Statements",
-     "end": "9 $1,642 $ $15,081 Fiscal year ended September 30, 2017 $15,081 $(747) $ $14,334",
-     "lines": [
-      2369,
-      2573
-     ],
-     "verified": "adjudicated",
-     "note": "runs through exhibit list, SIGNATURES (2509) and financial statement Schedule II (2560-2573); page number 89 at 2575 excluded",
-     "why": {
-      "end": "labeller: A Financial Statement Schedule (Schedule II, 2560-2573) follows the signatures, so Item 15 runs through it to 2573, before page number 89 at 2575."
-     }
-    }
-   },
-   "absent": [],
-   "notes": "Items 10-14 have no headings of their own; judgment call to list them as present via the Part III incorporation sentence at line 2364 (if that is not accepted, treat 10-14 as absent). Item 8 holds the statements inline. No Items 1C or 16."
   },
   {
    "accession": "0001558370-17-009444",
@@ -5948,208 +6643,6 @@
    "notes": "Item 8 body (1973-1975) only points to page F-1; the Index to Consolidated Financial Statements (2204), auditor reports, statements, notes and Schedule III (ending 4324, furniture 'S-14' at 4326) are printed after the SIGNATURES block (2159-2202), so Item 8 is that back block. Item 16 ends before SIGNATURES. TOC at lines 80-105 ignored. Items 10/11 and 13/14 share combined headings."
   },
   {
-   "accession": "0001047469-15-008864",
-   "cik": 831641,
-   "company": "TETRA TECH INC",
-   "filing_date": "2015-11-20",
-   "era": "2013-2018",
-   "size": "large",
-   "public_float": 1400000000,
-   "sic": 8711,
-   "items": {
-    "1": {
-     "start": "Item 1. Business General Tetra Tech, Inc. is a leading provider of consulting an",
-     "end": "tions, 3475 East Foothill Boulevard, Pasadena, California 91107, (626) 351-4664.",
-     "lines": [
-      141,
-      616
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: A starts at the Item 1 heading at 141 and keeps the 'General' subheading at 143; B's window skips that subheading and is not in the document."
-     }
-    },
-    "1A": {
-     "start": "Item 1A. Risk Factors We operate in a changing environment that involves numerou",
-     "end": "curities, the value of which is dependent on the performance of our stock price.",
-     "lines": [
-      621,
-      972
-     ],
-     "verified": "agreed"
-    },
-    "1B": {
-     "start": "Item 1B. Unresolved Staff Comments None.",
-     "end": "Item 1B. Unresolved Staff Comments None.",
-     "lines": [
-      974,
-      976
-     ],
-     "verified": "agreed"
-    },
-    "2": {
-     "start": "Item 2. Properties At fiscal 2015 year-end, we owned three facilities located in",
-     "end": "r, BC, Canada Office Building WEI / RME Montréal, QC, Canada Office Building RME",
-     "lines": [
-      978,
-      995
-     ],
-     "verified": "agreed"
-    },
-    "3": {
-     "start": "Item 3. Legal Proceedings For a description of our material pending legal and re",
-     "end": "gencies\" of the \"Notes to Consolidated Financial Statements\" included in Item 8.",
-     "lines": [
-      1000,
-      1002
-     ],
-     "verified": "agreed"
-    },
-    "4": {
-     "start": "Item 4. Mine Safety Disclosures Section 1503 of the Dodd-Frank Wall Street Refor",
-     "end": " of the Dodd-Frank Act and Item 104 of Regulation S-K is included in Exhibit 95.",
-     "lines": [
-      1004,
-      1006
-     ],
-     "verified": "agreed"
-    },
-    "5": {
-     "start": "Item 5. Market for Registrant's Common Equity, Related Stockholder Matters and I",
-     "end": "16,042,830 August 24, 2015 - September 27, 2015 645,822 25.62 645,822 99,500,010",
-     "lines": [
-      1010,
-      1100
-     ],
-     "verified": "agreed"
-    },
-    "6": {
-     "start": "Item 6. Selected Financial Data The following selected financial data was derive",
-     "end": ",868 Tetra Tech stockholders' equity 856,325 1,012,079 997,763 1,018,970 854,725",
-     "lines": [
-      1102,
-      1121
-     ],
-     "verified": "agreed"
-    },
-    "7": {
-     "start": "Item 7. Management's Discussion and Analysis of Financial Condition and Results ",
-     "end": "aration\" of the \"Notes to Consolidated Financial Statements\" included in Item 8.",
-     "lines": [
-      1126,
-      1739
-     ],
-     "verified": "agreed"
-    },
-    "7A": {
-     "start": "Item 7A. Quantitative and Qualitative Disclosures about Market Risk We do not en",
-     "end": "s were recognized as an adjustment to equity through other comprehensive income.",
-     "lines": [
-      1741,
-      1756
-     ],
-     "verified": "agreed"
-    },
-    "8": {
-     "start": "Item 8. Financial Statements and Supplementary Data INDEX TO FINANCIAL STATEMENT",
-     "end": "he sum of the quarterly EPS may not add up to the full-year EPS due to rounding.",
-     "lines": [
-      1761,
-      3268
-     ],
-     "verified": "agreed"
-    },
-    "9": {
-     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
-     "end": " and Disagreements with Accountants on Accounting and Financial Disclosure None.",
-     "lines": [
-      3273,
-      3275
-     ],
-     "verified": "agreed"
-    },
-    "9A": {
-     "start": "Item 9A. Controls and Procedures Evaluation of disclosure controls and procedure",
-     "end": "ably likely to materially affect, our internal control over financial reporting.",
-     "lines": [
-      3277,
-      3293
-     ],
-     "verified": "agreed"
-    },
-    "9B": {
-     "start": "Item 9B. Other Information None.",
-     "end": "Item 9B. Other Information None.",
-     "lines": [
-      3298,
-      3300
-     ],
-     "verified": "agreed"
-    },
-    "10": {
-     "start": "Item 10. Directors, Executive Officers and Corporate Governance The information ",
-     "end": "ny such information on our website, at the address and location specified above.",
-     "lines": [
-      3304,
-      3312
-     ],
-     "verified": "agreed"
-    },
-    "11": {
-     "start": "Item 11. Executive Compensation The information required by this item is include",
-     "end": "ted to the 2016 Annual Meeting of Stockholders and is incorporated by reference.",
-     "lines": [
-      3314,
-      3316
-     ],
-     "verified": "agreed"
-    },
-    "12": {
-     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
-     "end": "ted to the 2016 Annual Meeting of Stockholders and is incorporated by reference.",
-     "lines": [
-      3318,
-      3320
-     ],
-     "verified": "agreed"
-    },
-    "13": {
-     "start": "Item 13. Certain Relationships and Related Transactions, and Director Independen",
-     "end": "ted to the 2016 Annual Meeting of Stockholders and is incorporated by reference.",
-     "lines": [
-      3322,
-      3324
-     ],
-     "verified": "agreed"
-    },
-    "14": {
-     "start": "Item 14. Principal Accounting Fees and Services The information required by this",
-     "end": "ted to the 2016 Annual Meeting of Stockholders and is incorporated by reference.",
-     "lines": [
-      3326,
-      3328
-     ],
-     "verified": "agreed"
-    },
-    "15": {
-     "start": "Item 15. Exhibits, Financial Statement Schedules (a.) 1. Financial Statements Th",
-     "end": "t, except as shall be expressly set forth by specific reference in such filings.",
-     "lines": [
-      3335,
-      3491
-     ],
-     "verified": "adjudicated",
-     "note": "runs through Schedule II, signatures and exhibit index to end of document; policy-open: exhibit index after last item",
-     "why": {
-      "start": "labeller: A starts on the Item 15 heading at 3335 and its text matches the document; B's window ('CO...') is not in the document.",
-      "end": "labeller: An INDEX TO EXHIBITS (3430-3491) follows the signatures, so the last item runs through it and ends at the footnote at 3491, before page number 133. Policy-open: exhibit index after last item."
-     }
-    }
-   },
-   "absent": [],
-   "notes": "TOC at lines 76-130; body headings from 139. Item 8 holds the full financial statements inline. Item 15 includes Schedule II, SIGNATURES and the Index to Exhibits (ends at line 3491, before the trailing page number 133)."
-  },
-  {
    "accession": "0001640334-23-002227",
    "cik": 1348362,
    "company": "Lexaria Bioscience Corp.",
@@ -6342,251 +6835,6 @@
    },
    "absent": [],
    "notes": "Item 8 is a full body section with statements inline. Signatures at 2156 are not part of Item 15. No Item 16 or 9C in this filing. Item 6 titled Selected Financial Data."
-  },
-  {
-   "accession": "0001410578-25-001537",
-   "cik": 1328792,
-   "company": "TECHPRECISION CORP",
-   "filing_date": "2025-07-30",
-   "era": "2019-2025",
-   "size": "small",
-   "public_float": 25100000,
-   "sic": 3440,
-   "items": {
-    "1": {
-     "start": "Item 1. Business. Our Business We are a manufacturer of precision, large-scale f",
-     "end": ", the SEC. These reports are also available at the SEC’s website at www.sec.gov.",
-     "lines": [
-      126,
-      279
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: Item 1 starts on its heading at 126; the PART I divider at 124 belongs to neither item."
-     }
-    },
-    "1A": {
-     "start": "Item 1A. Risk Factors. Our business, results of operations and financial conditi",
-     "end": " sanctions or investigations by Nasdaq, the SEC or other regulatory authorities.",
-     "lines": [
-      281,
-      517
-     ],
-     "verified": "agreed"
-    },
-    "1B": {
-     "start": "Item 1B. Unresolved Staff Comments. None.",
-     "end": "Item 1B. Unresolved Staff Comments. None.",
-     "lines": [
-      519,
-      521
-     ],
-     "verified": "agreed"
-    },
-    "1C": {
-     "start": "Item 1C. Cybersecurity. Cybersecurity Risk Management and Strategy We have proce",
-     "end": "it committee provides regular updates to the board of directors on such reports.",
-     "lines": [
-      523,
-      538
-     ],
-     "verified": "agreed"
-    },
-    "2": {
-     "start": "Item 2. Properties. We own approximately 145,000 square feet of office and manuf",
-     "end": "ire Bank is secured by a first lien on all personal and real property of Stadco.",
-     "lines": [
-      540,
-      544
-     ],
-     "verified": "agreed"
-    },
-    "3": {
-     "start": "Item 3. Legal Proceedings. We may from time to time be subject to various legal ",
-     "end": " settlement, which has not been finalized in a long-form agreement at this time.",
-     "lines": [
-      546,
-      551
-     ],
-     "verified": "agreed"
-    },
-    "4": {
-     "start": "Item 4. Mine Safety Disclosures Not applicable to the registrant.",
-     "end": "Item 4. Mine Safety Disclosures Not applicable to the registrant.",
-     "lines": [
-      553,
-      555
-     ],
-     "verified": "agreed",
-     "note": "Item 4A Executive Officers (line 557) excluded"
-    },
-    "5": {
-     "start": "Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and I",
-     "end": "ompensation plans can be found under Item 12 of this Annual Report on Form 10-K.",
-     "lines": [
-      575,
-      585
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: Item 5 starts on its heading at 575, not on the PART II divider at 573."
-     }
-    },
-    "6": {
-     "start": "Item 6. Reserved",
-     "end": "Item 6. Reserved",
-     "lines": [
-      587,
-      587
-     ],
-     "verified": "agreed"
-    },
-    "7": {
-     "start": "Item 7. Management’s Discussion and Analysis of Financial Condition and Results ",
-     "end": "67 EBITDA $ 587 $ (2,160) $ 2,747 (1) Includes amortization of debt issue costs.",
-     "lines": [
-      589,
-      975
-     ],
-     "verified": "agreed"
-    },
-    "7A": {
-     "start": "Item 7A. Quantitative and Qualitative Disclosure About Market Risk. As a smaller",
-     "end": "g company, we have elected not to provide the information required by this Item.",
-     "lines": [
-      977,
-      979
-     ],
-     "verified": "agreed"
-    },
-    "8": {
-     "start": "Item 8. Financial Statements and Supplementary Data. REPORT OF INDEPENDENT REGIS",
-     "end": "uating the impact of the Act will have on our consolidated financial statements.",
-     "lines": [
-      982,
-      1742
-     ],
-     "verified": "agreed"
-    },
-    "9": {
-     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
-     "end": "and Disagreements with Accountants on Accounting and Financial Disclosure. None.",
-     "lines": [
-      1745,
-      1747
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "end": "labeller: Item 9 ends with 'None.' at 1747; Item 9A's heading is at 1749."
-     }
-    },
-    "9A": {
-     "start": "Item 9A. Controls and Procedures. Disclosure controls and procedures (as defined",
-     "end": " are reasonably likely to affect, our internal control over financial reporting.",
-     "lines": [
-      1749,
-      1820
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: Item 9A's heading is at 1749; B's window starts at the Item 9 heading (1745)."
-     }
-    },
-    "9B": {
-     "start": "Item 9B. Other Information. During the fiscal quarter ended March 31, 2025, none",
-     "end": " trading arrangement,” as those terms are defined in Item 408 of Regulation S-K.",
-     "lines": [
-      1822,
-      1824
-     ],
-     "verified": "agreed"
-    },
-    "9C": {
-     "start": "Item 9C. Disclosure Regarding Foreign Jurisdictions that Prevent Inspection. Not",
-     "end": "closure Regarding Foreign Jurisdictions that Prevent Inspection. Not Applicable.",
-     "lines": [
-      1826,
-      1828
-     ],
-     "verified": "agreed"
-    },
-    "10": {
-     "start": "Item 10. Directors, Executive Officers and Corporate Governance a) Directors of ",
-     "end": "an exhibit to this Annual Report on Form 10-K for the year ended March 31, 2025.",
-     "lines": [
-      1833,
-      1898
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: Item 10 starts on its heading at 1833, not on the PART III divider at 1831."
-     }
-    },
-    "11": {
-     "start": "Item 11. Executive Compensation Summary Compensation Table The Company’s executi",
-     "end": "ereof and irrespective of any general incorporation language in any such filing.",
-     "lines": [
-      1900,
-      2097
-     ],
-     "verified": "agreed"
-    },
-    "12": {
-     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
-     "end": "c) Equity compensation plans approved by security holders 542,500 $ 1.53 204,327",
-     "lines": [
-      2099,
-      2154
-     ],
-     "verified": "agreed"
-    },
-    "13": {
-     "start": "Item 13. Certain Relationships and Related Transactions, and Director Independen",
-     "end": "tandards: Andrew A. Levy, Victor Renuart, Robert Straus, and Walter M. Schenker.",
-     "lines": [
-      2156,
-      2169
-     ],
-     "verified": "agreed"
-    },
-    "14": {
-     "start": "Item 14. Principal Accountant Fees and Services The following is a summary of fe",
-     "end": "ng firm in fiscal 2025 and fiscal 2024 were pre-approved by the Audit Committee.",
-     "lines": [
-      2172,
-      2194
-     ],
-     "verified": "agreed"
-    },
-    "15": {
-     "start": "Item 15. Exhibits and Financial Statement Schedules. The following documents are",
-     "end": ")(6) of Regulation S-K and marked by means of brackets and asterisks (“[****]”).",
-     "lines": [
-      2199,
-      2345
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: Item 15 starts on its heading at 2199, not on the 'Part IV' divider at 2197."
-     }
-    },
-    "16": {
-     "start": "Item 16. Form 10-K Summary. None.",
-     "end": "Item 16. Form 10-K Summary. None.",
-     "lines": [
-      2348,
-      2350
-     ],
-     "verified": "agreed"
-    }
-   },
-   "absent": [
-    {
-     "item": "4A",
-     "note": "4A is not a standard 10-K item key; executive-officer sections belong to no item (non-standard keys are excluded from scoring)"
-    }
-   ],
-   "notes": "All TOC items present in body. Item 4A (557-571) is unnumbered executive officers section, in no item. Item 6 is 'Reserved'. Item 16 is followed by SIGNATURES only."
   },
   {
    "accession": "0001185185-21-000540",
@@ -6806,237 +7054,6 @@
     }
    ],
    "notes": "Item 16 is followed by SIGNATURES (2371), and nothing of substance follows the signature block."
-  },
-  {
-   "accession": "0001493152-23-012561",
-   "cik": 1886799,
-   "company": "Bright Green Corp",
-   "filing_date": "2023-04-17",
-   "era": "2019-2025",
-   "size": "small",
-   "public_float": 141818084,
-   "sic": 2833,
-   "items": {
-    "1": {
-     "start": "Item 1. Business. Overview Our Mission & Vision Bright Green’s mission is to be ",
-     "end": "e or maintain their health status and encourage engagement in healthy behaviors.",
-     "lines": [
-      205,
-      523
-     ],
-     "verified": "agreed"
-    },
-    "1A": {
-     "start": "Item 1A. Risk Factors. Investing in our securities involves a high degree of ris",
-     "end": "ilutive effect, which could lead to a decrease in the price of our common stock.",
-     "lines": [
-      525,
-      1148
-     ],
-     "verified": "agreed"
-    },
-    "1B": {
-     "start": "Item 1B. Unresolved Staff Comments. Not Applicable.",
-     "end": "Item 1B. Unresolved Staff Comments. Not Applicable.",
-     "lines": [
-      1150,
-      1152
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "start": "labeller: 1B starts on its heading at 1150. A's window holds page-field furniture text and could not be located.",
-      "end": "labeller: 1B ends at 'Not Applicable.' on 1152. B takes in the page-number field for page 39."
-     }
-    },
-    "2": {
-     "start": "Item 2. Properties. The following table set forth the Company’s owned and leased",
-     "end": "vailable properties will be sufficient for its needs for the foreseeable future.",
-     "lines": [
-      1156,
-      1173
-     ],
-     "verified": "agreed"
-    },
-    "3": {
-     "start": "Item 3. Legal Proceedings From time to time, we may be involved in legal proceed",
-     "end": "otion. There are no claims for specific monetary liability against either party.",
-     "lines": [
-      1175,
-      1194
-     ],
-     "verified": "agreed"
-    },
-    "4": {
-     "start": "Item 4. Mine Safety Disclosures. Not Applicable.",
-     "end": "Item 4. Mine Safety Disclosures. Not Applicable.",
-     "lines": [
-      1196,
-      1198
-     ],
-     "verified": "agreed"
-    },
-    "5": {
-     "start": "Item 5. Market for Registrant’s Common Equity, Related Stockholder Matters and I",
-     "end": "ur registered equity securities during the period covered by this Annual Report.",
-     "lines": [
-      1204,
-      1228
-     ],
-     "verified": "agreed"
-    },
-    "6": {
-     "start": "Item 6. [Reserved]. Not Applicable.",
-     "end": "Item 6. [Reserved]. Not Applicable.",
-     "lines": [
-      1230,
-      1232
-     ],
-     "verified": "agreed"
-    },
-    "7": {
-     "start": "Item 7. Management’s Discussion and Analysis of Financial Condition and Results ",
-     "end": "isclose the date on which we will adopt the recently issued accounting standard.",
-     "lines": [
-      1234,
-      1375
-     ],
-     "verified": "agreed"
-    },
-    "7A": {
-     "start": "Item 7A. Quantitative and Qualitative Disclosures about Market Risk. Not Applica",
-     "end": " 7A. Quantitative and Qualitative Disclosures about Market Risk. Not Applicable.",
-     "lines": [
-      1377,
-      1379
-     ],
-     "verified": "agreed"
-    },
-    "8": {
-     "start": "INDEX TO FINANCIAL STATEMENTS Report of Independent Registered Public Accounting",
-     "end": "ention to acquire the remaining issued and outstanding common stock of Alterola.",
-     "lines": [
-      2116,
-      2881
-     ],
-     "verified": "adjudicated",
-     "note": "item 8 pointer -> back statements",
-     "why": {
-      "end": "labeller: The statements end with the last real sentence at 2881. B takes in the trailing 'F-24' page number, which is also the last line of the document."
-     }
-    },
-    "9": {
-     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
-     "end": "eements with Accountants on Accounting and Financial Disclosure. Not Applicable.",
-     "lines": [
-      1385,
-      1387
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "end": "labeller: Item 9 ends at 'Not Applicable.' on 1387, before the page number '46'. A takes in that page-number field."
-     }
-    },
-    "9A": {
-     "start": "Item 9A. Controls and Procedures. Evaluation of Disclosure Controls and Procedur",
-     "end": "ably likely to materially affect, our internal control over financial reporting.",
-     "lines": [
-      1391,
-      1411
-     ],
-     "verified": "agreed"
-    },
-    "9B": {
-     "start": "Item 9B. Other Information. None.",
-     "end": "Item 9B. Other Information. None.",
-     "lines": [
-      1413,
-      1415
-     ],
-     "verified": "agreed"
-    },
-    "9C": {
-     "start": "Item 9C. Disclosure Regarding Foreign Jurisdictions that Prevent Inspections. No",
-     "end": "losure Regarding Foreign Jurisdictions that Prevent Inspections. Not Applicable.",
-     "lines": [
-      1417,
-      1419
-     ],
-     "verified": "agreed"
-    },
-    "10": {
-     "start": "Item 10. Directors, Executive Officers and Corporate Governance Directors and Ex",
-     "end": "rs of certain provisions of our Code of Conduct in a Current Report on Form 8-K.",
-     "lines": [
-      1425,
-      1619
-     ],
-     "verified": "agreed"
-    },
-    "11": {
-     "start": "Item 11. Executive Compensation. The following is a discussion and analysis of c",
-     "end": "d Related Transactions, and Director Independence - Indemnification Agreements.”",
-     "lines": [
-      1621,
-      1878
-     ],
-     "verified": "adjudicated",
-     "why": {
-      "end": "labeller: Item 11 ends at line 1878, before the page number '61' at 1880. B takes in that page-number field."
-     }
-    },
-    "12": {
-     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
-     "end": "igned as Chief Executive Officer in June 2022 and as a director on July 1, 2022.",
-     "lines": [
-      1882,
-      1923
-     ],
-     "verified": "agreed"
-    },
-    "13": {
-     "start": "Item 13. Certain Relationships and Related Transactions, and Director Independen",
-     "end": "ansaction is in, or is not inconsistent with, the best interests of the Company.",
-     "lines": [
-      1925,
-      1971
-     ],
-     "verified": "agreed"
-    },
-    "14": {
-     "start": "Item 14. Principal Accounting Fees and Services. The Company’s independent regis",
-     "end": "ether such services are consistent with the SEC’s rules on auditor independence.",
-     "lines": [
-      1973,
-      1992
-     ],
-     "verified": "agreed"
-    },
-    "15": {
-     "start": "Item 15. Exhibits, Financial Statement Schedules. (1) For a list of the financia",
-     "end": "¥ Indicates a management contract or compensatory plan, contract or arrangement.",
-     "lines": [
-      1998,
-      2061
-     ],
-     "verified": "agreed"
-    },
-    "16": {
-     "start": "Item 16. Form 10-K Summary None.",
-     "end": "Item 16. Form 10-K Summary None.",
-     "lines": [
-      2063,
-      2065
-     ],
-     "verified": "agreed"
-    }
-   },
-   "absent": [
-    {
-     "item": "1C",
-     "note": "not listed in TOC or body"
-    }
-   ],
-   "notes": "TOC at lines 92-138 skipped. Item 8 says statements appear beginning on page F-1; statements block (INDEX TO FINANCIAL STATEMENTS at 2116 through notes ending 2881; F-24 at 2883 is furniture) follows SIGNATURES (2069-2112) which belongs to no item. Item 6 is [Reserved]."
   },
   {
    "accession": "0001437749-20-006155",
@@ -8327,6 +8344,1687 @@
    },
    "absent": [],
    "notes": "All items present. Item 1 includes an executive officers list ending line 387. Financial statements (auditor report from line 923) are inside Item 15, so Item 8 is the short pointer text. The file ends in the signature block (1784-1811)."
+  },
+  {
+   "accession": "0001193125-07-218421",
+   "cik": 787253,
+   "company": "NATURAL ALTERNATIVES INTERNATIONAL INC",
+   "filing_date": "2007-10-15",
+   "era": "2007-2012",
+   "size": "small",
+   "public_float": 45238820,
+   "sic": 2833,
+   "items": {
+    "1": {
+     "start": "ITEM 1. BUSINESS Overview Our vision is to enrich the world through the best of ",
+     "end": "ation about these and other risks, please see Items 1A, 7 and 7A in this report.",
+     "lines": [
+      160,
+      397
+     ],
+     "verified": "agreed"
+    },
+    "1A": {
+     "start": "ITEM 1A. RISK FACTORS You should carefully consider the risks described below, a",
+     "end": "esult in a decline in our stock price, which in some cases could be significant.",
+     "lines": [
+      399,
+      610
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "ITEM 1B. UNRESOLVED STAFF COMMENTS Not applicable.",
+     "end": "ITEM 1B. UNRESOLVED STAFF COMMENTS Not applicable.",
+     "lines": [
+      612,
+      615
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "ITEM 2. PROPERTIES This table summarizes our facilities as of June 30, 2007. We ",
+     "end": "February 2008 and the lease for the remaining space terminates in December 2007.",
+     "lines": [
+      620,
+      652
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "ITEM 3. LEGAL PROCEEDINGS From time to time, we become involved in various inves",
+     "end": " was any of their property the subject of any material pending legal proceeding.",
+     "lines": [
+      654,
+      659
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "ITEM 4. SUBMISSION OF MATTERS TO A VOTE OF SECURITY HOLDERS We did not submit an",
+     "end": "rs to our stockholders for a vote during the fourth quarter ended June 30, 2007.",
+     "lines": [
+      661,
+      664
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "ITEM 5. MARKET FOR OUR COMMON EQUITY, RELATED STOCKHOLDER MATTERS AND ISSUER PUR",
+     "end": " except to the extent we specifically incorporate this information by reference.",
+     "lines": [
+      671,
+      713
+     ],
+     "verified": "agreed"
+    },
+    "6": {
+     "start": "ITEM 6. SELECTED FINANCIAL DATA The following tables contain certain financial i",
+     "end": " 6,589 6,572 6,186 6,013 Diluted 6,898 7,202 7,185 7,201 7,169 7,006 6,485 6,469",
+     "lines": [
+      718,
+      793
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "ITEM 7. MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
+     "end": "year beginning July 1, 2009. We are currently evaluating the impact of SFAS 159.",
+     "lines": [
+      798,
+      1205
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK We are expos",
+     "end": "ve decreased our net income for the fiscal year ended June 30, 2007 by $471,000.",
+     "lines": [
+      1207,
+      1238
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "ITEM 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA Report of Independent Regist",
+     "end": " during fiscal 2007. The raw material inventory was reserved before fiscal 2007.",
+     "lines": [
+      1243,
+      2204
+     ],
+     "verified": "agreed"
+    },
+    "9": {
+     "start": "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
+     "end": " AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE None.",
+     "lines": [
+      2206,
+      2209
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "ITEM 9A. CONTROLS AND PROCEDURES We maintain certain disclosure controls and pro",
+     "end": "rol procedures will be effective in accomplishing their objectives at all times.",
+     "lines": [
+      2211,
+      2223
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "ITEM 9B. OTHER INFORMATION None.",
+     "end": "ITEM 9B. OTHER INFORMATION None.",
+     "lines": [
+      2225,
+      2228
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "ITEM 10. DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE The information ",
+     "end": "ders to be held on December 11, 2007, to be filed on or before October 28, 2007.",
+     "lines": [
+      2232,
+      2235
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "ITEM 11. EXECUTIVE COMPENSATION The information for this item is incorporated by",
+     "end": "ders to be held on December 11, 2007, to be filed on or before October 28, 2007.",
+     "lines": [
+      2237,
+      2240
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "ITEM 12. SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT AND RELA",
+     "end": "ders to be held on December 11, 2007, to be filed on or before October 28, 2007.",
+     "lines": [
+      2242,
+      2245
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "ITEM 13. CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS, AND DIRECTOR INDEPENDEN",
+     "end": "ders to be held on December 11, 2007, to be filed on or before October 28, 2007.",
+     "lines": [
+      2247,
+      2250
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "ITEM 14. PRINCIPAL ACCOUNTING FEES AND SERVICES The information for this item is",
+     "end": "ders to be held on December 11, 2007, to be filed on or before October 28, 2007.",
+     "lines": [
+      2252,
+      2255
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "ITEM 15. EXHIBITS AND FINANCIAL STATEMENT SCHEDULES The following documents are ",
+     "end": "iled herewith Indicates management contract or compensatory plan or arrangement.",
+     "lines": [
+      2262,
+      2373
+     ],
+     "verified": "agreed",
+     "note": "ends at exhibit index end; signatures block follows with nothing of substance"
+    }
+   },
+   "added_in": 2,
+   "absent": [],
+   "notes": "2007 filing; no 1C; statements inline in Item 8"
+  },
+  {
+   "accession": "0001193125-12-081622",
+   "cik": 52485,
+   "company": "INTERSTATE POWER & LIGHT CO",
+   "filing_date": "2012-02-27",
+   "era": "2007-2012",
+   "size": "large",
+   "public_float": 4500000000,
+   "sic": 4931,
+   "items": {
+    "1": {
+     "start": "ITEM 1. BUSINESS A. GENERAL Alliant Energy was incorporated in Wisconsin in 1981",
+     "end": "state investments, two corporate airplanes and several other modest investments.",
+     "lines": [
+      328,
+      967
+     ],
+     "verified": "agreed"
+    },
+    "1A": {
+     "start": "ITEM 1A. RISK FACTORS You should carefully consider each of the risks described ",
+     "end": "significant adverse impact on our financial condition and results of operations.",
+     "lines": [
+      969,
+      1054
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "ITEM 1B. UNRESOLVED STAFF COMMENTS None.",
+     "end": "ITEM 1B. UNRESOLVED STAFF COMMENTS None.",
+     "lines": [
+      1056,
+      1059
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "ITEM 2. PROPERTIES IPL - At Dec. 31, 2011, IPL’s electric generating facilities ",
+     "end": "ase and purchase the building at the expiration of the lease term in April 2012.",
+     "lines": [
+      1061,
+      1195
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "ITEM 3. LEGAL PROCEEDINGS Alliant Energy - None. IPL - None. WPL - Air Permittin",
+     "end": "nd “Rate Matters” in MDA, which information is incorporated herein by reference.",
+     "lines": [
+      1197,
+      1225
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "ITEM 4. MINE SAFETY DISCLOSURES None.",
+     "end": "ITEM 4. MINE SAFETY DISCLOSURES None.",
+     "lines": [
+      1227,
+      1230
+     ],
+     "verified": "adjudicated",
+     "note": "Executive Officers of the Registrants (1235-1286) belongs to no item",
+     "why": {
+      "end": "labeller: Item 4 content is 'None.' at 1230; 1232 is page number '30' and 1235 starts the unnumbered Executive Officers section, which belongs to no item."
+     }
+    },
+    "5": {
+     "start": "ITEM 5. MARKET FOR REGISTRANTS’ COMMON EQUITY, RELATED STOCKHOLDER MATTERS AND I",
+     "end": "hat may be held under the DCP, which currently does not have an expiration date.",
+     "lines": [
+      1292,
+      1337
+     ],
+     "verified": "agreed"
+    },
+    "6": {
+     "start": "ITEM 6. SELECTED FINANCIAL DATA Alliant Energy Financial Information 2011 (a) 20",
+     "end": "mon stock outstanding. As such, earnings per share data is not disclosed herein.",
+     "lines": [
+      1343,
+      1426
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "ITEM 7. MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
+     "end": "on plans will have on their future financial condition or results of operations.",
+     "lines": [
+      1431,
+      3554
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Quantitative",
+     "end": " under “Other Matters - Market Risk Sensitive Instruments and Positions” in MDA.",
+     "lines": [
+      3559,
+      3562
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "ITEM 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA MANAGEMENT’S ANNUAL REPORT O",
+     "end": "on stock 313,237 Weighted average exercise price of options excluded $ $ $ 29.26",
+     "lines": [
+      3564,
+      7342
+     ],
+     "verified": "agreed",
+     "note": "statements inline in Item 8"
+    },
+    "9": {
+     "start": "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
+     "end": " AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE None.",
+     "lines": [
+      7348,
+      7351
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "ITEM 9A. CONTROLS AND PROCEDURES Alliant Energy’s, IPL’s and WPL’s management ev",
+     "end": "ect, Alliant Energy’s, IPL’s or WPL’s internal control over financial reporting.",
+     "lines": [
+      7353,
+      7358
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "ITEM 9B. OTHER INFORMATION None.",
+     "end": "ITEM 9B. OTHER INFORMATION None.",
+     "lines": [
+      7360,
+      7363
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "ITEM 10. DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE ALLIANT ENERGY A",
+     "end": "mation under the caption “Corporate Governance” in the 2012 WPL Proxy Statement.",
+     "lines": [
+      7367,
+      7376
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "ITEM 11. EXECUTIVE COMPENSATION ALLIANT ENERGY The information required by Item ",
+     "end": "iled with the SEC within 120 days after the end of IPL’s and WPL’s fiscal years.",
+     "lines": [
+      7381,
+      7390
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "ITEM 12. SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT AND RELA",
+     "end": "h will be filed with the SEC within 120 days after the end of WPL’s fiscal year.",
+     "lines": [
+      7392,
+      7452
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "ITEM 13. CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS, AND DIRECTOR INDEPENDEN",
+     "end": "h will be filed with the SEC within 120 days after the end of WPL’s fiscal year.",
+     "lines": [
+      7454,
+      7463
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "ITEM 14. PRINCIPAL ACCOUNTING FEES AND SERVICES ALLIANT ENERGY The information r",
+     "end": "h will be filed with the SEC within 120 days after the end of WPL’s fiscal year.",
+     "lines": [
+      7465,
+      7492
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "ITEM 15. EXHIBITS, FINANCIAL STATEMENT SCHEDULES (1) Consolidated Financial Stat",
+     "end": "2010 and 2009; and (vi) the Combined Notes to Consolidated Financial Statements.",
+     "lines": [
+      7496,
+      8164
+     ],
+     "verified": "adjudicated",
+     "note": "policy-open: exhibit index after last item",
+     "why": {
+      "end": "labeller: Item 15 is the last item and an Exhibit Index (7969) follows the SIGNATURES (7705), so Item 15 runs through the index to 8164; 8167 '204' is furniture."
+     }
+    }
+   },
+   "added_in": 2,
+   "absent": [],
+   "notes": "Combined report for Alliant Energy, IPL and WPL; items labelled once, first body occurrence. Three SIGNATURES blocks (7705, 7791, 7877) and exhibit index (7963-8164) fall inside Item 15 as last item."
+  },
+  {
+   "accession": "0001144204-13-019054",
+   "cik": 1511648,
+   "company": "Global Cornerstone Holdings Ltd",
+   "filing_date": "2013-04-01",
+   "era": "2013-2018",
+   "size": "small",
+   "public_float": 78000000,
+   "sic": 6770,
+   "items": {
+    "1": {
+     "start": "Item 1. Business Introduction Global Cornerstone Holdings Limited (the “Company”",
+     "end": "tion gives others an advantage in pursuing the acquisition of a target business.",
+     "lines": [
+      141,
+      240
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: Item 1. Business heading is at 141; 934 is the Item 11 heading.",
+      "end": "labeller: Last Item 1 content line is 240 (Competition paragraph); 242 is page number '4' and 244 is the Item 1A heading."
+     }
+    },
+    "1A": {
+     "start": "Item 1A. Risk Factors You should carefully consider the following risk factors a",
+     "end": "ments could result in a significant loss of business and business opportunities.",
+     "lines": [
+      244,
+      605
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "pipeline: Line 607 is the body paragraph of the last risk factor whose caption is 605; the next heading (Unresolved Staff Comments) is at 609, so 1A ends at 607."
+     }
+    },
+    "1B": {
+     "start": "Item 1A. Unresolved Staff Comments. None.",
+     "end": "Item 1A. Unresolved Staff Comments. None.",
+     "lines": [
+      609,
+      612
+     ],
+     "verified": "adjudicated",
+     "note": "filer mislabels as 'Item 1A. Unresolved Staff Comments'",
+     "why": {
+      "start": "labeller: The Unresolved Staff Comments heading is at 609 (misprinted 'Item 1A.'), with 'None.' at 612; this is the 1B item body.",
+      "end": "labeller: The Unresolved Staff Comments item (heading 609, misprinted 'Item 1A.') ends with 'None.' at 612, before Item 2 at 614."
+     }
+    },
+    "2": {
+     "start": "Item 2. Properties We do not own any real estate or other physical properties. O",
+     "end": "erson. We consider our current office space adequate for our current operations.",
+     "lines": [
+      614,
+      617
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "Item 3. Legal Proceedings To the knowledge of our management, there is no litiga",
+     "end": "r officers or director in their capacity as such or against any of our property.",
+     "lines": [
+      619,
+      622
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "Item 4. Mine Safety Disclosures Not applicable.",
+     "end": "Item 4. Mine Safety Disclosures Not applicable.",
+     "lines": [
+      624,
+      627
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "Item 5. Market for Registrant’s Common Equity, Related Shareholder Matters, and ",
+     "end": "ne. Purchases of Equity Securities by the Issuer and Affiliated Purchasers None.",
+     "lines": [
+      633,
+      671
+     ],
+     "verified": "agreed"
+    },
+    "6": {
+     "start": "Item 6. Selected Financial Data The following table sets forth selected historic",
+     "end": "ing activities (80,003,120) Net cash provided by financing activities 81,060,798",
+     "lines": [
+      675,
+      704
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "Item 7. MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
+     "end": "the Company’s interim financial statements. Off-Balance Sheet Arrangements None.",
+     "lines": [
+      708,
+      835
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Market risk ",
+     "end": "and money market funds, we do not view the interest rate risk to be significant.",
+     "lines": [
+      837,
+      841
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "INDEX TO FINANCIAL STATEMENTS Page Report of Independent Registered Public Accou",
+     "end": "Report, the Company has no arrangements in place with any acquisition candidates",
+     "lines": [
+      1098,
+      1485
+     ],
+     "verified": "adjudicated",
+     "note": "item 8 pointer -> back statements",
+     "why": {
+      "start": "labeller: Item 8 (843-846) only points to statements beginning on F-1 after the signatures, which are printed at the back after the last item, so Item 8 starts at the INDEX TO FINANCIAL STATEMENTS heading at 1098.",
+      "end": "labeller: Under the pointer rule Item 8 is the back statements block, whose last content line is 1485; 1487 'F-13' is furniture."
+     }
+    },
+    "9": {
+     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
+     "end": "and Disagreements with Accountants on Accounting and Financial Disclosure. None.",
+     "lines": [
+      850,
+      854
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "Item 9A. Controls and Procedures. Disclosure Controls and Procedures Disclosure ",
+     "end": "ably likely to materially affect, our internal control over financial reporting.",
+     "lines": [
+      856,
+      873
+     ],
+     "verified": "agreed",
+     "note": "TOC says 9A(T), body says 9A"
+    },
+    "9B": {
+     "start": "Item 9B. Other Information None.",
+     "end": "Item 9B. Other Information None.",
+     "lines": [
+      875,
+      878
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "Item 10. Directors, Executive Officers and Corporate Governance Directors and Ex",
+     "end": "r, officers and employees in accordance with applicable federal securities laws.",
+     "lines": [
+      884,
+      930
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "Item 11. Executive Compensation Compensation Discussion and Analysis Other than ",
+     "end": "ussion and Analysis and agreed that it should be included in this Annual Report.",
+     "lines": [
+      934,
+      947
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
+     "end": "ares held by our Sponsor except to the extent of his pecuniary interest therein.",
+     "lines": [
+      951,
+      983
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "Item 13. Certain Relationships and Related Transactions, and Director Independen",
+     "end": "s of the date of this Report, our sole director, Mr. Dunning is not independent.",
+     "lines": [
+      985,
+      1011
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "Item 14. Principal Accountant Fees and Services. During the fiscal years ended D",
+     "end": " independent registered public accounting firm other than those set forth above.",
+     "lines": [
+      1013,
+      1026
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "Item 15. Exhibits and Financial Statement Schedules. (a) The following documents",
+     "end": "934, as amended, and otherwise is not subject to liability under these sections.",
+     "lines": [
+      1028,
+      1072
+     ],
+     "verified": "agreed"
+    }
+   },
+   "added_in": 2,
+   "absent": [],
+   "notes": "SPAC; statements at back after SIGNATURES; Item 15 ends before SIGNATURES"
+  },
+  {
+   "accession": "0001104659-14-087276",
+   "cik": 48465,
+   "company": "HORMEL FOODS CORP /DE/",
+   "filing_date": "2014-12-17",
+   "era": "2013-2018",
+   "size": "large",
+   "public_float": 6361864485,
+   "sic": 2011,
+   "items": {
+    "1": {
+     "start": "Item 1. BUSINESS (a) General Development of Business Hormel Foods Corporation, a",
+     "end": "ockholders. Vacancies may be filled and additional officers elected at any time.",
+     "lines": [
+      119,
+      269
+     ],
+     "verified": "agreed",
+     "note": "includes (f) Executive Officers of the Registrant, part of Item 1"
+    },
+    "1A": {
+     "start": "Item 1A. RISK FACTORS Information on the Company’s risk factors included in the ",
+     "end": "for the fiscal year ended October 26, 2014, is incorporated herein by reference.",
+     "lines": [
+      271,
+      273
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "Item 1B. UNRESOLVED STAFF COMMENTS None.",
+     "end": "Item 1B. UNRESOLVED STAFF COMMENTS None.",
+     "lines": [
+      275,
+      277
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "Item 2. PROPERTIES Location Principal Segment (1) Approximate Area Owned or Leas",
+     "end": " or in process to accommodate all volumes anticipated in the foreseeable future.",
+     "lines": [
+      280,
+      472
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "Item 3. LEGAL PROCEEDINGS The Company is a party to various legal proceedings re",
+     "end": "ffect on the Company’s financial condition, results of operations, or liquidity.",
+     "lines": [
+      474,
+      476
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "Item 4. MINE SAFETY DISCLOSURES Not applicable.",
+     "end": "Item 4. MINE SAFETY DISCLOSURES Not applicable.",
+     "lines": [
+      478,
+      480
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "Item 5. MARKET FOR REGISTRANT’S COMMON EQUITY, RELATED STOCKHOLDER MATTERS AND I",
+     "end": "authorized at a meeting of the Company’s Board of Directors on January 29, 2013.",
+     "lines": [
+      485,
+      526
+     ],
+     "verified": "agreed"
+    },
+    "6": {
+     "start": "Item 6. SELECTED FINANCIAL DATA Selected Financial Data for the five fiscal year",
+     "end": "for the fiscal year ended October 26, 2014, is incorporated herein by reference.",
+     "lines": [
+      528,
+      530
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "Item 7. MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
+     "end": "for the fiscal year ended October 26, 2014, is incorporated herein by reference.",
+     "lines": [
+      532,
+      534
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "Item 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK Information ",
+     "end": "for the fiscal year ended October 26, 2014, is incorporated herein by reference.",
+     "lines": [
+      537,
+      539
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "Item 8. FINANCIAL STATEMENTS AND SUPPLEMENTARY DATA Consolidated Financial State",
+     "end": "or the fiscal year ended October 26, 2014, are incorporated herein by reference.",
+     "lines": [
+      541,
+      543
+     ],
+     "verified": "agreed",
+     "note": "incorporated by reference to Annual Stockholders' Report, exhibit not in document"
+    },
+    "9": {
+     "start": "Item 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
+     "end": " AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE None.",
+     "lines": [
+      545,
+      547
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "Item 9A. CONTROLS AND PROCEDURES Disclosure Controls and Procedures As of the en",
+     "end": "y to materially affect, the Company’s internal control over financial reporting.",
+     "lines": [
+      549,
+      561
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "Item 9B. OTHER INFORMATION None.",
+     "end": "Item 9B. OTHER INFORMATION None.",
+     "lines": [
+      563,
+      565
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "Item 10. DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE Information unde",
+     "end": "formation on the Company’s Web site at the address and location specified above.",
+     "lines": [
+      570,
+      578
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "Item 11. EXECUTIVE COMPENSATION Information commencing with “Executive Compensat",
+     "end": "f Stockholders to be held January 27, 2015, is incorporated herein by reference.",
+     "lines": [
+      580,
+      582
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "Item 12. SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT AND RELA",
+     "end": "f Stockholders to be held January 27, 2015, is incorporated herein by reference.",
+     "lines": [
+      584,
+      612
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "Item 13. CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS, AND DIRECTOR INDEPENDEN",
+     "end": "f Stockholders to be held January 27, 2015, is incorporated herein by reference.",
+     "lines": [
+      614,
+      616
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "Item 14. PRINCIPAL ACCOUNTING FEES AND SERVICES Information under “Independent R",
+     "end": "f Stockholders to be held January 27, 2015, is incorporated herein by reference.",
+     "lines": [
+      619,
+      621
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "Item 15. EXHIBITS, FINANCIAL STATEMENT SCHEDULES The response to Item 15 is subm",
+     "end": "nsmitted via EDGAR. (3) Management contract or compensatory plan or arrangement.",
+     "lines": [
+      625,
+      833
+     ],
+     "verified": "adjudicated",
+     "note": "policy-open: exhibit index after last item",
+     "why": {
+      "end": "labeller: Item 15 is the last item, and the Item 15 statement/schedule list and exhibit list follow the SIGNATURES (630) from 682 to the end, so it runs to 833."
+     }
+    }
+   },
+   "added_in": 2,
+   "absent": [],
+   "notes": "Items 6,7,7A,8 incorporate Annual Report by reference. Item 15 runs through signatures, F-pages (financial schedule list), and exhibit index to end of document."
+  },
+  {
+   "accession": "0001047469-15-001398",
+   "cik": 764038,
+   "company": "SOUTH STATE Corp",
+   "filing_date": "2015-02-27",
+   "era": "2013-2018",
+   "size": "large",
+   "public_float": 1427741000,
+   "sic": 6022,
+   "items": {
+    "1": {
+     "start": "Item 1. Business. South State Corporation (formerly First Financial Holdings, In",
+     "end": " directors or officers of the Company acting solely in their capacities as such.",
+     "lines": [
+      120,
+      440
+     ],
+     "verified": "adjudicated",
+     "note": "unnumbered Executive Officers section 442-458 belongs to no item",
+     "why": {
+      "end": "pipeline: Item 1 runs until Item 1A at 463, and the 'Executive Officers of South State Corporation' subsection (442-458) is printed inside Item 1, not after Item 4, so its last content line 458 ends Item 1; 460 '17' is furniture."
+     }
+    },
+    "1A": {
+     "start": "Item 1A. Risk Factors. Our business operations and the value of securities issue",
+     "end": "t, if you acquire our common stock, you may lose some or all of your investment.",
+     "lines": [
+      463,
+      869
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "Item 1B. Unresolved Staff Comments. None.",
+     "end": "Item 1B. Unresolved Staff Comments. None.",
+     "lines": [
+      871,
+      873
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "Item 2. Properties. Our corporate headquarters are located in a four-story facil",
+     "end": "nd Note 21 - Lease Commitments to our audited consolidated financial statements.",
+     "lines": [
+      875,
+      877
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "Item 3. Legal Proceedings. As of December 31, 2014 and the date of this form 10-",
+     "end": "oceeding other than those that may occur in the ordinary course of our business.",
+     "lines": [
+      879,
+      881
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "Item 4. Mine Safety Disclosures. Not applicable.",
+     "end": "Item 4. Mine Safety Disclosures. Not applicable.",
+     "lines": [
+      883,
+      885
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "Item 5. Market for the Registrant's Common Equity, Related Stockholder Matters a",
+     "end": "ock. These shares are not purchased under the plan to repurchase 250,000 shares.",
+     "lines": [
+      892,
+      996
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: Item 5 heading is at 892 (after the PART II divider at 890); 898 is a table row inside the item."
+     }
+    },
+    "6": {
+     "start": "Item 6. Selected Financial Data. The following table presents selected financial",
+     "end": "olders, diluted 3.08 2.38 2.03 1.63 4.08 Cash dividends 0.82 0.74 0.69 0.68 0.68",
+     "lines": [
+      1001,
+      1128
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "Item 7. Management's Discussion and Analysis of Financial Condition and Results ",
+     "end": ". # - Amount is included in the FDIC indemnification asset on the balance sheet.",
+     "lines": [
+      1133,
+      2256
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "Item 7A. Quantitative and Qualitative Disclosures about Market Risk. See \"Asset-",
+     "end": "ts of Operations for quantitative and qualitative disclosures about market risk.",
+     "lines": [
+      2258,
+      2260
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "MANAGEMENT'S REPORT ON INTERNAL CONTROL OVER FINANCIAL REPORTING Management of S",
+     "end": "of any loss share agreement of certain covered assets is approximately $600,000.",
+     "lines": [
+      2660,
+      6274
+     ],
+     "verified": "adjudicated",
+     "note": "item 8 pointer -> back statements",
+     "why": {
+      "start": "labeller: Item 8 at 2262-2264 only points to Table 1 and the F-pages, and the statements are printed at the back after the Exhibit Index, so Item 8 starts at the first heading of that block, MANAGEMENT'S REPORT ON INTERNAL CONTROL at 2660.",
+      "end": "labeller: The back statements end with the subsequent-events text at 6273, and 6275 'F-100' is furniture; B's line 6274 is the blank line after that content and its window excludes F-100, so it denotes the correct boundary."
+     }
+    },
+    "9": {
+     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
+     "end": "eements with Accountants on Accounting and Financial Disclosure. Not applicable.",
+     "lines": [
+      2266,
+      2268
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "Item 9A. Controls and Procedures. Evaluation of Disclosure Controls and Procedur",
+     "end": "led \"Report of Independent Registered Public Accounting Firm\" appears in Item 8.",
+     "lines": [
+      2270,
+      2289
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: The Item 9A heading is at 2270; A gives no line number."
+     }
+    },
+    "9B": {
+     "start": "Item 9B. Other Information. Not applicable.",
+     "end": "Item 9B. Other Information. Not applicable.",
+     "lines": [
+      2291,
+      2293
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "Item 10. Directors, Executive Officers and Corporate Governance. The information",
+     "end": "and under the caption \"Section 16(a) Beneficial Ownership Reporting Compliance.\"",
+     "lines": [
+      2300,
+      2302
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "Item 11. Executive Compensation. The information required by this item will be i",
+     "end": "ompensation,\" and \"Compensation Committee Interlocks and Insider Participation.\"",
+     "lines": [
+      2304,
+      2306
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
+     "end": " Company to be filed in connection with our 2015 Annual Meeting of Shareholders.",
+     "lines": [
+      2308,
+      2350
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "Item 13. Certain Relationships and Related Transactions, and Director Independen",
+     "end": " Company to be filed in connection with our 2015 Annual Meeting of Shareholders.",
+     "lines": [
+      2355,
+      2357
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "Item 14. Principal Accounting Fees and Services. The information required by thi",
+     "end": " Company to be filed in connection with our 2015 Annual Meeting of Shareholders.",
+     "lines": [
+      2359,
+      2361
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "Item 15. Exhibits, Financial Statement Schedules. (a) 1. The financial statement",
+     "end": "ber 31, 2014, 2013 and 2012 and (vi) Notes to Consolidated Financial Statements.",
+     "lines": [
+      2368,
+      2655
+     ],
+     "verified": "adjudicated",
+     "note": "policy-open: exhibit index after last item; includes signatures and exhibit index",
+     "why": {
+      "end": "labeller: Item 15 runs through the Exhibit Index after the signatures, ending at 2655; 2657 '97' is furniture, and the back statements from 2660 are Item 8 under the pointer rule."
+     }
+    }
+   },
+   "added_in": 2,
+   "absent": [
+    {
+     "item": "16",
+     "note": "not in filing"
+    }
+   ],
+   "notes": "statements at back after Item 15; Item 8 pointer at 2264"
+  },
+  {
+   "accession": "0000108312-14-000037",
+   "cik": 108312,
+   "company": "Woodward, Inc.",
+   "filing_date": "2014-11-12",
+   "era": "2013-2018",
+   "size": "large",
+   "public_float": 1829752615,
+   "sic": 3620,
+   "items": {
+    "1": {
+     "start": "Item 1. Business General Woodward enhances the global quality of life and sustai",
+     "end": "e Secretary, Woodward, Inc., 1000 East Drake Road, Fort Collins, Colorado 80525.",
+     "lines": [
+      185,
+      443
+     ],
+     "verified": "agreed"
+    },
+    "1A": {
+     "start": "Item 1A. Risk Factors Investment in our securities involves risk. An investor or",
+     "end": " the anti-takeover measures, from successfully completing a hostile acquisition.",
+     "lines": [
+      445,
+      804
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "end": "labeller: Last risk-factor text is at 804, and the Item 1B heading follows at 806."
+     }
+    },
+    "1B": {
+     "start": "Item 1B. Unresolved Staff Comments None.",
+     "end": "Item 1B. Unresolved Staff Comments None.",
+     "lines": [
+      806,
+      808
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "Item 2. Properties Our principal plants are as follows: United States Duarte, Ca",
+     "end": "ormed at those plants, and we believe our utilization levels are generally high.",
+     "lines": [
+      810,
+      846
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "Item 3. Legal Proceedings Woodward is currently involved in claims, pending or t",
+     "end": "l effect on Woodward's liquidity, financial condition, or results of operations.",
+     "lines": [
+      848,
+      852
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "Item 4. Mine Safety Disclosures Not applicable.",
+     "end": "Item 4. Mine Safety Disclosures Not applicable.",
+     "lines": [
+      854,
+      856
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "Item 5. Market for Registrant's Common Equity, Related Stockholder Matters and I",
+     "end": "easury stock held for deferred compensation\" in the Consolidated Balance Sheets.",
+     "lines": [
+      860,
+      904
+     ],
+     "verified": "agreed"
+    },
+    "6": {
+     "start": "Item 6. Selected Financial Data The following selected financial data should be ",
+     "end": " year 2010 of the reinstatement of the U.S. research and experimentation credit.",
+     "lines": [
+      906,
+      951
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "Item 7. Management's Discussion and Analysis of Financial Condition and Results ",
+     "end": "ignificant effect on our operating results, financial condition, and cash flows.",
+     "lines": [
+      953,
+      1629
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "Item 7A. Quantitative and Qualitative Disclosures About Market Risk In the norma",
+     "end": "our Consolidated Statements of Earnings related to these assets and liabilities.",
+     "lines": [
+      1631,
+      1678
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "Item 8. Financial Statements and Supplementary Data REPORT OF INDEPENDENT REGIST",
+     "end": "6,439) Consolidated earnings before income taxes $38,537 $50,336 $35,497 $75,201",
+     "lines": [
+      1680,
+      3388
+     ],
+     "verified": "agreed"
+    },
+    "9": {
+     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
+     "end": " any reportable events requiring disclosure under Item 304(b) of Regulation S-K.",
+     "lines": [
+      3390,
+      3392
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "Item 9A. Controls and Procedures Evaluation of Disclosure Controls and Procedure",
+     "end": "statement schedule. /s/ DELOITTE & TOUCHE LLP Denver, Colorado November 12, 2014",
+     "lines": [
+      3394,
+      3441
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "Item 9B. Other Information On November 12, 2014, the Board of Directors the Comp",
+     "end": " 2014, are filed as Exhibit 3.2 hereto and are hereby incorporated by reference.",
+     "lines": [
+      3443,
+      3447
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "Item 10. Directors, Executive Officers and Corporate Governance The information ",
+     "end": "ng such information to our Website, at the address and location specified above.",
+     "lines": [
+      3451,
+      3459
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "Item 11. Executive Compensation Information regarding executive compensation is ",
+     "end": "cussion and Analysis” is hereby “furnished” and not “filed” with this Form 10-K.",
+     "lines": [
+      3461,
+      3463
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
+     "end": "ockholders to be held January 21, 2015, and is incorporated herein by reference.",
+     "lines": [
+      3465,
+      3467
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "Item 13. Certain Relationships and Related Transactions, and Director Independen",
+     "end": "dit Committee Report” is hereby “furnished” and not “filed” with this Form 10-K.",
+     "lines": [
+      3469,
+      3471
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "Item 14. Principal Accountant Fees and Services Information regarding principal ",
+     "end": "ockholders to be held January 21, 2015, and is incorporated herein by reference.",
+     "lines": [
+      3473,
+      3475
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "Item 15. Exhibits and Financial Statement Schedules Page Number in Form 10-K (a)",
+     "end": "5 in fiscal year 2013, and an increase in the reserve of $4 in fiscal year 2012.",
+     "lines": [
+      3479,
+      3630
+     ],
+     "verified": "adjudicated",
+     "note": "schedule II follows signatures; runs to end",
+     "why": {
+      "end": "labeller: Item 15 is the last item and Schedule II (3604-3630) follows the SIGNATURES at 3561, so Item 15 runs through the schedule to 3630."
+     }
+    }
+   },
+   "added_in": 2,
+   "absent": [],
+   "notes": "Executive Officers of the Registrant sits inside Item 1 (before 1A), so Item 1 runs through it; statements inline in Item 8; Schedule II after signatures kept in Item 15"
+  },
+  {
+   "accession": "0000865058-22-000011",
+   "cik": 865058,
+   "company": "NATIONAL SECURITY GROUP INC",
+   "filing_date": "2022-03-23",
+   "era": "2019-2025",
+   "size": "small",
+   "public_float": 11354291,
+   "sic": 6311,
+   "items": {
+    "1": {
+     "start": "Item 1. Business Summary Description of The National Security Group, Inc. The Na",
+     "end": "ereto may also be accessed free of charge from the SEC's website at www.sec.gov.",
+     "lines": [
+      132,
+      389
+     ],
+     "verified": "agreed"
+    },
+    "1A": {
+     "start": "Item 1A. Risk Factors As a “Smaller Reporting Company,” we are not required to p",
+     "end": "ncial performance, as well as the response to any of the aforementioned factors.",
+     "lines": [
+      392,
+      542
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "Item 1B. Unresolved Staff Comments As a smaller reporting company, the Company i",
+     "end": "any, the Company is not required to furnish the information required in Item 1B.",
+     "lines": [
+      544,
+      546
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "Item 2. Properties Our principal executive offices, owned by NSIC, are located a",
+     "end": " recorded as land improvements and depreciated over the appropriate useful life.",
+     "lines": [
+      548,
+      555
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "Item 3. Legal Proceedings The Company and its subsidiaries are named parties to ",
+     "end": " pending suits can be found in Note 16 to the Consolidated Financial Statements.",
+     "lines": [
+      557,
+      559
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "Item 4. Mine Safety Disclosures This section is not applicable.",
+     "end": "Item 4. Mine Safety Disclosures This section is not applicable.",
+     "lines": [
+      561,
+      563
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "Item 5. Market for Registrant's Common Equity, Related Stockholder Matters and I",
+     "end": "uity compensation plans not approved by security holders - - - Total - - 195,975",
+     "lines": [
+      567,
+      613
+     ],
+     "verified": "agreed"
+    },
+    "6": {
+     "start": "Item 6. [Reserved]",
+     "end": "Item 6. [Reserved]",
+     "lines": [
+      615,
+      615
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "Item 7. Management's Discussion and Analysis of Financial Condition and Results ",
+     "end": " are disclosed in Note 16 to the accompanying Consolidated Financial Statements.",
+     "lines": [
+      617,
+      1341
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "Item 7A. Quantitative and Qualitative Disclosures About Market Risk Under smalle",
+     "end": "ID-19 pandemic continues to be difficult to quantify due to these uncertainties.",
+     "lines": [
+      1343,
+      1362
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "Item 8. Financial Statements and Supplementary Data Index to Financial Statement",
+     "end": "16 4 Deletions 15 3 Balance, December 31 Allowance for Doubtful Accounts $ 7 $ 6",
+     "lines": [
+      1365,
+      3088
+     ],
+     "verified": "agreed"
+    },
+    "9": {
+     "start": "Item 9. Changes in and Disagreements with Accountants on Accounting and Financia",
+     "end": " and Disagreements with Accountants on Accounting and Financial Disclosure None.",
+     "lines": [
+      3091,
+      3093
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "Item 9A. Controls and Procedures Company management, including the Chief Executi",
+     "end": "s report in this annual report. The National Security Group, Inc. March 23, 2022",
+     "lines": [
+      3095,
+      3113
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "Item 9B. Other Information None.",
+     "end": "Item 9B. Other Information None.",
+     "lines": [
+      3115,
+      3117
+     ],
+     "verified": "agreed"
+    },
+    "9C": {
+     "start": "Item 9C. Disclosure Regarding Foreign Jurisdictions that Prevent Inspections Non",
+     "end": "em 9C. Disclosure Regarding Foreign Jurisdictions that Prevent Inspections None.",
+     "lines": [
+      3119,
+      3121
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "Item 10. Directors, Executive Officers and Corporate Governance In 1990, Nationa",
+     "end": "tion on the beneficial ownership reporting for directors and executive officers.",
+     "lines": [
+      3125,
+      3324
+     ],
+     "verified": "agreed"
+    },
+    "11": {
+     "start": "Item 11. Executive Compensation Executive Compensation The primary oversight of ",
+     "end": "ncluded in “Other Compensation” to Executives in the Summary Compensation Table.",
+     "lines": [
+      3326,
+      3386
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "Item 12. Security Ownership of Certain Beneficial Owners and Management and Rela",
+     "end": "an and 20,444 units held in the National Security Employee Stock Ownership Plan.",
+     "lines": [
+      3389,
+      3419
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "Item 13. Certain Relationships and Related Transactions and Director Independenc",
+     "end": "hite. Winfield Baird (Director Emeritus) is the father of Elizabeth B. Crawford.",
+     "lines": [
+      3421,
+      3423
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "Item 14. Principal Accounting Fees and Services Aggregate fees for professional ",
+     "end": "ction with the acquisition of the Company by VR Insurance Holdings, Inc. (2021).",
+     "lines": [
+      3426,
+      3440
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "Item 15. Exhibits and Financial Statement Schedules (a) The following documents ",
+     "end": "ss release announcing financial results for the period ended September 30, 2021.",
+     "lines": [
+      3444,
+      3497
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: The Item 15 heading is at 3444 after the PART IV divider at 3442; A gives no line and starts after the heading."
+     }
+    }
+   },
+   "added_in": 2,
+   "absent": [],
+   "notes": "Item 8 in body (statements and schedules inline); Item 15 ends before SIGNATURE (3501); signature/power of attorney 3501-3529 in no item"
+  },
+  {
+   "accession": "0001596993-23-000033",
+   "cik": 1596993,
+   "company": "DORIAN LPG LTD.",
+   "filing_date": "2023-06-02",
+   "era": "2019-2025",
+   "size": "small",
+   "public_float": 519083561,
+   "sic": 4412,
+   "items": {
+    "1": {
+     "start": "ITEM 1. BUSINESS Unless otherwise indicated, references to \"Dorian,\" the \"Compan",
+     "end": "panying exhibits are available from the Commission’s website http://www.sec.gov.",
+     "lines": [
+      211,
+      775
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: The ITEM 1. BUSINESS heading is at 211, and the PART I divider at 209 belongs to no item."
+     }
+    },
+    "1A": {
+     "start": "ITEM 1A. RISK FACTORS The following risks relate principally to us and our busin",
+     "end": "er meetings; and restricting business combinations with interested shareholders.",
+     "lines": [
+      777,
+      1598
+     ],
+     "verified": "agreed"
+    },
+    "1B": {
+     "start": "ITEM 1B. UNRESOLVED STAFF COMMENTS. None.",
+     "end": "ITEM 1B. UNRESOLVED STAFF COMMENTS. None.",
+     "lines": [
+      1600,
+      1602
+     ],
+     "verified": "agreed"
+    },
+    "2": {
+     "start": "ITEM 2. PROPERTIES. VLGCs are our principal physical properties and are more ful",
+     "end": "r, 1415 Copenhagen, Denmark; and 24 Poseidonos Avenue, 17674, Kallithea, Greece.",
+     "lines": [
+      1604,
+      1606
+     ],
+     "verified": "agreed"
+    },
+    "3": {
+     "start": "ITEM 3. LEGAL PROCEEDINGS. We have not been involved in any legal proceedings th",
+     "end": "uld result in the expenditure of significant financial and managerial resources.",
+     "lines": [
+      1608,
+      1610
+     ],
+     "verified": "agreed"
+    },
+    "4": {
+     "start": "ITEM 4. MINE SAFETY DISCLOSURES. Not applicable.",
+     "end": "ITEM 4. MINE SAFETY DISCLOSURES. Not applicable.",
+     "lines": [
+      1612,
+      1614
+     ],
+     "verified": "agreed"
+    },
+    "5": {
+     "start": "ITEM 5. MARKET FOR REGISTRANT’S COMMON EQUITY, RELATED STOCKHOLDER MATTERS AND I",
+     "end": "the Company under the Securities Act of 1933, as amended, or the Securities Act.",
+     "lines": [
+      1619,
+      1674
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: The ITEM 5 heading is at 1619, and the PART II divider at 1617 belongs to no item."
+     }
+    },
+    "6": {
+     "start": "ITEM 6. (Reserved)",
+     "end": "ITEM 6. (Reserved)",
+     "lines": [
+      1676,
+      1676
+     ],
+     "verified": "agreed"
+    },
+    "7": {
+     "start": "ITEM 7. MANAGEMENT’S DISCUSSION AND ANALYSIS OF FINANCIAL CONDITION AND RESULTS ",
+     "end": "ements Refer to Note 2 of our consolidated financial statements included herein.",
+     "lines": [
+      1678,
+      2075
+     ],
+     "verified": "agreed"
+    },
+    "7A": {
+     "start": "ITEM 7A. QUANTITATIVE AND QUALITATIVE DISCLOSURES ABOUT MARKET RISK. We are expo",
+     "end": "cognized in earnings. As of March 31, 2023, we had no outstanding FFA positions.",
+     "lines": [
+      2077,
+      2102
+     ],
+     "verified": "agreed"
+    },
+    "8": {
+     "start": "INDEX TO THE FINANCIAL STATEMENTS DORIAN LPG LTD. Reports of Independent Registe",
+     "end": "emaining $0.3 million is deferred until certain shares of restricted stock vest.",
+     "lines": [
+      2267,
+      3321
+     ],
+     "verified": "adjudicated",
+     "note": "item 8 pointer -> back statements",
+     "why": {
+      "end": "labeller: The last statements content is the subsequent-event paragraph at 3321, and 3323 'F-35' is trailing furniture that B includes."
+     }
+    },
+    "9": {
+     "start": "ITEM 9. CHANGES IN AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIA",
+     "end": "AND DISAGREEMENTS WITH ACCOUNTANTS ON ACCOUNTING AND FINANCIAL DISCLOSURE. None.",
+     "lines": [
+      2108,
+      2110
+     ],
+     "verified": "agreed"
+    },
+    "9A": {
+     "start": "ITEM 9A. CONTROLS AND PROCEDURES. Evaluation of Disclosure Controls and Procedur",
+     "end": "uating the benefits of possible controls and procedures relative to their costs.",
+     "lines": [
+      2112,
+      2131
+     ],
+     "verified": "agreed"
+    },
+    "9B": {
+     "start": "ITEM 9B. OTHER INFORMATION. None",
+     "end": "ITEM 9B. OTHER INFORMATION. None",
+     "lines": [
+      2133,
+      2135
+     ],
+     "verified": "agreed"
+    },
+    "9C": {
+     "start": "Item 9C. DISCLOSURE REGARDING FOREIGN JURISDICTIONS THAT PREVENT INSPECTION Not ",
+     "end": "SCLOSURE REGARDING FOREIGN JURISDICTIONS THAT PREVENT INSPECTION Not applicable.",
+     "lines": [
+      2137,
+      2139
+     ],
+     "verified": "agreed"
+    },
+    "10": {
+     "start": "ITEM 10. DIRECTORS, EXECUTIVE OFFICERS AND CORPORATE GOVERNANCE. The required in",
+     "end": "he Company’s website is incorporated into or forms a part of this Annual Report.",
+     "lines": [
+      2144,
+      2150
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: The ITEM 10 heading is at 2144, and the PART III divider at 2142 belongs to no item."
+     }
+    },
+    "11": {
+     "start": "ITEM 11. EXECUTIVE COMPENSATION. The required information is incorporated by ref",
+     "end": "ct to our 2023 Annual Meeting of Shareholders within 120 days of March 31, 2023.",
+     "lines": [
+      2152,
+      2154
+     ],
+     "verified": "agreed"
+    },
+    "12": {
+     "start": "ITEM 12. SECURITY OWNERSHIP OF CERTAIN BENEFICIAL OWNERS AND MANAGEMENT AND RELA",
+     "end": "ct to our 2023 Annual Meeting of Shareholders within 120 days of March 31, 2023.",
+     "lines": [
+      2156,
+      2158
+     ],
+     "verified": "agreed"
+    },
+    "13": {
+     "start": "ITEM 13. CERTAIN RELATIONSHIPS AND RELATED TRANSACTIONS, AND DIRECTOR INDEPENDEN",
+     "end": "ct to our 2023 Annual Meeting of Shareholders within 120 days of March 31, 2023.",
+     "lines": [
+      2160,
+      2162
+     ],
+     "verified": "agreed"
+    },
+    "14": {
+     "start": "ITEM 14. PRINCIPAL ACCOUNTANT FEES AND SERVICES. The required information is inc",
+     "end": "ct to our 2023 Annual Meeting of Shareholders within 120 days of March 31, 2023.",
+     "lines": [
+      2164,
+      2166
+     ],
+     "verified": "agreed"
+    },
+    "15": {
+     "start": "ITEM 15. EXHIBITS AND FINANCIAL STATEMENT SCHEDULES. 1. Financial Statements Rep",
+     "end": "bits filed or furnished with or incorporated by reference in this Annual Report.",
+     "lines": [
+      2171,
+      2188
+     ],
+     "verified": "adjudicated",
+     "why": {
+      "start": "labeller: The ITEM 15 heading is at 2171, and the PART IV divider at 2169 belongs to no item."
+     }
+    },
+    "16": {
+     "start": "ITEM 16. FORM 10-K SUMMARY None.",
+     "end": "ITEM 16. FORM 10-K SUMMARY None.",
+     "lines": [
+      2190,
+      2192
+     ],
+     "verified": "agreed"
+    }
+   },
+   "added_in": 2,
+   "absent": [],
+   "notes": "Item 8 points to F-pages at back; exhibit index 2195-2229 after Item 16 belongs to no item (Item 16 rule); signatures 2232-2264 in no item"
   }
- ]
+ ],
+ "version": 2,
+ "replacement_rejected": {
+  "2": {
+   "dev_corpus": 0,
+   "abs": 1,
+   "no_html": 0,
+   "float_unstated": 6,
+   "stratum_full": 18
+  }
+ }
 }
