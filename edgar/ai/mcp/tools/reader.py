@@ -66,6 +66,9 @@ SECTION_MAP_6K = {
 # Form types that have dedicated extractors (keyed by base form, without /A suffix)
 FORM_EXTRACTORS = {"10-K", "10-Q", "8-K", "DEF 14A", "SC 13D", "SC 13G", "SC 13D/A", "SC 13G/A", "13F-HR"}
 
+# Rows of a 13F-HR ``holdings`` section returned when the caller sets no ``limit``.
+DEFAULT_HOLDINGS_LIMIT = 30
+
 
 @tool(
     name="edgar_read",
@@ -84,7 +87,8 @@ Available sections by form type:
 Examples:
 - Read risk factors: identifier="AAPL", form="10-K", sections=["risk_factors"]
 - Read 8-K event: identifier="AAPL", form="8-K", sections=["items"]
-- Read CEO pay: identifier="AAPL", form="DEF 14A", sections=["compensation"]""",
+- Read CEO pay: identifier="AAPL", form="DEF 14A", sections=["compensation"]
+- Read every 13F holding: identifier="1067983", form="13F-HR", sections=["holdings"], limit=0""",
     params={
         "accession_number": {
             "type": "string",
@@ -106,6 +110,13 @@ Examples:
             "description": "Sections to extract. Use 'summary' for metadata only, 'all' for everything. "
                            "Available sections depend on form type.",
             "default": ["summary"]
+        },
+        "limit": {
+            "type": "integer",
+            "description": "Max rows in the 13F-HR 'holdings' section (default 30; 0 returns every row). "
+                           "Validated for all forms, applied only to 13F holdings.",
+            "default": DEFAULT_HOLDINGS_LIMIT,
+            "minimum": 0
         }
     },
     required=[]
@@ -114,15 +125,36 @@ async def edgar_read(
     accession_number: Optional[str] = None,
     identifier: Optional[str] = None,
     form: Optional[str] = None,
-    sections: Optional[list[str]] = None
+    sections: Optional[list[str]] = None,
+    limit: Optional[int] = DEFAULT_HOLDINGS_LIMIT,
 ) -> Any:
     """
     Read SEC filing content.
 
     Can retrieve by accession number or find the most recent filing
     of a given type for a company.
+
+    ``limit`` caps the rows of a 13F-HR ``holdings`` section; ``0`` returns all
+    of them. It is validated for every form but applied only to 13F holdings,
+    which are also exempt from the 6,000-character cap that every other section
+    gets, so the rows ``limit`` asks for are all returned.
     """
     sections = sections or ["summary"]
+
+    if limit is None:
+        limit = DEFAULT_HOLDINGS_LIMIT
+    # JSON Schema counts 30.0 as an integer, so accept integral floats.
+    if isinstance(limit, float) and limit.is_integer():
+        limit = int(limit)
+    # bool is an int subclass: limit=True would silently mean one row.
+    if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
+        return error(
+            f"Invalid limit: {limit!r}",
+            suggestions=[
+                "Use a non-negative integer: 30 (the default), a larger number, or 0 for every row",
+            ],
+            error_code="INVALID_ARGUMENTS"
+        )
 
     try:
         # Get the filing
@@ -151,7 +183,7 @@ async def edgar_read(
 
         # Extract requested sections
         if not metadata_only:
-            extracted = await _extract_sections(filing, sections)
+            extracted = await _extract_sections(filing, sections, limit=limit)
             result["sections"] = extracted
 
         # Next steps
@@ -192,7 +224,7 @@ async def _get_filing(
     return None
 
 
-async def _extract_sections(filing, sections: list[str]) -> dict[str, Any]:
+async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HOLDINGS_LIMIT) -> dict[str, Any]:
     """Extract requested sections from filing."""
     extracted = {}
 
@@ -212,9 +244,15 @@ async def _extract_sections(filing, sections: list[str]) -> dict[str, Any]:
             sections_to_extract = [s for s in sections if s != "summary" or "summary" in available]
 
         for section in sections_to_extract:
-            content = _extract_section(obj, filing.form, section)
+            content = _extract_section(obj, filing.form, section, limit=limit)
             if content:
-                extracted[section] = truncate_text(str(content), max_chars=6000)
+                text = str(content)
+                if _is_13f_holdings(filing.form, section):
+                    # Bounded by ``limit``, so the 6,000-char cap would only cut
+                    # off rows the caller asked for.
+                    extracted[section] = text
+                else:
+                    extracted[section] = truncate_text(text, max_chars=6000)
             else:
                 extracted[section] = None
 
@@ -230,6 +268,11 @@ async def _extract_sections(filing, sections: list[str]) -> dict[str, Any]:
             logger.debug(f"Could not get raw text fallback: {e}")
 
     return extracted
+
+
+def _is_13f_holdings(form_type: str, section: str) -> bool:
+    """True for the ``holdings`` section of a 13F-HR (or 13F-HR/A) filing."""
+    return form_type.replace("/A", "").strip() == "13F-HR" and section == "holdings"
 
 
 def _get_section_list(form_type: str) -> list[str]:
@@ -255,11 +298,12 @@ def _get_section_list(form_type: str) -> list[str]:
         return ["full_text"]
 
 
-def _extract_section(obj, form_type: str, section: str) -> Optional[str]:
+def _extract_section(obj, form_type: str, section: str, limit: int = DEFAULT_HOLDINGS_LIMIT) -> Optional[str]:
     """Extract a specific section from a filing object.
 
     Routes to form-specific extractors for structured forms, with
-    fallback to __getitem__ for 10-K/10-Q narrative sections.
+    fallback to __getitem__ for 10-K/10-Q narrative sections. ``limit`` only
+    affects the 13F-HR ``holdings`` section.
     """
     base = form_type.replace("/A", "").strip()
 
@@ -275,7 +319,7 @@ def _extract_section(obj, form_type: str, section: str) -> Optional[str]:
     elif base in ("SC 13D", "SC 13G"):
         return _extract_schedule13_section(obj, section)
     elif base == "13F-HR":
-        return _extract_13f_section(obj, section)
+        return _extract_13f_section(obj, section, limit=limit)
 
     # For 10-K/10-Q narrative sections, look up the canonical key
     if base == "10-K":
@@ -475,8 +519,11 @@ def _extract_schedule13_section(obj, section: str) -> Optional[str]:
     return None
 
 
-def _extract_13f_section(obj, section: str) -> Optional[str]:
-    """Extract sections from a 13F-HR (ThirteenF) object."""
+def _extract_13f_section(obj, section: str, limit: int = DEFAULT_HOLDINGS_LIMIT) -> Optional[str]:
+    """Extract sections from a 13F-HR (ThirteenF) object.
+
+    ``limit`` is the most holdings rows to list; ``0`` lists every row.
+    """
     if section == "holdings":
         try:
             # ``ThirteenF.holdings`` is a DataFrame: its truth value raises and
@@ -484,16 +531,18 @@ def _extract_13f_section(obj, section: str) -> Optional[str]:
             # ``_get_fund_holdings`` in ownership.py does.
             holdings = getattr(obj, 'holdings', None)
             if holdings is not None and not holdings.empty:
+                total = len(holdings)
+                # DataFrame.head(0) is empty, so 0 ("all") must become the row count.
+                shown = total if limit == 0 else min(limit, total)
                 parts = []
-                for h in _holding_rows(holdings, 30):  # Limit to top 30
+                for h in _holding_rows(holdings, shown):
                     line = f"  {h.get('company', 'Unknown')}"
                     if "shares" in h:
                         line += f" | {h['shares']:,} shares"
                     if "value" in h:
                         line += f" | ${h['value']:,}"
                     parts.append(line)
-                total = len(holdings)
-                header = f"Top holdings ({min(30, total)} of {total}):"
+                header = f"Top holdings ({shown} of {total}):"
                 return header + "\n" + "\n".join(parts)
         except Exception as e:
             logger.warning(f"Could not extract 13F holdings: {e}")

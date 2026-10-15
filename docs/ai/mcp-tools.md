@@ -195,6 +195,7 @@ Available sections vary by form type:
 | `identifier` | Company ticker/CIK (alternative -- gets most recent filing) |
 | `form` | Form type (used with `identifier`) |
 | `sections` | Sections to extract. Use `summary` for metadata, `all` for everything. |
+| `limit` | Max rows in a 13F-HR `holdings` section (default 30; `0` returns every row). Validated for all forms, applied only to 13F holdings. |
 
 **Try asking Claude:**
 

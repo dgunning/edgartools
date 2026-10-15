@@ -276,6 +276,7 @@ Read specific sections from a filing.
 - `accession_number`: SEC accession number
 - OR `identifier` + `form`: Company + form type
 - `sections`: `summary`, `business`, `risk_factors`, `mda`, `financials`, or `all`
+- `limit` (default: 30): Max rows in a 13F-HR `holdings` section. Use `0` for every row.
 
 #### 5. edgar_compare
 Compare companies side-by-side or analyze an industry.

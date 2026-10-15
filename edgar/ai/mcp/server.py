@@ -274,6 +274,7 @@ Read specific sections from a filing.
 ```json
 {"identifier": "AAPL", "form": "10-K", "sections": ["business", "risk_factors"]}
 {"accession_number": "0000320193-23-000077", "sections": ["mda"]}
+{"identifier": "1067983", "form": "13F-HR", "sections": ["holdings"], "limit": 0}
 ```
 
 ### edgar_compare
