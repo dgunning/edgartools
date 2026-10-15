@@ -298,19 +298,19 @@ class MarkdownRenderer:
             # first non-empty data row to the header, so the output is a valid
             # pipe table with a delimiter row and real column labels instead of
             # a blank header bar on every layout table (GH #1524 review).
-            promoted_index = next(
-                (index for index, row in enumerate(expanded_data_rows)
-                 if any(row[column].strip() for column in content_columns if column < len(row))),
-                None,
-            )
-            if promoted_index is not None:
+            # A table with a single non-empty row (a page footer, a footnote)
+            # keeps its plain row: promoting it would leave a header with a
+            # lone delimiter under it and nothing in the body.
+            non_empty = [index for index, row in enumerate(expanded_data_rows)
+                         if any(row[column].strip() for column in content_columns if column < len(row))]
+            if len(non_empty) > 1:
+                promoted_index = non_empty[0]
                 promoted_row = expanded_data_rows[promoted_index]
                 promoted = [promoted_row[column] if column < len(promoted_row) else ""
                             for column in content_columns]
                 # Promoted labels must stay on one line, and literal pipes
                 # must not create header columns. Escape backslashes first.
-                promoted = [" ".join(line.strip() for line in cell.splitlines() if line.strip())
-                            for cell in promoted]
+                promoted = [" ".join(cell.split()) for cell in promoted]
                 promoted = [cell.replace('\\', '\\\\').replace('|', '\\|') for cell in promoted]
                 rows.append("| " + " | ".join(promoted) + " |")
                 rows.append("| " + " | ".join(["---"] * len(content_columns)) + " |")
@@ -319,6 +319,9 @@ class MarkdownRenderer:
         # Render data rows
         for expanded_row in expanded_data_rows:
             filtered_row = [expanded_row[i] if i < len(expanded_row) else "" for i in content_columns]
+            # A pipe-table row must stay on one line, so collapse the whitespace
+            # in each cell (line breaks from <br> or several paragraphs too).
+            filtered_row = [' '.join(cell.split()) for cell in filtered_row]
 
             # Only add rows with meaningful content
             if any(cell.strip() for cell in filtered_row):

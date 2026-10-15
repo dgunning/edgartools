@@ -21,6 +21,7 @@ import logging
 import random
 import re
 import time
+import warnings
 from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import List, Optional, Union
@@ -524,6 +525,28 @@ def _parse_aggregations(aggs_data: dict) -> EFTSAggregations:
 # Public API
 # ---------------------------------------------------------------------------
 
+def _efts_forms(forms: List[str]) -> List[str]:
+    """Form codes to send to EFTS.
+
+    EFTS returns amendments only as soon as the list holds an amendment code
+    (``S-1/A``), for every form in the list, while a root code (``S-1``) already
+    matches its amendments. So ``X/A`` is dropped when ``X`` is listed too, and
+    a warning is given when an amendment code without its root is mixed with
+    other forms, whose original filings EFTS would then leave out.
+    """
+    listed = set(forms)
+    kept = [form for form in forms if not (form.endswith("/A") and form[:-2] in listed)]
+    amendments = [form for form in kept if form.endswith("/A")]
+    if amendments and len(amendments) < len(kept):
+        warnings.warn(
+            f"EFTS returns only amendments when forms includes {', '.join(amendments)}, so the original "
+            f"filings of the other forms are left out. List the root form instead ({', '.join(a[:-2] for a in amendments)}), "
+            "which also matches its amendments.",
+            stacklevel=3,
+        )
+    return kept
+
+
 def search_filings(
     query: str = "",
     *,
@@ -610,7 +633,7 @@ def search_filings(
     if forms:
         if isinstance(forms, str):
             forms = [forms]
-        params["forms"] = ",".join(forms)
+        params["forms"] = ",".join(_efts_forms(forms))
 
     # 8-K item filter (server-side)
     if items:

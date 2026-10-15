@@ -7,7 +7,9 @@ row inside the ``if expanded_headers:`` branch, so a headerless table lost its
 delimiter row and was not a valid pipe table. Rather than give every layout
 table an empty header bar, the renderer now promotes the first non-empty data
 row to the header, keeps the delimiter row, and renders the remaining rows as
-the body (GH #1524 review). These tests pin the exact markdown for headerless
+the body (GH #1524 review). A table with only one non-empty row -- a page
+footer or a footnote -- keeps its plain row, since promoting it would leave a
+header with a lone delimiter and no body. These tests pin the exact markdown for headerless
 two-column and single-column tables.
 """
 
@@ -51,10 +53,29 @@ def test_headerless_table_skips_blank_leading_rows_when_promoting():
         rows=[
             Row([Cell(""), Cell("")]),
             Row([Cell("10"), Cell("20")]),
+            Row([Cell("30"), Cell("40")]),
         ],
     )
     document = Document(root=table)
-    assert document.to_markdown() == "| 10 | 20 |\n| --- | --- |"
+    assert document.to_markdown() == "| 10 | 20 |\n| --- | --- |\n| 30 | 40 |"
+
+
+@pytest.mark.parametrize(
+    ("rows", "expected"),
+    [
+        ([Row([Cell("17"), Cell("Bank of America")])], "| 17 | Bank of America |"),
+        (
+            [Row([Cell(""), Cell("")]), Row([Cell("(1)"), Cell("Footnote text")]), Row([Cell(""), Cell("")])],
+            "| (1) | Footnote text |",
+        ),
+    ],
+    ids=["one-row", "one-non-empty-row"],
+)
+def test_single_row_headerless_table_is_not_promoted(rows, expected):
+    # A page footer or footnote laid out as a one-row table would otherwise
+    # become a header with a lone delimiter and no body (bac 10-K: 182 tables).
+    document = Document(root=TableNode(headers=[], rows=rows))
+    assert document.to_markdown() == expected
 
 
 def _parsed_cells(document):
