@@ -95,8 +95,17 @@ PINNED = {
     # index is split off (Item 16 wrong -> eye on both).
     # 2026-10-14 (llmp.12.1): eight held-out 10-Ks retired to heldout_retired with
     # their blind labels (+157 items: 131 eye, 26 wrong; heldout/README.md v2).
-    "10-K": (934, 901, 867, 854),   # 96.5% / 92.8% / 91.4%
-    "10-Q": (111, 110, 107, 106),   # 99.1% / 96.4% / 95.5%
+    # 2026-10-14 (llmp.12.1): an anchor's preceding block lines are not its
+    # heading (TechPrecision's own PART dividers, Item 9/9A); the start pass
+    # walks from where the slice starts (Vasomedical's PART I); a "PART II /
+    # ITEM 7A" breadcrumb is furniture (Plum Creek); HTML comments no longer
+    # print in section text (Bright Green's page-number field codes); an
+    # open-ended section's final page number is dropped (Bright Green Item 8,
+    # 915358 Item 8 relabelled without "F-45"); pattern sections drop trailing
+    # page numbers ("- 22 -", Landec) and backlinks (xom 10-Q Item 1 wrong ->
+    # eye). Retired items: 26 wrong -> 6.
+    "10-K": (934, 908, 880, 874),   # 97.2% / 94.2% / 93.6%
+    "10-Q": (111, 110, 108, 107),   # 99.1% / 97.3% / 96.4%
 }
 
 

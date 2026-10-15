@@ -456,7 +456,11 @@ class TableProcessor:
             is_block = isinstance(tag, str) and tag.lower() in cls._BLOCK_TAGS
             if is_block:
                 parts.append('\n')
-            if node.text:
+            # A comment's .text is the comment, not cell text: TOC sections
+            # render tables from the original HTML, comments included, and
+            # Word-converted filings wrap each page number in field-code
+            # comments ("Field: Sequence; Type: Arabic; Name: PageNo").
+            if node.text and isinstance(tag, str):
                 parts.append(node.text)
             for child in node:
                 walk(child)

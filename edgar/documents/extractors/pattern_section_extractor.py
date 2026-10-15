@@ -1337,6 +1337,50 @@ class SectionExtractor:
         # Otherwise, section goes to end of document
         return sum(1 for _ in document.root.walk())
 
+    # At most this many trailing page-furniture lines are dropped from a section.
+    _FURNITURE_MAX_NODES = 8
+
+    @classmethod
+    def _retreat_past_page_furniture(cls, walk: List[Node], start_pos: int, end_pos: int) -> int:
+        """End a section before the page number that trails it.
+
+        A section ends where the next header begins, and the page number of
+        the page it ended on sits between them: Landec's 2008 10-K closed
+        seven items on "- 22 -"-style page numbers. The TOC path drops this
+        furniture (``SECSectionExtractor._retreat_ends_before_page_furniture``);
+        this is the same rule over node positions, with the same page-number
+        and contents-backlink predicates, and no repeat counting.
+
+        Walking back from the end, a leaf node that is empty or a page number
+        or backlink moves the end before it, and a node with children moves
+        it too: it is only reached once every one of its children in range was
+        furniture. The first leaf with content stops the walk.
+        """
+        from edgar.documents.extractors.toc_section_extractor import SECSectionExtractor
+
+        page_num = SECSectionExtractor._PAGE_NUM_RE
+        crumb = SECSectionExtractor._CRUMB_LINE_RE
+        new_end, skipped = end_pos, 0
+        for i in range(end_pos - 1, start_pos, -1):
+            node = walk[i]
+            if getattr(node, 'children', None):
+                new_end = i
+                continue
+            text = ' '.join((node.text() or '').split()) if callable(getattr(node, 'text', None)) else ''
+            if not text:
+                new_end = i
+                continue
+            if len(text) <= 40 and (page_num.match(text) or crumb.match(text)):
+                skipped += 1
+                if skipped > cls._FURNITURE_MAX_NODES:
+                    return end_pos
+                new_end = i
+                continue
+            break
+        else:
+            return end_pos  # nothing but furniture: leave the section alone
+        return new_end if skipped else end_pos
+
     def _create_sections(self,
                         matched_sections: Dict[str, Tuple[Node, str, int, int]],
                         document: Document,
@@ -1429,6 +1473,8 @@ class SectionExtractor:
             else:
                 # Normal path: Create section node containing all content in range
                 section_node = SectionNode(section_name=section_name)
+
+                end_pos = self._retreat_past_page_furniture(walk, start_pos, end_pos)
 
                 # Find all nodes in position range - only add top-level nodes
                 # (nodes whose parent is outside the range)
