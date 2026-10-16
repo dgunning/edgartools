@@ -17,9 +17,15 @@ get_revenue() fell to whatever matched next:
 
 The bank total is now searched after Revenues and before contract revenue. On a
 bank's statement (one with a us-gaap:NoninterestIncome row) the label patterns
-are skipped, because every "... revenue" label there is a component, so
-U.S. Bancorp reports no value instead of a wrong one.
+are skipped, because every "... revenue" label there is a component.
+
+Bead: edgartools-hmj0j. That left U.S. Bancorp and Capital One with no value.
+Both file the total off the face statement as a non-dimensional
+us-gaap:Revenues fact, next to dimensioned segment values of the same concept,
+and get_revenue() now reads it for the statement's period.
 """
+from types import SimpleNamespace
+
 import pandas as pd
 import pytest
 
@@ -43,15 +49,45 @@ def test_jpmorgan_revenue_is_total_net_revenue_not_noninterest_revenue():
     assert financials.get_revenue(1) == JPM_FY2022_TOTAL_NET_REVENUE
 
 
-def _financials_with_income_statement(monkeypatch, rows):
-    """A Financials whose income statement is exactly `rows` (concept, label, value)."""
+class _Facts:
+    """``xb.facts`` holding the given rows of the instance's fact frame."""
+
+    def __init__(self, rows):
+        self._frame = pd.DataFrame(rows, columns=[
+            "concept", "numeric_value", "period_start", "period_end", "is_dimensioned"])
+
+    def query(self):
+        return self
+
+    def by_concept(self, concept, exact=False):
+        self._concept = concept
+        return self
+
+    def to_dataframe(self):
+        return self._frame[self._frame["concept"] == self._concept]
+
+
+def _financials_with_income_statement(monkeypatch, rows, facts=()):
+    """A Financials whose income statement is exactly `rows` (concept, label, value),
+    for the year 2025, and whose instance holds `facts`."""
     df = pd.DataFrame(
         [{"concept": c, "label": label, "2025-12-31": value, "level": 1, "abstract": False}
          for c, label, value in rows]
     )
-    financials = Financials(xb=object())
-    monkeypatch.setattr(financials, "_render_statement_frame", lambda statement_type: (None, df))
+    period = SimpleNamespace(start_date="2025-01-01", end_date="2025-12-31", quarter=None,
+                             label="2025", is_duration=True)
+    financials = Financials(xb=SimpleNamespace(facts=_Facts(list(facts))))
+    monkeypatch.setattr(financials, "_render_statement_frame",
+                        lambda statement_type: (SimpleNamespace(periods=[period]), df))
     return financials
+
+
+_USB_FACE_ROWS = [
+    ("us-gaap_InterestIncomeExpenseNet", "Net interest income", 16_649_000_000),
+    ("us-gaap_FeeAndCommissionCreditAndDebitCards", "Card revenue", 1_735_000_000),
+    ("usb_CapitalMarketsRevenue", "Capital markets revenue", 1_633_000_000),
+    ("us-gaap_NoninterestIncome", "Total noninterest income", 11_891_000_000),
+]
 
 
 @pytest.mark.fast
@@ -67,15 +103,25 @@ def test_bank_total_beats_a_contract_revenue_fee_line(monkeypatch):
 
 
 @pytest.mark.fast
-def test_a_bank_without_a_total_reports_no_revenue_rather_than_a_component(monkeypatch):
-    """U.S. Bancorp's shape: no total row, revenue-labelled components."""
-    financials = _financials_with_income_statement(monkeypatch, [
-        ("us-gaap_InterestIncomeExpenseNet", "Net interest income", 16_649_000_000),
-        ("us-gaap_FeeAndCommissionCreditAndDebitCards", "Card revenue", 1_735_000_000),
-        ("usb_CapitalMarketsRevenue", "Capital markets revenue", 1_633_000_000),
-        ("us-gaap_NoninterestIncome", "Total noninterest income", 11_891_000_000),
-    ])
+def test_a_bank_without_any_total_reports_no_revenue_rather_than_a_component(monkeypatch):
+    """U.S. Bancorp's face statement, in a filing with no us-gaap:Revenues fact."""
+    financials = _financials_with_income_statement(monkeypatch, _USB_FACE_ROWS)
     assert financials.get_revenue() is None
+
+
+@pytest.mark.fast
+def test_a_bank_without_a_total_row_reports_its_filed_total(monkeypatch):
+    """U.S. Bancorp's shape, 0000036104-26-000011: the total is filed only as a
+    non-dimensional us-gaap:Revenues fact. Segment values of the same concept are
+    dimensioned, and a prior year's total is another period; neither is taken."""
+    financials = _financials_with_income_statement(monkeypatch, _USB_FACE_ROWS, facts=[
+        ("us-gaap:Revenues", 12_083_000_000, "2025-01-01", "2025-12-31", True),
+        ("us-gaap:Revenues", 7_607_000_000, "2025-01-01", "2025-12-31", True),
+        ("us-gaap:Revenues", 27_455_000_000, "2024-01-01", "2024-12-31", False),
+        ("us-gaap:Revenues", 28_656_000_000, "2025-01-01", "2025-12-31", False),
+    ])
+    assert financials.get_revenue() == 28_656_000_000
+    assert financials.get_revenue(1) is None  # the statement has one period
 
 
 @pytest.mark.fast
@@ -94,7 +140,11 @@ def test_label_fallback_still_serves_a_non_bank(monkeypatch):
     ("0000072971-26-000133", 83_699_000_000),   # Wells Fargo
     ("0000004962-26-000080", 72_229_000_000),   # American Express
     ("0001628280-26-008131", 182_447_000_000),  # JPMorgan Chase
-], ids=["WFC", "AXP", "JPM"])
+    # No total row on the face statement; the non-dimensional us-gaap:Revenues
+    # fact in the filing's instance, FY2025 (edgartools-hmj0j)
+    ("0000036104-26-000011", 28_656_000_000),   # U.S. Bancorp
+    ("0000927628-26-000024", 53_434_000_000),   # Capital One
+], ids=["WFC", "AXP", "JPM", "USB", "COF"])
 def test_bank_10k_revenue_matches_sec(accession, expected):
     from edgar import find
     financials = Financials(find(accession).xbrl())
