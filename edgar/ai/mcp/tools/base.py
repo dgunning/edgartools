@@ -687,9 +687,9 @@ def classify_error(exc: Exception) -> dict[str, Any]:
         pass
 
     # --- The same failures, in the wrapped era ---
-    # Under EDGARTOOLS_STRICT_ERRORS (and unconditionally in 6.0) the network
-    # boundary raises TransportError instead of the httpx2 types above, so this
-    # block has to answer the same questions the httpx2 blocks just did. It sits
+    # Since 6.0 the network boundary raises TransportError instead of the httpx2
+    # types above, so this block has to answer the same questions the httpx2
+    # blocks just did. It sits
     # last among the transport checks because TooManyRequestsError,
     # SSLVerificationError and IdentityNotSetError are all TransportError
     # subclasses and each has its own, better answer earlier in this function.

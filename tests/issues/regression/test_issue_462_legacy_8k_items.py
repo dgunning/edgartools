@@ -33,8 +33,10 @@ Expected after fix: All 7 items correctly extracted
 """
 
 import pytest
+
 from edgar import Company, Filing
 from edgar.company_reports import EightK
+from edgar.exceptions import SectionNotFoundError
 
 
 @pytest.mark.network
@@ -185,8 +187,10 @@ def test_legacy_sgml_8k_getitem():
     assert item_7 is not None, "eightk['Item 7'] should return content"
     assert 'Financial Statements and Exhibits' in item_7 or 'financial statements' in item_7.lower()
 
-    # Test missing item
-    assert eightk['Item 3'] is None, "eightk['Item 3'] should return None for missing item"
+    # Test missing item: raises since 6.0 (edgartools-07lk.10); .get() is the None form
+    assert eightk.get('Item 3') is None, "eightk.get('Item 3') should return None for missing item"
+    with pytest.raises(SectionNotFoundError):
+        eightk['Item 3']
 
 
 @pytest.mark.network

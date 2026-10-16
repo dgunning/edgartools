@@ -196,7 +196,7 @@ class SixK:
 
     @cached_property
     def financials(self):
-        """XBRL financials, if present (rare for 6-K; uses IFRS taxonomy)."""
+        """XBRL financials, or None when this 6-K carries none (most do not; IFRS taxonomy)."""
         from edgar.financials import Financials
         return Financials.extract(self._filing)
 

@@ -749,40 +749,26 @@ def test_as_company_filing(carbo_10k_filing):
 
 @pytest.mark.fast
 @pytest.mark.vcr
-def test_10K_filing_with_no_financial_data(monkeypatch):
-    """An ABS trust's 10-K carries no XBRL, and both lanes of that are pinned here.
+def test_10K_filing_with_no_financial_data():
+    """An ABS trust's 10-K carries no XBRL, so there are no financials: None.
 
-    This test asserted the hollow `Financials` alone until edgartools-07lk.10.1
-    gave that path a voice, at which point it failed in the strict lane — which
-    is the lane doing its job: it exists to find OUR code still relying on the
-    pre-6.0 behaviour. The repair is to say which lane each claim belongs to,
-    not to drop the claim.
-
-    The env var is set explicitly in both directions rather than inherited, so
-    the two halves assert the same things wherever the suite runs, and the flag
-    itself is what the test shows to be the switch.
+    In 5.x `tenk.financials` was a hollow `Financials` whose statements were all
+    None — truthy, so an `is not None` guard passed (edgartools-07lk.10).
     """
     from edgar.financials import Financials
-    from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
 
     filing = Filing(form='10-K', filing_date='2023-05-26', company='CarMax Auto Owner Trust 2019-3', cik=1779026,
                     accession_no='0001779026-23-000027')
     tenk: TenK = filing.obj()
 
-    # 5.x: the hollow object stays, and now says so once, on first access.
-    monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
-    with pytest.warns(FutureWarning, match="no XBRL"):
-        assert tenk.financials
-    assert not tenk.balance_sheet
-    assert not tenk.income_statement
-    assert not tenk.cash_flow_statement
-    print(tenk)
+    assert tenk.financials is None
+    assert Financials.extract(filing) is None
+    assert tenk.balance_sheet is None
+    assert tenk.income_statement is None
+    assert tenk.cash_flow_statement is None
+    assert tenk.auditor is None
+    assert "No financial data available" in repr(tenk)
 
-    # 6.0, today, under the flag. Reuses the same filing: `Financials.extract`
-    # is the line that changes, and `tenk.financials` has cached its answer.
-    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
-    with pytest.raises(XBRLFilingWithNoXbrlData):
-        Financials.extract(filing)
 
 @pytest.mark.fast
 def test_text_url_for_filing(carbo_10k_filing):

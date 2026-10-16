@@ -208,8 +208,6 @@ errors: |
   tenk["Item 7"]              # the item you expect
   tenk.get("Item 16", "")     # the item that may not be there
 
-  # EDGARTOOLS_STRICT_ERRORS=1 turns on 6.0 error behaviour today.
-
 avoid:
   - pattern: "except httpx.ReadTimeout:"
     fix: "except TransportError:  # from edgar.exceptions"

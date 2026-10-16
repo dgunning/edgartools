@@ -953,14 +953,11 @@ from edgar.xbrl import stitch_statements, render_stitched_statement, to_pandas
 ## Error Handling
 
 ```python
-from edgar.xbrl import XBRL, XBRLFilingWithNoXbrlData
+from edgar.xbrl import XBRL
 
-try:
-    xbrl = XBRL.from_filing(filing)
-except XBRLFilingWithNoXbrlData:
-    print("Filing does not contain XBRL data")
-except Exception as e:
-    print(f"Error parsing XBRL: {e}")
+xbrl = XBRL.from_filing(filing)
+if xbrl is None:
+    print("Filing does not contain XBRL data")   # a property of the filing, not an error
 
 # Check for statement availability
 if xbrl.statements.income_statement():

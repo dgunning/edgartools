@@ -116,27 +116,6 @@ def _forbidding_legacy(cls):
                 {"_chunked_document": property(_forbidden)})
 
 
-@pytest.fixture
-def lenient(monkeypatch):
-    """Pin today's error behaviour for the two lookups that MISS.
-
-    `report[item]` on an absent item warns now and raises under
-    `EDGARTOOLS_STRICT_ERRORS` (edgartools-sx7y wired that up for CurrentReport
-    and TwentyF, which had been answering None in silence). These two tests are
-    about a different question -- that the miss path does not read
-    `edgar.files` -- and that holds in either mode, so they name the mode they
-    assert rather than inheriting whichever lane invoked them. Not naming it is
-    exactly what left `test-strict-errors` red on main for five merges.
-    """
-    monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
-
-
-@pytest.fixture
-def strict(monkeypatch):
-    """The 6.0 error behaviour, asserted on the same offline fixtures."""
-    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
-
-
 def test_the_fixtures_are_present():
     """A glob that matches nothing would pass every parametrized test below."""
     assert len(TWENTY_F) >= 3, f"expected 20-F fixtures under {FIXTURES}, found {TWENTY_F}"
@@ -176,7 +155,7 @@ def test_eight_k_items_answer_from_the_modern_parser(path):
 
 
 @pytest.mark.parametrize("path", TWENTY_F, ids=lambda p: p.stem)
-def test_a_missing_twenty_f_item_returns_none_without_reading_legacy(path, lenient):
+def test_a_missing_twenty_f_item_get_returns_none_without_reading_legacy(path):
     """The lookup that actually EXERCISES the guard.
 
     Every item in TWENTY_F_EXPECTED is answered by the modern parser, so those
@@ -187,23 +166,23 @@ def test_a_missing_twenty_f_item_returns_none_without_reading_legacy(path, lenie
     """
     report = _forbidding_legacy(TwentyF)(FixtureFiling(path, "20-F"))
 
-    assert report["Item 99"] is None
+    assert report.get("Item 99") is None
 
 
 @pytest.mark.parametrize("path", EIGHT_K[:3], ids=lambda p: p.stem)
-def test_a_missing_eight_k_item_returns_none_without_reading_legacy(path, lenient):
+def test_a_missing_eight_k_item_get_returns_none_without_reading_legacy(path):
     """The Group B behaviour change, on the forms that had no fixture for it.
 
-    An item the filing does not have returns None. It used to fall through to
+    An item the filing does not have is None from `.get()`. It used to fall through to
     ``ChunkedDocument`` first; ``_forbidding_legacy`` proves it no longer does.
     """
     report = _forbidding_legacy(CurrentReport)(FixtureFiling(path, "8-K"))
 
-    assert report["Item 6.66"] is None
+    assert report.get("Item 6.66") is None
 
 
 @pytest.mark.parametrize("path", TWENTY_F, ids=lambda p: p.stem)
-def test_a_missing_twenty_f_item_raises_under_strict(path, strict):
+def test_a_missing_twenty_f_item_raises(path):
     """The other half of the same lookup, on the same fixtures.
 
     TwentyF overrode ``__getitem__`` and reimplemented the miss path without
@@ -219,7 +198,7 @@ def test_a_missing_twenty_f_item_raises_under_strict(path, strict):
 
 
 @pytest.mark.parametrize("path", EIGHT_K[:3], ids=lambda p: p.stem)
-def test_a_missing_eight_k_item_raises_under_strict(path, strict):
+def test_a_missing_eight_k_item_raises(path):
     """CurrentReport had the same override gap as TwentyF (edgartools-sx7y)."""
     report = _forbidding_legacy(CurrentReport)(FixtureFiling(path, "8-K"))
 

@@ -8,14 +8,13 @@ public contract by accident — every user `except` clause naming it, and every
 future call site, inherited a dependency's type. The wrap fixes that once at the
 boundary rather than at each of the call sites.
 
-The wrap is a 6.0 break (someone may be catching `httpx.HTTPError` around our
-calls), so in 5.x it is gated on `EDGARTOOLS_STRICT_ERRORS`. That makes this
-file's job two-sided: prove the wrap does the right thing when it is on, and
-prove nothing at all changed when it is off.
+The wrap was a 6.0 break (someone may have been catching `httpx.HTTPError`
+around our calls), so in 5.x it was gated on `EDGARTOOLS_STRICT_ERRORS`. Since
+6.0 it is unconditional.
 
 WHAT THESE TESTS PROTECT, in order of how quietly each could break:
 
-  1. **Retries still happen under strict.** The wrap must sit ABOVE `@retry`.
+  1. **Retries still happen.** The wrap must sit ABOVE `@retry`.
      Move it below and stamina sees `TransportError`, which is not in
      `RETRYABLE_EXCEPTIONS`, so every retried request silently becomes a
      single-shot one. Nothing about the raised type would look wrong; the
@@ -29,8 +28,6 @@ WHAT THESE TESTS PROTECT, in order of how quietly each could break:
      errors carry no status, so a naive `status_code is None` check would let
      the offline-fallback paths swallow the two errors whose whole value is the
      message telling the user what to change.
-  4. **The flag off is byte-for-byte the old behaviour.** That is what makes
-     this shippable in 5.x.
 """
 import asyncio
 
@@ -51,7 +48,6 @@ from edgar.exceptions import (
     TooManyRequestsError,
     TransportError,
     http_status,
-    strict_errors_enabled,
 )
 from edgar.httprequests import (
     RETRYABLE_EXCEPTIONS,
@@ -65,16 +61,6 @@ from edgar.httprequests import (
 )
 
 URL = "https://www.sec.gov/cgi-bin/browse-edgar"
-
-
-@pytest.fixture
-def strict(monkeypatch):
-    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
-
-
-@pytest.fixture
-def lenient(monkeypatch):
-    monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
 
 
 def _status_error(status: int, url: str = URL) -> httpx2.HTTPStatusError:
@@ -93,37 +79,10 @@ def _retrying(fn):
 
 
 # ---------------------------------------------------------------------------
-# The flag
+# The wrap
 # ---------------------------------------------------------------------------
 
-@pytest.mark.parametrize("value,expected", [
-    ("1", True), ("true", True), ("TRUE", True), ("yes", True), ("on", True),
-    (" 1 ", True), ("0", False), ("false", False), ("", False), ("maybe", False),
-])
-def test_strict_flag_reading(monkeypatch, value, expected):
-    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", value)
-    assert strict_errors_enabled() is expected
-
-
-def test_strict_flag_is_read_per_call_not_captured_at_import(monkeypatch):
-    """A test that sets the variable must be able to unset it again.
-
-    Caching this at import would make the strict CI job the only way to
-    exercise the wrapped paths, and make every test in this file order-dependent.
-    """
-    monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
-    assert strict_errors_enabled() is False
-    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
-    assert strict_errors_enabled() is True
-    monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS")
-    assert strict_errors_enabled() is False
-
-
-# ---------------------------------------------------------------------------
-# The wrap, on
-# ---------------------------------------------------------------------------
-
-def test_connect_failure_becomes_a_transport_error_with_no_status(strict):
+def test_connect_failure_becomes_a_transport_error_with_no_status():
     @_retrying
     def boundary(url):
         raise httpx2.ConnectError("nodename nor servname provided")
@@ -137,7 +96,7 @@ def test_connect_failure_becomes_a_transport_error_with_no_status(strict):
     assert isinstance(exc.__cause__, httpx2.ConnectError), "the original must stay reachable"
 
 
-def test_status_error_becomes_a_transport_error_carrying_the_status(strict):
+def test_status_error_becomes_a_transport_error_carrying_the_status():
     @_retrying
     def boundary(url):
         raise _status_error(503)
@@ -152,7 +111,7 @@ def test_status_error_becomes_a_transport_error_carrying_the_status(strict):
     assert isinstance(exc.__cause__, httpx2.HTTPStatusError)
 
 
-def test_the_url_comes_from_the_exception_when_it_has_one(strict):
+def test_the_url_comes_from_the_exception_when_it_has_one():
     """After a redirect the call argument is stale; the exception is not."""
     redirected = "https://www.sec.gov/somewhere-else"
 
@@ -165,7 +124,7 @@ def test_the_url_comes_from_the_exception_when_it_has_one(strict):
     assert excinfo.value.url == redirected
 
 
-def test_async_boundary_wraps(strict):
+def test_async_boundary_wraps():
     @_retrying
     async def boundary(client, url):
         raise httpx2.ReadTimeout("timed out")
@@ -176,7 +135,7 @@ def test_async_boundary_wraps(strict):
     assert excinfo.value.url == URL
 
 
-def test_generator_boundary_wraps(strict):
+def test_generator_boundary_wraps():
     """The failure mode here is silent: a generator treated as a plain function
     returns without executing, so the except clause never sees anything."""
     @_retrying
@@ -189,7 +148,7 @@ def test_generator_boundary_wraps(strict):
     assert isinstance(excinfo.value.__cause__, httpx2.ReadTimeout)
 
 
-def test_inspect_response_wraps_raise_for_status(strict):
+def test_inspect_response_wraps_raise_for_status():
     request = httpx2.Request("GET", URL)
     response = httpx2.Response(500, request=request)
 
@@ -200,12 +159,12 @@ def test_inspect_response_wraps_raise_for_status(strict):
 
 
 @pytest.mark.parametrize("status", [200, 304])
-def test_inspect_response_still_accepts_success_and_not_modified(strict, status):
+def test_inspect_response_still_accepts_success_and_not_modified(status):
     request = httpx2.Request("GET", URL)
     assert inspect_response(httpx2.Response(status, request=request)) is None
 
 
-def test_our_own_transport_errors_pass_through_untouched(strict):
+def test_our_own_transport_errors_pass_through_untouched():
     """429 and SSL are already ours; the wrap must not re-wrap them."""
     @_retrying
     def rate_limited(url):
@@ -215,31 +174,6 @@ def test_our_own_transport_errors_pass_through_untouched(strict):
         rate_limited(URL)
     assert excinfo.value.retry_after == 600
     assert excinfo.value.__cause__ is None
-
-
-# ---------------------------------------------------------------------------
-# The wrap, off — nothing changed
-# ---------------------------------------------------------------------------
-
-@pytest.mark.parametrize("original", [
-    httpx2.ConnectError("no route"),
-    httpx2.ReadTimeout("timed out"),
-    _status_error(404),
-])
-def test_without_the_flag_httpx_propagates_verbatim(lenient, original):
-    @_retrying
-    def boundary(url):
-        raise original
-
-    with pytest.raises(type(original)) as excinfo:
-        boundary(URL)
-    assert excinfo.value is original, "not merely the same type — the same object"
-
-
-def test_without_the_flag_inspect_response_still_raises_httpx(lenient):
-    request = httpx2.Request("GET", URL)
-    with pytest.raises(httpx2.HTTPStatusError):
-        inspect_response(httpx2.Response(500, request=request))
 
 
 # ---------------------------------------------------------------------------
@@ -253,15 +187,9 @@ def test_transport_error_is_not_retryable_which_is_why_order_matters():
     assert should_retry(TransportError("x")) is False
 
 
-@pytest.mark.parametrize("flag", [True, False])
-def test_the_boundary_still_retries(monkeypatch, flag):
+def test_the_boundary_still_retries():
     """Wrapping inside @retry would make this 1 instead of 3, and nothing else
     would look wrong."""
-    if flag:
-        monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
-    else:
-        monkeypatch.delenv("EDGARTOOLS_STRICT_ERRORS", raising=False)
-
     attempts = []
 
     @_retrying
@@ -269,7 +197,7 @@ def test_the_boundary_still_retries(monkeypatch, flag):
         attempts.append(1)
         raise httpx2.ReadTimeout("timed out")
 
-    with pytest.raises((TransportError, httpx2.ReadTimeout)):
+    with pytest.raises(TransportError):
         boundary(URL)
     assert len(attempts) == 3, (
         "the boundary stopped retrying — wrap_transport_errors is almost "
@@ -277,7 +205,7 @@ def test_the_boundary_still_retries(monkeypatch, flag):
     )
 
 
-def test_the_async_boundary_still_retries(strict):
+def test_the_async_boundary_still_retries():
     attempts = []
 
     @_retrying
@@ -344,14 +272,13 @@ def test_unreachable_errors_are_all_retryable():
 
 
 # ---------------------------------------------------------------------------
-# The internal call sites, in both eras
+# The internal call sites, whichever type raised
 #
-# These are what the strict CI job is for. Each site sits above the boundary and
-# translates a status it understands into a domain answer; each must give the
-# same answer whichever era raised. A site that only handles the httpx type
-# keeps passing today and starts falling through to its `raise` in 6.0 — the
-# 404-becomes-None handling would simply stop existing, and no test naming httpx
-# would notice.
+# Each site sits above the boundary and translates a status it understands into
+# a domain answer. The boundary raises TransportError; a request made outside it
+# still raises the httpx type, so each site must give the same answer for both.
+# A site that only handled the httpx type would fall through to its `raise`, and
+# the 404-becomes-None handling would simply stop existing.
 # ---------------------------------------------------------------------------
 
 @pytest.mark.parametrize("raised", [_status_error(404), TransportError("gone", status_code=404)])

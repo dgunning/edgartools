@@ -21,12 +21,6 @@ from edgar.sgml import sgml_common
 pytestmark = pytest.mark.fast
 
 
-@pytest.fixture(params=[False, True], ids=["legacy", "strict"])
-def strict_errors(request, monkeypatch):
-    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1" if request.param else "0")
-    return request.param
-
-
 @pytest.fixture
 def filing(monkeypatch):
     # Exercise the network-source path regardless of the developer's storage settings.
@@ -61,14 +55,13 @@ def test_http_error_leaves_filing_retryable(
     filing,
     homepage,
     submission_text,
-    strict_errors,
     monkeypatch,
     accessor,
     status,
 ):
     request = httpx2.Request("GET", filing.text_url)
     if status == 429:
-        # The streaming boundary raises this domain error in both modes.
+        # The streaming boundary raises this domain error as itself.
         error = TooManyRequestsError(filing.text_url, retry_after=120)
         expected_error = TooManyRequestsError
     else:
@@ -77,7 +70,7 @@ def test_http_error_leaves_filing_retryable(
             request=request,
             response=httpx2.Response(status, request=request),
         )
-        expected_error = TransportError if strict_errors else httpx2.HTTPStatusError
+        expected_error = TransportError
     read = Mock(side_effect=[error, submission_text])
 
     @wrap_transport_errors
@@ -93,7 +86,7 @@ def test_http_error_leaves_filing_retryable(
             filing.sgml()
 
     assert http_status(caught.value) == status
-    if strict_errors and status != 429:
+    if status != 429:
         assert caught.value.__cause__ is error
     else:
         assert caught.value is error
@@ -117,10 +110,9 @@ def test_http_error_leaves_filing_retryable(
 
 
 @pytest.mark.parametrize("error_type", [httpx2.ConnectError, httpx2.ReadTimeout])
-def test_unreachable_error_propagates_in_both_modes(
+def test_unreachable_error_propagates(
     filing,
     homepage,
-    strict_errors,
     monkeypatch,
     error_type,
 ):
@@ -131,7 +123,7 @@ def test_unreachable_error_propagates_in_both_modes(
         raise error
 
     monkeypatch.setattr(sgml_common, "read_content_as_string", download)
-    with pytest.raises(TransportError if strict_errors else error_type):
+    with pytest.raises(TransportError):
         filing.sgml()
     assert filing._sgml is None
     homepage.assert_not_called()

@@ -597,8 +597,7 @@ def get_sec_file_listing(url:str) -> pd.DataFrame:
 
     Raises:
         ValueError: If URL is invalid or doesn't point to SEC EDGAR
-        ConnectionError: If unable to download the page (pre-6.0; under
-            EDGARTOOLS_STRICT_ERRORS the TransportError propagates as itself)
+        TransportError: If unable to download the page
         RuntimeError: If page structure is invalid or no table found
     """
     try:
@@ -611,7 +610,7 @@ def get_sec_file_listing(url:str) -> pd.DataFrame:
         elif status == 404:
             raise FileNotFoundError(f"Page not found: {url}") from None
         if isinstance(e, TransportError):
-            # Already the right type under the strict wrap. Re-wrapping it as a
+            # Already the right type from the boundary wrap. Re-wrapping it as a
             # builtin ConnectionError would demote a typed error back to the
             # vocabulary the hierarchy exists to replace.
             raise
@@ -698,8 +697,7 @@ def list_filing_feed_files(url: str) -> pd.DataFrame:
 
     Raises:
         ValueError: If URL is invalid or doesn't point to SEC EDGAR
-        ConnectionError: If unable to download the page (pre-6.0; under
-            EDGARTOOLS_STRICT_ERRORS the TransportError propagates as itself)
+        TransportError: If unable to download the page
         RuntimeError: If page structure is invalid or no table found
     """
     # Validate URL

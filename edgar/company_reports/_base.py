@@ -13,7 +13,7 @@ from rich.panel import Panel
 
 from edgar.core import log
 from edgar.documents import Document, HTMLParser
-from edgar.exceptions import SectionNotFoundError, warn_will_raise
+from edgar.exceptions import SectionNotFoundError
 from edgar.financials import Financials
 from edgar.richtools import repr_rich
 
@@ -32,8 +32,8 @@ def section_not_found(report, item_or_part: str) -> SectionNotFoundError:
 
     Shared by every report `__getitem__`, because the answer to "why did I get
     None?" should not depend on which form the user happened to be holding.
-    Returns the error rather than raising it — `report_lookup_miss` decides
-    whether 5.x warns or strict raises.
+    Returns the error rather than raising it, so `report_lookup_miss` can stay
+    quiet under `.get()`.
 
     Listing what the filing DOES have is the whole value of the message. Items
     are optional in ways that surprise people: 10-K Item 16 is a summary a filer
@@ -53,30 +53,19 @@ def section_not_found(report, item_or_part: str) -> SectionNotFoundError:
         else "no items were detected in this filing at all — check .document",
         f"use .get({item_or_part!r}) if an absent item is an acceptable answer",
     ]
-    # The message above names the filing, and the suggestions name its items;
-    # both vary between two filings that miss the same item on the same line.
-    # The warning has to be the part that does not vary, or a loop over a corpus
-    # warns once per filing — see warn_will_raise.
-    error.warning_summary = (
-        f"{type(report).__name__}[{item_or_part!r}] found no such item in this "
-        f"filing. Items are optional and vary by filer, so this can be a "
-        f"property of the filing rather than a mistake."
-    )
     return error
 
 
 def report_lookup_miss(report, item_or_part: str) -> None:
-    """`report[item]` found nothing: warn now, raise in 6.0 — usually.
+    """`report[item]` found nothing: raise `SectionNotFoundError`.
 
-    The exception is `.get()`, which is the migration target we are telling
-    people to move to. Warning there would mean the users who took our advice
-    get the same noise as the users who ignored it, and the ones taking it are
-    the ones who most need the output to stay clean. Under strict it stays
-    silent for the same reason — `.get()` promises `default`, not a raise.
+    Except under `.get()`, which promises its default rather than a raise, and
+    marks that with `_absence_is_expected`. In 5.x this warned and returned
+    None (edgartools-07lk.10).
     """
     if _absence_is_expected.get():
         return
-    warn_will_raise(section_not_found(report, item_or_part), stacklevel=4)
+    raise section_not_found(report, item_or_part)
 
 
 class CompanyReport:
@@ -163,8 +152,8 @@ class CompanyReport:
         return self._filing.reports
 
     @cached_property
-    def financials(self):
-        """Get the financials for this filing"""
+    def financials(self) -> Optional[Financials]:
+        """The financials for this filing, or None when it carries no XBRL."""
         return Financials.extract(self._filing)
 
     @property

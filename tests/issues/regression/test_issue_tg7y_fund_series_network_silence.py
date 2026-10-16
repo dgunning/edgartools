@@ -145,9 +145,8 @@ def test_transport_errors_tuple_covers_what_the_http_layer_actually_raises():
     httpx2.HTTPError is the base of ConnectError/ReadTimeout/HTTPStatusError, so
     naming it covers that family without enumerating it. TransportError covers
     ours the same way — 429, SSL and identity are all subclasses of it, and so
-    is everything the boundary wrap raises under EDGARTOOLS_STRICT_ERRORS. Both
-    bases stay listed through 6.0 so this tuple means the same thing in either
-    era (bead edgartools-07lk.10).
+    is everything the boundary wrap raises. Both bases stay listed so this tuple
+    covers a request made outside the wrap too (bead edgartools-07lk.10).
     """
     assert issubclass(httpx2.ConnectError, TRANSPORT_ERRORS)
     assert issubclass(httpx2.ReadTimeout, TRANSPORT_ERRORS)
