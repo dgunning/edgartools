@@ -11,7 +11,7 @@
   <a href="https://github.com/dgunning/edgartools/actions"><img src="https://img.shields.io/github/actions/workflow/status/dgunning/edgartools/python-hatch-workflow.yml" alt="GitHub Workflow Status"></a>
   <a href="https://github.com/dgunning/edgartools/actions/workflows/regression-tests.yml"><img src="https://img.shields.io/github/actions/workflow/status/dgunning/edgartools/regression-tests.yml?branch=main&label=regression" alt="Regression Tests"></a>
   <a href="https://www.codefactor.io/repository/github/dgunning/edgartools"><img src="https://www.codefactor.io/repository/github/dgunning/edgartools/badge" alt="CodeFactor"></a>
-  <a href="https://github.com/dgunning/edgartools/blob/main/LICENSE"><img src="https://img.shields.io/github/license/dgunning/edgartools" alt="GitHub"></a>
+  <a href="https://github.com/dgunning/edgartools/blob/main/LICENSE.txt"><img src="https://img.shields.io/github/license/dgunning/edgartools" alt="GitHub"></a>
   <a href="https://edgartools.readthedocs.io/"><img alt="Documentation" src="https://img.shields.io/badge/docs-edgartools-blue"></a>
   <img alt="Pepy Total Downloads" src="https://img.shields.io/pepy/dt/edgartools">
   <a href="https://pepy.tech/project/edgartools"><img alt="Pepy Monthly Downloads" src="https://static.pepy.tech/badge/edgartools/month"></a>
@@ -19,13 +19,13 @@
 
 </p>
 
-**EdgarTools** is a Python library for accessing SEC EDGAR filings as structured data. Parse financial statements, insider trades, fund holdings, proxy statements, and 20+ other filing types with a consistent Python API — in a few lines of code. Free and open source.
+**EdgarTools** is a Python library for accessing SEC EDGAR filings as structured data. Parse financial statements, insider trades, fund holdings, proxy statements, and dozens of other filing types with a consistent Python API — in a few lines of code. Free and open source.
 
 ![EdgarTools SEC filing data extraction demo](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-demo.gif)
 
 ## Why EdgarTools?
 
-SEC EDGAR has every filing back to 1994, free — and almost none of it is ready to use. EdgarTools turns any filing into a typed Python object, so a 10-K's revenue is one line instead of an afternoon of XBRL parsing.
+SEC EDGAR has every filing since 1994, free — and almost none of it is ready to use. EdgarTools turns any filing into a typed Python object, so a 10-K's revenue is one line instead of an afternoon of XBRL parsing.
 
 ```python
 # Apple's latest income statement — rendered, standardized, done
@@ -45,7 +45,7 @@ Company("AAPL").get_financials().income_statement()
     <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-filings.svg" width="96" alt="Every Filing Type"><br>
     <b>Every Filing Type</b><br>
     13F holdings, Form 4 insiders, 8-K events, funds, proxies<br>
-    Typed objects + pandas DataFrames for 20+ forms
+    Typed objects + pandas DataFrames for 90 form types
   </td>
   <td align="center" width="33%">
     <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-ai.svg" width="96" alt="Built for Pipelines & AI"><br>
@@ -93,7 +93,7 @@ Company("AAPL").get_filings(form="4").latest().obj()
 
 ![Apple SEC Form 4 insider transactions parsed into a structured Python object](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/quickstart-form4.gif)
 
-**Next:** explore the [Use Cases](#use-cases) below, or dive into the [documentation](https://edgartools.readthedocs.io/) and [Quick Guide](https://edgartools.readthedocs.io/en/latest/quick-guide/).
+**Next:** explore the [Use Cases](https://github.com/dgunning/edgartools#use-cases) below, or dive into the [documentation](https://edgartools.readthedocs.io/) and [Quick Guide](https://edgartools.readthedocs.io/en/latest/quick-guide/).
 
 ## Use Cases
 
@@ -128,7 +128,7 @@ thirteenf.holdings  # every portfolio position as a DataFrame
 eightk = get_filings(form="8-K").latest().obj()
 eightk.items  # reported event items
 ```
-[Current Events guide →](https://edgartools.readthedocs.io/en/latest/guides/eightk-data-object-guide/)
+[Current Events guide →](https://edgartools.readthedocs.io/en/latest/eightk-filings/)
 
 ### XBRL financial data across companies
 
@@ -152,27 +152,27 @@ facts.query().by_concept("Revenue").to_dataframe()  # revenue history as a DataF
 **Funds & ownership**
 - 13F holdings, N-PORT, N-MFP, N-CSR/N-CEN fund reports
 - Form 3/4/5 insider transactions; Schedule 13D/G ownership
-- Position tracking over time
 
 </td>
 <td width="50%" valign="top">
 
 **Filings & text**
-- Typed objects for 20+ forms; complete history since 1994
-- Section extraction (Risk Factors, MD&A), EX-21 subsidiaries, auditor info
-- HTML → clean text + markdown for RAG; full-text search
+- 36 typed data objects covering 90 form types; filings since 1994
+- Section extraction (Risk Factors, MD&A): 91.5% of 10-K Item boundaries exact on a held-out set
+- EX-21 subsidiaries, auditor info
+- HTML → clean text + markdown for RAG; EDGAR full-text search
 - Ticker/CIK lookup, industry & exchange filtering
 
 **Built for production**
 - Configurable rate limiting + enterprise/academic mirrors
-- Smart caching, type hints throughout, 1000+ tests
-- [Enterprise configuration →](docs/configuration.md#enterprise-configuration)
+- Smart caching, type hints throughout, 45,000+ tests
+- [Enterprise configuration →](https://edgartools.readthedocs.io/en/latest/configuration/#enterprise-configuration)
 
 </td>
 </tr>
 </table>
 
-EdgarTools supports all SEC form types including **10-K annual reports**, **10-Q quarterly filings**, **8-K current reports**, **13F institutional holdings**, **Form 4 insider transactions**, **proxy statements (DEF 14A)**, **S-1 registration statements**, **N-CSR fund reports**, **N-MFP money market data**, **N-PORT fund portfolios**, **Schedule 13D/G ownership**, **Form D offerings**, **Form C crowdfunding**, and **Form 144 restricted stock**. Parse XBRL financial data, extract text sections, and convert filings to pandas DataFrames.
+EdgarTools has typed objects for 90 SEC form types, including **10-K annual reports**, **10-Q quarterly filings**, **8-K current reports**, **13F institutional holdings**, **Form 4 insider transactions**, **proxy statements (DEF 14A)**, **S-1 registration statements**, **N-CSR fund reports**, **N-MFP money market data**, **N-PORT fund portfolios**, **Schedule 13D/G ownership**, **Form D offerings**, **Form C crowdfunding**, and **Form 144 restricted stock**. Parse XBRL financial data, extract text sections, and convert filings to pandas DataFrames. Every other filing is still reachable as a `Filing`, with its documents, text and attachments.
 
 ## Comparison with Alternatives
 
@@ -187,7 +187,7 @@ EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](h
 | **AI / MCP** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Built in | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
 | **Open source** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Inspect, fork, self-host | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> Proprietary |
 
-**Bottom line:** in Python, EdgarTools gives you typed objects, AI-native output, and the full SEC corpus — free, open, and inspectable, with no keys or bills. `pip install edgartools` and you're querying filings in two lines.
+**Bottom line:** in Python, EdgarTools gives you typed objects, AI-native output, and the SEC filing record — free, open, and inspectable, with no keys or bills. `pip install edgartools` and you're querying filings in two lines.
 
 ## Library or hosted?
 
@@ -218,7 +218,7 @@ pip install "edgartools[ai]"
 python -c "from edgar.ai import install_skill; install_skill()"
 ```
 
-This adds SEC analysis capabilities to Claude, including 3,450+ lines of API documentation, code examples, and form type reference.
+This adds SEC analysis capabilities to Claude, including API documentation, code examples, and a form type reference.
 
 ### Option 2: MCP Server
 
@@ -242,15 +242,15 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 
 Requires [uv](https://docs.astral.sh/uv/). Alternatively, `pip install "edgartools[ai]"` and use `python -m edgar.ai`.
 
-See [AI Integration Guide](docs/ai-integration.md) for complete documentation.
+See [AI Integration Guide](https://github.com/dgunning/edgartools/blob/main/docs/ai-integration.md) for complete documentation.
 
 </details>
 
 ## ❤️ Support This Project
 
-EdgarTools runs in production at hedge funds, fintechs, and research desks — MIT-licensed, no keys, no subscriptions, and maintained by one person.
+EdgarTools is MIT-licensed, with no keys and no subscriptions.
 
-The SEC amends filing formats every quarter and ships a new XBRL taxonomy every year. Sponsorship is what keeps 20+ parsers current and funds new extractors as fresh disclosure types appear.
+The SEC changes filing formats and ships a new XBRL taxonomy every year. Sponsorship is what keeps the parsers current and funds new extractors as fresh disclosure types appear.
 
 <p align="center">
   <a href="https://github.com/sponsors/dgunning" target="_blank">
@@ -303,7 +303,7 @@ Contributions welcome:
 - **Feedback**: Report issues or suggest improvements
 - **Spread the Word**: Star the repo, share with colleagues
 
-See our [Contributing Guide](CONTRIBUTING.md) for details.
+See our [Contributing Guide](https://github.com/dgunning/edgartools/blob/main/CONTRIBUTING.md) for details.
 
 ### Professional Services
 
@@ -318,7 +318,7 @@ Need help building production SEC data infrastructure? The creator of EdgarTools
 ---
 
 <p align="center">
-EdgarTools is distributed under the <a href="LICENSE">MIT License</a>
+EdgarTools is distributed under the <a href="https://github.com/dgunning/edgartools/blob/main/LICENSE.txt">MIT License</a>
 </p>
 
 ## Star History
