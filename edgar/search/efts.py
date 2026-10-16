@@ -73,6 +73,27 @@ class EFTSResult:
         from edgar import get_by_accession_number
         return get_by_accession_number(self.accession_number)
 
+    # A result names its fields after EFTS (accession_number, filed), a Filing
+    # after the filing index (accession_no, filing_date). Code moves between the
+    # two, and in the README agent eval both conditions wrote result.accession_no
+    # and result.filing_date: 6 of the 6 errors on the full-text task. These
+    # read-only aliases make the Filing names work here too.
+    @property
+    def accession_no(self) -> str:
+        """The accession number, named as on ``Filing``. Same as ``accession_number``."""
+        return self.accession_number
+
+    @property
+    def filing_date(self) -> Optional[date]:
+        """The filing date as a ``datetime.date``, as on ``Filing``.
+
+        ``filed`` keeps the ISO string EFTS returns; this parses it. None when the
+        result carries no date.
+        """
+        if not self.filed:
+            return None
+        return date.fromisoformat(self.filed)
+
 
 @dataclass
 class Aggregation:
