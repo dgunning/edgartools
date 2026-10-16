@@ -99,7 +99,7 @@ The result is an `EntityFacts` object that wraps the data returned from the SEC 
 use the `to_pandas()` method. For example:
 
 ```python
-facts_df = facts.to_pandas()
+facts_df = facts.to_dataframe()
 ```
 
 
