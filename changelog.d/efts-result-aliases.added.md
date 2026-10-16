@@ -1,0 +1,1 @@
+- **`EFTSResult.accession_no` and `EFTSResult.filing_date`.** Full-text search results now answer to the names `Filing` uses, as read-only aliases of `accession_number` and a `datetime.date` parsed from `filed`. In the README agent eval, every API error on the full-text task (6 of 6) was one of these two names.
