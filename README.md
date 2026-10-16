@@ -99,6 +99,8 @@ Company("NVDA").income_statement(periods=5)
 - **Statements that line up.** Rows standardized across filers, so "Total Revenue" means the same thing for a bank and a chipmaker, plus discrete quarters (Q4 derived from the 10-K) and trailing twelve months.
 - **Search and plumbing.** Full-text search over filing content, the live filing feed, rate limiting, caching and offline storage.
 
+It runs in your own process, MIT-licensed, with no API key and no vendor quota; SEC's fair-access limit of 10 requests a second still applies, and EdgarTools keeps to it.
+
 ## What you can do
 
 ### Full-text search across SEC filings
@@ -108,8 +110,8 @@ Search the text of every filing since 2001, not just form types and dates.
 ```python
 from edgar import search_filings
 
-# Every 10-K filed in 2025 that mentions tariffs
-results = search_filings("tariff", forms="10-K", start_date="2025-01-01", end_date="2025-12-31")
+# Every 10-K filed since 2025 that mentions tariffs
+results = search_filings("tariff", forms="10-K", start_date="2025-01-01")
 results[0].get_filing()  # the Filing behind a hit, ready for .obj() or .markdown()
 
 # Structured: 8-Ks that reported a cybersecurity incident (Item 1.05) in 2025
@@ -249,21 +251,6 @@ eightk.earnings   # the EX-99.1 press release tables, parsed
 </table>
 
 EdgarTools has typed objects for 90 SEC form types, including **10-K annual reports**, **10-Q quarterly filings**, **8-K current reports**, **13F institutional holdings**, **Form 4 insider transactions**, **proxy statements (DEF 14A)**, **S-1 registration statements**, **N-CSR fund reports**, **N-MFP money market data**, **N-PORT fund portfolios**, **Schedule 13D/G ownership**, **Form D offerings**, **Form C crowdfunding**, and **Form 144 restricted stock**. Parse XBRL financial data, extract text sections, and convert filings to pandas DataFrames. Every other filing is still reachable as a `Filing`, with its documents, text and attachments.
-
-## Comparison with Alternatives
-
-EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](https://sec-api.io) is the best-known **hosted API** that returns JSON. Both parse filings — the difference is how you work with the data, and what it costs you.
-
-| | EdgarTools | sec-api |
-|---|------------|---------|
-| **Cost** | Free, MIT | $49+/mo |
-| **Data format** | Typed Python objects → DataFrames | JSON you parse yourself |
-| **Where it runs** | In your process — no key, no quotas, no vendor lock-in | Hosted API — key + rate tiers |
-| **Filing coverage** | 20+ typed forms (10-K, 8-K, 13F, N-PORT, proxy…) | 15+ structured endpoints |
-| **AI / MCP** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Built in | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> |
-| **Open source** | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-check.svg" width="20"> Inspect, fork, self-host | <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/compare-cross.svg" width="20"> Proprietary |
-
-**Bottom line:** in Python, EdgarTools gives you typed objects, AI-native output, and the SEC filing record — free, open, and inspectable, with no keys or bills. `pip install edgartools` and you're querying filings in two lines.
 
 ## Library or hosted?
 
