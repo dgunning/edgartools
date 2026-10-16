@@ -1,6 +1,8 @@
 """A title row before a header must not end header detection.
 
-Issue #1485. JPMorgan's 10-Q credit-card loan-modification table files an empty
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1485
+
+JPMorgan's 10-Q credit-card loan-modification table files an empty
 row, then a lone spanning title (``Loan modifications``), then the period row
 (``Three months ended June 30, 2026`` / ``Six months ended June 30, 2026``), then
 the metric row. ``_process_table_structure`` marks data as started on the first
