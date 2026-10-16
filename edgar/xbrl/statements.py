@@ -33,6 +33,8 @@ INVENTORY_CONCEPTS = ('us-gaap_InventoryNet', 'us-gaap_InventoryGross')
 # Apple, Microsoft — fall through to the ASC 606 tag, which is their top line.
 REVENUE_CONCEPTS = (
     'us-gaap_Revenues',
+    # A bank's top line; also searched by Financials.get_revenue (edgartools-u9yc9)
+    'us-gaap_RevenuesNetOfInterestExpense',
     'us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax',
     'us-gaap_RevenueFromContractWithCustomerIncludingAssessedTax',
     'us-gaap_SalesRevenueNet',

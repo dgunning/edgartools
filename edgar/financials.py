@@ -387,7 +387,12 @@ class Financials:
                 # iteration order deterministic across runs (otherwise a filer
                 # whose statement contains multiple mapped concepts can return
                 # different values depending on Python hash randomization).
-                xbrl_concepts = sorted(standardizer.mappings.get(std_concept_name, []))
+                # A name that is already an XBRL concept (``us-gaap_...``) is
+                # searched as itself, for concepts the mappings do not carry.
+                if std_concept_name.startswith(('us-gaap_', 'us-gaap:')):
+                    xbrl_concepts = [std_concept_name]
+                else:
+                    xbrl_concepts = sorted(standardizer.mappings.get(std_concept_name, []))
 
                 # Search for any of these concepts in the dataframe
                 for xbrl_concept in xbrl_concepts:
@@ -418,6 +423,22 @@ class Financials:
         except Exception as e:
             log.debug(f"Error getting standardized concept by XBRL: {e}")
             return None
+
+    def _is_bank_income_statement(self) -> bool:
+        """True when the income statement is laid out as a bank's.
+
+        Banks split revenue into net interest income and noninterest income;
+        a us-gaap:NoninterestIncome row on the face statement is the marker.
+        """
+        try:
+            _, df = self._render_statement_frame('income')
+        except Exception as e:
+            log.debug(f"Error rendering the income statement: {e}")
+            return False
+        if df is None or df.empty or 'concept' not in df.columns:
+            return False
+        concepts = df['concept'].astype(str).str.replace('us-gaap:', 'us-gaap_', regex=False)
+        return bool((concepts == 'us-gaap_NoninterestIncome').any())
 
     def _get_standardized_concept_value(self, statement_type: str, concept_patterns: list,
                                       period_offset: int = 0) -> Optional[Union[int, float]]:
@@ -516,14 +537,31 @@ class Financials:
         # the fixture corpus, both concepts resolve in no filing at different
         # values, and 7 filings (Apple, Microsoft, Amazon, Tesla) resolve only
         # the contract concept and are unchanged.
+        #
+        # Banks report their top line as total revenue net of interest expense
+        # (us-gaap:RevenuesNetOfInterestExpense), which the 'Revenue' mapping
+        # does not carry. It has to be searched before contract revenue: on a
+        # bank's face statement, contract revenue is one fee line. Without it,
+        # Wells Fargo's FY2025 revenue came back as its $16.1B "Fee income"
+        # instead of $83.7B, and JPMorgan's fell through to the label patterns
+        # below, which took "Noninterest revenue" ($87.0B of $182.4B)
+        # (edgartools-u9yc9).
         result = self._get_standardized_concept_by_xbrl(
             'income',
-            ['Revenue', 'Contract Revenue'],
+            ['Revenue', 'us-gaap_RevenuesNetOfInterestExpense', 'Contract Revenue'],
             period_offset
         )
 
         if result is not None:
             return result
+
+        # On a bank's statement every "... revenue" label is a component
+        # (card revenue, noninterest revenue, ...), so the label patterns below
+        # can only return part of the top line. U.S. Bancorp presents no total
+        # at all, and the patterns returned its $1.7B card revenue. Report no
+        # value rather than a component.
+        if self._is_bank_income_statement():
+            return None
 
         # Fallback to label-based search for edge cases
         patterns = [
