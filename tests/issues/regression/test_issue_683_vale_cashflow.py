@@ -27,18 +27,18 @@ is the state in which "the loop skipped a filing" would actually show up.
 
 import pytest
 
-from edgar.xbrl.exceptions import StatementNotFound
+from edgar.xbrl.exceptions import StatementNotFoundError
 
 
 class TestStitchingSkipsMissingStatements:
-    """Unit test: stitch_statements handles StatementNotFound gracefully."""
+    """Unit test: stitch_statements handles StatementNotFoundError gracefully."""
 
     def test_get_statement_by_type_exception_is_caught(self):
-        """Verify that StatementNotFound from get_statement_by_type doesn't
+        """Verify that StatementNotFoundError from get_statement_by_type doesn't
         propagate out of the stitching loop — it should be caught and the
         filing skipped."""
-        # StatementNotFound should be importable and is a proper exception
-        exc = StatementNotFound(
+        # StatementNotFoundError should be importable and is a proper exception
+        exc = StatementNotFoundError(
             statement_type="CashFlowStatement",
             confidence=0.0,
             found_statements=[],

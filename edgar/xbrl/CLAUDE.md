@@ -72,7 +72,7 @@ revenue_facts = facts.query().by_concept("Revenue").by_period_key(period_key).to
 try:
     statement = xbrl.statements.income_statement()
     data_available = statement is not None
-except StatementNotFound:
+except StatementNotFoundError:
     data_available = False
 
 # Get raw statement data for analysis
@@ -285,10 +285,10 @@ print(f"Period count: {len(available_periods)}")
 
 ### Error Handling
 ```python
-# Always handle StatementNotFound
+# Always handle StatementNotFoundError
 try:
     statement = xbrl.statements.balance_sheet()
-except StatementNotFound:
+except StatementNotFoundError:
     log.warning(f"Balance sheet not found in {xbrl.entity_name}")
     return None
 ```

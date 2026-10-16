@@ -122,21 +122,12 @@ from edgar.settings import (  # noqa: E402,F401  -- re-exports, intentionally un
 # so `from edgar.core import NORMAL` keeps working until 6.0.
 
 
-def _access_mode_getattr(name: str):
-    """Resolve the deprecated access modes without eager-importing them.
-
-    Chained into this module's __getattr__ at the bottom of the file; core.py
-    already installs one via edgar._compat.deprecated_alias, and assigning a
-    second would silently replace the first.
-    """
+def __getattr__(name: str):
+    """Resolve the deprecated access modes without eager-importing them."""
     from edgar import settings as _settings
 
     if name in _settings.DEPRECATED_ACCESS_MODE_NAMES:
-        # One frame deeper than the other two paths: deprecated_alias's own
-        # __getattr__ sits between the caller and this function, and without
-        # accounting for it the warning points at edgar/_compat.py instead of
-        # the code that asked for the mode.
-        _settings.warn_access_mode_deprecated(name, stacklevel=4)
+        _settings.warn_access_mode_deprecated(name)
         return _settings.DEPRECATED_ACCESS_MODE_NAMES[name]
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
@@ -240,13 +231,6 @@ def get_resource(file: str):
 
     import edgar
     return importlib.resources.as_file(importlib.resources.files(edgar).joinpath(file))
-
-
-# TooManyRequestsException was a dead duplicate of
-# edgar.exceptions.TooManyRequestsError: never raised anywhere, different
-# suffix, same meaning. Kept as a deprecated alias (see the module __getattr__
-# at the end of this file); removed in 6.0.
-
 
 
 
@@ -536,13 +520,3 @@ for _logger_name, _level in _NOISY_LOGGERS.items():
 # Turn on rich logging if the environment variable is set
 if os.getenv('EDGAR_USE_RICH_LOGGING', '0') == '1':
     initialize_rich_logging()
-
-
-# ---------------------------------------------------------------------------
-# Deprecated names (bead edgartools-07lk.10), removed in 6.0.
-# ---------------------------------------------------------------------------
-from edgar._compat import deprecated_alias  # noqa: E402
-from edgar.exceptions import TooManyRequestsError  # noqa: E402
-
-__getattr__ = deprecated_alias(_access_mode_getattr,
-                               TooManyRequestsException=TooManyRequestsError)

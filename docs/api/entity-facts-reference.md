@@ -880,16 +880,16 @@ class ConceptMetadata:
 
 ## Error Handling
 
-### NoCompanyFactsFound Exception
+### CompanyFactsNotFoundError
 
 Raised when company facts cannot be found.
 
 ```python
-from edgar.entity.core import NoCompanyFactsFound
+from edgar.exceptions import CompanyFactsNotFoundError
 
 try:
     facts = get_company_facts(invalid_cik)
-except NoCompanyFactsFound as e:
+except CompanyFactsNotFoundError as e:
     print(f"No facts found: {e.message}")
 ```
 

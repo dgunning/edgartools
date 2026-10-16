@@ -17,8 +17,7 @@ log = logging.getLogger(__name__)
 _MAX_CONTENT_SIZE = 500 * 1024 * 1024
 
 __all__ = ['SGMLParser', 'SGMLFormatType', 'SGMLDocument', 'SECIdentityError',
-           'FilingNotFoundError', 'SECHTMLResponseError',
-           'SECFilingNotFoundError']  # last is a deprecated alias, removed in 6.0
+           'FilingNotFoundError', 'SECHTMLResponseError']
 
 # Pre-compiled patterns for content extraction
 _TEXT_RE = re.compile(r'<TEXT>([\s\S]*?)</TEXT>', re.DOTALL | re.IGNORECASE)
@@ -39,15 +38,12 @@ _DOC_META_TAGS = (
 # edgartools-07lk.10): SECIdentityError joins IdentityNotSetError under
 # IdentityError (same root cause, noticed at different layers), and a filing
 # that does not exist is a NotFoundError like any other missing thing.
-from edgar._compat import deprecated_alias
 from edgar.exceptions import FilingNotFoundError, SECIdentityError, TransportError
 
 
 class SECHTMLResponseError(TransportError):
     """Raised when SEC returns HTML content instead of expected SGML"""
 
-
-__getattr__ = deprecated_alias(SECFilingNotFoundError=FilingNotFoundError)
 
 class SGMLFormatType(Enum):
     SEC_DOCUMENT = "sec_document"  # <SEC-DOCUMENT>...<SEC-HEADER> style
