@@ -17,28 +17,27 @@ Narrowing a query chooses fewer rows, not a different table shape. Before this,
   ``df['value']`` raised ``KeyError`` instead of yielding an empty typed column.
   A real query reaches this: Main Street Capital reports no ``Revenues`` concept.
 
-Dtypes below describe what each column looks like *today* when a null is present,
-so a materialized column is indistinguishable from a populated one. They are
-applied to columns that had to be materialized, plus the names in ``PINNED``.
+Dtypes below are applied to columns that had to be materialized, plus the names
+in ``PINNED``, so a materialized column is indistinguishable from a populated one.
 
-``value`` is the one pinned column. Pinning it moves nothing a caller depends on:
-the unfiltered surface is already ``float64``/``NaN`` on all 12 companies measured
-(a Python ``float`` in 100% of 344,769 rows), so this makes narrowed queries match
-the default rather than moving the default. ``fiscal_year`` is a different case —
-it is ``int64`` by default, so making it nullable ``Int64`` would move a sentinel,
-and that is held for the 6.0 window (edgartools-7wtj.1).
+``value`` was pinned in 5.x. The unfiltered surface was already ``float64``/``NaN``
+on all 12 companies measured (a Python ``float`` in 100% of 344,769 rows), so the
+pin made narrowed queries match the default. ``fiscal_year``, ``is_audited`` and
+``is_estimated`` were pinned in 6.0 (edgartools-7wtj.1) as nullable ``Int64`` and
+``boolean``. Their 5.x dtypes, ``int64`` and ``bool``, cannot hold a null, so a
+column that no returned row populated came back as ``float64`` or ``boolean``
+where a populated one came back ``int64`` or ``bool``.
 """
 
 from typing import Any, Dict
 
 from edgar.datatools import STR_DTYPE
 
-__all__ = ['FACT_QUERY_COLUMNS', 'PINNED', 'NULL_DTYPES', 'ENTITY_FACTS_CORE',
+__all__ = ['FACT_QUERY_COLUMNS', 'PINNED', 'ENTITY_FACTS_CORE',
            'ENTITY_FACTS_PIT', 'ENTITY_FACTS_METADATA', 'entity_facts_columns']
 
-# Dtypes are the ones these columns hold today when rows populate them, so an
-# empty result is dtype-identical to a populated one rather than nullable-and-
-# different — which would just be this bug again in the zero-row case.
+# An empty result carries these same dtypes, so it is dtype-identical to a
+# populated one.
 #
 # `scale`, the date columns and `filing_date` are `object` because that is what
 # they hold today: Optional[int] and datetime.date are not pandas-native here.
@@ -54,37 +53,20 @@ FACT_QUERY_COLUMNS: Dict[str, Any] = {
     'period_start': 'object',
     'period_end': 'object',
     'period_type': STR_DTYPE,
-    'fiscal_year': 'int64',
+    'fiscal_year': 'Int64',
     'fiscal_period': STR_DTYPE,
     'filing_date': 'object',
     'form_type': STR_DTYPE,
     'accession': STR_DTYPE,
     'data_quality': STR_DTYPE,
     'confidence_score': 'float64',
-    'is_audited': 'bool',
-    'is_estimated': 'bool',
+    'is_audited': 'boolean',
+    'is_estimated': 'boolean',
     'statement_type': STR_DTYPE,
 }
 
-# Applied to populated columns too, not only materialized ones. See the module
-# docstring for why `value` qualifies and `fiscal_year` does not.
-PINNED = frozenset({'value'})
-
-# The dtype a column takes when it is materialized because no returned row
-# populated it. Only the three columns whose declared dtype cannot hold a null:
-# casting an all-null column to `bool` yields False and to `int64` raises, so
-# declaring those would make the one path that fabricates data the path taken when
-# data is missing. Asserting a fact was not audited because we do not know is
-# exactly the failure class this schema exists to prevent.
-#
-# That a null-for-every-row `fiscal_year` still reads float64 where a populated one
-# reads int64 is the residue this 5.x half cannot remove; pinning it to nullable
-# Int64 moves the default's sentinel, which is edgartools-7wtj.1 in the 6.0 window.
-NULL_DTYPES = {
-    'fiscal_year': 'float64',
-    'is_audited': 'boolean',
-    'is_estimated': 'boolean',
-}
+# Applied to populated columns too, not only materialized ones.
+PINNED = frozenset({'value', 'fiscal_year', 'is_audited', 'is_estimated'})
 
 # edgar/entity/entity_facts.py :: EntityFacts.to_dataframe(), whose column set is
 # gated by its own arguments — the same "configuration determines the shape" rule.
@@ -97,7 +79,7 @@ ENTITY_FACTS_CORE: Dict[str, Any] = {
     'period_type': STR_DTYPE,
     'period_start': 'object',
     'period_end': 'object',
-    'fiscal_year': 'int64',
+    'fiscal_year': 'Int64',
     'fiscal_period': STR_DTYPE,
 }
 
@@ -114,7 +96,7 @@ ENTITY_FACTS_METADATA: Dict[str, Any] = {
     'taxonomy': STR_DTYPE,
     'scale': 'object',
     'data_quality': STR_DTYPE,
-    'is_audited': 'bool',
+    'is_audited': 'boolean',
     'confidence_score': 'float64',
 }
 

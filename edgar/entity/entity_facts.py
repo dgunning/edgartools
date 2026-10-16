@@ -34,7 +34,7 @@ from rich.text import Text
 
 from edgar.core import log
 from edgar.datatools import apply_declared_schema, empty_declared_frame
-from edgar.entity.dataframe_schema import NULL_DTYPES, PINNED, entity_facts_columns
+from edgar.entity.dataframe_schema import PINNED, entity_facts_columns
 from edgar.entity.enhanced_statement import MultiPeriodStatement
 from edgar.entity.utils import is_consolidated_total_over
 from edgar.entity.models import FinancialFact
@@ -406,7 +406,7 @@ class EntityFacts:
             # entity with no facts, and a `columns` projection raised too.
             return empty_declared_frame(declared, [c for c in order if c in declared])
 
-        df = apply_declared_schema(pd.DataFrame(records), declared, order, PINNED, NULL_DTYPES)
+        df = apply_declared_schema(pd.DataFrame(records), declared, order, PINNED)
 
         # Sort for consistency
         if not df.empty:
