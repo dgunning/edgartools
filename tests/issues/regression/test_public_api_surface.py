@@ -55,6 +55,10 @@ INTERNAL = {
     "clear_company_facts_cache",
     # helpers and protocols used inside the package
     "listify", "matches_form", "edgar_mode", "get_obj_info",
+    # deprecated access modes (GH #1326): still importable by name, which warns,
+    # but kept out of __all__ so `from edgar import *` stays silent
+    # (edgartools-2db17). Removed in 6.0 with edgar_mode (edgartools-2jwo).
+    "NORMAL", "CAUTION", "CRAWL",
     "HasContext", "compose_context",
     # `warn_will_raise` stages the 6.0 error flips (bead edgartools-07lk.10).
     # Users observe its effect — a FutureWarning naming what a call will raise —

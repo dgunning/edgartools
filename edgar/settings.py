@@ -31,19 +31,14 @@ from rich.prompt import Prompt
 log = logging.getLogger(__name__)
 
 __all__ = [
-    'CAUTION',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
-    'CRAWL',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
-    'NORMAL',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
     'EdgarSettings',
     'ask_for_identity',
     'default_http_timeout',
     'default_max_connections',
     'default_page_size',
     'default_retries',
-    'edgar_access_mode',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
     'edgar_data_dir',
     'edgar_identity',
-    'edgar_mode',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
     'get_edgar_data_directory',
     'get_identity',
     'identity_prompt',
