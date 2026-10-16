@@ -254,7 +254,6 @@ __all__ = [
 
     # -- Identity, HTTP and diagnostics --------------------------------------
     "set_identity", "get_identity",
-    "NORMAL", "CAUTION", "CRAWL",
     "configure_http", "get_http_config", "diagnose_ssl",
 
     # -- Local and cloud storage ---------------------------------------------
@@ -676,10 +675,15 @@ def obj(sec_filing: Filing) -> Optional[object]:
 # ---------------------------------------------------------------------------
 # Deprecated access modes (GH #1326), removed in 6.0.
 #
-# NORMAL / CAUTION / CRAWL stay in __all__ and importable from the top-level
-# namespace, but are served lazily so that `import edgar` does not itself raise
-# the DeprecationWarning. Importing them eagerly here would warn every user on
-# every import, naming this module instead of the code reaching for a mode.
+# NORMAL / CAUTION / CRAWL stay importable from the top-level namespace, but are
+# served lazily so that `import edgar` does not itself raise the
+# DeprecationWarning. Importing them eagerly here would warn every user on every
+# import, naming this module instead of the code reaching for a mode.
+#
+# They are NOT in __all__ (nor in edgar.core's or edgar.settings'). A star-import
+# resolves every name in __all__, so listing them made the README's
+# `from edgar import *` print three warnings about a feature the user never
+# touched (bead edgartools-2db17). Reaching for one by name still warns.
 # ---------------------------------------------------------------------------
 # Exactly the four names the eager `from edgar.settings import ...` used to place
 # in this namespace, and no more. They are still reachable, so `dir(edgar)` still

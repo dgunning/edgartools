@@ -45,10 +45,6 @@ __all__ = [
     'log',
     'Result',
     'get_bool',
-    'edgar_mode',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
-    'NORMAL',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
-    'CRAWL',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
-    'CAUTION',  # noqa: F822 -- served by the module __getattr__ (deprecated, GH #1326)
     'IntString',
     'get_identity',
     'python_version',
