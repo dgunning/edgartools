@@ -92,7 +92,9 @@ def check_search(result, ns):
     assert all(r.form.startswith("8-K") for r in result)
     tariff_hits = ns["results"]
     assert len(tariff_hits) > 0
-    assert all("2025-01-01" <= str(r.filed) <= "2025-12-31" for r in tariff_hits), (
+    # start_date alone: EFTS ignores a one-sided range unless both bounds are
+    # sent, so this also guards edgartools-329yu
+    assert all(str(r.filed) >= "2025-01-01" for r in tariff_hits), (
         "the date range was not applied"
     )
     assert all(r.form.startswith("10-K") for r in tariff_hits)
