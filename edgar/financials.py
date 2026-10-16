@@ -44,6 +44,13 @@ def _duration_bucket(days: int) -> str:
     return 'y'       # annual
 
 
+def _period_column_name(period) -> str:
+    """The column name ``RenderedStatement.to_dataframe()`` gives a period."""
+    if period.end_date:
+        return f"{period.end_date} ({period.quarter})" if period.quarter else period.end_date
+    return period.label
+
+
 def _order_period_columns(rendered, df_period_columns: List[str]) -> List[str]:
     """Order a rendered statement's period columns most-relevant-first.
 
@@ -64,11 +71,7 @@ def _order_period_columns(rendered, df_period_columns: List[str]) -> List[str]:
 
     entries = []
     for period in periods:
-        # Reconstruct the column name to_dataframe() assigns to this period.
-        if period.end_date:
-            name = f"{period.end_date} ({period.quarter})" if period.quarter else period.end_date
-        else:
-            name = period.label
+        name = _period_column_name(period)
         if name not in valid:
             continue
         end = _parse_iso_date(period.end_date)
@@ -440,6 +443,44 @@ class Financials:
         concepts = df['concept'].astype(str).str.replace('us-gaap:', 'us-gaap_', regex=False)
         return bool((concepts == 'us-gaap_NoninterestIncome').any())
 
+    def _filed_total_for_statement_period(self, concept: str,
+                                          period_offset: int = 0) -> Optional[Union[int, float]]:
+        """The non-dimensional value of ``concept`` for the income statement's period.
+
+        The period is the one ``period_offset`` selects among the statement's
+        columns, so this answers for the same period as the face-statement
+        lookups. Segment values of the concept are dimensioned and excluded.
+        None when the filing has no such fact, or more than one distinct value.
+        """
+        if self.xb is None:
+            return None
+        try:
+            rendered, df = self._render_statement_frame('income')
+            if df is None or df.empty:
+                return None
+            period_columns = _order_period_columns(
+                rendered, [col for col in df.columns if col not in _NON_PERIOD_COLUMNS])
+            if len(period_columns) <= period_offset:
+                return None
+            column = period_columns[period_offset]
+            period = next((p for p in rendered.periods if _period_column_name(p) == column), None)
+            if period is None or not period.start_date or not period.end_date:
+                return None
+            facts = self.xb.facts.query().by_concept(concept, exact=True).to_dataframe()
+            if facts is None or facts.empty:
+                return None
+            rows = facts[(~facts['is_dimensioned'].astype(bool))
+                         & (facts['period_start'].astype(str) == str(period.start_date))
+                         & (facts['period_end'].astype(str) == str(period.end_date))]
+            values = rows['numeric_value'].dropna().unique()
+            if len(values) != 1:
+                return None
+            value = values[0]
+            return int(value) if float(value).is_integer() else float(value)
+        except Exception as e:
+            log.debug(f"Error reading the filed {concept} fact: {e}")
+            return None
+
     def _get_standardized_concept_value(self, statement_type: str, concept_patterns: list,
                                       period_offset: int = 0) -> Optional[Union[int, float]]:
         """
@@ -557,11 +598,15 @@ class Financials:
 
         # On a bank's statement every "... revenue" label is a component
         # (card revenue, noninterest revenue, ...), so the label patterns below
-        # can only return part of the top line. U.S. Bancorp presents no total
-        # at all, and the patterns returned its $1.7B card revenue. Report no
-        # value rather than a component.
+        # can only return part of the top line: U.S. Bancorp presents no total
+        # at all, and the patterns returned its $1.7B card revenue. Such a bank
+        # can still file the total off the face statement, as a
+        # non-dimensional us-gaap:Revenues fact (U.S. Bancorp $28,656M and
+        # Capital One $53,434M for FY2025), so read that, or report nothing
+        # (edgartools-hmj0j). Summing the face rows is not a substitute: U.S.
+        # Bancorp's net interest income plus noninterest income is $28,540M.
         if self._is_bank_income_statement():
-            return None
+            return self._filed_total_for_statement_period('us-gaap:Revenues', period_offset)
 
         # Fallback to label-based search for edge cases
         patterns = [
