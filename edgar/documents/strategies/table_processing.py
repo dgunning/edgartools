@@ -244,7 +244,8 @@ class TableProcessor:
         consecutive_header_rows = 0
         data_rows_started = False
 
-        for tr in self._own_rows(rows_container):
+        ordered_rows = self._own_rows(rows_container)
+        for row_index, tr in enumerate(ordered_rows):
             # Skip if already processed in thead (identity, never id() - see above)
             if any(tr is head_row for head_row in thead_rows):
                 continue
@@ -301,10 +302,16 @@ class TableProcessor:
 
                         # A lone cell spanning several columns is a title or group
                         # row that labels the header rows below it, so it must not
-                        # end header detection. (#1485)
+                        # end header detection. (#1485) A lone spanning cell is also
+                        # common as plain data, so only honour it when a header-like
+                        # row (period or metric) follows within two rows.
                         non_empty = [c for c in cells if c.text().strip()]
                         is_title_or_group_row = (
                             len(non_empty) == 1 and non_empty[0].colspan > 1
+                            and any(
+                                self._is_header_row(following)
+                                for following in ordered_rows[row_index + 1:row_index + 3]
+                            )
                         )
 
                         # Don't consider this as "data started" if it's likely a header-related row
