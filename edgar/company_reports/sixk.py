@@ -196,20 +196,9 @@ class SixK:
 
     @cached_property
     def financials(self):
-        """XBRL financials, or None when this 6-K carries no XBRL.
-
-        Unlike a 10-K or 10-Q, a 6-K is not required to file XBRL statements,
-        and most do not — a press release or a meeting notice is a complete 6-K.
-        So for this form None is a documented answer, not a failure, and the
-        other report types' `XBRLFilingWithNoXbrlData` does not apply
-        (edgartools-07lk.10). Statements use the IFRS taxonomy when present.
-        """
+        """XBRL financials, or None when this 6-K carries none (most do not; IFRS taxonomy)."""
         from edgar.financials import Financials
-        from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
-        try:
-            return Financials.extract(self._filing)
-        except XBRLFilingWithNoXbrlData:
-            return None
+        return Financials.extract(self._filing)
 
     def text(self) -> str:
         """Get the full text content of the 6-K including exhibits."""

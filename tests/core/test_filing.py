@@ -750,29 +750,24 @@ def test_as_company_filing(carbo_10k_filing):
 @pytest.mark.fast
 @pytest.mark.vcr
 def test_10K_filing_with_no_financial_data():
-    """An ABS trust's 10-K carries no XBRL.
+    """An ABS trust's 10-K carries no XBRL, so there are no financials: None.
 
     In 5.x `tenk.financials` was a hollow `Financials` whose statements were all
-    None, with a FutureWarning; since 6.0 it raises (edgartools-07lk.10). The
-    report itself must still display: its rich panel says there is no financial
-    data instead of raising.
+    None — truthy, so an `is not None` guard passed (edgartools-07lk.10).
     """
     from edgar.financials import Financials
-    from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
 
     filing = Filing(form='10-K', filing_date='2023-05-26', company='CarMax Auto Owner Trust 2019-3', cik=1779026,
                     accession_no='0001779026-23-000027')
     tenk: TenK = filing.obj()
 
-    with pytest.raises(XBRLFilingWithNoXbrlData, match="0001779026-23-000027"):
-        tenk.financials
-    with pytest.raises(XBRLFilingWithNoXbrlData):
-        tenk.balance_sheet
-    with pytest.raises(XBRLFilingWithNoXbrlData):
-        Financials.extract(filing)
-
-    assert "No financial data available" in repr(tenk)
+    assert tenk.financials is None
+    assert Financials.extract(filing) is None
+    assert tenk.balance_sheet is None
+    assert tenk.income_statement is None
+    assert tenk.cash_flow_statement is None
     assert tenk.auditor is None
+    assert "No financial data available" in repr(tenk)
 
 
 @pytest.mark.fast

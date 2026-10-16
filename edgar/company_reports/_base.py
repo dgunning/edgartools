@@ -16,7 +16,6 @@ from edgar.documents import Document, HTMLParser
 from edgar.exceptions import SectionNotFoundError
 from edgar.financials import Financials
 from edgar.richtools import repr_rich
-from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
 
 __all__ = ['CompanyReport', 'section_not_found', 'report_lookup_miss']
 
@@ -103,9 +102,8 @@ class CompanyReport:
     def auditor(self):
         """Auditor information from XBRL DEI facts, if available."""
         from edgar.company_reports.auditor import extract_auditor_info
-        financials = self._financials_or_none()
-        if financials and financials.xb:
-            return extract_auditor_info(financials.xb)
+        if self.financials and self.financials.xb:
+            return extract_auditor_info(self.financials.xb)
         return None
 
     @cached_property
@@ -117,10 +115,9 @@ class CompanyReport:
                    Indexed by number or title: notes[5], notes['Debt']
         """
         from edgar.xbrl.notes import Notes
-        financials = self._financials_or_none()
-        if not financials or not financials.xb:
+        if not self.financials or not self.financials.xb:
             return Notes([], entity_name=str(self.company))
-        xbrl = financials.xb
+        xbrl = self.financials.xb
         # Get FilingSummary for hierarchy (ParentRole)
         filing_summary = None
         try:
@@ -155,26 +152,9 @@ class CompanyReport:
         return self._filing.reports
 
     @cached_property
-    def financials(self):
-        """The financials for this filing.
-
-        Raises:
-            XBRLFilingWithNoXbrlData: the filing carries no XBRL, which is true of
-                filings from before SEC's 2009-2011 phase-in (edgartools-07lk.10).
-        """
+    def financials(self) -> Optional[Financials]:
+        """The financials for this filing, or None when it carries no XBRL."""
         return Financials.extract(self._filing)
-
-    def _financials_or_none(self) -> Optional[Financials]:
-        """`financials`, or None when the filing carries no XBRL.
-
-        For our own display and for features where a filing without XBRL is an
-        ordinary answer (no auditor facts, no notes), not for anything a caller
-        asked financial statements of: those raise.
-        """
-        try:
-            return self.financials
-        except XBRLFilingWithNoXbrlData:
-            return None
 
     @property
     def period_of_report(self):
@@ -376,13 +356,12 @@ class CompanyReport:
         """Append expanded statement line items with their current values."""
         from edgar.display.formatting import format_currency_short
 
-        financials = self._financials_or_none()
-        if not financials or not financials.xb:
+        if not self.financials or not self.financials.xb:
             for label in note.expands:
                 lines.append(f"  {label}")
             return
 
-        xbrl = financials.xb
+        xbrl = self.financials.xb
         from edgar.xbrl.notes import _compute_expands_with_statements
 
         expands_data, stmt_types = _compute_expands_with_statements(note, xbrl)
@@ -407,7 +386,7 @@ class CompanyReport:
                                 label_text = item.get('label', concept)
                                 try:
                                     val_num = float(val)
-                                    cs = financials.get_currency_symbol() or '$'
+                                    cs = (self.financials.get_currency_symbol() if self.financials else '$') or '$'
                                     formatted = format_currency_short(val_num, cs)
                                 except (ValueError, TypeError):
                                     formatted = str(val)
@@ -427,7 +406,7 @@ class CompanyReport:
         return Panel(
             Group(
                 self._filing.__rich__(),
-                self._financials_or_none() or Text("No financial data available")
+                self.financials or Text("No financial data available")
             )
         )
 

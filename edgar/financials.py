@@ -9,7 +9,6 @@ from edgar.richtools import repr_rich
 from edgar.xbrl import XBRL, XBRLS, Statement
 from edgar.xbrl.presentation import ViewType
 from edgar.xbrl.statements import StitchedStatement
-from edgar.xbrl.xbrl import no_xbrl_attachments
 
 # Columns produced by RenderedStatement.to_dataframe() that are metadata, not
 # period values.
@@ -130,27 +129,24 @@ class Financials:
         self._statement_frame_memo: Optional[Dict[str, Any]] = None
 
     @classmethod
-    def extract(cls, filing) -> "Financials":
-        """Build the financials for a filing.
+    def extract(cls, filing) -> Optional["Financials"]:
+        """Build the financials for a filing, or None when it carries no XBRL.
 
-        Raises:
-            XBRLFilingWithNoXbrlData: the filing carries no XBRL attachments,
-                which is true of filings from before SEC's 2009-2011 phase-in.
+        No XBRL is a property of the filing — filings from before SEC's
+        2009-2011 phase-in have none, and a 6-K or 8-K need not carry
+        statements — so None is the answer, as it is from `filing.xbrl()`.
 
-        In 5.x that case warned and returned a `Financials` wrapping `xb=None`,
-        whose every statement accessor answered `None` (edgartools-07lk.10). The
+        In 5.x this case returned a `Financials` wrapping `xb=None` instead,
+        whose every statement accessor answered None (edgartools-07lk.10). The
         object was truthy, so the documented `if financials is not None:` guard
-        passed and the caller then got `None` from `income_statement()` with
-        nothing explaining it.
-
-        The error is raised here rather than in `XBRL.from_filing`, the shared
-        choke point: `filing.xbrl()` answering `None` for a filing without XBRL
-        is a documented true absence (docs/upgrade/6.0.md). Asking for
-        *financial statements* and getting none is the failure.
+        passed and the caller then got None from `income_statement()` with
+        nothing explaining it. The 5.x warning said 6.0 would raise
+        `XBRLFilingWithNoXbrlData`; 6.0 returns None instead, which makes that
+        guard correct.
         """
         xb = XBRL.from_filing(filing)
         if xb is None:
-            raise no_xbrl_attachments(filing)
+            return None
         return Financials(xb)
 
     def balance_sheet(self, include_dimensions: bool = None, view: ViewType = None):

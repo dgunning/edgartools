@@ -333,23 +333,6 @@ class XBRLFilingWithNoXbrlData(NotFoundError):
         super().__init__(message)
 
 
-def no_xbrl_attachments(filing) -> XBRLFilingWithNoXbrlData:
-    """The error for a filing that carries no XBRL attachments at all.
-
-    Lives here, next to the class and the condition it describes, but is raised
-    from `Financials.extract` rather than from `from_filing`: `filing.xbrl()`
-    answering `None` is a documented true absence, while a truthy `Financials`
-    whose accessors all answer `None` is the failure worth naming.
-    """
-    error = XBRLFilingWithNoXbrlData(
-        f"Filing {filing.accession_no} ({filing.form}) has no XBRL attachments, "
-        f"so there are no financial statements to read from it. This is a "
-        f"property of the filing: filings from before SEC's 2009-2011 XBRL "
-        f"phase-in carry none, and most 6-Ks never do."
-    )
-    return error
-
-
 class XBRLAttachments:
     """
     An adapter for the Attachments class that provides easy access to the XBRL documents.

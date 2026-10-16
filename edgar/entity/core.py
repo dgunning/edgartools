@@ -38,7 +38,6 @@ from edgar.financials import Financials
 from edgar.display.formatting import cik_text, datefmt, reverse_name
 from edgar.reference.tickers import find_cik
 from edgar.richtools import Docs, repr_rich
-from edgar.xbrl.xbrl import XBRLFilingWithNoXbrlData
 
 if TYPE_CHECKING:
     from edgar.enums import FormType
@@ -606,16 +605,12 @@ class Company(Entity):
         income statement, balance sheet, and cash flow statement.
 
         Returns:
-            Financials object, or None — and None means exactly one thing: this
-            company has filed no 10-K, 20-F or 40-F that we can see. It is never
-            how a failure is reported. If we could not reach SEC, a
-            ``TransportError`` propagates; if the filing was there but would not
-            parse, a ``ParsingError`` does.
-
-        Raises:
-            XBRLFilingWithNoXbrlData: the latest annual report carries no XBRL,
-                as one predating SEC's 2009-2011 phase-in does. In 5.x this
-                returned a ``Financials`` whose every accessor answered None.
+            Financials object, or None when there are no statements to read:
+            this company has filed no 10-K, 20-F or 40-F that we can see, or
+            the latest one carries no XBRL (one predating SEC's 2009-2011
+            phase-in, say). It is never how a failure is reported. If we could
+            not reach SEC, a ``TransportError`` propagates; if the filing was
+            there but would not parse, a ``ParsingError`` does.
 
         Example::
 
@@ -644,14 +639,10 @@ class Company(Entity):
         but with quarterly data instead of annual.
 
         Returns:
-            Financials object, or None — which means this company has filed no
-            10-Q, and either no 6-K or a latest 6-K without XBRL statements
-            (most 6-Ks have none). It is never how a failure is reported; a
+            Financials object, or None when there are no statements to read:
+            this company has filed no 10-Q or 6-K, or the latest one carries no
+            XBRL (most 6-Ks don't). It is never how a failure is reported; a
             transport or parsing failure raises.
-
-        Raises:
-            XBRLFilingWithNoXbrlData: the latest 10-Q carries no XBRL. In 5.x
-                this returned a ``Financials`` whose every accessor answered None.
 
         Example::
 
@@ -665,11 +656,7 @@ class Company(Entity):
         # Fall back to 6-K (foreign private issuers)
         filing = self.get_filings(form='6-K', amendments=False, trigger_full_load=False).latest()
         if filing is not None:
-            # Most 6-Ks carry no XBRL, and for that form it is not a failure.
-            try:
-                return Financials.extract(filing)
-            except XBRLFilingWithNoXbrlData:
-                return None
+            return Financials.extract(filing)
         return None
 
     @property

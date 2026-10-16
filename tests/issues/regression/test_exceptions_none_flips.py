@@ -274,7 +274,7 @@ def test_every_exception_the_guide_names_exists():
     modules = [importlib.import_module(name) for name in (
         "edgar.exceptions", "edgar", "edgar.httprequests", "edgar.dates",
         "edgar.core", "edgar.xbrl.exceptions", "edgar.sgml.sgml_parser",
-        "edgar.entity.entity_facts", "edgar.xbrl",
+        "edgar.entity.entity_facts",
     )]
 
     named = set(re.findall(r"\b([A-Z][A-Za-z]*(?:Error|Warning|Exception))\b", GUIDE.read_text()))

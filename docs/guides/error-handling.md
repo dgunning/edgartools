@@ -97,10 +97,9 @@ These calls used to return `None` for something that was really a failure. In 5.
 | `find("123456-99")` (malformed accession) | warned, returned `None` | raises `ValidationError` |
 | `filing.obj()` on a modelled form with unreadable data | warned, returned `None` | raises `DataObjectError` |
 | `tenk.document` when the parser fails | warned, returned `None` | raises the parser's `ParsingError` |
-| `company.get_financials()`, `tenk.financials` on a filing with no XBRL (a 6-K without XBRL still answers `None`) | warned, returned a `Financials` whose statements were all `None` | raises `XBRLFilingWithNoXbrlData` |
 | any HTTP failure out of the network layer | propagated as an `httpx2` type | raises `TransportError` |
 
-`XBRLFilingWithNoXbrlData` is a `NotFoundError`, so `except NotFoundError` catches it; to name it, import it from `edgar.xbrl`.
+`company.get_financials()` and `tenk.financials` on a filing with no XBRL warned in 5.x too, but they return `None` in 6.0 rather than raising: no XBRL is a property of the filing, as it is for `filing.xbrl()`. What changed is that you no longer get an empty `Financials` that passes `if financials is not None:`.
 
 Where the raising form is the only form, there is a non-raising one beside it. `report.get(item, default)` is to `report[item]` what `dict.get` is to `dict[...]`:
 
