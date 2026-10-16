@@ -57,7 +57,7 @@ from edgar import find
 results = find("Apple")
 print(f"Found {len(results)} companies:")
 for company in results:
-    print(f"  {company.ticker}: {company.name}")
+    print(f"  {company.get_ticker()}: {company.name}")
 ```
 
 **Output:**
@@ -87,15 +87,15 @@ company = Company("MSFT")
 # Basic information
 print(f"Name: {company.name}")
 print(f"CIK: {company.cik}")
-print(f"Ticker: {company.ticker}")
+print(f"Ticker: {company.get_ticker()}")
 print(f"Industry: {company.industry}")
-print(f"Website: {company.website}")
-print(f"Location: {company.city}, {company.state}")
+addr = company.business_address()
+print(f"Location: {addr.city}, {addr.state_or_country}")
 
 # SEC-specific information
 print(f"SIC Code: {company.sic}")
 print(f"Fiscal Year End: {company.fiscal_year_end}")
-print(f"Exchange: {company.exchange}")
+print(f"Exchange: {company.get_exchanges()}")
 ```
 
 **Output:**
@@ -297,7 +297,7 @@ for filing in recent_8k_filings.head(50):
     try:
         company = Company(filing.cik)
         active_companies.append({
-            'ticker': company.ticker,
+            'ticker': company.get_ticker(),
             'name': company.name,
             'filing_date': filing.filing_date,
             'cik': company.cik,
@@ -355,7 +355,7 @@ company = Company("AAPL")  # Correct for ticker lookup
 # Some foreign companies trade on US exchanges
 try:
     company = Company("ASML")  # Dutch company on NASDAQ
-    print(f"Found: {company.name} in {company.country}")
+    print(f"Found: {company.name} in {company.business_address().state_or_country_desc}")
 except:
     print("Company not found or not SEC-registered")
 ```
@@ -366,7 +366,7 @@ except:
 try:
     company = Company("1234567")  # Use CIK for delisted companies
     print(f"Company: {company.name}")
-    print(f"Status: {'Active' if company.ticker else 'Possibly delisted'}")
+    print(f"Status: {'Active' if company.get_ticker() else 'Possibly delisted'}")
 except:
     print("Company not found in SEC database")
 ```

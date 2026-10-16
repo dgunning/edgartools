@@ -420,6 +420,6 @@ Call `filing.obj()` on any supported filing. EdgarTools detects the form type, p
 from edgar import Company
 
 apple = Company("AAPL")
-filing = apple.get_latest_filing("10-K")
+filing = apple.get_filings(form="10-K").latest()
 tenk = filing.obj()          # returns a TenK with all sections and financials
 ```

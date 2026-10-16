@@ -169,9 +169,11 @@ Major expense categories (R&D, SG&A, Marketing) are now consistently positive ac
 
 1. **Check if the filing has XBRL data**:
 ```python
-filing = company.get_latest_filing("10-K")
-if filing.has_xbrl():
-    financials = filing.get_financials()
+from edgar.financials import Financials
+
+filing = company.get_filings(form="10-K").latest()
+if filing.xbrl():
+    financials = Financials.extract(filing)
 else:
     print("Filing does not contain XBRL data")
 ```
@@ -220,10 +222,10 @@ if len(filings) > 1:
 
 1. **Check if the filing has valid XBRL**:
 ```python
-if filing.has_xbrl():
+xbrl = filing.xbrl()
+if xbrl:
     try:
-        xbrl = filing.get_xbrl()
-        print("XBRL version:", xbrl.version)
+        print("XBRL entity:", xbrl.entity_name)
     except Exception as e:
         print(f"XBRL parsing error: {e}")
 ```
@@ -345,7 +347,7 @@ results = {}
    
 for ticker in companies:
     company = Company(ticker)
-    results[ticker] = company.get_latest_filing("10-K")
+    results[ticker] = company.get_filings(form="10-K").latest()
     time.sleep(1)  # Wait 1 second between companies
 ```
 
@@ -380,16 +382,17 @@ The SEC EDGAR system occasionally experiences downtime or performance issues:
 Always verify the data you're working with:
 
 ```python
+from edgar.financials import Financials
+
 # Print filing metadata to verify
 print(f"Filing: {filing.accession_number}")
-print(f"Form Type: {filing.form_type}")
+print(f"Form Type: {filing.form}")
 print(f"Filing Date: {filing.filing_date}")
-print(f"Has XBRL: {filing.has_xbrl()}")
+print(f"Has XBRL: {filing.xbrl() is not None}")
 
 # Check financial statement structure
-financials = filing.get_financials()
-print(f"Available statements: {financials.available_statements()}")
-print(f"Available periods: {financials.get_periods()}")
+financials = Financials.extract(filing)
+print(financials)
 ```
 
 ## Getting Help

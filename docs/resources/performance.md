@@ -166,7 +166,7 @@ for result in process_filings_generator(all_filings):
 For large filings (like 10-Ks), process sections individually:
 
 ```python
-filing = company.get_latest_filing("10-K").obj()
+filing = company.get_filings(form="10-K").latest().obj()
 
 # Process one section at a time
 sections = ["business", "risk_factors", "management_discussion"]

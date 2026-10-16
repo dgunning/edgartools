@@ -22,6 +22,7 @@ this catches invented names, not every possible mistake; the count of steps
 it did verify is asserted, so it cannot quietly verify nothing.
 """
 import ast
+import importlib
 import inspect
 import re
 import sys
@@ -40,6 +41,8 @@ PAGES = {
     "quick-guide.md": 140,  # 147 when written
     "api/company.md": 100,  # 108 when written
 }
+# Attribute steps verified across all of docs/ (4,996 when edgartools-j7s48 fixed 38 names on 17 pages)
+ALL_DOCS_FLOOR = 4700
 
 
 def _roots():
@@ -68,10 +71,12 @@ def _class_index() -> dict[str, type]:
     return {name: next(iter(classes)) for name, classes in seen.items() if len(classes) == 1}
 
 
-def _instance_attributes(cls) -> set[str]:
+def _instance_attributes(cls) -> set[str] | None:
     """Names assigned as ``self.<name>`` anywhere in the class or its bases.
 
     ``Filing.form`` is set in ``__init__``, so a class-level lookup cannot see it.
+    None when a class sets attributes by name (``EntityData`` stores its
+    ``**kwargs`` with ``setattr``), so its attributes cannot be known statically.
     """
     names = set()
     for klass in cls.__mro__:
@@ -83,10 +88,24 @@ def _instance_attributes(cls) -> set[str]:
         except (OSError, TypeError, SyntaxError, IndentationError):
             continue
         for node in ast.walk(tree):
+            if (isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "setattr"
+                    and node.args and isinstance(node.args[0], ast.Name) and node.args[0].id == "self"):
+                return None
             if (isinstance(node, ast.Attribute) and isinstance(node.ctx, ast.Store)
                     and isinstance(node.value, ast.Name) and node.value.id == "self"):
                 names.add(node.attr)
     return names
+
+
+def _on_a_subclass(cls, name) -> bool:
+    """A filing from ``company.get_filings()`` is an EntityFiling, which adds
+    ``is_xbrl`` and ``file_number`` to Filing; a page may use either."""
+    for sub in cls.__subclasses__():
+        known = _instance_attributes(sub)
+        if (inspect.getattr_static(sub, name, None) is not None or known is None or name in known
+                or _on_a_subclass(sub, name)):
+            return True
+    return False
 
 
 def _return_class(fn, index) -> type | None:
@@ -111,9 +130,31 @@ def _return_class(fn, index) -> type | None:
         hint = hint.__forward_arg__
     if isinstance(hint, str):
         hint = hint.removeprefix("Optional[").removesuffix("]").strip("'\"")
-        hint = getattr(fn, "__globals__", {}).get(hint) or index.get(hint)
-    # `object` (obj() returns "some data object") says nothing about attributes
-    return hint if inspect.isclass(hint) and hint is not object else None
+        hint = (getattr(fn, "__globals__", {}).get(hint) or _imported_name(fn, hint)
+                or index.get(hint))
+    # `object` (obj() returns "some data object") and `Any` say nothing about attributes
+    return hint if inspect.isclass(hint) and hint not in (object, typing.Any) else None
+
+
+def _imported_name(fn, name):
+    """A name the function's module imports only for type checking.
+
+    ``EntityFacts.query() -> 'FactQuery'`` imports FactQuery under
+    TYPE_CHECKING. The index cannot settle it: edgar.xbrl.facts has a
+    FactQuery too, and the index holds only modules already loaded.
+    """
+    module = sys.modules.get(getattr(fn, "__module__", "") or "")
+    try:
+        source = inspect.getsource(module)
+    except (OSError, TypeError):
+        return None
+    match = re.search(rf"^\s*from\s+([\w.]+)\s+import\s+[^\n]*\b{re.escape(name)}\b", source, re.MULTILINE)
+    if not match:
+        return None
+    try:
+        return getattr(importlib.import_module(match.group(1)), name, None)
+    except ImportError:
+        return None
 
 
 def _chain(node) -> list[str] | None:
@@ -141,45 +182,93 @@ def _code_snippets(text: str) -> list[str]:
     return blocks + re.findall(r"`([^`\n]+)`", rest)
 
 
-def _expressions(snippet: str):
+# `financials.py` in prose is a filename, not an attribute of a Financials
+_FILENAME = re.compile(r"^[\w./-]+\.(py|md|json|ya?ml|txt|csv|html?|toml|ipynb|parquet|pq|xml|zip)$")
+
+
+def _statements(snippet: str):
+    """The snippet's statements in source order, or nothing when it is not Python."""
+    if _FILENAME.match(snippet.strip()):
+        return []
     try:
         tree = ast.parse(snippet)
     except SyntaxError:
-        return  # shell lines, prose in backticks, fragments
-    for node in ast.walk(tree):
+        return []  # shell lines, prose in backticks, fragments
+    stmts = [n for n in ast.walk(tree) if isinstance(n, ast.stmt) and not isinstance(n, ast.Module)]
+    return sorted(stmts, key=lambda n: (n.lineno, n.col_offset))
+
+
+def _own_expressions(stmt):
+    """Attribute and call nodes of one statement, without those of nested statements."""
+    stack = [c for c in ast.iter_child_nodes(stmt) if not isinstance(c, ast.stmt)]
+    while stack:
+        node = stack.pop()
         if isinstance(node, (ast.Attribute, ast.Call)):
             yield node
+        stack.extend(c for c in ast.iter_child_nodes(node) if not isinstance(c, ast.stmt))
+
+
+def _walk(parts, roots, index, problems):
+    """Follow one chain; return (steps verified, the class it ends on or None)."""
+    import edgar
+    root, steps = parts[0], parts[1:]
+    if root in roots:
+        cls = roots[root]
+    elif root in getattr(edgar, "__all__", ()):
+        target = getattr(edgar, root)
+        cls = target if inspect.isclass(target) else _return_class(target, index)
+    else:
+        return 0, None
+    verified = 0
+    for step in steps:
+        if cls is None or step == "[]":
+            return verified, None
+        attr = inspect.getattr_static(cls, step, None)
+        if attr is None and not hasattr(cls, step):
+            known = _instance_attributes(cls)
+            if known is None:
+                return verified, None
+            if step in known or _on_a_subclass(cls, step):
+                verified += 1
+                return verified, None
+            problems.append(f"{'.'.join(parts)}: {cls.__name__} has no {step!r}")
+            return verified, None
+        verified += 1
+        target = attr.fget if isinstance(attr, property) else attr
+        target = getattr(target, "__func__", target)
+        cls = _return_class(target, index) if callable(target) else None
+    return verified, cls
 
 
 def check(text: str) -> tuple[list[str], int]:
-    """(missing-name problems, number of attribute steps verified) for a page."""
-    import edgar
+    """(missing-name problems, number of attribute steps verified) for a page.
+
+    A name the snippet assigns (``facts = xbrl.facts``) takes the type of its
+    right-hand side for the rest of that snippet, or no type when that is
+    unknown, instead of the page-wide root of the same name.
+    """
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        roots = _roots()
+        default_roots = _roots()
         index = _class_index()
     problems, verified = [], 0
     for snippet in _code_snippets(text):
-        for node in _expressions(snippet):
-            parts = _chain(node)
-            if not parts or len(parts) < 2:
-                continue
-            root, steps = parts[0], parts[1:]
-            cls = roots.get(root)
-            if cls is None and root in getattr(edgar, "__all__", ()):
-                target = getattr(edgar, root)
-                cls = target if inspect.isclass(target) else _return_class(target, index)
-            for step in steps:
-                if cls is None or step == "[]":
-                    break
-                attr = inspect.getattr_static(cls, step, None)
-                if attr is None and not hasattr(cls, step) and step not in _instance_attributes(cls):
-                    problems.append(f"{'.'.join(parts)}: {cls.__name__} has no {step!r}")
-                    break
-                verified += 1
-                target = attr.fget if isinstance(attr, property) else attr
-                target = getattr(target, "__func__", target)
-                cls = _return_class(target, index) if callable(target) else None
+        roots = dict(default_roots)
+        for stmt in _statements(snippet):
+            for node in _own_expressions(stmt):
+                parts = _chain(node)
+                if parts and len(parts) >= 2:
+                    verified += _walk(parts, roots, index, problems)[0]
+            if isinstance(stmt, ast.Assign) and len(stmt.targets) == 1 and isinstance(stmt.targets[0], ast.Name):
+                parts = _chain(stmt.value)
+                roots[stmt.targets[0].id] = _walk(parts, roots, index, [])[1] if parts else None
+            elif isinstance(stmt, (ast.For, ast.With, ast.AnnAssign, ast.AugAssign)):
+                targets = ([stmt.target] if not isinstance(stmt, ast.With)
+                           else [i.optional_vars for i in stmt.items if i.optional_vars is not None])
+                for t in targets:
+                    for name in ast.walk(t):
+                        if isinstance(name, ast.Name):
+                            roots[name.id] = None
     return sorted(set(problems)), verified
 
 
@@ -192,6 +281,23 @@ def test_every_documented_method_exists(page):
         f"only {verified} attribute steps verified on docs/{page} (floor {PAGES[page]}); "
         f"the walk is resolving less than it did"
     )
+
+
+@pytest.mark.fast
+def test_no_docs_page_names_a_missing_api():
+    """Everything under docs/ is published to Read the Docs, and models train on it.
+
+    Edgartools-j7s48: the first run over docs/ found 38 invented names on 17
+    pages, such as company.get_latest_filing, filing.form_type and
+    financials.income.
+    """
+    problems, verified = [], 0
+    for page in sorted(DOCS.rglob("*.md")):
+        page_problems, page_verified = check(page.read_text(encoding="utf-8"))
+        problems += [f"docs/{page.relative_to(DOCS)}: {p}" for p in page_problems]
+        verified += page_verified
+    assert not problems, "documented APIs that do not exist:\n" + "\n".join(problems)
+    assert verified >= ALL_DOCS_FLOOR, f"only {verified} attribute steps verified across docs/ (floor {ALL_DOCS_FLOOR})"
 
 
 @pytest.mark.fast
@@ -213,3 +319,29 @@ def test_a_name_that_exists_is_not_reported():
     problems, verified = check("| facts as a DataFrame | `company.get_facts().to_pandas()` |")
     assert problems == []
     assert verified >= 2  # get_facts, then to_pandas on EntityFacts (nested nodes count again)
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize("snippet", [
+    # the snippet binds `facts` to XBRL facts, not to the page-wide EntityFacts root
+    "```python\nxbrl = filing.xbrl()\nfacts = xbrl.facts\nfacts.query().by_statement_type('IncomeStatement')\n```\n",
+    # EntityFacts.query() imports its FactQuery only under TYPE_CHECKING
+    "`company.get_facts().query().by_form_type('10-K').by_period_length(12)`",
+    # a filename in prose
+    "Edit `financials.py` and `filing.md`.",
+    # EntityData stores its **kwargs with setattr
+    "```python\ncompany_data = company.data\nprint(company_data.former_names)\n```\n",
+    # a filing from company.get_filings() is an EntityFiling
+    "`filing.is_xbrl`",
+])
+def test_names_the_checker_cannot_see_are_not_reported(snippet):
+    """Edgartools-j7s48: the false-positive classes from the first run over docs/."""
+    problems, _ = check(snippet)
+    assert problems == []
+
+
+@pytest.mark.fast
+def test_a_local_binding_is_still_checked():
+    """A name the snippet assigns is checked as the type of its right-hand side."""
+    problems, _ = check("```python\nquarterly = company.get_quarterly_financials()\nq = quarterly.income\n```\n")
+    assert problems == ["quarterly.income: Financials has no 'income'"]

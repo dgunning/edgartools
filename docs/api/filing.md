@@ -281,7 +281,7 @@ reports = tenk.reports
 **Incorrect:**
 ```python
 # This will fail - Filing has no financials property
-financials = filing.financials  # AttributeError
+# filing.financials  -> AttributeError
 ```
 
 **Correct:**
@@ -361,8 +361,8 @@ Get parsed SGML structure of filing.
 **Example:**
 ```python
 sgml = filing.sgml()
-for doc in sgml.documents:
-    print(f"{doc.type}: {doc.sequence}")
+for doc in sgml.attachments:
+    print(f"{doc.document_type}: {doc.sequence_number}")
 ```
 
 ## Interactive Methods
@@ -538,7 +538,8 @@ Generate context string for LLM/AI use.
 
 ### Download
 
-#### download()
+A single `Filing` has no `download()`. Download to local storage from a `Filings` collection, which calls `edgar.storage.download_filings`:
+
 ```python
 def download(
     self,
@@ -549,7 +550,6 @@ def download(
     disable_progress: bool = False
 )
 ```
-Download filing to local storage.
 
 **Parameters:**
 - `data_directory`: Download directory (defaults to Edgar data directory)
@@ -560,12 +560,16 @@ Download filing to local storage.
 
 **Example:**
 ```python
+filings = company.get_filings(form="10-K").head(5)
+
 # Download with defaults
-filing.download()
+filings.download()
 
 # Custom directory without compression
-filing.download(data_directory="./raw_filings", compress=False)
+filings.download(data_directory="./raw_filings", compress=False)
 ```
+
+`filing.save(path)` is different: it pickles the `Filing` object itself.
 
 ## Common Recipes
 
