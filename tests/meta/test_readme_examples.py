@@ -40,7 +40,8 @@ def readme_python_blocks() -> list[tuple[int, str]]:
 
 
 def _numbers(df: pd.DataFrame) -> set[float]:
-    values = pd.to_numeric(df.select_dtypes(exclude="bool").stack(), errors="coerce").dropna()
+    cells = pd.Series(df.select_dtypes(exclude="bool").to_numpy().ravel())
+    values = pd.to_numeric(cells, errors="coerce").dropna()
     return set(values.astype(float))
 
 
@@ -134,8 +135,8 @@ def run_block(source: str, ns: dict):
     tree = ast.parse(source)
     last = tree.body[-1] if tree.body and isinstance(tree.body[-1], ast.Expr) else None
     body = tree.body[:-1] if last else tree.body
-    exec(compile(ast.Module(body=body, type_ignores=[]), "<README>", "exec"), ns)
-    return eval(compile(ast.Expression(last.value), "<README>", "eval"), ns) if last else None
+    exec(compile(ast.Module(body=body, type_ignores=[]), "<README>", "exec"), ns)  # noqa: S102 - our own README, not user input
+    return eval(compile(ast.Expression(last.value), "<README>", "eval"), ns) if last else None  # noqa: S307 - our own README
 
 
 def rendered(value) -> str:
