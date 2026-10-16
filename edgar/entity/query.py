@@ -656,6 +656,14 @@ class FactQuery:
         facts = self.execute()
         return HierarchicalFactsResult(facts)
 
+    def to_pandas(self, *args, **kwargs) -> pd.DataFrame:
+        """Alias of :meth:`to_dataframe`, taking the same arguments.
+
+        ``Filings``, ``XBRL`` and ``FilingSummary`` export with ``to_pandas()``, and
+        code written against them reaches for it here too (edgartools-m3jpa).
+        """
+        return self.to_dataframe(*args, **kwargs)
+
     def to_dataframe(self, *columns) -> pd.DataFrame:
         """
         Convert results to pandas DataFrame.
