@@ -14,7 +14,7 @@ Form 144 is a notice of proposed sale of restricted securities under SEC Rule 14
 |----------|------|-------------|
 | Class Name | `Form144` | |
 | Forms Handled | `144`, `144/A` | |
-| Module | `edgar.form144` | |
+| Module | `edgar.ownership.form144` (also `from edgar import Form144`) | |
 | Source Data | XML document | |
 
 ---
