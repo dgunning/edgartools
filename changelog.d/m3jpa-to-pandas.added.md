@@ -1,0 +1,1 @@
+- **`to_pandas()` on `EntityFacts`, `FactsView` and both `FactQuery` classes.** It is an alias of `to_dataframe()` with the same arguments, matching `Filings` and `XBRL`. `company.get_facts().to_pandas()` was the most-invented call in the README agent eval (8 of 19 failing scripts), and the quick guide documented it.
