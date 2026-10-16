@@ -1,0 +1,331 @@
+# Cold-agent README eval (bead edgartools-07lk.19.8).
+# Tasks come from the top arrival tasks mined from issues/discussions (07lk.19.4).
+# Every ground truth was taken from SEC's raw data (companyfacts / submissions JSON,
+# the raw 13F information table, the raw 10-K HTML), never from edgartools, so the
+# judge cannot inherit a library bug. Built 2026-10-15.
+
+- tier: base
+  id: T01_history
+  segment: quant
+  prompt: >-
+    Get Costco's (COST) total revenue for each of fiscal years 2021 through 2025, as reported
+    in its 10-K filings.
+  answer_shape: '{"FY2021": <int USD>, "FY2022": ..., "FY2023": ..., "FY2024": ..., "FY2025": ...}'
+  grade: {kind: numbers, tolerance: 0.005}
+  truth: {FY2021: 195929000000, FY2022: 226954000000, FY2023: 242290000000, FY2024: 254453000000, FY2025: 275235000000}
+  source: companyfacts CIK0000909832 RevenueFromContractWithCustomerExcludingAssessedTax, 10-K annual durations
+
+- tier: base
+  id: T02_cross_company
+  segment: quant
+  prompt: >-
+    Compare total revenue for fiscal year 2024 across Johnson & Johnson (JNJ), Pfizer (PFE)
+    and Merck (MRK), as reported in their 10-K filings.
+  answer_shape: '{"JNJ": <int USD>, "PFE": <int USD>, "MRK": <int USD>}'
+  grade: {kind: numbers, tolerance: 0.005}
+  truth: {JNJ: 88821000000, PFE: 63627000000, MRK: 64168000000}
+  source: companyfacts JNJ RevenueFromContractWithCustomerExcludingAssessedTax FY ending 2024-12-29; PFE Revenues 2024-12-31; MRK Revenues 2024-12-31
+
+- tier: base
+  id: T03_quarterly
+  segment: quant
+  prompt: >-
+    What was Microsoft's (MSFT) revenue for the three months ended March 31, 2025 (the quarter
+    alone, not year-to-date)?
+  answer_shape: '{"revenue": <int USD>}'
+  grade: {kind: numbers, tolerance: 0.005}
+  truth: {revenue: 70066000000}
+  source: companyfacts CIK0000789019 2025-01-01..2025-03-31, 10-Q 0000950170-25-061046
+
+- tier: base
+  id: T04_section_text
+  segment: rag
+  prompt: >-
+    Extract the full text of Item 1A (Risk Factors) from NVIDIA's 10-K for the fiscal year ended
+    January 26, 2025 (accession 0001045810-25-000023) and save it as plain text to
+    ./risk_factors.txt. Only Item 1A, not the items around it.
+  answer_shape: '{"file": "risk_factors.txt"}'
+  grade:
+    kind: section_file
+    file: risk_factors.txt
+    must_contain:
+      - "The following risk factors should be considered in addition to the other information in this Annual Report"
+      - "make it more difficult for shareholders to elect directors of their choosing"
+    must_not_contain:
+      - "Risk management and strategy We have in place certain infrastructure"
+      - "The following discussion and analysis of our financial condition"
+    min_chars: 90000
+    max_chars: 135000
+  source: raw nvda-20250126.htm, Item 1A spans ~110.8k normalized chars
+
+- tier: base
+  id: T05_markdown_rag
+  segment: rag
+  prompt: >-
+    Convert Deere & Company's (DE) 10-K filed 2024-12-12 (accession 0001558370-24-016169) to
+    Markdown for a RAG pipeline, preserving tables, and save it to ./deere_10k.md.
+  answer_shape: '{"file": "deere_10k.md"}'
+  grade:
+    kind: markdown_file
+    file: deere_10k.md
+    min_chars: 150000
+    min_table_rows: 200
+    must_contain_any: ["Item 7", "ITEM 7"]
+  source: structural check only
+
+- tier: base
+  id: T06_find_filings
+  segment: events
+  prompt: >-
+    List the accession numbers of every 8-K that Boeing (BA) filed in calendar year 2025
+    reporting Item 2.02 (Results of Operations and Financial Condition).
+  answer_shape: '{"accession_numbers": ["0000000000-00-000000", ...]}'
+  grade: {kind: set, key: accession_numbers}
+  truth: {accession_numbers: ["0000012927-25-000010", "0000012927-25-000027", "0000012927-25-000058", "0001628280-25-046915"]}
+  source: submissions CIK0000012927 items field
+
+- tier: base
+  id: T07_13f
+  segment: funds
+  prompt: >-
+    From Berkshire Hathaway's 13F-HR for the quarter ended June 30, 2025, list the five largest
+    holdings by reported market value, aggregated per issuer.
+  answer_shape: '{"top5": [{"issuer": "<name>", "value": <int USD>}, ...]}  (largest first)'
+  grade: {kind: ranked_values, key: top5, tolerance: 0.005}
+  truth:
+    top5:
+      - {issuer: APPLE, value: 57447600000}
+      - {issuer: AMERICAN EXPRESS, value: 48360781086}
+      - {issuer: BANK, value: 28641252185}
+      - {issuer: COCA, value: 28300000000}
+      - {issuer: CHEVRON, value: 17478457567}
+  source: raw information table 43977.xml in 0000950123-25-008343, 114 rows summed per CUSIP
+
+- tier: base
+  id: T08_insider
+  segment: insider
+  prompt: >-
+    How many Form 4 insider filings were filed for Tesla (TSLA) as the issuer during September
+    2025? Give the count and the accession numbers.
+  answer_shape: '{"count": <int>, "accession_numbers": [...]}'
+  grade: {kind: set, key: accession_numbers, also_count: true}
+  truth: {count: 4, accession_numbers: ["0001104659-25-088703", "0001104659-25-089693", "0001104659-25-090923", "0001972928-25-000004"]}
+  source: submissions CIK0001318605 form==4 filed 2025-09-01..2025-09-30
+
+- tier: base
+  id: T09_lookup
+  segment: lookup
+  prompt: >-
+    What is CrowdStrike's (CRWD) SEC CIK number and SIC code?
+  answer_shape: '{"cik": <int>, "sic": <int>}'
+  grade: {kind: numbers, tolerance: 0}
+  truth: {cik: 1535527, sic: 7372}
+  source: submissions CIK0001535527
+
+- tier: base
+  id: T10_earnings_8k
+  segment: events
+  prompt: >-
+    Nike (NKE) reported first-quarter fiscal 2026 results in an 8-K earnings release. What total
+    revenue did it report for that quarter (three months ended August 31, 2025)?
+  answer_shape: '{"revenue": <int USD>}'
+  grade: {kind: numbers, tolerance: 0.005}
+  truth: {revenue: 11720000000}
+  source: companyfacts CIK0000320187 2025-06-01..2025-08-31 (10-Q 0000320187-25-000097)
+
+# ---------------------------------------------------------------------------------------------
+# HARD TIER — tasks where a plausible answer is silently wrong, where 6.0 breaks 5.x code, or
+# where the agent must know a capability exists. Ground truth from the same raw SEC sources.
+
+- tier: hard
+  id: H01_total_revenue_trap
+  segment: quant
+  prompt: >-
+    What was Pfizer's (PFE) total revenue for fiscal year 2024, as reported in its 10-K?
+  answer_shape: '{"total_revenue": <int USD>}'
+  grade: {kind: numbers, tolerance: 0.005}
+  truth: {total_revenue: 63627000000}
+  trap: the first income-statement row is a component (55,681M), not Total revenues
+  source: companyfacts CIK0000078003 Revenues 2024-01-01..2024-12-31
+
+- tier: hard
+  id: H02_q4_derived
+  segment: quant
+  prompt: >-
+    What was Microsoft's (MSFT) revenue for the fourth quarter of fiscal 2025 (the three months
+    ended June 30, 2025)?
+  answer_shape: '{"revenue": <int USD>}'
+  grade: {kind: numbers, tolerance: 0.005}
+  truth: {revenue: 76441000000}
+  trap: there is no Q4 10-Q; Q4 = FY (281,724M, 10-K) minus 9M YTD (205,283M, Q3 10-Q)
+  source: companyfacts CIK0000789019
+
+- tier: hard
+  id: H03_ttm
+  segment: quant
+  prompt: >-
+    What was NVIDIA's (NVDA) trailing-twelve-month revenue as of the end of its fiscal quarter
+    ended July 27, 2025?
+  answer_shape: '{"ttm_revenue": <int USD>}'
+  grade: {kind: numbers, tolerance: 0.005}
+  truth: {ttm_revenue: 165218000000}
+  trap: needs a derived Q4 FY2025 (130,497 - 91,166 = 39,331M) plus 35,082 + 44,062 + 46,743
+  source: companyfacts CIK0001045810 Revenues
+
+- tier: hard
+  id: H04_restated
+  segment: quant
+  prompt: >-
+    Johnson & Johnson (JNJ) revenue for fiscal 2022 changed between filings after the Kenvue
+    separation. Give fiscal 2022 revenue as originally reported in the fiscal 2022 10-K, and as
+    presented for fiscal 2022 in the fiscal 2024 10-K.
+  answer_shape: '{"as_originally_reported": <int USD>, "as_presented_fy2024_10k": <int USD>}'
+  grade: {kind: numbers, tolerance: 0.005}
+  truth: {as_originally_reported: 94943000000, as_presented_fy2024_10k: 79990000000}
+  source: companyfacts JNJ period ending 2023-01-01 — 0000200406-23-000016 vs 0000200406-25-000038
+
+- tier: hard
+  id: H05_segments
+  segment: quant
+  prompt: >-
+    Break down Microsoft's (MSFT) fiscal 2025 revenue (year ended June 30, 2025) by its three
+    reportable segments.
+  answer_shape: '{"Productivity and Business Processes": <int USD>, "Intelligent Cloud": <int USD>, "More Personal Computing": <int USD>}'
+  grade: {kind: numbers, tolerance: 0.005}
+  truth: {"Productivity and Business Processes": 120810000000, "Intelligent Cloud": 106265000000, "More Personal Computing": 54649000000}
+  source: raw inline XBRL msft-20250630.htm, StatementBusinessSegmentsAxis contexts
+
+- tier: hard
+  id: H06_fcf_and_scale
+  segment: quant
+  prompt: >-
+    For Costco (COST) fiscal 2025 (year ended August 31, 2025): compute free cash flow (net cash
+    from operating activities minus capital expenditures), and give the weighted-average diluted
+    share count.
+  answer_shape: '{"free_cash_flow": <int USD>, "diluted_shares": <int shares>}'
+  grade: {kind: numbers, tolerance: 0.005}
+  truth: {free_cash_flow: 7837000000, diluted_shares: 444803000}
+  trap: capex is negative in the cash-flow frame (OCF - capex = 18,833M); shares are reported in thousands in the HTML
+  source: companyfacts CIK0000909832 (13,335M - 5,498M; 444,803,000 shares)
+
+- tier: hard
+  id: H07_legacy_migration
+  segment: migration
+  requires: "6.0"
+  fixture: legacy_report.py
+  prompt: >-
+    legacy_report.py in this directory was written against edgartools 5.x and worked. The team
+    has upgraded to the latest edgartools (already pinned for this project; just pip install
+    edgartools). Make the script work on that version without changing what it produces, then
+    run it so it writes answer.json and risk_factors.txt.
+  answer_shape: '{"free_cash_flow": <int USD>, "risk_factors_file": "risk_factors.txt"}'
+  grade:
+    kind: composite
+    parts:
+      - grade: {kind: numbers, tolerance: 0.005}
+        truth: {free_cash_flow: 7837000000}
+      - grade:
+          kind: section_file
+          file: risk_factors.txt
+          must_contain:
+            - "The following risk factors should be considered in addition to the other information in this Annual Report"
+            - "make it more difficult for shareholders to elect directors of their choosing"
+          must_not_contain:
+            - "Risk management and strategy We have in place certain infrastructure"
+            - "The following discussion and analysis of our financial condition"
+          min_chars: 90000
+          max_chars: 135000
+  source: legacy script validated on 5.62.0 (gives 7,837,000,000 and a passing risk file); 6.0 removes edgar.files
+
+- tier: hard
+  id: H08_fulltext
+  segment: events
+  prompt: >-
+    Find every 8-K filed between January 1 and March 31, 2025 whose text contains the exact
+    phrase "material cybersecurity incident".
+  answer_shape: '{"accession_numbers": [...]}'
+  grade: {kind: set, key: accession_numbers}
+  truth: {accession_numbers: ["0000033185-25-000009", "0001628280-25-005855", "0001437749-25-006475"]}
+  source: EDGAR full-text search (efts.sec.gov) 2026-10-15, total 3
+
+# ---------------------------------------------------------------------------------------------
+# SELECTION TIER — tasks where SEC's raw JSON APIs do not hand you the answer: parsed 13F
+# tables across quarters, Form 4 transactions, 10-K section text, N-PORT holdings. Compares an
+# agent told to use edgartools (blind/readme) with one free to choose (open_unnamed).
+
+- tier: select
+  id: S01_13f_changes
+  segment: funds
+  prompt: >-
+    Compare Berkshire Hathaway's 13F-HR for the quarter ended September 30, 2025 with the one for
+    June 30, 2025. Which positions (by CUSIP) are new in Q3, and which were fully exited? For new
+    positions, give the share count held at September 30.
+  answer_shape: '{"new": [{"issuer": "<name>", "cusip": "<cusip>", "shares": <int>}], "exited": [{"issuer": "<name>", "cusip": "<cusip>"}]}'
+  grade: {kind: changes}
+  truth:
+    new: [{cusip: "02079K305", shares: 17846142}]
+    exited: [{cusip: "23331A109"}]
+  source: raw information tables of 0000950123-25-008343 (Q2) and 0001193125-25-282901 (Q3), aggregated per CUSIP
+
+- tier: select
+  id: S02_insider_sales
+  segment: insider
+  prompt: >-
+    How many NVIDIA (NVDA) shares did CEO Jensen Huang sell in open-market sales (transaction code
+    S) reported on Form 4 filings filed in July 2025, and for how many dollars in total?
+  answer_shape: '{"shares_sold": <int>, "total_value_usd": <number>}'
+  grade: {kind: numbers, tolerance: 0.005}
+  truth: {shares_sold: 1800000, total_value_usd: 301007565}
+  source: raw XML of the 13 NVDA Form 4s filed 2025-07; 93 code-S rows for HUANG JEN HSUN
+
+- tier: select
+  id: S03_cyber_sections
+  segment: rag
+  prompt: >-
+    Extract Item 1C (Cybersecurity) as plain text from NVIDIA's 10-K for the fiscal year ended
+    January 26, 2025 (accession 0001045810-25-000023) and from Deere's 10-K filed 2024-12-12
+    (accession 0001558370-24-016169). Save them to ./nvda_1c.txt and ./deere_1c.txt. Only Item
+    1C, not the items around it.
+  answer_shape: '{"files": ["nvda_1c.txt", "deere_1c.txt"]}'
+  grade:
+    kind: composite
+    parts:
+      - grade:
+          kind: section_file
+          file: nvda_1c.txt
+          must_contain:
+            - "We have in place certain infrastructure, systems, policies, and procedures"
+            - "cybersecurity expertise includes over 17 years of combined government and private sector assignments"
+          must_not_contain:
+            - "Our headquarters is in Santa Clara"
+            - "make it more difficult for shareholders to elect directors"
+          min_chars: 3000
+          max_chars: 6000
+      - grade:
+          kind: section_file
+          file: deere_1c.txt
+          must_contain:
+            - "Cybersecurity is an integral part of our overall risk management program"
+            - "increase in cyberattack volume, frequency, and sophistication in the digital environment"
+          must_not_contain:
+            - "own and operate 23 factory locations"
+          min_chars: 3800
+          max_chars: 7000
+  source: raw nvda-20250126.htm (Item 1C ~3.9k chars) and de-20241027x10k.htm (~5.0k chars)
+
+- tier: select
+  id: S04_nport
+  segment: funds
+  prompt: >-
+    From the N-PORT filing of the ARK Innovation ETF (ARKK) for the reporting period ended July
+    31, 2026, list the five largest holdings by value.
+  answer_shape: '{"top5": [{"issuer": "<name>", "value": <number USD>}, ...]}  (largest first)'
+  grade: {kind: ranked_values, key: top5, tolerance: 0.005}
+  truth:
+    top5:
+      - {issuer: TESLA, value: 541622414.96}
+      - {issuer: TEMPUS, value: 271870242.73}
+      - {issuer: SPACE, value: 271100234.29}
+      - {issuer: CRISPR, value: 263318970.45}
+      - {issuer: SHOPIFY, value: 242272994.7}
+  source: raw primary_doc.xml of 0000940400-26-037955 (ARK ETF Trust, series ARK Innovation ETF), 47 holdings by valUSD
