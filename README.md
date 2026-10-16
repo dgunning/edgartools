@@ -8,63 +8,16 @@
 
 <p>
   <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/v/edgartools.svg" alt="PyPI - Version"></a>
-  <a href="https://github.com/dgunning/edgartools/actions"><img src="https://img.shields.io/github/actions/workflow/status/dgunning/edgartools/python-hatch-workflow.yml" alt="GitHub Workflow Status"></a>
-  <a href="https://github.com/dgunning/edgartools/actions/workflows/regression-tests.yml"><img src="https://img.shields.io/github/actions/workflow/status/dgunning/edgartools/regression-tests.yml?branch=main&label=regression" alt="Regression Tests"></a>
-  <a href="https://www.codefactor.io/repository/github/dgunning/edgartools"><img src="https://www.codefactor.io/repository/github/dgunning/edgartools/badge" alt="CodeFactor"></a>
-  <a href="https://github.com/dgunning/edgartools/blob/main/LICENSE.txt"><img src="https://img.shields.io/github/license/dgunning/edgartools" alt="GitHub"></a>
-  <a href="https://edgartools.readthedocs.io/"><img alt="Documentation" src="https://img.shields.io/badge/docs-edgartools-blue"></a>
-  <img alt="Pepy Total Downloads" src="https://img.shields.io/pepy/dt/edgartools">
-  <a href="https://pepy.tech/project/edgartools"><img alt="Pepy Monthly Downloads" src="https://static.pepy.tech/badge/edgartools/month"></a>
-  <a href="https://github.com/dgunning/edgartools/stargazers"><img alt="GitHub stars" src="https://img.shields.io/github/stars/dgunning/edgartools?style=social"></a>
-
+  <a href="https://pypi.org/project/edgartools"><img src="https://img.shields.io/pypi/pyversions/edgartools.svg" alt="Python versions"></a>
+  <a href="https://github.com/dgunning/edgartools/actions"><img src="https://img.shields.io/github/actions/workflow/status/dgunning/edgartools/python-hatch-workflow.yml" alt="Build status"></a>
+  <a href="https://pepy.tech/project/edgartools"><img alt="Monthly downloads" src="https://static.pepy.tech/badge/edgartools/month"></a>
 </p>
 
-**EdgarTools** is a Python library for accessing SEC EDGAR filings as structured data. Parse financial statements, insider trades, fund holdings, proxy statements, and dozens of other filing types with a consistent Python API — in a few lines of code. Free and open source.
+**EdgarTools** is a Python library for SEC EDGAR filings as structured data: financial statements, insider trades, fund holdings, proxy statements and dozens of other filing types, through one consistent Python API. SEC publishes every filing since 1994 for free, and almost none of it is ready to use; EdgarTools turns a filing into a typed Python object. Free and open source, MIT-licensed.
+
+**[Docs](https://edgartools.readthedocs.io/en/latest/)** · **[Cheat sheet](https://edgartools.readthedocs.io/en/latest/quick-guide/)** · Agents: **[Skill](https://edgartools.readthedocs.io/en/latest/ai/skills/)** · **[MCP server](https://edgartools.readthedocs.io/en/latest/ai/mcp-setup/)** · Hosted: **[edgar.tools](https://www.edgar.tools)**
 
 ![EdgarTools SEC filing data extraction demo](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-demo.gif)
-
-## Why EdgarTools?
-
-SEC EDGAR has every filing since 1994, free — and almost none of it is ready to use. EdgarTools turns any filing into a typed Python object, so a 10-K's revenue is one line instead of an afternoon of XBRL parsing.
-
-```python
-# Apple's latest income statement — rendered, standardized, done
-from edgar import Company
-Company("AAPL").get_financials().income_statement()
-```
-
-<table align="center">
-<tr>
-  <td align="center" width="33%">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-data.svg" width="96" alt="Financial Statements"><br>
-    <b>Financial Statements</b><br>
-    Income, balance sheet, cash flow in one call<br>
-    XBRL-standardized for cross-company comparison
-  </td>
-  <td align="center" width="33%">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-filings.svg" width="96" alt="Every Filing Type"><br>
-    <b>Every Filing Type</b><br>
-    13F holdings, Form 4 insiders, 8-K events, funds, proxies<br>
-    Typed objects + pandas DataFrames for 90 form types
-  </td>
-  <td align="center" width="33%">
-    <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/icons/icon-ai.svg" width="96" alt="Built for Pipelines & AI"><br>
-    <b>Built for Pipelines &amp; AI</b><br>
-    Rate-limit aware, smart caching, enterprise mirrors<br>
-    Built-in MCP server + LLM-ready text for RAG
-  </td>
-</tr>
-</table>
-
-## How It Works
-
-Everything starts with a **`Company`** or a **`Filing`**. Call **`.obj()`** and you get a typed object built for that form — its data ready as pandas DataFrames and clean text.
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/how-it-works.svg" alt="How EdgarTools turns any SEC filing into a typed Python object">
-</p>
-
-The same typed output that reads cleanly in a notebook drops straight into a pipeline: DataFrames for your warehouse, LLM-ready text and an MCP server for your AI stack, rate-limit and enterprise-mirror aware for scale.
 
 ## Quick Start
 
@@ -216,42 +169,6 @@ eightk.earnings   # the EX-99.1 press release tables, parsed
 ```
 [Current Events guide →](https://edgartools.readthedocs.io/en/latest/eightk-filings/)
 
-## Key Features
-
-<table>
-<tr>
-<td width="50%" valign="top">
-
-**Financial data**
-- Income, balance sheet, cash flow — XBRL-standardized for cross-company comparison
-- Individual line items, dimensional data, multi-period comparatives
-- Company Facts API: time-series for any concept across years
-
-**Funds & ownership**
-- 13F holdings, N-PORT, N-MFP, N-CSR/N-CEN fund reports
-- Form 3/4/5 insider transactions; Schedule 13D/G ownership
-
-</td>
-<td width="50%" valign="top">
-
-**Filings & text**
-- 36 typed data objects covering 90 form types; filings since 1994
-- Section extraction (Risk Factors, MD&A): 91.5% of 10-K Item boundaries exact on a held-out set
-- EX-21 subsidiaries, auditor info
-- HTML → clean text + markdown for RAG; EDGAR full-text search
-- Ticker/CIK lookup, industry & exchange filtering
-
-**Built for production**
-- Configurable rate limiting + enterprise/academic mirrors
-- Smart caching, type hints throughout, 45,000+ tests
-- [Enterprise configuration →](https://edgartools.readthedocs.io/en/latest/configuration/#enterprise-configuration)
-
-</td>
-</tr>
-</table>
-
-EdgarTools has typed objects for 90 SEC form types, including **10-K annual reports**, **10-Q quarterly filings**, **8-K current reports**, **13F institutional holdings**, **Form 4 insider transactions**, **proxy statements (DEF 14A)**, **S-1 registration statements**, **N-CSR fund reports**, **N-MFP money market data**, **N-PORT fund portfolios**, **Schedule 13D/G ownership**, **Form D offerings**, **Form C crowdfunding**, and **Form 144 restricted stock**. Parse XBRL financial data, extract text sections, and convert filings to pandas DataFrames. Every other filing is still reachable as a `Filing`, with its documents, text and attachments.
-
 ## Library or hosted?
 
 **EdgarTools** is this library: free, MIT-licensed, running in your own Python process. **[edgar.tools](https://www.edgar.tools)** is the hosted platform built on it: the same parsing, kept running and current, with every answer cited to its filing. You are not paying for the parsing; you are paying for it to be run and answerable. No feature is ever removed from the library to sell the platform.
@@ -265,34 +182,16 @@ EdgarTools has typed objects for 90 SEC form types, including **10-K annual repo
 
 Both have an MCP server: the library's runs locally (see AI Integration below), and edgar.tools' is hosted at [app.edgar.tools/mcp](https://app.edgar.tools/mcp). Attach one per client, not both: they overlap and split your assistant's routing.
 
-## AI Integration
+## AI integration
 
-### Use EdgarTools with Claude Code & Claude Desktop
-
-EdgarTools includes an MCP server and AI skills for Claude Desktop and Claude Code. Ask questions in natural language and get answers backed by real SEC data.
-
-- *"Compare Apple and Microsoft's revenue growth rates over the past 3 years"*
-- *"Which Tesla executives sold more than $1 million in stock in the past 6 months?"*
-
-<details>
-<summary><b>Setup Instructions</b></summary>
-
-### Option 1: AI Skills (Recommended)
-
-Install the EdgarTools skill for Claude Code or Claude Desktop:
+EdgarTools ships an agent skill and a local MCP server, both in the `ai` extra. For an assistant that cannot run Python, use the hosted connector from the section above instead.
 
 ```bash
 pip install "edgartools[ai]"
-python -c "from edgar.ai import install_skill; install_skill()"
+python -c "from edgar.ai import install_skill; install_skill()"  # the skill, for Claude Code and Claude Desktop
 ```
 
-This adds SEC analysis capabilities to Claude, including API documentation, code examples, and a form type reference.
-
-### Option 2: MCP Server
-
-Run EdgarTools as an MCP server for any AI client -- Claude Desktop, Cline, or your own containerized deployment.
-
-Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+The MCP server works with any MCP client. For Claude Desktop, add it to `claude_desktop_config.json`:
 
 ```json
 {
@@ -308,11 +207,7 @@ Add to Claude Desktop config (`~/Library/Application Support/Claude/claude_deskt
 }
 ```
 
-Requires [uv](https://docs.astral.sh/uv/). Alternatively, `pip install "edgartools[ai]"` and use `python -m edgar.ai`.
-
-See [AI Integration Guide](https://github.com/dgunning/edgartools/blob/main/docs/ai-integration.md) for complete documentation.
-
-</details>
+`uvx` needs [uv](https://docs.astral.sh/uv/); without it, `pip install "edgartools[ai]"` and run `python -m edgar.ai`. Setup for other clients: [MCP server guide](https://edgartools.readthedocs.io/en/latest/ai/mcp-setup/) · [Skill guide](https://edgartools.readthedocs.io/en/latest/ai/skills/).
 
 ## Support the project
 
@@ -332,39 +227,12 @@ The SEC changes filing formats and ships a new XBRL taxonomy every year. Sponsor
   </a>
 </p>
 
-## Community & Support
+## Docs, help and contributing
 
-### Documentation & Resources
+- [Documentation](https://edgartools.readthedocs.io/en/latest/) · [Cheat sheet](https://edgartools.readthedocs.io/en/latest/quick-guide/) · [Notebooks](https://edgartools.readthedocs.io/en/latest/notebooks/) · [Blog](https://www.edgartools.io)
+- Questions go to [Discussions](https://github.com/dgunning/edgartools/discussions); bugs and feature requests to [Issues](https://github.com/dgunning/edgartools/issues).
+- Contributions are welcome, including AI-assisted ones. Read the [contributing guide](https://github.com/dgunning/edgartools/blob/main/CONTRIBUTING.md) and point your assistant at [AGENTS.md](https://github.com/dgunning/edgartools/blob/main/AGENTS.md).
 
-- [Documentation](https://edgartools.readthedocs.io/)
-- [Notebooks / Examples](https://edgartools.readthedocs.io/en/latest/notebooks/)
-- [Quick Guide](https://edgartools.readthedocs.io/en/latest/quick-guide/)
-- [EdgarTools Blog](https://www.edgartools.io)
-
-### Get Help & Connect
-
-- [GitHub Issues](https://github.com/dgunning/edgartools/issues) - Bug reports and feature requests
-- [Discussions](https://github.com/dgunning/edgartools/discussions) - Questions and community discussions
-
-### Contributing
-
-Contributions welcome:
-
-- **Code**: Fix bugs, add features, improve documentation
-- **Examples**: Share interesting use cases and examples
-- **Feedback**: Report issues or suggest improvements
-- **Spread the Word**: Star the repo, share with colleagues
-
-See our [Contributing Guide](https://github.com/dgunning/edgartools/blob/main/CONTRIBUTING.md) for details.
-
----
-
-<p align="center">
-EdgarTools is distributed under the <a href="https://github.com/dgunning/edgartools/blob/main/LICENSE.txt">MIT License</a>
-</p>
-
-## Star History
-
-[![Star History Chart](https://api.star-history.com/svg?repos=dgunning/edgartools&type=Timeline)](https://star-history.com/#dgunning/edgartools&Timeline)
+EdgarTools is distributed under the [MIT License](https://github.com/dgunning/edgartools/blob/main/LICENSE.txt).
 
 <!-- mcp-name: io.github.dgunning/edgartools -->

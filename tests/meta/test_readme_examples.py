@@ -40,17 +40,9 @@ def readme_python_blocks() -> list[tuple[int, str]]:
     return [(text.count("\n", 0, m.start()) + 1, m.group(1)) for m in FENCE.finditer(text)]
 
 
-def _numbers(df: pd.DataFrame) -> set[float]:
-    cells = pd.Series(df.select_dtypes(exclude="bool").to_numpy().ravel())
-    values = pd.to_numeric(cells, errors="coerce").dropna()
-    return set(values.astype(float))
-
-
 # Ground truth, read from data.sec.gov (companyconcept / submissions / EFTS), not
 # through this library. Each names the filing it came from.
 #
-# Apple 10-K FY2025, 0000320193-25-000079: Revenue 2024-09-29..2025-09-27.
-AAPL_FY2025_REVENUE = 416_161_000_000
 # NVIDIA 10-K FY2026, 0001045810-26-000021: us-gaap:Revenues 2025-01-27..2026-01-25.
 NVDA_FY2026_REVENUE = 215_938_000_000
 # NVIDIA 10-Q, 0001045810-25-000116: us-gaap:Revenues 2025-01-27..2025-04-27 (fiscal Q1 2026).
@@ -70,10 +62,6 @@ APPLE_CIK, NVIDIA_CIK, TESLA_CIK, BERKSHIRE_CIK = 320193, 1045810, 1318605, 1067
 def _revenue_row(statement) -> pd.Series:
     df = statement.to_dataframe()
     return df.loc[df.label == "Total Revenue"].iloc[0]
-
-
-def check_aapl_income_statement(result, ns):
-    assert AAPL_FY2025_REVENUE in _numbers(result.to_dataframe())
 
 
 def check_identity(result, ns):
@@ -169,7 +157,6 @@ def check_eightk_earnings(result, ns):
 
 # Key: a fragment unique to one README block. Value: the check for its result.
 CHECKS = {
-    "# Apple's latest income statement": check_aapl_income_statement,
     'set_identity("your.name@example.com")': check_identity,
     'Company("NVDA").income_statement(periods=5)': check_nvda_five_years,
     'items="1.05"': check_search,
