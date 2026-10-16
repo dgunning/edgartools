@@ -68,75 +68,151 @@ The same typed output that reads cleanly in a notebook drops straight into a pip
 
 ## Quick Start
 
-**1. Install**
+**1. Install.** The package is `edgartools`; the module you import is `edgar`. Python 3.11+.
 
 ```bash
-pip install edgartools
+uv add edgartools        # or: pip install edgartools
 ```
 
-**2. Identify yourself to the SEC** — EDGAR requires an email with every request. No key, no signup, no rate-limit tier; set it once:
+**2. Identify yourself to the SEC.** EDGAR requires a contact email on every request. There is no key, signup or rate-limit tier.
 
 ```python
-from edgar import *
+from edgar import Company, set_identity
+
 set_identity("your.name@example.com")
 ```
 
-**3. Get data** — every filing is now a few lines away:
+**3. Get data.**
 
 ```python
-# Standardized financial statements, straight from XBRL
-Company("AAPL").get_financials().income_statement()
-
-# The latest insider Form 4 as a structured object
-Company("AAPL").get_filings(form="4").latest().obj()
+# Five fiscal years of standardized income statement, from XBRL
+Company("NVDA").income_statement(periods=5)
+#> Total Revenue $215.9B $130.5B $60.9B
 ```
 
-![Apple SEC Form 4 insider transactions parsed into a structured Python object](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/quickstart-form4.gif)
+## Why not just call SEC's APIs?
 
-**Next:** explore the [Use Cases](https://github.com/dgunning/edgartools#use-cases) below, or dive into the [documentation](https://edgartools.readthedocs.io/) and [Quick Guide](https://edgartools.readthedocs.io/en/latest/quick-guide/).
+`data.sec.gov` gives you JSON facts and filing indexes. Everything past that is your code. EdgarTools does that part:
 
-## Use Cases
+- **Section text and markdown.** Item 1A, Item 7 or any Item of a 10-K or 10-Q as text, and whole filings as markdown for RAG. Raw HTML is where hand-rolled parsers break.
+- **Parsed forms, not XML.** 13F holdings, Form 4 transactions, N-PORT portfolios and 8-K items as typed objects and DataFrames.
+- **Statements that line up.** Rows standardized across filers, so "Total Revenue" means the same thing for a bank and a chipmaker, plus discrete quarters (Q4 derived from the 10-K) and trailing twelve months.
+- **Search and plumbing.** Full-text search over filing content, the live filing feed, rate limiting, caching and offline storage.
 
-### Financial statements from 10-K and 10-Q filings
+## What you can do
+
+### Full-text search across SEC filings
+
+Search the text of every filing since 2001, not just form types and dates.
 
 ```python
-financials = Company("MSFT").get_financials()
-financials.balance_sheet()     # all line items
-financials.income_statement()  # revenue, net income, EPS
+from edgar import search_filings
+
+# Every 10-K filed in 2025 that mentions tariffs
+results = search_filings("tariff", forms="10-K", start_date="2025-01-01", end_date="2025-12-31")
+results[0].get_filing()  # the Filing behind a hit, ready for .obj() or .markdown()
+
+# Structured: 8-Ks that reported a cybersecurity incident (Item 1.05) in 2025
+search_filings(forms="8-K", items="1.05", start_date="2025-01-01", end_date="2025-12-31")
+#> 19 total
+```
+[Full-text search guide →](https://edgartools.readthedocs.io/en/latest/guides/full-text-search/)
+
+### Financial statements over several years
+
+```python
+Company("MSFT").income_statement(periods=10)  # also .balance_sheet() and .cash_flow_statement()
 ```
 [Financial Statements guide →](https://edgartools.readthedocs.io/en/latest/guides/financial-data/)
 
-### Insider trading from SEC Form 4
+### One metric across companies
+
+Pick rows by their standardized label, never by position: the first row of an income statement is not always total revenue.
 
 ```python
-form4 = Company("TSLA").get_filings(form="4").latest().obj()
-form4.to_dataframe()  # insider buy/sell transactions
+import pandas as pd
+
+revenue = {
+    ticker: Company(ticker).income_statement(periods=3, as_dataframe=True)
+            .set_index("label").filter(like="FY").loc["Total Revenue"] / 1e9
+    for ticker in ["JPM", "PFE", "XOM"]
+}
+pd.DataFrame(revenue).round(1)  # $ billions
+#> FY 2025 182.4 62.6 332.2
 ```
-[Insider Trades guide →](https://edgartools.readthedocs.io/en/latest/insider-filings/)
 
-### 13F institutional holdings & hedge fund portfolios
+### Quarterly figures and trailing twelve months
 
 ```python
-thirteenf = get_filings(form="13F-HR").latest().obj()
-thirteenf.holdings  # every portfolio position as a DataFrame
+nvda = Company("NVDA")
+nvda.get_ttm_revenue()                                 # the last four quarters, summed
+nvda.income_statement(period="quarterly", periods=8)   # discrete quarters; Q4 is derived from the 10-K
+```
+
+### Sections and markdown for RAG
+
+```python
+filing = Company("NVDA").latest("10-K")
+filing.markdown()          # the whole filing as markdown
+
+tenk = filing.obj()
+tenk.risk_factors          # Item 1A as text
+tenk["Item 1C"]            # any Item by number
+```
+[Sections guide →](https://edgartools.readthedocs.io/en/latest/concepts/data-objects/)
+
+### Find filings, by anything
+
+```python
+from edgar import find, get_current_filings, get_filings
+
+get_filings(2025, 4, form="10-K")   # every 10-K filed in Q4 2025
+get_current_filings()               # the live feed, as SEC posts it
+find("0000320193-25-000079")        # an accession number, CIK or ticker
+```
+[Finding filings guide →](https://edgartools.readthedocs.io/en/latest/guides/searching-filings/)
+
+![find() resolving a ticker, a CIK and an accession number](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/universal-find.gif)
+
+![get_current_filings() showing the live SEC filing feed](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/live-filings.gif)
+
+### 13F institutional holdings
+
+```python
+thirteenf = Company("BRK.A").get_filings(form="13F-HR").latest().obj()
+thirteenf.holdings  # every position, one row per security
 ```
 [Institutional Holdings guide →](https://edgartools.readthedocs.io/en/latest/guides/thirteenf-data-object-guide/)
 
-### 8-K current reports & corporate events
+![Berkshire Hathaway's latest 13F holdings](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/thirteenf-holdings.gif)
+
+### Insider trades from Form 4
 
 ```python
-eightk = get_filings(form="8-K").latest().obj()
-eightk.items  # reported event items
+form4 = Company("TSLA").get_filings(form="4").latest().obj()
+form4.to_dataframe()  # buys, sells, grants and exercises
+```
+[Insider Trades guide →](https://edgartools.readthedocs.io/en/latest/insider-filings/)
+
+![Tesla's latest Form 4 parsed into a structured object](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/insider-form4.gif)
+
+### Fund holdings from N-PORT
+
+```python
+from edgar import Fund
+
+Fund("VOO").get_portfolio()  # the latest N-PORT holdings as a DataFrame
+```
+[Fund Portfolios guide →](https://edgartools.readthedocs.io/en/latest/guides/nport-data-object-guide/)
+
+### 8-K events and earnings releases
+
+```python
+eightk = find("0001045810-26-000073").obj()  # NVIDIA, 2026-08-26
+eightk.items      # ['Item 2.02', 'Item 9.01']
+eightk.earnings   # the EX-99.1 press release tables, parsed
 ```
 [Current Events guide →](https://edgartools.readthedocs.io/en/latest/eightk-filings/)
-
-### XBRL financial data across companies
-
-```python
-facts = Company("AAPL").get_facts()
-facts.query().by_concept("Revenue").to_dataframe()  # revenue history as a DataFrame
-```
-[XBRL Deep Dive →](https://edgartools.readthedocs.io/en/latest/xbrl/)
 
 ## Key Features
 
