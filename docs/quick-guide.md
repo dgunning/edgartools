@@ -25,7 +25,7 @@ Common EdgarTools operations at a glance. For a step-by-step introduction, see t
 | 💰 Get public float                     | `company.public_float`                                        |
 | 🏭 Get industry                         | `company.industry`                                            |
 | 📋 Get company facts                    | `company.get_facts()`                                         |
-| 🐼 Get company facts as a DataFrame     | `company.get_facts().to_pandas()`                             |
+| 🐼 Get company facts as a DataFrame     | `company.get_facts().to_dataframe()`                          |
 
 ### Financial statements 💵
 
@@ -97,7 +97,7 @@ Common EdgarTools operations at a glance. For a step-by-step introduction, see t
 | 📝 Get company filings by form           | `company.get_filings(form="10-K")`                            |
 | 🕒 Get the latest 10-Q                   | `company.latest("10-Q")`                                      |
 | 📑 Get the last 5 10-Qs                  | `company.get_filings(form="10-Q").head(5)`                    |
-| 🔢 Get a filing by accession number      | `company.get_filing(accession_number="0000320193-21-000139")` |
+| 🔢 Get a filing by accession number      | `find("0000320193-20-000096")`                                |
 
 ### Working with a filing 📄
 
@@ -108,7 +108,7 @@ Common EdgarTools operations at a glance. For a step-by-step introduction, see t
 |                                     | Code                                                      |
 |-------------------------------------|-----------------------------------------------------------|
 | 📌 Get a single filing              | `filing = filings[3]`                                     |
-| 🔢 Get a filing by accession number | `filing = get_by_accession_number("0000320193-20-34576")` |
+| 🔢 Get a filing by accession number | `filing = get_by_accession_number("0000320193-20-000096")` |
 | 🏠 Get the filing homepage          | `filing.homepage`                                         |
 | 🌐 Open a filing in the browser     | `filing.open()`                                           |
 | 🏠 Open homepage in the browser     | `filing.homepage.open()`                                  |
@@ -142,7 +142,8 @@ Common EdgarTools operations at a glance. For a step-by-step introduction, see t
 |-------------------------------|--------------------------------------|
 | 📁 Get all filing attachments | `filing.attachments`                 |
 | 📄 Get a single attachment    | `attachment = filing.attachments[0]` |
-| 🌐 Open attachment in browser | `attachment.open()`                  |
+| 👀 View attachment in the terminal | `attachment.view()`             |
+| 🌐 Get the attachment's URL   | `attachment.url`                     |
 | ⬇️ Download an attachment     | `content = attachment.download()`    |
 
 ### 10-K Annual Report data 📊

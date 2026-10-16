@@ -317,13 +317,13 @@ def get_financials(self) -> Optional[Financials]
 ```python
 financials = company.get_financials()
 if financials:
-    balance_sheet = financials.balance_sheet
-    income_statement = financials.income
-    cash_flow = financials.cash_flow
-    
+    balance_sheet = financials.balance_sheet()
+    income_statement = financials.income_statement()
+    cash_flow = financials.cash_flow_statement()
+
     # Access specific metrics
-    revenue = income_statement.loc['Revenue'].iloc[0]
-    total_assets = balance_sheet.loc['Total Assets'].iloc[0]
+    revenue = financials.get_revenue()
+    total_assets = financials.get_total_assets()
 ```
 
 ### get_quarterly_financials()
@@ -359,10 +359,10 @@ def get_facts(self) -> Optional[EntityFacts]
 facts = company.get_facts()
 if facts:
     # Convert to pandas DataFrame
-    facts_df = facts.to_pandas()
+    facts_df = facts.to_dataframe()
     
     # Get number of facts
-    num_facts = facts.num_facts()
+    num_facts = len(facts)
     print(f"Company has {num_facts} XBRL facts")
 ```
 
@@ -520,10 +520,10 @@ XBRL facts data container.
 facts = company.get_facts()
 
 # Convert to DataFrame
-df = facts.to_pandas()
+df = facts.to_dataframe()
 
 # Get fact count
-count = facts.num_facts()
+count = len(facts)
 ```
 
 ## Factory Functions
@@ -617,13 +617,13 @@ for filing in recent_filings:
 # Get financial data
 financials = company.get_financials()
 if financials:
-    revenue = financials.income.loc['Revenue'].iloc[0]
+    revenue = financials.get_revenue()
     print(f"\nLatest Revenue: ${revenue/1e9:.1f}B")
 
 # Get company facts
 facts = company.get_facts()
 if facts:
-    print(f"Total XBRL Facts: {facts.num_facts()}")
+    print(f"Total XBRL Facts: {len(facts)}")
 
 # Address information
 address = company.business_address()

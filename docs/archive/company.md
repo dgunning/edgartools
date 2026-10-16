@@ -147,10 +147,10 @@ company_facts = company.get_facts_for_namespace()
 The result is a `CompanyFacts` object which wraps the underlying facts and provides convenient ways of working
 with the facts data. To get access to the underyling data use the `facts` property.
 
-You can get the facts as a pandas dataframe by calling `to_pandas`
+You can get the facts as a pandas dataframe by calling `to_dataframe`
 
 ```python
-df = company_facts.to_pandas()
+df = company_facts.to_dataframe()
 ```
 
 Facts differ among companies. To see what facts are available you can use the `facts_meta` property.
