@@ -267,11 +267,16 @@ EdgarTools is a **Python library** that talks directly to SEC EDGAR. [sec-api](h
 
 ## Library or hosted?
 
-**EdgarTools** is the open-source library — SEC-filing primitives you compose in your own code, free and self-run.
+**EdgarTools** is this library: free, MIT-licensed, running in your own Python process. **[edgar.tools](https://www.edgar.tools)** is the hosted platform built on it: the same parsing, kept running and current, with every answer cited to its filing. You are not paying for the parsing; you are paying for it to be run and answerable. No feature is ever removed from the library to sell the platform.
 
-[**edgar.tools**](https://edgar.tools) is the hosted platform built on that same open engine: the full SEC corpus as a managed service, so your team gets the data without running the pipeline — and without the black box of a closed API.
+| If you want to… | Use |
+|---|---|
+| Build something that runs: pipelines, backfills, backtests, model corpora, notebooks, custom joins, anything repeated across hundreds of names or run inside your own network | **The library** |
+| Ask, not build: what the companies you cover filed and what changed since last time, who sold, who holds it, one person across every company they touch, screens across a universe, alerts, cited answers to forward or share with a team. From a browser, a phone, Excel, Claude or ChatGPT, or an agent that cannot run Python | **[edgar.tools](https://app.edgar.tools)**. Free account to start |
+| Own a maintained dataset (insider trades, 13F, BDC portfolios, material events), every row traceable to its filing, without running the pipeline | **[edgar.tools data licensing](https://www.edgar.tools/data)** |
+| Fetch one known filing or one JSON document, once, from a script | **Neither**: call EDGAR directly |
 
-Reach for the library when you want control in your own stack; reach for **edgar.tools** when you'd rather not operate it yourself.
+Both have an MCP server: the library's runs locally (see AI Integration below), and edgar.tools' is hosted at [app.edgar.tools/mcp](https://app.edgar.tools/mcp). Attach one per client, not both: they overlap and split your assistant's routing.
 
 ## AI Integration
 
@@ -322,11 +327,13 @@ See [AI Integration Guide](https://github.com/dgunning/edgartools/blob/main/docs
 
 </details>
 
-## ❤️ Support This Project
+## Support the project
 
-EdgarTools is MIT-licensed, with no keys and no subscriptions.
+The SEC changes filing formats and ships a new XBRL taxonomy every year. Sponsorship is what keeps the parsers current and pays for new ones as new disclosures appear.
 
-The SEC changes filing formats and ships a new XBRL taxonomy every year. Sponsorship is what keeps the parsers current and funds new extractors as fresh disclosure types appear.
+- **[GitHub Sponsors](https://github.com/sponsors/dgunning)**: monthly tiers for individuals, and for teams running EdgarTools in production, tiers with a first-response time on the issues you open and your logo in this README.
+- **[Buy Me a Coffee](https://www.buymeacoffee.com/edgartools)**: a one-time thank-you.
+- **[Consulting](https://www.edgar.tools/consulting)**: help from the library's author with SEC data pipelines and financial AI built on it.
 
 <p align="center">
   <a href="https://github.com/sponsors/dgunning" target="_blank">
@@ -337,24 +344,6 @@ The SEC changes filing formats and ships a new XBRL taxonomy every year. Sponsor
     <img src="https://img.shields.io/badge/Buy_me_a_coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy Me A Coffee" height="44">
   </a>
 </p>
-
-<p align="center">
-  <sub>Recurring sponsorship + corporate tiers via GitHub · One-time thanks via Buy Me a Coffee</sub>
-</p>
-
----
-
-### For teams running EdgarTools in production
-
-If EdgarTools is in your data pipeline, [GitHub Sponsors](https://github.com/sponsors/dgunning) offers corporate tiers from **$250 to $1,500/mo** with:
-
-- Response SLAs (24h–48h first response on critical issues)
-- Quarterly strategy calls and roadmap input
-- Logo placement in this README
-- 7-day early access for internal regression testing
-- Annual invoicing through GitHub — procurement-friendly
-
-→ **[See sponsor tiers](https://github.com/sponsors/dgunning)**
 
 ## Community & Support
 
@@ -380,16 +369,6 @@ Contributions welcome:
 - **Spread the Word**: Star the repo, share with colleagues
 
 See our [Contributing Guide](https://github.com/dgunning/edgartools/blob/main/CONTRIBUTING.md) for details.
-
-### Professional Services
-
-Need help building production SEC data infrastructure? The creator of EdgarTools offers consulting for teams building financial AI products:
-
-- **SEC Data Sprint** (1–3 days) — Working prototype on your data
-- **Architecture Review** (1–2 weeks) — Pipeline audit with prioritized fixes
-- **Pipeline Build** (2–4 weeks) — Production-ready code, tests, and handoff
-
-[Learn more →](https://www.edgar.tools/consulting)
 
 ---
 
