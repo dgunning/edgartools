@@ -344,7 +344,7 @@ Handle these cases with careful code:
 def process_form4_safely(filing):
     try:
         # Check if this is an amended filing
-        if filing.form_type == "4/A":
+        if filing.form == "4/A":
             print(f"This is an amended filing: {filing.accession_number}")
         
         form4 = filing.obj()

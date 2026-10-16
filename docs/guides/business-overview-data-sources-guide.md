@@ -70,8 +70,8 @@ addr = company.business_address()
 # Individual components
 street = addr.street1
 city = addr.city
-state = addr.state
-zip_code = addr.zip_code
+state = addr.state_or_country
+zip_code = addr.zipcode
 
 # Formatted string
 formatted = str(addr)  # "1 Apple Park Way, Cupertino, CA 95014"
@@ -98,8 +98,8 @@ facts = company.facts  # Property alias
 | Net Income | `facts.get_net_income()` | Latest annual net income |
 | Total Assets | `facts.get_total_assets()` | Balance sheet total |
 | Shareholders' Equity | `facts.get_shareholders_equity()` | Book value |
-| Cash & Equivalents | `facts.get_cash_and_equivalents()` | Liquid assets |
-| Total Liabilities | `facts.get_liabilities()` | All liabilities |
+| Cash & Equivalents | `facts.get_fact('CashAndCashEquivalentsAtCarryingValue')` | Liquid assets |
+| Total Liabilities | `facts.get_total_liabilities()` | All liabilities |
 | Shares Outstanding | `facts.shares_outstanding` | Current shares |
 | Public Float | `facts.public_float` | Tradeable shares |
 
@@ -200,7 +200,7 @@ def get_business_description(ticker: str) -> dict:
         "full_text": business_text,
         "summary": business_text[:1000] if business_text else None,
         "filing_date": tenk.filing_date,
-        "fiscal_year": tenk.fiscal_year,
+        "period_of_report": tenk.period_of_report,
     }
 ```
 

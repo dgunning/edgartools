@@ -307,8 +307,8 @@ annual_income = facts.income_statement(annual=True)     # Annual
 quarterly_income = facts.income_statement(annual=False) # Quarterly
 
 # Advanced period filtering with query interface
-ttm_facts = facts.query().by_period_length(12).get()   # Trailing twelve months
-quarterly_facts = facts.query().by_period_length(3).get() # Quarterly periods
+ttm_facts = facts.query().by_period_length(12).execute()   # Trailing twelve months
+quarterly_facts = facts.query().by_period_length(3).execute() # Quarterly periods
 
 # Individual fact retrieval with period specification
 # Use XBRL concept names or lowercase labels (not simplified names like "Revenue")

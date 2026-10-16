@@ -322,7 +322,7 @@ if obj.financials:
 **Incorrect:**
 ```python
 # This will fail - Filing doesn't have financials
-financials = filing.financials  # AttributeError
+# filing.financials  -> AttributeError
 ```
 
 **Correct:**
@@ -518,12 +518,8 @@ from edgar import get_filings
 
 filings = get_filings(2023, 4, form="10-K").head(100)
 
-for filing in filings:
-    try:
-        filing.download(data_directory="./raw_filings/")
-        print(f"Downloaded: {filing.company}")
-    except Exception as e:
-        print(f"Error downloading {filing.company}: {e}")
+# Downloads every filing in the collection to local storage
+filings.download(data_directory="./raw_filings/")
 ```
 
 ## Error Handling

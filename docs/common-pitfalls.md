@@ -256,7 +256,7 @@ else:
 financials = company.get_financials()
 
 # WRONG: financials object has no to_dataframe()
-df = financials.to_dataframe()   # AttributeError
+# financials.to_dataframe()   -> AttributeError
 
 # RIGHT: call to_dataframe() on the individual statement
 df = financials.income_statement().to_dataframe()

@@ -1,6 +1,6 @@
 # Local Storage Guide
 
-**edgartools** is designed for interactive queries against **SEC Edgar**, which means it normally makes HTTP requests to the SEC website to retrieve data. For example, when you call `company.submissions` or `filing.attachments`, it makes a request to the SEC.
+**edgartools** is designed for interactive queries against **SEC Edgar**, which means it normally makes HTTP requests to the SEC website to retrieve data. For example, when you call `company.get_filings()` or `filing.attachments`, it makes a request to the SEC.
 
 There are times when you want to minimize or eliminate these requests:
 

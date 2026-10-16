@@ -673,17 +673,10 @@ print(ts_df[['revenue_growth', 'income_growth']].round(1))
 ### Dimensional Analysis
 
 ```python
-# Query facts by dimensions (if available)
-segment_facts = facts.query().by_dimension('Segment').to_dataframe()
-if not segment_facts.empty:
-    print("Segment-specific financial data:")
-    print(segment_facts[['concept', 'label', 'dimension_value', 'value']].head())
-
-# Get facts by geographic dimension
-geographic_facts = facts.query().by_dimension('Geography').to_dataframe()
-if not geographic_facts.empty:
-    print("Geographic breakdown:")
-    print(geographic_facts[['concept', 'dimension_value', 'value']].head())
+# Statements with dimensional (segment) detail, from the filing's XBRL
+financials = company.get_financials()
+segment_df = financials.income_statement(include_dimensions=True).to_dataframe()
+print(segment_df.head())
 ```
 
 ## Export and Integration
@@ -719,7 +712,7 @@ import seaborn as sns
 # Get multi-period data
 filings = company.get_filings(form="10-K").head(5)
 multi_financials = MultiFinancials.extract(filings)
-income_df = multi_financials.income.to_dataframe()
+income_df = multi_financials.income_statement().to_dataframe()
 
 # Extract revenue data for plotting
 revenue_data = income_df[income_df['label'] == 'Revenue'].iloc[0, 1:].astype(float)
@@ -756,11 +749,11 @@ def batch_analyze_companies(tickers, max_workers=5):
     def analyze_single(ticker):
         try:
             company = Company(ticker)
-            financials = company.financials
+            financials = company.get_financials()
             return {
                 'ticker': ticker,
-                'revenue': financials.income.loc['Revenue'].iloc[0],
-                'assets': financials.balance_sheet.loc['Total Assets'].iloc[0]
+                'revenue': financials.get_revenue(),
+                'assets': financials.get_total_assets()
             }
         except Exception as e:
             return {'ticker': ticker, 'error': str(e)}
@@ -834,22 +827,20 @@ def get_financial_metrics(company_ticker):
     """Get financial metrics with error handling."""
     try:
         company = Company(company_ticker)
-        financials = company.financials
+        financials = company.get_financials()
         
         metrics = {}
         
         # Try to get income statement metrics
         try:
-            income = financials.income
-            metrics['revenue'] = income.loc['Revenue'].iloc[0] if 'Revenue' in income.index else None
-            metrics['net_income'] = income.loc['Net Income'].iloc[0] if 'Net Income' in income.index else None
+            metrics['revenue'] = financials.get_revenue()
+            metrics['net_income'] = financials.get_net_income()
         except Exception as e:
             print(f"Income statement error for {company_ticker}: {e}")
         
         # Try to get balance sheet metrics
         try:
-            balance_sheet = financials.balance_sheet
-            metrics['total_assets'] = balance_sheet.loc['Total Assets'].iloc[0] if 'Total Assets' in balance_sheet.index else None
+            metrics['total_assets'] = financials.get_total_assets()
         except Exception as e:
             print(f"Balance sheet error for {company_ticker}: {e}")
         

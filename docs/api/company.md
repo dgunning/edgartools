@@ -340,8 +340,8 @@ def get_quarterly_financials(self) -> Optional[Financials]
 ```python
 quarterly = company.get_quarterly_financials()
 if quarterly:
-    q_income = quarterly.income
-    quarterly_revenue = q_income.loc['Revenue'].iloc[0]
+    q_income = quarterly.income_statement().to_dataframe()
+    quarterly_revenue = quarterly.get_revenue()
 ```
 
 ### get_facts()

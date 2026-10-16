@@ -88,8 +88,8 @@ The `Company` object gives you access to metadata, filings, financials, and fact
 company = Company("AAPL")
 company.name                # 'APPLE INC'
 company.cik                 # 320193
-company.sic_code            # '3571'
-company.sic_description     # 'Electronic Computers'
+company.sic                 # '3571'
+company.industry            # 'Electronic Computers'
 company.shares_outstanding  # 15115785000.0
 company.public_float        # 2899948348000.0
 ```

@@ -2301,9 +2301,9 @@ framework = ValidationFramework(store)
 # Define custom validation rules
 @framework.rule(statement='BalanceSheet', severity='error')
 def validate_accounting_equation(facts):
-    assets = facts.get('Total Assets')
-    liabilities = facts.get('Total Liabilities')
-    equity = facts.get("Total Stockholders' Equity")
+    assets = facts.get_total_assets()
+    liabilities = facts.get_total_liabilities()
+    equity = facts.get_shareholders_equity()
 
     if abs(assets - (liabilities + equity)) > 1.0:
         return ValidationError("Accounting equation violated")
