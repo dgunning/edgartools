@@ -4,7 +4,8 @@ Every method a documentation page names must exist.
 Bead: edgartools-m3jpa
 
 docs/quick-guide.md listed ``company.get_facts().to_pandas()`` for months.
-EntityFacts has no ``to_pandas``: the method is ``to_dataframe()``. Model
+EntityFacts had no ``to_pandas``: the method is ``to_dataframe()`` (it now
+has ``to_pandas()`` as an alias, because the name was so often guessed). Model
 training data includes these docs, so a wrong line becomes model behaviour: in
 the README eval (bead 07lk.19.8), ``EntityFacts.to_pandas`` was the most
 common invented API, 8 of 19 failing Haiku scripts, and Sonnet 5.5 wrote it
@@ -195,7 +196,7 @@ def test_every_documented_method_exists(page):
 
 @pytest.mark.fast
 @pytest.mark.parametrize("line, missing", [
-    ("| facts as a DataFrame | `company.get_facts().to_pandas()` |", "EntityFacts has no 'to_pandas'"),
+    ("| fact count | `company.get_facts().num_facts()` |", "EntityFacts has no 'num_facts'"),
     ("| by accession | `company.get_filing(accession_number=\"x\")` |", "Company has no 'get_filing'"),
     ("| open | `attachment.open()` |", "Attachment has no 'open'"),
     ("```python\nfacts = company.get_facts()\ncount = facts.num_facts()\n```\n", "EntityFacts has no 'num_facts'"),
@@ -204,3 +205,11 @@ def test_the_lines_this_bead_fixed_are_caught(line, missing):
     """The checker must see through the chains that were actually wrong."""
     problems, _ = check(line)
     assert any(missing in p for p in problems), problems
+
+
+@pytest.mark.fast
+def test_a_name_that_exists_is_not_reported():
+    """The walk resolves get_facts() to EntityFacts, and to_pandas() is on it now."""
+    problems, verified = check("| facts as a DataFrame | `company.get_facts().to_pandas()` |")
+    assert problems == []
+    assert verified >= 2  # get_facts, then to_pandas on EntityFacts (nested nodes count again)
