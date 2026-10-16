@@ -86,7 +86,11 @@ def check_search(result, ns):
         "the date range was not applied"
     )
     assert all(r.form.startswith("10-K") for r in tariff_hits)
-    assert isinstance(tariff_hits[0].get_filing(), Filing)
+    hit = ns["hit"]
+    assert re.fullmatch(r"\d{10}-\d{2}-\d{6}", hit.accession_number)
+    assert hit.form.startswith("10-K") and hit.filed >= "2025-01-01" and hit.company
+    assert isinstance(hit.get_filing(), Filing)
+    assert hit.get_filing().accession_no == hit.accession_number
 
 
 def check_msft_ten_years(result, ns):
@@ -132,7 +136,8 @@ def check_thirteenf(result, ns):
     assert isinstance(ns["thirteenf"], ThirteenF)
     assert int(ns["thirteenf"].filing.cik) == BERKSHIRE_CIK
     assert isinstance(result, pd.DataFrame) and not result.empty
-    assert "Value" in result.columns
+    # the README names these columns; the share count is SharesPrnAmount, not Shares
+    assert {"Issuer", "Cusip", "Ticker", "SharesPrnAmount", "Value"} <= set(result.columns)
 
 
 def check_tsla_form4(result, ns):

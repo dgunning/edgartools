@@ -65,7 +65,9 @@ from edgar import search_filings
 
 # Every 10-K filed since 2025 that mentions tariffs
 results = search_filings("tariff", forms="10-K", start_date="2025-01-01")
-results[0].get_filing()  # the Filing behind a hit, ready for .obj() or .markdown()
+hit = results[0]
+hit.accession_number, hit.form, hit.filed, hit.company  # a hit's fields; filed is the filing date
+hit.get_filing()  # the Filing behind a hit, ready for .obj() or .markdown()
 
 # Structured: 8-Ks that reported a cybersecurity incident (Item 1.05) in 2025
 search_filings(forms="8-K", items="1.05", start_date="2025-01-01", end_date="2025-12-31")
@@ -135,7 +137,7 @@ find("0000320193-25-000079")        # an accession number, CIK or ticker
 
 ```python
 thirteenf = Company("BRK.A").get_filings(form="13F-HR").latest().obj()
-thirteenf.holdings  # every position, one row per security
+thirteenf.holdings  # one row per security: Issuer, Cusip, Ticker, SharesPrnAmount, Value, ...
 ```
 [Institutional Holdings guide →](https://edgartools.readthedocs.io/en/latest/guides/thirteenf-data-object-guide/)
 
