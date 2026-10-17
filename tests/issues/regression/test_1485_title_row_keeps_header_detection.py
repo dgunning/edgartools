@@ -35,14 +35,14 @@ def table():
     return document.tables[0]
 
 
-def test_period_and_metric_rows_are_headers(table):
+def test_filed_table_row_period_and_metric_labels_are_headers(table):
     headers = [' '.join(c.text().split()) for row in table.headers for c in row]
     assert "Three months ended June 30, 2026" in headers
     assert "Six months ended June 30, 2026" in headers
     assert "Amortized cost basis" in headers
 
 
-def test_title_and_amounts_stay_body_rows(table):
+def test_filed_table_spanning_title_stays_a_body_row(table):
     body = [' '.join(c.text().split()) for row in table.rows for c in row.cells]
     assert "Loan modifications" in body            # the spanning title is a body row
     assert "648" in body and "1,262" in body       # the filed amounts are retained
@@ -77,12 +77,12 @@ def parse_table(html):
     return document.tables[0]
 
 
-def test_label_then_amounts_without_a_header_row_has_no_headers():
+def test_lone_spanning_label_without_header_row_emits_no_headers():
     table = parse_table(HTML_NO_HEADER)
     assert table.headers == []
 
 
-def test_label_does_not_suppress_a_real_header_row():
+def test_spanning_label_keeps_a_following_header_row():
     table = parse_table(HTML_LABEL_THEN_HEADER)
     headers = [' '.join(c.text().split()) for row in table.headers for c in row]
     assert "Item" in headers and "FY2025" in headers and "FY2024" in headers
@@ -90,7 +90,7 @@ def test_label_does_not_suppress_a_real_header_row():
     assert "648" in body and "1,262" in body
 
 
-def test_text_only_year_row_is_still_treated_as_a_header():
+def test_text_only_two_year_row_known_limit_is_header():
     """Pins the known limitation named in review; not a behaviour we endorse."""
     table = parse_table(HTML_TEXT_ONLY_YEARS)
     headers = [' '.join(c.text().split()) for row in table.headers for c in row]
