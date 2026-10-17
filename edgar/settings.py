@@ -5,11 +5,10 @@ identity functions the SEC requires you to set, and the local data directory.
 
 Historically all of this lived in ``edgar.core`` alongside quarter math, HTML
 sniffing, a pager, thread helpers and the logger — only about a third of that
-697-line module was settings. ``edgar.core`` still re-exports every name here so
-existing imports keep working; that shim is removed in 6.0 (edgartools-07lk.12.1).
+697-line module was settings. ``edgar.core`` re-exported every name here through
+5.x; 6.0 removed those re-exports (edgartools-07lk.22.1).
 
-    from edgar.settings import get_identity, set_identity   # preferred
-    from edgar.core import get_identity, set_identity       # works, removed in 6.0
+    from edgar.settings import get_identity, set_identity
 
 Most users never import this module at all — :func:`set_identity` is re-exported
 on the top-level ``edgar`` namespace.

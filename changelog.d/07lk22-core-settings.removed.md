@@ -1,0 +1,1 @@
+**`edgar.core` no longer re-exports the settings and identity names.** `get_identity`, `set_identity`, `EdgarSettings`, `get_edgar_data_directory` and the rest of `edgar.settings` import only from there (or from `edgar` for the names it exposes); `from edgar.core import get_identity` raises `ImportError`. (bead edgartools-07lk.22.1)

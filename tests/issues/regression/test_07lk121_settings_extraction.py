@@ -1,6 +1,7 @@
-"""Settings and identity live in `edgar.settings`; `edgar.core` re-exports them.
+"""Settings and identity live in `edgar.settings`; 6.0 removed the `edgar.core` re-exports.
 
-edgartools-07lk.12.1, staged under 07lk.23's "new paths behind import shims" row.
+edgartools-07lk.12.1 (the move, behind a re-export through 5.x) and
+edgartools-07lk.22.1 (the re-exports removed in 6.0).
 
 The bead proposed renaming `edgar/core.py` to `edgar/settings.py`. Measurement
 said no: core.py was 697 lines across 56 top-level definitions and only about a
@@ -18,11 +19,10 @@ WHAT THIS FILE GUARDS, and why each half matters:
    would still sit at the path 6.0 intends to delete, and dropping the shim would
    take the implementation with it. Asserted by module identity, not by value.
 
-2. **The re-exports are the SAME objects, not copies.** 71 call sites import from
-   `edgar.core`, every one of them a `from edgar.core import <name>` (measured by
-   AST — zero `import edgar.core`, zero attribute access). A re-export therefore
-   covers 100% of them, but only if identity holds: `isinstance(x, EdgarSettings)` must not care which
-   path the name arrived by.
+2. **6.0 removed the re-exports.** Through 5.x `edgar.core` re-exported every
+   settings name as the same object. By 6.0 no in-repo caller imported them from
+   `edgar.core` any more (AST scan, relative imports resolved), so the shim
+   went, and `from edgar.core import get_identity` raises ImportError.
 """
 import edgar
 import edgar.core
@@ -62,35 +62,31 @@ class TestTheImplementationMoved:
         assert edgar.settings.EdgarSettings.__module__ == "edgar.settings"
 
 
-class TestCoreStillReExportsEverything:
-    """The shim, removed in 6.0. Until then all 71 call sites keep working."""
+class TestCoreNoLongerReExportsSettings:
+    """The 5.x shim, removed in 6.0 (edgartools-07lk.22.1)."""
 
-    def test_every_settings_name_is_reachable_from_core(self):
-        missing = [n for n in SETTINGS_NAMES if not hasattr(edgar.core, n)]
-        assert not missing, f"edgar.core stopped re-exporting: {missing}"
+    def test_no_settings_name_is_reachable_from_core(self):
+        present = [n for n in SETTINGS_NAMES if hasattr(edgar.core, n)]
+        assert not present, f"edgar.core still exposes: {present}"
 
-    def test_re_exports_are_the_same_objects(self):
-        """Identity, not equality.
+    def test_no_settings_name_is_in_cores_all(self):
+        assert not set(SETTINGS_NAMES) & set(edgar.core.__all__)
 
-        A copy would pass an equality check and still break
-        `isinstance(x, EdgarSettings)`.
-        """
-        for name in SETTINGS_NAMES:
-            assert getattr(edgar.core, name) is getattr(edgar.settings, name), (
-                f"edgar.core.{name} is a different object from edgar.settings.{name}"
-            )
+    def test_importing_from_core_raises_import_error(self):
+        import pytest
+        for name in ("get_identity", "set_identity", "EdgarSettings",
+                     "get_edgar_data_directory"):
+            with pytest.raises(ImportError):
+                exec(f"from edgar.core import {name}", {})  # noqa: S102
 
     def test_the_top_level_namespace_is_unaffected(self):
         """What the docs actually tell people to import."""
         for name in ("set_identity", "get_identity"):
             assert getattr(edgar, name) is getattr(edgar.settings, name)
 
-    def test_isinstance_still_works_across_both_paths(self):
-        from edgar.core import EdgarSettings as core_cls
-        from edgar.settings import EdgarSettings as settings_cls
-
-        assert core_cls is settings_cls
-        assert isinstance(core_cls(http_timeout=1, max_connections=1), settings_cls)
+    def test_the_pager_default_still_comes_from_settings(self):
+        """core.py keeps a private import for DataPager's default page size."""
+        assert edgar.core.DataPager.__init__.__defaults__ == (edgar.settings.default_page_size,)
 
 
 class TestWhatDeliberatelyStayedInCore:
