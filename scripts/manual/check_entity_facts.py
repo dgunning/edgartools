@@ -25,7 +25,7 @@ def load_entity_facts(cik: str) -> EntityFacts:
         entity_facts = EntityFactsParser.parse_company_facts(company_facts_json)
         print(f"Entity facts for {ticker} loaded successfully.")
         print(entity_facts.balance_sheet())
-        print(entity_facts.cash_flow())
+        print(entity_facts.cash_flow_statement())
         print(entity_facts.income_statement())
 
 

@@ -27,7 +27,7 @@ latest = filings.latest()
 # Get financial statements
 income = company.income_statement()
 balance = company.balance_sheet()
-cashflow = company.cashflow_statement()
+cashflow = company.cash_flow_statement()
 ```
 
 ## Creating a Company
@@ -207,7 +207,7 @@ df = company.income_statement(as_dataframe=True)
 
 # Balance sheet and cash flow work the same way
 balance = company.balance_sheet(period='annual')
-cashflow = company.cashflow_statement(period='quarterly')
+cashflow = company.cash_flow_statement(period='quarterly')
 ```
 
 Note: TTM is not applicable for balance sheet (point-in-time data).

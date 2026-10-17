@@ -96,7 +96,7 @@ def test_issue_475_pypl_cashflow_multiperiod():
     stitched_statements = xbrls.statements
 
     # Display multi-period cash flow statement
-    cashflow_trend = stitched_statements.cashflow_statement()
+    cashflow_trend = stitched_statements.cash_flow_statement()
 
     # Get the statement data
     stmt_data = cashflow_trend.statement_data
@@ -192,7 +192,7 @@ def test_issue_475_khc_cashflow_multiperiod():
     stitched_statements = xbrls.statements
 
     # Display multi-period cash flow statement
-    cashflow_trend = stitched_statements.cashflow_statement()
+    cashflow_trend = stitched_statements.cash_flow_statement()
 
     # Get the statement data
     stmt_data = cashflow_trend.statement_data

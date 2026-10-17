@@ -3169,17 +3169,6 @@ class Statements:
         except Exception as e:
             return self._handle_statement_error(e, "CashFlowStatement")
 
-    def cashflow_statement(self, **kwargs):
-        """Deprecated: use :meth:`cash_flow_statement`."""
-        warnings.warn(
-            "cashflow_statement() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement(), which matches income_statement() and "
-            "balance_sheet().",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.cash_flow_statement(**kwargs)
-
     def statement_of_equity(self, parenthetical: bool = False,
                             view: ViewType = None,
                             include_dimensions: Optional[bool] = None) -> Optional[Statement]:
@@ -3713,17 +3702,6 @@ class StitchedStatements:
         if show_date_range:
             statement.show_date_range = show_date_range
         return statement
-
-    def cashflow_statement(self, **kwargs):
-        """Deprecated: use :meth:`cash_flow_statement`."""
-        warnings.warn(
-            "cashflow_statement() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement(), which matches income_statement() and "
-            "balance_sheet().",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.cash_flow_statement(**kwargs)
 
     def statement_of_equity(self, max_periods: int = 8, standard: bool = True,
                             use_optimal_periods: bool = True, show_date_range: bool = False,

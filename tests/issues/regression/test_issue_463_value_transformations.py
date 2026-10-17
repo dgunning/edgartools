@@ -48,7 +48,7 @@ class TestIssue463ValueTransformations:
         Issue #463: Users requested access to XBRL metadata to understand transformations.
         """
         xbrl = aapl_2017_filing.xbrl()
-        df = xbrl.statements.cashflow_statement().to_dataframe()
+        df = xbrl.statements.cash_flow_statement().to_dataframe()
 
         # Verify metadata columns are present
         assert 'balance' in df.columns, "Missing 'balance' column"
@@ -89,7 +89,7 @@ class TestIssue463ValueTransformations:
         Issue #463: Metadata columns should always be included to enable transparency.
         """
         xbrl = aapl_2017_filing.xbrl()
-        df = xbrl.statements.cashflow_statement().to_dataframe()
+        df = xbrl.statements.cash_flow_statement().to_dataframe()
 
         # Should have metadata
         assert 'balance' in df.columns
@@ -104,7 +104,7 @@ class TestIssue463ValueTransformations:
         (Default changed to presentation=True in Issue #669.)
         """
         xbrl = aapl_2017_filing.xbrl()
-        df = xbrl.statements.cashflow_statement().to_dataframe(presentation=False)
+        df = xbrl.statements.cash_flow_statement().to_dataframe(presentation=False)
 
         # Find dividend row
         dividend_row = df[df['concept'].str.contains('PaymentsOfDividends', na=False)]
@@ -128,7 +128,7 @@ class TestIssue463ValueTransformations:
         Uses 2024 AAPL 10-K which has preferred_sign=-1 for PaymentsOfDividends.
         """
         xbrl = aapl_2024_filing.xbrl()
-        df = xbrl.statements.cashflow_statement().to_dataframe(presentation=True)
+        df = xbrl.statements.cash_flow_statement().to_dataframe(presentation=True)
 
         # Find dividend row
         dividend_row = df[df['concept'].str.contains('PaymentsOfDividends', na=False)]
@@ -156,7 +156,7 @@ class TestIssue463ValueTransformations:
         Uses 2024 AAPL 10-K which has preferred_sign=-1 for PaymentsOfDividends.
         """
         xbrl = aapl_2017_filing.xbrl()
-        df = xbrl.statements.cashflow_statement().to_dataframe(presentation=True)
+        df = xbrl.statements.cash_flow_statement().to_dataframe(presentation=True)
 
         # Find dividend row
         dividend_row = df[df['concept'].str.contains('PaymentsOfDividends', na=False)]
@@ -185,7 +185,7 @@ class TestIssue463ValueTransformations:
         from io import StringIO
 
         xbrl = aapl_2017_filing.xbrl()
-        statement = xbrl.statements.cashflow_statement()
+        statement = xbrl.statements.cash_flow_statement()
 
         # Render to string
         console = Console(file=StringIO(), width=200)
@@ -207,7 +207,7 @@ class TestIssue463ValueTransformations:
         Issue #463: Metadata should be at the end for better readability.
         """
         xbrl = aapl_2017_filing.xbrl()
-        df = xbrl.statements.cashflow_statement().to_dataframe()
+        df = xbrl.statements.cash_flow_statement().to_dataframe()
 
         columns = list(df.columns)
 

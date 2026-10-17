@@ -23,7 +23,6 @@ from typing import Union
 import httpx2
 import orjson as json
 import pandas as pd
-from pandas.core.interchange.dataframe_protocol import DataFrame
 from rich.box import SIMPLE, SIMPLE_HEAVY
 from rich.columns import Columns
 from rich.console import Group
@@ -2114,17 +2113,6 @@ class EntityFacts:
 
         return df
 
-    def cashflow_statement(self, **kwargs):
-        """Deprecated: use :meth:`cash_flow_statement`."""
-        warnings.warn(
-            "cashflow_statement() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement(), which matches income_statement() and "
-            "balance_sheet().",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.cash_flow_statement(**kwargs)
-
     def cash_flow_statement(self,
                            periods: int = 4,
                            period_length: Optional[int] = None,
@@ -2180,19 +2168,6 @@ class EntityFacts:
             as_dataframe=as_dataframe,
             concise_format=concise_format,
         )
-
-    def cash_flow(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                  annual: Optional[bool] = None, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
-        """Deprecated: Use cash_flow_statement() instead."""
-        warnings.warn(
-            "cash_flow() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement() instead.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        return self.cash_flow_statement(periods=periods, period_length=period_length,
-                                       as_dataframe=as_dataframe, annual=annual,
-                                       concise_format=concise_format)
 
     # Investment analytics
     def calculate_ratios(self) -> Dict[str, Any]:

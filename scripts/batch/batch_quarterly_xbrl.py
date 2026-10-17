@@ -16,7 +16,7 @@ def sample_and_test_xbrls(year:Union[int, List[int]]=2024, sample=100):
             print(income_statement)
             balance = xbrl.statements.balance_sheet()
             print(balance)
-            cashflow = xbrl.statements.cashflow_statement()
+            cashflow = xbrl.statements.cash_flow_statement()
             print(cashflow)
             print("*" * 80)
         except Exception as e:

@@ -210,7 +210,7 @@ class TestCurrentPeriodView:
     def test_cashflow_statement(self, mock_xbrl):
         """Test cash flow statement retrieval."""
         current_period = CurrentPeriodView(mock_xbrl)
-        stmt = current_period.cashflow_statement()
+        stmt = current_period.cash_flow_statement()
         
         # Now returns Statement by default
         from edgar.xbrl.current_period import CurrentPeriodStatement

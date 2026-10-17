@@ -8,7 +8,7 @@ from edgar.files.htmltools import ChunkedDocument
 set_identity(os.environ["EDGAR_EVAL_IDENTITY"])
 
 # 1. Costco free cash flow for fiscal 2025 (operating cash flow minus capital expenditures)
-cf = Company("COST").get_financials().cashflow_statement().to_dataframe()
+cf = Company("COST").get_financials().cash_flow_statement().to_dataframe()
 period = [c for c in cf.columns if c.startswith("2025-08-31")][0]
 ocf = cf[cf["concept"] == "us-gaap_NetCashProvidedByUsedInOperatingActivities"][period].iloc[0]
 capex = cf[cf["concept"] == "us-gaap_PaymentsToAcquirePropertyPlantAndEquipment"][period].iloc[0]

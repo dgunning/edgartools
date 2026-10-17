@@ -1769,14 +1769,14 @@ class TestCompanyTTMIntegration:
         assert len(stmt.periods) == 2
 
     def test_facts_cashflow_statement_ttm_periods(self):
-        """Test that facts.cashflow_statement(period='ttm', periods=2) is supported."""
+        """Test that facts.cash_flow_statement(period='ttm', periods=2) is supported."""
         from edgar import Company
 
         company = Company("AAPL")
         facts = company.get_facts()
         assert facts is not None
 
-        stmt = facts.cashflow_statement(period='ttm', periods=2)
+        stmt = facts.cash_flow_statement(period='ttm', periods=2)
 
         assert stmt is not None
         assert stmt.statement_type == 'CashFlowStatement'
