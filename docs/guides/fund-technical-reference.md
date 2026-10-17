@@ -137,6 +137,8 @@ All portfolio positions sorted by absolute USD value descending.
 | `cusip` | str | CUSIP |
 | `ticker` | str | Ticker (if resolvable) |
 | `isin` | str | ISIN |
+| `other_id` | str | The filer's other unique identifier, where it states one (item C.1.e.iv) |
+| `other_id_type` | str | What that identifier is, as the filer names it (e.g. "BlackRock Identifier") |
 | `balance` | float | Quantity held |
 | `units` | str | Unit type (e.g., "NS" for number of shares) |
 | `value_usd` | float | Fair value in USD |
