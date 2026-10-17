@@ -215,7 +215,7 @@ The MCP server works with any MCP client. For Claude Desktop, add it to `claude_
 
 The SEC changes filing formats and ships a new XBRL taxonomy every year. Sponsorship is what keeps the parsers current and pays for new ones as new disclosures appear.
 
-- **[GitHub Sponsors](https://github.com/sponsors/dgunning)**: monthly tiers for individuals, and for teams running EdgarTools in production, tiers with a first-response time on the issues you open and your logo in this README.
+- **[GitHub Sponsors](https://github.com/sponsors/dgunning)**: monthly or one-time. Companies can sponsor on their existing GitHub bill.
 - **[Buy Me a Coffee](https://www.buymeacoffee.com/edgartools)**: a one-time thank-you.
 - **[Consulting](https://www.edgar.tools/consulting)**: help from the library's author with SEC data pipelines and financial AI built on it.
 
