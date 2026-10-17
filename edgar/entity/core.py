@@ -64,7 +64,6 @@ __all__ = [
     'get_entity',
     'get_company',
     'CompanyFactsNotFoundError',
-    'NoCompanyFactsFound',  # deprecated alias, removed in 6.0
     'has_company_filings',
     'COMPANY_FORMS',
 ]
@@ -1811,16 +1810,3 @@ def public_companies() -> Iterable[Company]:
     for _, row in df.iterrows():
         c = Company(row.cik)
         yield c
-
-
-
-
-# ---------------------------------------------------------------------------
-# Deprecated name (bead edgartools-07lk.10): NoCompanyFactsFound is now
-# CompanyFactsNotFoundError. Same object, so `except NoCompanyFactsFound:`
-# still works. Removed in 6.0.
-# ---------------------------------------------------------------------------
-from edgar._compat import deprecated_alias  # noqa: E402
-from edgar.exceptions import CompanyFactsNotFoundError as _CompanyFactsNotFoundError  # noqa: E402
-
-__getattr__ = deprecated_alias(NoCompanyFactsFound=_CompanyFactsNotFoundError)

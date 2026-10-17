@@ -29,7 +29,7 @@ from edgar.entity import (
     get_ticker_to_cik_lookup,
     get_cik_lookup_data,
     CompanySearchResults,
-    NoCompanyFactsFound
+    CompanyFactsNotFoundError
 )
 from edgar.entity.data import parse_entity_submissions, CompanyData
 from edgar.entity.constants import _classify_is_individual, _name_suggests_company
@@ -276,7 +276,7 @@ class TestEntityLegacyCompatibility:
             entity = Entity(999999999)  # Invalid CIK
             # If it doesn't raise, check it handles gracefully
             assert entity.cik == 999999999
-        except (ValueError, NoCompanyFactsFound):
+        except (ValueError, CompanyFactsNotFoundError):
             # These are acceptable exceptions for invalid CIKs
             pass
 

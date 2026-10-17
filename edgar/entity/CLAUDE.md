@@ -111,7 +111,7 @@ stmt = IncomeStatement(facts.get_income_statement())
 
 ## Common Bugs & Solutions
 
-### Bug: "NoCompanyFactsFound"
+### Bug: "CompanyFactsNotFoundError"
 **Cause**: Company may be investment company or foreign filer
 **Solution**: Check entity type first:
 ```python
@@ -163,9 +163,7 @@ if fact.period_start and fact.period_end:
 ### Error Handling
 ```python
 # Always provide context in exceptions:
-raise NoCompanyFactsFound(
-    f"No company facts found for {self.cik} ({self.name})"
-)
+raise CompanyFactsNotFoundError(cik=self.cik)
 ```
 
 ### Type Hints

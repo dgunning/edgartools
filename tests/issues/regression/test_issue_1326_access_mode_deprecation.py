@@ -101,10 +101,9 @@ class TestReachingForAModeWarns:
     def test_the_warning_points_at_the_caller_not_at_library_internals(self, module):
         """A deprecation that blames the library tells you nothing about your code.
 
-        `edgar.core` is the path that gets this wrong by default: it installs its
-        __getattr__ through `edgar._compat.deprecated_alias`, which adds a frame
-        between the caller and the warn() call, so the default stacklevel reports
-        `edgar/_compat.py` as the offender.
+        Each module routes the name through its own __getattr__, one frame
+        between the caller and warn(), so a wrong stacklevel would report
+        edgar/core.py or edgar/settings.py as the offender.
         """
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")

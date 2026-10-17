@@ -43,15 +43,7 @@ from edgar.httprequests import download_json
 from edgar.storage import get_edgar_data_directory, is_using_local_storage
 
 
-# NoCompanyFactsFound is now CompanyFactsNotFoundError in edgar.exceptions
-# (bead edgartools-07lk.10). Its __init__ called super().__init__() with no
-# arguments and set self.message instead, so str(exc) was '' and the message
-# never reached a traceback or a log. The canonical class builds the message
-# and passes it up. Old name kept as a deprecated alias below.
-from edgar._compat import deprecated_alias
 from edgar.exceptions import CompanyFactsNotFoundError, TransportError, ValidationError, http_status
-
-__getattr__ = deprecated_alias(NoCompanyFactsFound=CompanyFactsNotFoundError)
 
 
 def download_company_facts_from_sec(cik: int) -> Dict[str, Any]:

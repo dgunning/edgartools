@@ -149,8 +149,7 @@ def should_retry(exc: Exception) -> bool:
 
 # TooManyRequestsError and IdentityNotSetError are defined in edgar.exceptions
 # (bead edgartools-07lk.10) and re-exported here, so `from edgar.httprequests
-# import TooManyRequestsError` keeps working. IdentityNotSetException is the
-# deprecated spelling \u2014 see the module __getattr__ at the end of this file.
+# import TooManyRequestsError` keeps working.
 
 
 # =============================================================================
@@ -1585,13 +1584,3 @@ def download_datafile(data_url: str, local_directory: Optional[Path] = None) -> 
     download_filename = local_directory / filename
     download_file(data_url, path=download_filename)
     return download_filename
-
-
-# ---------------------------------------------------------------------------
-# Deprecated names (bead edgartools-07lk.10). Same objects as the canonical
-# classes, so `except IdentityNotSetException:` still works; touching the name
-# warns. Removed in 6.0.
-# ---------------------------------------------------------------------------
-from edgar._compat import deprecated_alias  # noqa: E402
-
-__getattr__ = deprecated_alias(IdentityNotSetException=IdentityNotSetError)

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from edgar import *
 from edgar.sgml import iter_documents, list_documents, FilingSGML, Filer
-from edgar.sgml.sgml_parser import SGMLDocument, SGMLParser, SGMLFormatType, SECIdentityError, SECFilingNotFoundError, SECHTMLResponseError
+from edgar.sgml.sgml_parser import SGMLDocument, SGMLParser, SGMLFormatType, SECIdentityError, FilingNotFoundError, SECHTMLResponseError
 from edgar.sgml.tools import get_content_between_tags
 import hashlib
 from io import BytesIO
@@ -466,8 +466,8 @@ def test_nosuchkey_error():
 
     parser = SGMLParser()
 
-    # Should raise SECFilingNotFoundError with specific message for NoSuchKey
-    with pytest.raises(SECFilingNotFoundError, match="SEC filing not found - the specified key does not exist"):
+    # Should raise FilingNotFoundError with specific message for NoSuchKey
+    with pytest.raises(FilingNotFoundError, match="SEC filing not found - the specified key does not exist"):
         parser.detect_format(xml_error)
 
 
@@ -490,7 +490,7 @@ def test_handle_sec_error_message_in_sgml_with_invalid_identity(monkeypatch):
 
 
 def test_handle_sec_error_message_with_nonexistent_filing():
-    """Test that a non-existent filing raises SECFilingNotFoundError"""
+    """Test that a non-existent filing raises FilingNotFoundError"""
     from unittest.mock import patch
 
     # Simulate the XML error SEC returns for missing filings (AWS S3 NoSuchKey)
@@ -503,5 +503,5 @@ def test_handle_sec_error_message_with_nonexistent_filing():
 
     # Mock the HTTP fetch to return the SEC not-found error
     with patch('edgar.sgml.sgml_common.read_content_as_string', return_value=sec_not_found_xml):
-        with pytest.raises(SECFilingNotFoundError):
+        with pytest.raises(FilingNotFoundError):
             filing.sgml()

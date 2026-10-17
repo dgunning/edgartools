@@ -212,7 +212,7 @@ def _is_transport_failure(ex: BaseException) -> bool:
     # outage (#1498), and an EFTS backend error ("getaddrinfo EBUSY") scored five
     # entries as extractor errors, failing whichever facet they fell in.
     return type(ex).__name__ in {
-        "SECFilingNotFoundError", "SECHTMLResponseError", "IdentityNotSetException",
+        "FilingNotFoundError", "SECHTMLResponseError", "IdentityNotSetError",
         "TransportError",
     }
 

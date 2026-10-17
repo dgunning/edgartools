@@ -19,7 +19,7 @@ from datetime import datetime, date
 import pyarrow as pa
 import pytest
 
-from edgar.dates import InvalidDateException, extract_dates
+from edgar.dates import InvalidDateError, extract_dates
 from edgar.filtering import filter_by_date
 
 
@@ -63,15 +63,15 @@ def test_extract_dates_tuple_open_start_defaults_to_edgar_epoch():
 
 @pytest.mark.fast
 def test_extract_dates_tuple_wrong_arity_raises():
-    with pytest.raises(InvalidDateException, match="exactly two elements"):
+    with pytest.raises(InvalidDateError, match="exactly two elements"):
         extract_dates(("2026-01-29",))
-    with pytest.raises(InvalidDateException, match="exactly two elements"):
+    with pytest.raises(InvalidDateError, match="exactly two elements"):
         extract_dates(("a", "b", "c"))
 
 
 @pytest.mark.fast
 def test_extract_dates_tuple_both_none_raises():
-    with pytest.raises(InvalidDateException, match="at least one non-None bound"):
+    with pytest.raises(InvalidDateError, match="at least one non-None bound"):
         extract_dates((None, None))
 
 

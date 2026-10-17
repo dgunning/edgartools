@@ -90,7 +90,6 @@ __all__ = [
     # Exceptions
     'CompanyNotFoundError',
     'CompanyFactsNotFoundError',
-    'NoCompanyFactsFound',  # deprecated alias, removed in 6.0
 
     # Constants and utilities
     'COMPANY_FORMS',
@@ -101,14 +100,3 @@ __all__ = [
     'CompanyFiling',
     'CompanyFilings',
 ]
-
-
-# ---------------------------------------------------------------------------
-# Deprecated name (bead edgartools-07lk.10): NoCompanyFactsFound is now
-# CompanyFactsNotFoundError. Same object, so `except NoCompanyFactsFound:`
-# still works. Removed in 6.0.
-# ---------------------------------------------------------------------------
-from edgar._compat import deprecated_alias  # noqa: E402
-from edgar.exceptions import CompanyFactsNotFoundError as _CompanyFactsNotFoundError  # noqa: E402
-
-__getattr__ = deprecated_alias(NoCompanyFactsFound=_CompanyFactsNotFoundError)

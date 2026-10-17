@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: MIT
 import logging
 import re
-import warnings
 from functools import lru_cache, partial
 from typing import List, Optional, Union
 
@@ -219,7 +218,6 @@ __all__ = [
     "SectionNotFoundError", "AttachmentNotFoundError",
     "ParsingError", "DataObjectError",
     "ValidationError",
-    "DataObjectException",  # deprecated alias, removed in 6.0
 
     # -- Financial statements ------------------------------------------------
     "Financials", "MultiFinancials", "XBRL",
@@ -330,25 +328,6 @@ def matches_form(sec_filing: Filing,
     if sec_filing.form in form_list + [f"{f}/A" for f in form_list if not f.endswith("/A")]:
         return True
     return False
-
-
-class DataObjectException(DataObjectError):
-    """Deprecated: use edgar.exceptions.DataObjectError. Removed in 6.0.
-
-    Kept as a subclass rather than a plain alias because this one takes a
-    Filing, and DataObjectError takes primitives — edgar.exceptions imports
-    nothing from edgar. It was never raised anywhere, so the constructor is
-    almost certainly unused, but a name in __all__ gets the full treatment.
-    """
-
-    def __init__(self, filing: Filing):
-        warnings.warn(
-            "DataObjectException is deprecated and will be removed in v6.0. "
-            "Use DataObjectError instead (from edgar.exceptions import DataObjectError).",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        super().__init__(form=filing.form, accession_no=filing.accession_no)
 
 
 def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:

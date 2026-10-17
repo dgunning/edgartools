@@ -315,7 +315,7 @@ class CompanyNotFoundError(NotFoundError):
 class FilingNotFoundError(NotFoundError):
     """SEC has no filing at that accession number.
 
-    Canonical name for `SECFilingNotFoundError`.
+    Was `SECFilingNotFoundError` before 6.0.
     """
 
 
@@ -338,7 +338,7 @@ class CompanyFactsNotFoundError(NotFoundError):
 class StatementNotFoundError(NotFoundError):
     """A financial statement could not be resolved with sufficient confidence.
 
-    Canonical name for `StatementNotFound`. Keeps that class's keyword
+    Was `StatementNotFound` before 6.0. Keeps that class's keyword
     signature and its rendered message exactly; it is no longer a dataclass,
     because a dataclass cannot pass a built message up to the base.
     """
@@ -421,9 +421,8 @@ class XBRLProcessingError(ParsingError):
 class DataObjectError(ParsingError):
     """`filing.obj()` could not build a data object for a form it supports.
 
-    Canonical name for `DataObjectException`. Takes primitives rather than a
-    Filing, because this module imports nothing from edgar; the deprecated
-    alias keeps the Filing-taking constructor.
+    Was `DataObjectException` before 6.0, which took a Filing. This takes
+    primitives instead, because this module imports nothing from edgar.
     """
 
     def __init__(self, message: str = "", *, form=None, accession_no=None, **kwargs):
@@ -464,5 +463,5 @@ class ValidationError(EdgarError, ValueError):
 class InvalidDateError(ValidationError):
     """A date or date range could not be understood.
 
-    Canonical name for `InvalidDateException`.
+    Was `InvalidDateException` before 6.0.
     """

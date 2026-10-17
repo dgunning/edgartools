@@ -20,7 +20,6 @@ from zoneinfo import ZoneInfo
 
 from pandas.tseries.offsets import BDay
 
-from edgar._compat import deprecated_alias
 from edgar.exceptions import InvalidDateError
 
 __all__ = [
@@ -30,13 +29,8 @@ __all__ = [
     "is_start_of_quarter",
     "parse_acceptance_datetime",
     "InvalidDateError",
-    "InvalidDateException",  # deprecated alias, removed in 6.0
 ]
 
-# InvalidDateException is now InvalidDateError in edgar.exceptions, under the
-# ValidationError branch (bead edgartools-07lk.10) — so it is now also a
-# ValueError, which is what a bad date string always was.
-__getattr__ = deprecated_alias(InvalidDateException=InvalidDateError)
 
 def extract_dates(
     date_str: Union[str, Sequence[Optional[str]]]

@@ -18,14 +18,13 @@ WHAT THESE TESTS PROTECT, in order of how quietly each could break:
   2. The MRO order. `EdgarError` must precede `KeyError` so `str(exc)` is the
      message, not KeyError's repr-quoted form.
   3. That importing edgar emits no DeprecationWarning. This is the one that
-     bites: it fires the moment our own code imports a deprecated alias, which
+     bites: it fires the moment our own code uses a deprecated name, which
      would spray warnings at users for something they cannot fix.
-  4. That every alias resolves to the *same object* as its canonical class, so
-     `except OldName:` and `pytest.raises(OldName)` still work.
+  4. That the 5.x deprecated spellings are gone in 6.0. In 5.x each resolved
+     to the same object as its canonical class and warned; 6.0 removed them.
 """
 import ast
 import pickle
-import warnings
 from pathlib import Path
 
 import pytest
@@ -58,14 +57,15 @@ CONSTRUCTOR_ARGS = {
     "InvalidDateError": ("boom",),
 }
 
-# Deprecated spelling -> (module it must still be importable from, canonical class)
-DEPRECATED_ALIASES = {
-    "InvalidDateException": ("edgar.dates", ex.InvalidDateError),
-    "StatementNotFound": ("edgar.xbrl.exceptions", ex.StatementNotFoundError),
-    "NoCompanyFactsFound": ("edgar.entity.entity_facts", ex.CompanyFactsNotFoundError),
-    "TooManyRequestsException": ("edgar.core", ex.TooManyRequestsError),
-    "SECFilingNotFoundError": ("edgar.sgml.sgml_parser", ex.FilingNotFoundError),
-    "IdentityNotSetException": ("edgar.httprequests", ex.IdentityNotSetError),
+# Spelling deprecated in 5.x and removed in 6.0 -> every module that resolved it
+REMOVED_ALIASES = {
+    "InvalidDateException": ("edgar.dates",),
+    "StatementNotFound": ("edgar.xbrl.exceptions",),
+    "NoCompanyFactsFound": ("edgar.entity", "edgar.entity.core", "edgar.entity.entity_facts"),
+    "TooManyRequestsException": ("edgar.core",),
+    "SECFilingNotFoundError": ("edgar.sgml.sgml_parser",),
+    "IdentityNotSetException": ("edgar.httprequests",),
+    "DataObjectException": ("edgar",),
 }
 
 
@@ -172,28 +172,22 @@ def test_importing_edgar_emits_no_deprecation_warning():
     )
 
 
-@pytest.mark.parametrize("old_name", sorted(DEPRECATED_ALIASES))
-def test_deprecated_alias_is_the_same_object_and_warns(old_name):
-    """`except OldName:` must still catch, and using it must say so."""
-    module_name, canonical = DEPRECATED_ALIASES[old_name]
-    module = __import__(module_name, fromlist=["_"])
+@pytest.mark.parametrize("old_name", sorted(REMOVED_ALIASES))
+def test_removed_alias_no_longer_resolves(old_name):
+    """6.0 removed the 5.x deprecated spellings (bead edgartools-07lk.10).
 
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        aliased = getattr(module, old_name)
-
-    assert aliased is canonical, (
-        f"{module_name}.{old_name} resolves to {aliased!r}, not to {canonical.__name__}. "
-        f"An alias that is a different class breaks `except {old_name}:`."
-    )
-    assert any(issubclass(w.category, DeprecationWarning) for w in caught), (
-        f"{old_name} resolved without a DeprecationWarning, so nobody learns to "
-        f"stop using it before 6.0 deletes it"
-    )
-    assert canonical.__name__ in str(caught[0].message), (
-        "the warning must name the replacement — a deprecation that does not say "
-        "what to use instead is just an alarm"
-    )
+    Each warned in a released 5.x naming its replacement. An alias that still
+    resolved would keep code on the old name working silently, and an alias
+    left in a module's __all__ would make `from module import *` fail.
+    """
+    for module_name in REMOVED_ALIASES[old_name]:
+        module = __import__(module_name, fromlist=["_"])
+        assert not hasattr(module, old_name), f"{module_name}.{old_name} still resolves"
+        assert old_name not in getattr(module, "__all__", ()), (
+            f"{old_name} is still in {module_name}.__all__"
+        )
+        with pytest.raises(ImportError):
+            exec(f"from {module_name} import {old_name}", {})
 
 
 @pytest.mark.parametrize("name", sorted(CONSTRUCTOR_ARGS))

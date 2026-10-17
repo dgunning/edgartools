@@ -127,9 +127,9 @@ except SectionNotFoundError as e:
     print(e.suggestions)    # what to do about it
 ```
 
-## Deprecated names
+## Names removed in 6.0
 
-Older exception names still resolve to the same objects, so `except StatementNotFound:` keeps working. They emit a `DeprecationWarning` and are removed in 6.0.
+These older exception names resolved to the same objects in 5.x and emitted a `DeprecationWarning`. 6.0 removed them, so importing one raises `ImportError`. Use the new name, which also works in 5.x.
 
 | Old | New |
 |---|---|
