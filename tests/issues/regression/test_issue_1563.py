@@ -41,7 +41,8 @@ FIXTURES = Path(__file__).parent.parent.parent / "fixtures"
 REPORT_8K = FIXTURES / "issues" / "0000710782-24-000002.html"
 
 
-def _parse_report():
+@pytest.fixture(scope="module")
+def report():
     from edgar.documents import parse_html
     from edgar.documents.config import ParserConfig
 
@@ -52,8 +53,8 @@ def _parse_report():
 class TestLastItemEndsAtSignatureStatement:
     """Item 8.01 stops before the SIGNATURE block (offline, no network)."""
 
-    def test_item_801_excludes_signature_block(self):
-        doc = _parse_report()
+    def test_item_801_excludes_signature_block(self, report):
+        doc = report
         sections = doc.sections
         assert "item_801" in sections, "Item 8.01 not detected"
 
@@ -61,18 +62,18 @@ class TestLastItemEndsAtSignatureStatement:
         assert "SIGNATURE" not in text, "signature block leaked into Item 8.01"
         assert "Baobing He" not in text, "signer name leaked into Item 8.01"
 
-    def test_item_801_length_matches_v5_62_0(self):
+    def test_item_801_length_matches_v5_62_0(self, report):
         """The item ends where it did before #1534: 972 chars."""
-        doc = _parse_report()
+        doc = report
         text = doc.sections["item_801"].text()
         assert len(text) == 972
         assert text.endswith(
             "enhancing the company's global competitiveness."
         )
 
-    def test_signature_statement_still_becomes_a_section(self):
+    def test_signature_statement_still_becomes_a_section(self, report):
         """The signature block is a section of its own, not dropped."""
-        doc = _parse_report()
+        doc = report
         signatures = doc.sections.named("signatures")
         assert signatures is not None
         assert "Baobing He" in signatures.text()
