@@ -85,7 +85,7 @@ company = Company("NVDA")
 income_stmt = company.income_statement(period='ttm')
 
 # TTM cash flow statement
-cash_flow = company.cash_flow(period='ttm')
+cash_flow = company.cash_flow_statement(period='ttm')
 
 # Convert to DataFrame
 df = company.income_statement(period='ttm', as_dataframe=True)

@@ -227,8 +227,8 @@ class IssueAnalyzer:
         cf_metrics = {}
 
         try:
-            if hasattr(statements, 'cashflow_statement'):
-                cf = statements.cashflow_statement()
+            if hasattr(statements, 'cash_flow_statement'):
+                cf = statements.cash_flow_statement()
                 df = cf.to_dataframe()
 
                 # Period analysis
@@ -624,7 +624,7 @@ def analyze_empty_periods(accession_or_ticker: str) -> Dict[str, Any]:
         if len(accession_or_ticker) > 15 and '-' in accession_or_ticker:
             # It's an accession number
             filing = get_by_accession_number(accession_or_ticker)
-            cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+            cashflow_stmt = filing.xbrl().statements.cash_flow_statement()
         else:
             # It's a ticker - get latest filing
             company = Company(accession_or_ticker)
@@ -632,7 +632,7 @@ def analyze_empty_periods(accession_or_ticker: str) -> Dict[str, Any]:
             if filings.empty:
                 filings = company.get_filings(form='10-K').head(1)
             filing = filings.iloc[0]
-            cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+            cashflow_stmt = filing.xbrl().statements.cash_flow_statement()
 
         df = cashflow_stmt.to_dataframe()
 
@@ -753,7 +753,7 @@ def analyze_xbrl_parsing(accession: str) -> Dict[str, Any]:
             statements = xbrl.statements
             analysis['has_statements'] = True
 
-            for stmt_name in ['cashflow_statement', 'income_statement', 'balance_sheet']:
+            for stmt_name in ['cash_flow_statement', 'income_statement', 'balance_sheet']:
                 try:
                     stmt = getattr(statements, stmt_name)()
                     analysis[f'has_{stmt_name}'] = True

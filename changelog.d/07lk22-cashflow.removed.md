@@ -1,0 +1,1 @@
+- **`cashflow_statement()` and `cash_flow()` removed.** The 5.x deprecated spellings are gone from `Company`, `Financials`, `EntityFacts`, `Statements` and `CurrentPeriodView`; calling them raises `AttributeError`. Use `cash_flow_statement()`, see the 6.0 upgrade guide. (bead edgartools-07lk.22.1)

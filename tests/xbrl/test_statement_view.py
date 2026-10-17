@@ -195,7 +195,7 @@ class TestStatementViewAccessors:
 
     def test_cashflow_statement_accepts_view(self, xbrl):
         """Test cashflow_statement accessor accepts view parameter."""
-        cf = xbrl.statements.cashflow_statement(view='standard')
+        cf = xbrl.statements.cash_flow_statement(view='standard')
         assert cf is not None
 
         df = cf.to_dataframe()

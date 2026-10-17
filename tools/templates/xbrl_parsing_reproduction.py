@@ -80,7 +80,7 @@ def reproduce_xbrl_parsing_issue():
                 console.print("  ✅ Statements object accessible")
 
                 # Test each statement type
-                for stmt_name in ['cashflow_statement', 'income_statement', 'balance_sheet']:
+                for stmt_name in ['cash_flow_statement', 'income_statement', 'balance_sheet']:
                     try:
                         stmt = getattr(statements, stmt_name)()
                         console.print(f"  ✅ {stmt_name} accessible")

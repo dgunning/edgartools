@@ -1,42 +1,17 @@
 """
-Regression test for edgartools-iirl: cash_flow_statement() alias
+Regression test for edgartools-iirl: cash_flow_statement() on every surface.
 
-The canonical method is cashflow_statement() (no underscore), but Python convention
-and user intuition expects cash_flow_statement() (with underscore). This test verifies
-that cash_flow_statement() exists as an alias on all surfaces and delegates correctly.
+cash_flow_statement() is the canonical name. The deprecated cashflow_statement()
+spelling was removed in 6.0 (bead edgartools-07lk.22.1), so it must not exist.
 """
+import pytest
+
+from edgar.entity.core import Company
+from edgar.financials import Financials, MultiFinancials
+from edgar.xbrl.statements import Statements, StitchedStatements
 
 
-def test_financials_has_cash_flow_statement_alias():
-    """Financials class should have cash_flow_statement() as alias for cashflow_statement()."""
-    from edgar.financials import Financials
-    assert hasattr(Financials, 'cash_flow_statement')
-    assert hasattr(Financials, 'cashflow_statement')
-
-
-def test_multi_financials_has_cash_flow_statement_alias():
-    """MultiFinancials class should have cash_flow_statement() as alias for cashflow_statement()."""
-    from edgar.financials import MultiFinancials
-    assert hasattr(MultiFinancials, 'cash_flow_statement')
-    assert hasattr(MultiFinancials, 'cashflow_statement')
-
-
-def test_statements_has_cash_flow_statement_alias():
-    """xbrl Statements class should have cash_flow_statement() as alias for cashflow_statement()."""
-    from edgar.xbrl.statements import Statements
-    assert hasattr(Statements, 'cash_flow_statement')
-    assert hasattr(Statements, 'cashflow_statement')
-
-
-def test_stitched_statements_has_cash_flow_statement_alias():
-    """StitchedStatements class should have cash_flow_statement() as alias for cashflow_statement()."""
-    from edgar.xbrl.statements import StitchedStatements
-    assert hasattr(StitchedStatements, 'cash_flow_statement')
-    assert hasattr(StitchedStatements, 'cashflow_statement')
-
-
-def test_company_has_cash_flow_statement_alias():
-    """Company class should have cash_flow_statement() as alias for cashflow_statement()."""
-    from edgar.entity.core import Company
-    assert hasattr(Company, 'cash_flow_statement')
-    assert hasattr(Company, 'cashflow_statement')
+@pytest.mark.parametrize("cls", [Financials, MultiFinancials, Statements, StitchedStatements, Company])
+def test_cash_flow_statement_exists_and_old_spelling_is_gone(cls):
+    assert hasattr(cls, 'cash_flow_statement')
+    assert not hasattr(cls, 'cashflow_statement')

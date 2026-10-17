@@ -360,7 +360,7 @@ def test_company_financials():
     assert financials
     assert financials.balance_sheet()
     assert financials.income_statement()
-    assert financials.cashflow_statement()
+    assert financials.cash_flow_statement()
     assert financials.statement_of_equity()
 
 

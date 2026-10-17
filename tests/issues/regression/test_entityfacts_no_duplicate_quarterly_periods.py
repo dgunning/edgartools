@@ -99,7 +99,7 @@ def test_quarterly_income_statement_no_duplicates():
 def test_quarterly_cash_flow_no_duplicates():
     """Test quarterly cash flow statement also has no duplicates"""
     c = Company("AAPL")
-    cf = c.cash_flow(annual=False, periods=4)
+    cf = c.cash_flow_statement(annual=False, periods=4)
 
     period_counts = Counter(cf.periods)
     duplicates = {p: count for p, count in period_counts.items() if count > 1}

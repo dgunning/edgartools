@@ -5,9 +5,9 @@ Bead: edgartools-2db17
 
 The README Quick Start tells every new user to run `from edgar import *`. Up to
 5.62.0 that line printed three DeprecationWarnings, one each for NORMAL, CAUTION
-and CRAWL. The access modes (GH #1326) are served lazily so `import edgar` stays
-silent, but they were still listed in `__all__`, and a star-import resolves every
-name in `__all__`. `edgar.core` and `edgar.settings` had the same problem.
+and CRAWL. The access modes (GH #1326) were listed in `__all__`, and a star-import resolves
+every name in `__all__`. They are removed in 6.0; the test stays as the guard
+that no deprecation warning ever sneaks back into a star-import.
 
 Each star-import runs in a fresh interpreter: the deprecation fires once per
 lookup, but whether it reaches the user depends on a clean warnings registry,
@@ -22,7 +22,6 @@ import pytest
 
 def _run(code: str) -> subprocess.CompletedProcess:
     env = {**os.environ}
-    env.pop("EDGAR_ACCESS_MODE", None)  # setting it warns at import, by design
     return subprocess.run(  # noqa: S603 -- sys.executable with a literal argv, no shell
         [sys.executable, "-W", "error::DeprecationWarning", "-c", code],
         capture_output=True, text=True, timeout=180, env=env,
@@ -48,8 +47,8 @@ def test_star_import_still_brings_in_the_readme_names():
     assert result.returncode == 0, result.stderr[-1500:]
 
 
-def test_naming_a_mode_still_warns():
-    """Out of __all__ is not removed: the explicit import keeps its deprecation."""
+def test_naming_a_mode_is_an_import_error():
+    """Removed in 6.0: absence, not a warning."""
     result = _run("from edgar import CAUTION")
     assert result.returncode != 0
-    assert "CAUTION is deprecated" in result.stderr
+    assert "ImportError" in result.stderr

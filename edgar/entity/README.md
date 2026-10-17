@@ -84,7 +84,7 @@ quarterly = apple.get_quarterly_financials()
 # Access specific financial statements
 balance_sheet = financials.balance_sheet
 income_statement = financials.income_statement
-cash_flow = financials.cashflow_statement
+cash_flow = financials.cash_flow_statement
 
 # Convert to pandas DataFrame for analysis
 income_df = income_statement.to_dataframe()

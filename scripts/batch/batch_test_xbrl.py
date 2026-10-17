@@ -42,7 +42,7 @@ def get_financials_for_filing(filing):
     financials = Financials(xbrl_data)
     balance_sheet = financials.balance_sheet()
     income_statement = financials.income_statement()
-    financials.cashflow_statement()
+    financials.cash_flow_statement()
     if income_statement:
         print(income_statement)
         #print(income_statement.to_dataframe())

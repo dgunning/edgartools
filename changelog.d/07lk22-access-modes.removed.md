@@ -1,0 +1,1 @@
+**The deprecated access modes are removed.** `NORMAL`, `CAUTION`, `CRAWL` and `edgar_mode` now raise `ImportError`, and `EDGAR_ACCESS_MODE` is no longer read or warned about; it never affected the HTTP client. Use `EDGAR_RATE_LIMIT_PER_SEC` and `EDGAR_HTTP_TIMEOUT`. (GH #1326, bead edgartools-07lk.22.1)

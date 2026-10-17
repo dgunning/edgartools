@@ -35,7 +35,7 @@ try:
         for stmt_name, stmt_method in [
             ("Balance Sheet", lambda: current.balance_sheet()),
             ("Income Statement", lambda: current.income_statement()),
-            ("Cash Flow", lambda: current.cashflow_statement()),
+            ("Cash Flow", lambda: current.cash_flow_statement()),
         ]:
             try:
                 stmt = stmt_method()
@@ -90,7 +90,7 @@ try:
         for stmt_name, stmt_method in [
             ("Balance Sheet", lambda: current.balance_sheet()),
             ("Income Statement", lambda: current.income_statement()),
-            ("Cash Flow", lambda: current.cashflow_statement()),
+            ("Cash Flow", lambda: current.cash_flow_statement()),
         ]:
             try:
                 stmt = stmt_method()

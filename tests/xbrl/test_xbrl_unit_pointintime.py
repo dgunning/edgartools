@@ -141,7 +141,7 @@ class TestBackwardCompatibility:
         statements_to_test = [
             'balance_sheet',
             'income_statement',
-            'cashflow_statement'
+            'cash_flow_statement'
         ]
 
         for stmt_method in statements_to_test:
@@ -493,7 +493,7 @@ class TestCrossStatementConsistency:
         """Test that the same concept has the same unit in different statements."""
         # Get Net Income from income statement and cash flow statement
         income_statement = aapl_xbrl.statements.income_statement()
-        cashflow_statement = aapl_xbrl.statements.cashflow_statement()
+        cashflow_statement = aapl_xbrl.statements.cash_flow_statement()
 
         is_df = income_statement.to_dataframe(include_unit=True)
         cf_df = cashflow_statement.to_dataframe(include_unit=True)

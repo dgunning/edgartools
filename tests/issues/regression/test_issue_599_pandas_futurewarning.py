@@ -76,7 +76,7 @@ class TestIssue599PandasFutureWarning:
 
         This was the second affected statement type from Issue #599.
         """
-        cashflow = msft_10k_xbrl.statements.cashflow_statement()
+        cashflow = msft_10k_xbrl.statements.cash_flow_statement()
 
         # This should NOT produce FutureWarning after the fix
         with warnings.catch_warnings():
@@ -136,7 +136,7 @@ class TestIssue599PandasFutureWarning:
         live (working-capital movements, debt repayments), and it was the second
         statement named in #599.
         """
-        cashflow = msft_10k_xbrl.statements.cashflow_statement()
+        cashflow = msft_10k_xbrl.statements.cash_flow_statement()
         df_with = cashflow.to_dataframe(presentation=True)
         df_without = cashflow.to_dataframe(presentation=False)
 
@@ -196,7 +196,7 @@ class TestIssue599PandasFutureWarning:
         User reported: to_dataframe(view='standard', presentation=True)
         """
         income = msft_10k_xbrl.statements.income_statement()
-        cashflow = msft_10k_xbrl.statements.cashflow_statement()
+        cashflow = msft_10k_xbrl.statements.cash_flow_statement()
 
         # Test exact combinations mentioned by user
         with warnings.catch_warnings():

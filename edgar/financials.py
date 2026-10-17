@@ -1,4 +1,3 @@
-import warnings
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
@@ -202,17 +201,6 @@ class Financials:
         if self.xb is None:
             return None
         return self.xb.statements.cash_flow_statement(view=view)
-
-    def cashflow_statement(self, **kwargs):
-        """Deprecated: use :meth:`cash_flow_statement`."""
-        warnings.warn(
-            "cashflow_statement() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement(), which matches income_statement() and "
-            "balance_sheet().",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.cash_flow_statement(**kwargs)
 
     def statement_of_equity(self, *, view: ViewType = None):
         """
@@ -1225,17 +1213,6 @@ class MultiFinancials:
 
     def cash_flow_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
         return self.xbs.statements.cash_flow_statement(view=view)
-
-    def cashflow_statement(self, **kwargs):
-        """Deprecated: use :meth:`cash_flow_statement`."""
-        warnings.warn(
-            "cashflow_statement() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement(), which matches income_statement() and "
-            "balance_sheet().",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.cash_flow_statement(**kwargs)
 
     def __rich__(self):
         return self.xbs.__rich__()

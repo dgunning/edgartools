@@ -13,7 +13,6 @@ Key features:
 - Beginner-friendly API design
 """
 
-import warnings
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Any, Dict, List, Optional, Union
 
@@ -342,17 +341,6 @@ class CurrentPeriodView:
             return self._get_statement_object('IncomeStatement', include_dimensions=include_dimensions)
         return self._get_statement_dataframe('IncomeStatement', raw_concepts=raw_concepts,
                                              include_dimensions=include_dimensions)
-
-    def cashflow_statement(self, **kwargs):
-        """Deprecated: use :meth:`cash_flow_statement`."""
-        warnings.warn(
-            "cashflow_statement() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement(), which matches income_statement() and "
-            "balance_sheet().",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.cash_flow_statement(**kwargs)
 
     def cash_flow_statement(self, raw_concepts: bool = False, as_statement: bool = True,
                             include_dimensions: bool = False) -> Union[pd.DataFrame, 'Statement']:

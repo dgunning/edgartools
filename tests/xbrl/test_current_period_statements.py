@@ -274,7 +274,7 @@ class TestCurrentPeriodStatementObjects:
         methods = [
             'balance_sheet',
             'income_statement', 
-            'cashflow_statement',
+            'cash_flow_statement',
             'statement_of_equity',
             'comprehensive_income'
         ]

@@ -2,7 +2,7 @@
 
 WHAT WAS BROKEN. Vale S.A.'s 20-F declares exactly one role typed
 CashFlowStatement -- "00000005 - Statement - Consolidated Statement of Cash
-Flows" -- and ``statements.cashflow_statement()`` returned None for it.
+Flows" -- and ``statements.cash_flow_statement()`` returned None for it.
 ``find_statement("CashFlowStatement")`` raised *"No matching statements found.
 No statements available. No statements available in XBRL data"*, while income
 statement, balance sheet, comprehensive income and statement of equity all
@@ -183,7 +183,7 @@ class TestValeCashFlowIsReachable:
         from edgar import get_by_accession_number
         filing = get_by_accession_number(self.ACCESSION)
         assert filing is not None, f"could not fetch {self.ACCESSION}"
-        statement = filing.xbrl().statements.cashflow_statement()
+        statement = filing.xbrl().statements.cash_flow_statement()
         assert statement is not None, (
             "cashflow_statement() returned None for a filing that declares a "
             "Consolidated Statement of Cash Flows — edgartools-gi1n has returned"

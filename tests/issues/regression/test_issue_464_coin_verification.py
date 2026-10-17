@@ -65,7 +65,7 @@ def _missing_in_period_columns(df) -> tuple[list[str], int]:
 def test_coin_10q_q3_2024_cash_flow_has_comparative_periods(coin_q3_2024_filing):
     """Cash Flow Statement for COIN Q3 2024 has comparative periods with no missing values."""
     xbrl = coin_q3_2024_filing.xbrl()
-    cash_flow = xbrl.statements.cashflow_statement()
+    cash_flow = xbrl.statements.cash_flow_statement()
     assert cash_flow is not None, "Cash Flow Statement not found"
 
     df = cash_flow.to_dataframe()

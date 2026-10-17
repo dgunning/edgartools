@@ -48,7 +48,7 @@ facts = company.get_facts()
 # Check statements
 income = facts.income_statement()
 balance = facts.balance_sheet()
-cash_flow = facts.cash_flow()
+cash_flow = facts.cash_flow_statement()
 
 print(f"Income: {income.shape if income else 'None'}")
 print(f"Balance: {balance.shape if balance else 'None'}")

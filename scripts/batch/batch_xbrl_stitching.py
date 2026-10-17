@@ -43,7 +43,7 @@ def get_financials_for_filing(filings):
         print(balance_sheet)
     assert len(balance_sheet.periods) == len(xbs.xbrl_list)
 
-    cashflow_statement = xbs.statements.cashflow_statement()
+    cashflow_statement = xbs.statements.cash_flow_statement()
     if cashflow_statement:
         print(cashflow_statement)
     assert len(cashflow_statement.periods) == len(xbs.xbrl_list)
