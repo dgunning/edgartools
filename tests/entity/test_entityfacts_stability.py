@@ -390,7 +390,7 @@ class TestCoverageRegression:
 
     def test_aapl_cash_flow_coverage(self, aapl_facts):
         """Test AAPL cash flow statement has expected coverage."""
-        cashflow = aapl_facts.cash_flow(annual=True, periods=1)
+        cashflow = aapl_facts.cash_flow_statement(annual=True, periods=1)
         df = cashflow.to_dataframe()
 
         # Should have at least 10 line items (baseline)
@@ -423,7 +423,7 @@ class TestCoverageRegression:
         elif stmt_type == "balance":
             stmt = facts.balance_sheet(annual=True, periods=1)
         else:
-            stmt = facts.cash_flow(annual=True, periods=1)
+            stmt = facts.cash_flow_statement(annual=True, periods=1)
 
         df = stmt.to_dataframe()
         assert len(df) >= min_items, \
@@ -463,7 +463,7 @@ class TestAPIContract:
         """Test that cash_flow returns expected type."""
         from edgar.entity.enhanced_statement import MultiPeriodStatement
 
-        stmt = test_facts.cash_flow(annual=True, periods=4)
+        stmt = test_facts.cash_flow_statement(annual=True, periods=4)
         assert isinstance(stmt, MultiPeriodStatement), \
             f"Expected MultiPeriodStatement, got {type(stmt)}"
 
@@ -579,7 +579,7 @@ class TestIntegration:
         # All three should work
         income = facts.income_statement(annual=True, periods=3)
         balance = facts.balance_sheet(annual=True, periods=3)
-        cashflow = facts.cash_flow(annual=True, periods=3)
+        cashflow = facts.cash_flow_statement(annual=True, periods=3)
 
         assert income is not None
         assert balance is not None

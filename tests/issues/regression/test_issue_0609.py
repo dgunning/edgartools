@@ -58,7 +58,7 @@ def test_cashflow_rollforward_labels_distinct(aapl_xbrl):
 @pytest.mark.regression
 def test_cashflow_rollforward_values_dataframe(aapl_xbrl):
     """Beginning/ending instant facts must map onto the duration columns."""
-    df = aapl_xbrl.statements.cashflow_statement().to_dataframe()
+    df = aapl_xbrl.statements.cash_flow_statement().to_dataframe()
     value_cols = [c for c in df.columns if c.startswith("20")]
     assert value_cols, "Expected period value columns"
     fy2023 = value_cols[0]   # most-recent fiscal year column
@@ -81,7 +81,7 @@ def test_cashflow_rollforward_values_dataframe(aapl_xbrl):
 @pytest.mark.regression
 def test_cashflow_rollforward_values_rendered(aapl_xbrl):
     """The rich render must show the values too (not blank cells)."""
-    text = rich_to_text(aapl_xbrl.statements.cashflow_statement().render(), width=200)
+    text = rich_to_text(aapl_xbrl.statements.cash_flow_statement().render(), width=200)
     begin_lines = [l for l in text.splitlines() if "beginning balances" in l.lower()]
     end_lines = [l for l in text.splitlines() if "ending balances" in l.lower()]
 

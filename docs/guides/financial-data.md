@@ -77,7 +77,7 @@ comprehensive = financials.comprehensive_income()
 | Comprehensive Income | `comprehensive_income()` |
 
 !!! tip "Cash flow naming"
-    The method is `cash_flow_statement()` (no underscore between "cash" and "flow"). The `Company` object also accepts `company.cash_flow()` as an alias, but on the `Financials` object always use `cash_flow_statement()`.
+    The method is `cash_flow_statement()` (no underscore between "cash" and "flow"). The older spellings `cashflow_statement()` and `cash_flow()` were removed in 6.0.
 
 ---
 

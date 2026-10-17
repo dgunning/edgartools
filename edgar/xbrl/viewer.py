@@ -368,8 +368,7 @@ class FilingViewer:
         Args:
             xbrl: XBRL object from filing.xbrl()
             statement: Statement method name ('balance_sheet', 'income_statement',
-                       'cash_flow_statement', 'comprehensive_income'). The
-                       deprecated spelling 'cashflow_statement' is accepted.
+                       'cash_flow_statement', 'comprehensive_income').
 
         Returns:
             Formatted text prompt comparing both renderings
@@ -380,14 +379,6 @@ class FilingViewer:
             "The SEC Viewer is the authoritative source — flag any XBRL discrepancies.",
             "",
         ]
-
-        # Normalise the deprecated spelling before it is used twice below: once
-        # to find the viewer report, once as a method name on xbrl.statements.
-        # A caller passing the canonical name found no keyword and got "(No
-        # viewer report found)"; one passing the old name reached a deprecated
-        # method. Both now take the same path.
-        if statement == 'cashflow_statement':
-            statement = 'cash_flow_statement'
 
         # Find the matching viewer report
         stmt_keywords = {

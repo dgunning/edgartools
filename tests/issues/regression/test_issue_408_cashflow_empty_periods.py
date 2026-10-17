@@ -32,7 +32,7 @@ class TestCashFlowEmptyPeriods:
         company = Company("AAPL")
         filing = company.get_filings(form="10-Q").latest(1)
         print(str(filing))
-        cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+        cashflow_stmt = filing.xbrl().statements.cash_flow_statement()
         print(cashflow_stmt)
         df = cashflow_stmt.to_dataframe()
 
@@ -48,7 +48,7 @@ class TestCashFlowEmptyPeriods:
         """Problematic filings should have empty periods filtered out by Issue #408 fix"""
         # Test filing that previously had empty string periods - now they should be filtered out
         filing = get_by_accession_number('0000320193-18-000070')  # Apple Q1 2018
-        cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+        cashflow_stmt = filing.xbrl().statements.cash_flow_statement()
         df = cashflow_stmt.to_dataframe()
 
         # Get data columns
@@ -94,7 +94,7 @@ class TestCashFlowEmptyPeriods:
 
         for case in test_cases:
             filing = get_by_accession_number(case['accession'])
-            cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+            cashflow_stmt = filing.xbrl().statements.cash_flow_statement()
             df = cashflow_stmt.to_dataframe()
 
             data_cols = [col for col in df.columns if col not in METADATA_COLUMNS]
@@ -123,7 +123,7 @@ class TestCashFlowEmptyPeriods:
 
         # Test on previously problematic filing
         filing = get_by_accession_number('0000320193-18-000070')
-        cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+        cashflow_stmt = filing.xbrl().statements.cash_flow_statement()
         df = cashflow_stmt.to_dataframe()
 
         # Get data columns
@@ -167,7 +167,7 @@ class TestCashFlowEmptyPeriods:
         # Test on recent working filing - use relative lookup
         company = Company("AAPL")
         filing = company.get_filings(form="10-Q").latest(1)
-        cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+        cashflow_stmt = filing.xbrl().statements.cash_flow_statement()
         original_df = cashflow_stmt.to_dataframe()
 
         # Apply filtering

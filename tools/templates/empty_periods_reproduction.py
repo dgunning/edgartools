@@ -46,7 +46,7 @@ def reproduce_empty_periods_issue():
         console.print(f"Filing: {filing.form} - {filing.company} - {filing.filing_date}")
 
         # Extract cash flow statement
-        cashflow_stmt = filing.xbrl().statements.cashflow_statement()
+        cashflow_stmt = filing.xbrl().statements.cash_flow_statement()
         df = cashflow_stmt.to_dataframe()
 
         # Analyze periods

@@ -78,7 +78,7 @@ class TestCurrentPeriodStatementTypes:
         with each filing — these four ran 19-38 rows when this was written — so
         the assertion is that a real statement came back, not its size.
         """
-        for name in ('balance_sheet', 'income_statement', 'cashflow_statement'):
+        for name in ('balance_sheet', 'income_statement', 'cash_flow_statement'):
             statement = getattr(current_period, name)()
             assert statement is not None, f"{ticker} {name}() returned None"
             rows = len(statement.get_dataframe())

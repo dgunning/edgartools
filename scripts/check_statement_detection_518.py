@@ -27,7 +27,7 @@ print(f"Dir: {[x for x in dir(xbrl.statements) if not x.startswith('_')]}")
 print("\n--- Individual Statement Check ---")
 print(f"balance_sheet: {xbrl.statements.balance_sheet}")
 print(f"income_statement: {xbrl.statements.income_statement}")
-print(f"cashflow_statement: {xbrl.statements.cashflow_statement}")
+print(f"cashflow_statement: {xbrl.statements.cash_flow_statement}")
 print(f"comprehensive_income: {xbrl.statements.comprehensive_income}")
 print(f"statement_of_equity: {xbrl.statements.statement_of_equity}")
 
@@ -74,7 +74,7 @@ print(f"Type: {type(xbrl.statements)}")
 print("\n--- Individual Statement Check ---")
 print(f"balance_sheet: {xbrl.statements.balance_sheet}")
 print(f"income_statement: {xbrl.statements.income_statement}")
-print(f"cashflow_statement: {xbrl.statements.cashflow_statement}")
+print(f"cashflow_statement: {xbrl.statements.cash_flow_statement}")
 print(f"comprehensive_income: {xbrl.statements.comprehensive_income}")
 
 # Check raw statements list

@@ -8,7 +8,7 @@ This directory contains reproduction scripts and tests for reported issues in Ed
 Files testing issues with the SEC Facts API data source (`edgar.entity` module).
 
 **What goes here:**
-- Issues with `Company.income_statement()`, `Company.balance_sheet()`, `Company.cash_flow()` methods
+- Issues with `Company.income_statement()`, `Company.balance_sheet()`, `Company.cash_flow_statement()` methods
 - Facts API data completeness or accuracy problems  
 - Period selection issues in Facts API data
 - Revenue classification and deduplication issues

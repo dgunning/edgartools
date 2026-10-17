@@ -47,7 +47,7 @@ class TestIssue464TenQRenderedStatements:
         filing = filings.latest(1)
 
         xbrl = filing.xbrl()
-        cash_flow = xbrl.statements.cashflow_statement()
+        cash_flow = xbrl.statements.cash_flow_statement()
 
         # Render to DataFrame
         df = cash_flow.to_dataframe()
@@ -84,11 +84,11 @@ class TestIssue464TenQRenderedStatements:
 
     @pytest.mark.parametrize("ticker,statement_type", [
         ("NVDA", "income_statement"),
-        ("NVDA", "cashflow_statement"),
+        ("NVDA", "cash_flow_statement"),
         ("MSFT", "income_statement"),
-        ("MSFT", "cashflow_statement"),
+        ("MSFT", "cash_flow_statement"),
         ("AAPL", "income_statement"),
-        ("AAPL", "cashflow_statement"),
+        ("AAPL", "cash_flow_statement"),
     ])
     def test_10q_statements_have_comparative_periods(self, ticker, statement_type):
         """Test multiple companies' 10-Q statements have comparative periods."""
@@ -138,7 +138,7 @@ class TestIssue464TenKStillWorks:
         xbrl = filing.xbrl()
 
         # Test all three statement types
-        for statement_type in ["balance_sheet", "income_statement", "cashflow_statement"]:
+        for statement_type in ["balance_sheet", "income_statement", "cash_flow_statement"]:
             statement = getattr(xbrl.statements, statement_type)()
             df = statement.to_dataframe()
 

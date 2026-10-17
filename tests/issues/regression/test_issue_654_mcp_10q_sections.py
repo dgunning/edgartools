@@ -93,7 +93,7 @@ class TestExtractSectionMapping:
         fin = MagicMock()
         fin.income_statement.return_value = "Net income: $1B"
         fin.balance_sheet.return_value = None
-        fin.cashflow_statement.return_value = None
+        fin.cash_flow_statement.return_value = None
 
         obj = MagicMock()
         obj.financials = fin

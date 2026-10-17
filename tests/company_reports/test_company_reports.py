@@ -83,7 +83,7 @@ def test_tenq_filing():
     assert tenq.financials is not None
     assert tenq.financials.balance_sheet()
     assert tenq.financials.income_statement()
-    assert tenq.financials.cashflow_statement()
+    assert tenq.financials.cash_flow_statement()
     print()
     print(tenq)
 

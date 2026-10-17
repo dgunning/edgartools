@@ -5,7 +5,6 @@ This module provides the main classes for interacting with SEC entities,
 including companies, funds, and individuals.
 """
 import re
-import warnings
 from abc import ABC, abstractmethod
 from datetime import date
 from functools import cached_property
@@ -1143,38 +1142,6 @@ class Company(Entity):
             from edgar.core import log
             log.debug(f"Error getting cash flow for {self.name}: {e}")
         return None
-
-    def cash_flow(
-        self,
-        periods: int = 4,
-        period: str = 'annual',
-        annual: Optional[bool] = None,
-        as_dataframe: bool = False,
-        concise_format: bool = False
-    ) -> Union["MultiPeriodStatement", TTMStatement, "pd.DataFrame", None]:
-        """Deprecated: Use cash_flow_statement() instead."""
-        import warnings
-        warnings.warn(
-            "cash_flow() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement() instead.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        return self.cash_flow_statement(
-            periods=periods, period=period, annual=annual,
-            as_dataframe=as_dataframe, concise_format=concise_format
-        )
-
-    def cashflow_statement(self, **kwargs):
-        """Deprecated: use :meth:`cash_flow_statement`."""
-        warnings.warn(
-            "cashflow_statement() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement(), which matches income_statement() and "
-            "balance_sheet().",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.cash_flow_statement(**kwargs)
 
     # -------------------------------------------------------------------------
     # Concept Discovery Methods

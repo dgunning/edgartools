@@ -251,7 +251,7 @@ income = facts.income_statement(periods=4, annual=True)
 balance = facts.balance_sheet(periods=4, annual=True)
 
 # Cash Flow Statement
-cash_flow = facts.cash_flow(periods=4, annual=True)
+cash_flow = facts.cash_flow_statement(periods=4, annual=True)
 
 # Quarterly data
 quarterly_income = facts.income_statement(periods=8, annual=False)

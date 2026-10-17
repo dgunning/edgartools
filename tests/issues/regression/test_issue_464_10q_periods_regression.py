@@ -56,7 +56,7 @@ def test_issue_464_coin_10q_comparative_periods():
     xbrl = filing.xbrl()
 
     # Cash Flow should have at least 2 comparative periods
-    cash_flow = xbrl.statements.cashflow_statement().to_dataframe()
+    cash_flow = xbrl.statements.cash_flow_statement().to_dataframe()
     cf_period_cols = [col for col in cash_flow.columns if col not in METADATA_COLUMNS]
 
     assert len(cf_period_cols) >= 2, (
@@ -84,7 +84,7 @@ def test_issue_464_coin_10q_has_comparative_periods():
 
     xbrl = filing.xbrl()
 
-    for statement_type in ["cashflow_statement", "income_statement", "balance_sheet"]:
+    for statement_type in ["cash_flow_statement", "income_statement", "balance_sheet"]:
         statement = getattr(xbrl.statements, statement_type)()
         df = statement.to_dataframe()
 
@@ -109,7 +109,7 @@ def test_issue_464_multiple_companies_10q(ticker):
 
     xbrl = filing.xbrl()
 
-    for statement_type in ["cashflow_statement", "income_statement"]:
+    for statement_type in ["cash_flow_statement", "income_statement"]:
         statement = getattr(xbrl.statements, statement_type)()
         df = statement.to_dataframe()
 
@@ -133,7 +133,7 @@ def test_issue_464_no_regression_in_10k():
 
     xbrl = filing.xbrl()
 
-    for statement_type in ["balance_sheet", "income_statement", "cashflow_statement"]:
+    for statement_type in ["balance_sheet", "income_statement", "cash_flow_statement"]:
         statement = getattr(xbrl.statements, statement_type)()
         df = statement.to_dataframe()
 

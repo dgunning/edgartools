@@ -28,7 +28,7 @@ class TestCurrencyDisplay:
 
         # Get XBRL and cash flow statement
         xbrl = filing.xbrl()
-        cashflow = xbrl.statements.cashflow_statement()
+        cashflow = xbrl.statements.cash_flow_statement()
         print(cashflow)
 
         # With the optimized version, currency is resolved on-demand, so we test directly
@@ -85,7 +85,7 @@ class TestCurrencyDisplay:
 
         # Get XBRL and cash flow statement
         xbrl = filing.xbrl()
-        cashflow = xbrl.statements.cashflow_statement()
+        cashflow = xbrl.statements.cash_flow_statement()
 
         # With the optimized version, test currency resolution directly
         raw_data = cashflow.get_raw_data()
