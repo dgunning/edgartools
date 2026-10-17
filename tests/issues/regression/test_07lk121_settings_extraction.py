@@ -21,28 +21,22 @@ WHAT THIS FILE GUARDS, and why each half matters:
 2. **The re-exports are the SAME objects, not copies.** 71 call sites import from
    `edgar.core`, every one of them a `from edgar.core import <name>` (measured by
    AST — zero `import edgar.core`, zero attribute access). A re-export therefore
-   covers 100% of them, but only if identity holds: `NORMAL is CAUTION`-style
-   comparisons and `isinstance(x, EdgarSettings)` must not care which path the
-   name arrived by.
+   covers 100% of them, but only if identity holds: `isinstance(x, EdgarSettings)` must not care which
+   path the name arrived by.
 """
 import edgar
 import edgar.core
 import edgar.settings
 
 SETTINGS_NAMES = [
-    "CAUTION",
-    "CRAWL",
-    "NORMAL",
     "EdgarSettings",
     "ask_for_identity",
     "default_http_timeout",
     "default_max_connections",
     "default_page_size",
     "default_retries",
-    "edgar_access_mode",
     "edgar_data_dir",
     "edgar_identity",
-    "edgar_mode",
     "get_edgar_data_directory",
     "get_identity",
     "identity_prompt",
@@ -79,7 +73,7 @@ class TestCoreStillReExportsEverything:
         """Identity, not equality.
 
         A copy would pass an equality check and still break
-        `isinstance(x, EdgarSettings)` and `mode is NORMAL`.
+        `isinstance(x, EdgarSettings)`.
         """
         for name in SETTINGS_NAMES:
             assert getattr(edgar.core, name) is getattr(edgar.settings, name), (
@@ -88,14 +82,15 @@ class TestCoreStillReExportsEverything:
 
     def test_the_top_level_namespace_is_unaffected(self):
         """What the docs actually tell people to import."""
-        for name in ("set_identity", "get_identity", "NORMAL", "CAUTION", "CRAWL"):
+        for name in ("set_identity", "get_identity"):
             assert getattr(edgar, name) is getattr(edgar.settings, name)
 
     def test_isinstance_still_works_across_both_paths(self):
-        from edgar.core import NORMAL as core_normal
+        from edgar.core import EdgarSettings as core_cls
         from edgar.settings import EdgarSettings as settings_cls
 
-        assert isinstance(core_normal, settings_cls)
+        assert core_cls is settings_cls
+        assert isinstance(core_cls(http_timeout=1, max_connections=1), settings_cls)
 
 
 class TestWhatDeliberatelyStayedInCore:
