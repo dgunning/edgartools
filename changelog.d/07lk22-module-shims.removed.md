@@ -1,0 +1,1 @@
+**`edgar.effect` and `edgar.form144` are removed.** They forwarded to `edgar.offerings.effect` and `edgar.ownership.form144` with a `DeprecationWarning` since 5.55.0, and now raise `ModuleNotFoundError`. `from edgar import Form144` and `filing.obj()` are unaffected. (bead edgartools-07lk.22.1)

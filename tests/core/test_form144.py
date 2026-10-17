@@ -1,5 +1,5 @@
 from pathlib import Path
-from edgar.form144 import Form144
+from edgar.ownership.form144 import Form144
 from edgar import Filing, find
 import pytest
 
@@ -186,7 +186,7 @@ def test_form144_type_annotations():
 @pytest.mark.fast
 def test_form144_holder_iteration():
     """Test that holders support iteration."""
-    from edgar.form144 import SecuritiesInformationHolder
+    from edgar.ownership.form144 import SecuritiesInformationHolder
     import pandas as pd
 
     # Create test data
@@ -223,7 +223,7 @@ def test_form144_holder_iteration():
 @pytest.mark.fast
 def test_form144_empty_holder():
     """Test holder behavior with empty data."""
-    from edgar.form144 import SecuritiesInformationHolder, SecuritiesToBeSoldHolder
+    from edgar.ownership.form144 import SecuritiesInformationHolder, SecuritiesToBeSoldHolder
     import pandas as pd
 
     # Test empty holder
@@ -370,7 +370,7 @@ def test_form144_to_analyst_summary():
 @pytest.mark.fast
 def test_form144_holder_derived_metrics():
     """Test derived metrics on SecuritiesInformationHolder."""
-    from edgar.form144 import SecuritiesInformationHolder
+    from edgar.ownership.form144 import SecuritiesInformationHolder
     import pandas as pd
 
     # Create test data
@@ -392,7 +392,7 @@ def test_form144_holder_derived_metrics():
 @pytest.mark.fast
 def test_form144_empty_holder_derived_metrics():
     """Test derived metrics return safe defaults on empty holder."""
-    from edgar.form144 import SecuritiesInformationHolder
+    from edgar.ownership.form144 import SecuritiesInformationHolder
     import pandas as pd
 
     holder = SecuritiesInformationHolder(pd.DataFrame())

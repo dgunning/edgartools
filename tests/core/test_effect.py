@@ -1,4 +1,4 @@
-from edgar.effect import Effect
+from edgar.offerings.effect import Effect
 from rich import print
 
 effect_xml_1 = """
