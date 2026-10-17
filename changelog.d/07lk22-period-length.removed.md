@@ -1,1 +1,1 @@
-**`period_length` removed from the EntityFacts statements.** `income_statement()`, `cash_flow_statement()` and `cash_flow()` no longer accept `period_length`; passing it raises `TypeError`. Use `period='quarterly'` or `period='annual'` instead (bead edgartools-07lk.22.1).
+**`period_length` removed from the EntityFacts statements.** `income_statement()` and `cash_flow_statement()` no longer accept `period_length`, by keyword or by position; passing it raises `TypeError`. Use `period='quarterly'` or `period='annual'` instead (bead edgartools-07lk.22.1).

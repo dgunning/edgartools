@@ -25,12 +25,22 @@ def resolve(period, annual):
 
 # --- period_length is gone ---------------------------------------------------
 
-@pytest.mark.parametrize("method_name", ["income_statement", "cash_flow_statement", "cash_flow"])
+@pytest.mark.parametrize("method_name", ["income_statement", "cash_flow_statement"])
 @pytest.mark.parametrize("length", [3, 12])
 def test_period_length_is_rejected_as_an_unexpected_keyword(method_name, length):
     facts = EntityFacts.__new__(EntityFacts)
     with pytest.raises(TypeError, match="period_length"):
         getattr(facts, method_name)(period_length=length)
+
+
+@pytest.mark.parametrize("method_name", ["income_statement", "cash_flow_statement"])
+def test_a_positional_period_length_is_rejected_not_rebound(method_name):
+    """period_length was the second positional parameter. Without keyword-only
+    arguments after `periods`, a 5.x call `income_statement(4, 12)` would bind
+    12 to `as_dataframe` and silently return a DataFrame."""
+    facts = EntityFacts.__new__(EntityFacts)
+    with pytest.raises(TypeError, match="positional"):
+        getattr(facts, method_name)(4, 12)
 
 
 # --- period resolution -------------------------------------------------------

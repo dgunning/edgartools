@@ -1905,6 +1905,7 @@ class EntityFacts:
     # Financial statement helpers
     def income_statement(self,
                          periods: int = 4,
+                         *,
                          as_dataframe: bool = False,
                          annual: Optional[bool] = None,
                          concise_format: bool = False,
@@ -2079,7 +2080,8 @@ class EntityFacts:
 
     def cash_flow_statement(self,
                            periods: int = 4,
-                             as_dataframe: bool = False,
+                           *,
+                           as_dataframe: bool = False,
                            annual: Optional[bool] = None,
                            concise_format: bool = False,
                            period: Optional[str] = None) -> Union[pd.DataFrame, MultiPeriodStatement, 'TTMStatement']:
@@ -2129,7 +2131,7 @@ class EntityFacts:
             concise_format=concise_format,
         )
 
-    def cash_flow(self, periods: int = 4, as_dataframe: bool = False,
+    def cash_flow(self, periods: int = 4, *, as_dataframe: bool = False,
                   annual: Optional[bool] = None, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
         """Deprecated: Use cash_flow_statement() instead."""
         warnings.warn(
