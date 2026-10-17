@@ -2998,7 +2998,8 @@ class PortfolioInvestments:
 
         Args:
             xbrl: The XBRL object from filing.xbrl()
-            period: Optional period (e.g., '2024-12-31'). If None, uses latest instant.
+            period: Optional period (e.g., '2024-12-31'). If None, uses the report
+                date when it carries holdings, else the latest instant.
             include_untyped: If False (default), excludes investments with "Unknown" type.
 
         Returns:
@@ -3017,11 +3018,13 @@ class PortfolioInvestments:
             if not fv_facts:
                 return cls([], period=None)
 
-            # Get unique periods and use the latest
+            # Use the report date when it carries holdings, else the latest instant:
+            # a roll-forward tagged on a later context must not replace the schedule.
             periods = set(f.get('period_instant') for f in fv_facts if f.get('period_instant'))
             if not periods:
                 return cls([], period=None)
-            period = max(periods)
+            report_date = getattr(xbrl, 'period_of_report', None)
+            period = report_date if report_date in periods else max(periods)
 
         # The dimension key for investment identifier
         dim_key = 'dim_us-gaap_InvestmentIdentifierAxis'
