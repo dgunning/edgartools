@@ -1,25 +1,19 @@
-"""Moved modules keep their old import path working until 6.0.
+"""Moved modules: the old import paths are gone in 6.0.
 
-Bead: edgartools-07lk.12.1
+Bead: edgartools-07lk.12.1 (the moves, shipped with shims in 5.55.0) and
+edgartools-07lk.22.1 (the shims removed in 6.0).
 
 `edgar.effect` -> `edgar.offerings.effect` and `edgar.form144` ->
-`edgar.ownership.form144`. Neither name is in `edgar.__all__` and neither had a
-top-level re-export, so the MODULE PATH was their entire public surface: moving
-without a shim is a break, not a staged deprecation (bead edgartools-07lk.23).
+`edgar.ownership.form144`. Through 5.x the old paths forwarded to the new
+modules with a DeprecationWarning. 6.0 deletes them, as docs/upgrade/6.0.md
+promised, so an old import fails at the import line instead of somewhere later.
 
-The two properties that matter, and neither is obvious from reading the shim:
-
-  IDENTITY. `edgar.form144.Form144 is edgar.ownership.form144.Form144`. A shim
-  that re-exported copies would pass a naive import test and then fail every
-  isinstance check written against the other path.
-
-  SILENCE INTERNALLY. `filing.obj()` routes 144/EFFECT filings through these
-  parsers. If dispatch imported the shim, every ordinary obj() call would warn
-  at a user who did nothing wrong — the deprecation would be noise instead of
-  signal, and the usual response to that is to delete the warning.
+What still matters: `filing.obj()` routes 144/EFFECT filings through the new
+modules, so ordinary use never touched the old paths and is unaffected.
 """
 
 import importlib
+import sys
 import warnings
 
 import pytest
@@ -37,44 +31,27 @@ def test_the_new_location_is_the_real_module(old, new, symbol):
 
 
 @pytest.mark.parametrize("old,new,symbol", MOVES)
-def test_the_old_path_still_resolves_to_the_same_object(old, new, symbol):
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", DeprecationWarning)
-        shim = importlib.import_module(old)
-        assert getattr(shim, symbol) is getattr(importlib.import_module(new), symbol)
+def test_the_old_path_is_removed(old, new, symbol):
+    sys.modules.pop(old, None)
+    with pytest.raises(ModuleNotFoundError, match=old.replace(".", r"\.")):
+        importlib.import_module(old)
 
 
-@pytest.mark.parametrize("old,new,symbol", MOVES)
-def test_the_old_path_warns_and_names_its_replacement(old, new, symbol):
-    shim = importlib.import_module(old)
-    with pytest.warns(DeprecationWarning, match=new.replace(".", r"\.")):
-        getattr(shim, symbol)
-
-
-@pytest.mark.parametrize("old,new,symbol", MOVES)
-def test_an_unknown_attribute_still_raises(old, new, symbol):
-    shim = importlib.import_module(old)
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", DeprecationWarning)
-        with pytest.raises(AttributeError):
-            shim.no_such_attribute_anywhere
-
-
-def test_form144_forwards_symbols_beyond_the_headline_class():
-    """tests/test_form144.py imports these off the old path."""
-    with warnings.catch_warnings():
-        warnings.simplefilter("ignore", DeprecationWarning)
-        from edgar.form144 import SecuritiesInformationHolder, SecuritiesToBeSoldHolder
+def test_form144_symbols_beyond_the_headline_class_live_at_the_new_path():
+    from edgar.ownership.form144 import SecuritiesInformationHolder, SecuritiesToBeSoldHolder
     assert SecuritiesInformationHolder.__module__ == "edgar.ownership.form144"
     assert SecuritiesToBeSoldHolder.__module__ == "edgar.ownership.form144"
 
 
-def test_obj_dispatch_does_not_route_through_the_shims():
-    """The deprecation must reach external callers only.
+def test_form144_is_still_exported_at_the_top_level():
+    import edgar
+    from edgar.ownership.form144 import Form144
+    assert edgar.Form144 is Form144
 
-    Read structurally rather than by calling obj(): a filing would need network
-    or a fixture, and the thing under test is which module the dispatch names.
-    """
+
+def test_obj_dispatch_names_the_new_modules():
+    """Read structurally rather than by calling obj(): a filing would need network
+    or a fixture, and the thing under test is which module the dispatch names."""
     source = (importlib.import_module("edgar").__file__)
     with open(source, encoding="utf-8") as fh:
         text = fh.read()
@@ -82,14 +59,6 @@ def test_obj_dispatch_does_not_route_through_the_shims():
     assert "from edgar.ownership.form144 import Form144" in text
     assert "from edgar.effect import Effect" not in text
     assert "from edgar.form144 import Form144" not in text
-
-
-def test_importing_edgar_emits_no_move_warning():
-    """A deprecation that fires on `import edgar` trains users to filter it out."""
-    with warnings.catch_warnings(record=True) as caught:
-        warnings.simplefilter("always")
-        importlib.reload(importlib.import_module("edgar"))
-    assert not [w for w in caught if "has moved" in str(w.message)]
 
 
 # ---------------------------------------------------------------------------
