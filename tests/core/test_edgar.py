@@ -1,6 +1,6 @@
 from edgar import obj, matches_form, Filing, CurrentFilings, FundReport, find, get_current_filings, CompanySearchResults
 from edgar.company_reports import TenK
-from edgar.effect import Effect
+from edgar.offerings.effect import Effect
 from edgar.entity import Entity
 from edgar.offerings import FormD
 from edgar.ownership import Ownership

@@ -1,0 +1,1 @@
+- **`edgar.core` no longer re-exports the date helpers.** `filing_date_to_year_quarters`, `current_year_and_quarter`, `is_start_of_quarter` and `parse_acceptance_datetime` now import only from `edgar.dates`; the old path raises `ImportError`. (bead edgartools-07lk.22.1)

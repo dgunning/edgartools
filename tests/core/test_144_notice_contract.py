@@ -14,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from edgar.form144 import Form144
+from edgar.ownership.form144 import Form144
 
 SAMPLE = Path('data/144/EDGAR Form 144 XML Samples/Sample 144.xml')
 SAMPLE_AMENDMENT = Path('data/144/EDGAR Form 144 XML Samples/Sample 144dashA.xml')

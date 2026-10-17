@@ -15,15 +15,6 @@ from rich.logging import RichHandler
 
 from edgar.datatools import PagingState
 
-# Re-exported for callers that still import them from here. The implementation
-# lives in edgar.dates; 6.0 drops this shim (edgartools-07lk.12.1 item 6).
-from edgar.dates import (  # noqa: F401
-    current_year_and_quarter,
-    filing_date_to_year_quarters,
-    is_start_of_quarter,
-    parse_acceptance_datetime,
-)
-
 log = logging.getLogger(__name__)
 
 def parse_pandas_version():
@@ -56,13 +47,11 @@ __all__ = [
     'text_extensions',
     'binary_extensions',
     'ask_for_identity',
-    'is_start_of_quarter',
     'run_async_or_sync',
     'get_edgar_data_directory',
     'is_probably_html',
     'has_html_content',
     'default_page_size',
-    'parse_acceptance_datetime',
     'PagingState',
     'Years',
     'Quarters',
@@ -113,29 +102,6 @@ from edgar.settings import (  # noqa: E402,F401  -- re-exports, intentionally un
     limits,
     set_identity,
 )
-
-# NORMAL / CAUTION / CRAWL / edgar_mode / edgar_access_mode are deliberately NOT
-# imported above. They are deprecated (GH #1326) and importing them here would
-# fire the DeprecationWarning once at `import edgar.core`, for every user,
-# naming this module rather than the code that actually reached for one. Routed
-# through __getattr__ instead so the warning lands on the real call site, and
-# so `from edgar.core import NORMAL` keeps working until 6.0.
-
-
-def __getattr__(name: str):
-    """Resolve the deprecated access modes without eager-importing them."""
-    from edgar import settings as _settings
-
-    if name in _settings.DEPRECATED_ACCESS_MODE_NAMES:
-        _settings.warn_access_mode_deprecated(name)
-        return _settings.DEPRECATED_ACCESS_MODE_NAMES[name]
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-def __dir__():
-    from edgar import settings as _settings
-
-    return sorted(set(globals()) | set(_settings.DEPRECATED_ACCESS_MODE_NAMES))
 
 
 def strtobool (val:str):
