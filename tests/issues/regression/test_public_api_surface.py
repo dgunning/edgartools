@@ -54,11 +54,7 @@ INTERNAL = {
     # _run_import_time_cache_migrations, so they live only in edgar.httpclient.
     "clear_company_facts_cache",
     # helpers and protocols used inside the package
-    "listify", "matches_form", "edgar_mode", "get_obj_info",
-    # deprecated access modes (GH #1326): still importable by name, which warns,
-    # but kept out of __all__ so `from edgar import *` stays silent
-    # (edgartools-2db17). Removed in 6.0 with edgar_mode (edgartools-2jwo).
-    "NORMAL", "CAUTION", "CRAWL",
+    "listify", "matches_form", "get_obj_info",
     "HasContext", "compose_context",
     # lower-level variants of supported entry points
     "get_by_accession_number_enriched", "get_entity_submissions",
