@@ -77,7 +77,7 @@ def test_vale_stitched_cashflow_no_crash():
 
     xbrls = XBRLS.from_filings(filings)
     try:
-        cf = xbrls.statements.cashflow_statement()
+        cf = xbrls.statements.cash_flow_statement()
     except Exception as e:
         pytest.fail(f"Should not raise, got: {e}")
 

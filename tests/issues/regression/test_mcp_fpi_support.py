@@ -197,7 +197,7 @@ class TestExtractSectionFPI:
         fin = MagicMock()
         fin.income_statement.return_value = "Revenue: $5B"
         fin.balance_sheet.return_value = None
-        fin.cashflow_statement.return_value = None
+        fin.cash_flow_statement.return_value = None
 
         obj = MagicMock()
         obj.financials = fin
@@ -225,7 +225,7 @@ class TestExtractSectionFPI:
         fin = MagicMock()
         fin.income_statement.return_value = "Quarterly Revenue: $1.2B"
         fin.balance_sheet.return_value = None
-        fin.cashflow_statement.return_value = None
+        fin.cash_flow_statement.return_value = None
 
         obj = MagicMock()
         obj.financials = fin

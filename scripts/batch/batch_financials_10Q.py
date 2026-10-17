@@ -8,7 +8,7 @@ def run_tenq_financials(num):
         if xbrl:
             income_statement = xbrl.statements.income_statement()
             balance_sheet = xbrl.statements.balance_sheet()
-            cashflow_statement = xbrl.statements.cashflow_statement()
+            cashflow_statement = xbrl.statements.cash_flow_statement()
             print(income_statement)
             print(balance_sheet)
             print(cashflow_statement)

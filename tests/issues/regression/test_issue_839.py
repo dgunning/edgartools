@@ -4,7 +4,7 @@ Regression test for GitHub Issue #839:
 The standardized cash flow statement dropped the primary "Depreciation and
 amortization" line for filers that tag it with ``us-gaap:OtherDepreciationAndAmortization``
 instead of the common ``us-gaap:DepreciationDepletionAndAmortization``. For
-Marvell (MRVL), ``Company("MRVL").cashflow_statement()`` had no canonical
+Marvell (MRVL), ``Company("MRVL").cash_flow_statement()`` had no canonical
 "Depreciation and amortization" row; the value surfaced only under a stray
 "Other Depreciation and Amortization" orphan row. The as-filed XBRL view was
 correct, so the gap was purely in the EntityFacts standardization layer.
@@ -244,7 +244,7 @@ def test_mrvl_cashflow_canonical_da_present():
     """
     from edgar import Company
 
-    df = Company("MRVL").cashflow_statement(periods=3).to_dataframe()
+    df = Company("MRVL").cash_flow_statement(periods=3).to_dataframe()
 
     canonical = df[
         df["label"].astype(str).str.fullmatch(r"(?i)depreciation and amortization", na=False)

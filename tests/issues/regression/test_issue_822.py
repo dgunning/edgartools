@@ -122,7 +122,7 @@ def test_cava_q1_2026_income_statement_revenue_values(cava_q1_2026):
 def test_cava_q1_2026_cash_flow_is_populated(cava_q1_2026):
     """CAVA Q1 fiscal 2026 cash flow must surface the current 111-day period
     with populated values (not the empty stray prior-year period)."""
-    df = cava_q1_2026.obj().financials.cashflow_statement().to_dataframe()
+    df = cava_q1_2026.obj().financials.cash_flow_statement().to_dataframe()
     period_cols = _period_columns(df)
 
     assert '2026-04-19' in period_cols, (

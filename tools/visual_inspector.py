@@ -56,7 +56,7 @@ def show_statement(filing_or_accession, statement_type="cashflow", max_rows=20, 
         statements = xbrl.statements
 
         if statement_type.lower() in ['cashflow', 'cash', 'cf']:
-            stmt = statements.cashflow_statement()
+            stmt = statements.cash_flow_statement()
             stmt_name = "Cash Flow Statement"
         elif statement_type.lower() in ['income', 'is', 'pnl']:
             stmt = statements.income_statement()
@@ -428,7 +428,7 @@ def show_filing_overview(filing_or_accession):
                 console.print("✅ Statements accessible")
 
                 statement_tests = [
-                    ('Cash Flow', 'cashflow_statement'),
+                    ('Cash Flow', 'cash_flow_statement'),
                     ('Income Statement', 'income_statement'),
                     ('Balance Sheet', 'balance_sheet')
                 ]

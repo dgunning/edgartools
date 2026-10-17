@@ -73,8 +73,8 @@ cashflow  = financials.cash_flow_statement()
 That's it — three lines to get any company's income statement, balance sheet, or cash flow.
 
 !!! note "Common gotcha"
-    Use `cash_flow_statement()` for cash flow statements. The older alias
-    `cashflow_statement()` is deprecated and will be removed in v6.0.
+    Use `cash_flow_statement()` for cash flow statements. The older spelling
+    `cashflow_statement()` was removed in v6.0.
     All three statements: `income_statement()`, `balance_sheet()`, `cash_flow_statement()`.
 
 ## Step 5: Get Specific Values
