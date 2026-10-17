@@ -137,7 +137,6 @@ revenue_ts = facts.time_series('Revenue', periods=8)
 
 ```python
 income_statement(periods: int = 4, 
-                 period_length: Optional[int] = None, 
                  as_dataframe: bool = False, 
                  annual: bool = True)
 ```
@@ -154,7 +153,6 @@ df = facts.income_statement(periods=8, annual=False, as_dataframe=True)
 
 **Parameters:**
 - `periods` (int): Number of periods to retrieve (default: 4)
-- `period_length` (int, optional): Filter by period length in months (3=quarterly, 12=annual)
 - `as_dataframe` (bool): If True, return DataFrame; if False, return FinancialStatement (default: False)
 - `annual` (bool): If True, prefer annual periods; if False, prefer quarterly (default: True)
 
@@ -180,7 +178,7 @@ snapshot = facts.balance_sheet(as_of=date(2024, 12, 31))
 
 **Returns:** FinancialStatement or DataFrame
 
-#### `cash_flow(periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False, annual: bool = True)`
+#### `cash_flow(periods: int = 4, as_dataframe: bool = False, annual: bool = True)`
 
 Get cash flow statement facts.
 
@@ -191,7 +189,6 @@ stmt = facts.cash_flow_statement(periods=5, annual=True)
 
 **Parameters:**
 - `periods` (int): Number of periods to retrieve (default: 4)
-- `period_length` (int, optional): Filter by period length in months
 - `as_dataframe` (bool): If True, return DataFrame; if False, return FinancialStatement (default: False)
 - `annual` (bool): If True, prefer annual periods (default: True)
 
