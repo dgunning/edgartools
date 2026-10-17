@@ -109,7 +109,7 @@ class TestStructuredDimensionsWithRealData:
         xbrl = filing.xbrl()
 
         income = xbrl.statements.income_statement()
-        df = income.to_dataframe(include_dimensions=True)
+        df = income.to_dataframe(view='detailed')
 
         # Check columns exist
         assert 'dimension_axis' in df.columns
@@ -149,7 +149,7 @@ class TestStructuredDimensionsWithRealData:
         xbrl = filing.xbrl()
 
         income = xbrl.statements.income_statement()
-        df = income.to_dataframe(include_dimensions=True)
+        df = income.to_dataframe(view='detailed')
 
         # Filter to ProductOrServiceAxis
         product_rows = df[df['dimension_axis'] == 'srt:ProductOrServiceAxis']
@@ -171,7 +171,7 @@ class TestStructuredDimensionsWithRealData:
         xbrl = filing.xbrl()
 
         income = xbrl.statements.income_statement()
-        df = income.to_dataframe(include_dimensions=True)
+        df = income.to_dataframe(view='detailed')
 
         # Get dimensional rows
         dim_rows = df[df['dimension'] == True]
@@ -194,7 +194,7 @@ class TestStructuredDimensionsWithRealData:
         xbrl = filing.xbrl()
 
         income = xbrl.statements.income_statement()
-        df = income.to_dataframe(include_dimensions=True)
+        df = income.to_dataframe(view='detailed')
 
         # Get dimensional rows with ProductOrServiceAxis
         product_rows = df[df['dimension_axis'] == 'srt:ProductOrServiceAxis']
@@ -214,7 +214,7 @@ class TestStructuredDimensionsWithRealData:
         xbrl = filing.xbrl()
 
         income = xbrl.statements.income_statement()
-        df = income.to_dataframe(include_dimensions=True)
+        df = income.to_dataframe(view='detailed')
 
         # Get non-dimensional rows
         non_dim_rows = df[df['dimension'] == False]

@@ -371,7 +371,8 @@ Render the statement with rich formatting.
 ```python
 def to_dataframe(
     self,
-    include_dimensions: bool = True,
+    view: ViewType = None,
+    *,
     include_unit: bool = False,
     include_point_in_time: bool = False,
     presentation: bool = False
@@ -380,7 +381,8 @@ def to_dataframe(
 Convert statement to pandas DataFrame with optional transformations.
 
 **Parameters:**
-- `include_dimensions`: Include dimensional breakdowns (default: True)
+- `view`: `"standard"`, `"detailed"` or `"summary"` (default: `"detailed"`). Replaces
+  `include_dimensions`, which was removed in 6.0 (`True` is `"detailed"`, `False` is `"standard"`)
 - `include_unit`: Include unit column (USD, shares, etc.) (default: False)
 - `include_point_in_time`: Include point-in-time column for instant facts (default: False)
 - `presentation`: Apply HTML-matching transformations using preferred_sign (default: False)

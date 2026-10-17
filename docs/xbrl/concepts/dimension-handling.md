@@ -287,7 +287,9 @@ df = income.to_dataframe()
 ```
 
 The `view` parameter accepts `"standard"`, `"detailed"`, or `"summary"` (or the `StatementView` enum).
-The legacy `include_dimensions` boolean is still supported but `view` is preferred.
+The `include_dimensions` boolean that `view` replaced was removed in 6.0: `include_dimensions=True` is
+`view="detailed"` and `include_dimensions=False` is `view="standard"` (see the
+[6.0 upgrade guide](../../upgrade/6.0.md)).
 
 ### Dimension Classification API
 
@@ -328,6 +330,7 @@ valid_dims = xbrl.get_valid_dimensions_for_role(role_uri)
 | Version | Change |
 |---------|--------|
 | v5.21.1 | Member hierarchy support — sub-members nested under parent members in `to_dataframe(view="detailed")` using definition linkbase hierarchy |
+| v6.0.0 | `include_dimensions` removed from statement rendering; use `view` |
 | v5.8.0 | `view` parameter replaces `include_dimensions`: printing defaults to `"standard"`, `to_dataframe()` to `"detailed"` |
 | v5.7.4 | Definition linkbase-based dimension filtering (GH-577 fix) |
 | v5.7.2 | Initial dimension handling with hardcoded lists (GH-569) |

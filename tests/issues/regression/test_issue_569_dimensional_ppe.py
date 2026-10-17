@@ -41,7 +41,7 @@ class TestIssue569DimensionalPPE:
 
         After fix: PPE row shows the actual $1,034M value (or current period equivalent).
         """
-        balance_sheet = uri_xbrl.statements.balance_sheet(include_dimensions=False)
+        balance_sheet = uri_xbrl.statements.balance_sheet(view='standard')
         df = balance_sheet.to_dataframe()
 
         # Find PPE rows
@@ -72,7 +72,7 @@ class TestIssue569DimensionalPPE:
         Rows like "UNITED STATES - Total equipment rentals" or "Foreign - Property and equipment"
         are breakdown details that should NOT appear on the face of the statement.
         """
-        balance_sheet = uri_xbrl.statements.balance_sheet(include_dimensions=False)
+        balance_sheet = uri_xbrl.statements.balance_sheet(view='standard')
         df = balance_sheet.to_dataframe()
 
         # Should NOT have geographic prefixed items
@@ -80,17 +80,17 @@ class TestIssue569DimensionalPPE:
         foreign_rows = df[df['label'].str.contains('Foreign -', case=False, na=False)]
 
         assert len(us_rows) == 0, (
-            f"Geographic breakdown 'UNITED STATES -' should be hidden with include_dimensions=False, "
+            f"Geographic breakdown 'UNITED STATES -' should be hidden with view='standard', "
             f"but found {len(us_rows)} rows"
         )
         assert len(foreign_rows) == 0, (
-            f"Geographic breakdown 'Foreign -' should be hidden with include_dimensions=False, "
+            f"Geographic breakdown 'Foreign -' should be hidden with view='standard', "
             f"but found {len(foreign_rows)} rows"
         )
 
     def test_all_dimensions_show_with_dimensions_true(self, uri_xbrl):
         """All dimensional items should appear with include_dimensions=True."""
-        balance_sheet = uri_xbrl.statements.balance_sheet(include_dimensions=True)
+        balance_sheet = uri_xbrl.statements.balance_sheet(view='detailed')
         df = balance_sheet.to_dataframe()
 
         # Should have both face values AND geographic breakdowns
@@ -98,14 +98,14 @@ class TestIssue569DimensionalPPE:
 
         # Should have multiple rows (face value + geographic breakdowns)
         assert len(ppe_rows) >= 3, (
-            f"Expected multiple PPE rows with include_dimensions=True (face + breakdowns), "
+            f"Expected multiple PPE rows with view='detailed' (face + breakdowns), "
             f"but found only {len(ppe_rows)}"
         )
 
         # Geographic breakdowns should be present
         geo_rows = df[df['label'].str.contains('UNITED STATES -|Foreign -', case=False, na=False)]
         assert len(geo_rows) > 0, (
-            "Geographic breakdown rows should appear with include_dimensions=True"
+            "Geographic breakdown rows should appear with view='detailed'"
         )
 
     def test_is_breakdown_column_present(self, uri_xbrl):
@@ -113,7 +113,7 @@ class TestIssue569DimensionalPPE:
 
         This allows users to filter breakdown vs face dimensions themselves.
         """
-        balance_sheet = uri_xbrl.statements.balance_sheet(include_dimensions=True)
+        balance_sheet = uri_xbrl.statements.balance_sheet(view='detailed')
         df = balance_sheet.to_dataframe()
 
         assert 'is_breakdown' in df.columns, "is_breakdown column should be present"
@@ -131,7 +131,7 @@ class TestIssue569DimensionalPPE:
         PPE by type (PropertyPlantAndEquipmentByTypeAxis) is a classification dimension
         that appears on the face of the statement, not a breakdown.
         """
-        balance_sheet = uri_xbrl.statements.balance_sheet(include_dimensions=True)
+        balance_sheet = uri_xbrl.statements.balance_sheet(view='detailed')
         df = balance_sheet.to_dataframe()
 
         # Find PPE dimension rows that are NOT geographic

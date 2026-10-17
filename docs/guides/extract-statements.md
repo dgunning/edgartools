@@ -675,7 +675,7 @@ print(ts_df[['revenue_growth', 'income_growth']].round(1))
 ```python
 # Statements with dimensional (segment) detail, from the filing's XBRL
 financials = company.get_financials()
-segment_df = financials.income_statement(include_dimensions=True).to_dataframe()
+segment_df = financials.income_statement(view='detailed').to_dataframe()
 print(segment_df.head())
 ```
 

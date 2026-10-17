@@ -654,8 +654,7 @@ class Statement:
                period_view: Optional[str] = None,
                standard: bool = True,
                show_date_range: bool = False,
-               view: ViewType = None,
-               include_dimensions: Optional[bool] = None) -> Any:
+               view: ViewType = None) -> Any:
         """
         Render the statement as a formatted table.
 
@@ -668,26 +667,10 @@ class Statement:
                   STANDARD: Face presentation only (default for display)
                   DETAILED: All dimensional data included
                   SUMMARY: Non-dimensional totals only
-            include_dimensions: Deprecated. Use view='standard'|'detailed'|'summary' instead.
 
         Returns:
             Rich Table containing the rendered statement
         """
-        # Handle deprecated include_dimensions parameter
-        if include_dimensions is not None:
-            if view is not None:
-                raise ValueError(
-                    "Cannot specify both 'view' and 'include_dimensions'. "
-                    "Use 'view' only (include_dimensions is deprecated)."
-                )
-            warnings.warn(
-                "include_dimensions is deprecated and will be removed in v6.0. "
-                "Use view='standard', 'detailed', or 'summary' instead.",
-                DeprecationWarning,
-                stacklevel=2
-            )
-            view = StatementView.DETAILED if include_dimensions else StatementView.STANDARD
-
         # Determine effective view - default to STANDARD for rendering (clean display)
         if view is not None:
             effective_view = normalize_view(view)
@@ -1156,7 +1139,7 @@ class Statement:
                      period_view: Optional[str] = None,
                      standard: bool = True,
                      view: ViewType = None,
-                     include_dimensions: Optional[bool] = None,
+                     *,
                      include_unit: bool = False,
                      include_point_in_time: bool = False,
                      include_standardization: bool = False,
@@ -1173,8 +1156,6 @@ class Statement:
                   DETAILED: All dimensional data (iPhone, iPad, Mac, etc.) - DEFAULT
                   SUMMARY: Non-dimensional totals only
                   If None, defaults to DETAILED for complete data extraction.
-            include_dimensions: Deprecated. Use view='standard'|'detailed'|'summary' instead.
-                              If specified, emits DeprecationWarning.
             include_unit: If True, add a 'unit' column with unit information (e.g., 'usd', 'shares', 'usdPerShare')
             include_point_in_time: If True, add a 'point_in_time' boolean column (True for 'instant', False for 'duration')
             include_standardization: If True, add a 'standard_concept' column showing
@@ -1206,24 +1187,6 @@ class Statement:
             >>> # Matrix format for Statement of Equity
             >>> equity_df = equity_statement.to_dataframe(matrix=True)
         """
-        # Handle deprecated include_dimensions parameter
-        if include_dimensions is not None:
-            if view is not None:
-                raise ValueError(
-                    "Cannot specify both 'view' and 'include_dimensions'. "
-                    "Use 'view' only (include_dimensions is deprecated)."
-                )
-            warnings.warn(
-                "include_dimensions is deprecated and will be removed in v6.0. "
-                "Use view='standard', 'detailed', or 'summary' instead. "
-                "include_dimensions=True maps to view='detailed', "
-                "include_dimensions=False maps to view='standard'.",
-                DeprecationWarning,
-                stacklevel=2
-            )
-            # Map deprecated parameter to view
-            view = StatementView.DETAILED if include_dimensions else StatementView.STANDARD
-
         # Determine effective view
         if view is not None:
             effective_view = normalize_view(view)
@@ -2464,32 +2427,6 @@ class Statements:
                     self.statement_by_type[stmt['type']] = []
                 self.statement_by_type[stmt['type']].append(stmt)
 
-    def _resolve_view(self, view: ViewType, include_dimensions: Optional[bool]) -> ViewType:
-        """
-        Resolve view parameter from deprecated include_dimensions.
-
-        Args:
-            view: Explicit view parameter (takes precedence)
-            include_dimensions: Deprecated parameter
-
-        Returns:
-            Resolved view (may be None if neither specified)
-        """
-        if include_dimensions is not None:
-            if view is not None:
-                raise ValueError(
-                    "Cannot specify both 'view' and 'include_dimensions'. "
-                    "Use 'view' only (include_dimensions is deprecated)."
-                )
-            warnings.warn(
-                "include_dimensions is deprecated and will be removed in v6.0. "
-                "Use view='standard', 'detailed', or 'summary' instead.",
-                DeprecationWarning,
-                stacklevel=3
-            )
-            return StatementView.DETAILED if include_dimensions else StatementView.STANDARD
-        return view
-
     @staticmethod
     def classify_statement(stmt: dict) -> str:
         """
@@ -3057,8 +2994,7 @@ class Statements:
         return self["CoverPage"]
 
     def balance_sheet(self, parenthetical: bool = False,
-                      view: ViewType = None,
-                      include_dimensions: Optional[bool] = None) -> Optional[Statement]:
+                      view: ViewType = None) -> Optional[Statement]:
         """
         Get a balance sheet.
 
@@ -3068,35 +3004,30 @@ class Statements:
                   STANDARD: Face presentation only (default for display)
                   DETAILED: All dimensional data (default for to_dataframe)
                   SUMMARY: Non-dimensional totals only
-            include_dimensions: Deprecated. Use view parameter instead.
 
         Returns:
             A balance sheet statement, or None if unable to resolve the statement
         """
-        # Handle deprecated include_dimensions parameter
-        effective_view = self._resolve_view(view, include_dimensions)
-
         try:
             role = self.find_statement_by_primary_concept("BalanceSheet", is_parenthetical=parenthetical)
             if role:
-                return Statement(self.xbrl, role, canonical_type=None if parenthetical else "BalanceSheet", view=effective_view)
+                return Statement(self.xbrl, role, canonical_type=None if parenthetical else "BalanceSheet", view=view)
 
             # Try using the xbrl.render_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("BalanceSheet", parenthetical)
                 if found_role:
-                    return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "BalanceSheet", view=effective_view)
+                    return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "BalanceSheet", view=view)
 
             if parenthetical:
                 return None
 
-            return Statement(self.xbrl, "BalanceSheet", canonical_type="BalanceSheet", view=effective_view)
+            return Statement(self.xbrl, "BalanceSheet", canonical_type="BalanceSheet", view=view)
         except Exception as e:
             return self._handle_statement_error(e, "BalanceSheet")
 
     def income_statement(self, parenthetical: bool = False, skip_concept_check: bool = False,
-                         view: ViewType = None,
-                         include_dimensions: Optional[bool] = None) -> Optional[Statement]:
+                         view: ViewType = None) -> Optional[Statement]:
         """
         Get an income statement.
 
@@ -3107,14 +3038,10 @@ class Statements:
                   STANDARD: Face presentation only (default for display)
                   DETAILED: All dimensional data (default for to_dataframe)
                   SUMMARY: Non-dimensional totals only
-            include_dimensions: Deprecated. Use view parameter instead.
 
         Returns:
             An income statement, or None if unable to resolve the statement
         """
-        # Handle deprecated include_dimensions parameter
-        effective_view = self._resolve_view(view, include_dimensions)
-
         try:
             # Try using the xbrl.find_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
@@ -3122,20 +3049,19 @@ class Statements:
                 if found_role:
                     return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "IncomeStatement",
                                    skip_concept_check=skip_concept_check,
-                                   view=effective_view)
+                                   view=view)
 
             if parenthetical:
                 return None
 
             return Statement(self.xbrl, "IncomeStatement", canonical_type="IncomeStatement",
                            skip_concept_check=skip_concept_check,
-                           view=effective_view)
+                           view=view)
         except Exception as e:
             return self._handle_statement_error(e, "IncomeStatement")
 
     def cash_flow_statement(self, parenthetical: bool = False,
-                           view: ViewType = None,
-                           include_dimensions: Optional[bool] = None) -> Optional[Statement]:
+                           view: ViewType = None) -> Optional[Statement]:
         """
         Get a cash flow statement.
 
@@ -3145,27 +3071,23 @@ class Statements:
                   STANDARD: Face presentation only (default for display)
                   DETAILED: All dimensional data (default for to_dataframe)
                   SUMMARY: Non-dimensional totals only
-            include_dimensions: Deprecated. Use view parameter instead.
 
         Returns:
              The cash flow statement, or None if unable to resolve the statement
         """
-        # Handle deprecated include_dimensions parameter
-        effective_view = self._resolve_view(view, include_dimensions)
-
         try:
             # Try using the xbrl.find_statement with parenthetical parameter
             if hasattr(self.xbrl, 'find_statement'):
                 matching_statements, found_role, _ = self.xbrl.find_statement("CashFlowStatement", parenthetical)
                 if found_role:
                     return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "CashFlowStatement",
-                                   view=effective_view)
+                                   view=view)
 
             if parenthetical:
                 return None
 
             return Statement(self.xbrl, "CashFlowStatement", canonical_type="CashFlowStatement",
-                           view=effective_view)
+                           view=view)
         except Exception as e:
             return self._handle_statement_error(e, "CashFlowStatement")
 
@@ -3181,8 +3103,7 @@ class Statements:
         return self.cash_flow_statement(**kwargs)
 
     def statement_of_equity(self, parenthetical: bool = False,
-                            view: ViewType = None,
-                            include_dimensions: Optional[bool] = None) -> Optional[Statement]:
+                            view: ViewType = None) -> Optional[Statement]:
         """
         Get a statement of equity.
 
@@ -3192,17 +3113,13 @@ class Statements:
                   STANDARD: Face presentation only (default for display)
                   DETAILED: All dimensional data (default for to_dataframe)
                   SUMMARY: Non-dimensional totals only
-            include_dimensions: Deprecated. Use view parameter instead.
 
         Returns:
            The statement of equity, or None if unable to resolve the statement
         """
-        # Handle deprecated include_dimensions parameter
-        effective_view = self._resolve_view(view, include_dimensions)
-
         # Issue #571: Statement of Equity is inherently dimensional - default to include_dimensions=True
-        # when neither view nor include_dimensions was explicitly set
-        effective_include_dimensions = True if (view is None and include_dimensions is None) else (include_dimensions if include_dimensions is not None else False)
+        # when no view was explicitly set
+        effective_include_dimensions = view is None
 
         try:
             # Try using the xbrl.find_statement with parenthetical parameter
@@ -3210,19 +3127,18 @@ class Statements:
                 matching_statements, found_role, _ = self.xbrl.find_statement("StatementOfEquity", parenthetical)
                 if found_role:
                     return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "StatementOfEquity",
-                                   view=effective_view, include_dimensions=effective_include_dimensions)
+                                   view=view, include_dimensions=effective_include_dimensions)
 
             if parenthetical:
                 return None
 
             return Statement(self.xbrl, "StatementOfEquity", canonical_type="StatementOfEquity",
-                           view=effective_view, include_dimensions=effective_include_dimensions)
+                           view=view, include_dimensions=effective_include_dimensions)
         except Exception as e:
             return self._handle_statement_error(e, "StatementOfEquity")
 
     def comprehensive_income(self, parenthetical: bool = False,
-                             view: ViewType = None,
-                             include_dimensions: Optional[bool] = None) -> Optional[Statement]:
+                             view: ViewType = None) -> Optional[Statement]:
         """
         Get a statement of comprehensive income.
 
@@ -3236,17 +3152,13 @@ class Statements:
                   STANDARD: Face presentation only (default for display)
                   DETAILED: All dimensional data (default for to_dataframe)
                   SUMMARY: Non-dimensional totals only
-            include_dimensions: Deprecated. Use view parameter instead.
 
         Returns:
             The comprehensive income statement, or None if unable to resolve the statement
         """
-        # Handle deprecated include_dimensions parameter
-        effective_view = self._resolve_view(view, include_dimensions)
-
         # Issue #571: Comprehensive Income is inherently dimensional - default to include_dimensions=True
-        # when neither view nor include_dimensions was explicitly set
-        effective_include_dimensions = True if (view is None and include_dimensions is None) else (include_dimensions if include_dimensions is not None else False)
+        # when no view was explicitly set
+        effective_include_dimensions = view is None
 
         try:
             # Try using the xbrl.find_statement with parenthetical parameter
@@ -3254,13 +3166,13 @@ class Statements:
                 matching_statements, found_role, _ = self.xbrl.find_statement("ComprehensiveIncome", parenthetical)
                 if found_role:
                     return Statement(self.xbrl, found_role, canonical_type=None if parenthetical else "ComprehensiveIncome",
-                                   view=effective_view, include_dimensions=effective_include_dimensions)
+                                   view=view, include_dimensions=effective_include_dimensions)
 
             if parenthetical:
                 return None
 
             return Statement(self.xbrl, "ComprehensiveIncome", canonical_type="ComprehensiveIncome",
-                           view=effective_view, include_dimensions=effective_include_dimensions)
+                           view=view, include_dimensions=effective_include_dimensions)
         except Exception as e:
             return self._handle_statement_error(e, "ComprehensiveIncome")
 
@@ -3454,7 +3366,8 @@ class Statements:
                      statement_type: str,
                      period_view: Optional[str] = None,
                      standard: bool = True,
-                     include_dimensions: bool = False,
+                     *,
+                     view: ViewType = None,
                      presentation: bool = True) -> Optional[pd.DataFrame]:
         """
         Convert a statement to a pandas DataFrame.
@@ -3463,7 +3376,9 @@ class Statements:
             statement_type: Type of statement to convert
             period_view: Optional period view name
             standard: Whether to use standardized concept labels (default: True)
-            include_dimensions: Whether to include dimensional segment data (default: False)
+            view: StatementView controlling dimensional data display
+                  ('standard', 'detailed' or 'summary'). Defaults to 'standard',
+                  as for ``Statement.render()``.
             presentation: Whether to apply the presentation sign so values match
                 SEC display (default: True), matching ``Statement.to_dataframe()``
 
@@ -3472,7 +3387,7 @@ class Statements:
         """
         statement = self[statement_type]
         return statement.render(
-            period_view=period_view, standard=standard, include_dimensions=include_dimensions
+            period_view=period_view, standard=standard, view=view
         ).to_dataframe(presentation=presentation)
 
 

@@ -71,7 +71,7 @@ def _financials_over(df):
     """A Financials whose cash flow statement is `df`, with no network behind it."""
 
     class _Fin(Financials):
-        def cash_flow_statement(self, include_dimensions=None, view=None):
+        def cash_flow_statement(self, *, view=None):
             return _FakeStatement(df)
 
     # xb only has to be non-None: every code path under test checks it and then

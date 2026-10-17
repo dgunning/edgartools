@@ -76,8 +76,8 @@ class TestIncomeStatementCOGS:
             xbrl = filing.xbrl()
 
             stmt = xbrl.statements.income_statement()
-            df_all = stmt.to_dataframe(include_dimensions=True)
-            df_filtered = stmt.to_dataframe(include_dimensions=False)
+            df_all = stmt.to_dataframe(view='detailed')
+            df_filtered = stmt.to_dataframe(view='standard')
 
             # Check if definition linkbase is available
             _, role_uri, _ = xbrl.find_statement("IncomeStatement")
@@ -215,8 +215,8 @@ class TestBalanceSheetGoodwill:
             xbrl = filing.xbrl()
 
             stmt = xbrl.statements.balance_sheet()
-            df_all = stmt.to_dataframe(include_dimensions=True)
-            df_filtered = stmt.to_dataframe(include_dimensions=False)
+            df_all = stmt.to_dataframe(view='detailed')
+            df_filtered = stmt.to_dataframe(view='standard')
 
             _, role_uri, _ = xbrl.find_statement("BalanceSheet")
             has_def = xbrl.has_definition_linkbase_for_role(role_uri) if role_uri else False
@@ -279,8 +279,8 @@ class TestBalanceSheetPPE:
             xbrl = filing.xbrl()
 
             stmt = xbrl.statements.balance_sheet()
-            df_all = stmt.to_dataframe(include_dimensions=True)
-            df_filtered = stmt.to_dataframe(include_dimensions=False)
+            df_all = stmt.to_dataframe(view='detailed')
+            df_filtered = stmt.to_dataframe(view='standard')
 
             _, role_uri, _ = xbrl.find_statement("BalanceSheet")
             has_def = xbrl.has_definition_linkbase_for_role(role_uri) if role_uri else False
@@ -403,7 +403,7 @@ class TestSummaryValidation:
                 xbrl = filing.xbrl()
 
                 stmt = xbrl.statements.income_statement()
-                df = stmt.to_dataframe(include_dimensions=False)
+                df = stmt.to_dataframe(view='standard')
 
                 cogs = get_face_value_sum(df, "CostOfGoodsAndServicesSold")
                 if cogs is None:
@@ -432,8 +432,8 @@ class TestSummaryValidation:
         xbrl = filing.xbrl()
 
         stmt = xbrl.statements.income_statement()
-        df_all = stmt.to_dataframe(include_dimensions=True)
-        df_filtered = stmt.to_dataframe(include_dimensions=False)
+        df_all = stmt.to_dataframe(view='detailed')
+        df_filtered = stmt.to_dataframe(view='standard')
 
         # Filtered should have fewer rows (breakdowns removed)
         assert len(df_filtered) < len(df_all), \

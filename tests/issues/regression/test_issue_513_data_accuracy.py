@@ -136,7 +136,7 @@ class TestIssue513NFLXRevenueDeduplication:
         This test explicitly enables dimensions to verify segment data is preserved.
         """
         statement = nflx_2025_q3_10q_filing.xbrl().statements.income_statement()
-        df = statement.to_dataframe(include_dimensions=True)
+        df = statement.to_dataframe(view='detailed')
 
         # Check that revenue segment labels are present
         labels = df['label'].tolist()
