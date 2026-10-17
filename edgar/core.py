@@ -43,7 +43,6 @@ python_version = tuple(map(int, sys.version.split()[0].split('.')))
 
 __all__ = [
     'log',
-    'Result',
     'get_bool',
     'IntString',
     'get_identity',
@@ -176,54 +175,6 @@ binary_extensions = (".pdf", ".jpg", ".jpeg", ".png", ".gif", ".tif", ".tiff", "
 def get_bool(value: Optional[str] = None) -> Optional[bool]:
     """Convert the value to a boolean"""
     return value in [1, "1", "Y", "true", "True", "TRUE"]
-
-
-class Result:
-    """Deprecated, removed in 6.0. Nothing imports this.
-
-    It was scaffolding for a flagged-result pattern that never got adopted —
-    zero importers anywhere in the codebase. The pattern that *did* get adopted
-    is NonAccrualResult (edgar/bdc/nonaccrual.py): a frozen dataclass carrying
-    the value plus its provenance and warnings, so a caller can tell "genuinely
-    zero" from "we may have failed to parse". Use that shape instead.
-    """
-
-    def __init__(self,
-                 success: bool,
-                 error: Optional[str] = None,
-                 value: Optional[object] = None):
-        self.success = success
-        self.error = error
-        self.value = value
-
-    @property
-    def failure(self) -> bool:
-        """:return True if the operation failed"""
-        return not self.success
-
-    def __str__(self):
-        if self.success:
-            return '[Success]'
-        else:
-            return f'[Failure] "{self.error}"'
-
-    def __repr__(self):
-        if self.success:
-            return f"Result (success={self.success})"
-        else:
-            return f'Result (success={self.success}, message="{self.error}")'
-
-    @classmethod
-    def Fail(cls,
-             error: str):
-        """Create a Result for a failed operation"""
-        return cls(False, error=error, value=None)
-
-    @classmethod
-    def Ok(cls,
-           value: object):
-        """Create a Result for a successful operation"""
-        return cls(success=True, value=value, error=None)
 
 
 def get_resource(file: str):
