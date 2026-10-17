@@ -17,7 +17,7 @@ from edgar.display.formatting import display_size, reverse_name, split_camel_cas
 from edgar.filtering import filter_by_accession_number, filter_by_cik, filter_by_date, filter_by_form, filter_by_ticker
 from edgar.httpclient import get_http_params
 from edgar.richtools import *
-from edgar.settings import CAUTION, CRAWL, ask_for_identity, get_identity, set_identity
+from edgar.settings import ask_for_identity, get_identity, set_identity
 
 
 def client_headers():
@@ -332,29 +332,11 @@ def test_dataframe_pager():
 
 @pytest.mark.fast
 def test_settings():
-    # Assigning `edgar.edgar_mode` installs a real module global that shadows the
-    # package __getattr__ for the rest of the session, so it has to be put back.
-    # Left set, this silently suppressed the access-mode DeprecationWarning for
-    # every test that ran afterwards (GH #1326).
-    #
-    # The first assertion also has to name the mode it means. `edgar.edgar_mode`
-    # is whichever mode EDGAR_ACCESS_MODE selected at import, so reading it and
-    # expecting 10 is only true when the variable is unset; under CRAWL it is 2.
-    had_override = 'edgar_mode' in vars(edgar)
-    original = vars(edgar).get('edgar_mode')
-    try:
-        assert edgar.settings.NORMAL.max_connections == 10
-
-        edgar.edgar_mode = CAUTION
-        assert edgar.edgar_mode.max_connections == 5
-
-        edgar.edgar_mode = CRAWL
-        assert edgar.edgar_mode.max_connections == 2
-    finally:
-        if had_override:
-            edgar.edgar_mode = original
-        else:
-            vars(edgar).pop('edgar_mode', None)
+    # The access modes (GH #1326) are removed in 6.0; the surviving connection
+    # default is the module-level limit.
+    assert edgar.settings.limits.max_connections == 10
+    assert not hasattr(edgar, 'edgar_mode')
+    assert not hasattr(edgar.settings, 'NORMAL')
 
 @pytest.mark.fast
 def test_reverse_name():

@@ -42,12 +42,12 @@ set_identity("John Doe john.doe@company.com")
 
 ### Performance and Access Control
 
-#### EDGAR_ACCESS_MODE (deprecated, removed in 6.0)
-`EDGAR_ACCESS_MODE` and the `NORMAL` / `CAUTION` / `CRAWL` modes are deprecated and
-have no effect. They advertised a timeout, connection-limit and retry policy that
-was never wired into the HTTP client, so setting a mode has never changed how
-edgartools talks to SEC. Setting the variable, or importing one of the mode
-objects, now raises a `DeprecationWarning`.
+#### EDGAR_ACCESS_MODE (removed in 6.0)
+`EDGAR_ACCESS_MODE` and the `NORMAL` / `CAUTION` / `CRAWL` modes are removed. They
+advertised a timeout, connection-limit and retry policy that was never wired into
+the HTTP client, so setting a mode never changed how edgartools talks to SEC. The
+variable is ignored if it is still set, and importing one of the mode objects
+raises `ImportError`.
 
 Use the two settings that do work:
 
