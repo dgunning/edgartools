@@ -15,15 +15,6 @@ from rich.logging import RichHandler
 
 from edgar.datatools import PagingState
 
-# Re-exported for callers that still import them from here. The implementation
-# lives in edgar.dates; 6.0 drops this shim (edgartools-07lk.12.1 item 6).
-from edgar.dates import (  # noqa: F401
-    current_year_and_quarter,
-    filing_date_to_year_quarters,
-    is_start_of_quarter,
-    parse_acceptance_datetime,
-)
-
 log = logging.getLogger(__name__)
 
 def parse_pandas_version():
@@ -56,13 +47,11 @@ __all__ = [
     'text_extensions',
     'binary_extensions',
     'ask_for_identity',
-    'is_start_of_quarter',
     'run_async_or_sync',
     'get_edgar_data_directory',
     'is_probably_html',
     'has_html_content',
     'default_page_size',
-    'parse_acceptance_datetime',
     'PagingState',
     'Years',
     'Quarters',
