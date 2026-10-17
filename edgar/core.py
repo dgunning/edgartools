@@ -36,21 +36,16 @@ __all__ = [
     'log',
     'get_bool',
     'IntString',
-    'get_identity',
     'python_version',
-    'set_identity',
     'strtobool',
     'listify',
     'decode_content',
     'cache_except_none',
     'text_extensions',
     'binary_extensions',
-    'ask_for_identity',
     'run_async_or_sync',
-    'get_edgar_data_directory',
     'is_probably_html',
     'has_html_content',
-    'default_page_size',
     'PagingState',
     'Years',
     'Quarters',
@@ -74,33 +69,9 @@ YYYY_MM_DD = "\\d{4}-\\d{2}-\\d{2}"
 DATE_PATTERN = re.compile(YYYY_MM_DD)
 DATE_RANGE_PATTERN = re.compile(f"^({YYYY_MM_DD}(:({YYYY_MM_DD})?)?|:({YYYY_MM_DD}))$")
 
-# ---------------------------------------------------------------------------
-# Settings and identity now live in edgar/settings.py (edgartools-07lk.12.1).
-#
-# These are RE-EXPORTS, not aliases: the implementation moved to the canonical
-# name and this module imports it back, rather than the reverse. Aliasing onto
-# the deprecated name is the trap 07lk.23 names — it leaves the real code at the
-# path you intend to delete, so 6.0 cannot simply drop the shim.
-#
-# The whole block below goes away in 6.0. Every one of the 71 call sites is a
-# `from edgar.core import <name>` (measured: zero `import edgar.core`, zero
-# attribute access), so a re-export covers 100% of them.
-# ---------------------------------------------------------------------------
-from edgar.settings import (  # noqa: E402,F401  -- re-exports, intentionally unused here
-    EdgarSettings,
-    ask_for_identity,
-    default_http_timeout,
-    default_max_connections,
-    default_page_size,
-    default_retries,
-    edgar_data_dir,
-    edgar_identity,
-    get_edgar_data_directory,
-    get_identity,
-    identity_prompt,
-    limits,
-    set_identity,
-)
+# Settings and identity live in edgar/settings.py. 6.0 removed the re-exports
+# that kept `from edgar.core import get_identity` working (edgartools-07lk.22.1).
+from edgar.settings import default_page_size as _default_page_size  # noqa: E402
 
 
 def strtobool (val:str):
@@ -156,7 +127,7 @@ def get_resource(file: str):
 class DataPager:
     def __init__(self,
                  data: Union[pa.Table, pd.DataFrame],
-                 page_size=default_page_size):
+                 page_size=_default_page_size):
         self.data: Union[pa.Table, pd.DataFrame] = data
         self.page_size = page_size
         self.total_pages = (len(self.data) // page_size) + 1
