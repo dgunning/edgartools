@@ -7,7 +7,7 @@ sharp_edges:
     solution: |
       from edgar import find
       filing = find("0001193125-24-276418")  # Accession → Filing
-      company = find("AAPL")                  # Ticker → Company
+      apple = find("AAPL")                    # Ticker → Entity (Company("AAPL") for financials)
       entity = find(320193)                   # CIK → Entity
     detection_pattern: 'Filing\s*\(.*cik|Filing\s*\(.*accession'
 
@@ -89,7 +89,6 @@ sharp_edges:
       # IDENTITY_NOT_SET → call set_identity() first
       # COMPANY_NOT_FOUND → try CIK, use find(), or edgar_search
       # NO_FACTS_DATA    → company may not file XBRL; try filing.obj() instead
-      # NO_XBRL_DATA     → filing has no XBRL; use filing.document()
       # FILING_NOT_FOUND → check accession number format
       # NETWORK_TIMEOUT  → retry once after brief wait
     detection_pattern: 'error_code|RATE_LIMIT|COMPANY_NOT_FOUND|NO_FACTS_DATA'

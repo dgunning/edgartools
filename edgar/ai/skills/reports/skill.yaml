@@ -223,13 +223,14 @@ patterns:
   - name: Item Content
     when: Work with extracted text
     code: |
-      item = tenk.risk_factors
-      item.text                         # Full text content
-      item.title                        # "Risk Factors"
-      len(item.text)                    # Character count
+      text = tenk.risk_factors          # Full section text (a str, or None if the filing has no Item 1A)
+      if text:
+          text[:500]                    # Slice it like any string
+          len(text)                     # Character count
+      tenk["Item 1A"]                   # The same text, by item key
 
 avoid:
-  - pattern: "filing.document().text"
+  - pattern: "filing.document.text()"
     when: Need specific section
-    fix: "filing.obj().risk_factors.text"
-    why: Report objects parse sections; document() gives raw HTML
+    fix: "filing.obj().risk_factors"
+    why: Report objects split out the sections; the primary document is the whole filing
