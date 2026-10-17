@@ -68,16 +68,20 @@ sharp_edges:
     detection_pattern: '\.iloc\[.*\]\.get|statement\(\)\[|balance_sheet\(\)\['
 
   - id: include-dimensions-vs-view
-    summary: Use view= instead of include_dimensions= for dimensional control
-    severity: low
+    summary: include_dimensions= was removed in 6.0 (TypeError); use view= for dimensional control
+    severity: medium
     solution: |
-      # PREFERRED: view parameter (works on single and stitched statements)
+      # RIGHT: view parameter (works on single and stitched statements)
       income = financials.income_statement(view="detailed")
       income = multi_financials.income_statement(view="detailed")
+      df = statement.to_dataframe(view="standard")
 
-      # LEGACY: include_dimensions boolean (still works but less expressive)
+      # WRONG: removed in 6.0, raises TypeError on Financials, xbrl.statements,
+      # Statement.render() and Statement.to_dataframe()
+      # include_dimensions=True  -> view="detailed"
+      # include_dimensions=False -> view="standard"
       income = financials.income_statement(include_dimensions=True)
-    detection_pattern: 'include_dimensions\s*=\s*True'
+    detection_pattern: 'include_dimensions\s*=\s*(True|False)'
 
   - id: value-scale-assumptions
     summary: Financial values are in actual dollars, not thousands/millions

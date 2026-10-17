@@ -31,7 +31,7 @@ import pathlib
 import pytest
 
 # Lower this when you convert raises. It may never be raised.
-BASELINE = 126
+BASELINE = 123
 
 EDGAR = pathlib.Path(__file__).resolve().parents[3] / "edgar"
 

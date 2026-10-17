@@ -207,7 +207,7 @@ class TestGH577Cases:
 
         # Get balance sheet with dimensions filtered
         stmt = xbrl.statements.balance_sheet()
-        df = stmt.to_dataframe(include_dimensions=False)
+        df = stmt.to_dataframe(view='standard')
 
         # PPE rows should still be present due to PropertyPlantAndEquipmentByTypeAxis in FACE_AXES
         ppe_rows = df[df['concept'].str.contains('PropertyPlant', case=False, na=False)]
@@ -228,11 +228,11 @@ class TestGH577Cases:
         stmt = xbrl.statements.balance_sheet()
 
         # With dimensions
-        df_all = stmt.to_dataframe(include_dimensions=True)
+        df_all = stmt.to_dataframe(view='detailed')
         goodwill_all = df_all[df_all['concept'].str.contains('Goodwill', case=False, na=False)]
 
         # Without dimensions (breakdowns filtered)
-        df_filtered = stmt.to_dataframe(include_dimensions=False)
+        df_filtered = stmt.to_dataframe(view='standard')
         goodwill_filtered = df_filtered[df_filtered['concept'].str.contains('Goodwill', case=False, na=False)]
 
         # Should have fewer rows when filtering

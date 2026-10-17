@@ -51,7 +51,7 @@ class TestIssue582BIODataframeLoss:
         warnings.filterwarnings('ignore', category=DeprecationWarning)
 
         income = bio_2019_xbrl.statements.income_statement()
-        df = income.to_dataframe(include_dimensions=False)
+        df = income.to_dataframe(view='standard')
 
         # Filter to non-abstract rows
         non_abstract = df[df['abstract'] == False]
@@ -76,7 +76,7 @@ class TestIssue582BIODataframeLoss:
         warnings.filterwarnings('ignore', category=DeprecationWarning)
 
         income = bio_2020_xbrl.statements.income_statement()
-        df = income.to_dataframe(include_dimensions=False)
+        df = income.to_dataframe(view='standard')
 
         # Filter to non-abstract rows
         non_abstract = df[df['abstract'] == False]
@@ -109,7 +109,7 @@ class TestIssue582BIODataframeLoss:
         warnings.filterwarnings('ignore', category=DeprecationWarning)
 
         income = bio_2019_xbrl.statements.income_statement()
-        df = income.to_dataframe(include_dimensions=False)
+        df = income.to_dataframe(view='standard')
 
         # Find revenue row
         revenue_rows = df[df['concept'].str.contains('Revenue', case=False, na=False)]

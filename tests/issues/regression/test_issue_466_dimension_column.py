@@ -27,7 +27,7 @@ def test_issue_466_dimension_column_tagging():
     company = Company("AAPL")
     filing = company.get_filings(form="10-K", year=2024).latest()
     statement = filing.xbrl().statements.income_statement()
-    df = statement.to_dataframe(include_dimensions=True)
+    df = statement.to_dataframe(view='detailed')
 
     # Verify dimension column exists
     assert 'dimension' in df.columns, "dimension column should exist in DataFrame"
@@ -55,7 +55,7 @@ def test_issue_466_msft_dimensional_data():
     # Use Microsoft filing from Issue #416 which has extensive dimensional data
     filing = Company('MSFT').get_filings().filter(accession_number="0000950170-25-100235").latest()
     statement = filing.xbrl().statements.income_statement()
-    df = statement.to_dataframe(include_dimensions=True)
+    df = statement.to_dataframe(view='detailed')
 
     # Verify dimension column exists
     assert 'dimension' in df.columns, "dimension column should exist in DataFrame"
@@ -85,7 +85,7 @@ def test_issue_466_dimension_filtering():
     # Use MSFT filing with known dimensional data
     filing = Company('MSFT').get_filings().filter(accession_number="0000950170-25-100235").latest()
     statement = filing.xbrl().statements.income_statement()
-    df = statement.to_dataframe(include_dimensions=True)
+    df = statement.to_dataframe(view='detailed')
 
     # Filter for dimensional rows only
     dimensional_df = df[df['dimension'] == True]
