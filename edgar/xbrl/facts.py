@@ -42,15 +42,16 @@ _STR_DTYPE = STR_DTYPE
 # shape, so a column no returned row happened to populate is materialized as null
 # rather than silently vanishing.
 #
-# Dtypes here are applied ONLY to columns that had to be materialized. Pinning the
-# dtype of a populated column moves a null sentinel, which is a breaking change
-# held for the 6.0 window (edgartools-rsyt.2) — until then `preferred_sign` and
-# `fiscal_year` keep the float64 they take today whenever a null is present.
+# Dtypes here are applied to columns that had to be materialized, and to the
+# populated columns in _PINNED. `preferred_sign` (-1, 1 or absent) and
+# `fiscal_year` are integers that can be absent, so they are nullable Int64 with
+# pd.NA, not float64 with NaN. Before 6.0 they were inferred per query, float64
+# when a returned row lacked one and int64 when none did (edgartools-rsyt.2, GH #1100).
 _CORE_COLUMNS: Dict[str, Any] = {
     'concept': _STR_DTYPE,
     'label': _STR_DTYPE,
     'balance': _STR_DTYPE,
-    'preferred_sign': 'float64',
+    'preferred_sign': 'Int64',
     'weight': 'float64',
     'value': _STR_DTYPE,
     'numeric_value': 'float64',
@@ -73,8 +74,13 @@ _CORE_COLUMNS: Dict[str, Any] = {
     'entity_identifier': _STR_DTYPE,
     'entity_scheme': _STR_DTYPE,
     'fiscal_period': _STR_DTYPE,
-    'fiscal_year': 'float64',
+    'fiscal_year': 'Int64',
 }
+
+# Declared dtype applied to populated columns too, so it holds whichever rows match.
+# `is_dimensioned` is always populated as a bool; pinning it to `boolean` keeps an
+# empty result, which must declare a nullable dtype, identical to a populated one.
+_PINNED = frozenset({'preferred_sign', 'fiscal_year', 'is_dimensioned'})
 
 # Dropped by include_contexts=False.
 _CONTEXT_COLUMNS = frozenset(
@@ -1261,11 +1267,14 @@ class FactQuery:
         # has nothing to work with there and lands somewhere arbitrary — an
         # all-None `decimals` infers as object/None rather than string/pd.NA — and
         # before this change dropna() hid that by deleting the column outright.
-        # Populated columns keep their inferred dtype until edgartools-rsyt.2
-        # pins them, since changing those moves a sentinel callers may rely on.
+        # Populated columns keep their inferred dtype unless pinned.
         for col in ordered:
-            if col in declared and result[col].isna().all():
+            if col not in declared:
+                continue
+            if result[col].isna().all():
                 result[col] = _null_column(declared[col], result.index)
+            elif col in _PINNED and result[col].dtype != declared[col]:
+                result[col] = result[col].astype(declared[col])
 
         cache[cache_key] = result
         self._df_cache = cache

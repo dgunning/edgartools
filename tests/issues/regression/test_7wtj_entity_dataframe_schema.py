@@ -149,19 +149,20 @@ def test_entity_facts_unknown_column_still_raises(facts):
 def test_materialized_null_column_is_not_fabricated_data(facts):
     """A column no returned row populated comes back null, never False or 0.
 
-    `is_audited` is declared `bool`, which cannot hold a null: casting an all-null
-    column to it yields False. Declaring the non-nullable dtype for a materialized
-    column would make the one path that fabricates data the path taken when data is
-    missing.
+    Casting an all-null column to numpy `bool` yields False. `is_audited` is
+    declared nullable `boolean` in 6.0 (edgartools-7wtj.1), so the declared dtype
+    can hold the null; in 5.x a separate NULL_DTYPES map supplied it.
     """
     from edgar.datatools import apply_declared_schema
-    from edgar.entity.dataframe_schema import NULL_DTYPES, PINNED
+    from edgar.entity.dataframe_schema import PINNED
 
     df = pd.DataFrame({"concept": ["Assets"], "value": [1.0]})
-    out = apply_declared_schema(df, FACT_QUERY_COLUMNS, list(FACT_QUERY_COLUMNS),
-                                PINNED, NULL_DTYPES)
+    out = apply_declared_schema(df, FACT_QUERY_COLUMNS, list(FACT_QUERY_COLUMNS), PINNED)
     assert out["is_audited"].isna().all()
     assert out["is_audited"].dtype == "boolean"
+    assert out["is_audited"].iloc[0] is pd.NA
+    assert out["fiscal_year"].dtype == "Int64"
+    assert out["fiscal_year"].iloc[0] is pd.NA
     # The mutation this guards: dtype 'bool' here would assert "not audited".
     assert not (out["is_audited"] == False).any()  # noqa: E712
 
@@ -181,13 +182,51 @@ def test_all_null_object_column_keeps_none():
     caught this.
     """
     from edgar.datatools import apply_declared_schema
-    from edgar.entity.dataframe_schema import NULL_DTYPES, PINNED
+    from edgar.entity.dataframe_schema import PINNED
 
     df = pd.DataFrame({"concept": ["Assets", "Assets"],
                        "value": [1.0, 2.0],
                        "period_start": [None, None]})
-    out = apply_declared_schema(df, FACT_QUERY_COLUMNS, list(FACT_QUERY_COLUMNS),
-                               PINNED, NULL_DTYPES)
+    out = apply_declared_schema(df, FACT_QUERY_COLUMNS, list(FACT_QUERY_COLUMNS), PINNED)
     assert list(out["period_start"]) == [None, None]
     assert all(v is None for v in out["period_start"]), (
         "an all-None object column was rewritten and its nulls became NaN")
+
+
+# --- 6.0 (edgartools-7wtj.1): the three non-nullable columns become nullable ---
+
+NULLABLE = {"fiscal_year": "Int64", "is_audited": "boolean", "is_estimated": "boolean"}
+
+
+def test_nullable_dtypes_on_every_query(facts):
+    """fiscal_year, is_audited and is_estimated read int64/bool in 5.x when every
+    returned row had a value, and float64/boolean when none did. 6.0 pins them."""
+    for query in (facts.query(),
+                  facts.query().by_concept("Assets"),
+                  facts.query().by_fiscal_year(2023),
+                  facts.query().by_concept("NoSuchConceptAtAll")):
+        df = query.to_dataframe()
+        for col, dtype in NULLABLE.items():
+            assert df[col].dtype == dtype, f"{col} is {df[col].dtype}"
+        assert df["value"].dtype == "float64"
+
+
+def test_nullable_dtypes_on_entity_facts_to_dataframe(facts):
+    for include_metadata in (False, True):
+        df = facts.to_dataframe(include_metadata=include_metadata)
+        assert df["fiscal_year"].dtype == "Int64"
+        if include_metadata:
+            assert df["is_audited"].dtype == "boolean"
+
+    empty = EntityFacts(cik=1318605, name="Nothing Filed Inc", facts=[])
+    df = empty.to_dataframe(include_metadata=True)
+    assert df["fiscal_year"].dtype == "Int64"
+    assert df["is_audited"].dtype == "boolean"
+
+
+def test_ground_truth_fiscal_year_is_an_integer(facts):
+    """Values survive the cast: fiscal years are whole years, not 2023.0."""
+    df = facts.query().to_dataframe()
+    years = df["fiscal_year"].dropna()
+    assert len(years) > 0
+    assert all(isinstance(int(y), int) and 2000 <= y <= 2030 for y in years.unique())
