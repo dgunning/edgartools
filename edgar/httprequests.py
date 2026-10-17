@@ -1496,13 +1496,13 @@ async def download_bulk_data(
         raise ValueError("Invalid URL - cannot extract filename")
 
     local_dir = filename.split(".")[0]
-    download_path = data_directory / local_dir
+    destination_path = data_directory / local_dir
+    data_directory.mkdir(parents=True, exist_ok=True)
+    staging = tempfile.TemporaryDirectory(prefix=f".{local_dir}-", dir=data_directory)
+    download_path = Path(staging.name)
     download_filename = download_path / filename
 
     try:
-        # Create the directory with parents=True and exist_ok=True to avoid race conditions
-        download_path.mkdir(parents=True, exist_ok=True)
-
         # Download the file
         try:
             await stream_file(url, client=client, path=download_path, disable_progress=disable_progress)
@@ -1528,11 +1528,13 @@ async def download_bulk_data(
                     # Security check for tar files to prevent path traversal
                     def is_within_directory(directory: Path, target: Path) -> bool:
                         try:
-                            return os.path.commonpath([directory, target]) == str(directory)
+                            return os.path.commonpath([directory.resolve(), target.resolve()]) == str(directory.resolve())
                         except ValueError:
                             return False
 
                     members = tar.getmembers()
+                    if any(not (member.isfile() or member.isdir()) for member in members):
+                        raise ValueError("Bulk archives must contain regular files and directories")
                     total_size = sum(member.size for member in members)
 
                     with tqdm(total=total_size, unit="B", unit_scale=True, desc="Extracting", disable=disable_progress) as pbar:
@@ -1543,10 +1545,7 @@ async def download_bulk_data(
                                 raise ValueError(f"Attempted path traversal in tar file: {member.name}")
 
                             # Extract file and update progress
-                            try:
-                                tar.extract(member, str(download_path), filter="tar")
-                            except TypeError:
-                                tar.extract(member, str(download_path))
+                            tar.extract(member, str(download_path), filter="tar")
                             pbar.update(member.size)
             else:
                 raise ValueError(f"Unsupported file format: {filename}")
@@ -1562,16 +1561,29 @@ async def download_bulk_data(
             except Exception as e:
                 logger.warning("Failed to delete archive file %s: %s", download_filename, e)
 
-        return download_path
+        # Publish complete members only after the archive has extracted successfully.
+        members = list(download_path.rglob("*"))
+        if any(member.is_symlink() for member in members):
+            raise ValueError("Bulk archives must contain regular files and directories")
+        destination_root = destination_path.resolve()
+        if any(not (destination_path / member.relative_to(download_path)).resolve().is_relative_to(destination_root)
+               for member in members):
+            raise ValueError("Bulk archive destination escapes cache directory")
+        destination_path.mkdir(parents=True, exist_ok=True)
+        for member in members:
+            target = destination_path / member.relative_to(download_path)
+            if member.is_dir():
+                target.mkdir(parents=True, exist_ok=True)
+            else:
+                target.parent.mkdir(parents=True, exist_ok=True)
+                os.replace(member, target)
+        return destination_path
 
-    except Exception:
-        # Clean up the download directory in case of any errors
+    finally:
         try:
-            if download_path.exists():
-                shutil.rmtree(download_path)
+            staging.cleanup()
         except Exception as cleanup_error:
             logger.error("Failed to clean up after error: %s", cleanup_error)
-        raise
 
 
 def download_datafile(data_url: str, local_directory: Optional[Path] = None) -> Path:
