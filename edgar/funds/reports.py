@@ -568,6 +568,7 @@ class FundReport:
         # Build data rows
         data = []
         for investment in investments_to_process:
+            other_id = investment.identifiers.other
             row_data = {
                 "name": investment.name,
                 "title": investment.title,
@@ -575,6 +576,8 @@ class FundReport:
                 "cusip": investment.cusip,
                 "ticker": investment.ticker,  # Now uses resolved ticker
                 "isin": investment.identifiers.isin,
+                "other_id": next(iter(other_id.values()), None),
+                "other_id_type": next(iter(other_id), None),
                 "balance": investment.balance,
                 "units": investment.units,
                 "desc_other_units": investment.desc_other_units,
