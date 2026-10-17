@@ -95,7 +95,7 @@ class TestWhatDeliberatelyStayedInCore:
 
     def test_non_date_names_did_not_move(self):
         for name in ("listify", "has_html_content", "is_probably_html", "strtobool",
-                     "get_bool", "parallel_thread_map", "DataPager", "Result"):
+                     "get_bool", "parallel_thread_map", "DataPager"):
             assert hasattr(edgar.core, name)
             assert not hasattr(edgar.dates, name), (
                 f"{name} is not date reasoning and should not have moved"

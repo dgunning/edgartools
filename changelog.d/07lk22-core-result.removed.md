@@ -1,0 +1,1 @@
+**`edgar.core.Result` is removed.** The success/failure wrapper was never returned by anything in edgartools, and `from edgar.core import Result` now raises `ImportError`. It was documented as deprecated but never warned. (bead edgartools-07lk.22.1)

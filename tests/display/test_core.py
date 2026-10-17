@@ -11,7 +11,7 @@ from rich.table import Table
 
 import edgar
 import edgar.settings
-from edgar.core import Result, decode_content, get_bool, has_html_content, parallel_thread_map
+from edgar.core import decode_content, get_bool, has_html_content, parallel_thread_map
 from edgar.dates import InvalidDateError, extract_dates, is_start_of_quarter
 from edgar.display.formatting import display_size, reverse_name, split_camel_case
 from edgar.filtering import filter_by_accession_number, filter_by_cik, filter_by_date, filter_by_form, filter_by_ticker
@@ -96,20 +96,12 @@ def test_repr_rich():
     assert '100% Bran' in value
 
 @pytest.mark.fast
-def test_result():
-    result = Result.Ok(value=1)
-    assert result.success
-    assert not result.failure
-    assert result.value == 1
-
-    assert "Success" in str(result)
-
-    result = Result.Fail("Does not work")
-    assert result.failure
-    assert not result.success
-    assert not result.value
-    assert result.error == "Does not work"
-    assert "Failure" in str(result)
+def test_result_is_removed():
+    """edgar.core.Result was unused scaffolding, deprecated and removed in 6.0
+    (bead edgartools-07lk.22.1)."""
+    import edgar.core
+    assert not hasattr(edgar.core, "Result")
+    assert "Result" not in edgar.core.__all__
 
 @pytest.mark.fast
 def test_display_size():
