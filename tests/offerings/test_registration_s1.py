@@ -321,26 +321,26 @@ class TestRegistrationS1Wolfspeed:
 class TestObjInfo:
 
     def test_get_obj_info_s1(self):
-        from edgar import get_obj_info
-        has_obj, class_name, description = get_obj_info("S-1")
+        from edgar import _get_obj_info
+        has_obj, class_name, description = _get_obj_info("S-1")
         assert has_obj is True
         assert class_name == "RegistrationS1"
 
     def test_get_obj_info_s1a(self):
-        from edgar import get_obj_info
-        has_obj, class_name, description = get_obj_info("S-1/A")
+        from edgar import _get_obj_info
+        has_obj, class_name, description = _get_obj_info("S-1/A")
         assert has_obj is True
         assert class_name == "RegistrationS1"
 
     def test_get_obj_info_f1(self):
-        from edgar import get_obj_info
-        has_obj, class_name, description = get_obj_info("F-1")
+        from edgar import _get_obj_info
+        has_obj, class_name, description = _get_obj_info("F-1")
         assert has_obj is True
         assert class_name == "RegistrationS1"
 
     def test_get_obj_info_f1a(self):
-        from edgar import get_obj_info
-        has_obj, class_name, description = get_obj_info("F-1/A")
+        from edgar import _get_obj_info
+        has_obj, class_name, description = _get_obj_info("F-1/A")
         assert has_obj is True
         assert class_name == "RegistrationS1"
 

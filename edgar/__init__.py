@@ -3,8 +3,7 @@
 # SPDX-License-Identifier: MIT
 import logging
 import re
-from functools import lru_cache, partial
-from typing import List, Optional, Union
+import functools
 
 from edgar.__about__ import __version__
 
@@ -16,11 +15,10 @@ from edgar._filings import (
     FilingHomepage,
     Filings,
     get_by_accession_number,
-    get_by_accession_number_enriched,
     get_filings,
 )
-from edgar.context import HasContext, compose_context
-from edgar.core import listify
+from edgar._filings import get_by_accession_number_enriched as _get_by_accession_number_enriched
+from edgar.core import listify as _listify
 from edgar.settings import get_identity, set_identity
 from edgar.exceptions import (
     AttachmentNotFoundError,
@@ -52,15 +50,11 @@ from edgar.entity import (
     Entity,
     EntityData,
     find_company,
-    get_cik_lookup_data,
     get_company_facts,
     get_company_tickers,
     get_entity,
-    get_entity_submissions,
     get_icon_from_ticker,
-    get_ticker_to_cik_lookup,
 )
-from edgar.entity.entity_facts import clear_company_facts_cache
 from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud, use_cloud_storage
 from edgar.financials import Financials, MultiFinancials
 from edgar.funds import Fund, FundClass, FundCompany, FundSeries, find_fund, find_funds
@@ -82,18 +76,6 @@ from edgar.bdc import BDCEntities, BDCEntity, get_bdc_list, get_active_bdc_ciks,
 # HTTP configuration functions for runtime SSL/proxy configuration
 from edgar.httpclient import configure_http, get_http_config
 from edgar.npx import NPX
-from edgar.paths import (
-    get_anchor_cache_directory,
-    get_cache_directory,
-    get_claude_skills_directory,
-    get_data_directory,
-    get_search_cache_directory,
-    get_test_directory,
-    set_cache_directory,
-    set_claude_skills_directory,
-    set_data_directory,
-    set_test_directory,
-)
 from edgar.proxy import PROXY_FORMS, ProxyContests, ProxyStatement, proxy_contests
 from edgar.storage import (
     StorageAnalysis,
@@ -143,19 +125,19 @@ latest_filings = get_current_filings
 current_filings = get_current_filings
 
 # Fund portfolio report filings
-get_fund_portfolio_filings = partial(get_filings, form=NPORT_FORMS)
+get_fund_portfolio_filings = functools.partial(get_filings, form=NPORT_FORMS)
 
 # Money market fund filings
-get_money_market_filings = partial(get_filings, form=MONEY_MARKET_FORMS)
+get_money_market_filings = functools.partial(get_filings, form=MONEY_MARKET_FORMS)
 
 # Restricted stock sales
-get_restricted_stock_filings = partial(get_filings, form=[144])
+get_restricted_stock_filings = functools.partial(get_filings, form=[144])
 
 # Insider transaction filings
-get_insider_transaction_filings = partial(get_filings, form=[3, 4, 5])
+get_insider_transaction_filings = functools.partial(get_filings, form=[3, 4, 5])
 
 # 13F filings - portfolio holdings
-get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
+get_portfolio_holding_filings = functools.partial(get_filings, form=THIRTEENF_FORMS)
 
 
 # ---------------------------------------------------------------------------
@@ -168,25 +150,13 @@ get_portfolio_holding_filings = partial(get_filings, form=THIRTEENF_FORMS)
 # API?" other than whether the import happened to work, which made every
 # removal a guess about who might be relying on what (bead edgartools-07lk.5).
 #
-# WHAT BEING ABSENT FROM THIS LIST MEANS TODAY. Nothing breaks. Every name that
-# was importable before still is; `__all__` only governs `from edgar import *`.
-# What it does say is that a name outside this list is internal, and 6.0 may
-# make it private (bead edgartools-07lk.23 stages the declaration in 5.x and
-# the enforcement in 6.0). If something you depend on is missing here, that is
-# worth an issue before 6.0 rather than after.
-#
-# THREE THINGS DELIBERATELY LEFT OUT. (No count here on purpose — this line used
-# to say "of 141 public names on 2026-08-10" and was 153 eleven days later, with
-# nothing to catch it. `tests/issues/regression/test_public_api_surface.py`
-# derives the current figures; run it with `-s` to see them.)
-#
-#   1. `List`, `Optional`, `Union`, `lru_cache`, `partial` — imported above for
-#      annotations and never API. `from edgar import Optional` works today and
-#      is an accident.
-#   2. Filesystem/config plumbing (`edgar.paths`), the internal cache-clearing
-#      helpers behind `clear_cache`, and lower-level variants of supported entry
-#      points (`get_by_accession_number_enriched`, `get_entity_submissions`,
-#      `get_cik_lookup_data`, `get_ticker_to_cik_lookup`).
+# WHAT BEING ABSENT FROM THIS LIST MEANS. Through 5.x a name outside this list
+# was internal but still importable. 6.0 made those names private
+# (edgartools-07lk.5): every non-module name reachable from `edgar` is now in
+# `__all__`, and `tests/issues/regression/test_public_api_surface.py` fails if a
+# new one appears without being listed. The names that went are in
+# `_PRIVATE_IN_6_0` below, each with its supported replacement. If something you
+# depend on is missing here, that is worth an issue.
 #
 # Submodules are not listed. `from edgar.xbrl import XBRL` works regardless of
 # `__all__`; this governs the top-level namespace only.
@@ -270,8 +240,8 @@ __all__ = [
 ]
 
 
-@lru_cache(maxsize=16)
-def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySearchResults, FundCompany, FundClass, FundSeries]]:
+@functools.lru_cache(maxsize=16)
+def find(search_id: str | int) -> Filing | Entity | CompanySearchResults | FundCompany | FundClass | FundSeries | None:
     """This is an uber search function that can take a variety of search ids and return the appropriate object
         - accession number -> returns a Filing
         - CIK -> returns an Entity
@@ -285,10 +255,10 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
     if isinstance(search_id, int):
         return Entity(search_id)
     elif re.match(r"\d{10}-\d{2}-\d{6}", search_id):
-        return get_by_accession_number_enriched(search_id)
+        return _get_by_accession_number_enriched(search_id)
     elif re.match(r"^\d{18}$", search_id): # accession number with no dashes
         accession_number = search_id[:10] + "-" + search_id[10:12] + "-" + search_id[12:]
-        return get_by_accession_number_enriched(accession_number)
+        return _get_by_accession_number_enriched(accession_number)
     elif re.match(r"\d{4,10}$", search_id):
         return Entity(search_id)
     elif re.match(r"^[A-Z]{4}X$", search_id):  # Mutual Fund Ticker
@@ -321,16 +291,16 @@ def find(search_id: Union[str, int]) -> Optional[Union[Filing, Entity, CompanySe
         return find_company(search_id)
 
 
-def matches_form(sec_filing: Filing,
-                 form: Union[str, List[str]]) -> bool:
+def _matches_form(sec_filing: Filing,
+                  form: str | list[str]) -> bool:
     """Check if the filing matches the forms"""
-    form_list = listify(form)
+    form_list = _listify(form)
     if sec_filing.form in form_list + [f"{f}/A" for f in form_list if not f.endswith("/A")]:
         return True
     return False
 
 
-def get_obj_info(form: str) -> tuple[bool, Optional[str], Optional[str]]:
+def _get_obj_info(form: str) -> tuple[bool, str | None, str | None]:
     """
     Get information about whether a form type has a structured data object.
 
@@ -465,7 +435,7 @@ def _no_xml_to_parse(sec_filing: Filing) -> DataObjectError:
     return error
 
 
-def obj(sec_filing: Filing) -> Optional[object]:
+def obj(sec_filing: Filing) -> object | None:
     """
     Depending on the filing return the data object that contains the data for the filing
 
@@ -492,15 +462,15 @@ def obj(sec_filing: Filing) -> Optional[object]:
     from edgar.ownership import Form3, Form4, Form5, Ownership
     from edgar.tender_offers import Schedule14D9
 
-    if matches_form(sec_filing, "6-K"):
+    if _matches_form(sec_filing, "6-K"):
         return SixK(sec_filing)
-    if matches_form(sec_filing, "8-K"):
+    if _matches_form(sec_filing, "8-K"):
         return EightK(sec_filing)
-    elif matches_form(sec_filing, "10-Q"):
+    elif _matches_form(sec_filing, "10-Q"):
         return TenQ(sec_filing)
-    elif matches_form(sec_filing, "10-K"):
+    elif _matches_form(sec_filing, "10-K"):
         return TenK(sec_filing)
-    elif matches_form(sec_filing, "10-D"):
+    elif _matches_form(sec_filing, "10-D"):
         # Only return TenD for CMBS filings (have EX-102 XML asset data)
         # Non-CMBS 10-D filings don't have structured data worth extracting
         attachments = sec_filing.attachments
@@ -511,104 +481,104 @@ def obj(sec_filing: Filing) -> Optional[object]:
         if has_cmbs_data:
             from edgar.abs import TenD
             return TenD(sec_filing)
-    elif matches_form(sec_filing, "20-F"):
+    elif _matches_form(sec_filing, "20-F"):
         return TwentyF(sec_filing)
-    elif matches_form(sec_filing, "40-F"):
+    elif _matches_form(sec_filing, "40-F"):
         from edgar.company_reports import FortyF
         return FortyF(sec_filing)
-    elif matches_form(sec_filing, THIRTEENF_FORMS):
+    elif _matches_form(sec_filing, THIRTEENF_FORMS):
         # ThirteenF can work with either XML (2013+) or TXT (2012 and earlier) format
         return ThirteenF(sec_filing)
-    elif matches_form(sec_filing, "144"):
+    elif _matches_form(sec_filing, "144"):
         return Form144.from_filing(sec_filing)
-    elif matches_form(sec_filing, "MA-I"):
+    elif _matches_form(sec_filing, "MA-I"):
         return MunicipalAdvisorForm.from_filing(sec_filing)
-    elif matches_form(sec_filing, "3"):
+    elif _matches_form(sec_filing, "3"):
         xml = sec_filing.xml()
         if xml:
             return Form3(**Ownership.parse_xml(xml))
         raise _no_xml_to_parse(sec_filing)
-    elif matches_form(sec_filing, "4"):
+    elif _matches_form(sec_filing, "4"):
         xml = sec_filing.xml()
         if xml:
             return Form4(**Ownership.parse_xml(xml))
         raise _no_xml_to_parse(sec_filing)
-    elif matches_form(sec_filing, "5"):
+    elif _matches_form(sec_filing, "5"):
         xml = sec_filing.xml()
         if xml:
             return Form5(**Ownership.parse_xml(xml))
         raise _no_xml_to_parse(sec_filing)
-    elif matches_form(sec_filing, ["SCHEDULE 13D", "SC 13D"]):
+    elif _matches_form(sec_filing, ["SCHEDULE 13D", "SC 13D"]):
         return Schedule13D.from_filing(sec_filing)
-    elif matches_form(sec_filing, ["SCHEDULE 13G", "SC 13G"]):
+    elif _matches_form(sec_filing, ["SCHEDULE 13G", "SC 13G"]):
         return Schedule13G.from_filing(sec_filing)
-    elif matches_form(sec_filing, "SC 14D9"):
+    elif _matches_form(sec_filing, "SC 14D9"):
         return Schedule14D9.from_filing(sec_filing)
-    elif matches_form(sec_filing, "EFFECT"):
+    elif _matches_form(sec_filing, "EFFECT"):
         xml = sec_filing.xml()
         if xml:
             return Effect.from_xml(xml)
         raise _no_xml_to_parse(sec_filing)
-    elif matches_form(sec_filing, "D"):
+    elif _matches_form(sec_filing, "D"):
         xml = sec_filing.xml()
         if xml:
             return FormD.from_xml(xml)
         raise _no_xml_to_parse(sec_filing)
-    elif matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
+    elif _matches_form(sec_filing, ["C", "C-U", "C-AR", "C-TR"]):
         return FormC.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, "DRS"):
+    elif _matches_form(sec_filing, "DRS"):
         from edgar.offerings.drs import DraftRegistrationStatement
         return DraftRegistrationStatement.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, ['S-1', 'F-1']):
+    elif _matches_form(sec_filing, ['S-1', 'F-1']):
         from edgar.offerings.registration_s1 import RegistrationS1
         return RegistrationS1.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, ['S-3', 'S-3ASR', 'S-3D', 'S-3DPOS', 'F-3', 'F-3ASR']):
+    elif _matches_form(sec_filing, ['S-3', 'S-3ASR', 'S-3D', 'S-3DPOS', 'F-3', 'F-3ASR']):
         from edgar.offerings.registration_s3 import RegistrationS3
         return RegistrationS3.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, ['S-4', 'F-4']):
+    elif _matches_form(sec_filing, ['S-4', 'F-4']):
         from edgar.offerings.registration_s4 import RegistrationS4
         return RegistrationS4.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, ['424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8']):
+    elif _matches_form(sec_filing, ['424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8']):
         from edgar.offerings.prospectus import Prospectus424B
         return Prospectus424B.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, PROSPECTUS497K_FORMS):
+    elif _matches_form(sec_filing, PROSPECTUS497K_FORMS):
         return Prospectus497K.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, NCEN_FORMS):
+    elif _matches_form(sec_filing, NCEN_FORMS):
         return FundCensus.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, NCSR_FORMS):
+    elif _matches_form(sec_filing, NCSR_FORMS):
         return FundShareholderReport.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, MONEY_MARKET_FORMS):
+    elif _matches_form(sec_filing, MONEY_MARKET_FORMS):
         return MoneyMarketFund.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, ["NPORT-P", "NPORT-EX"]):
+    elif _matches_form(sec_filing, ["NPORT-P", "NPORT-EX"]):
         return FundReport.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, ["N-PX"]):
+    elif _matches_form(sec_filing, ["N-PX"]):
         return NPX.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, PROXY_FORMS):
+    elif _matches_form(sec_filing, PROXY_FORMS):
         return ProxyStatement.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, CORRESPONDENCE_FORMS):
+    elif _matches_form(sec_filing, CORRESPONDENCE_FORMS):
         return Correspondence.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, "24F-2NT"):
+    elif _matches_form(sec_filing, "24F-2NT"):
         from edgar.funds.twentyfourf import FundFeeNotice
         return FundFeeNotice.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, ATS_N_WITHDRAWAL_FORMS):
+    elif _matches_form(sec_filing, ATS_N_WITHDRAWAL_FORMS):
         return AlternativeTradingSystemWithdrawal.from_filing(sec_filing)
 
-    elif matches_form(sec_filing, ATS_N_FORMS + ATS_N_AMENDMENT_FORMS):
+    elif _matches_form(sec_filing, ATS_N_FORMS + ATS_N_AMENDMENT_FORMS):
         return AlternativeTradingSystem.from_filing(sec_filing)
 
     else:
@@ -674,6 +644,32 @@ _LAZY_EXPORTS = {
 }
 
 
+# Names that were importable from `edgar` through 5.x without being in
+# `__all__`, made private in 6.0 (edgartools-07lk.5). `edgar.X` says where each
+# one lives; `from edgar import X` cannot carry the message (Python replaces an
+# AttributeError from a module `__getattr__` with a bare ImportError), so
+# docs/upgrade/6.0.md carries the same table.
+_PRIVATE_IN_6_0 = {
+    **{name: "import it from typing" for name in ("List", "Optional", "Union")},
+    **{name: "import it from functools" for name in ("lru_cache", "partial")},
+    **{name: "import it from edgar.paths" for name in (
+        "get_anchor_cache_directory", "get_cache_directory", "get_claude_skills_directory",
+        "get_data_directory", "get_search_cache_directory", "get_test_directory",
+        "set_cache_directory", "set_claude_skills_directory", "set_data_directory",
+        "set_test_directory",
+    )},
+    **{name: "import it from edgar.context" for name in ("HasContext", "compose_context")},
+    **{name: "import it from edgar.entity" for name in (
+        "get_entity_submissions", "get_cik_lookup_data", "get_ticker_to_cik_lookup",
+    )},
+    "clear_company_facts_cache": "call edgar.clear_cache(), or import it from edgar.entity.entity_facts",
+    "listify": "import it from edgar.core",
+    "get_by_accession_number_enriched": "call edgar.find(accession_no), which uses it",
+    "get_obj_info": "use Filing.obj_type, the class name filing.obj() would return, or None",
+    "matches_form": "compare filing.form directly",
+}
+
+
 def __getattr__(name: str):
     if name in _LAZY_EXPORTS:
         import importlib
@@ -683,6 +679,11 @@ def __getattr__(name: str):
         return value
     if name in _REMOVED_IN_6_0:
         raise AttributeError(_REMOVED_IN_6_0[name])
+    if name in _PRIVATE_IN_6_0:
+        raise AttributeError(
+            f"edgar.{name} is not part of the public API and was made private in "
+            f"edgartools 6.0; {_PRIVATE_IN_6_0[name]}. See docs/upgrade/6.0.md."
+        )
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 

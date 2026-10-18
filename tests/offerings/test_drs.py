@@ -88,14 +88,14 @@ class TestUnderlyingFormDetection:
 class TestObjInfo:
 
     def test_drs_obj_info(self):
-        from edgar import get_obj_info
-        has_obj, class_name, desc = get_obj_info("DRS")
+        from edgar import _get_obj_info
+        has_obj, class_name, desc = _get_obj_info("DRS")
         assert has_obj is True
         assert class_name == 'DraftRegistrationStatement'
 
     def test_drs_a_obj_info(self):
-        from edgar import get_obj_info
-        has_obj, class_name, desc = get_obj_info("DRS/A")
+        from edgar import _get_obj_info
+        has_obj, class_name, desc = _get_obj_info("DRS/A")
         assert has_obj is True
         assert class_name == 'DraftRegistrationStatement'
 

@@ -496,8 +496,8 @@ class TestObjIntegration:
         assert isinstance(result, FundCensus)
 
     def test_get_obj_info(self):
-        from edgar import get_obj_info
-        has_obj, class_name, desc = get_obj_info("N-CEN")
+        from edgar import _get_obj_info
+        has_obj, class_name, desc = _get_obj_info("N-CEN")
         assert has_obj is True
         assert class_name == "FundCensus"
         assert "census" in desc

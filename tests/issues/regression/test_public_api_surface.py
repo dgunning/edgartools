@@ -25,33 +25,31 @@ added rather than at the moment someone tries to remove it. That is the whole
 content of "define the public API": the boundary is only real if crossing it
 is noticeable.
 
-`__all__` governs `from edgar import *` only. Every name below is still
-importable directly whether or not it is listed, so nothing here is a
-compatibility guarantee about `from edgar import X` — the enforcement half
-lands in 6.0 (bead edgartools-07lk.23).
+Through 5.x `__all__` governed `from edgar import *` only, and the internal
+names stayed importable. 6.0 enforced the boundary: those names were made
+private, so every non-module name reachable from `edgar` is now in `__all__`,
+and the ones that went fail with directions to their supported replacement.
 """
+import importlib
 import types
 
 import pytest
 
 import edgar
 
-# Public names deliberately NOT in __all__. Each is either stdlib that leaked in
-# through an annotation import, or internal plumbing with a supported entry point in front
-# of it. Moving a name OUT of this set and into __all__ is a promise; moving one
-# in is a decision to make it private in 6.0. Either way, do it deliberately.
-INTERNAL = {
-    # stdlib, imported in __init__.py for annotations
+# The names that were importable from `edgar` through 5.x without being in
+# __all__, made private in 6.0. Each was stdlib that leaked in through an
+# annotation import, or internal plumbing with a supported entry point in front
+# of it. Pinned here so the set cannot quietly grow back.
+PRIVATE_IN_6_0 = {
+    # stdlib, once imported in __init__.py for annotations
     "List", "Optional", "Union", "lru_cache", "partial",
-    # filesystem/config plumbing
+    # filesystem/config plumbing; edgar.paths is the home
     "get_anchor_cache_directory", "get_cache_directory", "get_claude_skills_directory",
     "get_data_directory", "get_search_cache_directory", "get_test_directory",
     "set_cache_directory", "set_claude_skills_directory", "set_data_directory",
     "set_test_directory",
-    # internal cache management; clear_cache() is the supported entry point.
-    # clear_empty_cached_responses / clear_locale_corrupted_cache left this
-    # boundary in the #1051 fix: __init__.py now runs the migrations via
-    # _run_import_time_cache_migrations, so they live only in edgar.httpclient.
+    # internal cache management; clear_cache() is the supported entry point
     "clear_company_facts_cache",
     # helpers and protocols used inside the package
     "listify", "matches_form", "get_obj_info",
@@ -100,38 +98,53 @@ def test_all_has_no_duplicates():
     )
 
 
-def test_every_public_name_is_classified():
-    """The ratchet. A new top-level name is public or internal — pick one.
+def test_every_public_name_is_exported():
+    """The ratchet. A new top-level name is public, or it is private.
 
-    This is the test that does the work. If it fails, a name became reachable
-    from `edgar` without anyone deciding what it is. Add it to `__all__` if
-    callers should rely on it, or to INTERNAL above if it is plumbing.
+    If this fails, a name became reachable from `edgar` without anyone deciding
+    it is API. Add it to `__all__` in edgar/__init__.py if callers should rely
+    on it (it is then covered by the deprecation policy), or import it under an
+    underscore name if it is plumbing.
     """
-    unclassified = _public_names() - set(edgar.__all__) - INTERNAL
-    assert not unclassified, (
-        f"{len(unclassified)} name(s) are importable from `edgar` but are neither "
-        f"exported in __all__ nor listed as internal: {sorted(unclassified)}.\n"
-        f"Decide which: add to __all__ in edgar/__init__.py (a supported API, "
-        f"covered by the deprecation policy) or to INTERNAL in this file (may be "
-        f"made private in 6.0)."
+    undeclared = _public_names() - set(edgar.__all__)
+    assert not undeclared, (
+        f"{len(undeclared)} name(s) are importable from `edgar` but not exported in "
+        f"__all__: {sorted(undeclared)}. Export them or make them private."
     )
 
 
-def test_internal_names_are_not_also_exported():
-    """A name cannot be both supported and internal."""
-    both = sorted(set(edgar.__all__) & INTERNAL)
-    assert not both, (
-        f"{both} appear in both __all__ and INTERNAL. One of the two lists is wrong."
-    )
+@pytest.mark.parametrize("name", sorted(PRIVATE_IN_6_0))
+def test_a_private_name_is_gone_and_says_where_to_go(name):
+    assert name not in edgar.__all__
+    assert not hasattr(edgar, name)
+    with pytest.raises(AttributeError, match=r"made private in edgartools 6\.0; "):
+        getattr(edgar, name)
+    with pytest.raises(ImportError):
+        exec(f"from edgar import {name}", {})  # noqa: S102
 
 
-def test_internal_list_has_no_dead_entries():
-    """An entry for a name that no longer exists reads as coverage it is not."""
-    dead = sorted(INTERNAL - _public_names())
-    assert not dead, (
-        f"INTERNAL lists {dead}, which are no longer importable from `edgar`. "
-        f"Delete the entries — they describe a boundary that has moved."
-    )
+@pytest.mark.parametrize("name", sorted(PRIVATE_IN_6_0))
+def test_the_directions_are_true(name):
+    """A message that names a module must name one that has the name."""
+    direction = edgar._PRIVATE_IN_6_0[name]
+    if direction.startswith("import it from "):
+        module = direction.removeprefix("import it from ").split()[0]
+        assert hasattr(importlib.import_module(module), name), (
+            f"edgar.{name} says to import it from {module}, which has no {name}"
+        )
+    elif "or import it from " in direction:
+        module = direction.split("or import it from ")[1].split()[0]
+        assert hasattr(importlib.import_module(module), name)
+
+
+def test_the_private_set_is_pinned():
+    """The getattr table and this file describe the same names."""
+    assert set(edgar._PRIVATE_IN_6_0) == PRIVATE_IN_6_0
+
+
+def test_the_replacements_named_in_the_messages_exist():
+    from edgar import Filing, clear_cache, find  # noqa: F401
+    assert isinstance(Filing.obj_type, property)
 
 
 def test_stdlib_does_not_leak_through_star_import():
@@ -170,23 +183,12 @@ def test_report_the_current_surface(capsys):
 
         hatch run test:pytest tests/issues/regression/test_public_api_surface.py \
             -k report_the_current_surface -s
-
-    This asserts internal consistency rather than a fixed size — pinning the
-    numbers is what rotted last time, and freezing them would fail on every
-    added name, which the tests above deliberately do not do. What it does catch
-    is the surface drifting in a way the classification missed: every public
-    name is either exported or listed INTERNAL, so the three totals must add up.
     """
     public = _public_names()
     exported = set(edgar.__all__)
-    undeclared = public - exported
 
     print(f"\npublic top-level names: {len(public)}")
     print(f"declared in __all__:    {len(exported)}")
-    print(f"undeclared (INTERNAL):  {len(undeclared)}")
+    print(f"made private in 6.0:    {len(PRIVATE_IN_6_0)}")
 
-    assert len(public) == len(exported & public) + len(undeclared)
-    assert undeclared == INTERNAL & public, (
-        "the undeclared set has drifted from INTERNAL — "
-        f"unclassified: {sorted(undeclared - INTERNAL)}"
-    )
+    assert public <= exported
