@@ -403,9 +403,12 @@ class HTMLParser:
         Returns:
             Parsed Document object
         """
-        import requests
+        # Through the shared client, so SEC sees the user's identity and the
+        # request waits on the rate limiter. This used `requests`, which is not a
+        # dependency of edgartools and sent no User-Agent (edgartools-ot9sn).
+        from edgar.httprequests import get_with_retry
 
-        response = requests.get(url, timeout=30)
+        response = get_with_retry(url)
         response.raise_for_status()
 
         document = self.parse(response.text)

@@ -31,7 +31,7 @@ from edgar.exceptions import (
     TooManyRequestsError,
     TransportError,
 )
-from edgar.httpclient import async_http_client, http_client
+from edgar.httpclient import async_http_client, http_client, uncached_http_client
 
 """
 This module provides functions to handle HTTP requests with retry logic, throttling, and identity management.
@@ -962,12 +962,14 @@ def stream_with_retry(url, identity=None, identity_callable=None, bypass_cache=F
             as its ``__cause__``.
     """
     try:
-        with http_client(bypass_cache=bypass_cache) as client:
+        client_cm = uncached_http_client() if bypass_cache else http_client()
+        with client_cm as client:
             with client.stream("GET", url, **kwargs) as response:
                 if response.status_code == 429:
                     raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
                 elif is_redirect(response):
-                    response = stream_with_retry(redirect_url(url, response), identity=identity, identity_callable=identity_callable, **kwargs)
+                    response = stream_with_retry(redirect_url(url, response), identity=identity, identity_callable=identity_callable,
+                                                bypass_cache=bypass_cache, **kwargs)
                     yield from response
                 else:
                     yield response

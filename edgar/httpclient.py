@@ -291,6 +291,30 @@ def http_client(**kwargs) -> Generator[httpx2.Client, None, None]:
         yield client
 
 
+@contextmanager
+def uncached_http_client(**kwargs) -> Generator[httpx2.Client, None, None]:
+    """A short-lived client that skips the HTTP cache and nothing else.
+
+    It sends the user's identity, honours the configured SSL, proxy and timeout
+    settings, and draws from the same rate limiter as every other request. Use
+    it to refetch a response the cache may have stored bad (#672).
+
+    `http_client(bypass_cache=True)` cannot do this: the shared client is
+    created once, and httpxthrottlecache ignores `bypass_cache` after that, so
+    the flag silently had no effect. Opening a bare `httpx2.Client` instead
+    skipped the rate limiter as well (edgartools-ot9sn).
+    """
+    params = HTTP_MGR.httpx_params.copy()
+    HTTP_MGR._populate_user_agent(params)
+    params.update(**kwargs)
+    HTTP_MGR._normalize_timeout(params)
+    params["transport"] = HTTP_MGR._get_transport(
+        bypass_cache=True, httpx_transport_params=HTTP_MGR._get_httpx_transport_params(params)
+    )
+    with httpx2.Client(**params) as client:
+        yield client
+
+
 def get_http_params():
     return HTTP_MGR._populate_user_agent(HTTP_MGR.httpx_params.copy())
 
