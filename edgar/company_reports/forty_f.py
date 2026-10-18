@@ -556,36 +556,40 @@ class FortyF(CompanyReport):
         return _extract_business_section(text)
 
     # -- Named section properties (NI 51-102 high-frequency sections) --------
+    #
+    # These go through .get() and return None when the AIF has no such section,
+    # as TenK's section properties do (see the note above TenK.business).
+    # `forty_f[name]` is the lookup that raises SectionNotFoundError.
 
     @property
     def risk_factors(self) -> Optional[str]:
         """Risk Factors section from the AIF."""
-        return self['Risk Factors']
+        return self.get('Risk Factors')
 
     @property
     def corporate_structure(self) -> Optional[str]:
         """Corporate Structure section from the AIF."""
-        return self['Corporate Structure']
+        return self.get('Corporate Structure')
 
     @property
     def dividends(self) -> Optional[str]:
         """Dividends section from the AIF."""
-        return self['Dividends']
+        return self.get('Dividends')
 
     @property
     def capital_structure(self) -> Optional[str]:
         """Description of Capital Structure section from the AIF."""
-        return self['Description Of Capital Structure']
+        return self.get('Description Of Capital Structure')
 
     @property
     def directors_and_officers(self) -> Optional[str]:
         """Directors and Officers section from the AIF."""
-        return self['Directors And Officers']
+        return self.get('Directors And Officers')
 
     @property
     def legal_proceedings(self) -> Optional[str]:
         """Legal Proceedings section from the AIF."""
-        return self['Legal Proceedings']
+        return self.get('Legal Proceedings')
 
     # -- Section listing / lookup --------------------------------------------
 
