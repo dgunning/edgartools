@@ -20,18 +20,16 @@ from edgar.sgml.tools import is_xml
 
 def _fetch_url_directly(url: str) -> str:
     """
-    Fetch URL content directly with a fresh httpx2 client, completely bypassing
-    the HTTP cache layer.
+    Refetch a URL past the HTTP cache, for when the cached response is empty or
+    truncated (#672).
 
-    This is used as a retry mechanism when the cached response is empty or invalid.
-    The httpxthrottlecache library reuses a single client instance, so its
-    bypass_cache parameter has no effect after the client is first created.
+    It goes through `uncached_http_client`, so it still sends the user's
+    identity and waits on the shared rate limiter. It used to open a bare
+    httpx2.Client, which skipped the limiter (edgartools-ot9sn).
     """
-    import httpx2
-    from edgar.settings import get_identity
+    from edgar.httpclient import uncached_http_client
 
-    headers = {"User-Agent": get_identity()}
-    with httpx2.Client(headers=headers) as client:
+    with uncached_http_client() as client:
         response = client.get(url)
         return response.text
 
