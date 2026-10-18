@@ -260,7 +260,10 @@ for filing in filings:
 
 ### Download Specific Filings
 
-Instead of downloading all filings, you can filter to download only what you need:
+Instead of downloading all filings, you can filter to download only what you need.
+With `filings=`, each filing is fetched on its own from SEC, the same full submission file
+`filing.sgml()` reads, and stored where the daily downloads would put it. Filings already
+stored are skipped.
 
 ```python
 from edgar import get_filings, download_filings
@@ -271,6 +274,12 @@ filings = get_filings(form="10-K", year=2024).filter(exchange="NYSE")
 # Download only these filtered filings
 download_filings(filings=filings)
 ```
+
+`download_filings(filings=filings, source="feed")` downloads SEC's daily feed file for
+each filing date instead and keeps only the requested filings. A feed file holds every
+filing of its day, so this downloads far more: the 2026-03-20 feed file is 2.9 GB, while
+Snowflake's 10-K filed that day is 17.8 MB. Use it only when your filings make up a large
+share of the days they were filed on.
 
 ### Advanced Filtering Examples
 
