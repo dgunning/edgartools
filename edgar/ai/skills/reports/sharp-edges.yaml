@@ -2,13 +2,13 @@
 
 sharp_edges:
   - id: document-vs-obj
-    summary: Use filing.obj() for sections, not filing.document()
+    summary: Use filing.obj() for sections, not filing.document
     severity: high
     solution: |
       tenk = filing.obj()
       risk_factors = tenk.risk_factors       # Convenience property
       risk_factors = tenk['Item 1A']         # By item key
-    detection_pattern: 'document\(\)\.text.*Item|filing\.document\(\).*search'
+    detection_pattern: 'document\.text\(\).*Item|filing\.document\b.*search'
 
   - id: item-key-format
     summary: Use correct item key format for each report type
@@ -28,7 +28,7 @@ sharp_edges:
     solution: |
       risk_factors = tenk.risk_factors
       if risk_factors:
-          print(risk_factors.text[:1000])
+          print(risk_factors[:1000])
 
       if 'Item 1A' in tenk.items:
           risk = tenk['Item 1A']
@@ -51,22 +51,23 @@ sharp_edges:
       # Some filers instead map items to printed PAGE RANGES in a
       # "Form 10-K Cross-Reference Index" (Citigroup). Items whose index row says
       # "Not Applicable" or carries only an asterisk have no content in the 10-K,
-      # so tenk['Item 15'] is None. Ask what exists rather than assuming Items
-      # 1-16 are all present:
+      # so tenk['Item 15'] raises SectionNotFoundError; tenk.get('Item 15', '')
+      # returns '' instead. Ask what exists rather than assuming Items 1-16 are
+      # all present:
       print(tenk.items)   # e.g. ['Item 1', 'Item 1A', 'Item 7', 'Item 8', ...]
 
   - id: text-vs-html
-    summary: Item.text is plain text, tables lose structure
+    summary: Item text is plain text, tables lose structure
     severity: low
     solution: |
-      plain = item.text                     # Plain text
+      plain = tenk["Item 1A"]               # Plain text, a str
       # For tabular data, use financials skill (XBRL structured)
 
   - id: forty-f-not-item-numbers
     summary: 40-F uses NI 51-102 section names, not US Item numbers
     severity: high
     solution: |
-      # WRONG: forty_f['Item 1'] → None (40-F has no US Item numbers)
+      # WRONG: forty_f['Item 1'] raises SectionNotFoundError (40-F has no US Item numbers)
       # RIGHT: Use section names or convenience properties
       forty_f.risk_factors                   # Convenience property
       forty_f['Risk Factors']                # Exact name
