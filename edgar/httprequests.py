@@ -30,6 +30,7 @@ from edgar.exceptions import (
     IdentityNotSetError,
     TooManyRequestsError,
     TransportError,
+    ValidationError,
 )
 from edgar.httpclient import async_http_client, http_client
 
@@ -1545,7 +1546,7 @@ async def download_bulk_data(
 
                     members = tar.getmembers()
                     if any(not (member.isfile() or member.isdir()) for member in members):
-                        raise ValueError("Bulk archives must contain regular files and directories")
+                        raise ValidationError("Bulk archives must contain regular files and directories")
                     total_size = sum(member.size for member in members)
 
                     with tqdm(total=total_size, unit="B", unit_scale=True, desc="Extracting", disable=disable_progress) as pbar:
@@ -1575,7 +1576,7 @@ async def download_bulk_data(
         # Tar links and special files are refused before extraction above. ZipFile.extract
         # cannot create links, so this check is a backstop for what reached the disk.
         if any(member.is_symlink() for member in download_path.rglob("*")):
-            raise ValueError("Bulk archives must contain regular files and directories")
+            raise ValidationError("Bulk archives must contain regular files and directories")
 
         # Swap whole directories so the cache never holds a mix of old and new files:
         # move the old tree into staging, move the new tree into place, and restore the
