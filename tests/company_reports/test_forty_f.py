@@ -3,9 +3,10 @@
 Ground-truth assertions use Shopify Inc.'s 2024 40-F filing (FY2023).
 """
 import pytest
+
 from edgar import Filing
 from edgar.company_reports import FortyF
-
+from edgar.exceptions import SectionNotFoundError
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -170,8 +171,11 @@ class TestGetItem:
         assert 'Shopify' in result
 
     @pytest.mark.network
-    def test_missing_section_returns_none(self, shop_forty_f):
-        assert shop_forty_f['Nonexistent Section XYZ'] is None
+    def test_missing_section_raises_and_get_returns_none(self, shop_forty_f):
+        """6.0: the subscript raises for a missing section; .get() answers None."""
+        with pytest.raises(SectionNotFoundError, match="Nonexistent Section XYZ"):
+            shop_forty_f['Nonexistent Section XYZ']
+        assert shop_forty_f.get('Nonexistent Section XYZ') is None
 
     @pytest.mark.network
     def test_empty_key_returns_none(self, shop_forty_f):
