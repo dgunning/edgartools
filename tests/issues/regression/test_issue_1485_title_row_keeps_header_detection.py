@@ -18,7 +18,8 @@ from edgar.documents import HTMLParser, ParserConfig
 pytestmark = pytest.mark.fast
 
 # Row shapes copied from jpm-20260630.htm table 206: empty row, spanning title,
-# period row, metric row, then two data rows.
+# period row, metric row, then two data rows. The counts (648, 1,262) are from the
+# filing; the ratios and the second row's figures are illustrative, not read from it.
 HTML = b"""<html><body><table>
 <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
 <tr><td colspan="7">Loan modifications</td></tr>
@@ -95,3 +96,25 @@ def test_text_only_two_year_row_known_limit_is_header():
     table = parse_table(HTML_TEXT_ONLY_YEARS)
     headers = [' '.join(c.text().split()) for row in table.headers for c in row]
     assert "12 Months Ended Dec 31, 2025 and Dec 31, 2024" in headers
+
+
+# The lookahead must not accept a header row that is itself a row of figures.
+# _is_header_row scores on the ratio of label cells, and an amount row such as
+# "| $ | — | $ | 14,433" is all punctuation and digits, so it passes. Before the
+# stricter predicate, a lone spanning data cell could be vouched for by the amount
+# row two below it and the amount row was then learned as a header. Reported by
+# the maintainer against 1,083 of 10,718 fixture tables; AAPL 10-K FY2024 (CIK
+# 320193, 10-K filed 2024-11-01) table 32 is the smallest example.
+HTML_AMOUNT_ROW_BELOW = b"""<html><body><table>
+<tr><td colspan="3">Hedged assets/(liabilities):</td></tr>
+<tr><td>Current and non-current marketable securities</td><td>$</td><td>$</td><td>$</td><td>14,433</td></tr>
+</table></body></html>"""
+
+
+def test_amount_row_below_a_spanning_label_is_not_a_header():
+    document = HTMLParser(ParserConfig(enable_parallel=False, max_workers=1)).parse(HTML_AMOUNT_ROW_BELOW)
+    table = document.tables[0]
+    headers = [' '.join(c.text().split()) for row in table.headers for c in row]
+    assert "14,433" not in " ".join(headers)
+    body = [' '.join(c.text().split()) for row in table.rows for c in row.cells]
+    assert "14,433" in body
