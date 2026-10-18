@@ -560,7 +560,8 @@ class Filings:
                  compress: bool = True,
                  compression_level: int = 6,
                  upload_to_cloud: bool = False,
-                 disable_progress: bool = False):
+                 disable_progress: bool = False,
+                 source: str = 'submission'):
         """
         Download the filings based on the accession numbers in this Filings object.
 
@@ -573,11 +574,14 @@ class Filings:
             compression_level: Compression level for gzip (1-9, with 9 being highest compression). Default is 6.
             upload_to_cloud: If True, upload downloaded filings to cloud storage after download. Default is False.
             disable_progress: If True, suppress progress bars. Useful for logging environments. Default is False.
+            source: 'submission' (default) fetches each filing on its own; 'feed' downloads the
+                daily feed files that hold them. Filings already stored are not downloaded again.
         """
         from edgar.storage import download_filings
         download_filings(data_directory=data_directory,
-                         overwrite_existing=True,
+                         overwrite_existing=False,
                          filings=self,
+                         source=source,
                          compress=compress,
                          compression_level=compression_level,
                          upload_to_cloud=upload_to_cloud,

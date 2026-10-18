@@ -15,8 +15,8 @@ from tqdm.auto import tqdm
 
 from edgar.core import log, strtobool
 from edgar.dates import extract_dates, filing_date_to_year_quarters
-from edgar.exceptions import EdgarError, TransportError, http_status
-from edgar.httprequests import download_bulk_data, download_datafile, download_text
+from edgar.exceptions import EdgarError, TransportError, ValidationError, http_status
+from edgar.httprequests import download_bulk_data, download_datafile, download_text, inspect_response
 from edgar.settings import get_edgar_data_directory
 from edgar.urls import build_company_tickers_exchange_url, build_company_tickers_url, build_mutual_fund_tickers_url, build_ticker_url
 
@@ -310,10 +310,11 @@ def download_filings(filing_date: Optional[str] = None,
                      compress: bool = True,
                      compression_level: int = 6,
                      upload_to_cloud: bool = False,
-                     disable_progress: bool = False):
+                     disable_progress: bool = False,
+                     source: str = 'submission'):
     """
-    Download feed files for the specified date or date range, or for specific filings.
-    Optionally compresses the extracted files to save disk space.
+    Download filings into local storage, for a date or date range or for specific filings.
+    Optionally compresses the stored files to save disk space.
 
     Examples
 
@@ -321,136 +322,71 @@ def download_filings(filing_date: Optional[str] = None,
     download_filings('2025-01-03', overwrite_existing=False)
     download_filings('2024-01-01:2025-01-05', overwrite_existing=True)
     download_filings(filings=my_filings_object)
+    download_filings(filings=my_filings_object, source='feed')
     download_filings('2025-01-03', compress=True, compression_level=9)  # Maximum compression
     download_filings('2025-01-03', upload_to_cloud=True)  # Upload to cloud after download
     download_filings('2025-01-03', disable_progress=True)  # Suppress progress bars for logging
 
+    A date or date range downloads SEC's daily feed files, which hold every filing
+    disseminated that day. A feed file on a busy day is several GB.
+
+    With ``filings``, only those filings are downloaded. By default each one is
+    fetched as its own full submission file, the same file ``Filing.sgml()`` reads
+    from SEC, so a 10-K costs tens of MB rather than its day's feed file.
+    ``source='feed'`` downloads the feed file for each filing's date instead and keeps
+    only the requested filings from it; that downloads far more, and is only worth it
+    when the filings make up a large share of the days they were filed on.
+
     Args:
         filing_date: String in format 'YYYY-MM-DD', 'YYYY-MM-DD:', ':YYYY-MM-DD',
-                    or 'YYYY-MM-DD:YYYY-MM-DD'. If both filing_date and filings are provided,
-                    filing_date takes precedence for determining which feed files to download.
+                    or 'YYYY-MM-DD:YYYY-MM-DD'. With ``filings``, only the filings filed in
+                    this range are downloaded.
         data_directory: Directory to save the downloaded files. Defaults to the Edgar data directory.
-        overwrite_existing: If True, overwrite existing files. Default is False.
-        filings: Optional Filings object. If provided, will download only filings with matching accession numbers.
-        compress: Whether to compress the extracted files to save disk space. Default is True.
+        overwrite_existing: If True, download again what is already stored. Default is False.
+        filings: Optional Filings object. If provided, only these filings are downloaded.
+        compress: Whether to compress the stored files to save disk space. Default is True.
         compression_level: Compression level for gzip (1-9, with 9 being highest compression). Default is 6.
         upload_to_cloud: If True, upload downloaded filings to cloud storage after download.
             Requires cloud storage to be configured via use_cloud_storage(). Default is False.
         disable_progress: If True, suppress progress bars. Useful for logging environments where progress
             updates create excessive log entries. Default is False.
+        source: With ``filings``, where each filing comes from: 'submission' (default) fetches
+            each filing on its own; 'feed' downloads the daily feed files that contain them.
+            Ignored without ``filings``.
     """
+    if source not in ('submission', 'feed'):
+        raise ValidationError(f"source must be 'submission' or 'feed', not {source!r}")
+
     if not data_directory:
         data_directory = get_edgar_data_directory() / 'filings'
         log.info('Using data directory: %s', data_directory)
+    data_directory = Path(data_directory)
 
-    # If filings object is provided, extract accession numbers
-    accession_numbers = None
     if filings is not None:
-        log.info('Using provided Filings object with %d filings', len(filings))
-        accession_numbers = filings.data['accession_number'].to_pylist()
-
-        # If both filing_date and filings are provided, let the user know which takes precedence
         if filing_date:
-            log.info('Both filing_date and filings parameters provided. Using filing_date %s for determining feed files to download.', filing_date)
-        # Use the date range from the filings object if no filing_date specified
+            filings = filings.filter(filing_date=filing_date)
+            log.info('Using the %d filings filed in %s', len(filings), filing_date)
+        log.info('Downloading %d filings from %s', len(filings),
+                 'their submission files' if source == 'submission' else 'the daily feed files')
+        if source == 'submission':
+            _download_filing_submissions(filings, data_directory,
+                                         overwrite_existing=overwrite_existing,
+                                         compress=compress,
+                                         compression_level=compression_level,
+                                         disable_progress=disable_progress)
         else:
-            start_date, end_date = filings.date_range
-            filing_date = f"{start_date}:{end_date}"
-            log.info('Using date range from filings: %s', filing_date)
+            _download_feed_files_for_filings(filings, data_directory,
+                                             overwrite_existing=overwrite_existing,
+                                             compress=compress,
+                                             compression_level=compression_level,
+                                             disable_progress=disable_progress)
+    else:
+        _download_feed_files_for_dates(filing_date, data_directory,
+                                       overwrite_existing=overwrite_existing,
+                                       compress=compress,
+                                       compression_level=compression_level,
+                                       disable_progress=disable_progress)
 
-    # Use default date if not specified
-    if not filing_date:
-        filing_date = latest_filing_date()
-        log.info('No filing date specified. Using latest filing date: %s', filing_date)
-
-    # Get start and end dates for filtering
-    start_date_tm, end_date_tm, is_range = extract_dates(filing_date)
-
-    # Get quarters to process
-    year_and_quarters = filing_date_to_year_quarters(filing_date)
-
-    # Track statistics
-    total_feed_files_downloaded = 0
-    total_filings_kept = 0
-
-    for year, quarter in year_and_quarters:
-        log.info('Downloading feed files for %d Q%d', year, quarter)
-        # Get list of feed files for this quarter
-        feed_files = list_filing_feed_files_for_quarter(year, quarter)
-
-        log.info('Found %d total feed files', len(feed_files))
-
-        # Filter files based on date range
-        filtered_files = feed_files[
-            feed_files['Name'].apply(
-                lambda x: is_feed_file_in_date_range(x, start_date_tm, end_date_tm)
-            )
-        ]
-        log.info('Found %d feed files in date range', len(filtered_files))
-
-        if not filtered_files.empty:
-            # Process the filtered files...
-            for _, row in tqdm(filtered_files.iterrows(), desc='Downloading feed file(s)', disable=disable_progress):
-                bulk_filing_file = row['File']
-                bulk_file_directory = data_directory / row['Name'][:8]
-                filing_date_str = row['Name'][:8]  # Extract YYYYMMDD from filename
-
-                if not overwrite_existing:
-                    if bulk_file_directory.exists():
-                        log.warning('Skipping %s. Already exists', bulk_file_directory)
-                        continue
-
-                # Optimization: If we have specific accession numbers, check if all the ones
-                # for this specific filing date already exist locally
-                if accession_numbers and filings is not None:
-                    # Convert YYYYMMDD to YYYY-MM-DD format
-                    formatted_date = f"{filing_date_str[:4]}-{filing_date_str[4:6]}-{filing_date_str[6:8]}"
-
-                    # Filter accession numbers to only those for this specific filing date
-                    date_filtered_filings = filings.filter(filing_date=formatted_date)
-                    if not date_filtered_filings.empty:
-                        date_accession_numbers = date_filtered_filings.data['accession_number'].to_pylist()
-                        if check_filings_exist_locally(formatted_date, date_accession_numbers):
-                            log.warning('Not downloading for %s. All %d filings for this date already exist in local %s',
-                                   formatted_date, len(date_accession_numbers), bulk_file_directory)
-                            continue
-
-                # Track existing files before extraction to preserve them during filtering
-                existing_files = set()
-                if accession_numbers and bulk_file_directory.exists():
-                    existing_files = {str(f) for f in bulk_file_directory.glob('*.nc')}
-
-                path = _run_coroutine(download_bulk_data(client=None, url=bulk_filing_file, data_directory=data_directory, disable_progress=disable_progress))
-                log.info('Downloaded feed file to %s', path)
-                total_feed_files_downloaded += 1
-
-                # If we have specific accession numbers, filter the extracted files
-                if accession_numbers and path.exists():
-                    _filter_extracted_files._existing_files = existing_files
-
-                    log.info('Filtering extracted files to keep only specified accession numbers')
-                    filings_kept = _filter_extracted_files(path, accession_numbers, compress=compress, compression_level=compression_level)
-                    total_filings_kept += filings_kept
-
-                    # Clean up the tracking
-                    if hasattr(_filter_extracted_files, '_existing_files'):
-                        delattr(_filter_extracted_files, '_existing_files')
-                # If we don't have specific accession numbers but compression is enabled, compress all files
-                elif compress and path.exists():
-                    log.info('Compressing all extracted files')
-                    for file_path in path.glob('*.nc'):
-                        if not is_compressed_file(file_path):
-                            try:
-                                compress_filing(file_path, compression_level=compression_level)
-                            except Exception as e:
-                                log.warning(f"Failed to compress {file_path}: {e}")
-        else:
-            log.info('No feed files found for %d Q%d in date range %s', year, quarter, filing_date)
-
-    # Log summary statistics
-    log.info('Download complete. Downloaded %d feed files.', total_feed_files_downloaded)
-    if accession_numbers:
-        log.info('Kept %d filings out of %d requested.', total_filings_kept, len(accession_numbers))
 
     # Upload to cloud if requested
     if upload_to_cloud:
@@ -480,6 +416,213 @@ def download_filings(filing_date: Optional[str] = None,
                         log.warning('Upload error: %s', error)
                     if len(result['errors']) > 5:
                         log.warning('... and %d more errors', len(result['errors']) - 5)
+
+
+
+def _download_feed_files_for_dates(filing_date: Optional[str],
+                                   data_directory: Path,
+                                   overwrite_existing: bool,
+                                   compress: bool,
+                                   compression_level: int,
+                                   disable_progress: bool) -> None:
+    """Download every daily feed file in a date or date range."""
+    # Use default date if not specified
+    if not filing_date:
+        filing_date = latest_filing_date()
+        log.info('No filing date specified. Using latest filing date: %s', filing_date)
+
+    start_date_tm, end_date_tm, _ = extract_dates(filing_date)
+    total_feed_files_downloaded = 0
+
+    for year, quarter in filing_date_to_year_quarters(filing_date):
+        log.info('Downloading feed files for %d Q%d', year, quarter)
+        feed_files = list_filing_feed_files_for_quarter(year, quarter)
+        log.info('Found %d total feed files', len(feed_files))
+
+        filtered_files = feed_files[
+            feed_files['Name'].apply(
+                lambda x: is_feed_file_in_date_range(x, start_date_tm, end_date_tm)
+            )
+        ]
+        log.info('Found %d feed files in date range', len(filtered_files))
+        if filtered_files.empty:
+            log.info('No feed files found for %d Q%d in date range %s', year, quarter, filing_date)
+            continue
+
+        for _, row in tqdm(filtered_files.iterrows(), desc='Downloading feed file(s)', disable=disable_progress):
+            bulk_file_directory = data_directory / row['Name'][:8]
+            if not overwrite_existing and bulk_file_directory.exists():
+                log.warning('Skipping %s. Already exists', bulk_file_directory)
+                continue
+
+            path = _run_coroutine(download_bulk_data(client=None, url=row['File'], data_directory=data_directory,
+                                                     disable_progress=disable_progress))
+            log.info('Downloaded feed file to %s', path)
+            total_feed_files_downloaded += 1
+
+            if compress and path.exists():
+                log.info('Compressing all extracted files')
+                for file_path in path.glob('*.nc'):
+                    if not is_compressed_file(file_path):
+                        try:
+                            compress_filing(file_path, compression_level=compression_level)
+                        except Exception as e:
+                            log.warning(f"Failed to compress {file_path}: {e}")
+
+    log.info('Download complete. Downloaded %d feed files.', total_feed_files_downloaded)
+
+
+def _stored_filing_path(data_directory: Path, filing_date: date, accession_number: str) -> Optional[Path]:
+    """The stored bundle for a filing under data_directory, or None.
+
+    Looks in the filing date's folder first, then in the adjacent days a feed file
+    can file it under, as resolve_local_filing_path does on the read side.
+    """
+    for offset in (0, *_adjacent_day_offsets(_ADJACENT_FOLDER_SEARCH_DAYS)):
+        folder = data_directory / (filing_date + timedelta(days=offset)).strftime('%Y%m%d')
+        for name in (f"{accession_number}.nc.gz", f"{accession_number}.nc"):
+            if (folder / name).exists():
+                return folder / name
+    return None
+
+
+def _as_date(value) -> date:
+    if isinstance(value, datetime):
+        return value.date()
+    if isinstance(value, date):
+        return value
+    return datetime.strptime(str(value)[:10], '%Y-%m-%d').date()
+
+
+def _download_filing_submissions(filings: 'Filings',
+                                 data_directory: Path,
+                                 overwrite_existing: bool,
+                                 compress: bool,
+                                 compression_level: int,
+                                 disable_progress: bool) -> int:
+    """Store each filing's full submission file, the same file Filing.sgml() fetches.
+
+    Each one goes to <data_directory>/<YYYYMMDD of its filing date>/<accession>.nc,
+    where the local readers look first. Returns the number of filings stored.
+    """
+    from edgar.httprequests import get_with_retry
+
+    stored = skipped = 0
+    not_found = []
+    for filing in tqdm(filings, desc='Downloading filing(s)', total=len(filings), disable=disable_progress):
+        accession_number = filing.accession_no
+        filing_date = _as_date(filing.filing_date)
+        if not overwrite_existing and _stored_filing_path(data_directory, filing_date, accession_number):
+            skipped += 1
+            continue
+
+        try:
+            response = get_with_retry(url=filing.text_url)
+            inspect_response(response)
+        except TransportError as e:
+            if http_status(e) == 404:
+                not_found.append(accession_number)
+                continue
+            raise
+
+        folder = data_directory / filing_date.strftime('%Y%m%d')
+        folder.mkdir(parents=True, exist_ok=True)
+        target = folder / f"{accession_number}.nc"
+        partial = folder / f"{accession_number}.nc.part"
+        partial.write_bytes(response.content)
+        partial.replace(target)
+        stale = Path(f"{target}.gz")
+        if compress:
+            compress_filing(target, compression_level=compression_level)
+        elif stale.exists():
+            stale.unlink()   # an overwrite must not leave the old compressed copy in front of the new one
+        stored += 1
+
+    log.info('Download complete. Stored %d filings, skipped %d already stored.', stored, skipped)
+    if not_found:
+        log.warning('%d of %d filings were not found at SEC: %s', len(not_found), len(filings),
+                    ', '.join(not_found[:10]) + (' ...' if len(not_found) > 10 else ''))
+    return stored
+
+
+def _feed_file_urls(year: int, quarter: int, cache: dict) -> dict:
+    """{YYYYMMDD: feed file URL} for one quarter, listed once per call of the caller."""
+    if (year, quarter) not in cache:
+        feed_files = list_filing_feed_files_for_quarter(year, quarter)
+        cache[(year, quarter)] = {
+            name[:8]: url for name, url in zip(feed_files['Name'], feed_files['File'], strict=True)
+            if re.fullmatch(r'\d{8}\.nc\.tar\.gz', name)
+        }
+    return cache[(year, quarter)]
+
+
+def _download_feed_files_for_filings(filings: 'Filings',
+                                     data_directory: Path,
+                                     overwrite_existing: bool,
+                                     compress: bool,
+                                     compression_level: int,
+                                     disable_progress: bool) -> int:
+    """Download the daily feed files that hold the requested filings, keeping only those.
+
+    A feed file holds the filings SEC disseminated that day, which is usually but not
+    always the filing date (an after-hours or delayed filing can sit a day or more away;
+    see edgartools-a3ej). So each filing's own date is tried first, and only the filings
+    still missing move on to the adjacent days, nearest first. Dates that hold none of
+    the requested filings are never downloaded (GH #1608). Returns the number kept.
+    """
+    pending = {}
+    for filing in filings:
+        filing_date = _as_date(filing.filing_date)
+        if not overwrite_existing and _stored_filing_path(data_directory, filing_date, filing.accession_no):
+            continue
+        pending[filing.accession_no] = filing_date
+    requested = len(pending)
+    log.info('%d of %d filings are not stored yet', requested, len(filings))
+
+    listings: dict = {}
+    downloaded_days = set()
+    for offset in (0, *_adjacent_day_offsets(_ADJACENT_FOLDER_SEARCH_DAYS)):
+        if not pending:
+            break
+        days = sorted({filing_date + timedelta(days=offset) for filing_date in pending.values()})
+        for day in tqdm(days, desc='Downloading feed file(s)', disable=disable_progress):
+            if not pending:
+                break
+            if day in downloaded_days:
+                continue
+            quarter = (day.month - 1) // 3 + 1
+            url = _feed_file_urls(day.year, quarter, listings).get(day.strftime('%Y%m%d'))
+            if url is None:
+                continue   # a weekend or holiday: no feed file that day
+            downloaded_days.add(day)
+
+            bulk_file_directory = data_directory / day.strftime('%Y%m%d')
+            existing_files = set()
+            if bulk_file_directory.exists():
+                existing_files = {str(f) for f in bulk_file_directory.glob('*.nc')}
+
+            path = _run_coroutine(download_bulk_data(client=None, url=url, data_directory=data_directory,
+                                                     disable_progress=disable_progress))
+            log.info('Downloaded feed file to %s', path)
+            if not path.exists():
+                continue
+            _filter_extracted_files._existing_files = existing_files
+            try:
+                _filter_extracted_files(path, list(pending), compress=compress, compression_level=compression_level)
+            finally:
+                if hasattr(_filter_extracted_files, '_existing_files'):
+                    delattr(_filter_extracted_files, '_existing_files')
+            for accession_number in [a for a in pending
+                                     if (path / f"{a}.nc").exists() or (path / f"{a}.nc.gz").exists()]:
+                del pending[accession_number]
+
+    log.info('Download complete. Downloaded %d feed files and kept %d of %d filings.',
+             len(downloaded_days), requested - len(pending), requested)
+    if pending:
+        log.warning('%d filings were not found in the feed files within %d days of their filing date: %s',
+                    len(pending), _ADJACENT_FOLDER_SEARCH_DAYS,
+                    ', '.join(list(pending)[:10]) + (' ...' if len(pending) > 10 else ''))
+    return requested - len(pending)
 
 
 def _filter_extracted_files(directory_path: Path, accession_numbers: List[str], compress: bool = True, compression_level: int = 6) -> int:
