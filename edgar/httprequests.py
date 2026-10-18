@@ -1498,14 +1498,17 @@ async def download_bulk_data(
     local_dir = filename.split(".")[0]
     destination_path = data_directory / local_dir
     data_directory.mkdir(parents=True, exist_ok=True)
+    # Stage beside the cache so the final swap is a same-filesystem rename.
     staging = tempfile.TemporaryDirectory(prefix=f".{local_dir}-", dir=data_directory)
-    download_path = Path(staging.name)
-    download_filename = download_path / filename
+    staging_path = Path(staging.name)
+    download_filename = staging_path / filename
+    download_path = staging_path / local_dir
+    download_path.mkdir()
 
     try:
         # Download the file
         try:
-            await stream_file(url, client=client, path=download_path, disable_progress=disable_progress)
+            await stream_file(url, client=client, path=staging_path, disable_progress=disable_progress)
         except Exception as e:
             raise IOError(f"Failed to download file: {e}") from e
 
@@ -1524,11 +1527,15 @@ async def download_bulk_data(
                             pbar.update(info.file_size)
 
             elif any(filename.endswith(ext) for ext in (".tar.gz", ".tgz")):
+                if not hasattr(tarfile, "tar_filter"):
+                    raise RuntimeError("Extracting bulk tar archives safely requires Python 3.11.4 or later")
                 with tarfile.open(download_filename, "r:gz") as tar:
                     # Security check for tar files to prevent path traversal
-                    def is_within_directory(directory: Path, target: Path) -> bool:
+                    root = download_path.resolve()
+
+                    def is_within_directory(target: Path) -> bool:
                         try:
-                            return os.path.commonpath([directory.resolve(), target.resolve()]) == str(directory.resolve())
+                            return os.path.commonpath([root, target.resolve()]) == str(root)
                         except ValueError:
                             return False
 
@@ -1541,7 +1548,7 @@ async def download_bulk_data(
                         for member in members:
                             # Check for path traversal
                             member_path = os.path.join(str(download_path), member.name)
-                            if not is_within_directory(Path(str(download_path)), Path(member_path)):
+                            if not is_within_directory(Path(member_path)):
                                 raise ValueError(f"Attempted path traversal in tar file: {member.name}")
 
                             # Extract file and update progress
@@ -1561,22 +1568,23 @@ async def download_bulk_data(
             except Exception as e:
                 logger.warning("Failed to delete archive file %s: %s", download_filename, e)
 
-        # Publish complete members only after the archive has extracted successfully.
-        members = list(download_path.rglob("*"))
-        if any(member.is_symlink() for member in members):
+        # Tar links and special files are refused before extraction above. ZipFile.extract
+        # cannot create links, so this check is a backstop for what reached the disk.
+        if any(member.is_symlink() for member in download_path.rglob("*")):
             raise ValueError("Bulk archives must contain regular files and directories")
-        destination_root = destination_path.resolve()
-        if any(not (destination_path / member.relative_to(download_path)).resolve().is_relative_to(destination_root)
-               for member in members):
-            raise ValueError("Bulk archive destination escapes cache directory")
-        destination_path.mkdir(parents=True, exist_ok=True)
-        for member in members:
-            target = destination_path / member.relative_to(download_path)
-            if member.is_dir():
-                target.mkdir(parents=True, exist_ok=True)
-            else:
-                target.parent.mkdir(parents=True, exist_ok=True)
-                os.replace(member, target)
+
+        # Swap whole directories so readers see the old set or the new one, never a mix:
+        # move the old tree into staging, move the new tree into place, and restore the
+        # old tree if that fails. Staging cleanup then deletes the old tree.
+        previous_path = staging_path / "previous"
+        if destination_path.exists():
+            os.replace(destination_path, previous_path)
+        try:
+            os.replace(download_path, destination_path)
+        except Exception:
+            if previous_path.exists():
+                os.replace(previous_path, destination_path)
+            raise
         return destination_path
 
     finally:
