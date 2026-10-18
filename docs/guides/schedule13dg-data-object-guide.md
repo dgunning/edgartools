@@ -72,8 +72,8 @@ When you call `filing.obj()` on a Schedule 13D filing, edgartools parses the XML
 | `amendment_number` | `Optional[int]` | Amendment sequence number |
 | `is_amendment` | `bool` | Whether this is an amendment (`/A`) |
 | `filing_date` | `date` | Date filed with the SEC |
-| `total_shares` | `int` | Aggregate beneficial ownership (handles joint/separate filers) |
-| `total_percent` | `float` | Aggregate ownership percentage |
+| `total_shares` | `Optional[int]` | Aggregate beneficial ownership (handles joint/separate filers) |
+| `total_percent` | `Optional[float]` | Aggregate ownership percentage |
 
 ### Items (Narrative Disclosures)
 
@@ -151,8 +151,8 @@ When you call `filing.obj()` on a Schedule 13G filing, edgartools parses the XML
 | `rule_designation` | `Optional[str]` | SEC rule under which filing is made (e.g., "Rule 13d-1(c)") |
 | `is_amendment` | `bool` | Whether this is an amendment |
 | `filing_date` | `date` | Date filed with the SEC |
-| `total_shares` | `int` | Aggregate beneficial ownership |
-| `total_percent` | `float` | Aggregate ownership percentage |
+| `total_shares` | `Optional[int]` | Aggregate beneficial ownership |
+| `total_percent` | `Optional[float]` | Aggregate ownership percentage |
 | `is_passive_investor` | `bool` | Always `True` for Schedule 13G |
 
 ### Example: Reading a Schedule 13G
@@ -240,20 +240,20 @@ Each reporting person (individual or entity) in the filing.
 | `cik` | `str` | SEC Central Index Key |
 | `name` | `str` | Person or entity name |
 | `citizenship` | `str` | Citizenship or place of organization |
-| `sole_voting_power` | `int` | Shares with sole voting authority |
-| `shared_voting_power` | `int` | Shares with shared voting authority |
-| `sole_dispositive_power` | `int` | Shares with sole dispositive authority |
-| `shared_dispositive_power` | `int` | Shares with shared dispositive authority |
-| `aggregate_amount` | `int` | Total shares beneficially owned |
-| `percent_of_class` | `float` | Percentage of outstanding shares |
+| `sole_voting_power` | `Optional[int]` | Shares with sole voting authority |
+| `shared_voting_power` | `Optional[int]` | Shares with shared voting authority |
+| `sole_dispositive_power` | `Optional[int]` | Shares with sole dispositive authority |
+| `shared_dispositive_power` | `Optional[int]` | Shares with shared dispositive authority |
+| `aggregate_amount` | `Optional[int]` | Total shares beneficially owned |
+| `percent_of_class` | `Optional[float]` | Percentage of outstanding shares |
 | `type_of_reporting_person` | `str` | Entity type code (e.g., "IN" = individual, "IA" = investment adviser) |
 | `member_of_group` | `Optional[str]` | `"a"` = joint filer, `"b"` = separate filer |
-| `total_voting_power` | `int` | Computed: sole + shared voting power |
-| `total_dispositive_power` | `int` | Computed: sole + shared dispositive power |
+| `total_voting_power` | `Optional[int]` | Computed: sole + shared voting power |
+| `total_dispositive_power` | `Optional[int]` | Computed: sole + shared dispositive power |
 | `unreported_fields` | `frozenset[str]` | Names of the six ownership figures above that the filing does not report |
 | `reported(figure)` | `Optional[int \| float]` | An ownership figure by field name, or `None` when the filing does not report it |
 
-An amendment (13D/A, 13G/A) may leave any of the six ownership figures out, and a pre-2025 filing read from its SGML header has identities only. Such a figure holds a placeholder `0` in its field and is named in `unreported_fields`; `reported()` returns `None` for it, and `0` for a reported zero. In edgartools 6.0 the fields themselves become `None` for an unreported figure, so code that uses `reported()` today keeps working unchanged.
+An amendment (13D/A, 13G/A) may leave any of the six ownership figures out, and a pre-2025 filing read from its SGML header has identities only. Such a figure is `None` and is named in `unreported_fields`, and `total_voting_power` or `total_dispositive_power` is `None` when either half is. A reported zero stays `0`. `reported(figure)` returns the same value as the field, looked up by name.
 
 ### IssuerInfo
 
@@ -320,24 +320,22 @@ amendment = Schedule13D.from_filing(amended_filing)
 
 comparison = OwnershipComparison(current=amendment, previous=original)
 
-change = comparison.reported_shares_change
+change = comparison.shares_change
 if change is None:
     print("Shares changed: unknown, a filing does not report its share count")
 else:
     print(f"Shares changed: {change:+,}")
-if comparison.reported_percent_change is not None:
-    print(f"Percent changed: {comparison.reported_percent_change:+.1f} points")
+if comparison.percent_change is not None:
+    print(f"Percent changed: {comparison.percent_change:+.1f} points")
 print(f"Accumulating: {comparison.is_accumulating}")
 print(f"Liquidating: {comparison.is_liquidating}")
 ```
 
-`reported_shares_change` is `None` when either filing does not report its share counts: an amendment that leaves them out (the schema makes them optional on 13D/A and 13G/A), a pre-2025 header-only filing (`has_structured_data` is `False`), or a filing with no reporting-person rows. `is_accumulating`, `is_liquidating` and `is_unchanged` are then all `False`. `reported_percent_change` is `None` in the same way for percentages, and the two are checked separately, since a filing can report one and not the other. A reported zero stays `0`.
+`shares_change` is `None` when either filing does not report its share counts: an amendment that leaves them out (the schema makes them optional on 13D/A and 13G/A), a pre-2025 header-only filing (`has_structured_data` is `False`), or a filing with no reporting-person rows. `is_accumulating`, `is_liquidating` and `is_unchanged` are then all `False`. `percent_change` is `None` in the same way for percentages, and the two are checked separately, since a filing can report one and not the other. A reported zero stays `0`.
 
 Each filing's figure is its `total_shares` or `total_percent`, so a change between two `'ambiguous'` filings is a change in the largest reporting person's holding.
 
-`shares_change` and `percent_change` still return a number in 5.x, reading an unreported figure as `0`, and emit a `FutureWarning` when they do. In edgartools 6.0 they return `None` instead, as `reported_shares_change` and `reported_percent_change` do today.
-
-The comparison still adds up the rows of every reporting person in each filing. It does not use `total_shares`, and it does not work out whether joint filers report the same shares, so for a joint filing whose rows overlap the change can be overstated. Check the rows in `reporting_persons` before relying on the change for a joint filing.
+In `get_summary()` a share or percent value is `None` when its filing does not report it. `reported_shares_change` and `reported_percent_change` (and the summary keys of the same names) come from 5.x, where `shares_change` and `percent_change` read an unreported figure as `0`; in 6.0 they equal `shares_change` and `percent_change`.
 
 ---
 

@@ -23,13 +23,13 @@ Holdings 13G (two 10,000,000-share rows) it was -20,000,000.
 The parsers now record which figures a filing leaves out
 (``ReportingPerson.unreported_fields``, ``ReportingPerson.reported()``) and the
 comparison treats them as unknown: ``reported_shares_change`` and
-``reported_percent_change`` are None and no direction flag is set. The 5.x
-fields keep their types, so an unreported figure still holds the placeholder 0
-and ``shares_change``/``percent_change`` still return numbers, with a
-FutureWarning that they become None in 6.0 (the 6.0 release plan stages value
-changes additively in 5.x). A reported 0 stays 0: the controls below check that
-selling out, a single-person sale and a 13G/A that does report its figures
-still compare as numbers, without a warning.
+``reported_percent_change`` are None and no direction flag is set. In 5.x the
+fields kept a placeholder 0 and ``shares_change``/``percent_change`` returned
+numbers with a FutureWarning; edgartools 6.0 made them None (edgartools-u6tkw),
+so the assertions on those placeholders now assert None and no warning. A
+reported 0 stays 0: the controls below check that selling out, a single-person
+sale and a 13G/A that does report its figures still compare as numbers, without
+a warning.
 """
 import re
 import warnings
@@ -82,18 +82,18 @@ def _header_only_schedule13d():
     return Schedule13D.from_filing(filing)
 
 
-def _assert_change_unknown(comparison, placeholder_shares_change):
+def _assert_change_unknown(comparison):
     """No purchase, sale or "unchanged" is read into a comparison with unreported figures."""
-    assert comparison.is_accumulating is False
-    assert comparison.is_liquidating is False
-    assert comparison.is_unchanged is False
-    assert comparison.reported_shares_change is None
-    assert comparison.reported_percent_change is None
-    # 5.x keeps the numeric properties, counting an unreported figure as 0, and says so.
-    with pytest.warns(FutureWarning, match=r'shares_change .* None in edgartools 6\.0'):
-        assert comparison.shares_change == placeholder_shares_change
-    with pytest.warns(FutureWarning, match=r'percent_change .* None in edgartools 6\.0'):
-        assert isinstance(comparison.percent_change, float)
+    with warnings.catch_warnings():
+        warnings.simplefilter('error', FutureWarning)
+        assert comparison.is_accumulating is False
+        assert comparison.is_liquidating is False
+        assert comparison.is_unchanged is False
+        assert comparison.reported_shares_change is None
+        assert comparison.reported_percent_change is None
+        # 6.0: the main properties are None too (5.x read the figure as 0 and warned).
+        assert comparison.shares_change is None
+        assert comparison.percent_change is None
 
 
 @pytest.mark.fast
@@ -107,17 +107,17 @@ def test_ownership_comparison_against_header_only_filing_is_unknown():
     structured = _schedule13d_from_xml(SCHEDULE_13D_XML_PATH.read_text())
     assert header_only.has_structured_data is False
 
-    _assert_change_unknown(OwnershipComparison(current=structured, previous=header_only), 2_435_000)
-    _assert_change_unknown(OwnershipComparison(current=header_only, previous=structured), -2_435_000)
+    _assert_change_unknown(OwnershipComparison(current=structured, previous=header_only))
+    _assert_change_unknown(OwnershipComparison(current=header_only, previous=structured))
 
     person = header_only.reporting_persons[0]
     assert person.unreported_fields == OWNERSHIP_FIGURES
     assert person.reported('aggregate_amount') is None
 
-    with pytest.warns(FutureWarning):
-        summary = OwnershipComparison(current=structured, previous=header_only).get_summary()
+    summary = OwnershipComparison(current=structured, previous=header_only).get_summary()
     assert summary['reported_shares_change'] is None
     assert summary['reported_percent_change'] is None
+    assert summary['shares_change'] is None
     assert summary['is_accumulating'] is False
 
 
@@ -132,34 +132,37 @@ def test_ownership_comparison_without_reporting_person_rows_is_unknown():
     assert no_rows.has_structured_data is True
     assert no_rows.reporting_persons == []
 
-    _assert_change_unknown(OwnershipComparison(current=no_rows, previous=structured), -2_435_000)
-    _assert_change_unknown(OwnershipComparison(current=structured, previous=no_rows), 2_435_000)
+    _assert_change_unknown(OwnershipComparison(current=no_rows, previous=structured))
+    _assert_change_unknown(OwnershipComparison(current=structured, previous=no_rows))
+    assert no_rows.total_shares is None
+    assert no_rows.total_percent is None
 
 
 @pytest.mark.fast
-def test_unreported_figures_keep_their_5x_types():
-    """Control: code written against 5.x keeps getting numbers until 6.0.
+def test_unreported_figures_are_none():
+    """6.0: an unreported figure is None in the field itself, not the 5.x placeholder 0.
 
-    Formatting a figure of a header-only filing, or a change against it, printed
-    0 and a number before this fix and must not raise TypeError now. Only the new
-    accessors answer None.
+    This test asserted the 5.x placeholders (0, and a change of +2,435,000 against
+    a header-only filing) until edgartools-u6tkw made them None.
     """
     header_only = _header_only_schedule13d()
     structured = _schedule13d_from_xml(SCHEDULE_13D_XML_PATH.read_text())
     person = header_only.reporting_persons[0]
-    assert format(person.aggregate_amount, ',') == '0'
-    assert f"{person.percent_of_class:.2f}%" == '0.00%'
-    assert person.total_voting_power == 0
-    assert person.total_dispositive_power == 0
+    for field_name in OWNERSHIP_FIGURES:
+        assert getattr(person, field_name) is None
+    assert person.total_voting_power is None
+    assert person.total_dispositive_power is None
 
     with warnings.catch_warnings():
-        warnings.simplefilter('ignore', FutureWarning)
+        warnings.simplefilter('error', FutureWarning)
         comparison = OwnershipComparison(current=structured, previous=header_only)
-        assert f"{comparison.shares_change:+,}" == '+2,435,000'
-        assert f"{comparison.percent_change:+.1f}" == '+9.9'
+        assert comparison.shares_change is None
+        assert comparison.percent_change is None
         summary = comparison.get_summary()
-    assert summary['previous_shares'] == 0
+    assert summary['previous_shares'] is None
+    assert summary['previous_percent'] is None
     assert summary['current_shares'] == 2_435_000
+    assert summary['current_percent'] == 9.9
 
 
 @pytest.mark.fast
@@ -272,7 +275,7 @@ def test_amendment_omitting_ownership_figures_marks_them_unreported(schedule_cla
         assert person.unreported_fields == OWNERSHIP_FIGURES
         for field_name in OWNERSHIP_FIGURES:
             assert person.reported(field_name) is None
-            assert getattr(person, field_name) == 0  # the 5.x placeholder, None in 6.0
+            assert getattr(person, field_name) is None  # the 5.x placeholder 0 became None in 6.0
 
     # The display paths show the gap instead of a zero.
     context = amendment.to_context(detail='full')
@@ -373,11 +376,10 @@ def test_ownership_comparison_13d_amendment_omitting_figures_is_unknown():
     assert amendment.has_structured_data is True
     assert len(amendment.reporting_persons) == 2
 
-    _assert_change_unknown(OwnershipComparison(current=amendment, previous=original), -2_435_000)
-    _assert_change_unknown(OwnershipComparison(current=original, previous=amendment), 2_435_000)
+    _assert_change_unknown(OwnershipComparison(current=amendment, previous=original))
+    _assert_change_unknown(OwnershipComparison(current=original, previous=amendment))
 
-    with pytest.warns(FutureWarning):
-        summary = OwnershipComparison(current=amendment, previous=original).get_summary()
+    summary = OwnershipComparison(current=amendment, previous=original).get_summary()
     assert summary['is_liquidating'] is False
     assert summary['reported_shares_change'] is None
     assert summary['reported_percent_change'] is None
@@ -393,8 +395,8 @@ def test_ownership_comparison_13g_amendment_omitting_figures_is_unknown():
     assert amendment.has_structured_data is True
     assert len(amendment.reporting_persons) == 2
 
-    _assert_change_unknown(OwnershipComparison(current=amendment, previous=original), -10_000_000)
-    _assert_change_unknown(OwnershipComparison(current=original, previous=amendment), 10_000_000)
+    _assert_change_unknown(OwnershipComparison(current=amendment, previous=original))
+    _assert_change_unknown(OwnershipComparison(current=original, previous=amendment))
 
 
 @pytest.mark.fast
@@ -421,12 +423,11 @@ def test_ownership_comparison_13g_amendment_reporting_figures():
 
 
 @pytest.mark.fast
-def test_get_summary_warns_once_at_the_callers_line():
-    """get_summary() names the caller's line, not amendments.py.
+def test_get_summary_emits_no_warning():
+    """6.0: get_summary() reports an unreported figure as None and warns no more.
 
-    It used to read self.shares_change and self.percent_change, so it emitted two
-    warnings attributed to amendments.py, and Python's default filter then showed
-    them once per process no matter where get_summary() was called from.
+    In 5.x it emitted one FutureWarning at the caller's line and returned the
+    placeholder values (shares_change 2,435,000, previous_shares 0).
     """
     comparison = OwnershipComparison(current=_schedule13d_from_xml(SCHEDULE_13D_XML_PATH.read_text()),
                                      previous=_header_only_schedule13d())
@@ -434,14 +435,10 @@ def test_get_summary_warns_once_at_the_callers_line():
         warnings.simplefilter('always')
         summary = comparison.get_summary()
 
-    future = [w for w in caught if issubclass(w.category, FutureWarning)]
-    assert len(future) == 1
-    assert future[0].filename == __file__
-    assert "'reported_shares_change'" in str(future[0].message)
-    # The 5.x values are unchanged.
-    assert summary['shares_change'] == 2_435_000
+    assert [w for w in caught if issubclass(w.category, FutureWarning)] == []
+    assert summary['shares_change'] is None
     assert summary['current_shares'] == 2_435_000
-    assert summary['previous_shares'] == 0
+    assert summary['previous_shares'] is None
     assert summary['reported_shares_change'] is None
 
 

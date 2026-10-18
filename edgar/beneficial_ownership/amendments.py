@@ -4,7 +4,6 @@ Amendment tracking and comparison for Schedule 13D/G filings.
 This module provides utilities for linking amendments to original filings
 and comparing ownership changes between filings.
 """
-import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING, Optional
 
@@ -77,35 +76,6 @@ def _reported_total(schedule: 'Schedule13D | Schedule13G', figure: str):
     return _total_over_persons(schedule.reporting_persons, figure)
 
 
-def _placeholder_total(schedule: 'Schedule13D | Schedule13G', figure: str):
-    """``_reported_total`` reading an unreported figure as 0 (the 5.x values), as ``total_shares`` does."""
-    counted = [getattr(p, figure) for p in schedule.reporting_persons if not p.is_aggregate_exclude_shares]
-    return max(counted, default=0)
-
-
-def _warn_unreported(name: str, replacement: str) -> None:
-    # The text is fixed per property so Python's default filter shows it once per call site.
-    # stacklevel=3 skips this helper and the property, so the caller's line is reported.
-    warnings.warn(
-        f"OwnershipComparison.{name} is computed from figures a filing does not report, read as 0. "
-        f"It will be None in edgartools 6.0. Use OwnershipComparison.{replacement}, which is None today.",
-        FutureWarning,
-        stacklevel=3,
-    )
-
-
-def _warn_unreported_summary() -> None:
-    # get_summary() warns for itself: reading self.shares_change would attribute the
-    # warning to this module, and the default filter would then show it once per process.
-    warnings.warn(
-        "OwnershipComparison.get_summary() computes 'shares_change' and 'percent_change' from figures "
-        "a filing does not report, read as 0. They will be None in edgartools 6.0. "
-        "Use the 'reported_shares_change' and 'reported_percent_change' keys, which are None today.",
-        FutureWarning,
-        stacklevel=3,
-    )
-
-
 @dataclass
 class OwnershipComparison:
     """
@@ -117,25 +87,26 @@ class OwnershipComparison:
     A filing's figure is the largest any counted reporting person reports, the
     same as ``total_shares``; check each filing's ``aggregation_basis`` before
     reading it as the group's holding. A change is known only when both filings
-    report the figure for every counted reporting person. An amendment may leave the figures out, a pre-2025 filing
-    read from its SGML header has none, and a filing may have no reporting-person
-    rows. ``reported_shares_change`` and ``reported_percent_change`` are None then,
-    and ``is_accumulating``, ``is_liquidating`` and ``is_unchanged`` are all False.
+    report the figure for every counted reporting person. An amendment may leave the
+    figures out, a pre-2025 filing read from its SGML header has none, and a filing
+    may have no reporting-person rows. ``shares_change`` and ``percent_change`` are
+    None then, and ``is_accumulating``, ``is_liquidating`` and ``is_unchanged`` are
+    all False. A reported 0 is a number.
 
     Example:
         original = Schedule13D.from_filing(original_filing)
         amendment = Schedule13D.from_filing(amended_filing)
         comparison = OwnershipComparison(current=amendment, previous=original)
 
-        if comparison.reported_shares_change is not None:
-            print(f"Shares changed by: {comparison.reported_shares_change:,}")
+        if comparison.shares_change is not None:
+            print(f"Shares changed by: {comparison.shares_change:,}")
         print(f"Is accumulating: {comparison.is_accumulating}")
     """
     current: 'Schedule13D | Schedule13G'
     previous: 'Schedule13D | Schedule13G'
 
     @property
-    def reported_shares_change(self) -> Optional[int]:
+    def shares_change(self) -> Optional[int]:
         """
         Change in total shares owned, or None when either filing does not report its share counts.
 
@@ -151,13 +122,13 @@ class OwnershipComparison:
         return curr_shares - prev_shares
 
     @property
-    def reported_percent_change(self) -> Optional[float]:
+    def percent_change(self) -> Optional[float]:
         """
         Change in ownership percentage, or None when either filing does not report its percentages.
 
         Returns:
             Net change in ownership percentage (e.g., 1.5 means increased by 1.5%),
-            or None as for ``reported_shares_change``
+            or None as for ``shares_change``
         """
         curr_pct = _reported_total(self.current, 'percent_of_class')
         prev_pct = _reported_total(self.previous, 'percent_of_class')
@@ -166,81 +137,59 @@ class OwnershipComparison:
         return curr_pct - prev_pct
 
     @property
-    def shares_change(self) -> int:
-        """
-        Change in total shares owned.
-
-        Returns:
-            Net change in share count (positive = increased, negative = decreased).
-            A figure a filing does not report counts as 0 here and emits a
-            ``FutureWarning``: in edgartools 6.0 this returns None instead, as
-            ``reported_shares_change`` does today.
-        """
-        if self.reported_shares_change is None:
-            _warn_unreported('shares_change', 'reported_shares_change')
-        return _placeholder_total(self.current, 'aggregate_amount') - _placeholder_total(self.previous, 'aggregate_amount')
+    def reported_shares_change(self) -> Optional[int]:
+        """The same value as ``shares_change``; kept from 5.x, where ``shares_change`` read unreported figures as 0."""
+        return self.shares_change
 
     @property
-    def percent_change(self) -> float:
-        """
-        Change in ownership percentage.
-
-        Returns:
-            Net change in ownership percentage (e.g., 1.5 means increased by 1.5%).
-            A figure a filing does not report counts as 0 here and emits a
-            ``FutureWarning``: in edgartools 6.0 this returns None instead, as
-            ``reported_percent_change`` does today.
-        """
-        if self.reported_percent_change is None:
-            _warn_unreported('percent_change', 'reported_percent_change')
-        return _placeholder_total(self.current, 'percent_of_class') - _placeholder_total(self.previous, 'percent_of_class')
+    def reported_percent_change(self) -> Optional[float]:
+        """The same value as ``percent_change``; kept from 5.x, where ``percent_change`` read unreported figures as 0."""
+        return self.percent_change
 
     @property
     def is_accumulating(self) -> bool:
         """Check if shares increased (False when the change is unknown)"""
-        change = self.reported_shares_change
+        change = self.shares_change
         return change is not None and change > 0
 
     @property
     def is_liquidating(self) -> bool:
         """Check if shares decreased (False when the change is unknown)"""
-        change = self.reported_shares_change
+        change = self.shares_change
         return change is not None and change < 0
 
     @property
     def is_unchanged(self) -> bool:
         """Check if shareholding is unchanged (False when the change is unknown)"""
-        return self.reported_shares_change == 0
+        return self.shares_change == 0
 
     def get_summary(self) -> dict:
         """
         Get summary of changes.
 
         Returns:
-            Dictionary with change metrics. The share and percent values read a
-            figure a filing does not report as 0, as ``shares_change`` does, and
-            emit the same ``FutureWarning``; ``reported_shares_change`` and
-            ``reported_percent_change`` are None for them.
+            Dictionary with change metrics. A share or percent value is None when
+            its filing does not report the figure, and a change is None when either
+            side is. ``reported_shares_change`` and ``reported_percent_change`` are
+            kept from 5.x and equal ``shares_change`` and ``percent_change``.
         """
-        reported_shares_change = self.reported_shares_change
-        reported_percent_change = self.reported_percent_change
-        if reported_shares_change is None or reported_percent_change is None:
-            _warn_unreported_summary()
-        previous_shares = _placeholder_total(self.previous, 'aggregate_amount')
-        current_shares = _placeholder_total(self.current, 'aggregate_amount')
-        previous_percent = _placeholder_total(self.previous, 'percent_of_class')
-        current_percent = _placeholder_total(self.current, 'percent_of_class')
+        previous_shares = _reported_total(self.previous, 'aggregate_amount')
+        current_shares = _reported_total(self.current, 'aggregate_amount')
+        previous_percent = _reported_total(self.previous, 'percent_of_class')
+        current_percent = _reported_total(self.current, 'percent_of_class')
+        shares_change = self.shares_change
+        percent_change = self.percent_change
         return {
             'previous_filing_date': self.previous.filing_date,
             'current_filing_date': self.current.filing_date,
             'previous_shares': previous_shares,
             'current_shares': current_shares,
-            'shares_change': current_shares - previous_shares,
+            'shares_change': shares_change,
             'previous_percent': previous_percent,
             'current_percent': current_percent,
-            'percent_change': current_percent - previous_percent,
-            'reported_shares_change': reported_shares_change,
-            'reported_percent_change': reported_percent_change,
+            'percent_change': percent_change,
+            'reported_shares_change': shares_change,
+            'reported_percent_change': percent_change,
             'is_accumulating': self.is_accumulating,
             'is_liquidating': self.is_liquidating,
             'is_unchanged': self.is_unchanged
