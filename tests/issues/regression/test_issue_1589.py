@@ -29,10 +29,13 @@ item all use it, so they cannot disagree again.
 Fixture
 -------
 tests/fixtures/issues/regression/issue_1589/0000710782-24-000005.htm is the primary
-document of that filing (8kSYQH.htm), saved byte for byte as the SEC served it. The
-SGML envelope around the HTML is removed before parsing, as Filing.text() does. The
-test reads the file with line endings normalised, so it passes on LF and CRLF
-checkouts.
+document of that filing (8kSYQH.htm), saved byte for byte as the SEC served it. That
+includes a bot-defense <script> tag that www.sec.gov adds to every response; its src
+changes from one request to the next, and it is not part of the filing. The HTML
+parser removes script elements before it builds the text, and the assertions concern
+the filed item headings and text, so the tag does not affect them. The SGML envelope
+around the HTML is removed before parsing, as Filing.text() does. The test reads the
+file with line endings normalised, so it passes on LF and CRLF checkouts.
 """
 
 import pathlib
