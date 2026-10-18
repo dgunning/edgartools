@@ -1469,6 +1469,10 @@ async def download_bulk_data(
     """
     Download and extract bulk data from zip or tar.gz archives
 
+    A refresh replaces the whole ``data_directory/<archive name>`` directory. It never
+    leaves a mix of old and new files, but the swap is two renames, so a reader that
+    looks between them briefly finds no directory.
+
     Args:
         client: The httpx2.AsyncClient instance
         url: URL to download from (e.g. "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
@@ -1573,9 +1577,10 @@ async def download_bulk_data(
         if any(member.is_symlink() for member in download_path.rglob("*")):
             raise ValueError("Bulk archives must contain regular files and directories")
 
-        # Swap whole directories so readers see the old set or the new one, never a mix:
+        # Swap whole directories so the cache never holds a mix of old and new files:
         # move the old tree into staging, move the new tree into place, and restore the
-        # old tree if that fails. Staging cleanup then deletes the old tree.
+        # old tree if that fails. Staging cleanup then deletes the old tree. Between the
+        # two renames the directory is briefly absent (see the docstring).
         previous_path = staging_path / "previous"
         if destination_path.exists():
             os.replace(destination_path, previous_path)
