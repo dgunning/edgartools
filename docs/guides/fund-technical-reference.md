@@ -158,6 +158,8 @@ All portfolio positions sorted by absolute USD value descending.
 
 When `include_ticker_metadata=True`, adds `ticker_resolution_method` and `ticker_resolution_confidence`.
 
+`other_id` and `other_id_type` carry N-PORT item C.1.e.iv. `swaptions_data()` carries the same item as `main_internal_id` and `main_internal_id_desc`; the other derivative frames do not carry it.
+
 #### `securities_data()` -> DataFrame
 
 Same as `investment_data(include_derivatives=False)`. Non-derivative positions only.

@@ -13,8 +13,24 @@ it, and the frame is sorted by value, so a row could not be paired back to
 as filed: BHK writes both "BlackRock Identifier" and "Blackrock Identifier".
 """
 from collections import Counter
+from pathlib import Path
 
 import pytest
+
+
+@pytest.mark.fast
+def test_a_stated_other_identifier_reaches_investment_data_offline():
+    """Keeps the column covered in test-fast: Sample 1's one holding, given an ``<other>`` identifier."""
+    from edgar.funds.reports import FundReport
+
+    xml = Path('data/nport/samples/N-PORT Sample 1.xml').read_text()
+    holding = '<ticker value="3F708"/>'
+    assert xml.count(holding) == 1
+    xml = xml.replace(holding, holding + '<other otherDesc="LoanX ID" value="LX123456"/>')
+
+    report = FundReport(**FundReport.parse_fund_xml(xml))
+    row = report.investment_data(include_derivatives=False).iloc[0]
+    assert (row['cusip'], row['other_id'], row['other_id_type']) == ('379006355', 'LX123456', 'LoanX ID')
 
 
 @pytest.mark.network
