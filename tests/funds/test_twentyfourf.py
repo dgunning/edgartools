@@ -56,8 +56,8 @@ def _load_notice(path: Path, *, company: str = 'Stub Fund') -> FundFeeNotice:
 class TestObjInfo:
 
     def test_24f2nt_registered(self):
-        from edgar import get_obj_info
-        has_obj, class_name, desc = get_obj_info("24F-2NT")
+        from edgar import _get_obj_info
+        has_obj, class_name, desc = _get_obj_info("24F-2NT")
         assert has_obj is True
         assert class_name == 'FundFeeNotice'
 

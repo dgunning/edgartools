@@ -2103,8 +2103,8 @@ class Filing:
             >>> filing.obj_type is None  # unsupported form
             True
         """
-        from edgar import get_obj_info
-        has_obj, obj_type_name, _ = get_obj_info(self.form)
+        from edgar import _get_obj_info
+        has_obj, obj_type_name, _ = _get_obj_info(self.form)
         return obj_type_name if has_obj else None
 
     def open_homepage(self):
@@ -2447,7 +2447,7 @@ class Filing:
               - Use .document for the primary document (Attachment)
               - Use .attachments for exhibits (5 documents)
         """
-        from edgar import get_obj_info
+        from edgar import _get_obj_info
 
         lines = []
 
@@ -2480,7 +2480,7 @@ class Filing:
             lines.append("AVAILABLE ACTIONS:")
 
             # Check if this form has a structured data object
-            has_obj, obj_type, obj_desc = get_obj_info(self.form)
+            has_obj, obj_type, obj_desc = _get_obj_info(self.form)
             if has_obj:
                 lines.append("  - Use .obj() to parse as structured data")
                 lines.append(f"    Returns: {obj_type} ({obj_desc})")

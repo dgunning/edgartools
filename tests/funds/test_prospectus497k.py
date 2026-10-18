@@ -6,7 +6,7 @@ Ground truth values are hand-verified from actual SEC filings.
 import pytest
 from decimal import Decimal
 
-from edgar import find, get_obj_info
+from edgar import find, _get_obj_info
 from edgar.funds.prospectus497k import Prospectus497K, ShareClassFees, PerformanceReturn
 
 
@@ -198,7 +198,7 @@ class TestProspectus497KDispatch:
         assert isinstance(p, Prospectus497K)
 
     def test_get_obj_info(self):
-        has_obj, name, desc = get_obj_info("497K")
+        has_obj, name, desc = _get_obj_info("497K")
         assert has_obj is True
         assert name == "Prospectus497K"
         assert "summary prospectus" in desc

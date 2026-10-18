@@ -1,0 +1,1 @@
+**The 25 top-level names outside `edgar.__all__` are private.** They include `set_data_directory`, `get_obj_info` and stdlib names like `Optional` that leaked in through annotation imports. `from edgar import X` now raises `ImportError`, and `edgar.X` names the replacement. Import them from their modules (`edgar.paths`, `edgar.entity`, `typing`) or use `Filing.obj_type`.

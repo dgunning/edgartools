@@ -1,4 +1,4 @@
-from edgar import obj, matches_form, Filing, CurrentFilings, FundReport, find, get_current_filings, CompanySearchResults
+from edgar import obj, _matches_form, Filing, CurrentFilings, FundReport, find, get_current_filings, CompanySearchResults
 from edgar.company_reports import TenK
 from edgar.offerings.effect import Effect
 from edgar.entity import Entity
@@ -15,11 +15,11 @@ def bioen_filing():
 def test_matches_form(bioen_filing):
     form3_filing_amendment = Filing(form='3/A', company='Bio-En Holdings Corp.', cik=1568139,
                                     filing_date='2013-04-29', accession_no='0001477932-13-002021')
-    assert matches_form(bioen_filing, form=["3", "4", "5"])
-    assert matches_form(bioen_filing, form="3")
-    assert matches_form(bioen_filing, form=["3"])
-    assert not matches_form(bioen_filing, form="4")
-    assert matches_form(form3_filing_amendment, form=["3", "4", "5"])
+    assert _matches_form(bioen_filing, form=["3", "4", "5"])
+    assert _matches_form(bioen_filing, form="3")
+    assert _matches_form(bioen_filing, form=["3"])
+    assert not _matches_form(bioen_filing, form="4")
+    assert _matches_form(form3_filing_amendment, form=["3", "4", "5"])
 
 @pytest.mark.network
 def test_obj(bioen_filing):

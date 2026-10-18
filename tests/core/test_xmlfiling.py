@@ -93,9 +93,9 @@ class TestXmlFilingForms:
 class TestObjInfo:
 
     def test_xml_filing_forms_registered(self):
-        from edgar import get_obj_info
+        from edgar import _get_obj_info
         for form in ['X-17A-5', 'TA-1', 'TA-2', 'MA', 'CFPORTAL', 'SBSE']:
-            has_obj, class_name, desc = get_obj_info(form)
+            has_obj, class_name, desc = _get_obj_info(form)
             assert has_obj is True, f"{form} not registered"
             assert class_name == 'XmlFiling', f"{form} has wrong class: {class_name}"
 

@@ -1,4 +1,5 @@
-from edgar import get_cik_lookup_data, Entity, Company
+from edgar import Entity, Company
+from edgar.entity import get_cik_lookup_data
 from tqdm import tqdm
 from rich import print
 import time
