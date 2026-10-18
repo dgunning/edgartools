@@ -1,0 +1,1 @@
+**A blank cell in a filing's R-file table is `NaN`, not `0.0`.** `Report.to_dataframe()` reported every blank cell as zero, which was 45% of parsed cells across six filers' 10-K statements. A blank, `N/A` or `NM` is now `NaN`, and a dash still reads as `0.0`. Use `.fillna(0.0)` for the old frame.
