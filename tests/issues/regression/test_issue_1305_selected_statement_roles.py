@@ -450,11 +450,10 @@ def test_literal_role_uri_keeps_the_presentation_role_without_a_catalog_entry(fr
             assert direct is not None
             assert direct.title == rendered.title
             assert [row.metadata["concept"] for row in direct.rows] == expected_concepts
-            if expected_kind:
-                assert [period.key for period in rendered.periods] == ["instant_2023-09-30", "instant_2022-09-24"]
-            else:
-                # An uncatalogued tree stays untyped, including its generic periods.
-                assert all(period.key.startswith("duration_") for period in rendered.periods)
+            # An uncatalogued tree stays untyped (asserted above), but since
+            # GH #1469 an instant-only statement takes its own instants, so
+            # both cases show the filed share-count dates.
+            assert [period.key for period in rendered.periods] == ["instant_2023-09-30", "instant_2022-09-24"]
 
 
 @pytest.mark.parametrize("kind", ("BalanceSheet", "CashFlowStatement", "StatementOfEquity"))
