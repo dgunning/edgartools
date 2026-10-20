@@ -33,6 +33,7 @@ $9,896 million. The parent balance-sheet role has no corresponding receivable
 row. The regression asserts USD amounts, not the displayed million-dollar scale.
 
 These fixtures establish role fidelity, comparative-period selection and
-processing preservation. They do not establish complete subsidiary financial
-correctness: the independently reported parent-fact contamination of the plain
-`us-gaap:Assets` row remains unresolved by this correction.
+processing preservation. Since GH #1468 the subsidiary role also reads American
+Airlines, Inc.'s `dei:LegalEntityAxis` facts on its plain rows, so its
+`us-gaap:Assets` row carries the filed $72,888 million (10-Q) and $70,247 million
+(10-K) rather than the group's amounts.

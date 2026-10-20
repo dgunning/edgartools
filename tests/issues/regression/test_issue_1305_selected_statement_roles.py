@@ -167,9 +167,11 @@ def test_role_uri_balance_sheet_keeps_its_instant_comparison(aal):
     _assert_balance_frame(xbrl.statements[case["role"]], case)
     frame = xbrl.statements[case["role"]].to_dataframe(standard=False)
     assert _period_columns(frame) == list(case["periods"])
-    subsidiary = frame.loc[frame["concept"].eq("us-gaap_Assets") & frame["dimension_member"].eq("aal_AmericanAirlinesIncMember")]
-    assert len(subsidiary) == 1
-    assert subsidiary[list(case["periods"])].iloc[0].tolist() == list(case["subsidiary_assets"])
+    # GH #1468: the subsidiary's own role reads its LegalEntityAxis facts on
+    # the plain rows, so its total assets are no longer a dimensional child.
+    row = _plain_row(frame, "us-gaap_Assets")
+    assert [row[period] for period in case["periods"]] == list(case["subsidiary_assets"])
+    assert not frame["dimension_member"].eq("aal_AmericanAirlinesIncMember").any()
 
 
 def test_group_role_uri_balance_sheet_keeps_its_instant_comparison(aal):
@@ -213,7 +215,7 @@ def test_named_balance_sheet_keeps_the_primary_role(aal):
         assert not frame["concept"].eq(RECEIVABLES).any()
 
 
-def test_standard_and_detailed_keep_legal_entity_receivables(aal):
+def test_standard_and_detailed_keep_subsidiary_receivables(aal):
     xbrl, case = aal
     statement = _select(xbrl, case["role"], "integer")
     for view in ("standard", "detailed"):
@@ -226,14 +228,11 @@ def test_standard_and_detailed_keep_legal_entity_receivables(aal):
                 standard,
                 "subsidiary receivables disappeared",
             )
-            assert any([row[period] for period in case["periods"]] == list(case["receivables"]) for _, row in rows.iterrows())
-            children = rows.loc[rows["dimension_member"].eq("aal_AmericanAirlinesIncMember")]
-            assert not children.empty, (
-                view,
-                standard,
-                "LegalEntityAxis child disappeared",
-            )
-            assert any([row[period] for period in case["periods"]] == list(case["receivables"]) for _, row in children.iterrows())
+            plain = _plain_row(frame, RECEIVABLES)
+            assert [plain[period] for period in case["periods"]] == list(case["receivables"])
+            # GH #1468: the LegalEntityAxis member is consumed by the
+            # subsidiary's own role rather than repeated as a child row.
+            assert not rows["dimension_member"].eq("aal_AmericanAirlinesIncMember").any(), (view, standard)
 
 
 @pytest.mark.parametrize("helper", ("integer", "get"))
