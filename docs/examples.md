@@ -99,8 +99,8 @@ for ticker in ["AAPL", "MSFT"]:
 ```python
 from edgar import Company
 
-tenk = Company("NVDA").latest("10-K")
-print(tenk['Item 1'].text[:2000])
+tenk = Company("NVDA").latest("10-K").obj()
+print(tenk['Item 1'][:2000])
 ```
 
 ### Get auditor and subsidiaries from a 10-K

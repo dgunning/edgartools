@@ -343,11 +343,11 @@ use_local_storage()
 
 ### Ticker vs Company Name Confusion
 ```python
-# This will fail - searching for ticker in name search
-results = find("AAPL")  # Returns companies with "AAPL" in name, not ticker
+# find() resolves the ticker, but returns an Entity (CIK 320193), not a Company
+entity = find("AAPL")  # Entity has no get_financials()
 
-# Use Company() for ticker lookup
-company = Company("AAPL")  # Correct for ticker lookup
+# Use Company() for a company's data
+company = Company("AAPL")  # Has get_financials(), get_facts(), latest(), ...
 ```
 
 ### International Companies

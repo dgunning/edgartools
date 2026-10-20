@@ -247,7 +247,8 @@ def find(search_id: str | int) -> Filing | Entity | CompanySearchResults | FundC
         - CIK -> returns an Entity
         - Class/Contract ID -> returns a FundClass
         - Series ID -> returns a FundSeries
-        - Ticker -> returns a Company or a Fund if the ticker is a fund ticker
+        - Ticker -> returns an Entity (use Company(ticker) for get_financials()); a ticker no company has falls back
+          to a company-name search, and a mutual fund ticker (four uppercase letters then X) goes to find_fund()
         - Company name -> returns CompanySearchResults
 
     :type: object
