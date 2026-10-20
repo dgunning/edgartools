@@ -1315,7 +1315,8 @@ class Statement:
         periods_to_display = determine_periods_to_display(
             self.xbrl, statement_type,
             period_filter=period_filter,
-            period_view=period_view
+            period_view=period_view,
+            statement_data=raw_data
         )
 
         if not periods_to_display:

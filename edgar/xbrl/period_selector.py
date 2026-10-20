@@ -29,8 +29,12 @@ EQUITY_STATEMENT_TYPES = frozenset({
     'StatementOfComprehensiveIncome'
 })
 
+# Instant-based statements (point-in-time snapshots)
+INSTANT_STATEMENT_TYPES = frozenset({'BalanceSheet', 'ScheduleOfInvestments', 'FinancialHighlights'})
 
-def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tuple[str, str]]:
+
+def select_periods(xbrl, statement_type: str, max_periods: int = 4,
+                   statement_data: Optional[List[Dict[str, Any]]] = None) -> List[Tuple[str, str]]:
     """
     Single entry point for period selection.
 
@@ -38,6 +42,9 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
         xbrl: XBRL instance with reporting_periods and entity_info
         statement_type: 'BalanceSheet', 'IncomeStatement', 'CashFlowStatement', etc.
         max_periods: Maximum number of periods to return
+        statement_data: Optional rows from get_statement(). When every value in
+            them sits in an instant period, the statement is a point-in-time
+            table whatever its type, and its own instants are selected.
 
     Returns:
         List of (period_key, period_label) tuples, most recent first
@@ -56,12 +63,21 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
         logger.warning("No valid periods found after document date filtering for %s", xbrl.entity_name)
         return [(p['key'], p['label']) for p in all_periods[:max_periods]]  # Fallback to unfiltered
 
+    # GH #1469: an unclassified note role (statement_type None) fell through
+    # to the duration selector, so a note holding only instant facts rendered
+    # annual columns with every cell blank. Choose from the statement's own
+    # instants instead. The fact-density filter below counts facts by
+    # statement type, which means nothing for an untyped note, so density is
+    # measured within the statement. Instant and equity statement types keep
+    # their own selectors.
+    if statement_type not in INSTANT_STATEMENT_TYPES and statement_type not in EQUITY_STATEMENT_TYPES:
+        own_periods = _select_instant_only_statement_periods(statement_data, filtered_periods, max_periods)
+        if own_periods:
+            return own_periods
+
     try:
         # Step 2: Statement-specific logic
-        # Instant-based statements (point-in-time snapshots)
-        instant_statement_types = {'BalanceSheet', 'ScheduleOfInvestments', 'FinancialHighlights'}
-
-        if statement_type in instant_statement_types:
+        if statement_type in INSTANT_STATEMENT_TYPES:
             candidate_periods = _select_balance_sheet_periods(filtered_periods, xbrl.entity_info, max_periods)
         elif statement_type in EQUITY_STATEMENT_TYPES:
             candidate_periods = _select_equity_statement_periods(filtered_periods, xbrl.entity_info, max_periods, document_end_date)
@@ -100,6 +116,34 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4) -> List[Tupl
         logger.error("Period selection failed for %s %s: %s", xbrl.entity_name, statement_type, e)
         # Final fallback: return filtered periods (document date filter already applied)
         return [(p['key'], p['label']) for p in filtered_periods[:max_periods]]
+
+
+def _select_instant_only_statement_periods(statement_data: Optional[List[Dict[str, Any]]],
+                                           periods: List[Dict],
+                                           max_periods: int) -> List[Tuple[str, str]]:
+    """
+    Select periods for a statement whose values all sit in instant periods.
+
+    Returns an empty list when the statement has no values or any duration
+    value. Otherwise keeps the statement's instants that carry at least half
+    as many rows as its densest instant, newest first. A row that alone
+    reaches back further (shares outstanding restated for prior years, say)
+    does not add a mostly blank column.
+    """
+    if not statement_data:
+        return []
+    rows_per_key: Dict[str, int] = {}
+    for row in statement_data:
+        for key in (row.get('values') or {}):
+            rows_per_key[key] = rows_per_key.get(key, 0) + 1
+    if not rows_per_key or not all(key.startswith('instant_') for key in rows_per_key):
+        return []
+
+    densest = max(rows_per_key.values())
+    own_periods = [p for p in periods
+                   if p['type'] == 'instant' and rows_per_key.get(p['key'], 0) * 2 >= densest]
+    own_periods = _sort_periods_by_date(own_periods, 'instant')
+    return [(p['key'], p['label']) for p in own_periods[:max_periods]]
 
 
 def _filter_by_document_date(periods: List[Dict], document_end_date: Optional[str]) -> List[Dict]:
