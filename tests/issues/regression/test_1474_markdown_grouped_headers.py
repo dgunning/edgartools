@@ -358,13 +358,14 @@ def test_unequal_header_body_widths_preserve_amounts_and_padding(header_html, da
             "<tr><th>Metric</th><th>Revenue | margin\\_forecast</th></tr>",
             "<tr><td>Revenue</td><td>10</td></tr>",
             None,
-            "| Metric | Revenue | margin\\_forecast |\n| --- | --- |\n| Revenue | 10 |",
+            # A flat header escapes pipes and backslashes like a grouped one (GH #1483).
+            "| Metric | Revenue \\| margin\\\\_forecast |\n| --- | --- |\n| Revenue | 10 |",
         ),
     ],
-    ids=["flat-colspan-and-whitespace", "flat-whitespace-and-line-break", "flat-existing-escape-policy"],
+    ids=["flat-colspan-and-whitespace", "flat-whitespace-and-line-break", "flat-escapes-pipe-and-backslash"],
 )
 def test_single_header_row_retains_original_markdown_bytes(header_html, data_html, header_override, expected):
-    """Pin existing flat-header bytes; this does not assert Markdown escape correctness. The whitespace colspan case uses a controlled post-parser Cell."""
+    """Pin flat-header bytes. The whitespace colspan case uses a controlled post-parser Cell."""
     document = parse_document(f"<html><body><table><thead>{header_html}</thead><tbody>{data_html}</tbody></table></body></html>")
     table = first_table(document)
     if header_override is not None:
