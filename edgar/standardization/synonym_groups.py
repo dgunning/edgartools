@@ -228,9 +228,9 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
         SynonymGroup(
             name='revenue',
             synonyms=[
+                'Revenues',
                 'RevenueFromContractWithCustomerExcludingAssessedTax',
                 'RevenueFromContractWithCustomerIncludingAssessedTax',
-                'Revenues',
                 'Revenue',
                 'SalesRevenueNet',
                 'SalesRevenueGoodsNet',
