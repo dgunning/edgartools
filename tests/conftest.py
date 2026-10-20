@@ -113,11 +113,25 @@ def reset_local_storage_state():
         del os.environ['EDGAR_LOCAL_DATA_DIR']
 
 
+@pytest.fixture
+def bundled_tickers_only(monkeypatch):
+    """Resolve tickers from the bundled parquet, never SEC's live file.
+
+    find_company_cik() asks SEC's live company_tickers.json first (GH #1588), so
+    without this an offline test that builds Company("AAPL") would quietly fetch
+    it. Applied to every test not marked network.
+    """
+    from edgar.reference import tickers
+    monkeypatch.setattr(tickers, "_get_live_company_cik_lookup", lambda: None)
+
+
 def pytest_runtest_setup(item):
-    """Auto-apply isolation fixtures to network tests."""
+    """Auto-apply isolation fixtures: network tests get a clean client, the rest stay offline."""
     if "network" in {m.name for m in item.iter_markers()}:
         item.fixturenames.append("reset_http_client_state")
         item.fixturenames.append("reset_local_storage_state")
+    else:
+        item.fixturenames.append("bundled_tickers_only")
 
 
 # Base paths
