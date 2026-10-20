@@ -170,7 +170,9 @@ def _leading_date(column):
 
 
 @pytest.mark.network
-@pytest.mark.parametrize("ticker", ["MSFT", "KO", "NVDA", "JNJ", "XOM"])
+# Exxon by CIK: ticker XOM now names ExxonMobil Holdings Corp (2115436), which has
+# no 10-K yet. Exxon Mobil Corp (34088) filed the 10-Ks this test was written against.
+@pytest.mark.parametrize("ticker", ["MSFT", "KO", "NVDA", "JNJ", 34088])
 def test_the_filers_that_already_worked_still_do(ticker):
     """No regression on the five whose labels happened to match.
 

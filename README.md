@@ -92,10 +92,10 @@ import pandas as pd
 revenue = {
     ticker: Company(ticker).income_statement(periods=3, as_dataframe=True)
             .set_index("label").filter(like="FY").loc["Total Revenue"] / 1e9
-    for ticker in ["JPM", "PFE", "XOM"]
+    for ticker in ["JPM", "PFE", "CAT"]
 }
 pd.DataFrame(revenue).round(1)  # $ billions
-#> FY 2025 182.4 62.6 332.2
+#> FY 2025 182.4 62.6 67.6
 ```
 
 ### Quarterly figures and trailing twelve months
