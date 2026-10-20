@@ -118,7 +118,9 @@ def test_company_get_facts_repr():
     company = get_test_company(1318605)
     facts = company.get_facts()
     facts_repr = str(facts)
-    assert 'Tesla' in facts_repr
+    # companyfacts' entityName is SEC's to case: 'Tesla, Inc.' until 2026-10-19, 'TESLA, INC.' since
+    assert 'TESLA, INC.' in facts_repr.upper()
+    assert '1318605' in facts_repr
 
 
 @pytest.mark.network
