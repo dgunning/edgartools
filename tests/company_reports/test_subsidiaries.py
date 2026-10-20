@@ -286,7 +286,8 @@ class TestTenKSubsidiariesProperty:
     @pytest.mark.network
     def test_xom_tenk_subsidiaries_with_ownership(self):
         from edgar import Company
-        tenk = Company("XOM").get_filings(form="10-K").latest().obj()
+        # Exxon Mobil Corp by CIK: ticker XOM moved to a holding company with no 10-K yet
+        tenk = Company(34088).get_filings(form="10-K").latest().obj()
         subs = tenk.subsidiaries
         assert subs is not None
         assert len(subs) > 100
