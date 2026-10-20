@@ -17,12 +17,20 @@ from edgar.ai.mcp.tools.base import (
     error,
     resolve_company,
     format_filing_summary,
-    get_error_suggestions,
+    classify_error,
     truncate_text,
     _holding_rows,
 )
 
 logger = logging.getLogger(__name__)
+
+NO_XBRL_NOTE = ("This filing has no XBRL, so there are no structured financial statements. "
+                "Filings from before SEC's 2009-2011 XBRL phase-in have none; the statements are in the text.")
+NO_XBRL_NEXT_STEP = {
+    "10-K": "Read the statements as text with sections=['Item 8']",
+    "10-Q": "Read the statements as text with sections=['Part I, Item 1']",
+    "*": "Read the filing's text with sections=['full_text']",
+}
 
 # Section mapping for different form types.
 # For 10-K: maps MCP section names to the friendly-name keys accepted by TenK.__getitem__
@@ -166,7 +174,8 @@ async def edgar_read(
                 suggestions=[
                     "Provide accession_number for a specific filing",
                     "Or provide identifier + form for most recent"
-                ]
+                ],
+                error_code="FILING_NOT_FOUND"
             )
 
         # Build response with metadata
@@ -191,13 +200,24 @@ async def edgar_read(
         next_steps = []
         if metadata_only:
             next_steps.append("Add sections like 'business', 'risk_factors', 'mda' to read content")
+        # A filing with no XBRL has no structured statements. That is an answer,
+        # not a failure, but a bare None does not say so (GH #1582).
+        if "financials" in result.get("sections", {}) and result["sections"]["financials"] is None \
+                and filing.xbrl() is None:
+            result["notes"] = {"financials": NO_XBRL_NOTE}
+            next_steps.append(NO_XBRL_NEXT_STEP.get(filing.form.replace("/A", "").strip(), NO_XBRL_NEXT_STEP["*"]))
         next_steps.append("Use edgar_company for full company analysis")
 
         return success(result, next_steps=next_steps)
 
     except Exception as e:
         logger.exception("Error in edgar_read")
-        return error(str(e), suggestions=get_error_suggestions(e))
+        classified = classify_error(e)
+        return error(
+            classified["message"],
+            suggestions=classified["suggestions"],
+            error_code=classified["error_code"]
+        )
 
 
 async def _get_filing(
@@ -209,10 +229,14 @@ async def _get_filing(
     from edgar import Filing
 
     if accession_number:
-        # Direct lookup by accession number
+        # Direct lookup by accession number. Without identifier + form to fall
+        # back on, let the failure reach the caller: a malformed accession raises
+        # ValidationError, and its message says what the format is (GH #1582).
         try:
             return find(search_id=accession_number)
         except Exception as e:
+            if not (identifier and form):
+                raise
             logger.debug(f"Direct accession lookup failed for '{accession_number}': {e}")
 
     if identifier and form:
