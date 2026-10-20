@@ -123,12 +123,11 @@ recent = list(company.get_filings())[:5]
 recent = company.get_filings().head(5)
 ```
 
-### Use `filing.obj()` for sections, not `filing.document()`
+### Use `filing.obj()` for sections, not `filing.document`
 
 ```python
-# WRONG: Raw document text, no structure
-doc = filing.document()
-text = doc.text()
+# WRONG: Raw document text, no structure (document is a property, not a method)
+text = filing.document.text()
 
 # RIGHT: Parsed data object with sections
 tenk = filing.obj()
@@ -241,7 +240,7 @@ eightk['Item 5.02']   # Personnel Changes
 ```python
 risk_factors = tenk.risk_factors
 if risk_factors:
-    print(risk_factors.text[:1000])
+    print(risk_factors[:1000])
 else:
     print("No risk factors section in this filing")
 ```
