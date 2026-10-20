@@ -89,6 +89,18 @@ def load_company_facts_from_local(cik: int) -> Dict[str, Any]:
     return json.loads(company_facts_file.read_text())
 
 
+# Revenue variants for get_revenue() and get_revenue_detailed(), in priority
+# order. The filed total, Revenues, comes first, as in the statement builder's
+# _REVENUE_CONCEPTS and Financials.get_revenue() (edgartools-jrqvs).
+_REVENUE_VARIANTS = [
+    'Revenues',
+    'RevenueFromContractWithCustomerExcludingAssessedTax',
+    'SalesRevenueNet',
+    'Revenue',
+    'TotalRevenues',
+    'NetSales',
+]
+
 _COMPANY_FACTS_CACHE_MAXSIZE = 1
 
 _company_facts_cache: OrderedDict[int, 'EntityFacts'] = OrderedDict()
@@ -953,14 +965,7 @@ class EntityFacts:
             >>> quarterly_revenue = facts.get_revenue(period="2024-Q1")
         """
         return self._get_standardized_concept_value(
-            concept_variants=[
-                'RevenueFromContractWithCustomerExcludingAssessedTax',
-                'SalesRevenueNet',
-                'Revenues',
-                'Revenue',
-                'TotalRevenues',
-                'NetSales'
-            ],
+            concept_variants=_REVENUE_VARIANTS,
             period=period,
             unit=unit,
             fallback_calculation=self._calculate_revenue_from_components,
@@ -1335,7 +1340,7 @@ class EntityFacts:
             >>> facts = company.get_facts()
             >>> available = facts.discover_concept_tags('revenue')
             >>> print(available)
-            ['RevenueFromContractWithCustomerExcludingAssessedTax', 'Revenues']
+            ['Revenues', 'RevenueFromContractWithCustomerExcludingAssessedTax']
         """
         from edgar.standardization import get_synonym_groups
 
@@ -1812,8 +1817,8 @@ class EntityFacts:
     def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months revenue using common revenue concepts."""
         revenue_concepts = [
-            'RevenueFromContractWithCustomerExcludingAssessedTax',
             'Revenues',
+            'RevenueFromContractWithCustomerExcludingAssessedTax',
             'SalesRevenueNet',
             'Revenue',
         ]
@@ -2704,7 +2709,7 @@ class EntityFacts:
         self._suppress_warnings = True
         try:
             revenue_fact = None
-            for concept in ['RevenueFromContractWithCustomerExcludingAssessedTax', 'SalesRevenueNet', 'Revenues', 'Revenue']:
+            for concept in ['Revenues', 'RevenueFromContractWithCustomerExcludingAssessedTax', 'SalesRevenueNet', 'Revenue']:
                 revenue_fact = self.get_fact(concept, period)
                 if revenue_fact:
                     break
@@ -2819,19 +2824,13 @@ class EntityFacts:
             ...         print(f"  - {suggestion}")
         """
         return self._get_standardized_concept_value(
-            concept_variants=[
-                'RevenueFromContractWithCustomerExcludingAssessedTax',
-                'SalesRevenueNet',
-                'Revenues',
-                'Revenue',
-                'TotalRevenues',
-                'NetSales'
-            ],
+            concept_variants=_REVENUE_VARIANTS,
             period=period,
             unit=unit,
             fallback_calculation=self._calculate_revenue_from_components,
             return_detailed=True,
-            annual=annual
+            annual=annual,
+            prefer_consolidated_total=True
         )
 
     def get_net_income_detailed(self, period: Optional[str] = None, unit: Optional[str] = None, annual: bool = True):
