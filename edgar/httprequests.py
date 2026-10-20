@@ -39,6 +39,7 @@ This module provides functions to handle HTTP requests with retry logic, throttl
 __all__ = [
     "get_with_retry",
     "get_with_retry_no_time_budget",
+    "get_once",
     "get_with_retry_async",
     "stream_with_retry",
     "post_with_retry",
@@ -876,6 +877,18 @@ def get_with_retry_no_time_budget(url, identity=None, identity_callable=None, **
     ``timeout=Timeout(90.0, connect=10.0)``.
     """
     return _get(get_with_retry_no_time_budget, url, identity=identity, identity_callable=identity_callable, **kwargs)
+
+
+@wrap_transport_errors
+@with_identity
+def get_once(url, identity=None, identity_callable=None, **kwargs):
+    """One GET attempt with no retries, through the shared client.
+
+    For an optional refresh that has a local answer to fall back on, such as the
+    live ticker file over the bundled one (GH #1588). Offline, `get_with_retry`
+    spends about 16s in retries before it gives up, which there buys nothing.
+    """
+    return _get(get_once, url, identity=identity, identity_callable=identity_callable, **kwargs)
 
 
 def _get(retry_fn, url, identity=None, identity_callable=None, **kwargs):

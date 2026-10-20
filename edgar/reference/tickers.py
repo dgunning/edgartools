@@ -8,11 +8,12 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 import pyarrow as pa
+from httpx2 import Timeout
 
 from edgar.core import listify, log
 from edgar.settings import get_edgar_data_directory
 from edgar.exceptions import http_status
-from edgar.httprequests import download_file, download_json
+from edgar.httprequests import download_file, download_json, get_once, inspect_response
 from edgar.reference.data.common import read_csv_from_package, read_parquet_from_package
 
 __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers', 'get_icon_from_ticker', 'find_cik',
@@ -490,16 +491,22 @@ def find_mutual_fund_cik(ticker):
     return lookup.get(ticker.upper())
 
 
+# One short attempt: the bundle answers when SEC can't, so don't wait out retries offline
+LIVE_TICKERS_TIMEOUT = Timeout(10.0, connect=3.0)
+
+
 @lru_cache(maxsize=1)
 def _get_live_company_cik_lookup() -> Optional[dict]:
     """
     Fetch the live company_tickers.json from the SEC and build a ticker→CIK dict.
 
-    Called once per session as a fallback when a ticker is missing from the
-    bundled parquet data (e.g. recent IPOs). Returns None on network failure.
+    Fetched once per session; find_company_cik() asks it before the bundled
+    parquet, which goes stale between refreshes. Returns None on network failure.
     """
     try:
-        tickers_json = download_json(build_company_tickers_url())
+        response = get_once(build_company_tickers_url(), timeout=LIVE_TICKERS_TIMEOUT)
+        inspect_response(response)
+        tickers_json = response.json()
         lookup = {}
         for item in tickers_json.values():
             ticker = item['ticker'].upper()
@@ -515,16 +522,19 @@ def _get_live_company_cik_lookup() -> Optional[dict]:
 
 
 def find_company_cik(ticker):
-    lookup = get_company_cik_lookup()
     ticker = ticker.upper().replace('.', '-')
-    cik = lookup.get(ticker)
-    if cik is not None:
-        return cik
-
-    # Fallback: try live SEC data for tickers missing from bundled parquet
-    live_lookup = _get_live_company_cik_lookup()
-    if live_lookup is not None:
-        return live_lookup.get(ticker)
+    if os.getenv("EDGAR_USE_LOCAL_DATA"):
+        lookups = (get_company_cik_lookup, _get_live_company_cik_lookup)
+    else:
+        # SEC's live file first: the bundle is a snapshot, and a ticker that moves
+        # to a new registrant after it is taken keeps answering the old CIK
+        # (GH #1588: XOM is 2115436 since 2026, the bundle still says 34088).
+        # The bundle answers offline, and for tickers SEC no longer lists.
+        lookups = (_get_live_company_cik_lookup, get_company_cik_lookup)
+    for get_lookup in lookups:
+        lookup = get_lookup()
+        if lookup is not None and ticker in lookup:
+            return lookup[ticker]
     return None
 
 def find_company_ticker(cik: Union[int, str]) -> Union[str, List[str], None]:
