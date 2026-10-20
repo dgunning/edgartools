@@ -98,11 +98,18 @@ _ACCEPTS_LINKED_FROM = {
 }
 
 # Income statement concept lists for deduplication and promotion
-# Revenue concepts (in priority order - first found wins)
+# Revenue concepts (in priority order - first found wins). The filed total,
+# us-gaap:Revenues, comes before contract revenue, which can be one component of
+# it: GM's face statement tags "Automotive" ($168.0B) as contract revenue and
+# "Total net sales and revenue" ($185.0B) as Revenues. Contract revenue can also
+# exceed the total (Williams: $14.9B vs $11.95B), so the larger figure is not the
+# answer either. Financials.get_revenue() settled the same order in gh #1294;
+# this list disagreeing with it is why the two paths reported different revenue
+# for the same filing (edgartools-jrqvs).
 _REVENUE_CONCEPTS = [
+    'Revenues',
     'RevenueFromContractWithCustomerExcludingAssessedTax',
     'SalesRevenueNet',
-    'Revenues',
     'Revenue',
 ]
 
@@ -2812,8 +2819,8 @@ class EnhancedStatementBuilder:
                 # Find revenue (try various concepts)
                 revenue = None
                 revenue_concepts = [
-                    'RevenueFromContractWithCustomerExcludingAssessedTax',
-                    'Revenues', 'Revenue', 'SalesRevenueNet', 'TotalRevenues'
+                    'Revenues', 'RevenueFromContractWithCustomerExcludingAssessedTax',
+                    'Revenue', 'SalesRevenueNet', 'TotalRevenues'
                 ]
                 for concept in revenue_concepts:
                     if concept in period_map:
@@ -3092,7 +3099,7 @@ class EnhancedStatementBuilder:
         # Define the preferred order of concepts
         concept_order = [
             # Revenue first
-            'RevenueFromContractWithCustomerExcludingAssessedTax', 'Revenues', 'SalesRevenueNet', 'TotalRevenue',
+            'Revenues', 'RevenueFromContractWithCustomerExcludingAssessedTax', 'SalesRevenueNet', 'TotalRevenue',
             # Cost of Revenue
             'CostOfGoodsAndServicesSold', 'CostOfRevenue',
             # Gross Profit (calculated or actual)
