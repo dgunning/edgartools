@@ -336,35 +336,41 @@ def get_company_cik_lookup():
     return lookup
 
 
-# Manual overrides for CIKs where the shortest non-hyphenated ticker is wrong
-_PREFERRED_TICKER = {
-    1166691: 'CMCSA',   # Comcast common stock, not CCZ (ETN)
-    1161611: 'ALMMF',   # Aluminum Corp of China, not ACH (conflicts with CIK 75252)
-    1787518: 'DFNSW',   # T3 Defense, not DFNS (conflicts with CIK 1777946)
-}
+def _is_derivative_ticker(ticker: str, siblings: list[str]) -> bool:
+    """Preferred/unit/warrant tickers: hyphenated (JPM-PC, KCAC-UN), or a
+    sibling plus only U/W/R (BEATW, ALFUU). Share-class letters (FOXA, GOOGL)
+    are not derivatives."""
+    if '-' in ticker:
+        return True
+    return any(
+        ticker != s and ticker.startswith(s) and set(ticker[len(s):]) <= {'U', 'W', 'R'}
+        for s in siblings
+    )
 
 
 @lru_cache(maxsize=1)
 def get_cik_ticker_lookup():
     """Create a mapping of CIK to the primary ticker symbol for each CIK.
 
-    For CIKs with multiple tickers, prefers non-hyphenated tickers (common stock)
-    over hyphenated ones (share classes like BRK-A), then picks the shortest.
+    SEC lists a CIK's tickers primary-first (GOOGL before GOOG, CMCSA before
+    the CCZ note), so the listed order decides, after demoting OTC tickers and
+    derivative tickers (preferreds, units, warrants). A missing exchange is not
+    demoted: a new SPAC lists its shares before they trade.
     """
-    df = get_cik_tickers()
+    df = _get_company_tickers_raw()
+    exchanges = df['exchange'] if 'exchange' in df.columns else [None] * len(df)
+    by_cik: dict[int, list[tuple[str, object]]] = {}
+    for ticker, cik, exchange in zip(df['ticker'], df['cik'], exchanges, strict=True):
+        by_cik.setdefault(cik, []).append((ticker, exchange))
+
     cik_to_ticker = {}
-    for ticker, cik in zip(df['ticker'], df['cik'], strict=False):
-        has_hyphen = '-' in ticker
-        prev = cik_to_ticker.get(cik)
-        if prev is None:
-            cik_to_ticker[cik] = ticker
-        else:
-            prev_has_hyphen = '-' in prev
-            # Prefer non-hyphenated over hyphenated; among equals, prefer shortest
-            if (prev_has_hyphen and not has_hyphen) or \
-               (prev_has_hyphen == has_hyphen and len(ticker) < len(prev)):
-                cik_to_ticker[cik] = ticker
-    cik_to_ticker.update(_PREFERRED_TICKER)
+    for cik, rows in by_cik.items():
+        siblings = [ticker for ticker, _ in rows]
+        best = min(
+            range(len(rows)),
+            key=lambda i: (rows[i][1] == 'OTC', _is_derivative_ticker(siblings[i], siblings), i),
+        )
+        cik_to_ticker[cik] = siblings[best]
     return cik_to_ticker
 
 

@@ -366,53 +366,57 @@ class TwentyF(CompanyReport):
 
         return "\n".join(lines)
 
-    # Convenience properties for common sections
+    # Convenience properties for common sections.
+    #
+    # These go through .get() and return None when the filing has no such item,
+    # as TenK's section properties do (see the note above TenK.business).
+    # `twenty_f[item]` is the lookup that raises SectionNotFoundError.
     @property
     def key_information(self):
         """Item 3 - Key Information (includes risk factors and selected financial data)."""
-        return self['Item 3']
+        return self.get('Item 3')
 
     @property
     def risk_factors(self):
         """Item 3 - Key Information (contains risk factors section)."""
-        return self['Item 3']
+        return self.get('Item 3')
 
     @property
     def business(self):
         """Item 4 - Information on the Company (business overview, operations, properties)."""
-        return self['Item 4']
+        return self.get('Item 4')
 
     @property
     def company_information(self):
         """Item 4 - Information on the Company (alias for business)."""
-        return self['Item 4']
+        return self.get('Item 4')
 
     @property
     def operating_review(self):
         """Item 5 - Operating and Financial Review and Prospects (similar to MD&A)."""
-        return self['Item 5']
+        return self.get('Item 5')
 
     @property
     def management_discussion(self):
         """Item 5 - Operating and Financial Review and Prospects (alias for operating_review)."""
-        return self['Item 5']
+        return self.get('Item 5')
 
     @property
     def directors_and_employees(self):
         """Item 6 - Directors, Senior Management and Employees."""
-        return self['Item 6']
+        return self.get('Item 6')
 
     @property
     def major_shareholders(self):
         """Item 7 - Major Shareholders and Related Party Transactions."""
-        return self['Item 7']
+        return self.get('Item 7')
 
     @property
     def financial_information(self):
         """Item 8 - Financial Information."""
-        return self['Item 8']
+        return self.get('Item 8')
 
     @property
     def controls_and_procedures(self):
         """Item 15 - Controls and Procedures."""
-        return self['Item 15']
+        return self.get('Item 15')

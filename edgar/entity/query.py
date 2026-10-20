@@ -866,8 +866,6 @@ class FactQuery:
                 mixed_periods=pivot.attrs.get('mixed_periods', False)
             )
         else:
-            # Set display format to avoid scientific notation for raw DataFrame
-            pd.options.display.float_format = '{:,.0f}'.format
             return pivot
 
     def _format_period_label(self, fact: FinancialFact) -> str:

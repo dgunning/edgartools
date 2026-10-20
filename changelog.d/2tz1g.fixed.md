@@ -1,0 +1,1 @@
+**`pivot_by_period(return_statement=False)` no longer changes pandas' display settings for the whole process.** It set the global `float_format` to whole numbers, so every DataFrame printed afterwards lost its decimals: JPM's FY 2025 revenue of 182.4 ($ billions) printed as 182.
