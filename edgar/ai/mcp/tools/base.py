@@ -498,7 +498,8 @@ ERROR_SUGGESTIONS = {
     ],
     "SSLVerificationError": [
         "SSL certificate verification failed",
-        "Try: from edgar import configure_http; configure_http(use_system_certs=True)",
+        "edgartools verifies against the OS certificate store: add your corporate root CA there, "
+        "or point SSL_CERT_FILE at a CA bundle that holds it",
         "This is common in corporate networks with SSL inspection"
     ],
     "IdentityNotSetError": [

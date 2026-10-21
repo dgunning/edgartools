@@ -209,7 +209,7 @@ class TestErrorClassification:
         from edgar.httprequests import SSLVerificationError
         result = classify_error(SSLVerificationError("cert failed", "https://efts.sec.gov"))
         assert result["error_code"] == "SSL_ERROR"
-        assert any("use_system_certs" in s for s in result["suggestions"])
+        assert any("SSL_CERT_FILE" in s for s in result["suggestions"])
 
     def test_identity_not_set(self):
         from edgar.httprequests import IdentityNotSetError

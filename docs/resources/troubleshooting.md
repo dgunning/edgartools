@@ -69,18 +69,18 @@ for filing in filings:
 
 **Solutions** (in order of preference):
 
-1. **Use OS certificate store (Recommended)**:
-```python
-from edgar import configure_http
+edgartools already verifies against your OS certificate store, so the error means the CA that signed the certificate you are seeing is missing from it.
 
-# Uses your OS's trusted certificates — secure and works on corporate networks
-configure_http(use_system_certs=True)
+1. **Add your corporate root CA to the OS trust store (Recommended)**: ask IT to install it (Keychain on macOS, the Windows certificate store, the `ca-certificates` package on Linux). No code change is needed afterwards.
 
-from edgar import Company
-company = Company("AAPL")
+2. **Point `SSL_CERT_FILE` at a CA bundle** holding the corporate CA and the public roots, set before the first request:
+```bash
+pip install certifi   # only a source of the public roots
+cat "$(python -m certifi)" /path/to/corporate-ca.crt > ~/combined-bundle.pem
+export SSL_CERT_FILE="$HOME/combined-bundle.pem"
 ```
 
-2. **Disable SSL verification (Last resort)**:
+3. **Disable SSL verification (Last resort)**:
 ```python
 from edgar import configure_http
 
@@ -88,13 +88,13 @@ from edgar import configure_http
 configure_http(verify_ssl=False)
 ```
 
-3. **Configure a proxy** if your network requires it:
+4. **Configure a proxy** if your network requires it:
 ```python
 from edgar import configure_http
-configure_http(use_system_certs=True, proxy="http://proxy.company.com:8080")
+configure_http(proxy="http://proxy.company.com:8080")
 ```
 
-See the [SSL Configuration Guide](../guides/ssl_verification.md) for detailed instructions.
+Run `diagnose_ssl()` to see which certificates are in use. See the [SSL Configuration Guide](../guides/ssl_verification.md) for detailed instructions.
 
 ## Data Retrieval Issues
 
@@ -418,8 +418,8 @@ If you're still experiencing issues:
 | `HTTPError 403` | SEC has blocked your requests | Set proper identity and respect rate limits |
 | `HTTPError 429` | Too many requests in a short time | Implement rate limiting and backoff |
 | `ConnectionError` | Network issues | Check your internet connection |
-| `SSLVerificationError` | Corporate VPN/proxy with SSL inspection | Use `configure_http(use_system_certs=True)` |
-| `CERTIFICATE_VERIFY_FAILED` | SSL certificate issues | Use `configure_http(use_system_certs=True)` |
+| `SSLVerificationError` | Corporate VPN/proxy with SSL inspection | Add the corporate CA to the OS trust store, or set `SSL_CERT_FILE` |
+| `CERTIFICATE_VERIFY_FAILED` | SSL certificate issues | Run `diagnose_ssl()`; add the missing CA to the OS store or `SSL_CERT_FILE` |
 | `UnsupportedFilingTypeError` | Data Object not available for this filing type | Use generic access methods |
 
 Remember that SEC filings can vary significantly in structure and content, especially across different years and companies. Always implement robust error handling in your code to deal with these variations.

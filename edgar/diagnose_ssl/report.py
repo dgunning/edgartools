@@ -71,9 +71,19 @@ class HttpClientState:
     client_created: bool = False
     client_verify: Optional[bool] = None
     configured_verify: bool = True
-    use_system_certs: bool = False
+    use_system_certs: bool = False  # True when the OS store verifies, the 6.0 default
+    cert_source: str = "os-store"  # edgar.httpclient.get_cert_source()
     settings_match: bool = True
     rate_limit_per_sec: int = 9
+
+
+CERT_SOURCE_LABELS = {
+    "os-store": "OS certificate store",
+    "SSL_CERT_FILE": "SSL_CERT_FILE",
+    "SSL_CERT_DIR": "SSL_CERT_DIR",
+    "custom": "custom SSL context",
+    "disabled": "nothing (verification disabled)",
+}
 
 
 @dataclass
@@ -206,6 +216,8 @@ class DiagnosticResult:
         if self.environment.truststore_version:
             active = " [green](active)[/green]" if self.http_client_state.use_system_certs else ""
             env_table.add_row("truststore:", f"{self.environment.truststore_version}{active}")
+        env_table.add_row("Verifies against:", CERT_SOURCE_LABELS.get(self.http_client_state.cert_source,
+                                                                      self.http_client_state.cert_source))
 
         sections.append(Panel(env_table, title="[bold]Environment[/bold]", border_style="dim", padding=(0, 1)))
 

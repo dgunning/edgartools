@@ -417,7 +417,11 @@ def test_ssl_error_message_enhancement(monkeypatch):
 
         # Verify helpful message is present
         error_msg = str(exc_info.value)
-        assert "use_system_certs" in error_msg  # Recommends system certs first
+        # 6.0 already verifies against the OS store, so the advice is to add the
+        # missing CA there or to an SSL_CERT_FILE bundle (edgartools-r5iw)
+        assert "OS certificate store" in error_msg
+        assert "SSL_CERT_FILE" in error_msg
+        assert "REQUESTS_CA_BUNDLE=" not in error_msg
         assert "configure_http" in error_msg
         assert "last resort" in error_msg  # Warns that disabling SSL is last resort
         assert "https://www.sec.gov" in error_msg
@@ -439,7 +443,7 @@ def test_post_with_retry_ssl_error():
             post_with_retry("https://www.sec.gov", data={"key": "value"})
 
         error_msg = str(exc_info.value)
-        assert "use_system_certs" in error_msg
+        assert "SSL_CERT_FILE" in error_msg
         assert "last resort" in error_msg
 
 
@@ -460,7 +464,7 @@ async def test_post_with_retry_async_ssl_error():
                 await post_with_retry_async(client=client, url="https://www.sec.gov", data={"key": "value"})
 
             error_msg = str(exc_info.value)
-            assert "use_system_certs" in error_msg
+            assert "SSL_CERT_FILE" in error_msg
             assert "last resort" in error_msg
 
 
@@ -911,16 +915,21 @@ def test_get_http_config_reports_system_certs():
 
     original_verify = HTTP_MGR.httpx_params.get("verify", True)
     try:
-        # Default: not using system certs
+        # Default: httpx2 verifies against the OS store unless SSL_CERT_* points
+        # elsewhere, so the config must say so (edgartools-r5iw)
         HTTP_MGR.httpx_params["verify"] = True
         config = get_http_config()
-        assert config["use_system_certs"] is False
+        expected_source = ("SSL_CERT_FILE" if os.environ.get("SSL_CERT_FILE")
+                           else "SSL_CERT_DIR" if os.environ.get("SSL_CERT_DIR") else "os-store")
+        assert config["cert_source"] == expected_source
+        assert config["use_system_certs"] is (expected_source == "os-store")
         assert config["verify_ssl"] is True
 
         # Enable system certs
         configure_http(use_system_certs=True)
         config = get_http_config()
         assert config["use_system_certs"] is True
+        assert config["cert_source"] == "os-store"
         assert config["verify_ssl"] is True  # system certs still verify, just with OS store
     finally:
         HTTP_MGR.httpx_params["verify"] = original_verify
