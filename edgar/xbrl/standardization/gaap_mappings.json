@@ -1471,13 +1471,13 @@
   },
   "AccumulatedOtherComprehensiveIncomeLossOtherThanTemporaryImpairmentNotCreditLossNetOfTaxAvailableforsaleDebtSecurities": {
     "standard_tags": [
-      "CommonEquity"
+      "AccumulatedOtherComprehensiveIncome"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Accumulated Other Comprehensive Income",
     "statement": "BalanceSheet",
     "section": "Equity",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -1487,13 +1487,13 @@
   },
   "AccumulatedOtherComprehensiveIncomeLossOtherThanTemporaryImpairmentNotCreditLossNetOfTaxDebtSecurities": {
     "standard_tags": [
-      "CommonEquity"
+      "AccumulatedOtherComprehensiveIncome"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Accumulated Other Comprehensive Income",
     "statement": "BalanceSheet",
     "section": "Equity",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -1503,13 +1503,13 @@
   },
   "AccumulatedOtherComprehensiveIncomeLossOtherThanTemporaryImpairmentNotCreditLossNetOfTaxHeldtomaturityDebtSecurities": {
     "standard_tags": [
-      "CommonEquity"
+      "AccumulatedOtherComprehensiveIncome"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Accumulated Other Comprehensive Income",
     "statement": "BalanceSheet",
     "section": "Equity",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -2851,30 +2851,14 @@
   },
   "AociDerivativeQualifyingAsHedgeExcludedComponentAfterTax": {
     "standard_tags": [
-      "CommonEquity"
+      "AccumulatedOtherComprehensiveIncome"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Accumulated Other Comprehensive Income",
     "statement": "BalanceSheet",
     "section": "Equity",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
-  "AociIncludingPortionAttributableToNoncontrollingInterestTax": {
-    "standard_tags": [
-      "AllEquityBalanceIncludingMinorityInterest"
-    ],
-    "display_name": "Total Equity Including Noncontrolling Interest",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 2,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
     "years_present": 4,
@@ -2883,13 +2867,13 @@
   },
   "AociLossCashFlowHedgeCumulativeGainLossAfterTax": {
     "standard_tags": [
-      "CommonEquity"
+      "AccumulatedOtherComprehensiveIncome"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Accumulated Other Comprehensive Income",
     "statement": "BalanceSheet",
     "section": "Equity",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 20,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
@@ -2899,13 +2883,13 @@
   },
   "AociTaxAttributableToParent": {
     "standard_tags": [
-      "CommonEquity"
+      "AccumulatedOtherComprehensiveIncome"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Accumulated Other Comprehensive Income",
     "statement": "BalanceSheet",
     "section": "Equity",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 15,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
@@ -5625,13 +5609,13 @@
   },
   "CommonStockHeldBySubsidiary": {
     "standard_tags": [
-      "CommonEquity"
+      "TreasuryShares"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Treasury Stock",
     "statement": "BalanceSheet",
     "section": "Equity",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 4,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -5689,13 +5673,13 @@
   },
   "CommonStockOtherSharesOutstanding": {
     "standard_tags": [
-      "CommonEquity"
+      "SharesYearEnd"
     ],
-    "display_name": "Total Stockholders' Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": true,
-    "confidence": 0.5,
+    "display_name": "Shares Outstanding",
+    "statement": "PerShareData",
+    "section": "Shares Outstanding",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 27,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.417,
@@ -5718,22 +5702,6 @@
     "years_present": 4,
     "first_year": 2021,
     "last_year": 2024
-  },
-  "CommonStockShareSubscribedButUnissuedSubscriptionsReceivable": {
-    "standard_tags": [
-      "CommonEquity"
-    ],
-    "display_name": "Total Stockholders' Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 69,
-    "occurrence_rate": 0.008,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
   },
   "CommonStockSharesHeldInEmployeeTrust": {
     "standard_tags": [
@@ -5781,38 +5749,6 @@
     "temporal_consistency": 1.0,
     "years_present": 12,
     "first_year": 2012,
-    "last_year": 2025
-  },
-  "CommonStockValue": {
-    "standard_tags": [
-      "CommonEquity"
-    ],
-    "display_name": "Total Stockholders' Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": true,
-    "confidence": 1.0,
-    "company_count": 7620,
-    "occurrence_rate": 0.847,
-    "temporal_consistency": 1.0,
-    "years_present": 12,
-    "first_year": 2012,
-    "last_year": 2025
-  },
-  "CommonStockValueOutstanding": {
-    "standard_tags": [
-      "CommonEquity"
-    ],
-    "display_name": "Total Stockholders' Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 313,
-    "occurrence_rate": 0.035,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
     "last_year": 2025
   },
   "CommonStocksIncludingAdditionalPaidInCapital": {
@@ -9603,22 +9539,6 @@
     "first_year": 2021,
     "last_year": 2024
   },
-  "DeferredCompensationEquity": {
-    "standard_tags": [
-      "CommonEquity"
-    ],
-    "display_name": "Total Stockholders' Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 42,
-    "occurrence_rate": 0.005,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
   "DeferredCompensationLiabilityClassifiedNoncurrent": {
     "standard_tags": [
       "DeferredCompensationNonCurrent"
@@ -11969,13 +11889,13 @@
   },
   "DefinedBenefitPlanAccumulatedOtherComprehensiveIncomeNetGainsLossesAfterTax": {
     "standard_tags": [
-      "CommonEquity"
+      "AccumulatedOtherComprehensiveIncome"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Accumulated Other Comprehensive Income",
     "statement": "BalanceSheet",
     "section": "Equity",
-    "is_total": true,
-    "confidence": 0.4,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -12001,13 +11921,13 @@
   },
   "DefinedBenefitPlanAccumulatedOtherComprehensiveIncomeNetPriorServiceCostCreditAfterTax": {
     "standard_tags": [
-      "CommonEquity"
+      "AccumulatedOtherComprehensiveIncome"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Accumulated Other Comprehensive Income",
     "statement": "BalanceSheet",
     "section": "Equity",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -14394,13 +14314,13 @@
   },
   "Dividends": {
     "standard_tags": [
-      "CommonDividendsPaid"
+      "DividendsEquity"
     ],
-    "display_name": "Dividends Paid",
-    "statement": "CashFlowStatement",
-    "section": "Financing Activities",
-    "is_total": true,
-    "confidence": 0.952,
+    "display_name": "Dividends (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 454,
     "occurrence_rate": 0.05,
     "temporal_consistency": 0.417,
@@ -14410,13 +14330,13 @@
   },
   "DividendsCash": {
     "standard_tags": [
-      "CommonDividendsPaid"
+      "DividendsEquity"
     ],
-    "display_name": "Dividends Paid",
-    "statement": "CashFlowStatement",
-    "section": "Financing Activities",
+    "display_name": "Dividends (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 212,
     "occurrence_rate": 0.024,
     "temporal_consistency": 0.5,
@@ -14442,13 +14362,13 @@
   },
   "DividendsCommonStock": {
     "standard_tags": [
-      "CommonDividendsPaid"
+      "DividendsEquity"
     ],
-    "display_name": "Dividends Paid",
-    "statement": "CashFlowStatement",
-    "section": "Financing Activities",
-    "is_total": true,
-    "confidence": 0.956,
+    "display_name": "Dividends (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 623,
     "occurrence_rate": 0.069,
     "temporal_consistency": 0.417,
@@ -14458,13 +14378,13 @@
   },
   "DividendsCommonStockCash": {
     "standard_tags": [
-      "CommonDividendsPaid"
+      "DividendsEquity"
     ],
-    "display_name": "Dividends Paid",
-    "statement": "CashFlowStatement",
-    "section": "Financing Activities",
+    "display_name": "Dividends (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.984,
+    "confidence": 0.9,
     "company_count": 1166,
     "occurrence_rate": 0.13,
     "temporal_consistency": 0.583,
@@ -14474,13 +14394,13 @@
   },
   "DividendsPaid": {
     "standard_tags": [
-      "CommonDividendsPaid"
+      "DividendsEquity"
     ],
-    "display_name": "Dividends Paid",
-    "statement": "CashFlowStatement",
-    "section": "Financing Activities",
-    "is_total": true,
-    "confidence": 0.5,
+    "display_name": "Dividends (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 252,
     "occurrence_rate": 0.028,
     "temporal_consistency": 0.583,
@@ -14519,22 +14439,6 @@
     "years_present": 6,
     "first_year": 2017,
     "last_year": 2025
-  },
-  "DividendsPayableAmountPerShare": {
-    "standard_tags": [
-      "CommonDividendsPerShare"
-    ],
-    "display_name": "Dividends Per Share",
-    "statement": "PerShareData",
-    "section": "Dividends",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 21,
-    "occurrence_rate": 0.002,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
   },
   "DividendsPayableCurrent": {
     "standard_tags": [
@@ -29353,13 +29257,13 @@
   },
   "OtherAdditionalCapital": {
     "standard_tags": [
-      "CommonEquity"
+      "AdditionalPaidInCapital"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Additional Paid-In Capital",
     "statement": "BalanceSheet",
     "section": "Equity",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 25,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.5,
@@ -33631,22 +33535,6 @@
     "first_year": 2020,
     "last_year": 2025
   },
-  "PreferredStockLiquidationPreferenceValue": {
-    "standard_tags": [
-      "AllEquityBalance"
-    ],
-    "display_name": "Total Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": false,
-    "confidence": 0.317,
-    "company_count": 261,
-    "occurrence_rate": 0.029,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
-  },
   "PreferredStockRedemptionAmount": {
     "standard_tags": [
       "PreferredStock"
@@ -33694,38 +33582,6 @@
     "years_present": 4,
     "first_year": 2021,
     "last_year": 2024
-  },
-  "PreferredStockSharesIssued": {
-    "standard_tags": [
-      "SharesIssued"
-    ],
-    "display_name": "Shares Issued",
-    "statement": "PerShareData",
-    "section": "Shares Outstanding",
-    "is_total": false,
-    "confidence": 0.6,
-    "company_count": 4681,
-    "occurrence_rate": 0.52,
-    "temporal_consistency": 0.917,
-    "years_present": 11,
-    "first_year": 2015,
-    "last_year": 2025
-  },
-  "PreferredStockSharesOutstanding": {
-    "standard_tags": [
-      "SharesYearEnd"
-    ],
-    "display_name": "Shares Outstanding",
-    "statement": "PerShareData",
-    "section": "Shares Outstanding",
-    "is_total": false,
-    "confidence": 0.593,
-    "company_count": 4394,
-    "occurrence_rate": 0.488,
-    "temporal_consistency": 0.917,
-    "years_present": 11,
-    "first_year": 2015,
-    "last_year": 2025
   },
   "PreferredStockSharesSubscribedButUnissuedSubscriptionsReceivable": {
     "standard_tags": [
@@ -36423,13 +36279,13 @@
   },
   "PurchaseOfTreasuryShares": {
     "standard_tags": [
-      "StockRepurchasePayments"
+      "StockRepurchasesEquity"
     ],
-    "display_name": "Stock Repurchase Payments",
-    "statement": "CashFlowStatement",
-    "section": "Financing Activities",
+    "display_name": "Stock Repurchases (Equity)",
+    "statement": "StatementOfEquity",
+    "section": "Equity Changes",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 166,
     "occurrence_rate": 0.018,
     "temporal_consistency": 0.5,
@@ -36677,38 +36533,6 @@
     "first_year": null,
     "last_year": null
   },
-  "ReceivableFromOfficersAndDirectorsForIssuanceOfCapitalStock": {
-    "standard_tags": [
-      "CommonEquity"
-    ],
-    "display_name": "Total Stockholders' Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 2,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
-  "ReceivableFromShareholdersOrAffiliatesForIssuanceOfCapitalStock": {
-    "standard_tags": [
-      "CommonEquity"
-    ],
-    "display_name": "Total Stockholders' Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 25,
-    "occurrence_rate": 0.003,
-    "temporal_consistency": 0.75,
-    "years_present": 9,
-    "first_year": 2016,
-    "last_year": 2025
-  },
   "ReceivableWithImputedInterestNetAmount": {
     "standard_tags": [
       "TradeReceivables"
@@ -36823,13 +36647,13 @@
   },
   "ReclassificationFromAociCurrentPeriodNetOfTaxAttributableToParent": {
     "standard_tags": [
-      "CommonEquity"
+      "AOCIReclassifications"
     ],
-    "display_name": "Total Stockholders' Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": true,
-    "confidence": 0.5,
+    "display_name": "AOCI Reclassification Adjustments",
+    "statement": "ComprehensiveIncome",
+    "section": "OCI Components",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 19,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.333,
@@ -38657,13 +38481,13 @@
   },
   "RetainedEarningsAppropriated": {
     "standard_tags": [
-      "CommonEquity"
+      "RetainedEarnings"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Retained Earnings",
     "statement": "BalanceSheet",
     "section": "Equity",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 38,
     "occurrence_rate": 0.004,
     "temporal_consistency": 0.333,
@@ -38673,13 +38497,13 @@
   },
   "RetainedEarningsUnappropriated": {
     "standard_tags": [
-      "CommonEquity"
+      "RetainedEarnings"
     ],
-    "display_name": "Total Stockholders' Equity",
+    "display_name": "Retained Earnings",
     "statement": "BalanceSheet",
     "section": "Equity",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 51,
     "occurrence_rate": 0.006,
     "temporal_consistency": 0.5,
@@ -40803,22 +40627,6 @@
     "first_year": 2016,
     "last_year": 2025
   },
-  "StockholdersEquityNoteSubscriptionsReceivable": {
-    "standard_tags": [
-      "AllEquityBalance"
-    ],
-    "display_name": "Total Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": false,
-    "confidence": 0.31,
-    "company_count": 157,
-    "occurrence_rate": 0.017,
-    "temporal_consistency": 0.583,
-    "years_present": 7,
-    "first_year": 2012,
-    "last_year": 2025
-  },
   "SubordinatedDebt": {
     "standard_tags": [
       "LongTermDebt"
@@ -41687,7 +41495,7 @@
     "first_year": 2017,
     "last_year": 2025
   },
-  "TreasuryStockCommonShares": {
+  "TreasuryStockCommonValue": {
     "standard_tags": [
       "TreasuryShares"
     ],
@@ -41695,44 +41503,12 @@
     "statement": "BalanceSheet",
     "section": "Equity",
     "is_total": false,
-    "confidence": 0.991,
-    "company_count": 1825,
-    "occurrence_rate": 0.203,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
-  },
-  "TreasuryStockCommonValue": {
-    "standard_tags": [
-      "CommonEquity"
-    ],
-    "display_name": "Total Stockholders' Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": false,
-    "confidence": 0.976,
+    "confidence": 0.9,
     "company_count": 1159,
     "occurrence_rate": 0.129,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025
-  },
-  "TreasuryStockDeferredEmployeeStockOwnershipPlan": {
-    "standard_tags": [
-      "CommonEquity"
-    ],
-    "display_name": "Total Stockholders' Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 7,
-    "occurrence_rate": 0.001,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
     "last_year": 2025
   },
   "TreasuryStockPreferredValue": {
@@ -41750,22 +41526,6 @@
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025
-  },
-  "TreasuryStockShares": {
-    "standard_tags": [
-      "TreasuryShares"
-    ],
-    "display_name": "Treasury Stock",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": false,
-    "confidence": 0.958,
-    "company_count": 1484,
-    "occurrence_rate": 0.165,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2020,
-    "last_year": 2024
   },
   "TreasuryStockValue": {
     "standard_tags": [
@@ -41946,22 +41706,6 @@
     "years_present": 4,
     "first_year": 2021,
     "last_year": 2024
-  },
-  "UnearnedESOPShares": {
-    "standard_tags": [
-      "CommonEquity"
-    ],
-    "display_name": "Total Stockholders' Equity",
-    "statement": "BalanceSheet",
-    "section": "Equity",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 65,
-    "occurrence_rate": 0.007,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2020,
-    "last_year": 2025
   },
   "UnearnedPremiums": {
     "standard_tags": [
@@ -43061,7 +42805,7 @@
   },
   "ifrs-full_DividendsPaid": {
     "standard_tags": [
-      "CommonDividendsPaid"
+      "DividendsEquity"
     ]
   },
   "ifrs-full_DividendsPaidClassifiedAsFinancingActivities": {
@@ -43471,7 +43215,7 @@
   },
   "ifrs-full_PurchaseOfTreasuryShares": {
     "standard_tags": [
-      "StockRepurchasePayments"
+      "StockRepurchasesEquity"
     ]
   },
   "ifrs-full_RepaymentsOfBorrowingsClassifiedAsFinancingActivities": {

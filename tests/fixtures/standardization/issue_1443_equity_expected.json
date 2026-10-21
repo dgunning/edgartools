@@ -1,0 +1,87 @@
+{
+  "AccumulatedOtherComprehensiveIncomeLossOtherThanTemporaryImpairmentNotCreditLossNetOfTaxAvailableforsaleDebtSecurities": [
+    "AccumulatedOtherComprehensiveIncome"
+  ],
+  "AccumulatedOtherComprehensiveIncomeLossOtherThanTemporaryImpairmentNotCreditLossNetOfTaxDebtSecurities": [
+    "AccumulatedOtherComprehensiveIncome"
+  ],
+  "AccumulatedOtherComprehensiveIncomeLossOtherThanTemporaryImpairmentNotCreditLossNetOfTaxHeldtomaturityDebtSecurities": [
+    "AccumulatedOtherComprehensiveIncome"
+  ],
+  "AociDerivativeQualifyingAsHedgeExcludedComponentAfterTax": [
+    "AccumulatedOtherComprehensiveIncome"
+  ],
+  "AociIncludingPortionAttributableToNoncontrollingInterestTax": null,
+  "AociLossCashFlowHedgeCumulativeGainLossAfterTax": [
+    "AccumulatedOtherComprehensiveIncome"
+  ],
+  "AociTaxAttributableToParent": [
+    "AccumulatedOtherComprehensiveIncome"
+  ],
+  "CommonStockHeldBySubsidiary": [
+    "TreasuryShares"
+  ],
+  "CommonStockOtherSharesOutstanding": [
+    "SharesYearEnd"
+  ],
+  "CommonStockShareSubscribedButUnissuedSubscriptionsReceivable": null,
+  "CommonStockValue": null,
+  "CommonStockValueOutstanding": null,
+  "DeferredCompensationEquity": null,
+  "DefinedBenefitPlanAccumulatedOtherComprehensiveIncomeNetGainsLossesAfterTax": [
+    "AccumulatedOtherComprehensiveIncome"
+  ],
+  "DefinedBenefitPlanAccumulatedOtherComprehensiveIncomeNetPriorServiceCostCreditAfterTax": [
+    "AccumulatedOtherComprehensiveIncome"
+  ],
+  "Dividends": [
+    "DividendsEquity"
+  ],
+  "DividendsCash": [
+    "DividendsEquity"
+  ],
+  "DividendsCommonStock": [
+    "DividendsEquity"
+  ],
+  "DividendsCommonStockCash": [
+    "DividendsEquity"
+  ],
+  "DividendsPaid": [
+    "DividendsEquity"
+  ],
+  "DividendsPayableAmountPerShare": null,
+  "OtherAdditionalCapital": [
+    "AdditionalPaidInCapital"
+  ],
+  "PreferredStockLiquidationPreferenceValue": null,
+  "PreferredStockSharesIssued": null,
+  "PreferredStockSharesOutstanding": null,
+  "PurchaseOfTreasuryShares": [
+    "StockRepurchasesEquity"
+  ],
+  "ReceivableFromOfficersAndDirectorsForIssuanceOfCapitalStock": null,
+  "ReceivableFromShareholdersOrAffiliatesForIssuanceOfCapitalStock": null,
+  "ReclassificationFromAociCurrentPeriodNetOfTaxAttributableToParent": [
+    "AOCIReclassifications"
+  ],
+  "RetainedEarningsAppropriated": [
+    "RetainedEarnings"
+  ],
+  "RetainedEarningsUnappropriated": [
+    "RetainedEarnings"
+  ],
+  "StockholdersEquityNoteSubscriptionsReceivable": null,
+  "TreasuryStockCommonShares": null,
+  "TreasuryStockCommonValue": [
+    "TreasuryShares"
+  ],
+  "TreasuryStockDeferredEmployeeStockOwnershipPlan": null,
+  "TreasuryStockShares": null,
+  "UnearnedESOPShares": null,
+  "ifrs-full_DividendsPaid": [
+    "DividendsEquity"
+  ],
+  "ifrs-full_PurchaseOfTreasuryShares": [
+    "StockRepurchasesEquity"
+  ]
+}
