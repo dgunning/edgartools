@@ -260,17 +260,9 @@ retained on `ParserConfig` as a deprecated no-op.
 
 ## Migration from Old Parser
 
-### Compatibility Layer
-
-For gradual migration:
-
-```python
-# Use compatibility wrapper
-from edgar.documents.migration import SECHTMLParser
-
-parser = SECHTMLParser()  # Works like old parser with deprecation warnings
-document = parser.parse(html)
-```
+The old parser (`edgar.files`) and its compatibility wrapper
+(`edgar.documents.migration`) were removed in 6.0. See the
+[6.0 upgrade guide](../../docs/upgrade/6.0.md) for replacements.
 
 ### Key Differences
 
