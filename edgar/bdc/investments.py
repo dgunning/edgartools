@@ -3029,106 +3029,18 @@ class PortfolioInvestments:
         """
         Create PortfolioInvestments from an XBRL Schedule of Investments Statement.
 
+        Reads the statement's filing through ``from_xbrl``, so both entry points
+        name, type and exclude the same positions (GH #1612).
+
         Args:
             statement: The Statement from xbrl.statements.schedule_of_investments()
-            period: Optional period column (e.g., '2024-12-31'). If None, uses latest.
+            period: Optional period (e.g., '2024-12-31'). If None, ``from_xbrl`` picks it.
             include_untyped: If False (default), excludes investments with "Unknown" type.
-                These are typically company-level rollup entries that would inflate totals.
 
         Returns:
             PortfolioInvestments collection
         """
-        df = statement.to_dataframe()
-
-        # Find the period column to use
-        if period is None:
-            # Find date columns (exclude metadata columns)
-            date_cols = [
-                col for col in df.columns
-                if re.match(r'\d{4}-\d{2}-\d{2}', str(col))
-            ]
-            if not date_cols:
-                return cls([], period=None)
-            # Use the latest (first) date column
-            period = date_cols[0]
-
-        # Filter to rows with values and dimension labels
-        mask = (
-            df[period].notna() &
-            df['dimension_label'].notna() &
-            df['dimension_label'].str.contains('InvestmentIdentifierAxis', na=False)
-        )
-        data = df[mask].copy()
-
-        if data.empty:
-            return cls([], period=period)
-
-        # Group by dimension_label and pivot concepts
-        investments = {}
-        for _, row in data.iterrows():
-            dim_label = row['dimension_label']
-            concept = row['concept']
-            value = row[period]
-
-            if dim_label not in investments:
-                identifier, company_name, inv_type = _parse_investment_identifier(dim_label)
-                investments[dim_label] = {
-                    'identifier': identifier,
-                    'company_name': company_name,
-                    'investment_type': inv_type,
-                }
-            if concept == CONCEPT_INDUSTRY_ENUMERATION and isinstance(value, str) and value.strip():
-                investments[dim_label]['industry'] = clean_industry_label(value)
-                investments[dim_label]['industry_source'] = 'enumeration'
-
-            # Map concept to field
-            inv = investments[dim_label]
-
-            # Skip empty or invalid values
-            if pd.isna(value) or value == '':
-                continue
-
-            try:
-                if concept == CONCEPT_FAIR_VALUE:
-                    inv['fair_value'] = Decimal(str(value))
-                elif concept == CONCEPT_COST:
-                    inv['cost'] = Decimal(str(value))
-                elif concept == CONCEPT_PRINCIPAL:
-                    inv['principal_amount'] = Decimal(str(value))
-                elif concept == CONCEPT_SHARES:
-                    inv['shares'] = int(float(value))
-                elif concept == CONCEPT_INTEREST_RATE:
-                    inv['interest_rate'] = float(value)
-                elif concept == CONCEPT_PIK_RATE:
-                    inv['pik_rate'] = float(value)
-                elif concept == CONCEPT_SPREAD:
-                    inv['spread'] = float(value)
-                elif concept == CONCEPT_PCT_NET_ASSETS:
-                    inv['percent_of_net_assets'] = float(value)
-            except (ValueError, TypeError, InvalidOperation):
-                # Skip values that can't be converted
-                pass
-
-        _fill_industries(investments)
-
-        # Create PortfolioInvestment objects
-        portfolio = [
-            PortfolioInvestment(**inv_data)
-            for inv_data in investments.values()
-        ]
-
-        # Filter out Unknown types unless include_untyped is True
-        # Unknown types are typically company-level rollups that inflate totals
-        if not include_untyped:
-            portfolio = [inv for inv in portfolio if inv.investment_type != "Unknown"]
-
-        # Sort by fair value (largest first)
-        portfolio.sort(
-            key=lambda x: x.fair_value if x.fair_value is not None else Decimal(0),
-            reverse=True
-        )
-
-        return cls(portfolio, period=period)
+        return cls.from_xbrl(statement.xbrl, period=period, include_untyped=include_untyped)
 
     @classmethod
     def from_xbrl(
