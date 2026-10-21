@@ -348,8 +348,6 @@ omit = [
   "edgar/reference/financials.py",
   # Training scripts (ML training utilities, not runtime code)
   "edgar/entity/training/*",
-  # Migration utilities (one-time migration helpers)
-  "edgar/documents/migration.py",
   # CLI entry points (tested via integration, not unit tests)
   "edgar/**/__main__.py",
   # MCP server (optional external integration, requires MCP runtime)
