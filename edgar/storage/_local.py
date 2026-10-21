@@ -1,4 +1,3 @@
-import asyncio
 import os
 import re
 from datetime import date, datetime, timedelta
@@ -13,7 +12,7 @@ import pandas as pd
 from httpx2 import AsyncClient, HTTPStatusError
 from tqdm.auto import tqdm
 
-from edgar.core import log, strtobool
+from edgar.core import log, run_async_or_sync, strtobool
 from edgar.dates import extract_dates, filing_date_to_year_quarters
 from edgar.exceptions import EdgarError, TransportError, ValidationError, http_status
 from edgar.httprequests import download_bulk_data, download_datafile, download_text, inspect_response
@@ -22,18 +21,8 @@ from edgar.urls import build_company_tickers_exchange_url, build_company_tickers
 
 
 def _run_coroutine(coroutine):
-    """Run an async coroutine, handling the case where an event loop is already running (e.g. Jupyter)."""
-    try:
-        loop = asyncio.get_running_loop()
-    except RuntimeError:
-        loop = None
-
-    if loop and loop.is_running():
-        import nest_asyncio
-        nest_asyncio.apply()
-        return loop.run_until_complete(coroutine)
-    else:
-        return asyncio.run(coroutine)
+    """Run an async coroutine from sync code, also when an event loop is already running (e.g. Jupyter)."""
+    return run_async_or_sync(coroutine)
 
 
 __all__ = ['download_edgar_data',
