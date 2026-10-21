@@ -2223,13 +2223,13 @@
   },
   "AdministrativeFeesExpense": {
     "standard_tags": [
-      "TotalOperatingExpenses"
+      "SellingGeneralAndAdminExpenses"
     ],
-    "display_name": "Total Operating Expenses",
+    "display_name": "Selling, General and Administrative Expense",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.311,
+    "confidence": 0.9,
     "company_count": 163,
     "occurrence_rate": 0.018,
     "temporal_consistency": 0.417,
@@ -2287,19 +2287,21 @@
   },
   "AdvancesFromFederalHomeLoanBanks": {
     "standard_tags": [
-      "Liabilities"
+      "LongTermDebt",
+      "ShortTermDebt"
     ],
-    "display_name": "Total Liabilities",
+    "display_name": "Long-Term Debt",
     "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.308,
+    "section": "Non-Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 122,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025
+    "last_year": 2025,
+    "ambiguous": true
   },
   "AdvancesOnInventoryPurchases": {
     "standard_tags": [
@@ -3219,13 +3221,13 @@
   },
   "AssetsNet": {
     "standard_tags": [
-      "Assets"
+      "AllEquityBalance"
     ],
-    "display_name": "Total Assets",
+    "display_name": "Total Equity",
     "statement": "BalanceSheet",
-    "section": "Totals",
+    "section": "Equity",
     "is_total": true,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 107,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.5,
@@ -3741,13 +3743,13 @@
   },
   "BankOwnedLifeInsurance": {
     "standard_tags": [
-      "Assets"
+      "OtherNonOperatingNonCurrentAssets"
     ],
-    "display_name": "Total Assets",
+    "display_name": "Other Non-Operating Non-Current Assets",
     "statement": "BalanceSheet",
-    "section": "Totals",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.319,
+    "confidence": 0.9,
     "company_count": 289,
     "occurrence_rate": 0.032,
     "temporal_consistency": 0.417,
@@ -4985,13 +4987,13 @@
   },
   "CashCashEquivalentsAndFederalFundsSold": {
     "standard_tags": [
-      "Assets"
+      "CashAndMarketableSecurities"
     ],
-    "display_name": "Total Assets",
+    "display_name": "Cash and Cash Equivalents",
     "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.307,
+    "section": "Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 101,
     "occurrence_rate": 0.011,
     "temporal_consistency": 0.417,
@@ -10281,13 +10283,13 @@
   },
   "DeferredPolicyAcquisitionCostAmortizationExpense": {
     "standard_tags": [
-      "DeferredPolicyAcquisitionCosts"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Deferred Policy Acquisition Costs",
-    "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "display_name": "Other Operating Expense",
+    "statement": "IncomeStatement",
+    "section": "Operating Expenses",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 59,
     "occurrence_rate": 0.007,
     "temporal_consistency": 0.333,
@@ -12415,22 +12417,6 @@
     "first_year": 2020,
     "last_year": 2025
   },
-  "DepositsFairValueDisclosure": {
-    "standard_tags": [
-      "TotalDeposits"
-    ],
-    "display_name": "Total Deposits",
-    "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 6,
-    "occurrence_rate": 0.001,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
   "DepositsReceivedForSecuritiesLoanedAtCarryingValue": {
     "standard_tags": [
       "OtherNonOperatingCurrentLiabilities"
@@ -14298,13 +14284,13 @@
   },
   "DividendIncomeOperating": {
     "standard_tags": [
-      "NetInterestIncome"
+      "InterestAndDividendIncome"
     ],
-    "display_name": "Net Interest Income",
+    "display_name": "Interest and Dividend Income (Non-Bank)",
     "statement": "IncomeStatement",
-    "section": "Banking Revenue",
-    "is_total": true,
-    "confidence": 0.312,
+    "section": "Non-Operating Items",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 176,
     "occurrence_rate": 0.02,
     "temporal_consistency": 0.417,
@@ -16601,13 +16587,13 @@
   },
   "FederalFundsSold": {
     "standard_tags": [
-      "Assets"
+      "CashAndMarketableSecurities"
     ],
-    "display_name": "Total Assets",
+    "display_name": "Cash and Cash Equivalents",
     "statement": "BalanceSheet",
-    "section": "Totals",
+    "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.309,
+    "confidence": 0.9,
     "company_count": 128,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.5,
@@ -16633,13 +16619,13 @@
   },
   "FederalHomeLoanBankStock": {
     "standard_tags": [
-      "Assets"
+      "LongtermInvestments"
     ],
-    "display_name": "Total Assets",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
-    "section": "Totals",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.311,
+    "confidence": 0.9,
     "company_count": 162,
     "occurrence_rate": 0.018,
     "temporal_consistency": 0.417,
@@ -19873,13 +19859,13 @@
   },
   "IncentiveFeeExpense": {
     "standard_tags": [
-      "TotalOperatingExpenses"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Total Operating Expenses",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.308,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 123,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.417,
@@ -21441,13 +21427,13 @@
   },
   "IncreaseDecreaseInDeferredPolicyAcquisitionCosts": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.307,
+    "confidence": 0.9,
     "company_count": 102,
     "occurrence_rate": 0.011,
     "temporal_consistency": 0.417,
@@ -21485,22 +21471,6 @@
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025
-  },
-  "IncreaseDecreaseInDeposits": {
-    "standard_tags": [
-      "NetCashFromFinancingActivities"
-    ],
-    "display_name": "Net Cash from Financing Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.327,
-    "company_count": 404,
-    "occurrence_rate": 0.045,
-    "temporal_consistency": 0.5,
-    "years_present": 6,
-    "first_year": 2018,
     "last_year": 2025
   },
   "IncreaseDecreaseInDerivativeLiabilities": {
@@ -21729,13 +21699,13 @@
   },
   "IncreaseDecreaseInManagementFeePayable": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ChangeInOtherWorkingCapital"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Change in Other Working Capital",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Working Capital Changes",
     "is_total": false,
-    "confidence": 0.307,
+    "confidence": 0.9,
     "company_count": 112,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.417,
@@ -22577,13 +22547,13 @@
   },
   "InterestAndDividendIncomeOperating": {
     "standard_tags": [
-      "NetInterestIncome"
+      "TotalInterestIncomeOperating"
     ],
-    "display_name": "Net Interest Income",
+    "display_name": "Total Interest Income",
     "statement": "IncomeStatement",
     "section": "Banking Revenue",
     "is_total": true,
-    "confidence": 0.962,
+    "confidence": 0.9,
     "company_count": 527,
     "occurrence_rate": 0.059,
     "temporal_consistency": 0.5,
@@ -22625,13 +22595,13 @@
   },
   "InterestAndFeeIncomeLoansAndLeases": {
     "standard_tags": [
-      "NetInterestIncome"
+      "InterestIncome"
     ],
-    "display_name": "Net Interest Income",
+    "display_name": "Interest Income",
     "statement": "IncomeStatement",
-    "section": "Banking Revenue",
-    "is_total": true,
-    "confidence": 0.327,
+    "section": "Non-Operating Items",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 406,
     "occurrence_rate": 0.045,
     "temporal_consistency": 0.417,
@@ -22669,22 +22639,6 @@
     "temporal_consistency": 0.583,
     "years_present": 7,
     "first_year": 2018,
-    "last_year": 2025
-  },
-  "InterestBearingDepositLiabilities": {
-    "standard_tags": [
-      "TotalDeposits"
-    ],
-    "display_name": "Total Deposits",
-    "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.316,
-    "company_count": 246,
-    "occurrence_rate": 0.027,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
     "last_year": 2025
   },
   "InterestBearingDepositsInBanks": {
@@ -23217,13 +23171,13 @@
   },
   "InterestIncomeSecuritiesTaxExempt": {
     "standard_tags": [
-      "NetInterestIncome"
+      "InterestIncome"
     ],
-    "display_name": "Net Interest Income",
+    "display_name": "Interest Income",
     "statement": "IncomeStatement",
-    "section": "Banking Revenue",
-    "is_total": true,
-    "confidence": 0.314,
+    "section": "Non-Operating Items",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 216,
     "occurrence_rate": 0.024,
     "temporal_consistency": 0.417,
@@ -23233,13 +23187,13 @@
   },
   "InterestIncomeSecuritiesTaxable": {
     "standard_tags": [
-      "NetInterestIncome"
+      "InterestIncome"
     ],
-    "display_name": "Net Interest Income",
+    "display_name": "Interest Income",
     "statement": "IncomeStatement",
-    "section": "Banking Revenue",
-    "is_total": true,
-    "confidence": 0.315,
+    "section": "Non-Operating Items",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 224,
     "occurrence_rate": 0.025,
     "temporal_consistency": 0.417,
@@ -24201,13 +24155,13 @@
   },
   "InvestmentOwnedAtFairValue": {
     "standard_tags": [
-      "Assets"
+      "LongtermInvestments"
     ],
-    "display_name": "Total Assets",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.315,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 224,
     "occurrence_rate": 0.025,
     "temporal_consistency": 0.417,
@@ -25475,35 +25429,19 @@
   },
   "LoansAndLeasesReceivableAllowance": {
     "standard_tags": [
-      "NetLoansAndLeases"
+      "LoanLossReserve"
     ],
-    "display_name": "Net Loans and Leases",
+    "display_name": "Allowance for Loan and Lease Losses",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.318,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 276,
     "occurrence_rate": 0.031,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025
-  },
-  "LoansAndLeasesReceivableImpairedTroubledDebtInterestIncome": {
-    "standard_tags": [
-      "InterestExpense"
-    ],
-    "display_name": "Interest Expense",
-    "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
   },
   "LoansAndLeasesReceivableNetOfDeferredIncome": {
     "standard_tags": [
@@ -26553,13 +26491,13 @@
   },
   "ManagementFeeExpense": {
     "standard_tags": [
-      "TotalOperatingExpenses"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Total Operating Expenses",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.32,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 295,
     "occurrence_rate": 0.033,
     "temporal_consistency": 0.917,
@@ -26569,13 +26507,13 @@
   },
   "ManagementFeePayable": {
     "standard_tags": [
-      "Liabilities"
+      "OtherOperatingCurrentLiabilities"
     ],
-    "display_name": "Total Liabilities",
+    "display_name": "Other Current Liabilities",
     "statement": "BalanceSheet",
-    "section": "Totals",
+    "section": "Current Liabilities",
     "is_total": false,
-    "confidence": 0.311,
+    "confidence": 0.9,
     "company_count": 171,
     "occurrence_rate": 0.019,
     "temporal_consistency": 0.417,
@@ -27915,22 +27853,6 @@
     "first_year": 2021,
     "last_year": 2025
   },
-  "NoninterestBearingDepositLiabilities": {
-    "standard_tags": [
-      "TotalDeposits"
-    ],
-    "display_name": "Total Deposits",
-    "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.319,
-    "company_count": 281,
-    "occurrence_rate": 0.031,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
   "NoninterestExpense": {
     "standard_tags": [
       "NonInterestExpense"
@@ -27949,13 +27871,13 @@
   },
   "NoninterestExpenseDirectorsFees": {
     "standard_tags": [
-      "TotalOperatingExpenses"
+      "OtherOperatingExpense"
     ],
-    "display_name": "Total Operating Expenses",
+    "display_name": "Other Operating Expense",
     "statement": "IncomeStatement",
     "section": "Operating Expenses",
     "is_total": false,
-    "confidence": 0.311,
+    "confidence": 0.9,
     "company_count": 160,
     "occurrence_rate": 0.018,
     "temporal_consistency": 0.417,
@@ -27981,13 +27903,13 @@
   },
   "NoninterestIncomeOther": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "NonInterestIncome"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Non-Interest Income",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Banking Revenue",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 142,
     "occurrence_rate": 0.016,
     "temporal_consistency": 0.417,
@@ -27997,13 +27919,13 @@
   },
   "NoninterestIncomeOtherOperatingIncome": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "NonInterestIncome"
     ],
-    "display_name": "Other Operating Expense",
+    "display_name": "Non-Interest Income",
     "statement": "IncomeStatement",
-    "section": "Operating Expenses",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Banking Revenue",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 291,
     "occurrence_rate": 0.032,
     "temporal_consistency": 0.417,
@@ -31285,13 +31207,13 @@
   },
   "OtherNoninterestExpense": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "NonInterestExpense"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Non-Interest Expense",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Banking Expenses",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 430,
     "occurrence_rate": 0.048,
     "temporal_consistency": 0.5,
@@ -32029,13 +31951,13 @@
   },
   "PaidInKindInterest": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "OtherNonCashItemsCF"
     ],
-    "display_name": "Net Cash from Operating Activities",
+    "display_name": "Other Non-Cash Items (CF)",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Operating Activities",
     "is_total": false,
-    "confidence": 0.328,
+    "confidence": 0.9,
     "company_count": 426,
     "occurrence_rate": 0.047,
     "temporal_consistency": 0.417,
@@ -32237,13 +32159,13 @@
   },
   "PaymentsForProceedsFromFederalHomeLoanBankStock": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.307,
+    "confidence": 0.9,
     "company_count": 108,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.417,
@@ -32269,13 +32191,13 @@
   },
   "PaymentsForProceedsFromLoansAndLeases": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.317,
+    "confidence": 0.9,
     "company_count": 248,
     "occurrence_rate": 0.028,
     "temporal_consistency": 0.417,
@@ -32781,13 +32703,13 @@
   },
   "PaymentsToAcquireFederalHomeLoanBankStock": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentPurchases"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Purchases of Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.309,
+    "confidence": 0.9,
     "company_count": 133,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.417,
@@ -35109,13 +35031,13 @@
   },
   "ProceedsFromSaleOfFederalHomeLoanBankStock": {
     "standard_tags": [
-      "NetCashFromInvestingActivities"
+      "InvestmentProceeds"
     ],
-    "display_name": "Net Cash from Investing Activities",
+    "display_name": "Proceeds from Investments",
     "statement": "CashFlowStatement",
-    "section": null,
+    "section": "Investing Activities",
     "is_total": false,
-    "confidence": 0.307,
+    "confidence": 0.9,
     "company_count": 106,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.417,
@@ -36119,13 +36041,13 @@
   },
   "ProvisionForLoanLeaseAndOtherLosses": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ProvisionForCreditLosses"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.321,
+    "display_name": "Provision for Credit Losses",
+    "statement": "IncomeStatement",
+    "section": "Banking Expenses",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 310,
     "occurrence_rate": 0.034,
     "temporal_consistency": 0.417,
@@ -36135,13 +36057,13 @@
   },
   "ProvisionForLoanLossesExpensed": {
     "standard_tags": [
-      "NetCashFromOperatingActivities"
+      "ProvisionForCreditLosses"
     ],
-    "display_name": "Net Cash from Operating Activities",
-    "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.318,
+    "display_name": "Provision for Credit Losses",
+    "statement": "IncomeStatement",
+    "section": "Banking Expenses",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 275,
     "occurrence_rate": 0.031,
     "temporal_consistency": 0.417,
@@ -36391,13 +36313,13 @@
   },
   "RealEstateInvestments": {
     "standard_tags": [
-      "LongtermInvestments"
+      "RealEstateInvestments"
     ],
-    "display_name": "Long-Term Investments",
+    "display_name": "Real Estate Investments",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 75,
     "occurrence_rate": 0.008,
     "temporal_consistency": 0.5,
@@ -36423,13 +36345,13 @@
   },
   "RealEstateRevenueNet": {
     "standard_tags": [
-      "RentalAndLeasingRevenue"
+      "Revenue"
     ],
-    "display_name": "Rental and Leasing Revenue",
+    "display_name": "Revenue",
     "statement": "IncomeStatement",
     "section": "Revenue",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -36487,13 +36409,13 @@
   },
   "RealizedInvestmentGainsLosses": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "GainLossOnInvestmentsIS"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Gain/Loss on Investments",
     "statement": "IncomeStatement",
     "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 267,
     "occurrence_rate": 0.03,
     "temporal_consistency": 0.417,
@@ -37065,13 +36987,13 @@
   },
   "RegulatoryLiabilityNoncurrent": {
     "standard_tags": [
-      "DefiniteLivedOperatingProvisions(DecommissioningEtc)"
+      "RegulatedLiabilities"
     ],
-    "display_name": "Asset Retirement Obligations",
+    "display_name": "Regulatory Liabilities",
     "statement": "BalanceSheet",
     "section": "Non-Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 85,
     "occurrence_rate": 0.009,
     "temporal_consistency": 0.417,
@@ -37259,13 +37181,13 @@
   },
   "RentalProperties": {
     "standard_tags": [
-      "LongtermInvestments"
+      "RealEstateInvestments"
     ],
-    "display_name": "Long-Term Investments",
+    "display_name": "Real Estate Investments",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 17,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
@@ -39603,13 +39525,13 @@
   },
   "SecuritiesSoldUnderAgreementsToRepurchase": {
     "standard_tags": [
-      "Liabilities"
+      "ShortTermDebt"
     ],
-    "display_name": "Total Liabilities",
+    "display_name": "Short-Term Debt",
     "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.308,
+    "section": "Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 124,
     "occurrence_rate": 0.014,
     "temporal_consistency": 0.417,
@@ -41157,22 +41079,6 @@
     "first_year": 2022,
     "last_year": 2022
   },
-  "TimeDeposits": {
-    "standard_tags": [
-      "TotalDeposits"
-    ],
-    "display_name": "Total Deposits",
-    "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.307,
-    "company_count": 107,
-    "occurrence_rate": 0.012,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
   "TimeDepositsAtCarryingValue": {
     "standard_tags": [
       "CashAndMarketableSecurities"
@@ -41627,13 +41533,13 @@
   },
   "UnamortizedLossReacquiredDebtNoncurrent": {
     "standard_tags": [
-      "LongTermDebt"
+      "RegulatedAssets"
     ],
-    "display_name": "Long-Term Debt",
+    "display_name": "Regulatory Assets",
     "statement": "BalanceSheet",
-    "section": "Non-Current Liabilities",
+    "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 2,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.417,
@@ -41709,13 +41615,13 @@
   },
   "UnearnedPremiums": {
     "standard_tags": [
-      "Liabilities"
+      "UnearnedRevenue"
     ],
-    "display_name": "Total Liabilities",
+    "display_name": "Unearned Revenue",
     "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.307,
+    "section": "Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 107,
     "occurrence_rate": 0.012,
     "temporal_consistency": 0.333,

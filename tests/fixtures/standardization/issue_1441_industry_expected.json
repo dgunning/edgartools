@@ -1,0 +1,126 @@
+{
+  "AdministrativeFeesExpense": [
+    "SellingGeneralAndAdminExpenses"
+  ],
+  "AdvancesFromFederalHomeLoanBanks": [
+    "LongTermDebt",
+    "ShortTermDebt"
+  ],
+  "AssetsNet": [
+    "AllEquityBalance"
+  ],
+  "BankOwnedLifeInsurance": [
+    "OtherNonOperatingNonCurrentAssets"
+  ],
+  "CashCashEquivalentsAndFederalFundsSold": [
+    "CashAndMarketableSecurities"
+  ],
+  "DeferredPolicyAcquisitionCostAmortizationExpense": [
+    "OtherOperatingExpense"
+  ],
+  "DepositsFairValueDisclosure": null,
+  "DividendIncomeOperating": [
+    "InterestAndDividendIncome"
+  ],
+  "FederalFundsSold": [
+    "CashAndMarketableSecurities"
+  ],
+  "FederalHomeLoanBankStock": [
+    "LongtermInvestments"
+  ],
+  "IncentiveFeeExpense": [
+    "OtherOperatingExpense"
+  ],
+  "IncreaseDecreaseInDeferredPolicyAcquisitionCosts": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "IncreaseDecreaseInDeposits": null,
+  "IncreaseDecreaseInManagementFeePayable": [
+    "ChangeInOtherWorkingCapital"
+  ],
+  "InterestAndDividendIncomeOperating": [
+    "TotalInterestIncomeOperating"
+  ],
+  "InterestAndFeeIncomeLoansAndLeases": [
+    "InterestIncome"
+  ],
+  "InterestBearingDepositLiabilities": null,
+  "InterestIncomeSecuritiesTaxExempt": [
+    "InterestIncome"
+  ],
+  "InterestIncomeSecuritiesTaxable": [
+    "InterestIncome"
+  ],
+  "InvestmentOwnedAtFairValue": [
+    "LongtermInvestments"
+  ],
+  "LoansAndLeasesReceivableAllowance": [
+    "LoanLossReserve"
+  ],
+  "LoansAndLeasesReceivableImpairedTroubledDebtInterestIncome": null,
+  "ManagementFeeExpense": [
+    "OtherOperatingExpense"
+  ],
+  "ManagementFeePayable": [
+    "OtherOperatingCurrentLiabilities"
+  ],
+  "NoninterestBearingDepositLiabilities": null,
+  "NoninterestExpenseDirectorsFees": [
+    "OtherOperatingExpense"
+  ],
+  "NoninterestIncomeOther": [
+    "NonInterestIncome"
+  ],
+  "NoninterestIncomeOtherOperatingIncome": [
+    "NonInterestIncome"
+  ],
+  "OtherNoninterestExpense": [
+    "NonInterestExpense"
+  ],
+  "PaidInKindInterest": [
+    "OtherNonCashItemsCF"
+  ],
+  "PaymentsForProceedsFromFederalHomeLoanBankStock": [
+    "InvestmentPurchases"
+  ],
+  "PaymentsForProceedsFromLoansAndLeases": [
+    "InvestmentPurchases"
+  ],
+  "PaymentsToAcquireFederalHomeLoanBankStock": [
+    "InvestmentPurchases"
+  ],
+  "ProceedsFromSaleOfFederalHomeLoanBankStock": [
+    "InvestmentProceeds"
+  ],
+  "ProvisionForLoanLeaseAndOtherLosses": [
+    "ProvisionForCreditLosses"
+  ],
+  "ProvisionForLoanLossesExpensed": [
+    "ProvisionForCreditLosses"
+  ],
+  "RealEstateInvestments": [
+    "RealEstateInvestments"
+  ],
+  "RealEstateRevenueNet": [
+    "Revenue"
+  ],
+  "RealizedInvestmentGainsLosses": [
+    "GainLossOnInvestmentsIS"
+  ],
+  "RegulatoryLiabilityNoncurrent": [
+    "RegulatedLiabilities"
+  ],
+  "RentalProperties": [
+    "RealEstateInvestments"
+  ],
+  "SecuritiesSoldUnderAgreementsToRepurchase": [
+    "ShortTermDebt"
+  ],
+  "TimeDeposits": null,
+  "UnamortizedLossReacquiredDebtNoncurrent": [
+    "RegulatedAssets"
+  ],
+  "UnearnedPremiums": [
+    "UnearnedRevenue"
+  ]
+}

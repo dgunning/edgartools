@@ -60,8 +60,11 @@ def index():
 
 
 def test_the_reported_tag_no_longer_claims_to_be_total_assets(store):
-    """`us-gaap:BankOwnedLifeInsurance` -> 'Total Assets' at confidence 0.319."""
-    assert store.get_standard_concept("us-gaap_BankOwnedLifeInsurance") is None
+    """`us-gaap:BankOwnedLifeInsurance` -> 'Total Assets' at confidence 0.319.
+
+    GH #1441 gave it its own line concept; the point of this test is that it is not Total Assets.
+    """
+    assert store.get_standard_concept("us-gaap_BankOwnedLifeInsurance") == "Other Non-Operating Non-Current Assets"
 
 
 @pytest.mark.parametrize(
@@ -73,10 +76,11 @@ def test_the_reported_tag_no_longer_claims_to_be_total_assets(store):
         ("us-gaap_LiabilitiesCurrent", "Total Current Liabilities"),
         ("us-gaap_LiabilitiesAndStockholdersEquity", "Total Liabilities and Equity"),
         # The totals a confidence threshold would have destroyed: these are the
-        # total equity of a partnership, an LLC and a fund respectively.
+        # total equity of a partnership, an LLC and a fund respectively. A
+        # fund's net assets are assets less liabilities (GH #1441).
         ("us-gaap_PartnersCapital", "Total Stockholders' Equity"),
         ("us-gaap_MembersEquity", "Total Stockholders' Equity"),
-        ("us-gaap_AssetsNet", "Total Assets"),
+        ("us-gaap_AssetsNet", "Total Equity"),
     ],
 )
 def test_real_totals_still_resolve(store, tag, expected):
