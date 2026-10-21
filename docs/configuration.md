@@ -511,8 +511,9 @@ print(f"Actual request rate: {actual_rate:.2f} req/sec")
 # If custom mirror uses self-signed certificates
 export EDGAR_VERIFY_SSL="false"
 
-# Or configure SSL certificate bundle
-export REQUESTS_CA_BUNDLE="/path/to/company-ca-bundle.crt"
+# Or trust the mirror's CA: SSL_CERT_FILE replaces the OS store, so the bundle
+# needs the public roots too (edgartools does not read REQUESTS_CA_BUNDLE)
+export SSL_CERT_FILE="/path/to/company-ca-bundle.pem"
 ```
 
 ### Best Practices for Enterprise Deployment

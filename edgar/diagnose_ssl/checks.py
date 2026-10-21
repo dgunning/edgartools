@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple
 
 from .report import (
+    CERT_SOURCE_LABELS,
     CertificateConfig,
     CertificateInfo,
     CheckResult,
@@ -120,22 +121,17 @@ def get_proxy_config() -> ProxyConfig:
 
 def get_http_client_state() -> HttpClientState:
     """Check HTTP client state."""
-    from edgar.httpclient import HTTP_MGR, get_edgar_rate_limit_per_sec
+    from edgar.httpclient import HTTP_MGR, get_cert_source, get_edgar_rate_limit_per_sec
 
     state = HttpClientState()
 
     # Get configured settings
     verify_param = HTTP_MGR.httpx_params.get("verify", True)
+    state.cert_source = get_cert_source(verify_param)
+    state.use_system_certs = state.cert_source == "os-store"
 
-    # Detect if truststore SSLContext is in use
-    try:
-        import truststore
-        state.use_system_certs = isinstance(verify_param, truststore.SSLContext)
-    except ImportError:
-        pass
-
-    # configured_verify is True when using system certs (they do verify, just with OS store)
-    state.configured_verify = True if state.use_system_certs else verify_param
+    # configured_verify is a bool: an SSLContext verifies too, just from its own CAs
+    state.configured_verify = state.cert_source != "disabled"
     state.rate_limit_per_sec = get_edgar_rate_limit_per_sec()
 
     # Check if client exists
@@ -298,14 +294,20 @@ def _is_corporate_proxy_cert(subject: str, issuer: str) -> bool:
 
 
 def test_ssl_handshake() -> SSLHandshakeResult:
-    """Test SSL handshake with SEC.gov using system certificates."""
+    """Test SSL handshake with SEC.gov using the certificates the HTTP client trusts."""
     # Get certificate chain first (this doesn't verify)
     cert_chain = get_certificate_chain(SEC_HOST, SEC_PORT)
     is_proxy = any(c.is_corporate_proxy for c in cert_chain)
 
     try:
-        # Now try actual verification
-        context = ssl.create_default_context()
+        # Verify with the same CAs the client uses. ssl.create_default_context()
+        # reads OpenSSL's compiled-in paths, which is not the OS store httpx2 uses
+        # on macOS and Windows, so it can fail where edgartools succeeds.
+        import httpx2
+
+        from edgar.httpclient import HTTP_MGR
+        verify = HTTP_MGR.httpx_params.get("verify", True)
+        context = httpx2.create_ssl_context(verify=True if verify is False else verify)
 
         with socket.create_connection((SEC_HOST, SEC_PORT), timeout=10) as sock:
             with context.wrap_socket(sock, server_hostname=SEC_HOST) as ssock:
@@ -460,54 +462,39 @@ def generate_checks(
             details="Certificate details unavailable. Install with: pip install cryptography",
         ))
 
-    # Truststore library check
-    if env.truststore_version:
-        if client_state.use_system_certs:
+    # Where verification takes its trusted CAs from. httpx2 reads SSL_CERT_FILE,
+    # then SSL_CERT_DIR, then the OS store; certifi plays no part.
+    source = client_state.cert_source
+    if source == "SSL_CERT_FILE":
+        if Path(cert_config.ssl_cert_file).is_file():
             checks.append(CheckResult(
-                name="System Certificates",
+                name="Certificate Source",
                 status=CheckStatus.PASS,
-                message=f"truststore {env.truststore_version} active (using OS certificate store)",
+                message="SSL_CERT_FILE (replaces the OS certificate store)",
+                details=cert_config.ssl_cert_file,
             ))
         else:
             checks.append(CheckResult(
-                name="System Certificates",
-                status=CheckStatus.PASS,
-                message=f"truststore {env.truststore_version} available (not active)",
-                details="Enable with: configure_http(use_system_certs=True) or EDGAR_USE_SYSTEM_CERTS=true",
-            ))
-
-    # Certificate bundle check
-    if cert_config.bundle_exists:
-        checks.append(CheckResult(
-            name="Certificate Bundle",
-            status=CheckStatus.PASS,
-            message=f"certifi bundle found ({cert_config.bundle_size_kb} KB)",
-            details=cert_config.certifi_path,
-        ))
-    else:
-        checks.append(CheckResult(
-            name="Certificate Bundle",
-            status=CheckStatus.WARN,
-            message="certifi bundle not found or not accessible",
-        ))
-
-    # Custom CA check
-    if cert_config.requests_ca_bundle:
-        bundle_path = Path(cert_config.requests_ca_bundle)
-        if bundle_path.exists():
-            checks.append(CheckResult(
-                name="Custom CA Bundle",
-                status=CheckStatus.PASS,
-                message="REQUESTS_CA_BUNDLE is set",
-                details=cert_config.requests_ca_bundle,
-            ))
-        else:
-            checks.append(CheckResult(
-                name="Custom CA Bundle",
+                name="Certificate Source",
                 status=CheckStatus.FAIL,
-                message="REQUESTS_CA_BUNDLE points to non-existent file",
-                details=cert_config.requests_ca_bundle,
+                message="SSL_CERT_FILE points to a file that does not exist",
+                details=cert_config.ssl_cert_file,
             ))
+    elif source != "disabled":
+        checks.append(CheckResult(
+            name="Certificate Source",
+            status=CheckStatus.PASS,
+            message=CERT_SOURCE_LABELS.get(source, source),
+            details=os.environ.get("SSL_CERT_DIR") if source == "SSL_CERT_DIR" else None,
+        ))
+
+    if cert_config.requests_ca_bundle:
+        checks.append(CheckResult(
+            name="REQUESTS_CA_BUNDLE",
+            status=CheckStatus.WARN,
+            message="REQUESTS_CA_BUNDLE is set, but edgartools does not read it",
+            details="Point SSL_CERT_FILE at the bundle instead",
+        ))
 
     # HTTP client state checks
     if client_state.client_created and not client_state.settings_match:
@@ -640,72 +627,58 @@ company = Company("AAPL")""",
 
     # SSL handshake failure recommendations
     if network.ssl_handshake and not network.ssl_handshake.success:
-        if network.ssl_handshake.is_corporate_proxy:
-            # Corporate proxy detected — recommend truststore first
-            recommendations.append(Recommendation(
-                title="Recommended: Use OS certificate store",
-                description=(
-                    "Your network uses SSL inspection. The truststore library lets Python "
-                    "use your OS's certificates, which include your organization's CA."
-                ),
-                code_snippet="""pip install truststore
+        bundle_snippet = """# The file replaces the OS store, so it needs the corporate CA
+# AND the public roots (certifi supplies those; it is not what verifies):
+pip install certifi
+cat "$(python -m certifi)" /path/to/corporate-ca.crt > ~/combined-bundle.pem
+export SSL_CERT_FILE="$HOME/combined-bundle.pem\""""
 
-from edgar import configure_http
-configure_http(use_system_certs=True)""",
+        if client_state.cert_source in ("SSL_CERT_FILE", "SSL_CERT_DIR", "custom"):
+            # A CA file or directory overrides the OS store and still fails
+            recommendations.append(Recommendation(
+                title="Check the CA file that replaces your OS certificate store",
+                description=(
+                    f"Verification uses {CERT_SOURCE_LABELS[client_state.cert_source]}, not your OS "
+                    "certificate store. It must hold your corporate root CA and the public roots."
+                ),
+                code_snippet=bundle_snippet,
                 priority=1,
             ))
-
             recommendations.append(Recommendation(
-                title="Quick Fix: Disable SSL verification",
-                description=(
-                    "If truststore doesn't work, you can disable SSL verification. "
-                    "WARNING: This reduces security."
-                ),
+                title="Or verify against your OS certificate store",
+                description="Unset SSL_CERT_FILE / SSL_CERT_DIR, or call this before any request:",
                 code_snippet="""from edgar import configure_http
-configure_http(verify_ssl=False)""",
+configure_http(use_system_certs=True)""",
                 priority=2,
             ))
-
-            recommendations.append(Recommendation(
-                title="Secure Fix: Add corporate CA to trust store",
-                description=(
-                    "Ask your IT department for your organization's root CA certificate, "
-                    "then configure Python to trust it."
-                ),
-                code_snippet="""# Option 1: Environment variable
-# export REQUESTS_CA_BUNDLE="/path/to/corporate-ca.pem"
-
-# Option 2: Runtime configuration
-import os
-os.environ["REQUESTS_CA_BUNDLE"] = "/path/to/corporate-ca.pem"
-
-# Then import edgar
-from edgar import Company""",
-                priority=3,
-            ))
-
         else:
-            # Generic SSL failure — still recommend truststore first
+            # Already verifying against the OS store (the default): the CA is missing from it
+            proxy = network.ssl_handshake.is_corporate_proxy
             recommendations.append(Recommendation(
-                title="Try using OS certificate store",
+                title="Recommended: Add your corporate root CA to the OS trust store",
                 description=(
-                    "The truststore library uses your OS's native certificates, "
-                    "which may resolve SSL issues."
+                    ("Your network uses SSL inspection. " if proxy else "") +
+                    "edgartools already verifies against your OS certificate store, so the CA that "
+                    "signed the certificate you are seeing is not in it. Ask IT to install it "
+                    "(Keychain on macOS, the Windows certificate store, ca-certificates on Linux); "
+                    "no code change is needed afterwards."
                 ),
-                code_snippet="""pip install truststore
-
-from edgar import configure_http
-configure_http(use_system_certs=True)""",
                 priority=1,
             ))
-
             recommendations.append(Recommendation(
-                title="Disable SSL verification",
-                description="If truststore doesn't help, try disabling SSL verification.",
-                code_snippet="""from edgar import configure_http
-configure_http(verify_ssl=False)""",
+                title="Secure Fix: Point SSL_CERT_FILE at a CA bundle",
+                description="If the OS store cannot be changed, give edgartools its own bundle.",
+                code_snippet=bundle_snippet,
                 priority=2,
             ))
+
+        recommendations.append(Recommendation(
+            title="Last Resort: Disable SSL verification",
+            description="WARNING: This reduces security.",
+            code_snippet="""from edgar import configure_http
+configure_http(verify_ssl=False)""",
+            priority=3,
+        ))
 
     # DNS failure
     if not network.dns_resolved:

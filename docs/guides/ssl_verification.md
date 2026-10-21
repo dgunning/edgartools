@@ -4,32 +4,27 @@ This guide covers SSL verification, proxy configuration, and network troubleshoo
 
 ## Quick Fix: SSL Verification Errors
 
-If you're getting SSL certificate errors, the best solution is to use your OS certificate store:
+edgartools verifies SEC's certificate against your operating system's trust store, through the `truststore` library it ships with. Corporate networks that inspect HTTPS usually install their CA there, so most corporate setups work with no configuration.
 
-```python
-from edgar import configure_http
+If you still get certificate errors, the CA that signed the certificate you are seeing is missing from that store. In order of preference:
 
-# Use your OS certificate store (recommended)
-configure_http(use_system_certs=True)
+1. Ask IT to install your corporate root CA in the OS trust store (Keychain on macOS, the Windows certificate store, the `ca-certificates` package on Linux). No code change is needed afterwards.
+2. Point `SSL_CERT_FILE` at a CA bundle that holds the corporate CA and the public roots (see [Option 2](#option-2-custom-ca-certificate)).
+3. As a last resort, turn verification off with `configure_http(verify_ssl=False)`.
 
-# Now use edgartools normally
-from edgar import Company
-company = Company("AAPL")
-```
-
-This works because corporate networks add their CA certificates to your operating system's trust store. The `truststore` library (included with edgartools) lets Python use those certificates instead of a bundled CA list.
+Run `diagnose_ssl()` to see which certificates are in use and what fails (see [Troubleshooting](#troubleshooting)).
 
 !!! note "From 6.0 the OS store is the default"
-    edgartools 6.0 makes its requests with `httpx2`, which verifies against your operating system's trust store by default; earlier releases used the `certifi` bundle unless you opted in. On 6.0, `use_system_certs=True` therefore matches what you already get, and stays available so existing code keeps working. `SSL_CERT_FILE` still overrides it with a CA file of your choice. See [the upgrade guide](../upgrade/6.0.md#the-http-client-moved-from-httpx-to-httpx2).
+    edgartools 6.0 makes its requests with `httpx2`, which verifies against your operating system's trust store by default; earlier releases used the `certifi` bundle unless you opted in. On 6.0, `use_system_certs=True` therefore matches what you already get, and stays available so existing code keeps working. `SSL_CERT_FILE` still overrides the default with a CA file of your choice. See [the upgrade guide](../upgrade/6.0.md#the-http-client-moved-from-httpx-to-httpx2).
 
 ## Understanding SSL Issues
 
 ### Common Causes
 
-1. **Corporate VPN with SSL inspection** - Your organization intercepts HTTPS traffic and re-signs it with their own CA certificate
+1. **Corporate VPN with SSL inspection** - Your organization intercepts HTTPS traffic and re-signs it with their own CA certificate, and that CA is not in your OS trust store
 2. **Corporate proxy servers** - Traffic routed through a proxy that modifies certificates
 3. **Self-signed certificates** - Development or testing environments
-4. **Outdated CA certificates** - Python's bundled certificate store is outdated
+4. **Missing OS CA certificates** - A minimal container image without the `ca-certificates` package has no trust store to verify against
 
 ### Error Messages
 
@@ -40,9 +35,11 @@ You might see errors like:
 
 ## Configuration Options
 
-### Option 1: Use OS Certificate Store (Recommended)
+### Option 1: OS Certificate Store (the Default)
 
-The most secure fix for corporate environments. Uses your operating system's native certificate store, which your IT department manages:
+edgartools verifies against your operating system's native certificate store, which your IT department manages. There is nothing to turn on.
+
+`SSL_CERT_FILE` and `SSL_CERT_DIR` replace the OS store when they are set. To verify against the OS store regardless of them, pass `use_system_certs=True`:
 
 ```python
 from edgar import configure_http
@@ -57,22 +54,23 @@ export EDGAR_USE_SYSTEM_CERTS=true
 python your_script.py
 ```
 
-```python
-import os
-os.environ['EDGAR_USE_SYSTEM_CERTS'] = 'true'
-
-# IMPORTANT: Set env var BEFORE this import!
-from edgar import Company
-```
-
 ### Option 2: Custom CA Certificate
 
-If your IT department provides a specific CA certificate file:
+If your IT department provides a CA certificate file and it cannot go into the OS store, point `SSL_CERT_FILE` at a bundle (set it **before** the first request):
 
 ```bash
-export REQUESTS_CA_BUNDLE="/path/to/company-ca-bundle.crt"
-export SSL_CERT_FILE="/path/to/company-ca-bundle.crt"
+export SSL_CERT_FILE="/path/to/company-ca-bundle.pem"
 ```
+
+The file replaces the OS store, so it must hold the public roots that SEC.gov chains to as well as your corporate CA. The `certifi` package is a convenient source of those roots; it plays no other part in verification:
+
+```bash
+pip install certifi
+cat "$(python -m certifi)" /path/to/corporate-ca.crt > ~/combined-bundle.pem
+export SSL_CERT_FILE="$HOME/combined-bundle.pem"
+```
+
+`SSL_CERT_DIR` works the same way for a directory of hashed certificates. edgartools does not read `REQUESTS_CA_BUNDLE` or `CURL_CA_BUNDLE`.
 
 ### Option 3: Disable SSL Verification (Last Resort)
 
@@ -123,9 +121,8 @@ Your IT department inspects HTTPS traffic, causing certificate errors:
 ```python
 from edgar import configure_http, Company
 
-# Use OS certs — your IT department's CA is already trusted by your OS
-configure_http(use_system_certs=True)
-
+# Nothing to configure when your IT department's CA is in the OS trust store.
+# If it is not, add it there or point SSL_CERT_FILE at a bundle (Option 2).
 company = Company("AAPL")
 filings = company.get_filings(form="10-K")
 ```
@@ -137,10 +134,7 @@ Traffic must go through a proxy:
 ```python
 from edgar import configure_http, Company
 
-configure_http(
-    use_system_certs=True,
-    proxy="http://proxy.company.com:8080"
-)
+configure_http(proxy="http://proxy.company.com:8080")
 
 company = Company("AAPL")
 ```
@@ -153,7 +147,6 @@ Common in enterprise environments:
 from edgar import configure_http, Company
 
 configure_http(
-    use_system_certs=True,
     proxy="http://proxy.company.com:8080",
     timeout=60.0  # Longer timeout for slow proxies
 )
@@ -163,7 +156,7 @@ company = Company("AAPL")
 
 ### Scenario 4: Nothing Else Works
 
-If system certs and custom CA bundles don't resolve the issue:
+If neither the OS store nor an `SSL_CERT_FILE` bundle resolves the issue:
 
 ```python
 from edgar import configure_http, Company
@@ -205,6 +198,7 @@ from edgar import get_http_config
 
 config = get_http_config()
 print(f"SSL Verification: {config['verify_ssl']}")
+print(f"Certificates: {config['cert_source']}")  # e.g. 'os-store'
 print(f"System Certs: {config['use_system_certs']}")
 print(f"Proxy: {config['proxy']}")
 print(f"Timeout: {config['timeout']}")
@@ -243,17 +237,19 @@ company = Company("AAPL")  # Will show detailed HTTP logs
 
 | Approach | Security | When to Use |
 |----------|----------|-------------|
-| `use_system_certs=True` | Full SSL verification | Corporate networks (recommended) |
-| `REQUESTS_CA_BUNDLE` | Full SSL verification | When IT provides a cert file |
+| OS certificate store (default) | Full SSL verification | Everywhere, including corporate networks whose CA is installed in the OS |
+| `SSL_CERT_FILE` | Full SSL verification | When IT provides a cert file that cannot go into the OS store |
 | `verify_ssl=False` | No SSL verification | Last resort only |
 
-Disabling SSL verification makes connections vulnerable to man-in-the-middle attacks. Always prefer `use_system_certs=True` — it keeps SSL verification active while using the certificates your OS trusts.
+Disabling SSL verification makes connections vulnerable to man-in-the-middle attacks. Prefer adding the missing CA to the OS store or to an `SSL_CERT_FILE` bundle, which keeps verification active.
 
 ## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `EDGAR_USE_SYSTEM_CERTS` | `false` | Use OS native certificate store (already the default from 6.0) |
+| `EDGAR_USE_SYSTEM_CERTS` | `false` | Verify against the OS store even when `SSL_CERT_FILE` / `SSL_CERT_DIR` is set (the OS store is already the default) |
+| `SSL_CERT_FILE` | not set | CA bundle that replaces the OS store |
+| `SSL_CERT_DIR` | not set | Directory of CA certificates that replaces the OS store |
 | `EDGAR_VERIFY_SSL` | `true` | Enable/disable SSL verification |
 | `EDGAR_RATE_LIMIT_PER_SEC` | `9` | Request rate limit |
 
@@ -275,7 +271,7 @@ def configure_http(
 Configure HTTP client settings at runtime.
 
 **Parameters:**
-- `use_system_certs`: Use OS native certificate store (recommended for corporate networks)
+- `use_system_certs`: Verify against the OS certificate store even when `SSL_CERT_FILE` / `SSL_CERT_DIR` is set; the OS store is already the default
 - `verify_ssl`: Enable/disable SSL certificate verification (last resort)
 - `proxy`: HTTP/HTTPS proxy URL (e.g., "http://proxy.company.com:8080")
 - `timeout`: Request timeout in seconds
@@ -289,8 +285,9 @@ def get_http_config() -> dict
 ```
 
 Returns current HTTP configuration as a dictionary with keys:
-- `verify_ssl`: Current SSL verification setting
-- `use_system_certs`: Whether the OS certificate store was requested explicitly. From 6.0 the default also verifies against the OS store, and this still reads `False` then
+- `verify_ssl`: Whether SSL verification is on
+- `cert_source`: Where verification takes its trusted CAs from: `"os-store"` (the default), `"SSL_CERT_FILE"`, `"SSL_CERT_DIR"`, `"custom"` (an `SSLContext` you passed) or `"disabled"`
+- `use_system_certs`: Whether the OS certificate store is what verifies, which is `True` by default
 - `proxy`: Current proxy URL (or None)
 - `timeout`: Current timeout setting
 

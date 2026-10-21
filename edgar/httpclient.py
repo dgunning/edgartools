@@ -184,6 +184,37 @@ def get_truststore_context():
     return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
 
+CertSource = Literal["os-store", "SSL_CERT_FILE", "SSL_CERT_DIR", "custom", "disabled"]
+
+
+def get_cert_source(verify=None) -> CertSource:
+    """
+    Name where certificate verification takes its trusted CAs from.
+
+    With verify=True, httpx2 reads SSL_CERT_FILE, then SSL_CERT_DIR, and
+    otherwise the operating system's trust store (httpcore2.default_ssl_context).
+    It never reads certifi or REQUESTS_CA_BUNDLE. An explicit truststore
+    context, from use_system_certs=True, is the OS store and ignores SSL_CERT_*.
+
+    Args:
+        verify: The verify value to describe. Defaults to the shared client's.
+    """
+    if verify is None:
+        verify = HTTP_MGR.httpx_params.get("verify", True)
+    if verify is False:
+        return "disabled"
+    if verify is True:
+        if os.environ.get("SSL_CERT_FILE"):
+            return "SSL_CERT_FILE"
+        if os.environ.get("SSL_CERT_DIR"):
+            return "SSL_CERT_DIR"
+        return "os-store"
+    import truststore
+    if isinstance(verify, truststore.SSLContext):
+        return "os-store"
+    return "custom"
+
+
 def get_edgar_http_timeout() -> Optional[float]:
     """
     Default request timeout in seconds for the internal httpx2 client.
@@ -338,11 +369,11 @@ def configure_http(
 
     Args:
         verify_ssl: Enable/disable SSL certificate verification.
-                   Set to False if use_system_certs doesn't resolve your SSL issues.
                    WARNING: Disabling SSL verification reduces security.
-        use_system_certs: Use the OS native certificate store via the truststore library.
-                         This is the recommended approach for corporate networks with
-                         SSL inspection, as it uses certificates managed by your OS.
+        use_system_certs: Verify against the OS native certificate store via the
+                         truststore library. From 6.0 that is already the default;
+                         passing True also makes the client ignore SSL_CERT_FILE
+                         and SSL_CERT_DIR.
         proxy: HTTP/HTTPS proxy URL (e.g., "http://proxy.company.com:8080").
                Supports authentication: "http://user:pass@proxy.company.com:8080"
         timeout: Request timeout in seconds (default: 30.0). Passing None
@@ -355,11 +386,11 @@ def configure_http(
                ConnectionTerminated). Set to True to opt back into HTTP/2.
 
     Examples:
-        # Use OS certificate store (recommended for corporate networks)
+        # Use the OS certificate store even when SSL_CERT_FILE is set
         from edgar import configure_http
         configure_http(use_system_certs=True)
 
-        # Disable SSL verification (fallback if system certs don't work)
+        # Disable SSL verification (last resort)
         configure_http(verify_ssl=False)
 
         # Disable system certs and SSL verification
@@ -443,7 +474,9 @@ def get_http_config() -> dict:
     Get current HTTP client configuration.
 
     Returns:
-        dict: Current configuration including verify_ssl, proxy, and timeout settings.
+        dict: Current configuration including verify_ssl, cert_source, proxy,
+        and timeout settings. cert_source is one of "os-store", "SSL_CERT_FILE",
+        "SSL_CERT_DIR", "custom" or "disabled" (see get_cert_source).
 
     Example:
         >>> from edgar import get_http_config
@@ -451,19 +484,14 @@ def get_http_config() -> dict:
         >>> print(f"SSL verification: {config['verify_ssl']}")
     """
     params = HTTP_MGR.httpx_params
-    verify = params.get("verify", True)
-
-    # Detect if truststore SSLContext is in use
-    using_system_certs = False
-    try:
-        import truststore
-        using_system_certs = isinstance(verify, truststore.SSLContext)
-    except ImportError:
-        pass
+    cert_source = get_cert_source(params.get("verify", True))
 
     return {
-        "verify_ssl": verify if not using_system_certs else True,
-        "use_system_certs": using_system_certs,
+        "verify_ssl": cert_source != "disabled",
+        # True whenever the OS store is what verifies, which is the default
+        # from 6.0, not only after configure_http(use_system_certs=True).
+        "use_system_certs": cert_source == "os-store",
+        "cert_source": cert_source,
         "proxy": params.get("proxy"),
         "timeout": params.get("timeout"),
         "http2": params.get("http2", False),
