@@ -870,9 +870,8 @@ class Attachments:
             self.sgml.download(path, archive)
             return
 
-        import asyncio
-        loop = asyncio.get_event_loop()
-        downloaded_files = loop.run_until_complete(Attachments._download_all_attachments(self._attachments))
+        from edgar.core import run_async_or_sync
+        downloaded_files = run_async_or_sync(Attachments._download_all_attachments(self._attachments))
 
         # Ensure path is a Path object
         path = Path(path)

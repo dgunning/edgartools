@@ -55,7 +55,6 @@ dependencies = [
   "unidecode>=1.2.0",
   "pydantic>=2.4.0",
   "tqdm>=4.66.3",
-  "nest-asyncio>=1.5.1",
   "jinja2>=3.1.6",
   # 4.x blocks on a full bucket by default; httpxthrottlecache>=0.6.1 needs >=4.0 too.
   "pyrate-limiter>=4.0.0",

@@ -209,31 +209,21 @@ def sample_table(table, n=None, frac=None, replace=False, random_state=None):
 
 
 def run_async_or_sync(coroutine):
+    """Run a coroutine to completion from synchronous code and return its result.
+
+    With no event loop running in this thread, this is asyncio.run(). Inside one,
+    as in Jupyter, asyncio.run() refuses, so the coroutine runs on a fresh loop in
+    a worker thread and this call waits for it. Our coroutines share no state with
+    the caller's loop, so a private loop needs no re-entrancy patching (the
+    archived nest-asyncio did that by patching the running loop).
+    Exceptions from the coroutine propagate unchanged.
+    """
     try:
-        # Check if we're in an IPython environment
-        ipython = sys.modules['IPython']
-        if 'asyncio' in sys.modules:
-            # try is needed for ipython console
-            try:
-                loop = asyncio.get_event_loop()
-            except RuntimeError:
-                import nest_asyncio
-                nest_asyncio.apply()
-                loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # We're in a notebook with an active event loop
-                import nest_asyncio
-                nest_asyncio.apply()
-                return loop.run_until_complete(coroutine)
-            else:
-                # We're in IPython but without an active event loop
-                return loop.run_until_complete(coroutine)
-        else:
-            # We're in IPython but asyncio is not available
-            return ipython.get_ipython().run_cell_magic('time', '', f'import asyncio; asyncio.run({coroutine!r})')
-    except (KeyError, AttributeError):
-        # We're not in an IPython environment, use asyncio.run()
+        asyncio.get_running_loop()
+    except RuntimeError:
         return asyncio.run(coroutine)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        return executor.submit(asyncio.run, coroutine).result()
 
 
 def listify(value):
