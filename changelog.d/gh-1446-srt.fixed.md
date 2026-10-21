@@ -1,0 +1,1 @@
+- **SRT elements reach their standard concept.** `ReverseIndex.lookup()` stripped only the `us-gaap` and `dei` prefixes, so `srt:PayablesToCustomers` and `srt:BankLoans` returned `None` while their bare names were mapped; Charles Schwab's $116,341M payables to brokerage clients had no `standard_concept`. The `srt:` and `srt_` prefixes are now stripped too. (#1446)
