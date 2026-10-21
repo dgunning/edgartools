@@ -1,0 +1,1 @@
+**edgartools now requires `pyrate-limiter>=4.0`.** It already did in practice, through `httpxthrottlecache>=0.6.1`; the declared floor was still 3.0, and the 3.x compatibility shim behind it is removed. A burst past SEC's 9 requests per second still waits rather than fails.
