@@ -57,7 +57,8 @@ dependencies = [
   "tqdm>=4.66.3",
   "nest-asyncio>=1.5.1",
   "jinja2>=3.1.6",
-  "pyrate-limiter>=3.0.0",
+  # 4.x blocks on a full bucket by default; httpxthrottlecache>=0.6.1 needs >=4.0 too.
+  "pyrate-limiter>=4.0.0",
   # The [httpx2] extra is required, not decorative: from 0.6.0 httpxthrottlecache
   # declares httpx and httpx2 as optional extras and installs neither by default.
   # It uses httpx2 whenever httpx2 is importable, and edgar/httpclient.py refuses

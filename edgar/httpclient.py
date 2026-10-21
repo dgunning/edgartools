@@ -250,22 +250,15 @@ def get_edgar_rate_limit_per_sec():
 
 
 def _create_rate_limiter(requests_per_second: int):
-    """Create a rate limiter compatible with both pyrate-limiter 3.x and 4.x.
+    """Create the shared rate limiter: requests_per_second per second, blocking.
 
-    pyrate-limiter 4.0 removed max_delay, raise_when_fail, and retry_until_max_delay
-    parameters from Limiter.__init__(). This function handles both API versions.
-    See: https://github.com/dgunning/edgartools/issues/640
+    A full bucket makes try_acquire() wait for a free slot rather than refuse the
+    request, which is pyrate-limiter 4's default and how we stay under SEC's limit.
     """
     from pyrate_limiter import Duration, InMemoryBucket, Limiter, Rate
 
     rate = Rate(requests_per_second, Duration.SECOND)
-    bucket = InMemoryBucket([rate])
-    try:
-        # pyrate-limiter 3.x API
-        return Limiter(bucket, max_delay=Duration.DAY, raise_when_fail=False, retry_until_max_delay=True)
-    except TypeError:
-        # pyrate-limiter 4.0+ removed these parameters
-        return Limiter(bucket)
+    return Limiter(InMemoryBucket([rate]))
 
 
 def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> HttpxThrottleCache:
