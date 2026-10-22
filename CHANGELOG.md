@@ -27,8 +27,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-- **XML parsing reads only the document it is given.** lxml before 6.1.3 loads a local file named by a DTD parameter entity in filing XML (LP#2165901), so the floor is now `lxml>=6.1.3`, and every lxml XML parse also goes through one parser, `edgar.xmltools.xml_parser`, that never loads an external resource whatever lxml is installed. Entities a document defines itself still expand, so output is unchanged. (edgartools-o6y3i)
-- **certifi is floored at 2026.10.19, which no longer trusts the compromised emSign root.** On 5.x, httpx verifies SEC connections against certifi's bundle unless `EDGAR_USE_SYSTEM_CERTS` is set, so an older certifi kept trusting "emSign ECC Root CA - G3", removed after its private keys were found to be compromised (2026-10-20). Upgrading edgartools now upgrades certifi. (edgartools-a9bak)
+- **XML parsing is hardened.** The minimum lxml is now 6.1.3, which includes an upstream security fix, and edgartools parses filing XML with stricter settings whichever lxml is installed. Parsed output is unchanged. Upgrading is recommended. (edgartools-o6y3i)
+- **The minimum certifi is now 2026.10.19, which drops the distrusted emSign root certificates.** On 5.x, SEC connections are verified against certifi's bundle unless `EDGAR_USE_SYSTEM_CERTS` is set, so upgrading edgartools now also updates the trusted roots. (edgartools-a9bak)
 
 ## [5.62.0] - 2026-10-11
 
