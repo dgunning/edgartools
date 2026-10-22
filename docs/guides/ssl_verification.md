@@ -122,7 +122,7 @@ EdgarTools talks to SEC over HTTPS only, and the proxy variable it reads is the 
 - `ALL_PROXY`
 - `NO_PROXY`, so when `HTTPS_PROXY` is set every SEC request goes through the proxy
 
-`get_http_config()["proxy"]` reports only a proxy set with `configure_http(proxy=...)`. It shows `None` when the proxy comes from `HTTPS_PROXY`, even though that proxy is in use.
+`get_http_config()["proxy"]` reports the proxy in use, whether it was set with `configure_http(proxy=...)` or `HTTPS_PROXY`.
 
 ## Corporate Network Scenarios
 
