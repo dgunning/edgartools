@@ -1,0 +1,1 @@
+**Proxy and rate-limit documentation matched the code.** The 429 message and `docs/configuration.md` pointed at a `update_rate_limiter` function that does not exist; they now say to set `EDGAR_RATE_LIMIT_PER_SEC` before importing `edgar`. The proxy guide now lists the one variable honoured (upper-case `HTTPS_PROXY`) and the ones that are not.

@@ -210,9 +210,10 @@ What to do:
   2. Reduce your request rate (edgartools defaults to 9 req/sec)
   3. Consider using local storage: download_edgar_data()
 
-To adjust rate limit:
+To adjust rate limit (set it before edgar is first imported):
   import os
-  os.environ['EDGAR_RATE_LIMIT_PER_SEC'] = '5'  # More conservative"""
+  os.environ['EDGAR_RATE_LIMIT_PER_SEC'] = '5'  # More conservative
+  import edgar"""
 
         footer = """
 
