@@ -136,8 +136,9 @@ def _env():
     return EnvironmentInfo(python_version="3.12", platform="test", edgartools_version="6.0", httpx_version="2")
 
 
-def test_the_check_fails_and_recommends_a_rebuild_even_when_requests_work():
-    config = CertificateConfig(ssl_cert_file="/tmp/combined-bundle.pem", distrusted_roots=["emSign ECC Root CA - G3"])
+def test_the_check_fails_and_recommends_a_rebuild_even_when_requests_work(tmp_path):
+    bundle = str(tmp_path / "combined-bundle.pem")
+    config = CertificateConfig(ssl_cert_file=bundle, distrusted_roots=["emSign ECC Root CA - G3"])
     state = HttpClientState(cert_source="SSL_CERT_FILE")
     network = NetworkTestResults(dns_resolved=True, tcp_connected=True, http_request_ok=True)
 
