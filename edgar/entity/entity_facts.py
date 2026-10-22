@@ -803,6 +803,13 @@ class EntityFacts:
         facts sharing a ``period_end`` but representing different reporting
         windows (e.g., a 3-month Q2 vs. a 6-month YTD H1) remain distinguishable.
 
+        The concept resolves the way ``get_fact()`` does: a qualified name
+        (``'us-gaap:Assets'``), a bare local name (``'Assets'``) or a lowercased
+        label (``'assets'``) selects exactly that concept. Only text that names
+        no concept and has no taxonomy prefix (``'Net Income'``) falls back to a
+        substring search over concept names and labels; that fallback can mix
+        several concepts in one series, so it warns and names them.
+
         Args:
             concept: Concept name or label
             periods: Number of periods to retrieve
@@ -814,8 +821,32 @@ class EntityFacts:
         from edgar.entity.query import FactQuery
         query = FactQuery(self._facts, self._fact_index)
 
+        # A bare name used to be substring-matched, so time_series('Assets')
+        # returned AssetsCurrent, AmortizationOfIntangibleAssets... rows with no
+        # way to tell them apart (GH #1658). The index holds local names (#1217),
+        # so resolve exactly first, exactly as get_fact() does.
+        by_concept = self._fact_index['by_concept']
+        if concept in by_concept:
+            key, exact = concept, True
+        elif concept.lower() in by_concept:
+            key, exact = concept.lower(), True
+        else:
+            key, exact = concept, ":" in concept
+            if not exact and not getattr(self, '_suppress_warnings', False):
+                needle = concept.lower()
+                matched = sorted({f.concept for f in self._facts
+                                  if needle in f.concept.lower()
+                                  or (f.label and needle in f.label.lower())})
+                if matched:
+                    shown = ', '.join(matched[:5]) + (f" (+{len(matched) - 5} more)" if len(matched) > 5 else "")
+                    warnings.warn(
+                        f"No concept named '{concept}'; time_series() fell back to a substring "
+                        f"match over {len(matched)} concepts: {shown}. Pass a concept name "
+                        f"(see search_concepts('{concept}')) for a single-concept series.",
+                        stacklevel=2)
+
         df = query \
-            .by_concept(concept, exact=":" in concept) \
+            .by_concept(key, exact=exact) \
             .sort_by('filing_date', ascending=False) \
             .to_dataframe('period_start', 'period_end', 'numeric_value',
                           'fiscal_period', 'fiscal_year') \

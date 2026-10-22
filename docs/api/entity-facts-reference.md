@@ -128,7 +128,7 @@ revenue_ts = facts.time_series('Revenue', periods=8)
 ```
 
 **Parameters:**
-- `concept` (str): Concept name or label
+- `concept` (str): Concept name, as qualified (`'us-gaap:Assets'`) or bare (`'Assets'`), or lowercase label. Each selects exactly that concept. Text that names no concept (`'Revenue'`) falls back to a substring search that can mix several concepts, and warns with their names.
 - `periods` (int): Number of periods to retrieve (default: 20)
 
 **Returns:** DataFrame with time series data
