@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from edgar._filings import Filing
     from edgar.filesystem import EdgarPath
 
-from edgar.attachments import Attachment, Attachments, get_document_type
+from edgar.attachments import Attachment, Attachments, get_document_type, safe_attachment_filename, safe_attachment_path
 from edgar.httprequests import stream_with_retry
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.sgml_header import FilingHeader
@@ -438,17 +438,18 @@ class FilingSGML:
         path: str or Path - The path to save the attachments
         archive: bool (default False) - If True, save the attachments in a zip file
         """
+        path = Path(path)
         if archive:
             if path.is_dir():
                 raise ValueError("Path must be a zip file name to create zipfile")
             else:
                 with zipfile.ZipFile(path, 'w') as zipf:
                     for document in self._documents_by_name.values():
-                        zipf.writestr(document.filename, document.content)
+                        zipf.writestr(safe_attachment_filename(document.filename), document.content)
         else:
             if path.is_dir():
                 for document in self._documents_by_name.values():
-                    file_path = path / document.filename
+                    file_path = safe_attachment_path(path, document.filename)
                     content = document.content
                     if isinstance(content, bytes):
                         file_path.write_bytes(content)

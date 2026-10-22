@@ -585,8 +585,22 @@ class TOCAnalyzer:
 
     # Trailing page-number / dot-leader run on a TOC link's text ("Use of
     # Proceeds .... 12"), stripped before matching the schema title vocabulary
-    # (whose regexes are heading-anchored with \s*$).
-    _TOC_PAGE_TAIL = re.compile(r'[\s.…]*\d{0,4}\s*$')
+    # (whose regexes are heading-anchored with \s*$). It removes exactly what
+    # re.sub(r'[\s.…]*\d{0,4}\s*$', '', text) removes, but as one backward
+    # scan: that regex backtracks cubically on a long run of spaces and dots
+    # (33 KB of ". " took 10.7 s; attack-surface audit 2026-10-22).
+    @staticmethod
+    def _strip_toc_page_tail(text: str) -> str:
+        end = len(text)
+        while end and text[end - 1].isspace():          # \s*$
+            end -= 1
+        digits = 0
+        while end and digits < 4 and text[end - 1].isdecimal():   # \d{0,4}
+            end -= 1
+            digits += 1
+        while end and (text[end - 1].isspace() or text[end - 1] in '.…'):  # [\s.…]*
+            end -= 1
+        return text[:end]
 
     # A TOC entry whose visible text is only a page number ("8", "12") is a
     # dot-leader artifact, not a section title. It shares its sibling title's
@@ -799,7 +813,7 @@ class TOCAnalyzer:
                 title = ' '.join(t for t in texts[lo_k:hi_k] if t).strip()
                 # A single-fragment entry can still carry an inline trailing page
                 # number ("Use of Proceeds 12"); strip it for matching.
-                title = self._TOC_PAGE_TAIL.sub('', title).strip() or title
+                title = self._strip_toc_page_tail(title).strip() or title
                 key = self.schema.match_section_pattern(title) if title else None
                 # Depth from the non-page fragments only: a page-number link is
                 # rendered flush (indent 0) and would otherwise drag every entry's

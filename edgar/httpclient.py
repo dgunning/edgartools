@@ -1,6 +1,7 @@
 import locale
 import os
 import re
+import warnings
 from contextlib import asynccontextmanager, contextmanager
 from typing import AsyncGenerator, Generator, Literal, Optional
 
@@ -240,13 +241,57 @@ def get_edgar_http_timeout() -> Optional[float]:
     return value
 
 
+def _validate_rate_limit(value, source: str) -> int:
+    """A positive whole number of requests per second, or ValidationError.
+
+    pyrate-limiter guards its rate only with ``assert``, so under ``python -O``
+    a zero or negative rate silently disables throttling (30 requests in 0.00 s)
+    and without ``-O`` it fails with a bare AssertionError.
+    """
+    from edgar.exceptions import ValidationError
+    try:
+        rate = int(str(value).strip())
+    except (TypeError, ValueError):
+        rate = None
+    if rate is None or rate < 1:
+        raise ValidationError(
+            f"{source} must be a whole number of requests per second, at least 1 "
+            f"(SEC allows 10; the default is 9), got {value!r}",
+            parameter=source,
+            invalid_value=value,
+        )
+    return rate
+
+
 def get_edgar_rate_limit_per_sec():
     """
     Returns the rate limit in requests per second.
     Defaults to 9 requests/sec (SEC's rate limit).
     Use higher values for custom mirrors with relaxed limits.
+
+    Raises ValidationError if EDGAR_RATE_LIMIT_PER_SEC is not a whole number >= 1.
     """
-    return int(os.environ.get("EDGAR_RATE_LIMIT_PER_SEC", "9"))
+    return _validate_rate_limit(os.environ.get("EDGAR_RATE_LIMIT_PER_SEC", "9"),
+                                "EDGAR_RATE_LIMIT_PER_SEC")
+
+
+_ssl_disabled_warned = False
+
+
+def _warn_if_ssl_verification_disabled(verify, stacklevel: int = 3) -> None:
+    """Warn once per process when certificate verification is turned off."""
+    global _ssl_disabled_warned
+    if verify is not False or _ssl_disabled_warned:
+        return
+    _ssl_disabled_warned = True
+    warnings.warn(
+        "SSL certificate verification is disabled (EDGAR_VERIFY_SSL=false or "
+        "configure_http(verify_ssl=False)); responses from SEC can be intercepted "
+        "or altered in transit. Prefer configure_http(use_system_certs=True) "
+        "behind a corporate proxy.",
+        UserWarning,
+        stacklevel=stacklevel,
+    )
 
 
 def _create_rate_limiter(requests_per_second: int):
@@ -257,6 +302,7 @@ def _create_rate_limiter(requests_per_second: int):
     """
     from pyrate_limiter import Duration, InMemoryBucket, Limiter, Rate
 
+    requests_per_second = _validate_rate_limit(requests_per_second, "requests_per_second")
     rate = Rate(requests_per_second, Duration.SECOND)
     return Limiter(InMemoryBucket([rate]))
 
@@ -281,6 +327,7 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
         http_mgr.httpx_params["verify"] = get_truststore_context()
     else:
         http_mgr.httpx_params["verify"] = get_edgar_verify_ssl()
+    _warn_if_ssl_verification_disabled(http_mgr.httpx_params["verify"])
 
     # Default to HTTP/1.1 (http2=False). HTTP/2 multiplexes every request over a
     # single TCP connection, so a mid-stream reset from cloud egress fails all
@@ -421,6 +468,7 @@ def configure_http(
     elif verify_ssl is not None:
         HTTP_MGR.httpx_params["verify"] = verify_ssl
         settings_changed = True
+    _warn_if_ssl_verification_disabled(HTTP_MGR.httpx_params.get("verify", True))
 
     if proxy is not None:
         # Configure proxy for httpx2
