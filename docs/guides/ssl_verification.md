@@ -65,10 +65,13 @@ export SSL_CERT_FILE="/path/to/company-ca-bundle.pem"
 The file replaces the OS store, so it must hold the public roots that SEC.gov chains to as well as your corporate CA. The `certifi` package is a convenient source of those roots; it plays no other part in verification:
 
 ```bash
-pip install certifi
+pip install --upgrade "certifi>=2026.10.19"
 cat "$(python -m certifi)" /path/to/corporate-ca.crt > ~/combined-bundle.pem
 export SSL_CERT_FILE="$HOME/combined-bundle.pem"
 ```
+
+!!! warning "Rebuild the bundle after certifi updates"
+    The combined file is a copy: upgrading certifi does not change it, and because it replaces the OS store, OS updates do not reach it either. A bundle built from certifi older than 2026.10.19 still trusts the emSign ECC Root CA - G3, which CA bundles removed in October 2026 after its private keys were found to be compromised. `diagnose_ssl()` fails its "Distrusted Root CA" check when `SSL_CERT_FILE` or `SSL_CERT_DIR` still holds it.
 
 `SSL_CERT_DIR` works the same way for a directory of hashed certificates. edgartools does not read `REQUESTS_CA_BUNDLE` or `CURL_CA_BUNDLE`.
 

@@ -1,8 +1,10 @@
 """
 Diagnostic checks for SSL troubleshooting.
 """
+import hashlib
 import os
 import platform
+import re
 import socket
 import ssl
 import sys
@@ -27,6 +29,41 @@ from .report import (
 # SEC.gov connection details
 SEC_HOST = "www.sec.gov"
 SEC_PORT = 443
+
+# Roots removed from CA bundles after a compromise, keyed by the SHA-256 of the DER
+# certificate. A CA file built before the removal keeps trusting them: certifi
+# upgrades do not touch a copy, and SSL_CERT_FILE replaces the OS store.
+DISTRUSTED_ROOTS = {
+    # eMudhra emSign, October 2026: its CAs had trivially small EC private keys.
+    # certifi removed this root in 2026.10.18 (2026.10.19 restored the unaffected ones).
+    "86a1ecba089c4a8d3bbe2734c612ba341d813e043cf9e8a862cd5c57a36bbe6b": "emSign ECC Root CA - G3",
+}
+FIXED_CERTIFI = "2026.10.19"
+
+_PEM_CERT = re.compile(r"-----BEGIN CERTIFICATE-----.+?-----END CERTIFICATE-----", re.S)
+
+
+def find_distrusted_roots(path: Optional[str]) -> List[str]:
+    """Labels of the DISTRUSTED_ROOTS held by a PEM CA file, or by the files of a CA directory."""
+    if not path:
+        return []
+    location = Path(path)
+    files = sorted(f for f in location.iterdir() if f.is_file()) if location.is_dir() else [location]
+    found = []
+    for file in files:
+        try:
+            text = file.read_text(encoding="ascii", errors="ignore")
+        except OSError:
+            continue
+        for pem in _PEM_CERT.findall(text):
+            try:
+                fingerprint = hashlib.sha256(ssl.PEM_cert_to_DER_cert(pem)).hexdigest()
+            except ValueError:
+                continue
+            label = DISTRUSTED_ROOTS.get(fingerprint)
+            if label and label not in found:
+                found.append(label)
+    return found
 
 
 def get_environment_info() -> EnvironmentInfo:
@@ -96,6 +133,9 @@ def get_certificate_config() -> CertificateConfig:
             config.bundle_size_kb = int(cert_path.stat().st_size / 1024)
     except ImportError:
         pass
+
+    # A CA file or directory that replaces the OS store is only as current as when it was built
+    config.distrusted_roots = find_distrusted_roots(config.ssl_cert_file or os.environ.get("SSL_CERT_DIR"))
 
     return config
 
@@ -488,6 +528,14 @@ def generate_checks(
             details=os.environ.get("SSL_CERT_DIR") if source == "SSL_CERT_DIR" else None,
         ))
 
+    if cert_config.distrusted_roots:
+        checks.append(CheckResult(
+            name="Distrusted Root CA",
+            status=CheckStatus.FAIL,
+            message="Your CA bundle still trusts a compromised root: " + ", ".join(cert_config.distrusted_roots),
+            details=f"Rebuild it from certifi>={FIXED_CERTIFI}; see the recommendation below",
+        ))
+
     if cert_config.requests_ca_bundle:
         checks.append(CheckResult(
             name="REQUESTS_CA_BUNDLE",
@@ -607,6 +655,22 @@ def generate_recommendations(
     """Generate recommendations based on diagnostic results."""
     recommendations = []
 
+    # A bundle that trusts a compromised root is a security problem even when every request succeeds
+    if cert_config.distrusted_roots:
+        recommendations.append(Recommendation(
+            title="Rebuild your CA bundle: it trusts a compromised root",
+            description=(
+                f"The CA file that replaces your OS certificate store holds {', '.join(cert_config.distrusted_roots)}, "
+                "which CA bundles removed in October 2026 because its private keys were compromised. "
+                "Upgrading certifi does not change a copy, so rebuild the file, or unset SSL_CERT_FILE / "
+                "SSL_CERT_DIR to verify against your OS store."
+            ),
+            code_snippet=f"""pip install --upgrade "certifi>={FIXED_CERTIFI}"
+cat "$(python -m certifi)" /path/to/corporate-ca.crt > ~/combined-bundle.pem
+export SSL_CERT_FILE="$HOME/combined-bundle.pem\"""",
+            priority=1,
+        ))
+
     # Check for settings mismatch
     if client_state.client_created and not client_state.settings_match:
         recommendations.append(Recommendation(
@@ -627,9 +691,10 @@ company = Company("AAPL")""",
 
     # SSL handshake failure recommendations
     if network.ssl_handshake and not network.ssl_handshake.success:
-        bundle_snippet = """# The file replaces the OS store, so it needs the corporate CA
-# AND the public roots (certifi supplies those; it is not what verifies):
-pip install certifi
+        bundle_snippet = f"""# The file replaces the OS store, so it needs the corporate CA
+# AND the public roots (certifi supplies those; it is not what verifies).
+# Rebuild it after certifi updates: a copy keeps the roots it was built with.
+pip install --upgrade "certifi>={FIXED_CERTIFI}"
 cat "$(python -m certifi)" /path/to/corporate-ca.crt > ~/combined-bundle.pem
 export SSL_CERT_FILE="$HOME/combined-bundle.pem\""""
 
