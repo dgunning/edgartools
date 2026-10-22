@@ -27,11 +27,15 @@ import pytest
 from edgar import Company, Filing
 from edgar.company_reports import EightK
 
+# Bitcoin Depot by CIK: SEC's ticker file stopped listing BTM, so a ticker
+# lookup fails once the bundled table is refreshed (2026-10-21).
+BITCOIN_DEPOT = 1901799
+
 
 @pytest.mark.network
 def test_items_includes_item_105_not_in_parser_sections():
     """Item 1.05 body is present but missed by the section parser — .items must still list it."""
-    filing = Company('BTM').get_filings(form='8-K').filter(date='2026-04-08')[0]
+    filing = Company(BITCOIN_DEPOT).get_filings(form='8-K').filter(date='2026-04-08')[0]
     eightk = filing.obj()
     assert isinstance(eightk, EightK)
 
@@ -45,7 +49,7 @@ def test_items_includes_item_105_not_in_parser_sections():
 @pytest.mark.network
 def test_item_105_accessible_via_both_key_formats():
     """Consistency contract: every item in .items is retrievable via __getitem__."""
-    filing = Company('BTM').get_filings(form='8-K').filter(date='2026-04-08')[0]
+    filing = Company(BITCOIN_DEPOT).get_filings(form='8-K').filter(date='2026-04-08')[0]
     eightk = filing.obj()
 
     for key in ('1.05', 'Item 1.05'):
@@ -62,7 +66,7 @@ def test_item_105_accessible_via_both_key_formats():
 def test_date_of_report_is_always_a_date():
     """date_of_report returns datetime.date, never a formatted string."""
     # Modern filing
-    filing = Company('BTM').get_filings(form='8-K').filter(date='2026-04-08')[0]
+    filing = Company(BITCOIN_DEPOT).get_filings(form='8-K').filter(date='2026-04-08')[0]
     eightk = filing.obj()
     assert isinstance(eightk.date_of_report, date)
     assert eightk.date_of_report == date(2026, 4, 6)
