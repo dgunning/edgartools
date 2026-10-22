@@ -43,23 +43,36 @@ FIXED_CERTIFI = "2026.10.19"
 _PEM_CERT = re.compile(r"-----BEGIN CERTIFICATE-----.+?-----END CERTIFICATE-----", re.S)
 
 
+def _ca_files(path: str) -> List[Path]:
+    """The PEM file at *path*, or the files of the CA directory at *path*."""
+    location = Path(path)
+    if location.is_dir():
+        return sorted(f for f in location.iterdir() if f.is_file())
+    return [location]
+
+
+def _pem_fingerprints(file: Path) -> List[str]:
+    """SHA-256 of each PEM certificate in *file*; unreadable files and malformed blocks are skipped."""
+    try:
+        text = file.read_text(encoding="ascii", errors="ignore")
+    except OSError:
+        return []
+    fingerprints = []
+    for pem in _PEM_CERT.findall(text):
+        try:
+            fingerprints.append(hashlib.sha256(ssl.PEM_cert_to_DER_cert(pem)).hexdigest())
+        except ValueError:
+            continue
+    return fingerprints
+
+
 def find_distrusted_roots(path: Optional[str]) -> List[str]:
     """Labels of the DISTRUSTED_ROOTS held by a PEM CA file, or by the files of a CA directory."""
     if not path:
         return []
-    location = Path(path)
-    files = sorted(f for f in location.iterdir() if f.is_file()) if location.is_dir() else [location]
     found = []
-    for file in files:
-        try:
-            text = file.read_text(encoding="ascii", errors="ignore")
-        except OSError:
-            continue
-        for pem in _PEM_CERT.findall(text):
-            try:
-                fingerprint = hashlib.sha256(ssl.PEM_cert_to_DER_cert(pem)).hexdigest()
-            except ValueError:
-                continue
+    for file in _ca_files(path):
+        for fingerprint in _pem_fingerprints(file):
             label = DISTRUSTED_ROOTS.get(fingerprint)
             if label and label not in found:
                 found.append(label)
@@ -647,29 +660,33 @@ def generate_checks(
     return checks
 
 
+def _distrusted_root_recommendations(cert_config: CertificateConfig) -> List[Recommendation]:
+    """Rebuild advice for a CA file that still holds a root CA bundles have removed; [] if it holds none."""
+    if not cert_config.distrusted_roots:
+        return []
+    return [Recommendation(
+        title="Rebuild your CA bundle: it trusts a compromised root",
+        description=(
+            f"The CA file that replaces your OS certificate store holds {', '.join(cert_config.distrusted_roots)}, "
+            "which CA bundles removed in October 2026 because its private keys were compromised. "
+            "Upgrading certifi does not change a copy, so rebuild the file, or unset SSL_CERT_FILE / "
+            "SSL_CERT_DIR to verify against your OS store."
+        ),
+        code_snippet=f"""pip install --upgrade "certifi>={FIXED_CERTIFI}"
+cat "$(python -m certifi)" /path/to/corporate-ca.crt > ~/combined-bundle.pem
+export SSL_CERT_FILE="$HOME/combined-bundle.pem\"""",
+        priority=1,
+    )]
+
+
 def generate_recommendations(
     cert_config: CertificateConfig,
     client_state: HttpClientState,
     network: NetworkTestResults,
 ) -> List[Recommendation]:
     """Generate recommendations based on diagnostic results."""
-    recommendations = []
-
     # A bundle that trusts a compromised root is a security problem even when every request succeeds
-    if cert_config.distrusted_roots:
-        recommendations.append(Recommendation(
-            title="Rebuild your CA bundle: it trusts a compromised root",
-            description=(
-                f"The CA file that replaces your OS certificate store holds {', '.join(cert_config.distrusted_roots)}, "
-                "which CA bundles removed in October 2026 because its private keys were compromised. "
-                "Upgrading certifi does not change a copy, so rebuild the file, or unset SSL_CERT_FILE / "
-                "SSL_CERT_DIR to verify against your OS store."
-            ),
-            code_snippet=f"""pip install --upgrade "certifi>={FIXED_CERTIFI}"
-cat "$(python -m certifi)" /path/to/corporate-ca.crt > ~/combined-bundle.pem
-export SSL_CERT_FILE="$HOME/combined-bundle.pem\"""",
-            priority=1,
-        ))
+    recommendations = _distrusted_root_recommendations(cert_config)
 
     # Check for settings mismatch
     if client_state.client_created and not client_state.settings_match:
