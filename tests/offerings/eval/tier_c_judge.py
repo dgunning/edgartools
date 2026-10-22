@@ -320,7 +320,7 @@ def _evidence_lead(filing, max_chars: int) -> str:
 
 
 def _evidence_fee(filing, max_chars: int) -> str:
-    from edgar.offerings._fee_table import _get_filing_fees_attachment, _resolve_fee_source
+    from edgar.offerings.prospectus._fee_table import _get_filing_fees_attachment, _resolve_fee_source
     att = _get_filing_fees_attachment(filing)
     source_note = ""
     if att is None:

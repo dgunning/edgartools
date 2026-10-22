@@ -10,7 +10,7 @@ Bead: edgartools-4jm1
 """
 import pytest
 
-from edgar.offerings._fee_table import (
+from edgar.offerings.prospectus._fee_table import (
     _join_dollar_cells,
     _parse_dollar_amount,
     _parse_fee_rate,
@@ -305,7 +305,7 @@ class TestXn7eMisparsedTotalOfferingAmount:
     def test_refine_recovers_aggregate_from_shifted_columns(self):
         """fee = aggregate x rate is self-validating, so a column shift that put
         the offering amount in the fee column is corrected (333-275559 shape)."""
-        from edgar.offerings._fee_table import _refine_fee_columns
+        from edgar.offerings.prospectus._fee_table import _refine_fee_columns
         # ['Unallocated...', '—', '457', '(o)', '—', '(3', ')', '$150,000,000',
         #  '0.00014760', '$22,140.00'] — '(3)' split shifted the columns.
         texts = ['Unallocated (Universal) Shelf (1)', '—', '457', '(o)', '—',
@@ -320,7 +320,7 @@ class TestXn7eMisparsedTotalOfferingAmount:
     def test_refine_is_noop_without_fee_rate(self):
         """A deferred / placeholder row with no fee rate is left untouched even
         when a par value in the title falls in the rate band."""
-        from edgar.offerings._fee_table import _refine_fee_columns
+        from edgar.offerings.prospectus._fee_table import _refine_fee_columns
         texts = ['Equity', 'Common Stock, $0.0001 par value per share',
                  '—', '—', '—', '—', '—', '—']
         security = {'max_aggregate_amount': None, 'fee_amount': None,
@@ -376,7 +376,7 @@ class TestInlineFeeTablePreEX107:
     def test_multi_row_with_total_picks_aggregate_not_fee(self):
         """Aggregate is the largest $; the smaller fee and an embedded par value
         in a prose cell must both be ignored."""
-        from edgar.offerings._fee_table import _parse_inline_fee_table
+        from edgar.offerings.prospectus._fee_table import _parse_inline_fee_table
         html = (
             "<table>"
             "<tr><td>Title of each class of securities to be registered</td>"
@@ -394,7 +394,7 @@ class TestInlineFeeTablePreEX107:
     def test_single_row_no_total_uses_row_aggregate(self):
         """A single-class resale has no Total row; the aggregate is the row's
         largest $ and the unpriced share count is ignored."""
-        from edgar.offerings._fee_table import _parse_inline_fee_table
+        from edgar.offerings.prospectus._fee_table import _parse_inline_fee_table
         html = (
             "<table>"
             "<tr><td>Title of Each Class of Securities To Be Registered</td>"
@@ -409,7 +409,7 @@ class TestInlineFeeTablePreEX107:
 
     def test_indeterminate_asr_is_deferred(self):
         """An ASR table with only footnote placeholders (no $) is pay-as-you-go."""
-        from edgar.offerings._fee_table import _parse_inline_fee_table
+        from edgar.offerings.prospectus._fee_table import _parse_inline_fee_table
         html = (
             "<table>"
             "<tr><td>Title of each class of securities to be registered</td>"
@@ -423,7 +423,7 @@ class TestInlineFeeTablePreEX107:
         assert data["fee_deferred"] is True
 
     def test_457r_marker_marks_deferred_even_without_asr_form(self):
-        from edgar.offerings._fee_table import _parse_inline_fee_table
+        from edgar.offerings.prospectus._fee_table import _parse_inline_fee_table
         html = (
             "<table>"
             "<tr><td>Title of each class of securities to be registered</td>"
@@ -437,7 +437,7 @@ class TestInlineFeeTablePreEX107:
         assert data["fee_deferred"] is True
 
     def test_no_fee_table_returns_empty(self):
-        from edgar.offerings._fee_table import _parse_inline_fee_table
+        from edgar.offerings.prospectus._fee_table import _parse_inline_fee_table
         data = _parse_inline_fee_table("<html><body><p>No table here.</p></body></html>", form="S-3")
         assert data["total_offering_amount"] is None
         assert data["fee_deferred"] is False

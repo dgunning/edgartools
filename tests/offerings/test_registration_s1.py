@@ -7,7 +7,7 @@ Ground truth filings:
   - Wolfspeed (0001193125-26-098748) — Resale
 """
 import pytest
-from edgar.offerings.registration_s1 import RegistrationS1, S1OfferingType, S1CoverPage
+from edgar.offerings.prospectus.registration_s1 import RegistrationS1, S1OfferingType, S1CoverPage
 
 
 # ---------------------------------------------------------------------------
@@ -66,11 +66,11 @@ class TestS1OfferingType:
 class TestS1Classifier:
 
     def test_classifier_import(self):
-        from edgar.offerings._s1_classifier import classify_s1_offering_type
+        from edgar.offerings.prospectus._s1_classifier import classify_s1_offering_type
         assert callable(classify_s1_offering_type)
 
     def test_classifier_returns_dict_keys(self):
-        from edgar.offerings._s1_classifier import classify_s1_offering_type
+        from edgar.offerings.prospectus._s1_classifier import classify_s1_offering_type
 
         class FakeFiling:
             def html(self): return "<html>blank check company trust account</html>"
@@ -81,20 +81,20 @@ class TestS1Classifier:
         assert 'signals' in result
 
     def test_spac_signals(self):
-        from edgar.offerings._s1_classifier import classify_s1_offering_type
+        from edgar.offerings.prospectus._s1_classifier import classify_s1_offering_type
         html = "<html><body>This is a blank check company formed for the purpose of a business combination. Trust account.</body></html>"
         result = classify_s1_offering_type(None, html=html)
         assert result['type'] == 'spac'
         assert result['confidence'] == 'high'
 
     def test_resale_signals(self):
-        from edgar.offerings._s1_classifier import classify_s1_offering_type
+        from edgar.offerings.prospectus._s1_classifier import classify_s1_offering_type
         html = "<html><body>resale of shares by selling stockholders. We will not receive any proceeds from the sale. registration rights agreement</body></html>"
         result = classify_s1_offering_type(None, html=html)
         assert result['type'] == 'resale'
 
     def test_ipo_signals(self):
-        from edgar.offerings._s1_classifier import classify_s1_offering_type
+        from edgar.offerings.prospectus._s1_classifier import classify_s1_offering_type
         html = "<html><body>initial public offering price. no established trading market for our common stock. we have applied to list our shares on nasdaq.</body></html>"
         result = classify_s1_offering_type(None, html=html)
         assert result['type'] == 'ipo'
@@ -107,7 +107,7 @@ class TestS1Classifier:
 class TestS1CoverExtractor:
 
     def test_extract_imports(self):
-        from edgar.offerings._s1_cover import extract_s1_cover_page
+        from edgar.offerings.prospectus._s1_cover import extract_s1_cover_page
         assert callable(extract_s1_cover_page)
 
 

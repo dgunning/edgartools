@@ -453,7 +453,7 @@ company = Company("1881570")  # Example: ViiT Health
 cf_filings = company.get_filings(form=['C', 'C/A', 'C-U', 'C-AR', 'C-TR'])
 
 # Group by offering
-from edgar.offerings.formc import group_offerings_by_file_number
+from edgar.offerings import group_offerings_by_file_number
 grouped = group_offerings_by_file_number(cf_filings)
 
 print(f"{company.name} has {len(grouped)} crowdfunding offerings")
@@ -537,6 +537,6 @@ This is useful when passing Form C data to language models or building AI-powere
 ## Related
 
 - **User Guide:** Working with Form C Filings (coming soon)
-- **API Reference:** `edgar.offerings.formc` module
+- **API Reference:** `edgar.offerings.crowdfunding.formc` module
 - **Related Filings:** [Form D: Private Placements](formd-data-object-guide.md)
 - **Company Data:** [Find a Company](finding-companies.md)

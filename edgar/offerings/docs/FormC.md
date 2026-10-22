@@ -570,7 +570,7 @@ filings = company.get_filings(form=["C", "C/A", "C-U", "C-AR"])
 print(f"Found {len(filings)} Form C filings")
 
 # Step 2: Group filings by offering (by file number)
-from edgar.offerings.formc import group_offerings_by_file_number
+from edgar.offerings import group_offerings_by_file_number
 grouped = group_offerings_by_file_number(filings)
 
 print(f"Company has {len(grouped)} distinct offerings")
@@ -632,7 +632,7 @@ recent = get_filings(2024, 3, form="C")
 
 ### Group by Offering
 ```python
-from edgar.offerings.formc import group_offerings_by_file_number
+from edgar.offerings import group_offerings_by_file_number
 
 company = Company("1881570")
 all_filings = company.get_filings(form=["C", "C/A", "C-U", "C-AR"])
@@ -894,7 +894,7 @@ filings = company.get_filings(form=["C", "C/A", "C-U", "C-AR", "C-TR"])
 
 ### Step 2: Group by Offering
 ```python
-from edgar.offerings.formc import group_offerings_by_file_number
+from edgar.offerings import group_offerings_by_file_number
 
 # Group filings by offering (issuer file number)
 grouped = group_offerings_by_file_number(filings)
@@ -955,7 +955,7 @@ for offering in offerings:
 
 ## Related Classes
 
-- **Offering** - Represents complete offering lifecycle (edgar.offerings.campaign)
+- **Offering** - Represents complete offering lifecycle (edgar.offerings.crowdfunding.campaign)
 - **IssuerCompany** - Offering-specific company wrapper
 - **Company** - Full SEC entity data
 - **Filing** - Base filing class
@@ -964,6 +964,6 @@ for offering in offerings:
 
 ## See Also
 
-- **Offering class documentation** - See `edgar.offerings.campaign` module docstring
+- **Offering class documentation** - See `edgar.offerings.crowdfunding.campaign` module docstring
 - **Company class** - For general company operations
 - **Filing class** - For base filing operations
