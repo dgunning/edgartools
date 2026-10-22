@@ -66,16 +66,16 @@
   ],
   "NoninterestBearingDepositLiabilities": null,
   "NoninterestExpenseDirectorsFees": [
-    "OtherOperatingExpense"
+    "OtherNonInterestExpense"
   ],
   "NoninterestIncomeOther": [
-    "NonInterestIncome"
+    "OtherNonInterestIncome"
   ],
   "NoninterestIncomeOtherOperatingIncome": [
-    "NonInterestIncome"
+    "OtherNonInterestIncome"
   ],
   "OtherNoninterestExpense": [
-    "NonInterestExpense"
+    "OtherNonInterestExpense"
   ],
   "PaidInKindInterest": [
     "OtherNonCashItemsCF"

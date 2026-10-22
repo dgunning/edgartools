@@ -91,7 +91,7 @@ def test_explicit_lookups(index):
     """The rows the issue reproduces, spelled out."""
     assert index.lookup("us-gaap:InterestAndDividendIncomeOperating").standard_concepts == ["TotalInterestIncomeOperating"]
     assert index.lookup("us-gaap:InterestAndFeeIncomeLoansAndLeases").standard_concepts == ["InterestIncome"]
-    assert index.lookup("us-gaap:OtherNoninterestExpense").standard_concepts == ["NonInterestExpense"]
+    assert index.lookup("us-gaap:OtherNoninterestExpense").standard_concepts == ["OtherNonInterestExpense"]
     assert index.lookup("us-gaap:PaidInKindInterest").standard_concepts == ["OtherNonCashItemsCF"]
     assert index.lookup("us-gaap:ProvisionForLoanLeaseAndOtherLosses").standard_concepts == ["ProvisionForCreditLosses"]
     assert index.lookup("us-gaap:IncreaseDecreaseInDeposits") is None
@@ -213,3 +213,27 @@ def test_auburn_interest_income_is_not_net_interest_income():
     assert list(total[period]) == [34_374_000]
     # The components now sum to the filed total.
     assert frame.loc[frame["standard_concept"] == "InterestIncome", period].sum() == 34_374_000
+
+
+def test_auburn_other_noninterest_lines_are_not_their_totals():
+    """Auburn National FY2023 10-K (0001193125-24-067944): total noninterest expense $22,594,000,
+    of which other noninterest expense $5,609,000; other noninterest income $1,870,000.
+
+    The issue proposed the totals' concepts for the "other" lines. In SEC's CY2023 frames 387 of
+    the 400 filers of OtherNoninterestExpense also file NoninterestExpense (median 10% of it), so
+    those lines get their own concepts. (BankOwnedLifeInsuranceIncome, EquipmentExpense and the
+    FDIC premium still map to the totals; they are outside this issue.)
+    """
+    frame = _frame("aubn/10k_2023", "income_statement")
+    period = "2023-12-31 (FY)"
+    expense = frame[frame["standard_concept"] == "NonInterestExpense"]
+    assert list(expense.loc[expense["concept"] == "us-gaap_NoninterestExpense", period]) == [22_594_000]
+    other_expense = frame[frame["standard_concept"] == "OtherNonInterestExpense"]
+    assert list(other_expense["concept"]) == ["us-gaap_OtherNoninterestExpense"]
+    assert list(other_expense[period]) == [5_609_000]
+    income_rows = set(frame.loc[frame["standard_concept"] == "NonInterestIncome", "concept"])
+    assert "us-gaap_NoninterestIncome" in income_rows
+    assert "us-gaap_NoninterestIncomeOther" not in income_rows
+    other_income = frame[frame["standard_concept"] == "OtherNonInterestIncome"]
+    assert list(other_income["concept"]) == ["us-gaap_NoninterestIncomeOther"]
+    assert list(other_income[period]) == [1_870_000]

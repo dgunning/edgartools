@@ -27871,11 +27871,11 @@
   },
   "NoninterestExpenseDirectorsFees": {
     "standard_tags": [
-      "OtherOperatingExpense"
+      "OtherNonInterestExpense"
     ],
-    "display_name": "Other Operating Expense",
+    "display_name": "Other Non-Interest Expense",
     "statement": "IncomeStatement",
-    "section": "Operating Expenses",
+    "section": "Banking Expenses",
     "is_total": false,
     "confidence": 0.9,
     "company_count": 160,
@@ -27903,9 +27903,9 @@
   },
   "NoninterestIncomeOther": {
     "standard_tags": [
-      "NonInterestIncome"
+      "OtherNonInterestIncome"
     ],
-    "display_name": "Non-Interest Income",
+    "display_name": "Other Non-Interest Income",
     "statement": "IncomeStatement",
     "section": "Banking Revenue",
     "is_total": false,
@@ -27919,9 +27919,9 @@
   },
   "NoninterestIncomeOtherOperatingIncome": {
     "standard_tags": [
-      "NonInterestIncome"
+      "OtherNonInterestIncome"
     ],
-    "display_name": "Non-Interest Income",
+    "display_name": "Other Non-Interest Income",
     "statement": "IncomeStatement",
     "section": "Banking Revenue",
     "is_total": false,
@@ -31207,9 +31207,9 @@
   },
   "OtherNoninterestExpense": {
     "standard_tags": [
-      "NonInterestExpense"
+      "OtherNonInterestExpense"
     ],
-    "display_name": "Non-Interest Expense",
+    "display_name": "Other Non-Interest Expense",
     "statement": "IncomeStatement",
     "section": "Banking Expenses",
     "is_total": false,
