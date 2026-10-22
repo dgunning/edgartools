@@ -529,19 +529,19 @@ def obj(sec_filing: Filing) -> object | None:
         return FormC.from_filing(sec_filing)
 
     elif _matches_form(sec_filing, "DRS"):
-        from edgar.offerings.drs import DraftRegistrationStatement
+        from edgar.offerings.prospectus.drs import DraftRegistrationStatement
         return DraftRegistrationStatement.from_filing(sec_filing)
 
     elif _matches_form(sec_filing, ['S-1', 'F-1']):
-        from edgar.offerings.registration_s1 import RegistrationS1
+        from edgar.offerings.prospectus.registration_s1 import RegistrationS1
         return RegistrationS1.from_filing(sec_filing)
 
     elif _matches_form(sec_filing, ['S-3', 'S-3ASR', 'S-3D', 'S-3DPOS', 'F-3', 'F-3ASR']):
-        from edgar.offerings.registration_s3 import RegistrationS3
+        from edgar.offerings.prospectus.registration_s3 import RegistrationS3
         return RegistrationS3.from_filing(sec_filing)
 
     elif _matches_form(sec_filing, ['S-4', 'F-4']):
-        from edgar.offerings.registration_s4 import RegistrationS4
+        from edgar.offerings.prospectus.registration_s4 import RegistrationS4
         return RegistrationS4.from_filing(sec_filing)
 
     elif _matches_form(sec_filing, ['424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8']):

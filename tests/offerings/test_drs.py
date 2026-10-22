@@ -7,7 +7,7 @@ Ground truth filings:
   - Arxis, Inc. (0001193125-26-106851) — DRS/A, S-1 underlying
 """
 import pytest
-from edgar.offerings.drs import DraftRegistrationStatement, _detect_underlying_form
+from edgar.offerings.prospectus.drs import DraftRegistrationStatement, _detect_underlying_form
 
 
 # ---------------------------------------------------------------------------
@@ -122,7 +122,7 @@ class TestDraftRegistrationStatement:
         assert drs.registration_number == '377-09148'
 
         # Underlying object should be RegistrationS1
-        from edgar.offerings.registration_s1 import RegistrationS1
+        from edgar.offerings.prospectus.registration_s1 import RegistrationS1
         assert isinstance(drs.underlying_object, RegistrationS1)
 
     def test_f1_drs_texxon(self):
@@ -137,7 +137,7 @@ class TestDraftRegistrationStatement:
         assert drs.is_amendment is False
 
         # F-1 also delegates to RegistrationS1
-        from edgar.offerings.registration_s1 import RegistrationS1
+        from edgar.offerings.prospectus.registration_s1 import RegistrationS1
         assert isinstance(drs.underlying_object, RegistrationS1)
 
     def test_drs_amendment_arxis(self):

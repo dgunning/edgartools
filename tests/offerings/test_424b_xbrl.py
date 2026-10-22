@@ -16,7 +16,7 @@ from pathlib import Path
 
 import pytest
 
-from edgar.offerings._424b_xbrl import extract_filing_fees_xbrl
+from edgar.offerings.prospectus._424b_xbrl import extract_filing_fees_xbrl
 
 FIXTURE = Path(__file__).parent / "fixtures" / "ex_filing_fees_0001193125-25-155880.html"
 

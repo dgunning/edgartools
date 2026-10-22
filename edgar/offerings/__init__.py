@@ -5,8 +5,8 @@ Organized into domain subpackages:
 - ``exempt``       — Regulation D exempt offerings (Form D)
 - ``prospectus``   — 424B prospectuses, S-1/S-3/DRS registration statements, fee tables
 
-The former flat module paths (``edgar.offerings.formc``, ``edgar.offerings._fee_table``,
-``edgar.offerings.registration_s1``, …) remain importable via thin back-compat shims.
+The flat module paths (``edgar.offerings.formc``, ``edgar.offerings.registration_s1``, …)
+were removed in 6.0; see docs/upgrade/6.0.md.
 """
 from __future__ import annotations
 

@@ -1,7 +1,7 @@
 """Verification tests for RegistrationS3 data object."""
 
 import pytest
-from edgar.offerings.registration_s3 import (
+from edgar.offerings.prospectus.registration_s3 import (
     RegistrationS3, S3OfferingType, S3CoverPage, _is_checked, _extract_s3_cover_page
 )
 

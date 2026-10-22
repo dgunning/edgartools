@@ -819,7 +819,7 @@ class TestDilutionDollarPrefix:
         ])
 
     def test_embedded_dollar_not_doubled(self):
-        from edgar.offerings._424b_tables import extract_dilution_data
+        from edgar.offerings.prospectus._424b_tables import extract_dilution_data
         table = self._table([
             ['Public offering price per share', '$5.10'],
             ['Dilution per share to new investors', '$3.50'],
@@ -829,7 +829,7 @@ class TestDilutionDollarPrefix:
         assert dd.dilution_per_share == '$3.50'
 
     def test_spacer_dollar_cell_still_prefixed(self):
-        from edgar.offerings._424b_tables import extract_dilution_data
+        from edgar.offerings.prospectus._424b_tables import extract_dilution_data
         table = self._table([
             ['Public offering price per share', '$', '5.10'],
             ['Dilution per share to new investors', '$', '3.50'],
@@ -839,7 +839,7 @@ class TestDilutionDollarPrefix:
         assert dd.dilution_per_share == '$3.50'
 
     def test_negative_value_left_in_parens(self):
-        from edgar.offerings._424b_tables import extract_dilution_data
+        from edgar.offerings.prospectus._424b_tables import extract_dilution_data
         table = self._table([
             ['Net tangible book value before the offering', '(0.34)'],
         ])

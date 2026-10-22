@@ -15,8 +15,8 @@ import random
 from collections import Counter
 
 from edgar import get_filings, set_identity
-from edgar.offerings._424b_cover import extract_cover_page_fields
-from edgar.offerings._424b_xbrl import extract_filing_fees_xbrl
+from edgar.offerings.prospectus._424b_cover import extract_cover_page_fields
+from edgar.offerings.prospectus._424b_xbrl import extract_filing_fees_xbrl
 from edgar.offerings.prospectus import CoverPageData, _parse_sec_number
 
 set_identity(os.environ.get("EDGAR_IDENTITY", "bench dgunning@gmail.com"))
