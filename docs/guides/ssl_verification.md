@@ -99,18 +99,27 @@ from edgar import configure_http
 configure_http(proxy="http://proxy.company.com:8080")
 ```
 
-Standard proxy environment variables are also respected:
+Requests sent through the proxy keep edgartools' response cache and its request throttle.
+
+The proxy can also come from an environment variable, set before `edgar` is first imported:
 
 ```bash
-export HTTP_PROXY="http://proxy.company.com:8080"
 export HTTPS_PROXY="http://proxy.company.com:8080"
-export NO_PROXY="localhost,127.0.0.1"
 ```
 
 For authenticated proxies:
 ```bash
 export HTTPS_PROXY="http://username:password@proxy.company.com:8080"
 ```
+
+EdgarTools talks to SEC over HTTPS only, and the proxy variable it reads is the upper-case `HTTPS_PROXY`. These are **not** honoured:
+
+- `HTTP_PROXY`, because SEC requests are HTTPS
+- lower-case `https_proxy` and `http_proxy`
+- `ALL_PROXY`
+- `NO_PROXY`, so when `HTTPS_PROXY` is set every SEC request goes through the proxy
+
+`get_http_config()["proxy"]` reports only a proxy set with `configure_http(proxy=...)`. It shows `None` when the proxy comes from `HTTPS_PROXY`, even though that proxy is in use.
 
 ## Corporate Network Scenarios
 
