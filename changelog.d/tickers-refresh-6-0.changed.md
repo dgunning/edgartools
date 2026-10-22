@@ -1,0 +1,1 @@
+**The bundled ticker table is refreshed from SEC (2026-10-21).** `company_tickers.parquet` goes from 10,365 to 10,443 rows, and 10 tickers that moved to a new registrant now resolve to it offline too, among them XOM (ExxonMobil Holdings Corp, CIK 2115436, was 34088). Online lookups already read SEC's live file first (#1588).
