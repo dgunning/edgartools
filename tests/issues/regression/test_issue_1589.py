@@ -118,8 +118,15 @@ def test_item_text_runs_from_the_heading_to_the_signature(eight_k):
     assert eight_k["Item 5.02"] == text
 
 
-def test_item_missing_from_the_filing_still_raises(eight_k):
-    """A lookup that finds nothing raises a useful error; it does not return None."""
+def test_item_missing_from_the_filing_is_still_reported(eight_k, monkeypatch):
+    """A lookup that finds nothing is reported, under 5.x's contract.
+
+    5.x returns None with a FutureWarning, and raises under EDGARTOOLS_STRICT_ERRORS=1
+    (the 6.0 behaviour; on main this test asserts the raise directly).
+    """
+    with pytest.warns(FutureWarning):
+        assert eight_k["8.01"] is None
+    monkeypatch.setenv("EDGARTOOLS_STRICT_ERRORS", "1")
     with pytest.raises(SectionNotFoundError):
         eight_k["8.01"]
 
