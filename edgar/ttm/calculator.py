@@ -42,6 +42,14 @@ YTD_9M_MAX_DAYS = 329  # Non-overlapping with Annual
 ANNUAL_MIN_DAYS = 330
 ANNUAL_MAX_DAYS = 420
 
+# Consecutive quarters: days between quarter ends, and the span of a four-quarter
+# window. 52/53-week filers have 12/12/12/16 or 13/13/13/14-week quarters, and a
+# 53-week year is 371 days (GH #1694).
+QUARTER_END_GAP_MIN_DAYS = 70
+QUARTER_END_GAP_MAX_DAYS = 119
+WINDOW_SPAN_MIN_DAYS = 350
+WINDOW_SPAN_MAX_DAYS = 371
+
 # Calculation limits
 MAX_TTM_PERIODS = 100  # Maximum periods for TTM trend calculation
 MIN_QUARTERS_FOR_TTM = 4  # Minimum quarters needed for a single TTM value
@@ -250,6 +258,9 @@ class TTMCalculator:
             - fiscal_period: e.g., 'Q2'
             - yoy_growth: % change vs 4 quarters ago (None if insufficient data)
             - periods_included: List of quarters in this TTM window
+            - has_gaps: True if the window's quarters are not consecutive, so
+              ttm_value is not a twelve-month figure (same test as
+              `calculate_ttm`'s `has_gaps`, GH #1694)
 
         Raises:
             ValueError: If periods < 1 or > 100, or insufficient data
@@ -341,7 +352,8 @@ class TTMCalculator:
                     (calculate_fiscal_year_for_label(q.period_end, fiscal_year_end_month),
                      q.fiscal_period)
                     for q in ttm_window
-                ]
+                ],
+                'has_gaps': self._check_for_gaps(ttm_window),
             })
 
         # 5. Convert to DataFrame (already in most-recent-first order)
@@ -1299,12 +1311,17 @@ class TTMCalculator:
             return False
 
         for i in range(len(quarters) - 1):
-            # Calculate gap between consecutive quarters
+            # Quarter ends ~91 days apart. A 52/53-week filer's long quarter is
+            # 16 or 17 weeks (Costco's Q4: 112 days), so up to 119 (GH #1694).
             gap = (quarters[i+1].period_end - quarters[i].period_end).days
+            if not (QUARTER_END_GAP_MIN_DAYS <= gap <= QUARTER_END_GAP_MAX_DAYS):
+                return True
 
-            # Expect ~90 days between consecutive quarters
-            # Allow 70-110 day range for calendar variations
-            if not (70 <= gap <= 110):
+        # Four consecutive quarters span a year: 52 or 53 weeks, or a calendar year.
+        first_start = quarters[0].period_start
+        if len(quarters) == 4 and first_start is not None:
+            span = (quarters[-1].period_end - first_start).days + 1
+            if not (WINDOW_SPAN_MIN_DAYS <= span <= WINDOW_SPAN_MAX_DAYS):
                 return True
 
         return False

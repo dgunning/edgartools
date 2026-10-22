@@ -403,6 +403,7 @@ class TTMStatementBuilder:
                     "fiscal_year": label_fy,
                     "fiscal_period": as_of_fact.fiscal_period,
                     "as_of_date": as_of_fact.period_end,
+                    "has_gaps": ni_calc._check_for_gaps(window),
                 })
 
             if not rows:
@@ -506,7 +507,11 @@ class TTMStatementBuilder:
                             concept, period_label, row["as_of_date"],
                         )
                         continue
-                    period_values[period_label] = row["ttm_value"]
+                    # A window whose quarters are not consecutive does not
+                    # cover twelve months (a skipped quarter makes it ~15), so
+                    # its sum is not a TTM value: leave the cell empty rather
+                    # than print it under a TTM column (GH #1694).
+                    period_values[period_label] = None if row.get("has_gaps") else row["ttm_value"]
 
                 if base_period_labels:
                     values = {p: period_values.get(p) for p in base_period_labels}
