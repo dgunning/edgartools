@@ -10,6 +10,7 @@ import logging
 from typing import Optional, Union
 
 from lxml import etree
+from edgar.xmltools import xml_parser
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
@@ -249,9 +250,9 @@ class AlternativeTradingSystem:
     def _parse_xml(cls, xml: Union[str, bytes]) -> Optional["AlternativeTradingSystem"]:
         xml_bytes = xml.encode("utf-8") if isinstance(xml, str) else xml
         try:
-            root = etree.fromstring(xml_bytes)
+            root = etree.fromstring(xml_bytes, parser=xml_parser())
         except etree.XMLSyntaxError:
-            root = etree.fromstring(xml_bytes, parser=etree.XMLParser(recover=True))
+            root = etree.fromstring(xml_bytes, parser=xml_parser(recover=True))
         _strip_namespaces(root)
 
         if root.tag != "edgarSubmission":
@@ -610,10 +611,10 @@ class AlternativeTradingSystemWithdrawal:
             return None
         xml_bytes = xml.encode("utf-8") if isinstance(xml, str) else xml
         try:
-            root = etree.fromstring(xml_bytes)
+            root = etree.fromstring(xml_bytes, parser=xml_parser())
         except etree.XMLSyntaxError:
             try:
-                root = etree.fromstring(xml_bytes, parser=etree.XMLParser(recover=True))
+                root = etree.fromstring(xml_bytes, parser=xml_parser(recover=True))
             except etree.XMLSyntaxError as e:
                 log.warning("ATS-N-W XML parse failed for %s: %s", filing.accession_no, e)
                 return None

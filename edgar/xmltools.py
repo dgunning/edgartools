@@ -43,6 +43,8 @@ __all__ = [
     'local_name',
     'optional_decimal',
     'parse_xml',
+    'xml_parser',
+    'add_safe_resolver',
     'value_or_footnote',
     'extract_child_text',
     'extract_child_value',
@@ -170,6 +172,42 @@ def _attrib(node: XmlNode):
 # Public helpers. Signatures unchanged — ~350 call sites depend on them.
 # ---------------------------------------------------------------------------
 
+class _NoExternalResources(etree.Resolver):
+    """Answer every external lookup — a DTD, a parameter entity, a general entity — with nothing."""
+
+    def resolve(self, system_url, public_id, context):
+        return self.resolve_string("", context)
+
+
+def xml_parser(**options) -> etree.XMLParser:
+    """An lxml XMLParser that never reads a resource the document names.
+
+    Filing XML is written by the filer. lxml's defaults block network access and
+    external general entities, but before lxml 6.1.3 (LP#2165901) they still loaded
+    an external *parameter* entity (``<!ENTITY % p SYSTEM "file:///...">`` in the
+    internal subset) from the local filesystem, with or without ``recover``. The
+    floor is now 6.1.3; this parser keeps the guarantee independent of whichever
+    lxml is installed. The resolver answers every such
+    lookup with an empty document, so nothing outside the bytes being parsed is
+    read. Entities the document defines itself, and the predefined and character
+    entities, still expand, so ordinary output is unchanged.
+
+    Every lxml XML parse in edgartools goes through this; ``options`` are passed
+    to ``etree.XMLParser``. Build a fresh parser per call: lxml parsers hold
+    mutable state and must not be shared across threads. For ``etree.iterparse``,
+    which takes no parser, add the resolver with ``add_safe_resolver``.
+    """
+    parser = etree.XMLParser(**options)
+    parser.resolvers.add(_NoExternalResources())
+    return parser
+
+
+def add_safe_resolver(context):
+    """Give an ``etree.iterparse`` context the resolver ``xml_parser`` installs; returns it."""
+    context.resolvers.add(_NoExternalResources())
+    return context
+
+
 def parse_xml(xml: Union[str, bytes]) -> etree._Element:
     """Parse a whole XML document with lxml and return its root element.
 
@@ -214,9 +252,9 @@ def parse_xml(xml: Union[str, bytes]) -> etree._Element:
         # A fresh parser per call: lxml parsers hold mutable state and must not be
         # shared across threads, and edgartools parses on worker threads.
         root = etree.fromstring(xml.lstrip('\ufeff \t\r\n').encode('utf-8'),
-                                parser=etree.XMLParser(encoding='utf-8', recover=True))
+                                parser=xml_parser(encoding='utf-8', recover=True))
     else:
-        root = etree.fromstring(xml.lstrip(), parser=etree.XMLParser(recover=True))
+        root = etree.fromstring(xml.lstrip(), parser=xml_parser(recover=True))
     if root is None:
         raise etree.XMLSyntaxError("Document is not XML: nothing recoverable", None, 1, 1)
     return root

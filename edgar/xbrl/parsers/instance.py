@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Union, Optional
 
 from lxml import etree as ET
+from edgar.xmltools import xml_parser
 
 from edgar.core import log
 from edgar.xbrl.core import (
@@ -151,7 +152,7 @@ class InstanceParser(BaseParser):
         """Parse instance document content and extract contexts, facts, and units."""
         try:
             # Use lxml's optimized parser with smart string handling and recovery mode
-            parser = ET.XMLParser(remove_blank_text=True, recover=True, huge_tree=True)
+            parser = xml_parser(remove_blank_text=True, recover=True, huge_tree=True)
 
             # Convert to bytes for faster parsing if not already
             if isinstance(content, str):
@@ -185,7 +186,7 @@ class InstanceParser(BaseParser):
         """
 
         # Use lxml's optimized parser with smart string handling and recovery mode
-        parser = ET.XMLParser(remove_blank_text=True, recover=True, huge_tree=True)
+        parser = xml_parser(remove_blank_text=True, recover=True, huge_tree=True)
 
         # Convert to bytes for faster parsing if not already
         if isinstance(content, str):
