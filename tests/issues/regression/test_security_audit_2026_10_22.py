@@ -1,5 +1,8 @@
 """Regression tests for the attack-surface audit 2026-10-22.
 
+Bead: edgartools-vbutj
+GitHub PR: https://github.com/dgunning/edgartools/pull/1768
+
 Origin: attack-surface audit 2026-10-22 (findings 3, 4, 5, 6 and 9), run
 against origin/main 50813f0c.
 
