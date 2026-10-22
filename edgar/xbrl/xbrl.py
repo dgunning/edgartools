@@ -2462,6 +2462,8 @@ class XBRL:
         - INF (infinite precision) returns 1_000_000
         - Numeric decimals return their value (e.g., -6 for millions, 2 for hundredths)
         - None or invalid returns 0 (default/unknown precision)
+        - A valueless (nil) fact returns -2_000_000, below any valued fact, because
+          its missing decimals says nothing about precision (GH #1750)
 
         Args:
             fact: An XBRL Fact object with a decimals attribute
@@ -2469,6 +2471,8 @@ class XBRL:
         Returns:
             Integer precision value for comparison (higher = more precise)
         """
+        if fact.numeric_value is None and fact.value in (None, ''):
+            return -2_000_000  # Nil/valueless: never outranks a fact with a value
         if fact.decimals == 'INF':
             return 1_000_000  # Infinite precision = highest
         elif fact.decimals is not None:
