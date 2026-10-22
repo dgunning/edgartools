@@ -18,6 +18,7 @@ from functools import cached_property
 from typing import Any, Optional, TYPE_CHECKING
 
 from lxml import etree
+from edgar.xmltools import xml_parser
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
@@ -176,7 +177,7 @@ class XmlFiling:
             return None
 
         try:
-            root = etree.fromstring(xml_str.encode() if isinstance(xml_str, str) else xml_str)
+            root = etree.fromstring(xml_str.encode() if isinstance(xml_str, str) else xml_str, parser=xml_parser())
             _strip_namespaces(root)
 
             form_data_el = root.find('formData')

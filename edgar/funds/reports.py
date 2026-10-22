@@ -23,6 +23,7 @@ from edgar.core import get_bool
 from edgar.display.formatting import moneyfmt
 from edgar.funds import FundCompany, FundSeries
 from edgar.richtools import df_to_rich_table, repr_rich
+from edgar.xmltools import xml_parser
 
 log = logging.getLogger(__name__)
 
@@ -1233,9 +1234,9 @@ class FundReport:
             xml_bytes = xml
 
         try:
-            root = etree.fromstring(xml_bytes)
+            root = etree.fromstring(xml_bytes, parser=xml_parser())
         except etree.XMLSyntaxError:
-            parser = etree.XMLParser(recover=True)
+            parser = xml_parser(recover=True)
             root = etree.fromstring(xml_bytes, parser=parser)
 
         # Strip namespaces for simpler element lookups

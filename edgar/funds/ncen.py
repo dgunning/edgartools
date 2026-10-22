@@ -13,6 +13,7 @@ from typing import Any, List, Optional, Union
 
 import pandas as pd
 from lxml import etree
+from edgar.xmltools import xml_parser
 from pydantic import BaseModel
 from rich import box
 from rich.console import Group
@@ -582,9 +583,9 @@ class FundCensus:
             xml_bytes = xml
 
         try:
-            root = etree.fromstring(xml_bytes)
+            root = etree.fromstring(xml_bytes, parser=xml_parser())
         except etree.XMLSyntaxError:
-            parser = etree.XMLParser(recover=True)
+            parser = xml_parser(recover=True)
             root = etree.fromstring(xml_bytes, parser=parser)
 
         _strip_namespaces(root)

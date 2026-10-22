@@ -19,7 +19,7 @@ from edgar.display.formatting import accepted_time_text, accession_number_text
 from edgar.exceptions import ValidationError
 from edgar.httprequests import get_with_retry, get_with_retry_no_time_budget
 from edgar.reference.tickers import find_ticker
-from edgar.xmltools import child_text, find_all_elements
+from edgar.xmltools import child_text, find_all_elements, xml_parser
 
 __all__ = [
     'CurrentFilings',
@@ -125,7 +125,7 @@ def _parse_feed(content: bytes):
     """
     if not content.strip():
         return None
-    return etree.fromstring(content, parser=etree.XMLParser(recover=True))
+    return etree.fromstring(content, parser=xml_parser(recover=True))
 
 
 def _check_timeout(timeout: Optional[float]) -> Optional[float]:
