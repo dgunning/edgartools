@@ -420,7 +420,9 @@ def download_filings(filing_date: Optional[str] = None,
                 if accession_numbers and bulk_file_directory.exists():
                     existing_files = {str(f) for f in bulk_file_directory.glob('*.nc')}
 
-                path = _run_coroutine(download_bulk_data(client=None, url=bulk_filing_file, data_directory=data_directory, disable_progress=disable_progress))
+                path = _run_coroutine(download_bulk_data(client=None, url=bulk_filing_file, data_directory=data_directory,
+                                                        disable_progress=disable_progress,
+                                                        preserve_existing_filings=bool(accession_numbers)))
                 log.info('Downloaded feed file to %s', path)
                 total_feed_files_downloaded += 1
 

@@ -64,14 +64,14 @@ def test_success_replaces_the_whole_tree(cache, extension):
     root, target = cache
     assert refresh(root, extension) == target
     assert tree(target) == FILES
-    assert set(root.iterdir()) == {target}
+    assert set(root.iterdir()) == {target, root / ".bulk.lock"}
 
 
 @pytest.mark.fast
 @pytest.mark.parametrize("extension", ["zip", "tar.gz"])
 def test_first_run_creates_the_tree(tmp_path, extension):
     assert tree(refresh(tmp_path, extension)) == FILES
-    assert set(tmp_path.iterdir()) == {tmp_path / "bulk"}
+    assert set(tmp_path.iterdir()) == {tmp_path / "bulk", tmp_path / ".bulk.lock"}
 
 
 @pytest.mark.fast
@@ -110,7 +110,7 @@ def test_failure_leaves_the_cache_as_it_was(tmp_path, extension, existing, failu
         refresh(tmp_path, extension, stream)
     if existing:
         assert tree(target) == {"first.json": b"previous"}
-    assert set(tmp_path.iterdir()) == ({target} if existing else set())
+    assert set(tmp_path.iterdir()) == ({target} if existing else set()) | {tmp_path / ".bulk.lock"}
 
 
 @pytest.mark.fast
@@ -131,7 +131,7 @@ def test_tar_links_and_special_files_are_refused(cache, link_type):
     with pytest.raises(ValueError, match="regular files"):
         refresh(root, "tar.gz", stream)
     assert tree(target) == PREVIOUS
-    assert set(root.iterdir()) == {target}
+    assert set(root.iterdir()) == {target, root / ".bulk.lock"}
 
 
 @pytest.mark.fast
@@ -146,7 +146,7 @@ def test_tar_paths_outside_staging_are_refused(cache, name):
     with pytest.raises((ValueError, tarfile.TarError)):
         refresh(root, "tar.gz", stream)
     assert tree(target) == PREVIOUS
-    assert set(root.iterdir()) == {target}
+    assert set(root.iterdir()) == {target, root / ".bulk.lock"}
 
 
 @pytest.mark.fast
