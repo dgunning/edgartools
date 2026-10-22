@@ -697,10 +697,24 @@ class Financials:
             >>> financials = company.get_financials()
             >>> total_assets = financials.get_total_assets()
         """
+        # Identify the concept, not the filer's prose, as get_total_liabilities
+        # does. The label path alone returned the current-assets subtotal
+        # (gh #1667): when the us-gaap:Assets row is labeled "Assets" or
+        # "Total consolidated assets", neither "Total Assets" pattern matches and
+        # the old r'Assets$' fallback hit "Total current assets", the first
+        # such row. NovaGold's 10-Q for 2026-08-31 returned $349.8M against a
+        # filed total of $573.3M.
+        value = self._get_standardized_concept_by_xbrl(
+            'balance', ['Total Assets'], period_offset)
+        if value is not None:
+            return value
+
+        # Label fallback for a filer whose total is present but unmapped,
+        # anchored at both ends so that no subtotal ("Total current assets",
+        # "Total other assets") can match.
         patterns = [
-            r'Total Assets$',      # Exact match
-            r'^Total Assets',      # Starts with
-            r'Assets$'             # Just "Assets"
+            r'^Total Assets$',
+            r'^Assets$',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
