@@ -18,8 +18,8 @@ import asyncio
 import httpx2
 import pytest
 
-from edgar import configure_http, get_http_config
-from edgar.httpclient import HTTP_MGR, uncached_http_client
+from edgar import configure_http, get_http_config, httpclient
+from edgar.httpclient import uncached_http_client
 
 PROXY = "http://proxy.example.com:3128"
 SEC_URLS = ["https://www.sec.gov/Archives/edgar/data/320193/x.txt", "https://data.sec.gov/submissions/CIK0000320193.json"]
@@ -38,13 +38,13 @@ def _chain(transport):
 
 
 def _sync_chains():
-    with HTTP_MGR.http_client() as client:
+    with httpclient.HTTP_MGR.http_client() as client:
         return [_chain(client._transport_for_url(httpx2.URL(url))) for url in SEC_URLS]
 
 
 def _async_chains():
     async def collect():
-        async with HTTP_MGR.async_http_client() as client:
+        async with httpclient.HTTP_MGR.async_http_client() as client:
             return [_chain(client._transport_for_url(httpx2.URL(url))) for url in SEC_URLS]
     return asyncio.run(collect())
 
@@ -56,17 +56,21 @@ def _uncached_chains():
 
 @pytest.fixture
 def manager(monkeypatch):
-    """Restore the shared manager's proxy, params and client around each test."""
+    """Restore the shared manager's proxy, params and client around each test.
+
+    Read through the module every time: tests/conftest.py swaps in a fresh
+    httpclient.HTTP_MGR, so a reference imported at module load goes stale.
+    """
     monkeypatch.delenv("HTTPS_PROXY", raising=False)
-    saved_proxy, saved_params = HTTP_MGR.proxy, HTTP_MGR.httpx_params.copy()
-    HTTP_MGR.close()
-    HTTP_MGR.proxy = None
-    HTTP_MGR.httpx_params.pop("proxy", None)
+    saved_proxy, saved_params = httpclient.HTTP_MGR.proxy, httpclient.HTTP_MGR.httpx_params.copy()
+    httpclient.HTTP_MGR.close()
+    httpclient.HTTP_MGR.proxy = None
+    httpclient.HTTP_MGR.httpx_params.pop("proxy", None)
     yield
-    HTTP_MGR.close()
-    HTTP_MGR.proxy = saved_proxy
-    HTTP_MGR.httpx_params.clear()
-    HTTP_MGR.httpx_params.update(saved_params)
+    httpclient.HTTP_MGR.close()
+    httpclient.HTTP_MGR.proxy = saved_proxy
+    httpclient.HTTP_MGR.httpx_params.clear()
+    httpclient.HTTP_MGR.httpx_params.update(saved_params)
 
 
 @pytest.mark.parametrize("chains", [_sync_chains, _async_chains, _uncached_chains], ids=["shared", "async", "uncached"])
@@ -75,7 +79,7 @@ def test_a_proxy_changes_only_the_connection_under_the_chain(manager, chains):
     assert all(any("RateLimitingTransport" in name for name in names) for names, _ in direct)
 
     configure_http(proxy=PROXY)
-    HTTP_MGR.close()
+    httpclient.HTTP_MGR.close()
     proxied = chains()
 
     for (direct_names, direct_inner), (proxy_names, proxy_inner) in zip(direct, proxied, strict=True):
@@ -87,10 +91,10 @@ def test_a_proxy_changes_only_the_connection_under_the_chain(manager, chains):
 
 def test_cache_stays_in_front_when_enabled(manager, tmp_path, monkeypatch):
     """With the file cache on (the default outside tests), it stays outermost behind a proxy."""
-    monkeypatch.setattr(HTTP_MGR, "cache_mode", "FileCache")
-    monkeypatch.setattr(HTTP_MGR, "cache_dir", tmp_path)
+    monkeypatch.setattr(httpclient.HTTP_MGR, "cache_mode", "FileCache")
+    monkeypatch.setattr(httpclient.HTTP_MGR, "cache_dir", tmp_path)
     configure_http(proxy=PROXY)
-    HTTP_MGR.close()
+    httpclient.HTTP_MGR.close()
     for names, inner in _sync_chains():
         assert names[:2] == ["CachingTransport", "RateLimitingTransport"], names
         assert type(inner._pool).__name__ == "HTTPProxy"
@@ -98,6 +102,6 @@ def test_cache_stays_in_front_when_enabled(manager, tmp_path, monkeypatch):
 
 def test_the_proxy_is_reported_and_not_a_client_param(manager):
     configure_http(proxy=PROXY)
-    assert "proxy" not in HTTP_MGR.httpx_params
-    assert HTTP_MGR.proxy == PROXY
+    assert "proxy" not in httpclient.HTTP_MGR.httpx_params
+    assert httpclient.HTTP_MGR.proxy == PROXY
     assert get_http_config()["proxy"] == PROXY
