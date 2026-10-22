@@ -11,6 +11,7 @@ from lxml import etree as ET
 
 from edgar.core import log
 from edgar.xbrl.core import NAMESPACES
+from edgar.xmltools import xml_parser
 
 
 class BaseParser:
@@ -31,7 +32,7 @@ class BaseParser:
         Returns:
             parsed XML root element
         """
-        parser = ET.XMLParser(remove_blank_text=True, recover=True)
+        parser = xml_parser(remove_blank_text=True, recover=True)
 
         # Convert to bytes for safer parsing if needed
         if isinstance(content, str):

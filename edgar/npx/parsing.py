@@ -5,6 +5,8 @@ from typing import Any, Dict, Generator, Optional
 
 from lxml import etree as ET  # type: ignore[import-untyped]
 
+from edgar.xmltools import add_safe_resolver, xml_parser
+
 from .models import (
     ClassInfo,
     IncludedManager,
@@ -28,7 +30,7 @@ class BaseExtractor:
         self.xml_bytes = xml_bytes
         try:
             # Use a recovering parser for robustness against minor XML issues.
-            parser = ET.XMLParser(recover=True)
+            parser = xml_parser(recover=True)
             self.root: Optional[ET._Element] = ET.fromstring(xml_bytes, parser=parser)
             if self.root is None:
                 # This might occur if the XML is severely malformed beyond recovery.
@@ -595,12 +597,12 @@ class ProxyVoteTableExtractor(BaseExtractor):
         """
         xml_file_like = io.BytesIO(self.xml_bytes)
 
-        context = ET.iterparse(
+        context = add_safe_resolver(ET.iterparse(
             xml_file_like,
             events=("end",),
             tag=self.proxy_table_iter_tag,
             recover=True,
-        )
+        ))
 
         for _, element in context:
             try:

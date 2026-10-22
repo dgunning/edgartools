@@ -22,6 +22,7 @@ from edgar.thirteenf.units import (  # noqa: F401
     _schema_implies_dollars,
     resolve_value_unit,
 )
+from edgar.xmltools import xml_parser
 
 __all__ = [
     'FilingManager',
@@ -698,7 +699,7 @@ class ThirteenF:
                 return None
             root = etree.fromstring(
                 primary_xml.strip().encode('utf-8'),
-                parser=etree.XMLParser(recover=True),
+                parser=xml_parser(recover=True),
             )
             for el in root.iter():
                 tag = el.tag.rsplit('}', 1)[-1] if isinstance(el.tag, str) else ''

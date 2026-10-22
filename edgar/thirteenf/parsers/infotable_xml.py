@@ -4,6 +4,7 @@ import pandas as pd
 from lxml import etree
 
 from edgar.reference import cusip_ticker_mapping
+from edgar.xmltools import xml_parser
 
 __all__ = ['parse_infotable_xml']
 
@@ -27,10 +28,10 @@ def parse_infotable_xml(infotable_xml: str) -> pd.DataFrame:
     xml_content = infotable_xml.strip()
 
     try:
-        root = etree.fromstring(xml_content.encode('utf-8'))
+        root = etree.fromstring(xml_content.encode('utf-8'), parser=xml_parser())
     except etree.XMLSyntaxError:
         # Fallback: Try to parse with more lenient parser
-        parser = etree.XMLParser(recover=True)
+        parser = xml_parser(recover=True)
         root = etree.fromstring(xml_content.encode('utf-8'), parser=parser)
 
     rows = []
