@@ -14,7 +14,6 @@ of "emSign ECC Root CA - G3" in certifi 2026.07.22's cacert.pem; certifi 2026.10
 import hashlib
 import re
 import ssl
-import tomllib
 from pathlib import Path
 
 import certifi
@@ -24,8 +23,8 @@ PEM = re.compile(r"-----BEGIN CERTIFICATE-----.+?-----END CERTIFICATE-----", re.
 
 
 def test_pyproject_floors_certifi_at_the_fixed_release():
-    deps = tomllib.loads(Path("pyproject.toml").read_text())["project"]["dependencies"]
-    assert "certifi>=2026.10.19" in deps
+    # A regex, not tomllib: 5.x still supports Python 3.10, where tomllib does not exist.
+    assert re.search(r'^\s*"certifi>=2026\.10\.19"', Path("pyproject.toml").read_text(), re.M)
 
 
 def test_the_installed_bundle_does_not_hold_the_compromised_root():
