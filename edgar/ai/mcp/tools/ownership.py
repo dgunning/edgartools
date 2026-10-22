@@ -22,6 +22,11 @@ from edgar.ai.mcp.tools.base import (
 
 logger = logging.getLogger(__name__)
 
+# Upper bound on `limit`, matching edgar_monitor and edgar_screen. The insider
+# path parses up to 2 * limit Form 4 filings, so an unbounded limit would let
+# one call fetch every Form 4 a company has ever filed.
+_MAX_LIMIT = 100
+
 
 @tool(
     name="edgar_ownership",
@@ -48,8 +53,10 @@ Examples:
         },
         "limit": {
             "type": "integer",
-            "description": "Max results (default 20)",
-            "default": 20
+            "description": "Max results (default 20, max 100)",
+            "default": 20,
+            "minimum": 1,
+            "maximum": _MAX_LIMIT
         }
     },
     required=["identifier", "analysis_type"]
@@ -66,6 +73,7 @@ async def edgar_ownership(
     Routes to appropriate analysis based on analysis_type.
     """
     try:
+        limit = min(max(int(limit), 1), _MAX_LIMIT)
         if analysis_type == "insiders":
             return await _get_insider_transactions(identifier, days, limit)
         elif analysis_type == "fund_portfolio":

@@ -328,6 +328,12 @@ _DURATION_UNITS = {'year': 'Y', 'month': 'M', 'week': 'W', 'day': 'D',
                    'hour': 'H', 'minute': 'M', 'second': 'S'}
 _DURATION_ORDER = ('Y', 'M', 'W', 'D', 'H', 'MIN', 'S')
 
+# Real durations are a few words ("two years and six months" is 24 characters).
+# The phrase regex below is quadratic in its input, so 24 KB of filer-supplied
+# text took 7 s; anything longer than this cannot be a duration and is refused
+# before matching (attack-surface audit 2026-10-22).
+_DUR_WORDS_MAX_LEN = 200
+
 
 def _dur_words_en(value: str) -> str:
     """
@@ -341,6 +347,9 @@ def _dur_words_en(value: str) -> str:
         text = text.replace(dash, '-')
     if not text:
         raise _fail(value, 'an English duration')
+    if len(text) > _DUR_WORDS_MAX_LEN:
+        raise _fail(text[:40] + '...',
+                    f'an English duration (longer than {_DUR_WORDS_MAX_LEN} characters)')
     text = re.sub(r"'s\b|\bs\b", '', text)
     parts = re.findall(r'([\w\s]+?)[\s-]+(years?|months?|weeks?|days?|hours?|minutes?|seconds?)\b', text)
     if not parts:
