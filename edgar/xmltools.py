@@ -183,9 +183,11 @@ def xml_parser(**options) -> etree.XMLParser:
     """An lxml XMLParser that never reads a resource the document names.
 
     Filing XML is written by the filer. lxml's defaults block network access and
-    external general entities, but libxml2 still loads an external *parameter*
-    entity (``<!ENTITY % p SYSTEM "file:///...">`` in the internal subset) from the
-    local filesystem, with or without ``recover``. The resolver answers every such
+    external general entities, but before lxml 6.1.3 (LP#2165901) they still loaded
+    an external *parameter* entity (``<!ENTITY % p SYSTEM "file:///...">`` in the
+    internal subset) from the local filesystem, with or without ``recover``. The
+    floor is now 6.1.3; this parser keeps the guarantee independent of whichever
+    lxml is installed. The resolver answers every such
     lookup with an empty document, so nothing outside the bytes being parsed is
     read. Entities the document defines itself, and the predefined and character
     entities, still expand, so ordinary output is unchanged.

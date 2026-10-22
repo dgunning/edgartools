@@ -2,10 +2,12 @@
 
 Bead: edgartools-o6y3i (attack-surface audit, 2026-10-22).
 
-lxml's defaults block network access and external general entities, but libxml2
-still loads an external parameter entity named in a document's internal DTD subset
-from the local filesystem, in strict and recovering mode alike. Filing XML is
-written by the filer, so every parse now goes through ``edgar.xmltools.xml_parser``
+lxml's defaults block network access and external general entities, but lxml
+6.1.0-6.1.2 (and every earlier release) still load an external parameter entity
+named in a document's internal DTD subset from the local filesystem, in strict and
+recovering mode alike; lxml 6.1.3 fixed that upstream (LP#2165901). Filing XML is
+written by the filer, so the lxml floor is now 6.1.3 and, independently of the
+installed lxml, every parse goes through ``edgar.xmltools.xml_parser``
 (and ``add_safe_resolver`` for iterparse), whose resolver answers each external
 lookup with an empty document. Entities the document defines itself, and the
 predefined and character entities, still expand, so ordinary output is unchanged.
@@ -35,11 +37,11 @@ def hostile(tmp_path):
     return build
 
 
-def test_lxml_alone_reads_the_file(hostile):
-    """The premise: without the resolver, libxml2 loads the parameter entity."""
-    doc = hostile("<ownershipDocument><issuerName>&secret;</issuerName></ownershipDocument>")
-    root = etree.fromstring(doc.encode(), parser=etree.XMLParser(recover=True))
-    assert root.findtext(".//issuerName") == MARKER
+def test_lxml_floor_has_the_upstream_fix():
+    """lxml 6.1.3 stopped loading external parameter entities by default; the floor must not fall below it."""
+    pyproject = (EDGAR.parent / "pyproject.toml").read_text(encoding="utf-8")
+    floor = re.search(r'"lxml>=([0-9.]+)"', pyproject).group(1)
+    assert tuple(int(part) for part in floor.split(".")) >= (6, 1, 3)
 
 
 def test_parse_xml_does_not(hostile):
@@ -51,8 +53,9 @@ def test_parse_xml_does_not(hostile):
 
 def test_strict_xml_parser_rejects_instead_of_reading(hostile):
     doc = hostile("<ownershipDocument><issuerName>&secret;</issuerName></ownershipDocument>")
-    with pytest.raises(etree.XMLSyntaxError, match="secret"):
+    with pytest.raises(etree.XMLSyntaxError) as raised:
         etree.fromstring(doc.encode(), parser=xml_parser())
+    assert MARKER not in str(raised.value)
 
 
 def test_iterparse_with_the_resolver_does_not(hostile):
