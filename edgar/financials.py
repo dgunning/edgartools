@@ -746,14 +746,35 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
         Returns:
-            Stockholders' equity value if found, None otherwise
+            Stockholders' equity attributable to the parent if found; equity
+            including noncontrolling interest when that is the only total
+            filed; None otherwise. A deficit is negative.
         """
+        # Identify the concept, not the filer's prose, as get_total_liabilities
+        # does. The label path alone returned the liabilities-and-equity total
+        # (gh #1659): r'Total.*Stockholders.*Equity' matches "Total liabilities
+        # and stockholders' equity (deficit)", so American Airlines' FY2025
+        # 10-K returned $61.774B -- its total assets -- for a $3.727B deficit.
+        # NovaGold labels its us-gaap:StockholdersEquity row "Equity,
+        # Attributable to Parent", which no pattern matched, so it got None.
+        # The parent-attributable total comes first; the NCI-inclusive total is
+        # the answer only when the filing has no parent total (#1442).
+        value = self._get_standardized_concept_by_xbrl(
+            'balance',
+            ["Total Stockholders' Equity",
+             'us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest'],
+            period_offset)
+        if value is not None:
+            return value
+
+        # Label fallback for a filer whose total is present but unmapped.
+        # Anchored at the start and excluding any caption that also names
+        # liabilities, so the combined total can never match.
         patterns = [
-            r'Total.*Stockholders.*Equity',
-            r'Stockholders.*Equity$',
-            r'Shareholders.*Equity',
-            r'Total.*Equity$',
-            r'^Equity$'
+            r'^Total (?!.*Liabilit)(?!.*Noncontrolling).*(?:Stockholders|Shareholders).*(?:Equity|Deficit)',
+            r'^(?:Stockholders|Shareholders)\W*\s(?:Equity|Deficit)$',
+            r'^Total (?!.*Liabilit).*Equity$',
+            r'^Equity$',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
