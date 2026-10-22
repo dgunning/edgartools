@@ -73,7 +73,7 @@ def setup_edgar_identity():
             return
 
         set_identity(identity)
-        logger.info(f"SEC identity configured: {identity}")
+        logger.info("SEC identity configured")
 
     except Exception as e:
         logger.error(f"Error setting up EDGAR identity: {e}")
@@ -590,7 +590,7 @@ def test_server():
     # Test 4: Identity configuration check
     identity = os.environ.get('EDGAR_IDENTITY')
     if identity:
-        print(f"✓ EDGAR_IDENTITY configured: {identity}")
+        print("✓ EDGAR_IDENTITY configured")
     else:
         print("⚠ EDGAR_IDENTITY not set (recommended)")
         print("  Set with: export EDGAR_IDENTITY=\"Your Name your@email.com\"")
