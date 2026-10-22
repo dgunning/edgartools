@@ -46,6 +46,42 @@ def tree(path):
             for p in sorted(path.rglob("*")) if p.is_file()}
 
 
+@pytest.mark.fast
+def test_sweep_preserves_linked_stage(tmp_path):
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    (outside / "keep").write_bytes(b"outside")
+    linked = tmp_path / ".bulk-linked"
+    try:
+        linked.symlink_to(outside, target_is_directory=True)
+    except OSError as error:
+        pytest.skip(f"directory symlinks unavailable: {error}")
+    refresh(tmp_path, "zip")
+    assert linked.is_symlink()
+    assert (outside / "keep").read_bytes() == b"outside"
+
+
+@pytest.mark.fast
+def test_preservation_does_not_follow_existing_filing_link(tmp_path):
+    target = tmp_path / "bulk"
+    target.mkdir()
+    outside = tmp_path / "outside.nc"
+    outside.write_bytes(b"outside")
+    try:
+        (target / "old.nc").symlink_to(outside)
+    except OSError as error:
+        pytest.skip(f"file symlinks unavailable: {error}")
+
+    async def stream(url, **kwargs):
+        write_archive(kwargs["path"] / "bulk.zip")
+
+    with patch.object(httprequests, "stream_file", stream), pytest.raises(ValueError, match="regular files"):
+        asyncio.run(download_bulk_data("https://example.invalid/bulk.zip", tmp_path,
+                                      disable_progress=True, preserve_existing_filings=True))
+    assert outside.read_bytes() == b"outside"
+    assert (target / "old.nc").is_symlink()
+
+
 @pytest.fixture
 def cache(tmp_path):
     target = tmp_path / "bulk"

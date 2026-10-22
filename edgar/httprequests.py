@@ -1,3 +1,4 @@
+import errno
 import gzip
 import inspect
 import logging
@@ -6,6 +7,7 @@ import shutil
 import stat
 import tarfile
 import tempfile
+import time
 import uuid
 import zipfile
 from contextlib import contextmanager
@@ -1468,12 +1470,21 @@ def _bulk_file_lock(path: Path, blocking: bool = True):
         try:
             if os.name == "nt":
                 import msvcrt
-                msvcrt.locking(handle.fileno(), msvcrt.LK_LOCK if blocking else msvcrt.LK_NBLCK, 1)
+                # LK_LOCK stops after ten attempts. Match flock's blocking
+                # semantics by retrying contention, while propagating other errors.
+                while True:
+                    try:
+                        msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+                        break
+                    except OSError as error:
+                        if not blocking or error.errno != errno.EACCES:
+                            raise
+                        time.sleep(0.1)
             else:
                 import fcntl
                 fcntl.flock(handle, fcntl.LOCK_EX | (0 if blocking else fcntl.LOCK_NB))
-        except OSError:
-            if blocking:
+        except OSError as error:
+            if blocking or error.errno not in (errno.EACCES, errno.EAGAIN):
                 raise
             yield False
             return
@@ -1519,10 +1530,17 @@ def _bulk_staging(directory: Path, local_dir: str):
     with _bulk_file_lock(coordinator):
         _sweep_bulk_staging(directory, local_dir)
         staging = Path(tempfile.mkdtemp(prefix=f".{local_dir}-", dir=directory))
-        marker = staging / _BULK_STAGE_MARKER
-        marker.write_bytes(_BULK_STAGE_OWNER)
-        lease = _bulk_file_lock(marker)
-        lease.__enter__()
+        try:
+            marker = staging / _BULK_STAGE_MARKER
+            marker.write_bytes(_BULK_STAGE_OWNER)
+            lease = _bulk_file_lock(marker)
+            lease.__enter__()
+        except BaseException:
+            try:
+                shutil.rmtree(staging)
+            except OSError as error:
+                logger.warning("Failed to remove uninitialised bulk staging %s: %s", staging, error)
+            raise
     try:
         yield staging
     finally:

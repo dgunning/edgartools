@@ -4,10 +4,12 @@ Maintainer-reported archive recovery and incremental feed regressions.
 Fabricated archives only; no requests reach the SEC.
 """
 import asyncio
+import errno
 import gzip
 import os
 import subprocess
 import sys
+from contextlib import contextmanager
 from datetime import date
 from pathlib import Path
 from unittest.mock import patch
@@ -45,7 +47,7 @@ def test_two_filtered_downloads_keep_both_filings(tmp_path, compress):
         assert (gzip.decompress(path.read_bytes()) if compress else path.read_bytes()) == content
 
 
-@pytest.mark.parametrize("failure", [OSError, KeyboardInterrupt])
+@pytest.mark.parametrize("failure", [OSError, KeyboardInterrupt, asyncio.CancelledError])
 def test_failed_publication_and_restore_retain_recovery(tmp_path, caplog, failure):
     target = tmp_path / "bulk"
     target.mkdir()
@@ -87,37 +89,79 @@ with _bulk_staging(Path(sys.argv[1]), 'bulk') as stage:
     assert not abandoned[0].exists()
 
 
-def test_sweep_preserves_active_unknown_and_symlink_stages(tmp_path):
+def test_sweep_preserves_active_and_unknown_stages(tmp_path):
     unknown = tmp_path / ".bulk-user-data"
     unknown.mkdir()
     (unknown / "keep").write_bytes(b"unknown ownership")
-    outside = tmp_path / "outside"
-    outside.mkdir()
-    (outside / "keep").write_bytes(b"outside")
-    linked = tmp_path / ".bulk-linked"
-    linked.symlink_to(outside, target_is_directory=True)
     with httprequests._bulk_staging(tmp_path, "bulk") as active:
         (active / "partial").write_bytes(b"active download")
         refresh(tmp_path, "zip")
         assert (active / "partial").read_bytes() == b"active download"
         assert (unknown / "keep").read_bytes() == b"unknown ownership"
-        assert linked.is_symlink()
-        assert (outside / "keep").read_bytes() == b"outside"
 
 
-def test_preservation_does_not_follow_existing_filing_link(tmp_path):
-    target = tmp_path / "bulk"
-    target.mkdir()
-    outside = tmp_path / "outside.nc"
-    outside.write_bytes(b"outside")
-    (target / "old.nc").symlink_to(outside)
+@pytest.mark.parametrize("setup_step", ["marker", "lease"])
+def test_failed_stage_setup_leaves_no_orphan(tmp_path, setup_step):
+    write = Path.write_bytes
+    lock = httprequests._bulk_file_lock
 
-    async def stream(url, **kwargs):
-        write_archive(kwargs["path"] / "bulk.zip")
+    def fail_marker(path, content):
+        if path.name == httprequests._BULK_STAGE_MARKER:
+            raise OSError("synthetic marker failure")
+        return write(path, content)
 
-    with patch.object(httprequests, "stream_file", stream), pytest.raises(ValueError, match="regular files"):
-        asyncio.run(httprequests.download_bulk_data.__wrapped__("https://example.invalid/bulk.zip", tmp_path,
-                                                              disable_progress=True,
-                                                              preserve_existing_filings=True))
-    assert outside.read_bytes() == b"outside"
-    assert (target / "old.nc").is_symlink()
+    @contextmanager
+    def fail_lease(path, blocking=True):
+        if path.name == httprequests._BULK_STAGE_MARKER:
+            raise OSError("synthetic lease failure")
+        with lock(path, blocking) as acquired:
+            yield acquired
+
+    target = "write_bytes" if setup_step == "marker" else "_bulk_file_lock"
+    owner = Path if setup_step == "marker" else httprequests
+    replacement = fail_marker if setup_step == "marker" else fail_lease
+    with patch.object(owner, target, replacement), pytest.raises(OSError, match="synthetic"):
+        with httprequests._bulk_staging(tmp_path, "bulk"):
+            pytest.fail("failed setup must not yield a stage")
+    assert list(tmp_path.glob(".bulk-*")) == []
+
+
+@pytest.mark.parametrize("blocking", [False, True])
+def test_lock_errors_other_than_contention_propagate(tmp_path, blocking):
+    module = __import__("msvcrt" if os.name == "nt" else "fcntl")
+    operation = "locking" if os.name == "nt" else "flock"
+    with patch.object(module, operation, side_effect=OSError(errno.EBADF, "synthetic invalid descriptor")), \
+            pytest.raises(OSError, match="invalid descriptor"):
+        with httprequests._bulk_file_lock(tmp_path / ".bulk.lock", blocking=blocking):
+            pytest.fail("non-contention errors must propagate")
+
+
+def test_coordinator_waits_through_long_contention(tmp_path):
+    program = """
+import sys
+from pathlib import Path
+from edgar.httprequests import _bulk_file_lock
+print('waiting', flush=True)
+with _bulk_file_lock(Path(sys.argv[1])):
+    print('acquired', flush=True)
+"""
+    with httprequests._bulk_file_lock(tmp_path / ".bulk.lock"):
+        waiter = subprocess.Popen([sys.executable, "-c", program, str(tmp_path / ".bulk.lock")],  # noqa: S603
+                                  stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        try:
+            assert waiter.stdout.readline().strip() == "waiting"
+            with pytest.raises(subprocess.TimeoutExpired):
+                waiter.communicate(timeout=12)
+            assert waiter.poll() is None
+        except BaseException:
+            waiter.kill()
+            waiter.communicate(timeout=10)
+            raise
+    try:
+        output, error = waiter.communicate(timeout=10)
+        assert waiter.returncode == 0, error
+        assert output.strip() == "acquired"
+    finally:
+        if waiter.poll() is None:
+            waiter.kill()
+            waiter.communicate(timeout=10)
