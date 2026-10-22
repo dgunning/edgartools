@@ -5,35 +5,35 @@ This module tests the AI-optimized context generation methods that enable
 AI agents to discover and navigate the EdgarTools API independently.
 """
 import pytest
-from edgar import Company, get_filings, get_obj_info
+from edgar import Company, get_filings, _get_obj_info
 
 
 class TestGetObjInfo:
-    """Test the get_obj_info() helper function."""
+    """Test the _get_obj_info() helper function."""
 
     def test_form_c_has_obj(self):
         """Form C should have FormC object."""
-        has_obj, obj_type, description = get_obj_info('C')
+        has_obj, obj_type, description = _get_obj_info('C')
         assert has_obj is True
         assert obj_type == 'FormC'
         assert 'crowdfunding' in description.lower()
 
     def test_form_c_amendment_has_obj(self):
         """Form C/A should also have FormC object."""
-        has_obj, obj_type, description = get_obj_info('C/A')
+        has_obj, obj_type, description = _get_obj_info('C/A')
         assert has_obj is True
         assert obj_type == 'FormC'
 
     def test_form_10k_has_obj(self):
         """Form 10-K should have TenK object."""
-        has_obj, obj_type, description = get_obj_info('10-K')
+        has_obj, obj_type, description = _get_obj_info('10-K')
         assert has_obj is True
         assert obj_type == 'TenK'
         assert 'annual' in description.lower()
 
     def test_unknown_form_no_obj(self):
         """Unknown form types should return False."""
-        has_obj, obj_type, description = get_obj_info('UNKNOWN-FORM')
+        has_obj, obj_type, description = _get_obj_info('UNKNOWN-FORM')
         assert has_obj is False
         assert obj_type is None
         assert description is None
@@ -42,7 +42,7 @@ class TestGetObjInfo:
         """All crowdfunding forms should map to FormC."""
         crowdfunding_forms = ['C', 'C-U', 'C-AR', 'C-TR']
         for form in crowdfunding_forms:
-            has_obj, obj_type, _ = get_obj_info(form)
+            has_obj, obj_type, _ = _get_obj_info(form)
             assert has_obj is True, f"Form {form} should have obj"
             assert obj_type == 'FormC', f"Form {form} should map to FormC"
 

@@ -60,7 +60,7 @@ _ACCESSION_RE = re.compile(r"^\d{10}-\d{2}-\d{6}$")
 
 def _dev_corpus_exclusions():
     """(ciks, accessions) of every filing the phase B rules were developed on."""
-    from edgar import get_by_accession_number_enriched
+    from edgar._filings import get_by_accession_number_enriched
     from edgar.reference.tickers import find_cik
 
     ciks, accessions = set(), set()
@@ -266,7 +266,7 @@ def cached_html(accession):
 
 
 def cmd_fetch():
-    from edgar import get_by_accession_number_enriched
+    from edgar._filings import get_by_accession_number_enriched
 
     CACHE.mkdir(parents=True, exist_ok=True)
     for f in load()["filings"]:

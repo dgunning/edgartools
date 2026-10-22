@@ -42,12 +42,12 @@ set_identity("John Doe john.doe@company.com")
 
 ### Performance and Access Control
 
-#### EDGAR_ACCESS_MODE (deprecated, removed in 6.0)
-`EDGAR_ACCESS_MODE` and the `NORMAL` / `CAUTION` / `CRAWL` modes are deprecated and
-have no effect. They advertised a timeout, connection-limit and retry policy that
-was never wired into the HTTP client, so setting a mode has never changed how
-edgartools talks to SEC. Setting the variable, or importing one of the mode
-objects, now raises a `DeprecationWarning`.
+#### EDGAR_ACCESS_MODE (removed in 6.0)
+`EDGAR_ACCESS_MODE` and the `NORMAL` / `CAUTION` / `CRAWL` modes are removed. They
+advertised a timeout, connection-limit and retry policy that was never wired into
+the HTTP client, so setting a mode never changed how edgartools talks to SEC. The
+variable is ignored if it is still set, and importing one of the mode objects
+raises `ImportError`.
 
 Use the two settings that do work:
 
@@ -169,12 +169,12 @@ configure_http(http2=False)  # force HTTP/1.1 (default)
 ```
 
 ### HTTP Rate Limiting
-Rate limiting is implemented in `httpclient_ratelimiting`. 
+Requests to SEC are throttled by a shared in-memory limiter built with [pyrate_limiter](https://pypi.org/project/pyrate-limiter/).
 
-The default rate limit is 9 requests per second. SEC has a maximum of 10 requests per second. To change the rate limit, call: `httpclient.update_rate_limiter(requests_per_second: int)`.
+The default rate limit is 9 requests per second. SEC has a maximum of 10 requests per second. To change the rate limit, set the `EDGAR_RATE_LIMIT_PER_SEC` environment variable before `edgar` is first imported (see [below](#edgar_rate_limit_per_sec)). The limiter is built once at import time, so changing the variable afterwards has no effect.
 
-### Advanced: Distributed Rate Limiting
-Distributed Rate Limiting: rate limiting is implemented using [pyrate_limiter](https://pypi.org/project/pyrate-limiter/). To use a distributed rate limiter, such as for multiprocessing, define an httpclient._RATE_LIMITER. See the pyrate_limiter documentation and examples for details.
+### Multiple processes
+The rate limiter lives in memory inside each Python process, so each process gets its own budget of `EDGAR_RATE_LIMIT_PER_SEC`. If you run several processes at once, set the variable so that the combined rate stays under SEC's limit of 10 requests per second (for example `2` for each of four processes).
 
 ## Enterprise Configuration
 
@@ -190,6 +190,8 @@ export EDGAR_RATE_LIMIT_PER_SEC="9"
 ```
 
 **Default:** `9` requests/second (SEC's official limit)
+
+**When it is read:** once, when `edgar` is first imported. Set it in your shell or in `os.environ` before the first `import edgar`; changing it later in the same process has no effect.
 
 **Typical Values:**
 - `9` - SEC's standard limit (default, recommended for official SEC servers)
@@ -242,10 +244,12 @@ export EDGAR_RATE_LIMIT_PER_SEC="5"
 
 **Python Alternative:**
 ```python
-from edgar import httpclient
+import os
 
-# Update rate limiter programmatically
-httpclient.update_rate_limiter(requests_per_second=20)
+# Must run before edgar is first imported
+os.environ["EDGAR_RATE_LIMIT_PER_SEC"] = "5"
+
+import edgar
 ```
 
 **⚠️ Important:** Only use rate limits higher than 10 req/sec with custom mirrors or when authorized by SEC. Exceeding SEC's 10 req/sec limit may result in IP blocking.
@@ -511,8 +515,9 @@ print(f"Actual request rate: {actual_rate:.2f} req/sec")
 # If custom mirror uses self-signed certificates
 export EDGAR_VERIFY_SSL="false"
 
-# Or configure SSL certificate bundle
-export REQUESTS_CA_BUNDLE="/path/to/company-ca-bundle.crt"
+# Or trust the mirror's CA: SSL_CERT_FILE replaces the OS store, so the bundle
+# needs the public roots too (edgartools does not read REQUESTS_CA_BUNDLE)
+export SSL_CERT_FILE="/path/to/company-ca-bundle.pem"
 ```
 
 ### Best Practices for Enterprise Deployment

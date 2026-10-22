@@ -34,11 +34,14 @@ _PART_HEADER = re.compile(r'^\s*PART\s+(I|II|III|IV|V)\b', re.IGNORECASE)
 _SIGNATURES_HEADER = re.compile(r'^\s*SIGNATURES?\s*$', re.IGNORECASE)
 
 # The sentence Form 8-K's General Instructions prescribe to open the signature
-# block, matched on whitespace-normalized paragraph text. Anchored at the start
-# and required to reach "caused this report to be signed", so a paragraph that
-# merely cites the Exchange Act is not a boundary. Strategy 5c.
+# block, matched on whitespace-normalized paragraph text. Required to reach
+# "caused this report to be signed", so a paragraph that merely cites the
+# Exchange Act is not a boundary. Strategy 5c.
+# A plain-text filing with no <TABLE> is split at blank lines (#1534), so when
+# the source has no blank line between the SIGNATURE heading and this sentence
+# they arrive as one paragraph; allow that label to lead it.
 _SIGNATURE_STATEMENT = re.compile(
-    r'^Pursuant to the requirements of the Securities Exchange Act of 1934,?'
+    r'^(?:SIGNATURES?\s+)?Pursuant to the requirements of the Securities Exchange Act of 1934,?'
     r'.{0,80}?caused this (?:report|amendment) to be signed',
     re.IGNORECASE,
 )

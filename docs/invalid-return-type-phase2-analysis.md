@@ -127,7 +127,7 @@ def income_statement(self) -> Optional[Statement]:
     return self.xbs.statements.income_statement()  # Returns Unknown | StitchedStatement | None
 
 def cashflow_statement(self) -> Optional[Statement]:
-    return self.xbs.statements.cashflow_statement()  # Returns Unknown | StitchedStatement | None
+    return self.xbs.statements.cash_flow_statement()  # Returns Unknown | StitchedStatement | None
 ```
 
 **Issue**: Returns `StitchedStatement` but annotation says `Statement`

@@ -341,7 +341,7 @@ audit_sections = filing.search("audit fees")
 html_content = filing.html()
 
 # Or access the filing document directly
-doc = filing.document()
+doc = filing.document  # an Attachment; doc.text() returns its text
 ```
 
 > **Note**: Board composition, director bios, beneficial ownership tables, and shareholder proposals are available in the filing HTML but require custom parsing. Structured `Director` and `Proposal` objects are planned for a future release. See the [HTML-Based Data](#html-based-data-future-features) section below for details on what data is available and extraction patterns.

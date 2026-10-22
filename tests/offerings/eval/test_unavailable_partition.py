@@ -47,8 +47,8 @@ class TestTransportFailuresAreRecognised:
 
     def test_edgar_fetch_failures_matched_by_name(self):
         """Matched by name so this does not break when they are moved."""
-        for name in ("SECFilingNotFoundError", "SECHTMLResponseError",
-                     "IdentityNotSetException"):
+        for name in ("FilingNotFoundError", "SECHTMLResponseError",
+                     "IdentityNotSetError"):
             assert _is_transport_failure(type(name, (Exception,), {})("boom")), name
 
     def test_an_efts_outage_is_unavailable(self):

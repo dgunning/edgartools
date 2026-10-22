@@ -18,7 +18,7 @@ from edgar.offerings.prospectus import (
     CoverPageData,
     _MIN_PLAUSIBLE_DEAL_SIZE,
 )
-from edgar.offerings._424b_classifier import (
+from edgar.offerings.prospectus._424b_classifier import (
     classify_offering_type,
     _classify_from_security_type,
 )

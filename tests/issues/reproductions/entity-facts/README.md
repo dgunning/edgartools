@@ -8,7 +8,7 @@ The SEC Facts API provides structured, pre-processed financial data accessed thr
 
 - `Company.income_statement()`
 - `Company.balance_sheet()`  
-- `Company.cash_flow()`
+- `Company.cash_flow_statement()`
 - `Company.financials`
 
 ## Files In This Directory

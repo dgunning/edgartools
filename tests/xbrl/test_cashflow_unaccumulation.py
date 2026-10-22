@@ -480,7 +480,7 @@ class TestCashflowUnaccumulationRealSEC:
         op_concept = 'NetCashProvidedByUsedInOperatingActivities'
 
         # Baseline (YTD mode) - confirm we read the SEC-reported values correctly
-        ytd_df = xbrls.statements.cashflow_statement(discrete_quarters=False).to_dataframe()
+        ytd_df = xbrls.statements.cash_flow_statement(discrete_quarters=False).to_dataframe()
         ytd_op = ytd_df[ytd_df['concept'].str.contains(op_concept, na=False)]
         assert not ytd_op.empty, f"{op_concept} not found in stitched cashflow"
 
@@ -496,7 +496,7 @@ class TestCashflowUnaccumulationRealSEC:
         )
 
         # Unaccumulated (discrete mode) - Q2 should now hold the discrete 3-month value
-        discrete_df = xbrls.statements.cashflow_statement(discrete_quarters=True).to_dataframe()
+        discrete_df = xbrls.statements.cash_flow_statement(discrete_quarters=True).to_dataframe()
         disc_op = discrete_df[discrete_df['concept'].str.contains(op_concept, na=False)]
         assert not disc_op.empty
 

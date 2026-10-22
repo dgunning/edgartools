@@ -73,7 +73,7 @@ Phase 1 of the Entity Facts API revamp has been **FULLY COMPLETED** with signifi
 - ✅ **Seamless integration** with existing Company class
 - ✅ Added `company.facts` property for direct access
 - ✅ Added convenience properties: `company.public_float`, `company.shares_outstanding`
-- ✅ Added financial statement methods: `company.income_statement()`, `company.balance_sheet()`, `company.cash_flow()`
+- ✅ Added financial statement methods: `company.income_statement()`, `company.balance_sheet()`, `company.cash_flow_statement()`
 - ✅ **Graceful error handling** - methods return `None` instead of raising exceptions
 - ✅ **No user experience jarring** - smooth fallback for companies without facts
 

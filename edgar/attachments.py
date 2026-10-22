@@ -1,5 +1,6 @@
 import ast
 import http.server
+import logging
 import os
 import re
 import signal
@@ -31,11 +32,13 @@ from rich.text import Text
 
 from edgar.config import SEC_BASE_URL
 from edgar.documents.utils.html_utils import create_lxml_parser
-from edgar.exceptions import AttachmentNotFoundError
+from edgar.exceptions import AttachmentNotFoundError, ValidationError
 from edgar.core import binary_extensions, has_html_content, text_extensions
 from edgar.httpclient import async_http_client
 from edgar.httprequests import download_file, download_file_async, get_with_retry
 from edgar.richtools import print_rich, print_xml, repr_rich
+
+log = logging.getLogger(__name__)
 
 xbrl_document_types = ['XBRL INSTANCE DOCUMENT', 'XBRL INSTANCE FILE', 'EXTRACTED XBRL INSTANCE DOCUMENT']
 
@@ -338,6 +341,47 @@ class FilerInfo(BaseModel):
         return repr_rich(self.__rich__())
 
 
+def safe_attachment_filename(name: Optional[str]) -> str:
+    """Reduce a filer-chosen attachment name to a bare file name.
+
+    Attachment names come from the filing itself, so a name such as
+    ``../x.htm`` or ``/etc/x`` must not choose where a download lands. Every
+    directory part is dropped (both ``/`` and ``\\`` count as separators);
+    an ordinary name like ``aapl-20240928.htm`` comes back unchanged. A name
+    with nothing usable left raises ``ValidationError``.
+    """
+    raw = "" if name is None else str(name)
+    base = raw.replace("\\", "/").rsplit("/", 1)[-1]
+    if base.strip() in ("", ".", "..") or "\x00" in base:
+        raise ValidationError(
+            f"Attachment name {raw!r} is not a usable file name",
+            parameter="document",
+            invalid_value=raw,
+        )
+    if base != raw:
+        log.warning("Attachment name %r contains a path; saving it as %r", raw, base)
+    return base
+
+
+def safe_attachment_path(directory: Union[str, Path], name: Optional[str]) -> Path:
+    """The path inside ``directory`` where the attachment ``name`` is saved.
+
+    Raises ``ValidationError`` if the resulting path would fall outside
+    ``directory`` (for example a Windows drive-relative name like ``C:x``).
+    """
+    directory = Path(directory)
+    base = safe_attachment_filename(name)
+    file_path = directory / base
+    resolved_dir = directory.resolve()
+    if file_path.resolve().parent != resolved_dir:
+        raise ValidationError(
+            f"Attachment name {name!r} would be saved outside {directory}",
+            parameter="document",
+            invalid_value=name,
+        )
+    return file_path
+
+
 class Attachment:
     """
     A class to represent an attachment in an SEC filing
@@ -480,7 +524,7 @@ class Attachment:
 
         # Determine if the path is a directory or a file
         if path.is_dir():
-            file_path = path / self.document
+            file_path = safe_attachment_path(path, self.document)
         else:
             file_path = path
 
@@ -870,9 +914,8 @@ class Attachments:
             self.sgml.download(path, archive)
             return
 
-        import asyncio
-        loop = asyncio.get_event_loop()
-        downloaded_files = loop.run_until_complete(Attachments._download_all_attachments(self._attachments))
+        from edgar.core import run_async_or_sync
+        downloaded_files = run_async_or_sync(Attachments._download_all_attachments(self._attachments))
 
         # Ensure path is a Path object
         path = Path(path)
@@ -885,13 +928,13 @@ class Attachments:
                 with zipfile.ZipFile(path, 'w') as zipf:
                     for attachment, downloaded in zip(self._attachments, downloaded_files, strict=False):
                         if isinstance(downloaded, bytes):
-                            zipf.writestr(attachment.document, downloaded)
+                            zipf.writestr(safe_attachment_filename(attachment.document), downloaded)
                         else:
-                            zipf.writestr(attachment.document, downloaded.encode('utf-8'))
+                            zipf.writestr(safe_attachment_filename(attachment.document), downloaded.encode('utf-8'))
         else:
             if path.is_dir():
                 for attachment, downloaded in zip(self._attachments, downloaded_files, strict=False):
-                    file_path = path / attachment.document
+                    file_path = safe_attachment_path(path, attachment.document)
                     if isinstance(downloaded, bytes):
                         file_path.write_bytes(downloaded)
                     else:

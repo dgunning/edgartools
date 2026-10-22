@@ -50,8 +50,8 @@ NVDA_Q1_FY2026_REVENUE = 44_062_000_000
 # Microsoft 10-K FY2026, 0001193125-26-323660: Revenue 2025-07-01..2026-06-30.
 MSFT_FY2026_REVENUE = 331_839_000_000
 # FY2025 10-Ks: JPMorgan 0001628280-26-008131 (us-gaap:Revenues), Pfizer
-# 0000078003-26-000026 (us-gaap:Revenues), Exxon 0000034088-26-000045 (us-gaap:Revenues).
-FY2025_REVENUE_BILLIONS = {"JPM": 182.4, "PFE": 62.6, "XOM": 332.2}  # 182,447 / 62,579 / 332,238 M
+# 0000078003-26-000026 (us-gaap:Revenues), Caterpillar 0000018230-26-000008 (us-gaap:Revenues).
+FY2025_REVENUE_BILLIONS = {"JPM": 182.4, "PFE": 62.6, "CAT": 67.6}  # 182,447 / 62,579 / 67,589 M
 # EFTS: forms=8-K&items=1.05&startdt=2025-01-01&enddt=2025-12-31 -> total 19 (relation eq).
 ITEM_105_8KS_IN_2025 = 19
 # NVIDIA 8-K 2026-08-26, 0001045810-26-000073, items "2.02,9.01" in the submissions JSON.
@@ -166,7 +166,7 @@ CHECKS = {
     'Company("NVDA").income_statement(periods=5)': check_nvda_five_years,
     'items="1.05"': check_search,
     'income_statement(periods=10)': check_msft_ten_years,
-    '["JPM", "PFE", "XOM"]': check_metric_across_companies,
+    '["JPM", "PFE", "CAT"]': check_metric_across_companies,
     'period="quarterly"': check_quarterly_and_ttm,
     'latest("10-K")': check_sections,
     'find("0000320193-25-000079")': check_find,

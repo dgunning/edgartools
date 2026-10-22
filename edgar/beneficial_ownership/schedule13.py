@@ -99,8 +99,7 @@ def _ownership_figures(sole_voting: Optional[str], shared_voting: Optional[str],
     ReportingPerson keyword arguments for the six ownership figures, from their XML text.
 
     A figure whose element is missing (an amendment may leave any of them out) or
-    is not a number keeps the placeholder 0 it has always had, and is named in
-    ``unreported_fields`` so that it can be told apart from a reported 0.
+    is not a number is None, and is named in ``unreported_fields``. A reported 0 stays 0.
     """
     texts = dict(zip(_OWNERSHIP_FIGURES, (sole_voting, shared_voting, sole_dispositive,
                                            shared_dispositive, aggregate, percent), strict=True))
@@ -111,7 +110,6 @@ def _ownership_figures(sole_voting: Optional[str], shared_voting: Optional[str],
         value = parse(text, default=None)
         if value is None:
             unreported.add(figure)
-            value = parse(None)
         figures[figure] = value
     figures['unreported_fields'] = frozenset(unreported)
     return figures
@@ -171,7 +169,7 @@ def _partial_from_header(filing: 'Filing') -> tuple:
     identities are recoverable from the header — the subject company (issuer) and
     the filer(s)/reporting person(s). Beneficial-ownership numerics
     (shares, percentage, voting/dispositive power) are NOT in the header and are
-    left as ``0`` / empty; callers must gate on ``has_structured_data``.
+    None, named in ``unreported_fields``; ``has_structured_data`` is False.
 
     Returns:
         Tuple of (IssuerInfo, List[ReportingPerson]). Falls back to filing-level
@@ -212,12 +210,12 @@ def _partial_from_header(filing: 'Filing') -> tuple:
                     cik=ci.cik or '',
                     name=ci.name,
                     citizenship='',
-                    sole_voting_power=0,
-                    shared_voting_power=0,
-                    sole_dispositive_power=0,
-                    shared_dispositive_power=0,
-                    aggregate_amount=0,
-                    percent_of_class=0.0,
+                    sole_voting_power=None,
+                    shared_voting_power=None,
+                    sole_dispositive_power=None,
+                    shared_dispositive_power=None,
+                    aggregate_amount=None,
+                    percent_of_class=None,
                     type_of_reporting_person='',
                     unreported_fields=frozenset(_OWNERSHIP_FIGURES),
                 ))
@@ -554,24 +552,17 @@ class Schedule13D:
         is less than the group's: check ``aggregation_basis`` before treating it as
         the group total.
 
-        Excludes shares flagged with is_aggregate_exclude_shares == True.
+        Excludes shares flagged with is_aggregate_exclude_shares == True; 0 when
+        every person is excluded.
 
-        Returns ``None`` when ``has_structured_data`` is False (pre-2025 HTML-only
-        filing) — the share count is genuinely unavailable, not zero.
+        Returns ``None`` when the filing does not report the share count: a
+        pre-2025 HTML-only filing (``has_structured_data`` is False), a filing with
+        no reporting-person rows, or an amendment where a counted person leaves
+        its share count out. A reported 0 stays 0.
         """
         if not self.has_structured_data:
             return None
-
-        if not self.reporting_persons:
-            return 0
-
-        included_persons = [p for p in self.reporting_persons
-                           if not p.is_aggregate_exclude_shares]
-
-        if not included_persons:
-            return 0
-
-        return max(p.aggregate_amount for p in included_persons)
+        return _reported_total(self.reporting_persons, 'aggregate_amount')
 
     @property
     def total_percent(self) -> Optional[float]:
@@ -584,24 +575,15 @@ class Schedule13D:
         is less than the group's: check ``aggregation_basis`` before treating it as
         the group total.
 
-        Excludes shares flagged with is_aggregate_exclude_shares == True.
+        Excludes shares flagged with is_aggregate_exclude_shares == True; 0 when
+        every person is excluded.
 
-        Returns ``None`` when ``has_structured_data`` is False (pre-2025 HTML-only
-        filing) — the percentage is genuinely unavailable, not zero.
+        Returns ``None`` when the filing does not report the percentage, as for
+        ``total_shares``. A reported 0 stays 0.
         """
         if not self.has_structured_data:
             return None
-
-        if not self.reporting_persons:
-            return 0.0
-
-        included_persons = [p for p in self.reporting_persons
-                           if not p.is_aggregate_exclude_shares]
-
-        if not included_persons:
-            return 0.0
-
-        return max(p.percent_of_class for p in included_persons)
+        return _reported_total(self.reporting_persons, 'percent_of_class')
 
     @property
     def aggregation_basis(self) -> Optional[str]:
@@ -1088,24 +1070,17 @@ class Schedule13G:
         is less than the group's: check ``aggregation_basis`` before treating it as
         the group total.
 
-        Excludes shares flagged with is_aggregate_exclude_shares == True.
+        Excludes shares flagged with is_aggregate_exclude_shares == True; 0 when
+        every person is excluded.
 
-        Returns ``None`` when ``has_structured_data`` is False (pre-2025 HTML-only
-        filing) — the share count is genuinely unavailable, not zero.
+        Returns ``None`` when the filing does not report the share count: a
+        pre-2025 HTML-only filing (``has_structured_data`` is False), a filing with
+        no reporting-person rows, or an amendment where a counted person leaves
+        its share count out. A reported 0 stays 0.
         """
         if not self.has_structured_data:
             return None
-
-        if not self.reporting_persons:
-            return 0
-
-        included_persons = [p for p in self.reporting_persons
-                           if not p.is_aggregate_exclude_shares]
-
-        if not included_persons:
-            return 0
-
-        return max(p.aggregate_amount for p in included_persons)
+        return _reported_total(self.reporting_persons, 'aggregate_amount')
 
     @property
     def total_percent(self) -> Optional[float]:
@@ -1118,24 +1093,15 @@ class Schedule13G:
         is less than the group's: check ``aggregation_basis`` before treating it as
         the group total.
 
-        Excludes shares flagged with is_aggregate_exclude_shares == True.
+        Excludes shares flagged with is_aggregate_exclude_shares == True; 0 when
+        every person is excluded.
 
-        Returns ``None`` when ``has_structured_data`` is False (pre-2025 HTML-only
-        filing) — the percentage is genuinely unavailable, not zero.
+        Returns ``None`` when the filing does not report the percentage, as for
+        ``total_shares``. A reported 0 stays 0.
         """
         if not self.has_structured_data:
             return None
-
-        if not self.reporting_persons:
-            return 0.0
-
-        included_persons = [p for p in self.reporting_persons
-                           if not p.is_aggregate_exclude_shares]
-
-        if not included_persons:
-            return 0.0
-
-        return max(p.percent_of_class for p in included_persons)
+        return _reported_total(self.reporting_persons, 'percent_of_class')
 
     @property
     def is_passive_investor(self) -> bool:

@@ -23,6 +23,7 @@ from edgar.core import get_bool
 from edgar.display.formatting import moneyfmt
 from edgar.funds import FundCompany, FundSeries
 from edgar.richtools import df_to_rich_table, repr_rich
+from edgar.xmltools import xml_parser
 
 log = logging.getLogger(__name__)
 
@@ -289,18 +290,37 @@ class DebtSecurity(BaseModel):
             )
 
 
+def _lending_answer(tag, flag, condition, value_attr):
+    """Item C.12 states No as <flag>N</flag> and Yes as <condition flag="Y" value_attr="..."/>."""
+    condition_tag = tag.find(condition)
+    if condition_tag is None:
+        return _text(tag, flag), None
+    return condition_tag.get(flag), _opt_decimal_attr(condition_tag, value_attr)
+
+
 class SecurityLending(BaseModel):
     is_cash_collateral: Optional[str]
     is_non_cash_collateral: Optional[str]
     is_loan_by_fund: Optional[str]
+    cash_collateral_value: Optional[Decimal] = None
+    non_cash_collateral_value: Optional[Decimal] = None
+    loan_value: Optional[Decimal] = None
 
     @classmethod
     def from_xml(cls, tag):
         if tag is not None:
+            is_cash, cash_value = _lending_answer(tag, "isCashCollateral", "cashCollateralCondition",
+                                                  "cashCollateralVal")
+            is_non_cash, non_cash_value = _lending_answer(tag, "isNonCashCollateral", "nonCashCollateralCondition",
+                                                          "nonCashCollateralVal")
+            is_loan, loan_value = _lending_answer(tag, "isLoanByFund", "loanByFundCondition", "loanVal")
             return cls(
-                is_cash_collateral=_text(tag, "isCashCollateral"),
-                is_non_cash_collateral=_text(tag, "isNonCashCollateral"),
-                is_loan_by_fund=_text(tag, "isLoanByFund")
+                is_cash_collateral=is_cash,
+                is_non_cash_collateral=is_non_cash,
+                is_loan_by_fund=is_loan,
+                cash_collateral_value=cash_value,
+                non_cash_collateral_value=non_cash_value,
+                loan_value=loan_value,
             )
 
 
@@ -568,6 +588,7 @@ class FundReport:
         # Build data rows
         data = []
         for investment in investments_to_process:
+            other_id = investment.identifiers.other
             row_data = {
                 "name": investment.name,
                 "title": investment.title,
@@ -575,6 +596,8 @@ class FundReport:
                 "cusip": investment.cusip,
                 "ticker": investment.ticker,  # Now uses resolved ticker
                 "isin": investment.identifiers.isin,
+                "other_id": next(iter(other_id.values()), None),
+                "other_id_type": next(iter(other_id), None),
                 "balance": investment.balance,
                 "units": investment.units,
                 "desc_other_units": investment.desc_other_units,
@@ -1233,9 +1256,9 @@ class FundReport:
             xml_bytes = xml
 
         try:
-            root = etree.fromstring(xml_bytes)
+            root = etree.fromstring(xml_bytes, parser=xml_parser())
         except etree.XMLSyntaxError:
-            parser = etree.XMLParser(recover=True)
+            parser = xml_parser(recover=True)
             root = etree.fromstring(xml_bytes, parser=parser)
 
         # Strip namespaces for simpler element lookups

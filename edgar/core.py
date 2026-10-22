@@ -15,15 +15,6 @@ from rich.logging import RichHandler
 
 from edgar.datatools import PagingState
 
-# Re-exported for callers that still import them from here. The implementation
-# lives in edgar.dates; 6.0 drops this shim (edgartools-07lk.12.1 item 6).
-from edgar.dates import (  # noqa: F401
-    current_year_and_quarter,
-    filing_date_to_year_quarters,
-    is_start_of_quarter,
-    parse_acceptance_datetime,
-)
-
 log = logging.getLogger(__name__)
 
 def parse_pandas_version():
@@ -43,26 +34,18 @@ python_version = tuple(map(int, sys.version.split()[0].split('.')))
 
 __all__ = [
     'log',
-    'Result',
     'get_bool',
     'IntString',
-    'get_identity',
     'python_version',
-    'set_identity',
     'strtobool',
     'listify',
     'decode_content',
     'cache_except_none',
     'text_extensions',
     'binary_extensions',
-    'ask_for_identity',
-    'is_start_of_quarter',
     'run_async_or_sync',
-    'get_edgar_data_directory',
     'is_probably_html',
     'has_html_content',
-    'default_page_size',
-    'parse_acceptance_datetime',
     'PagingState',
     'Years',
     'Quarters',
@@ -86,65 +69,9 @@ YYYY_MM_DD = "\\d{4}-\\d{2}-\\d{2}"
 DATE_PATTERN = re.compile(YYYY_MM_DD)
 DATE_RANGE_PATTERN = re.compile(f"^({YYYY_MM_DD}(:({YYYY_MM_DD})?)?|:({YYYY_MM_DD}))$")
 
-# ---------------------------------------------------------------------------
-# Settings and identity now live in edgar/settings.py (edgartools-07lk.12.1).
-#
-# These are RE-EXPORTS, not aliases: the implementation moved to the canonical
-# name and this module imports it back, rather than the reverse. Aliasing onto
-# the deprecated name is the trap 07lk.23 names — it leaves the real code at the
-# path you intend to delete, so 6.0 cannot simply drop the shim.
-#
-# The whole block below goes away in 6.0. Every one of the 71 call sites is a
-# `from edgar.core import <name>` (measured: zero `import edgar.core`, zero
-# attribute access), so a re-export covers 100% of them.
-# ---------------------------------------------------------------------------
-from edgar.settings import (  # noqa: E402,F401  -- re-exports, intentionally unused here
-    EdgarSettings,
-    ask_for_identity,
-    default_http_timeout,
-    default_max_connections,
-    default_page_size,
-    default_retries,
-    edgar_data_dir,
-    edgar_identity,
-    get_edgar_data_directory,
-    get_identity,
-    identity_prompt,
-    limits,
-    set_identity,
-)
-
-# NORMAL / CAUTION / CRAWL / edgar_mode / edgar_access_mode are deliberately NOT
-# imported above. They are deprecated (GH #1326) and importing them here would
-# fire the DeprecationWarning once at `import edgar.core`, for every user,
-# naming this module rather than the code that actually reached for one. Routed
-# through __getattr__ instead so the warning lands on the real call site, and
-# so `from edgar.core import NORMAL` keeps working until 6.0.
-
-
-def _access_mode_getattr(name: str):
-    """Resolve the deprecated access modes without eager-importing them.
-
-    Chained into this module's __getattr__ at the bottom of the file; core.py
-    already installs one via edgar._compat.deprecated_alias, and assigning a
-    second would silently replace the first.
-    """
-    from edgar import settings as _settings
-
-    if name in _settings.DEPRECATED_ACCESS_MODE_NAMES:
-        # One frame deeper than the other two paths: deprecated_alias's own
-        # __getattr__ sits between the caller and this function, and without
-        # accounting for it the warning points at edgar/_compat.py instead of
-        # the code that asked for the mode.
-        _settings.warn_access_mode_deprecated(name, stacklevel=4)
-        return _settings.DEPRECATED_ACCESS_MODE_NAMES[name]
-    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
-
-
-def __dir__():
-    from edgar import settings as _settings
-
-    return sorted(set(globals()) | set(_settings.DEPRECATED_ACCESS_MODE_NAMES))
+# Settings and identity live in edgar/settings.py. 6.0 removed the re-exports
+# that kept `from edgar.core import get_identity` working (edgartools-07lk.22.1).
+from edgar.settings import default_page_size as _default_page_size  # noqa: E402
 
 
 def strtobool (val:str):
@@ -187,66 +114,11 @@ def get_bool(value: Optional[str] = None) -> Optional[bool]:
     return value in [1, "1", "Y", "true", "True", "TRUE"]
 
 
-class Result:
-    """Deprecated, removed in 6.0. Nothing imports this.
-
-    It was scaffolding for a flagged-result pattern that never got adopted —
-    zero importers anywhere in the codebase. The pattern that *did* get adopted
-    is NonAccrualResult (edgar/bdc/nonaccrual.py): a frozen dataclass carrying
-    the value plus its provenance and warnings, so a caller can tell "genuinely
-    zero" from "we may have failed to parse". Use that shape instead.
-    """
-
-    def __init__(self,
-                 success: bool,
-                 error: Optional[str] = None,
-                 value: Optional[object] = None):
-        self.success = success
-        self.error = error
-        self.value = value
-
-    @property
-    def failure(self) -> bool:
-        """:return True if the operation failed"""
-        return not self.success
-
-    def __str__(self):
-        if self.success:
-            return '[Success]'
-        else:
-            return f'[Failure] "{self.error}"'
-
-    def __repr__(self):
-        if self.success:
-            return f"Result (success={self.success})"
-        else:
-            return f'Result (success={self.success}, message="{self.error}")'
-
-    @classmethod
-    def Fail(cls,
-             error: str):
-        """Create a Result for a failed operation"""
-        return cls(False, error=error, value=None)
-
-    @classmethod
-    def Ok(cls,
-           value: object):
-        """Create a Result for a successful operation"""
-        return cls(success=True, value=value, error=None)
-
-
 def get_resource(file: str):
     import importlib
 
     import edgar
     return importlib.resources.as_file(importlib.resources.files(edgar).joinpath(file))
-
-
-# TooManyRequestsException was a dead duplicate of
-# edgar.exceptions.TooManyRequestsError: never raised anywhere, different
-# suffix, same meaning. Kept as a deprecated alias (see the module __getattr__
-# at the end of this file); removed in 6.0.
-
 
 
 
@@ -255,7 +127,7 @@ def get_resource(file: str):
 class DataPager:
     def __init__(self,
                  data: Union[pa.Table, pd.DataFrame],
-                 page_size=default_page_size):
+                 page_size=_default_page_size):
         self.data: Union[pa.Table, pd.DataFrame] = data
         self.page_size = page_size
         self.total_pages = (len(self.data) // page_size) + 1
@@ -337,31 +209,21 @@ def sample_table(table, n=None, frac=None, replace=False, random_state=None):
 
 
 def run_async_or_sync(coroutine):
+    """Run a coroutine to completion from synchronous code and return its result.
+
+    With no event loop running in this thread, this is asyncio.run(). Inside one,
+    as in Jupyter, asyncio.run() refuses, so the coroutine runs on a fresh loop in
+    a worker thread and this call waits for it. Our coroutines share no state with
+    the caller's loop, so a private loop needs no re-entrancy patching (the
+    archived nest-asyncio did that by patching the running loop).
+    Exceptions from the coroutine propagate unchanged.
+    """
     try:
-        # Check if we're in an IPython environment
-        ipython = sys.modules['IPython']
-        if 'asyncio' in sys.modules:
-            # try is needed for ipython console
-            try:
-                loop = asyncio.get_event_loop()
-            except RuntimeError:
-                import nest_asyncio
-                nest_asyncio.apply()
-                loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # We're in a notebook with an active event loop
-                import nest_asyncio
-                nest_asyncio.apply()
-                return loop.run_until_complete(coroutine)
-            else:
-                # We're in IPython but without an active event loop
-                return loop.run_until_complete(coroutine)
-        else:
-            # We're in IPython but asyncio is not available
-            return ipython.get_ipython().run_cell_magic('time', '', f'import asyncio; asyncio.run({coroutine!r})')
-    except (KeyError, AttributeError):
-        # We're not in an IPython environment, use asyncio.run()
+        asyncio.get_running_loop()
+    except RuntimeError:
         return asyncio.run(coroutine)
+    with ThreadPoolExecutor(max_workers=1) as executor:
+        return executor.submit(asyncio.run, coroutine).result()
 
 
 def listify(value):
@@ -536,13 +398,3 @@ for _logger_name, _level in _NOISY_LOGGERS.items():
 # Turn on rich logging if the environment variable is set
 if os.getenv('EDGAR_USE_RICH_LOGGING', '0') == '1':
     initialize_rich_logging()
-
-
-# ---------------------------------------------------------------------------
-# Deprecated names (bead edgartools-07lk.10), removed in 6.0.
-# ---------------------------------------------------------------------------
-from edgar._compat import deprecated_alias  # noqa: E402
-from edgar.exceptions import TooManyRequestsError  # noqa: E402
-
-__getattr__ = deprecated_alias(_access_mode_getattr,
-                               TooManyRequestsException=TooManyRequestsError)

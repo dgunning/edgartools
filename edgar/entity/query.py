@@ -19,7 +19,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.datatools import apply_declared_schema, empty_declared_frame
-from edgar.entity.dataframe_schema import FACT_QUERY_COLUMNS, NULL_DTYPES, PINNED
+from edgar.entity.dataframe_schema import FACT_QUERY_COLUMNS, PINNED
 from edgar.entity.models import DataQuality, FinancialFact
 from edgar.ttm.calculator import ANNUAL_MAX_DAYS, ANNUAL_MIN_DAYS
 
@@ -729,7 +729,7 @@ class FactQuery:
 
         df = pd.DataFrame(records)
 
-        return apply_declared_schema(df, declared, order, PINNED, NULL_DTYPES)
+        return apply_declared_schema(df, declared, order, PINNED)
 
     def to_llm_context(self) -> List[Dict[str, Any]]:
         """
@@ -866,8 +866,6 @@ class FactQuery:
                 mixed_periods=pivot.attrs.get('mixed_periods', False)
             )
         else:
-            # Set display format to avoid scientific notation for raw DataFrame
-            pd.options.display.float_format = '{:,.0f}'.format
             return pivot
 
     def _format_period_label(self, fact: FinancialFact) -> str:

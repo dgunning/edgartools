@@ -11,7 +11,7 @@ Generated from: data/xbrl-mappings/gaap_taxonomy_mapping.csv
 
 from typing import Set
 
-# Tags to exclude from standardization (276 tags)
+# Tags to exclude from standardization (261 tags)
 EXCLUDED_TAGS: Set[str] = {
     "AcceleratedShareRepurchasesFinalPricePaidPerShare",
     "AcceleratedShareRepurchasesInitialPricePaidPerShare",
@@ -27,16 +27,19 @@ EXCLUDED_TAGS: Set[str] = {
     "BusinessAcquisitionProFormaIncomeLossFromContinuingOperationsBeforeChangesInAccountingAndExtraordinaryItemsNetOfTaxPerShareDiluted",
     "BusinessCombinationSeparatelyRecognizedTransactionsAdditionalDisclosuresAcquisitionCostExpensed",
     "CapitalizedContractCostAmortization",
-    "CashAndCashEquivalentsPeriodIncreaseDecrease",
+    # CashAndCashEquivalentsPeriodIncreaseDecrease
+    # removed from exclusions (GH #1445): a face-statement line its mapping already covers
     # CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents
     # removed from exclusions: needed for cash flow stitching (ending cash balance)
-    "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+    # CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations
+    # removed from exclusions (GH #1445): a face-statement line its mapping already covers
     "ChangeInReportingEntityEarningsPerShareBasic",
     "ChangeInReportingEntityEarningsPerShareDiluted",
     "CommitmentsAndContingencies",
     "CommonStockParOrStatedValuePerShare",
     "CommonStockSharesAuthorized",
-    "ComprehensiveIncomeNetOfTax",
+    # ComprehensiveIncomeNetOfTax
+    # removed from exclusions (GH #1445): a face-statement line its mapping already covers
     "ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
     "ContingentlyConvertibleSecuritiesIncludedInDilutedEarningsPerShare",
     "DebtInstrumentCollateralAmount",
@@ -49,11 +52,13 @@ EXCLUDED_TAGS: Set[str] = {
     "DiscontinuedOperationIncomeLossFromDiscontinuedOperationNetOfTaxPerBasicShare",
     "DiscontinuedOperationIncomeLossFromDiscontinuedOperationNetOfTaxPerDilutedShare",
     "DistributionMadeToMemberOrLimitedPartnerShareDistributionDilutionPerShare",
-    "EarningsPerShareBasic",
+    # EarningsPerShareBasic
+    # removed from exclusions (GH #1445): a face-statement line its mapping already covers
     "EarningsPerShareBasicAndDiluted",
     "EarningsPerShareBasicDistributed",
     "EarningsPerShareBasicUndistributed",
-    "EarningsPerShareDiluted",
+    # EarningsPerShareDiluted
+    # removed from exclusions (GH #1445): a face-statement line its mapping already covers
     "EarningsPerShareDilutedConvertibleSecurityMethodExtensibleEnumeration",
     "EarningsPerShareDilutedDistributed",
     "EarningsPerShareDilutedEsopConvertiblePreferredStockMethodExtensibleEnumeration",
@@ -172,12 +177,16 @@ EXCLUDED_TAGS: Set[str] = {
     "IncomeTaxHolidayIncomeTaxBenefitsPerShare",
     "IncomeTaxRateReconciliationDeductionsEmployeeStockOwnershipPlanDividends",
     "IncomeTaxesPaid",
-    "IncreaseDecreaseInAccountsAndOtherReceivables",
-    "IncreaseDecreaseInAccountsPayable",
-    "IncreaseDecreaseInAccountsReceivable",
+    # IncreaseDecreaseInAccountsAndOtherReceivables
+    # removed from exclusions (GH #1445): a face-statement line its mapping already covers
+    # IncreaseDecreaseInAccountsPayable
+    # removed from exclusions (GH #1445): a face-statement line its mapping already covers
+    # IncreaseDecreaseInAccountsReceivable
+    # removed from exclusions (GH #1445): a face-statement line its mapping already covers
     "IncreaseDecreaseInAccruedIncomeTaxesPayable",
     "IncreaseDecreaseInAccruedTaxesPayable",
-    "IncreaseDecreaseInInventories",
+    # IncreaseDecreaseInInventories
+    # removed from exclusions (GH #1445): a face-statement line its mapping already covers
     "IncreaseDecreaseInOtherAccruedLiabilities",
     "IncreaseDecreaseInOtherCurrentLiabilities",
     "IncreaseDecreaseInOtherOperatingAssets",
@@ -237,8 +246,10 @@ EXCLUDED_TAGS: Set[str] = {
     "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
     "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationReclassificationAdjustmentFromAOCIRealizedUponSaleOrLiquidationBeforeTax",
     "OtherComprehensiveIncomeLossForeignCurrencyTranslationAdjustmentTax",
-    "OtherComprehensiveIncomeLossNetOfTax",
-    "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+    # OtherComprehensiveIncomeLossNetOfTax
+    # removed from exclusions (GH #1445): a face-statement line its mapping already covers
+    # OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent
+    # removed from exclusions (GH #1445): a face-statement line its mapping already covers
     "OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax",
     "OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansNetUnamortizedGainLossArisingDuringPeriodBeforeTax",
     "OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax",

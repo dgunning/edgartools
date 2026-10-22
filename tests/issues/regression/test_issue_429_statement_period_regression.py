@@ -108,7 +108,7 @@ class TestIssue429StatementPeriodRegression(unittest.TestCase):
     def test_cashflow_statement_returns_data(self):
         """Test that cash flow statement returns meaningful data (this was the main bug)"""
         # Get Statement object (new default) and convert to DataFrame for testing
-        stmt = self.current_period.cashflow_statement()
+        stmt = self.current_period.cash_flow_statement()
         df = stmt.get_dataframe()
         self.assertGreater(len(df), 20, 
                           f"Cash flow statement should have more than 20 rows, got {len(df)}")
@@ -136,7 +136,7 @@ class TestIssue429StatementPeriodRegression(unittest.TestCase):
         # Get Statement objects (new default) and convert to DataFrames for testing
         balance_sheet_stmt = self.current_period.balance_sheet()
         income_statement_stmt = self.current_period.income_statement()
-        cash_flow_stmt = self.current_period.cashflow_statement()
+        cash_flow_stmt = self.current_period.cash_flow_statement()
         
         balance_sheet = balance_sheet_stmt.get_dataframe()
         income_statement = income_statement_stmt.get_dataframe()

@@ -28,9 +28,9 @@ def profile_single_filing(filing):
     from edgar.documents import HTMLParser, ParserConfig
     from edgar.core import is_probably_html
     from edgar.offerings.prospectus import Prospectus424B
-    from edgar.offerings._424b_cover import extract_cover_page_fields
-    from edgar.offerings._424b_classifier import classify_offering_type
-    from edgar.offerings._424b_tables import classify_tables_in_document
+    from edgar.offerings.prospectus._424b_cover import extract_cover_page_fields
+    from edgar.offerings.prospectus._424b_classifier import classify_offering_type
+    from edgar.offerings.prospectus._424b_tables import classify_tables_in_document
 
     timings = {}
 

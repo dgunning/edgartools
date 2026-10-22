@@ -33,7 +33,7 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
-from edgar.bdc.investments import _parse_investment_identifier
+from edgar.bdc.investments import _get_investment_member_candidates, _parse_investment_identifier
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
@@ -563,6 +563,8 @@ def _extract_from_footnotes(
     seen_identifiers: set = set()
     investments: List[NonAccrualInvestment] = []
     recognized = 0
+    # Bound company names by the filing's own members, as from_xbrl does; built on first use.
+    member_candidates = None
 
     for fn_id, footnote in footnotes.items():
         # Only process English footnotes
@@ -595,7 +597,9 @@ def _extract_from_footnotes(
                 continue
             seen_identifiers.add(inv_identifier)
 
-            _id, company_name, investment_type = _parse_investment_identifier(inv_identifier)
+            if member_candidates is None:
+                member_candidates = _get_investment_member_candidates(xbrl)
+            _id, company_name, investment_type = _parse_investment_identifier(inv_identifier, member_candidates)
             cost = _find_cost_for_investment(all_facts, inv_identifier, period)
 
             fv = None

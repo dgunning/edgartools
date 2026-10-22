@@ -92,10 +92,10 @@ import pandas as pd
 revenue = {
     ticker: Company(ticker).income_statement(periods=3, as_dataframe=True)
             .set_index("label").filter(like="FY").loc["Total Revenue"] / 1e9
-    for ticker in ["JPM", "PFE", "XOM"]
+    for ticker in ["JPM", "PFE", "CAT"]
 }
 pd.DataFrame(revenue).round(1)  # $ billions
-#> FY 2025 182.4 62.6 332.2
+#> FY 2025 182.4 62.6 67.6
 ```
 
 ### Quarterly figures and trailing twelve months
@@ -215,7 +215,7 @@ The MCP server works with any MCP client. For Claude Desktop, add it to `claude_
 
 The SEC changes filing formats and ships a new XBRL taxonomy every year. Sponsorship is what keeps the parsers current and pays for new ones as new disclosures appear.
 
-- **[GitHub Sponsors](https://github.com/sponsors/dgunning)**: monthly tiers for individuals, and for teams running EdgarTools in production, tiers with a first-response time on the issues you open and your logo in this README.
+- **[GitHub Sponsors](https://github.com/sponsors/dgunning)**: monthly or one-time. Companies can sponsor on their existing GitHub bill.
 - **[Buy Me a Coffee](https://www.buymeacoffee.com/edgartools)**: a one-time thank-you.
 - **[Consulting](https://www.edgar.tools/consulting)**: help from the library's author with SEC data pipelines and financial AI built on it.
 

@@ -113,12 +113,14 @@
     "Banking Expenses": [
       "InterestExpenseDeposits",
       "NonInterestExpense",
+      "OtherNonInterestExpense",
       "ProvisionForCreditLosses"
     ],
     "Banking Revenue": [
       "NetInterestIncome",
       "NetInterestIncomeAfterProvision",
       "NonInterestIncome",
+      "OtherNonInterestIncome",
       "TotalInterestIncomeOperating"
     ],
     "Cost of Revenue": [

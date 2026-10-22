@@ -26,7 +26,7 @@ def test_msft_segment_member_values():
     # Extract income statement with dimensions enabled (default is now False as of v5.7.0)
     financials = Financials.extract(filing)
     income_statement = financials.income_statement()
-    df = income_statement.to_dataframe(include_dimensions=True)
+    df = income_statement.to_dataframe(view='detailed')
 
     # Verify dimensional display is enabled
     # The dataframe should have more than the basic 21 rows due to dimensional breakdowns
@@ -97,7 +97,7 @@ def test_dimensional_revenue_breakdown():
     filing = Company('MSFT').get_filings().filter(accession_number="0000950170-25-100235").latest()
     financials = Financials.extract(filing)
     income_statement = financials.income_statement()
-    df = income_statement.to_dataframe(include_dimensions=True)
+    df = income_statement.to_dataframe(view='detailed')
     
     # Get all dimensional revenue rows
     revenue_rows = df[

@@ -137,6 +137,8 @@ All portfolio positions sorted by absolute USD value descending.
 | `cusip` | str | CUSIP |
 | `ticker` | str | Ticker (if resolvable) |
 | `isin` | str | ISIN |
+| `other_id` | str | The filer's other unique identifier, where it states one (item C.1.e.iv) |
+| `other_id_type` | str | What that identifier is, as the filer names it (e.g. "BlackRock Identifier") |
 | `balance` | float | Quantity held |
 | `units` | str | Unit type (e.g., "NS" for number of shares) |
 | `value_usd` | float | Fair value in USD |
@@ -155,6 +157,8 @@ All portfolio positions sorted by absolute USD value descending.
 | `counterparty` | str | Derivative counterparty |
 
 When `include_ticker_metadata=True`, adds `ticker_resolution_method` and `ticker_resolution_confidence`.
+
+`other_id` and `other_id_type` carry N-PORT item C.1.e.iv. `swaptions_data()` carries the same item as `main_internal_id` and `main_internal_id_desc`; the other derivative frames do not carry it.
 
 #### `securities_data()` -> DataFrame
 

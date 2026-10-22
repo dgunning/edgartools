@@ -9,7 +9,7 @@ amendments). Ground truth is verified against four real filings in the
 
 import pytest
 
-from edgar.offerings.registration_s4 import (
+from edgar.offerings.prospectus.registration_s4 import (
     RegistrationS4, S4OfferingType, S4CoverPage,
     _extract_s4_cover_page, _classify_s4_offering,
 )

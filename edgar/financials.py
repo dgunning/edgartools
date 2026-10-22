@@ -1,4 +1,3 @@
-import warnings
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Union
 
@@ -152,13 +151,11 @@ class Financials:
             return None
         return Financials(xb)
 
-    def balance_sheet(self, include_dimensions: bool = None, view: ViewType = None):
+    def balance_sheet(self, *, view: ViewType = None):
         """
         Get the balance sheet.
 
         Args:
-            include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: False)
             view: StatementView controlling dimensional data display.
                   STANDARD: Face presentation matching SEC Viewer (display default)
                   DETAILED: All dimensional data included (to_dataframe default)
@@ -169,15 +166,13 @@ class Financials:
         """
         if self.xb is None:
             return None
-        return self.xb.statements.balance_sheet(include_dimensions=include_dimensions, view=view)
+        return self.xb.statements.balance_sheet(view=view)
 
-    def income_statement(self, include_dimensions: bool = None, view: ViewType = None):
+    def income_statement(self, *, view: ViewType = None):
         """
         Get the income statement.
 
         Args:
-            include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: False)
             view: StatementView controlling dimensional data display.
                   STANDARD: Face presentation matching SEC Viewer (display default)
                   DETAILED: All dimensional data included (to_dataframe default)
@@ -188,15 +183,13 @@ class Financials:
         """
         if self.xb is None:
             return None
-        return self.xb.statements.income_statement(include_dimensions=include_dimensions, view=view)
+        return self.xb.statements.income_statement(view=view)
 
-    def cash_flow_statement(self, include_dimensions: bool = None, view: ViewType = None):
+    def cash_flow_statement(self, *, view: ViewType = None):
         """
         Get the cash flow statement.
 
         Args:
-            include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: False)
             view: StatementView controlling dimensional data display.
                   STANDARD: Face presentation matching SEC Viewer (display default)
                   DETAILED: All dimensional data included (to_dataframe default)
@@ -207,26 +200,13 @@ class Financials:
         """
         if self.xb is None:
             return None
-        return self.xb.statements.cash_flow_statement(include_dimensions=include_dimensions, view=view)
+        return self.xb.statements.cash_flow_statement(view=view)
 
-    def cashflow_statement(self, **kwargs):
-        """Deprecated: use :meth:`cash_flow_statement`."""
-        warnings.warn(
-            "cashflow_statement() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement(), which matches income_statement() and "
-            "balance_sheet().",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.cash_flow_statement(**kwargs)
-
-    def statement_of_equity(self, include_dimensions: bool = None, view: ViewType = None):
+    def statement_of_equity(self, *, view: ViewType = None):
         """
         Get the statement of equity.
 
         Args:
-            include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: False)
             view: StatementView controlling dimensional data display.
                   STANDARD: Face presentation matching SEC Viewer (display default)
                   DETAILED: All dimensional data included (to_dataframe default)
@@ -237,15 +217,13 @@ class Financials:
         """
         if self.xb is None:
             return None
-        return self.xb.statements.statement_of_equity(include_dimensions=include_dimensions, view=view)
+        return self.xb.statements.statement_of_equity(view=view)
 
-    def comprehensive_income(self, include_dimensions: bool = None, view: ViewType = None):
+    def comprehensive_income(self, *, view: ViewType = None):
         """
         Get the comprehensive income statement.
 
         Args:
-            include_dimensions: Default setting for whether to include dimensional segment data
-                              when rendering or converting to DataFrame (default: False)
             view: StatementView controlling dimensional data display.
                   STANDARD: Face presentation matching SEC Viewer (display default)
                   DETAILED: All dimensional data included (to_dataframe default)
@@ -256,7 +234,7 @@ class Financials:
         """
         if self.xb is None:
             return None
-        return self.xb.statements.comprehensive_income(include_dimensions=include_dimensions, view=view)
+        return self.xb.statements.comprehensive_income(view=view)
 
     def cover(self):
         """
@@ -1235,17 +1213,6 @@ class MultiFinancials:
 
     def cash_flow_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
         return self.xbs.statements.cash_flow_statement(view=view)
-
-    def cashflow_statement(self, **kwargs):
-        """Deprecated: use :meth:`cash_flow_statement`."""
-        warnings.warn(
-            "cashflow_statement() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement(), which matches income_statement() and "
-            "balance_sheet().",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.cash_flow_statement(**kwargs)
 
     def __rich__(self):
         return self.xbs.__rich__()

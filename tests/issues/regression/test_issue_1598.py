@@ -35,13 +35,12 @@ def test_two_filtered_downloads_keep_both_filings(tmp_path, compress):
 
     feed = pd.DataFrame([{"Name": "20240102.nc.tar.gz", "File": "https://example.invalid/20240102.nc.tar.gz"}])
     with patch.object(_local, "list_filing_feed_files_for_quarter", return_value=feed), \
-            patch.object(_local, "check_filings_exist_locally", return_value=False), \
             patch.object(httprequests, "stream_file", stream):
         for accession in [first, second]:
             filings = Filings(pa.table({"accession_number": [accession], "filing_date": [date(2024, 1, 2)],
                                         "cik": [1], "company": ["Fixture"], "form": ["10-K"]}))
             _local.download_filings("2024-01-02", data_directory=tmp_path, filings=filings,
-                                    overwrite_existing=True, compress=compress, disable_progress=True)
+                                    overwrite_existing=True, compress=compress, disable_progress=True, source="feed")
     for accession, content in [(first, b"filing A"), (second, b"filing B")]:
         path = tmp_path / "20240102" / (accession + (".nc.gz" if compress else ".nc"))
         assert (gzip.decompress(path.read_bytes()) if compress else path.read_bytes()) == content

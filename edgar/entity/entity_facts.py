@@ -23,7 +23,6 @@ from typing import Union
 import httpx2
 import orjson as json
 import pandas as pd
-from pandas.core.interchange.dataframe_protocol import DataFrame
 from rich.box import SIMPLE, SIMPLE_HEAVY
 from rich.columns import Columns
 from rich.console import Group
@@ -34,7 +33,7 @@ from rich.text import Text
 
 from edgar.core import log
 from edgar.datatools import apply_declared_schema, empty_declared_frame
-from edgar.entity.dataframe_schema import NULL_DTYPES, PINNED, entity_facts_columns
+from edgar.entity.dataframe_schema import PINNED, entity_facts_columns
 from edgar.entity.enhanced_statement import MultiPeriodStatement
 from edgar.entity.utils import is_consolidated_total_over
 from edgar.entity.models import FinancialFact
@@ -43,15 +42,7 @@ from edgar.httprequests import download_json
 from edgar.storage import get_edgar_data_directory, is_using_local_storage
 
 
-# NoCompanyFactsFound is now CompanyFactsNotFoundError in edgar.exceptions
-# (bead edgartools-07lk.10). Its __init__ called super().__init__() with no
-# arguments and set self.message instead, so str(exc) was '' and the message
-# never reached a traceback or a log. The canonical class builds the message
-# and passes it up. Old name kept as a deprecated alias below.
-from edgar._compat import deprecated_alias
 from edgar.exceptions import CompanyFactsNotFoundError, TransportError, ValidationError, http_status
-
-__getattr__ = deprecated_alias(NoCompanyFactsFound=CompanyFactsNotFoundError)
 
 
 def download_company_facts_from_sec(cik: int) -> Dict[str, Any]:
@@ -88,6 +79,18 @@ def load_company_facts_from_local(cik: int) -> Dict[str, Any]:
 
     return json.loads(company_facts_file.read_text())
 
+
+# Revenue variants for get_revenue() and get_revenue_detailed(), in priority
+# order. The filed total, Revenues, comes first, as in the statement builder's
+# _REVENUE_CONCEPTS and Financials.get_revenue() (edgartools-jrqvs).
+_REVENUE_VARIANTS = [
+    'Revenues',
+    'RevenueFromContractWithCustomerExcludingAssessedTax',
+    'SalesRevenueNet',
+    'Revenue',
+    'TotalRevenues',
+    'NetSales',
+]
 
 _COMPANY_FACTS_CACHE_MAXSIZE = 1
 
@@ -406,7 +409,7 @@ class EntityFacts:
             # entity with no facts, and a `columns` projection raised too.
             return empty_declared_frame(declared, [c for c in order if c in declared])
 
-        df = apply_declared_schema(pd.DataFrame(records), declared, order, PINNED, NULL_DTYPES)
+        df = apply_declared_schema(pd.DataFrame(records), declared, order, PINNED)
 
         # Sort for consistency
         if not df.empty:
@@ -961,14 +964,7 @@ class EntityFacts:
             >>> quarterly_revenue = facts.get_revenue(period="2024-Q1")
         """
         return self._get_standardized_concept_value(
-            concept_variants=[
-                'RevenueFromContractWithCustomerExcludingAssessedTax',
-                'SalesRevenueNet',
-                'Revenues',
-                'Revenue',
-                'TotalRevenues',
-                'NetSales'
-            ],
+            concept_variants=_REVENUE_VARIANTS,
             period=period,
             unit=unit,
             fallback_calculation=self._calculate_revenue_from_components,
@@ -1343,7 +1339,7 @@ class EntityFacts:
             >>> facts = company.get_facts()
             >>> available = facts.discover_concept_tags('revenue')
             >>> print(available)
-            ['RevenueFromContractWithCustomerExcludingAssessedTax', 'Revenues']
+            ['Revenues', 'RevenueFromContractWithCustomerExcludingAssessedTax']
         """
         from edgar.standardization import get_synonym_groups
 
@@ -1820,8 +1816,8 @@ class EntityFacts:
     def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months revenue using common revenue concepts."""
         revenue_concepts = [
-            'RevenueFromContractWithCustomerExcludingAssessedTax',
             'Revenues',
+            'RevenueFromContractWithCustomerExcludingAssessedTax',
             'SalesRevenueNet',
             'Revenue',
         ]
@@ -1852,71 +1848,27 @@ class EntityFacts:
     # Period resolution
     # ------------------------------------------------------------------
     #
-    # Three parameters name the same thing. `period` is the supported spelling;
-    # `annual` and `period_length` are legacy and both go in 6.0.
-    #
-    # `period_length` was accepted, documented as "3=quarterly, 12=annual", and
-    # never read — it appeared nowhere in the body of either statement method
-    # (#1177). Honouring it is therefore a fix and not a behaviour change: a
-    # caller passing period_length=3 was already getting the annual statement
-    # they did not ask for, silently, which is the failure class 6.0 is closing.
+    # Two parameters name the same thing. `period` is the supported spelling;
+    # `annual` is legacy and goes in a later release. (`period_length` was
+    # removed in 6.0; passing it raises TypeError.)
 
-    _PERIOD_LENGTH_TO_PERIOD = {3: "quarterly", 12: "annual"}
     _VALID_PERIODS = {"annual", "quarterly", "ttm"}
 
     @classmethod
     def _resolve_period(cls,
                         period: Optional[str],
-                        annual: Optional[bool],
-                        period_length: Optional[int]) -> str:
-        """Collapse period/annual/period_length into one period name.
+                        annual: Optional[bool]) -> str:
+        """Collapse period/annual into one period name.
 
-        `period=None` means the caller did not say, which is what lets a
-        contradiction be told apart from the default. Raises ValidationError
-        when the caller asks for two different things at once.
+        `annual`, when given, overrides `period`; with neither the default is
+        annual.
         """
         if annual is not None:
-            explicit = "annual" if annual else "quarterly"
+            resolved = "annual" if annual else "quarterly"
         elif period is not None:
-            explicit = period.lower()
+            resolved = period.lower()
         else:
-            explicit = None
-
-        if period_length is None:
-            resolved = explicit or "annual"
-        else:
-            implied = cls._PERIOD_LENGTH_TO_PERIOD.get(period_length)
-            if implied is None:
-                raise ValidationError(
-                    f"period_length={period_length!r} is not a period this statement can be "
-                    "built for.",
-                    parameter="period_length",
-                    invalid_value=period_length,
-                    suggestions=[
-                        "period_length=3 for quarterly, or period_length=12 for annual",
-                        "better, use period='quarterly' or period='annual' — "
-                        "period_length is removed in 6.0",
-                    ],
-                )
-            if explicit is not None and explicit != implied:
-                raise ValidationError(
-                    f"period_length={period_length!r} means {implied!r}, which contradicts "
-                    f"the {explicit!r} period also requested.",
-                    parameter="period_length",
-                    invalid_value=period_length,
-                    suggestions=[
-                        f"drop period_length and pass period={implied!r}",
-                        f"or drop the {explicit!r} request if you meant {implied!r}",
-                    ],
-                )
-            warnings.warn(
-                "period_length is deprecated and will be removed in v6.0. "
-                "Use period='quarterly' instead of period_length=3, and "
-                "period='annual' instead of period_length=12.",
-                DeprecationWarning,
-                stacklevel=3,
-            )
-            resolved = implied
+            resolved = "annual"
 
         if resolved not in cls._VALID_PERIODS:
             # ValidationError IS-A ValueError, so this stays catchable as one.
@@ -1957,7 +1909,7 @@ class EntityFacts:
     # Financial statement helpers
     def income_statement(self,
                          periods: int = 4,
-                         period_length: Optional[int] = None,
+                         *,
                          as_dataframe: bool = False,
                          annual: Optional[bool] = None,
                          concise_format: bool = False,
@@ -1967,9 +1919,6 @@ class EntityFacts:
 
         Args:
             periods: Number of periods to retrieve
-            period_length: Deprecated, removed in 6.0. Period length in months
-                (3=quarterly, 12=annual); prefer period='quarterly'/'annual'.
-                Raises ValidationError if it contradicts period or annual.
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             annual: Legacy parameter - if provided, overrides period (True='annual', False='quarterly')
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
@@ -1993,7 +1942,7 @@ class EntityFacts:
             stmt = facts.income_statement(periods=4)
             df = stmt.to_dataframe()
         """
-        period = self._resolve_period(period, annual, period_length)
+        period = self._resolve_period(period, annual)
 
         if period == 'ttm':
             from edgar.ttm.statement import TTMStatementBuilder
@@ -2122,20 +2071,9 @@ class EntityFacts:
 
         return df
 
-    def cashflow_statement(self, **kwargs):
-        """Deprecated: use :meth:`cash_flow_statement`."""
-        warnings.warn(
-            "cashflow_statement() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement(), which matches income_statement() and "
-            "balance_sheet().",
-            DeprecationWarning,
-            stacklevel=2,
-        )
-        return self.cash_flow_statement(**kwargs)
-
     def cash_flow_statement(self,
                            periods: int = 4,
-                           period_length: Optional[int] = None,
+                           *,
                            as_dataframe: bool = False,
                            annual: Optional[bool] = None,
                            concise_format: bool = False,
@@ -2145,9 +2083,6 @@ class EntityFacts:
 
         Args:
             periods: Number of periods to retrieve
-            period_length: Deprecated, removed in 6.0. Period length in months
-                (3=quarterly, 12=annual); prefer period='quarterly'/'annual'.
-                Raises ValidationError if it contradicts period or annual.
             as_dataframe: If True, return DataFrame; if False, return MultiPeriodStatement
             annual: Legacy parameter - if provided, overrides period
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
@@ -2168,7 +2103,7 @@ class EntityFacts:
             stmt = facts.cash_flow_statement(periods=4)
             df = stmt.to_dataframe()
         """
-        period = self._resolve_period(period, annual, period_length)
+        period = self._resolve_period(period, annual)
 
         if period == 'ttm':
             from edgar.ttm.statement import TTMStatementBuilder
@@ -2188,19 +2123,6 @@ class EntityFacts:
             as_dataframe=as_dataframe,
             concise_format=concise_format,
         )
-
-    def cash_flow(self, periods: int = 4, period_length: Optional[int] = None, as_dataframe: bool = False,
-                  annual: Optional[bool] = None, concise_format: bool = False) -> Union[DataFrame, MultiPeriodStatement]:
-        """Deprecated: Use cash_flow_statement() instead."""
-        warnings.warn(
-            "cash_flow() is deprecated and will be removed in v6.0. "
-            "Use cash_flow_statement() instead.",
-            DeprecationWarning,
-            stacklevel=2
-        )
-        return self.cash_flow_statement(periods=periods, period_length=period_length,
-                                       as_dataframe=as_dataframe, annual=annual,
-                                       concise_format=concise_format)
 
     # Investment analytics
     def calculate_ratios(self) -> Dict[str, Any]:
@@ -2712,7 +2634,7 @@ class EntityFacts:
         self._suppress_warnings = True
         try:
             revenue_fact = None
-            for concept in ['RevenueFromContractWithCustomerExcludingAssessedTax', 'SalesRevenueNet', 'Revenues', 'Revenue']:
+            for concept in ['Revenues', 'RevenueFromContractWithCustomerExcludingAssessedTax', 'SalesRevenueNet', 'Revenue']:
                 revenue_fact = self.get_fact(concept, period)
                 if revenue_fact:
                     break
@@ -2827,19 +2749,13 @@ class EntityFacts:
             ...         print(f"  - {suggestion}")
         """
         return self._get_standardized_concept_value(
-            concept_variants=[
-                'RevenueFromContractWithCustomerExcludingAssessedTax',
-                'SalesRevenueNet',
-                'Revenues',
-                'Revenue',
-                'TotalRevenues',
-                'NetSales'
-            ],
+            concept_variants=_REVENUE_VARIANTS,
             period=period,
             unit=unit,
             fallback_calculation=self._calculate_revenue_from_components,
             return_detailed=True,
-            annual=annual
+            annual=annual,
+            prefer_consolidated_total=True
         )
 
     def get_net_income_detailed(self, period: Optional[str] = None, unit: Optional[str] = None, annual: bool = True):

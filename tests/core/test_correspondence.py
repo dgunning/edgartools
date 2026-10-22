@@ -6,7 +6,7 @@ Tests use VCR cassettes to replay network requests deterministically.
 
 import pytest
 
-from edgar import Filing, get_obj_info
+from edgar import Filing, _get_obj_info
 from edgar.correspondence import (
     Correspondence,
     CorrespondenceType,
@@ -176,12 +176,12 @@ class TestObjDispatch:
         assert result.correspondence_type == CorrespondenceType.REVIEW_COMPLETE
 
     def test_get_obj_info_corresp(self):
-        has_obj, class_name, desc = get_obj_info('CORRESP')
+        has_obj, class_name, desc = _get_obj_info('CORRESP')
         assert has_obj is True
         assert class_name == 'Correspondence'
 
     def test_get_obj_info_upload(self):
-        has_obj, class_name, desc = get_obj_info('UPLOAD')
+        has_obj, class_name, desc = _get_obj_info('UPLOAD')
         assert has_obj is True
         assert class_name == 'Correspondence'
 

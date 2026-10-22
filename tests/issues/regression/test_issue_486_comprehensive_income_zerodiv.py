@@ -18,7 +18,7 @@ GitHub Issue: https://github.com/dgunning/edgartools/issues/486
 import pytest
 
 from edgar import Company
-from edgar.xbrl.exceptions import StatementNotFound
+from edgar.xbrl.exceptions import StatementNotFoundError
 
 
 class TestComprehensiveIncomeZeroDivision:
@@ -31,7 +31,7 @@ class TestComprehensiveIncomeZeroDivision:
         The original bug was ZeroDivisionError when weight_map sums to zero.
         This test verifies the fix by attempting to access comprehensive income
         on multiple filings - even if the statement doesn't exist, it should
-        NOT raise ZeroDivisionError (it may raise StatementNotFound instead).
+        NOT raise ZeroDivisionError (it may raise StatementNotFoundError instead).
         """
         # Test with Apple which has comprehensive income
         company = Company("AAPL")
@@ -43,7 +43,7 @@ class TestComprehensiveIncomeZeroDivision:
             ci = xb.statements.comprehensive_income()
         except ZeroDivisionError as e:
             pytest.fail(f"ZeroDivisionError raised: {e}. Bug #486 not fixed.")
-        except StatementNotFound as e:
+        except StatementNotFoundError as e:
             pytest.fail(
                 f"Apple's 10-K has no comprehensive income statement ({e}). The "
                 "absence used to be tolerated here, which meant the test could "
@@ -73,7 +73,7 @@ class TestComprehensiveIncomeZeroDivision:
             ci_br = xb.statements['ComprehensiveIncome']
         except ZeroDivisionError as e:
             pytest.fail(f"ZeroDivisionError raised: {e}. Bug #486 not fixed.")
-        except (StatementNotFound, KeyError) as e:
+        except (StatementNotFoundError, KeyError) as e:
             pytest.fail(
                 f"bracket notation could not resolve ComprehensiveIncome for "
                 f"MSFT ({type(e).__name__}: {e}). Tolerating that made a green "
@@ -136,7 +136,7 @@ class TestComprehensiveIncomeZeroDivision:
                 ci_bracket = xb.statements.get('ComprehensiveIncome')
             except ZeroDivisionError as e:
                 pytest.fail(f"ZeroDivisionError for CIK {cik}: {e}. Bug #486 not fixed.")
-            except (StatementNotFound, KeyError):
+            except (StatementNotFoundError, KeyError):
                 # The statement being absent is not this bug; the crash was.
                 continue
 

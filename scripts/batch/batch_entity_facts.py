@@ -1,7 +1,7 @@
 from edgar.entity import EntityFacts
 from edgar.entity.parser import EntityFactsParser
 from edgar.reference.tickers import get_company_tickers
-from edgar.entity.entity_facts import download_company_facts_from_sec, load_company_facts_from_local, NoCompanyFactsFound
+from edgar.entity.entity_facts import download_company_facts_from_sec, load_company_facts_from_local, CompanyFactsNotFoundError
 from tqdm.auto import tqdm
 from edgar import *
 
@@ -22,7 +22,7 @@ def sample_entity_facts(sample=100):
                 income_statement = entity_facts.income_statement()
                 print(income_statement)
                 balance_sheet = entity_facts.balance_sheet()
-        except NoCompanyFactsFound:
+        except CompanyFactsNotFoundError:
             print("No company facts found for CIK:", c.cik)
         except Exception as e:
             print(f"Error processing CIK {c.cik}: {e}")
@@ -41,7 +41,7 @@ def load_entity_facts(cik: str) -> EntityFacts:
     """
     company_facts_json = load_company_facts_from_local(cik)
     if not company_facts_json:
-        raise NoCompanyFactsFound(f"No facts found for CIK {cik}")
+        raise CompanyFactsNotFoundError(cik=cik)
 
     return EntityFactsParser.parse_company_facts(company_facts_json)
 

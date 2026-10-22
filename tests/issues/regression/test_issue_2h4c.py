@@ -19,7 +19,7 @@ Garbage examples verified against real 424B2/424B5 filings (2025 Q1).
 """
 import pytest
 
-from edgar.offerings._424b_tables import is_plausible_underwriter_name as ok
+from edgar.offerings.prospectus._424b_tables import is_plausible_underwriter_name as ok
 from tests._offline_filings import offline_filing
 
 REAL_UNDERWRITER_NAMES = [
@@ -108,7 +108,7 @@ def test_all_garbage_yields_no_underwriters():
 
 def test_resolve_abbreviation_expands_defined_tag():
     """A defined abbreviation expands to its full name; an undefined one is kept."""
-    from edgar.offerings._424b_cover import _resolve_abbreviation
+    from edgar.offerings.prospectus._424b_cover import _resolve_abbreviation
     text = 'Calculation Agent: BofA Securities, Inc. (“BofAS”), an affiliate.'
     assert _resolve_abbreviation("BofAS", text) == "BofA Securities, Inc."
     # Already a full name (not a defined tag) — unchanged.

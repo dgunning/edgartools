@@ -1,4 +1,4 @@
-"""Quarter and date reasoning lives in `edgar.dates`; `edgar.core` re-exports it.
+"""Quarter and date reasoning lives in `edgar.dates`; `edgar.core` no longer re-exports it.
 
 edgartools-07lk.12.1 item (6), staged under 07lk.23's "new paths behind import
 shims" row. This is the same bounded extraction `edgar/settings.py` was in PR
@@ -36,6 +36,8 @@ WHAT THIS FILE GUARDS:
 import ast
 import datetime
 
+import pytest
+
 import edgar.core
 import edgar.dates
 
@@ -60,20 +62,21 @@ class TestTheImplementationMoved:
             )
 
 
-class TestCoreStillReExportsThem:
-    """The shim, removed in 6.0."""
+class TestCoreNoLongerReExportsThem:
+    """The 6.0 removal (edgartools-07lk.22.1)."""
 
-    def test_every_moved_name_is_reachable_from_core(self):
-        missing = [n for n in MOVED_NAMES if not hasattr(edgar.core, n)]
-        assert not missing, f"edgar.core stopped re-exporting: {missing}"
-
-    def test_re_exports_are_the_same_objects(self):
+    def test_every_moved_name_is_importable_from_dates(self):
         for name in MOVED_NAMES:
-            assert getattr(edgar.core, name) is getattr(edgar.dates, name), (
-                f"edgar.core.{name} is a different object from edgar.dates.{name}"
-            )
+            assert callable(getattr(edgar.dates, name)), name
 
-    def test_core_imports_dates_and_not_the_reverse(self):
+    def test_no_moved_name_is_importable_from_core(self):
+        for name in MOVED_NAMES:
+            assert not hasattr(edgar.core, name), f"edgar.core still exposes {name}"
+            assert name not in edgar.core.__all__
+            with pytest.raises(ImportError):
+                exec(f"from edgar.core import {name}")  # noqa: S102
+
+    def test_dates_does_not_import_core(self):
         """Parsed, not searched: dates.py names `edgar.core` in its docstring."""
 
         def imported_modules(module) -> set:
@@ -81,7 +84,6 @@ class TestCoreStillReExportsThem:
             return {n.module for n in ast.walk(tree)
                     if isinstance(n, ast.ImportFrom) and n.module}
 
-        assert "edgar.dates" in imported_modules(edgar.core)
         assert "edgar.core" not in imported_modules(edgar.dates), (
             "edgar.dates must not depend on edgar.core -- that would make the "
             "deprecation shim a circular import"
@@ -93,7 +95,7 @@ class TestWhatDeliberatelyStayedInCore:
 
     def test_non_date_names_did_not_move(self):
         for name in ("listify", "has_html_content", "is_probably_html", "strtobool",
-                     "get_bool", "parallel_thread_map", "DataPager", "Result"):
+                     "get_bool", "parallel_thread_map", "DataPager"):
             assert hasattr(edgar.core, name)
             assert not hasattr(edgar.dates, name), (
                 f"{name} is not date reasoning and should not have moved"

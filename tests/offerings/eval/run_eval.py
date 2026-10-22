@@ -46,7 +46,7 @@ OUTLIER_HIGH = 1e12  # > $1T registered capacity is implausible
 # --------------------------------------------------------------------------
 
 def _facet_fee_capacity(filing):
-    from edgar.offerings._fee_table import extract_registration_fee_table, _get_filing_fees_attachment
+    from edgar.offerings.prospectus._fee_table import extract_registration_fee_table, _get_filing_fees_attachment
     ft = extract_registration_fee_table(filing)
     if ft is None:
         reason = "no EX-FILING-FEES attachment" if _get_filing_fees_attachment(filing) is None \
@@ -148,7 +148,7 @@ def _prospectus(filing):
 
 
 def _facet_lead_bookrunner(filing):
-    from edgar.offerings._424b_tables import is_plausible_underwriter_name
+    from edgar.offerings.prospectus._424b_tables import is_plausible_underwriter_name
     uw = _prospectus(filing).underwriting
     val = uw.lead_manager if uw else None
     if val is None:
@@ -212,7 +212,7 @@ def _is_transport_failure(ex: BaseException) -> bool:
     # outage (#1498), and an EFTS backend error ("getaddrinfo EBUSY") scored five
     # entries as extractor errors, failing whichever facet they fell in.
     return type(ex).__name__ in {
-        "SECFilingNotFoundError", "SECHTMLResponseError", "IdentityNotSetException",
+        "FilingNotFoundError", "SECHTMLResponseError", "IdentityNotSetError",
         "TransportError",
     }
 

@@ -9,7 +9,7 @@ if TYPE_CHECKING:
     from edgar._filings import Filing
     from edgar.filesystem import EdgarPath
 
-from edgar.attachments import Attachment, Attachments, get_document_type
+from edgar.attachments import Attachment, Attachments, get_document_type, safe_attachment_filename, safe_attachment_path
 from edgar.httprequests import stream_with_retry
 from edgar.sgml.filing_summary import FilingSummary
 from edgar.sgml.sgml_header import FilingHeader
@@ -20,18 +20,16 @@ from edgar.sgml.tools import is_xml
 
 def _fetch_url_directly(url: str) -> str:
     """
-    Fetch URL content directly with a fresh httpx2 client, completely bypassing
-    the HTTP cache layer.
+    Refetch a URL past the HTTP cache, for when the cached response is empty or
+    truncated (#672).
 
-    This is used as a retry mechanism when the cached response is empty or invalid.
-    The httpxthrottlecache library reuses a single client instance, so its
-    bypass_cache parameter has no effect after the client is first created.
+    It goes through `uncached_http_client`, so it still sends the user's
+    identity and waits on the shared rate limiter. It used to open a bare
+    httpx2.Client, which skipped the limiter (edgartools-ot9sn).
     """
-    import httpx2
-    from edgar.settings import get_identity
+    from edgar.httpclient import uncached_http_client
 
-    headers = {"User-Agent": get_identity()}
-    with httpx2.Client(headers=headers) as client:
+    with uncached_http_client() as client:
         response = client.get(url)
         return response.text
 
@@ -440,17 +438,18 @@ class FilingSGML:
         path: str or Path - The path to save the attachments
         archive: bool (default False) - If True, save the attachments in a zip file
         """
+        path = Path(path)
         if archive:
             if path.is_dir():
                 raise ValueError("Path must be a zip file name to create zipfile")
             else:
                 with zipfile.ZipFile(path, 'w') as zipf:
                     for document in self._documents_by_name.values():
-                        zipf.writestr(document.filename, document.content)
+                        zipf.writestr(safe_attachment_filename(document.filename), document.content)
         else:
             if path.is_dir():
                 for document in self._documents_by_name.values():
-                    file_path = path / document.filename
+                    file_path = safe_attachment_path(path, document.filename)
                     content = document.content
                     if isinstance(content, bytes):
                         file_path.write_bytes(content)

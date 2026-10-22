@@ -48,7 +48,7 @@ class TestIssue669PreferredSignInDataFrame:
     def test_default_applies_preferred_sign(self, azn_filing):
         """Default to_dataframe() should apply preferred_sign (negate raw values)."""
         xbrl = azn_filing.xbrl()
-        cf = xbrl.statements.cashflow_statement()
+        cf = xbrl.statements.cash_flow_statement()
         assert cf is not None, "AZN 20-F should have a cash flow statement"
         df_pres = cf.to_dataframe()  # presentation=True is default
         df_raw = cf.to_dataframe(presentation=False)
@@ -84,7 +84,7 @@ class TestIssue669PreferredSignInDataFrame:
     def test_presentation_false_returns_raw(self, azn_filing):
         """presentation=False should return unmodified XBRL instance values."""
         xbrl = azn_filing.xbrl()
-        cf = xbrl.statements.cashflow_statement()
+        cf = xbrl.statements.cash_flow_statement()
         assert cf is not None, "AZN 20-F should have a cash flow statement"
         df_pres = cf.to_dataframe(presentation=True)
         df_raw = cf.to_dataframe(presentation=False)
@@ -126,7 +126,7 @@ class TestIssue669StitchedPreferredSign:
         company = Company("AAPL")
         financials = company.get_financials()
         assert financials is not None, "AAPL should have financials"
-        cf = financials.cashflow_statement()
+        cf = financials.cash_flow_statement()
         assert cf is not None, "AAPL financials should have a cash flow statement"
         df = cf.to_dataframe()
         assert 'preferred_sign' in df.columns, "Stitched DataFrame should include preferred_sign column"
@@ -136,7 +136,7 @@ class TestIssue669StitchedPreferredSign:
         company = Company("AAPL")
         financials = company.get_financials()
         assert financials is not None, "AAPL should have financials"
-        cf = financials.cashflow_statement()
+        cf = financials.cash_flow_statement()
         assert cf is not None, "AAPL financials should have a cash flow statement"
 
         df_pres = cf.to_dataframe(presentation=True)

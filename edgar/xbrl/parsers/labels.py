@@ -13,6 +13,7 @@ from lxml import etree as ET
 
 from edgar.xbrl.core import STANDARD_LABEL, extract_element_id
 from edgar.xbrl.models import ElementCatalog, XBRLProcessingError
+from edgar.xmltools import xml_parser
 
 from .base import BaseParser
 
@@ -51,7 +52,7 @@ class LabelsParser(BaseParser):
             }
 
             # Optimize: Use lxml parser with smart string handling
-            parser = ET.XMLParser(remove_blank_text=True, recover=True)
+            parser = xml_parser(remove_blank_text=True, recover=True)
             root = ET.XML(content.encode('utf-8'), parser)
 
             # Optimize: Use specific XPath expressions with namespaces for faster lookups

@@ -262,10 +262,18 @@ def test_jpmorgan_securities_are_investments_and_total_assets_appears_once(jpm_f
 
 
 def test_auburn_national_cash_excludes_its_securities(aubn_fy2023):
-    """Auburn National FY2023 10-K, 0001193125-24-067944: cash and due from banks $27,127K, bank deposits $12,830K, AFS securities $270,910K."""
+    """Auburn National FY2023 10-K, 0001193125-24-067944: cash and due from banks $27,127K, bank deposits $12,830K, AFS securities $270,910K.
+
+    Federal funds sold ($31,412K) joined the cash group in GH #1441, so the group now sums to the
+    filed cash and cash equivalents of $71,369K.
+    """
     cash = _rows(aubn_fy2023, "CashAndMarketableSecurities", "2023-12-31")
-    assert cash == {"us-gaap_CashAndDueFromBanks": 27_127_000, "us-gaap_InterestBearingDepositsInBanks": 12_830_000}
-    assert sum(cash.values()) == 39_957_000
+    assert cash == {
+        "us-gaap_CashAndDueFromBanks": 27_127_000,
+        "us-gaap_FederalFundsSold": 31_412_000,
+        "us-gaap_InterestBearingDepositsInBanks": 12_830_000,
+    }
+    assert sum(cash.values()) == 71_369_000
     assert _rows(aubn_fy2023, "LongtermInvestments", "2023-12-31") == {"us-gaap_AvailableForSaleSecuritiesDebtSecurities": 270_910_000}
 
 

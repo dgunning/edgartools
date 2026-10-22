@@ -34,7 +34,7 @@ from edgar.exceptions import (
     TransportError,
     ValidationError,
 )
-from edgar.httpclient import async_http_client, http_client
+from edgar.httpclient import async_http_client, http_client, uncached_http_client
 from edgar.settings import get_edgar_data_directory
 
 """
@@ -43,6 +43,7 @@ This module provides functions to handle HTTP requests with retry logic, throttl
 __all__ = [
     "get_with_retry",
     "get_with_retry_no_time_budget",
+    "get_once",
     "get_with_retry_async",
     "stream_with_retry",
     "post_with_retry",
@@ -153,8 +154,7 @@ def should_retry(exc: Exception) -> bool:
 
 # TooManyRequestsError and IdentityNotSetError are defined in edgar.exceptions
 # (bead edgartools-07lk.10) and re-exported here, so `from edgar.httprequests
-# import TooManyRequestsError` keeps working. IdentityNotSetException is the
-# deprecated spelling \u2014 see the module __getattr__ at the end of this file.
+# import TooManyRequestsError` keeps working.
 
 
 # =============================================================================
@@ -177,9 +177,10 @@ class SSLDiagnostic:
     configured_verify: bool           # What httpx_params["verify"] says
     client_exists: bool               # Whether HTTP client has been created
     client_verify: Optional[bool]     # What the client is actually using
-    requests_ca_bundle: Optional[str] # REQUESTS_CA_BUNDLE env var
+    requests_ca_bundle: Optional[str] # REQUESTS_CA_BUNDLE env var, which httpx2 never reads
     ssl_cert_file: Optional[str]      # SSL_CERT_FILE env var
-    certifi_path: Optional[str]       # Default Python cert bundle path
+    certifi_path: Optional[str]       # certifi's bundle, if installed: public roots to combine with
+    cert_source: str = "os-store"     # httpclient.get_cert_source() for the configured verify
 
     @property
     def mismatch(self) -> bool:
@@ -190,8 +191,8 @@ class SSLDiagnostic:
 
     @property
     def custom_ca_configured(self) -> bool:
-        """True if a custom CA bundle is configured."""
-        return bool(self.requests_ca_bundle or self.ssl_cert_file)
+        """True if verification reads a CA file or directory instead of the OS store."""
+        return self.cert_source in ("SSL_CERT_FILE", "SSL_CERT_DIR", "custom")
 
     @property
     def status(self) -> str:
@@ -270,7 +271,10 @@ def _get_ssl_diagnostic() -> SSLDiagnostic:
     requests_ca_bundle = os.environ.get('REQUESTS_CA_BUNDLE')
     ssl_cert_file = os.environ.get('SSL_CERT_FILE')
 
-    # Get certifi path
+    from edgar.httpclient import get_cert_source
+
+    # certifi is not what verifies (httpx2 never reads it); its bundle is only
+    # offered as a source of public roots for an SSL_CERT_FILE.
     certifi_path = None
     try:
         import certifi
@@ -285,6 +289,7 @@ def _get_ssl_diagnostic() -> SSLDiagnostic:
         requests_ca_bundle=requests_ca_bundle,
         ssl_cert_file=ssl_cert_file,
         certifi_path=certifi_path,
+        cert_source=get_cert_source(configured_verify),
     )
 
 
@@ -331,6 +336,35 @@ An SSL certificate verification error occurred.""",
     return causes.get(category, causes[SSLErrorCategory.UNKNOWN])
 
 
+def _describe_cert_source(diag: SSLDiagnostic) -> str:
+    """One line naming the CAs that verification trusts."""
+    if diag.cert_source == "os-store":
+        return "OS certificate store"
+    if diag.cert_source == "SSL_CERT_FILE":
+        return f"SSL_CERT_FILE ({diag.ssl_cert_file})"
+    if diag.cert_source == "SSL_CERT_DIR":
+        return f"SSL_CERT_DIR ({os.environ.get('SSL_CERT_DIR')})"
+    if diag.cert_source == "custom":
+        return "custom SSL context"
+    return "none (verification disabled)"
+
+
+def _combined_bundle_steps(diag: SSLDiagnostic) -> str:
+    """Shell steps that build an SSL_CERT_FILE holding the corporate CA and the public roots."""
+    # certifi only supplies the public roots here; it is not what verifies. The floor keeps
+    # the roots CA bundles have since distrusted (emSign, October 2026) out of a new copy.
+    steps = ['     pip install --upgrade "certifi>=2026.10.19"']
+    if diag.certifi_path:
+        steps.append(f'     cat "{diag.certifi_path}" \\')
+    else:
+        steps.append('     cat "$(python -m certifi)" \\')
+    steps += [
+        "         /path/to/corporate-ca.crt > ~/combined-bundle.pem",
+        '     export SSL_CERT_FILE="$HOME/combined-bundle.pem"',
+    ]
+    return "\n".join(steps)
+
+
 def _build_diagnostic_section(diag: SSLDiagnostic) -> str:
     """Build the diagnostic section showing configuration state."""
     lines = ["", "Configuration Status:"]
@@ -345,14 +379,9 @@ def _build_diagnostic_section(diag: SSLDiagnostic) -> str:
         mismatch_marker = "  ⚠️ MISMATCH" if diag.mismatch else ""
         lines.append(f"  HTTP client actual:     {client_str}{mismatch_marker}")
 
-    # Show custom CA if configured
-    if diag.custom_ca_configured:
-        if diag.requests_ca_bundle:
-            lines.append(f"  REQUESTS_CA_BUNDLE:     {diag.requests_ca_bundle}")
-        if diag.ssl_cert_file:
-            lines.append(f"  SSL_CERT_FILE:          {diag.ssl_cert_file}")
-    elif diag.certifi_path:
-        lines.append(f"  Python cert bundle:     {diag.certifi_path}")
+    lines.append(f"  Certificate source:     {_describe_cert_source(diag)}")
+    if diag.requests_ca_bundle:
+        lines.append(f"  REQUESTS_CA_BUNDLE:     {diag.requests_ca_bundle} (not read by edgartools; use SSL_CERT_FILE)")
 
     # Add mismatch explanation if applicable
     if diag.mismatch:
@@ -406,49 +435,46 @@ SSL verification is disabled but connection still failed. Try:
 
   3. Verify SEC.gov is not blocked by your firewall"""
 
-    # CUSTOM_CA_NOT_WORKING: CA bundle configured but not working
+    # CUSTOM_CA_NOT_WORKING: a CA file or directory replaces the OS store and still fails
     if status == "CUSTOM_CA_NOT_WORKING":
-        certifi_path = diag.certifi_path or "/path/to/certifi/cacert.pem"
         return f"""
 Solution:
 ---------
-Custom CA bundle is configured but verification still failed. Check:
+Verification uses {_describe_cert_source(diag)} instead of your OS
+certificate store, and it still failed. Check:
 
-  1. Verify the CA file contains your corporate root certificate
+  1. The file replaces the OS store, so it must hold BOTH your corporate
+     root CA AND the public roots SEC.gov chains to:
 
-  2. Ensure file includes BOTH corporate CA AND standard CAs:
+{_combined_bundle_steps(diag)}
 
-     cat "{certifi_path}" \\
-         /path/to/corporate-ca.crt > ~/combined-bundle.pem
-     export REQUESTS_CA_BUNDLE="$HOME/combined-bundle.pem"
+  2. Or verify against your OS certificate store instead: unset
+     SSL_CERT_FILE / SSL_CERT_DIR, or
 
-  3. Fallback - disable verification:
+     from edgar import configure_http
+     configure_http(use_system_certs=True)
+
+  3. Last resort - disable verification:
 
      from edgar import configure_http
      configure_http(verify_ssl=False)"""
 
-    # SSL_ENABLED: Default state, user hasn't tried to disable
-    certifi_path = diag.certifi_path or "/path/to/certifi/cacert.pem"
-
+    # SSL_ENABLED: verifying against the OS store, the 6.0 default
     if category == SSLErrorCategory.CORPORATE_NETWORK:
-        return """
+        return f"""
 Solutions:
 ----------
+edgartools already verifies against your OS certificate store, so the
+certificate your network presents is signed by a CA that store lacks.
 
-1. RECOMMENDED - Use your OS certificate store:
+1. RECOMMENDED - Ask IT to install your corporate root CA in the OS trust
+   store (Keychain on macOS, the Windows certificate store, or the
+   ca-certificates package on Linux). edgartools picks it up with no code change.
 
-   from edgar import configure_http
-   configure_http(use_system_certs=True)
+2. SECURE OPTION - Point SSL_CERT_FILE at a bundle holding the corporate CA
+   and the public roots:
 
-   # Then your code
-   from edgar import Company
-   company = Company("AAPL")
-
-2. SECURE OPTION - Add corporate root CA certificate:
-
-   Ask IT for your corporate root CA certificate file, then:
-
-   export REQUESTS_CA_BUNDLE="/path/to/corporate-ca-bundle.pem"
+{_combined_bundle_steps(diag)}
 
 3. LAST RESORT - Disable SSL verification:
 
@@ -466,25 +492,21 @@ Solutions:
 
 2. If the issue persists, this may be a temporary SEC.gov issue
 
-3. Try using your OS certificate store:
-
-   from edgar import configure_http
-   configure_http(use_system_certs=True)
-
-4. Last resort - disable SSL verification:
+3. Last resort - disable SSL verification:
 
    from edgar import configure_http
    configure_http(verify_ssl=False)"""
 
     else:
         # Generic solution for other categories
-        return """
+        return f"""
 Solution:
 ---------
-Use your OS certificate store:
+edgartools verifies against your OS certificate store. If your network
+re-signs HTTPS traffic, install its root CA in the OS trust store, or point
+SSL_CERT_FILE at a bundle holding that CA and the public roots:
 
-  from edgar import configure_http
-  configure_http(use_system_certs=True)
+{_combined_bundle_steps(diag)}
 
 If that doesn't work, disable SSL verification (last resort):
 
@@ -524,8 +546,9 @@ Error: {str(self.original_error)}"""
         diagnostic = _build_diagnostic_section(self.diagnostic)
         solution = _build_solution_section(self.category, self.diagnostic)
 
-        footer = """
-💡 Recommended: configure_http(use_system_certs=True) uses your OS certificates securely.
+        footer = f"""
+💡 Certificates are verified against: {_describe_cert_source(self.diagnostic)}.
+   Add a corporate CA to the OS trust store, or point SSL_CERT_FILE at a bundle.
 ⚠️  Only disable SSL verification (verify_ssl=False) as a last resort.
 
 Details: https://github.com/dgunning/edgartools/blob/main/docs/guides/ssl_verification.md"""
@@ -883,6 +906,18 @@ def get_with_retry_no_time_budget(url, identity=None, identity_callable=None, **
     return _get(get_with_retry_no_time_budget, url, identity=identity, identity_callable=identity_callable, **kwargs)
 
 
+@wrap_transport_errors
+@with_identity
+def get_once(url, identity=None, identity_callable=None, **kwargs):
+    """One GET attempt with no retries, through the shared client.
+
+    For an optional refresh that has a local answer to fall back on, such as the
+    live ticker file over the bundled one (GH #1588). Offline, `get_with_retry`
+    spends about 16s in retries before it gives up, which there buys nothing.
+    """
+    return _get(get_once, url, identity=identity, identity_callable=identity_callable, **kwargs)
+
+
 def _get(retry_fn, url, identity=None, identity_callable=None, **kwargs):
     """One GET attempt; a redirect is followed through `retry_fn` with the same kwargs."""
     with _ssl_errors_as_verification_error(url):
@@ -967,12 +1002,14 @@ def stream_with_retry(url, identity=None, identity_callable=None, bypass_cache=F
             as its ``__cause__``.
     """
     try:
-        with http_client(bypass_cache=bypass_cache) as client:
+        client_cm = uncached_http_client() if bypass_cache else http_client()
+        with client_cm as client:
             with client.stream("GET", url, **kwargs) as response:
                 if response.status_code == 429:
                     raise TooManyRequestsError(url, retry_after=_get_retry_after(response))
                 elif is_redirect(response):
-                    response = stream_with_retry(redirect_url(url, response), identity=identity, identity_callable=identity_callable, **kwargs)
+                    response = stream_with_retry(redirect_url(url, response), identity=identity, identity_callable=identity_callable,
+                                                bypass_cache=bypass_cache, **kwargs)
                     yield from response
                 else:
                     yield response
@@ -1733,13 +1770,3 @@ def download_datafile(data_url: str, local_directory: Optional[Path] = None) -> 
     download_filename = local_directory / filename
     download_file(data_url, path=download_filename)
     return download_filename
-
-
-# ---------------------------------------------------------------------------
-# Deprecated names (bead edgartools-07lk.10). Same objects as the canonical
-# classes, so `except IdentityNotSetException:` still works; touching the name
-# warns. Removed in 6.0.
-# ---------------------------------------------------------------------------
-from edgar._compat import deprecated_alias  # noqa: E402
-
-__getattr__ = deprecated_alias(IdentityNotSetException=IdentityNotSetError)

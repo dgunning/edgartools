@@ -205,7 +205,7 @@ def test_issue_450_no_regression_other_statements():
     assert len(balance_df) > 0
 
     # Test cashflow statement
-    cashflow = xbrl.statements.cashflow_statement()
+    cashflow = xbrl.statements.cash_flow_statement()
     assert cashflow is not None
     cashflow_df = cashflow.to_dataframe()
     assert len(cashflow_df) > 0

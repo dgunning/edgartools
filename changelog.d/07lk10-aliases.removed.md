@@ -1,0 +1,1 @@
+**Seven deprecated exception names are removed.** `StatementNotFound`, `NoCompanyFactsFound`, `SECFilingNotFoundError`, `InvalidDateException`, `IdentityNotSetException`, `TooManyRequestsException` and `DataObjectException` warned throughout 5.x and now raise `ImportError`. The replacements in `edgar.exceptions` have existed since 5.48.0. (GH #933, bead edgartools-07lk.10)

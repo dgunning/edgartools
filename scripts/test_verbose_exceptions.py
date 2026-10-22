@@ -10,7 +10,7 @@ import os
 print("=" * 80)
 print("TEST 1: Default behavior (VERBOSE_EXCEPTIONS not set)")
 print("=" * 80)
-print("Expected: No error logs when StatementNotFound is caught\n")
+print("Expected: No error logs when StatementNotFoundError is caught\n")
 
 # First, ensure the environment variable is not set
 if 'EDGAR_VERBOSE_EXCEPTIONS' in os.environ:
@@ -35,7 +35,7 @@ try:
         for stmt_name, stmt_method in [
             ("Balance Sheet", lambda: current.balance_sheet()),
             ("Income Statement", lambda: current.income_statement()),
-            ("Cash Flow", lambda: current.cashflow_statement()),
+            ("Cash Flow", lambda: current.cash_flow_statement()),
         ]:
             try:
                 stmt = stmt_method()
@@ -51,7 +51,7 @@ except Exception as e:
 print("\n" + "=" * 80)
 print("TEST 2: Verbose mode (EDGAR_VERBOSE_EXCEPTIONS=true)")
 print("=" * 80)
-print("Expected: Error logs should appear when StatementNotFound is caught\n")
+print("Expected: Error logs should appear when StatementNotFoundError is caught\n")
 
 # Set the environment variable
 os.environ['EDGAR_VERBOSE_EXCEPTIONS'] = 'true'
@@ -90,7 +90,7 @@ try:
         for stmt_name, stmt_method in [
             ("Balance Sheet", lambda: current.balance_sheet()),
             ("Income Statement", lambda: current.income_statement()),
-            ("Cash Flow", lambda: current.cashflow_statement()),
+            ("Cash Flow", lambda: current.cash_flow_statement()),
         ]:
             try:
                 stmt = stmt_method()

@@ -27,7 +27,7 @@ def test_boeing_product_service_axis_not_breakdown():
     xbrl = filing.xbrl()
 
     stmt = xbrl.statements.income_statement()
-    df = stmt.to_dataframe(include_dimensions=False)
+    df = stmt.to_dataframe(view='standard')
 
     # Find rows with ProductOrServiceAxis (check dimension_axis column, not dimension_label)
     # dimension_axis contains the axis name (e.g., 'srt:ProductOrServiceAxis')

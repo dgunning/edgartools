@@ -12,6 +12,7 @@ from lxml import etree as ET
 
 from edgar.xbrl.core import PERIOD_END_LABEL, PERIOD_START_LABEL, extract_element_id
 from edgar.xbrl.models import ElementCatalog, PresentationNode, PresentationTree, XBRLProcessingError
+from edgar.xmltools import xml_parser
 
 from .base import BaseParser
 
@@ -63,7 +64,7 @@ class PresentationParser(BaseParser):
             }
 
             # Optimize: Use lxml parser with smart string handling
-            parser = ET.XMLParser(remove_blank_text=True, recover=True)
+            parser = xml_parser(remove_blank_text=True, recover=True)
             root = ET.XML(content.encode('utf-8'), parser)
 
             # Optimize: Use XPath with namespaces for faster extraction

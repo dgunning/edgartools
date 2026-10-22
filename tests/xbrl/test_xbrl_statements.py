@@ -143,7 +143,7 @@ def test_get_income_statement(tsla_xbrl):
 
 
 def test_statement_to_dataframe(aapl_xbrl):
-    cashflow_statement: Statement = aapl_xbrl.statements.cashflow_statement()
+    cashflow_statement: Statement = aapl_xbrl.statements.cash_flow_statement()
     print()
     # print(cashflow_statement)
     rendered_statement:RenderedStatement = cashflow_statement.render()
@@ -188,7 +188,7 @@ def test_statement_to_dataframe(aapl_xbrl):
 
 def test_xbrls_cashflow_to_dataframe(aapl_xbrl, aapl_xbrl_2022):
     xbs = XBRLS([aapl_xbrl, aapl_xbrl_2022])
-    cashflow = xbs.statements.cashflow_statement()
+    cashflow = xbs.statements.cash_flow_statement()
     assert cashflow.periods == ['2023-09-30', '2022-09-24']
     # Use presentation=False to assert raw XBRL instance values
     df = cashflow.to_dataframe(presentation=False)
@@ -294,7 +294,7 @@ def test_cashflow_statement_totals():
     filing = Filing(company='Corsair Gaming, Inc.', cik=1743759, form='10-K',
                     filing_date='2025-02-26', accession_no='0000950170-25-027856')
     xbrl: XBRL = XBRL.from_filing(filing)
-    cashflow_statement = xbrl.statements.cashflow_statement()
+    cashflow_statement = xbrl.statements.cash_flow_statement()
     print()
     print(cashflow_statement)
     df = cashflow_statement.to_dataframe()
@@ -641,7 +641,7 @@ def test_periods_property_different_statement_types(aapl_xbrl):
     statements_to_test = {
         'balance_sheet': 'instant',
         'income_statement': 'duration',
-        'cashflow_statement': 'duration'
+        'cash_flow_statement': 'duration'
     }
 
     for stmt_method, expected_type in statements_to_test.items():

@@ -8,27 +8,29 @@ This document showcases common workflows and tasks that financial professionals,
 **Problem:** Need to analyze a company's financial health across multiple periods.
 
 ```python
-from edgar import find
+from edgar import Company
 
 # Get Microsoft's financial data for the last 3 years
-company = find("MSFT")
+company = Company("MSFT")
 financials = company.get_financials()
 
-# Compare key metrics across years
-revenue = financials.extract("Revenues")
-net_income = financials.extract("NetIncomeLoss")
+# Compare key metrics across years (period_offset 0 is the latest year)
+years = [0, 1, 2]
+revenue = [financials.get_revenue(period_offset=i) for i in years]
+net_income = [financials.get_net_income(period_offset=i) for i in years]
 
 # Create a financial dashboard
 import matplotlib.pyplot as plt
 
 fig, ax = plt.subplots(figsize=(10, 6))
-revenue.plot(kind='bar', ax=ax, position=1, width=0.3, color='blue', alpha=0.7)
-net_income.plot(kind='bar', ax=ax, position=0, width=0.3, color='green', alpha=0.7)
+positions = range(len(years))
+ax.bar([p - 0.15 for p in positions], revenue, width=0.3, color='blue', alpha=0.7)
+ax.bar([p + 0.15 for p in positions], net_income, width=0.3, color='green', alpha=0.7)
+ax.set_xticks(list(positions), [f"Year -{i}" if i else "Latest year" for i in years])
 
 ax.set_title('Microsoft Financial Performance')
 ax.legend(['Revenue', 'Net Income'])
-ax.set_ylabel('USD (millions)')
-plt.xticks(rotation=45)
+ax.set_ylabel('USD')
 plt.tight_layout()
 plt.show()
 ```

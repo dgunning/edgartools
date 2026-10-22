@@ -190,8 +190,8 @@ class TestErrorClassification:
         assert len(result["suggestions"]) > 0
 
     def test_no_company_facts(self):
-        from edgar.entity.entity_facts import NoCompanyFactsFound
-        result = classify_error(NoCompanyFactsFound(12345))
+        from edgar.exceptions import CompanyFactsNotFoundError
+        result = classify_error(CompanyFactsNotFoundError(12345))
         assert result["error_code"] == "NO_FACTS_DATA"
 
     def test_no_xbrl_data(self):
@@ -209,7 +209,7 @@ class TestErrorClassification:
         from edgar.httprequests import SSLVerificationError
         result = classify_error(SSLVerificationError("cert failed", "https://efts.sec.gov"))
         assert result["error_code"] == "SSL_ERROR"
-        assert any("use_system_certs" in s for s in result["suggestions"])
+        assert any("SSL_CERT_FILE" in s for s in result["suggestions"])
 
     def test_identity_not_set(self):
         from edgar.httprequests import IdentityNotSetError
@@ -223,8 +223,8 @@ class TestErrorClassification:
         assert result["error_code"] == "IDENTITY_NOT_SET"
 
     def test_sec_filing_not_found(self):
-        from edgar.sgml.sgml_parser import SECFilingNotFoundError
-        result = classify_error(SECFilingNotFoundError("not found"))
+        from edgar.exceptions import FilingNotFoundError
+        result = classify_error(FilingNotFoundError("not found"))
         assert result["error_code"] == "FILING_NOT_FOUND"
 
     def test_timeout_exception(self):

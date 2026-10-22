@@ -228,7 +228,7 @@ The `view` parameter accepts three values:
 | `"detailed"` | All dimensional data included | Segment performance, geographic breakdown, product line analysis |
 | `"summary"` | Non-dimensional totals only | Quick overview of main line items |
 
-The legacy `include_dimensions` boolean is still supported (`include_dimensions=True` is equivalent to `view="detailed"`), but `view` is the preferred API.
+Use `view` to choose dimensional detail. `include_dimensions` was removed from the single-filing statement methods in 6.0 (`include_dimensions=True` is `view="detailed"`); the multi-period methods still accept it, but `view` overrides it and is the preferred API.
 
 ## Period Selection
 

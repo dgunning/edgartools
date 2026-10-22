@@ -196,7 +196,7 @@ class ReverseIndex:
         Normalize an XBRL tag to match index keys.
 
         Handles:
-        - Namespace prefixes (us-gaap:, us-gaap_, ifrs-full:, dei:)
+        - Namespace prefixes (us-gaap:, us-gaap_, srt:, srt_, ifrs-full:, dei:)
         - Case variations
 
         Args:
@@ -231,7 +231,9 @@ class ReverseIndex:
 
         # Strip namespace prefix if present
         normalized = tag
-        for prefix in ("us-gaap:", "us-gaap_", "dei:"):
+        # SRT shares no element name with us-gaap, so a bare srt key cannot answer
+        # for a different taxonomy's concept the way a bare IFRS one could.
+        for prefix in ("us-gaap:", "us-gaap_", "srt:", "srt_", "dei:"):
             if tag.startswith(prefix):
                 normalized = tag[len(prefix):]
                 break

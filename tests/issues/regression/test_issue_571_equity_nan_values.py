@@ -98,7 +98,7 @@ class TestIssue571EquityNaNValues:
         The behavior difference from include_dimensions=True would only appear
         if the statement had additional breakdown dimensions (geographic, segment).
         """
-        stmt = aapl_10k_xbrl.statements.statement_of_equity(include_dimensions=False)
+        stmt = aapl_10k_xbrl.statements.statement_of_equity(view='standard')
 
         # Should respect explicit False setting
         assert stmt._include_dimensions is False
@@ -111,7 +111,7 @@ class TestIssue571EquityNaNValues:
         # dimensions are preserved (they're structural, not breakdown)
         # This is correct per Issue #569: StatementEquityComponentsAxis is
         # marked as structural for StatementOfEquity
-        stmt_with_dims = aapl_10k_xbrl.statements.statement_of_equity(include_dimensions=True)
+        stmt_with_dims = aapl_10k_xbrl.statements.statement_of_equity(view='detailed')
         df_with_dims = stmt_with_dims.to_dataframe()
         non_abstract_with_dims = df_with_dims[df_with_dims['abstract'] == False]
 

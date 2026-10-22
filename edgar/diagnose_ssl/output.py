@@ -2,7 +2,7 @@
 Output formatting for SSL diagnostics - supports terminal and Jupyter notebook.
 """
 
-from .report import CheckStatus, DiagnosticResult
+from .report import CERT_SOURCE_LABELS, CheckStatus, DiagnosticResult
 
 
 def is_notebook() -> bool:
@@ -99,12 +99,7 @@ class TerminalFormatter:
         lines.append(f"  REQUESTS_CA_BUNDLE: {ca_bundle}")
         lines.append(f"  SSL_CERT_FILE:      {ssl_cert}")
         lines.append(f"  CURL_CA_BUNDLE:     {curl_ca}")
-        if result.certificate_config.certifi_path:
-            lines.append(f"  certifi bundle:     {result.certificate_config.certifi_path}")
-            if result.certificate_config.bundle_exists:
-                lines.append(f"  Bundle exists:      Yes ({result.certificate_config.bundle_size_kb} KB)")
-            else:
-                lines.append("  Bundle exists:      No")
+        lines.append(f"  Verifies against:   {CERT_SOURCE_LABELS.get(result.http_client_state.cert_source)}")
         lines.append("")
 
         # Proxy configuration
@@ -306,10 +301,7 @@ class NotebookFormatter:
             ("SSL_CERT_FILE", ssl_cert),
             ("CURL_CA_BUNDLE", curl_ca),
         ]
-        if result.certificate_config.certifi_path:
-            cert_rows.append(("certifi bundle", result.certificate_config.certifi_path))
-            status = f"Yes ({result.certificate_config.bundle_size_kb} KB)" if result.certificate_config.bundle_exists else "No"
-            cert_rows.append(("Bundle exists", status))
+        cert_rows.append(("Verifies against", CERT_SOURCE_LABELS.get(result.http_client_state.cert_source)))
 
         for label, value in cert_rows:
             html_parts.append(

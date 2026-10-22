@@ -9,6 +9,7 @@ if TYPE_CHECKING:
     from edgar.offerings.crowdfunding.campaign import Offering
 
 from lxml import etree
+from edgar.xmltools import xml_parser
 
 from edgar._party import Address
 from edgar.core import get_bool
@@ -335,9 +336,9 @@ class FormC(FormCRenderMixin):
     def from_xml(cls, offering_xml: str, form: str):
         xml_bytes = offering_xml.encode() if isinstance(offering_xml, str) else offering_xml
         try:
-            root = etree.fromstring(xml_bytes)
+            root = etree.fromstring(xml_bytes, parser=xml_parser())
         except etree.XMLSyntaxError:
-            parser = etree.XMLParser(recover=True, huge_tree=True)
+            parser = xml_parser(recover=True, huge_tree=True)
             root = etree.fromstring(xml_bytes, parser=parser)
         _strip_namespaces(root)
 

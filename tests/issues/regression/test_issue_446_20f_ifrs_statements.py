@@ -60,7 +60,7 @@ class TestIssue446_20F_IFRS_Statements:
         assert items_with_values > 0, "Income statement should have items with actual values"
 
         # Test Cash Flow Statement
-        cashflow_statement = statements.cashflow_statement()
+        cashflow_statement = statements.cash_flow_statement()
         assert cashflow_statement is not None, "Cash flow statement should be found"
 
         cf_raw_data = cashflow_statement.get_raw_data()

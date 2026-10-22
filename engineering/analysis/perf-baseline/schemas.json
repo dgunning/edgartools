@@ -94,10 +94,10 @@
         "all_null": false
       },
       "preferred_sign": {
-        "dtype_family": "float",
-        "dtype_exact": "float64",
+        "dtype_family": "integer",
+        "dtype_exact": "Int64",
         "null_tokens": [
-          "NaN"
+          "pd.NA"
         ],
         "all_null": false
       },
@@ -155,7 +155,7 @@
       },
       "is_dimensioned": {
         "dtype_family": "bool",
-        "dtype_exact": "bool",
+        "dtype_exact": "boolean",
         "null_tokens": [],
         "all_null": false
       },
@@ -239,7 +239,7 @@
       },
       "fiscal_year": {
         "dtype_family": "integer",
-        "dtype_exact": "int64",
+        "dtype_exact": "Int64",
         "null_tokens": [],
         "all_null": false
       }
@@ -260,6 +260,7 @@
       "period_key",
       "period_start",
       "period_end",
+      "period_instant",
       "is_dimensioned",
       "decimals",
       "statement_type",
@@ -297,7 +298,7 @@
       },
       "preferred_sign": {
         "dtype_family": "integer",
-        "dtype_exact": "int64",
+        "dtype_exact": "Int64",
         "null_tokens": [],
         "all_null": false
       },
@@ -339,9 +340,17 @@
         "null_tokens": [],
         "all_null": false
       },
+      "period_instant": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": true
+      },
       "is_dimensioned": {
         "dtype_family": "bool",
-        "dtype_exact": "bool",
+        "dtype_exact": "boolean",
         "null_tokens": [],
         "all_null": false
       },
@@ -415,12 +424,12 @@
       },
       "fiscal_year": {
         "dtype_family": "integer",
-        "dtype_exact": "int64",
+        "dtype_exact": "Int64",
         "null_tokens": [],
         "all_null": false
       }
     },
-    "row_count": 141,
+    "row_count": 157,
     "index_dtype_family": "integer",
     "label": "FactsQuery.to_dataframe() [IncomeStatement]"
   },
@@ -494,7 +503,7 @@
       },
       "fiscal_year": {
         "dtype_family": "integer",
-        "dtype_exact": "int64",
+        "dtype_exact": "Int64",
         "null_tokens": [],
         "all_null": false
       },
@@ -584,7 +593,7 @@
       },
       "fiscal_year": {
         "dtype_family": "integer",
-        "dtype_exact": "int64",
+        "dtype_exact": "Int64",
         "null_tokens": [],
         "all_null": false
       },
@@ -642,7 +651,7 @@
       },
       "is_audited": {
         "dtype_family": "bool",
-        "dtype_exact": "bool",
+        "dtype_exact": "boolean",
         "null_tokens": [],
         "all_null": false
       },
@@ -740,7 +749,7 @@
       },
       "fiscal_year": {
         "dtype_family": "integer",
-        "dtype_exact": "int64",
+        "dtype_exact": "Int64",
         "null_tokens": [],
         "all_null": false
       },
@@ -782,13 +791,13 @@
       },
       "is_audited": {
         "dtype_family": "bool",
-        "dtype_exact": "bool",
+        "dtype_exact": "boolean",
         "null_tokens": [],
         "all_null": false
       },
       "is_estimated": {
         "dtype_family": "bool",
-        "dtype_exact": "bool",
+        "dtype_exact": "boolean",
         "null_tokens": [],
         "all_null": false
       },
@@ -841,8 +850,8 @@
         "all_null": false
       },
       "value": {
-        "dtype_family": "integer",
-        "dtype_exact": "int64",
+        "dtype_family": "float",
+        "dtype_exact": "float64",
         "null_tokens": [],
         "all_null": false
       },
@@ -886,7 +895,7 @@
       },
       "fiscal_year": {
         "dtype_family": "integer",
-        "dtype_exact": "int64",
+        "dtype_exact": "Int64",
         "null_tokens": [],
         "all_null": false
       },
@@ -928,13 +937,13 @@
       },
       "is_audited": {
         "dtype_family": "bool",
-        "dtype_exact": "bool",
+        "dtype_exact": "boolean",
         "null_tokens": [],
         "all_null": false
       },
       "is_estimated": {
         "dtype_family": "bool",
-        "dtype_exact": "bool",
+        "dtype_exact": "boolean",
         "null_tokens": [],
         "all_null": false
       },
@@ -974,6 +983,7 @@
       "is_total",
       "filing_count",
       "standardized",
+      "source_filing_index",
       "fiscal_year"
     ],
     "columns": {
@@ -1097,6 +1107,12 @@
         "null_tokens": [],
         "all_null": false
       },
+      "source_filing_index": {
+        "dtype_family": "integer",
+        "dtype_exact": "Int64",
+        "null_tokens": [],
+        "all_null": false
+      },
       "fiscal_year": {
         "dtype_family": "string",
         "dtype_exact": "str",
@@ -1115,6 +1131,2471 @@
     ]
   },
   "Document.to_dataframe()": {
-    "unavailable": "TypeError: Cannot cast array data from dtype('float64') to dtype('int64') according to the rule 'safe'"
+    "column_order": [
+      "0",
+      "1",
+      "_table_index",
+      "_table_type",
+      "_table_caption",
+      "Large accelerated filer Non-accelerated filer",
+      "Large accelerated filer",
+      "Large accelerated filer.1",
+      "\u2612 \u2610",
+      "\u2612",
+      "\u2612.1",
+      "Accelerated filer Smaller reporting company",
+      "Accelerated filer",
+      "Accelerated filer.1",
+      "\u2610",
+      "\u2610.1",
+      "\u2610.2",
+      "2",
+      "row_label",
+      "Family of Apps Year Ended December 31, 2024 (in millions, except percentages)",
+      "Family of Apps",
+      "Family of Apps.1",
+      "Family of Apps.2",
+      "Family of Apps.3",
+      "Family of Apps.4",
+      "Family of Apps 2023",
+      "Family of Apps.5",
+      "Family of Apps.6",
+      "Family of Apps.7",
+      "Family of Apps.8",
+      "Family of Apps.9",
+      "Family of Apps % change",
+      "Family of Apps.10",
+      "Family of Apps.11",
+      "Reality Labs Year Ended December 31, 2024",
+      "Reality Labs",
+      "Reality Labs.1",
+      "Reality Labs.2",
+      "Reality Labs.3",
+      "Reality Labs.4",
+      "Reality Labs 2023",
+      "Reality Labs.5",
+      "Reality Labs.6",
+      "Reality Labs.7",
+      "Reality Labs.8",
+      "Reality Labs.9",
+      "Reality Labs % change",
+      "Reality Labs.10",
+      "Reality Labs.11",
+      "Total Year Ended December 31, 2024",
+      "Total",
+      "Total.1",
+      "Total.2",
+      "Total.3",
+      "Total.4",
+      "Total 2023",
+      "Total.5",
+      "Total.6",
+      "Total.7",
+      "Total.8",
+      "Total.9",
+      "Total % change",
+      "Total.10",
+      "Total.11",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "Year Ended December 31, 2024",
+      "Year Ended December 31,",
+      "Year Ended December 31,.1",
+      "Year Ended December 31,.2",
+      "Year Ended December 31,.3",
+      "Year Ended December 31, 2023",
+      "Year Ended December 31,.4",
+      "Year Ended December 31,.5",
+      "Year Ended December 31,.6",
+      "Year Ended December 31,.7",
+      "Year Ended December 31, 2022",
+      "Year Ended December 31,.8",
+      "Year Ended December 31,.9",
+      "Year Ended December 31,.10",
+      "Year Ended December 31,.11",
+      "Year Ended December 31, 2024 (in millions, except percentages)",
+      "Year Ended December 31, 2023 (in millions, except percentages)",
+      "Year Ended December 31, 2022 (in millions, except percentages)",
+      "2024 vs 2023 % change",
+      "column_14",
+      "2023 vs 2022 % change",
+      "column_16",
+      "column_17",
+      "column_19",
+      "December 31, 2024",
+      "December 31,",
+      "December 31,.1",
+      "December 31,.2",
+      "December 31,.3",
+      "December 31, 2023",
+      "December 31,.4",
+      "Class A and Class B Common Stock",
+      "Class A and Class B Common Stock.1",
+      "Class A and Class B Common Stock.2",
+      "Class A and Class B Common Stock.3",
+      "Class A and Class B Common Stock.4",
+      "Class A and Class B Common Stock.5",
+      "Class A and Class B Common Stock.6",
+      "Class A and Class B Common Stock.7",
+      "Class A and Class B Common Stock.8",
+      "Additional Paid-In Capital",
+      "Additional Paid-In Capital.1",
+      "Additional Paid-In Capital.2",
+      "Accumulated Other Comprehensive Income (Loss)",
+      "Accumulated Other Comprehensive Income (Loss).1",
+      "Accumulated Other Comprehensive Income (Loss).2",
+      "Retained Earnings",
+      "Retained Earnings.1",
+      "Retained Earnings.2",
+      "Total Stockholders' Equity",
+      "Total Stockholders' Equity.1",
+      "Total Stockholders' Equity.2",
+      "Year Ended December 31, 2024 (1)",
+      "Year Ended December 31, 2023 (2)",
+      "Year Ended December 31, 2022 (2)",
+      "December 31, 2024 Less than 12 months Fair Value",
+      "December 31, 2024.1",
+      "December 31, 2024.2",
+      "December 31, 2024.3",
+      "December 31, 2024.4",
+      "December 31, 2024 Unrealized Losses",
+      "December 31, 2024.5",
+      "December 31, 2024.6",
+      "December 31, 2024.7",
+      "December 31, 2024.8",
+      "December 31, 2024.9",
+      "December 31, 2024 12 months or greater Fair Value",
+      "December 31, 2024.10",
+      "December 31, 2024.11",
+      "December 31, 2024.12",
+      "December 31, 2024.13",
+      "December 31, 2024 Unrealized Losses.1",
+      "December 31, 2024.14",
+      "December 31, 2024.15",
+      "December 31, 2024.16",
+      "December 31, 2024.17",
+      "December 31, 2024.18",
+      "December 31, 2024 Total Fair Value",
+      "December 31, 2024.19",
+      "December 31, 2024.20",
+      "December 31, 2024.21",
+      "December 31, 2024.22",
+      "December 31, 2024 Unrealized Losses.2",
+      "December 31, 2024.23",
+      "December 31, 2024.24",
+      "December 31, 2023 Less than 12 months Fair Value",
+      "December 31, 2023.1",
+      "December 31, 2023.2",
+      "December 31, 2023.3",
+      "December 31, 2023.4",
+      "December 31, 2023 Unrealized Losses",
+      "December 31, 2023.5",
+      "December 31, 2023.6",
+      "December 31, 2023.7",
+      "December 31, 2023.8",
+      "December 31, 2023.9",
+      "December 31, 2023 12 months or greater Fair Value",
+      "December 31, 2023.10",
+      "December 31, 2023.11",
+      "December 31, 2023.12",
+      "December 31, 2023.13",
+      "December 31, 2023 Unrealized Losses.1",
+      "December 31, 2023.14",
+      "December 31, 2023.15",
+      "December 31, 2023.16",
+      "December 31, 2023.17",
+      "December 31, 2023.18",
+      "December 31, 2023 Total Fair Value",
+      "December 31, 2023.19",
+      "December 31, 2023.20",
+      "December 31, 2023.21",
+      "December 31, 2023.22",
+      "December 31, 2023 Unrealized Losses.2",
+      "December 31, 2023.23",
+      "December 31, 2023.24",
+      "December 31,.5",
+      "December 31,.6",
+      "Weighted-Average Remaining Useful Lives (in years)",
+      "December 31, 2024 Gross Carrying Amount",
+      "December 31, 2024 Accumulated Amortization",
+      "December 31, 2024 Net Carrying Amount",
+      "December 31, 2023 Gross Carrying Amount",
+      "December 31, 2023 Accumulated Amortization",
+      "December 31, 2023 Net Carrying Amount",
+      "Maturity",
+      "Maturity.1",
+      "Maturity.2",
+      "Stated Interest Rate",
+      "Stated Interest Rate.1",
+      "Stated Interest Rate.2",
+      "Effective Interest Rate",
+      "Effective Interest Rate.1",
+      "Effective Interest Rate.2",
+      "2025 through 2026",
+      "2025 through 2026.1",
+      "2025 through 2026.2",
+      "$\u2014",
+      "Exhibit Number",
+      "Exhibit",
+      "Exhibit.1",
+      "Exhibit Description",
+      "column_4",
+      "column_5",
+      "Incorporated by Reference Form",
+      "Incorporated by Reference",
+      "Incorporated by Reference.1",
+      "Incorporated by Reference.2",
+      "Incorporated by Reference.3",
+      "Incorporated by Reference.4",
+      "Incorporated by Reference File No.",
+      "Incorporated by Reference.5",
+      "Incorporated by Reference.6",
+      "Incorporated by Reference.7",
+      "Incorporated by Reference.8",
+      "Incorporated by Reference.9",
+      "Incorporated by Reference Exhibit",
+      "Incorporated by Reference.10",
+      "Incorporated by Reference.11",
+      "Incorporated by Reference.12",
+      "Incorporated by Reference.13",
+      "Incorporated by Reference.14",
+      "Incorporated by Reference Filing Date",
+      "Incorporated by Reference.15",
+      "Incorporated by Reference.16",
+      "Filed Herewith",
+      "Filed Herewith.1",
+      "Filed Herewith.2",
+      "Exhibit Number 10.2(A)+ 10.2(B)+ 10.2(C)+ 10.2(D)+ 10.2(E)+ 10.2(F)+ 10.2(G)+ 10.2(H)+ 10.2(I)+ 10.2(J)+ 10.2(K)+ 10.5+ 10.6+ 10.7+ 10.8+",
+      "Exhibit Description 2012 Equity Incentive Plan, as amended. Third Amendment to the 2012 Equity Incentive Plan. Fourth Amendment to the 2012 Equity Incentive Plan. 2012 Equity Incentive Plan forms of award agreements. 2012 Equity Incentive Plan forms of award agreements (Additional Forms). Offer Letter, dated June 5, 2020, between Registrant and Christopher K. Cox. Offer Letter, dated December 22, 2022, between Registrant and Javier Olivan. Offer Letter, dated March 14, 2022, between Registrant and Andrew Bosworth. Offer Letter, dated November 1, 2022, between Registrant and Susan Li.",
+      "Incorporated by Reference Form 10-K 10-Q 10-K 10-Q 10-K 10-Q",
+      "Incorporated by Reference File No. 001-35551",
+      "Incorporated by Reference Exhibit 10.2(A) 10.2(B) 10.1 10.2 10.3(G) 10.2 10.3 10.1 10.2 10.1 10.8 10.3 10.4",
+      "Incorporated by Reference Filing Date February 2, 2023 August 1, 2024 April 26, 2018 January 31, 2019 April 25, 2019 April 30, 2020 July 29, 2021 April 28, 2022 April 27, 2023 April 25, 2024 April 29, 2021 February 2, 2023 April 27, 2023",
+      "Exhibit Number 32.1# 32.2# 101. INS 101. SCH 101. CAL 101. DEF 101. LAB 101. PRE",
+      "Exhibit Description Certification of Mark Zuckerberg, Chief Executive Officer, pursuant to 18 U.S.C. Section 1350, as adopted pursuant to Section 906 of the Sarbanes-Oxley Act of 2002. Certification of Susan Li, Chief Financial Officer, pursuant to 18 U.S.C. Section 1350, as adopted pursuant to Section 906 of the Sarbanes-Oxley Act of 2002. Inline XBRL Instance Document (the instance document does not appear in the Interactive Data File because its XBRL tags are embedded within the Inline XBRL document). Inline XBRL Taxonomy Extension Schema Document. Inline XBRL Taxonomy Extension Calculation Linkbase Document. Inline XBRL Taxonomy Extension Definition Linkbase Document. Inline XBRL Taxonomy Extension Labels Linkbase Document. Inline XBRL Taxonomy Extension Presentation Linkbase Document.",
+      "Filed Herewith X",
+      "Signature+ /s/ Mark Zuckerberg",
+      "Signature+",
+      "Signature+.1",
+      "Title Chairman and Chief Executive Officer (Principal Executive Officer)",
+      "Title",
+      "Title.1",
+      "Date January 29, 2025",
+      "Date",
+      "Date.1",
+      "Signature /s/ Hock E. Tan",
+      "Signature",
+      "Signature.1",
+      "Title Director"
+    ],
+    "columns": {
+      "0": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "_table_index": {
+        "dtype_family": "integer",
+        "dtype_exact": "int64",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "_table_type": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [],
+        "all_null": false
+      },
+      "_table_caption": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "None"
+        ],
+        "all_null": true
+      },
+      "Large accelerated filer Non-accelerated filer": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Large accelerated filer": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Large accelerated filer.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "\u2612 \u2610": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "\u2612": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "\u2612.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Accelerated filer Smaller reporting company": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Accelerated filer": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Accelerated filer.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "\u2610": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "\u2610.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "\u2610.2": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "2": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "row_label": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Family of Apps Year Ended December 31, 2024 (in millions, except percentages)": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Family of Apps": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Family of Apps.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Family of Apps.2": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Family of Apps.3": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Family of Apps.4": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Family of Apps 2023": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Family of Apps.5": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Family of Apps.6": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Family of Apps.7": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Family of Apps.8": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Family of Apps.9": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Family of Apps % change": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Family of Apps.10": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Family of Apps.11": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Reality Labs Year Ended December 31, 2024": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Reality Labs": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Reality Labs.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Reality Labs.2": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Reality Labs.3": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Reality Labs.4": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Reality Labs 2023": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Reality Labs.5": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Reality Labs.6": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Reality Labs.7": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Reality Labs.8": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Reality Labs.9": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Reality Labs % change": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Reality Labs.10": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Reality Labs.11": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Total Year Ended December 31, 2024": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Total": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Total.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Total.2": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Total.3": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Total.4": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Total 2023": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Total.5": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Total.6": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Total.7": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Total.8": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Total.9": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Total % change": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Total.10": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Total.11": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "3": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "4": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "5": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "6": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "7": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "8": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "9": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31, 2024": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,.1": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,.2": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,.3": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Year Ended December 31, 2023": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,.4": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,.5": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,.6": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,.7": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31, 2022": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,.8": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,.9": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,.10": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31,.11": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31, 2024 (in millions, except percentages)": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31, 2023 (in millions, except percentages)": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31, 2022 (in millions, except percentages)": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "2024 vs 2023 % change": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "column_14": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "2023 vs 2022 % change": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "column_16": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "column_17": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "column_19": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "December 31,": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "December 31,.1": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31,.2": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "December 31,.3": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2023": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "December 31,.4": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Class A and Class B Common Stock": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Class A and Class B Common Stock.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Class A and Class B Common Stock.2": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Class A and Class B Common Stock.3": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Class A and Class B Common Stock.4": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Class A and Class B Common Stock.5": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Class A and Class B Common Stock.6": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Class A and Class B Common Stock.7": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Class A and Class B Common Stock.8": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Additional Paid-In Capital": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Additional Paid-In Capital.1": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Additional Paid-In Capital.2": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Accumulated Other Comprehensive Income (Loss)": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Accumulated Other Comprehensive Income (Loss).1": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Accumulated Other Comprehensive Income (Loss).2": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Retained Earnings": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Retained Earnings.1": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Retained Earnings.2": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Total Stockholders' Equity": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Total Stockholders' Equity.1": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Total Stockholders' Equity.2": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31, 2024 (1)": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31, 2023 (2)": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Year Ended December 31, 2022 (2)": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024 Less than 12 months Fair Value": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.1": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.2": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.3": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2024.4": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2024 Unrealized Losses": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.5": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.6": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.7": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.8": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2024.9": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2024 12 months or greater Fair Value": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.10": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.11": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.12": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2024.13": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2024 Unrealized Losses.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.14": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.15": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.16": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.17": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2024.18": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2024 Total Fair Value": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.19": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.20": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.21": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2024.22": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2024 Unrealized Losses.2": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.23": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024.24": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023 Less than 12 months Fair Value": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.2": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.3": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2023.4": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2023 Unrealized Losses": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.5": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.6": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.7": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.8": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2023.9": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2023 12 months or greater Fair Value": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.10": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.11": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.12": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2023.13": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2023 Unrealized Losses.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.14": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.15": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.16": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.17": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2023.18": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2023 Total Fair Value": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.19": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.20": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.21": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2023.22": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "December 31, 2023 Unrealized Losses.2": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.23": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023.24": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "December 31,.5": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "December 31,.6": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Weighted-Average Remaining Useful Lives (in years)": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024 Gross Carrying Amount": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024 Accumulated Amortization": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2024 Net Carrying Amount": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023 Gross Carrying Amount": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023 Accumulated Amortization": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "December 31, 2023 Net Carrying Amount": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Maturity": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Maturity.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Maturity.2": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Stated Interest Rate": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Stated Interest Rate.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Stated Interest Rate.2": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Effective Interest Rate": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Effective Interest Rate.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Effective Interest Rate.2": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "2025 through 2026": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "2025 through 2026.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "2025 through 2026.2": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "$\u2014": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Exhibit Number": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Exhibit": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Exhibit.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Exhibit Description": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "column_4": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "column_5": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference Form": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Incorporated by Reference": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference.2": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Incorporated by Reference.3": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference.4": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference File No.": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Incorporated by Reference.5": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference.6": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference.7": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Incorporated by Reference.8": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference.9": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference Exhibit": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Incorporated by Reference.10": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference.11": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference.12": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Incorporated by Reference.13": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference.14": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference Filing Date": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Incorporated by Reference.15": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Incorporated by Reference.16": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Filed Herewith": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Filed Herewith.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Filed Herewith.2": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Exhibit Number 10.2(A)+ 10.2(B)+ 10.2(C)+ 10.2(D)+ 10.2(E)+ 10.2(F)+ 10.2(G)+ 10.2(H)+ 10.2(I)+ 10.2(J)+ 10.2(K)+ 10.5+ 10.6+ 10.7+ 10.8+": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Exhibit Description 2012 Equity Incentive Plan, as amended. Third Amendment to the 2012 Equity Incentive Plan. Fourth Amendment to the 2012 Equity Incentive Plan. 2012 Equity Incentive Plan forms of award agreements. 2012 Equity Incentive Plan forms of award agreements (Additional Forms). Offer Letter, dated June 5, 2020, between Registrant and Christopher K. Cox. Offer Letter, dated December 22, 2022, between Registrant and Javier Olivan. Offer Letter, dated March 14, 2022, between Registrant and Andrew Bosworth. Offer Letter, dated November 1, 2022, between Registrant and Susan Li.": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Incorporated by Reference Form 10-K 10-Q 10-K 10-Q 10-K 10-Q": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Incorporated by Reference File No. 001-35551": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Incorporated by Reference Exhibit 10.2(A) 10.2(B) 10.1 10.2 10.3(G) 10.2 10.3 10.1 10.2 10.1 10.8 10.3 10.4": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Incorporated by Reference Filing Date February 2, 2023 August 1, 2024 April 26, 2018 January 31, 2019 April 25, 2019 April 30, 2020 July 29, 2021 April 28, 2022 April 27, 2023 April 25, 2024 April 29, 2021 February 2, 2023 April 27, 2023": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Exhibit Number 32.1# 32.2# 101. INS 101. SCH 101. CAL 101. DEF 101. LAB 101. PRE": {
+        "dtype_family": "float",
+        "dtype_exact": "float64",
+        "null_tokens": [
+          "NaN"
+        ],
+        "all_null": false
+      },
+      "Exhibit Description Certification of Mark Zuckerberg, Chief Executive Officer, pursuant to 18 U.S.C. Section 1350, as adopted pursuant to Section 906 of the Sarbanes-Oxley Act of 2002. Certification of Susan Li, Chief Financial Officer, pursuant to 18 U.S.C. Section 1350, as adopted pursuant to Section 906 of the Sarbanes-Oxley Act of 2002. Inline XBRL Instance Document (the instance document does not appear in the Interactive Data File because its XBRL tags are embedded within the Inline XBRL document). Inline XBRL Taxonomy Extension Schema Document. Inline XBRL Taxonomy Extension Calculation Linkbase Document. Inline XBRL Taxonomy Extension Definition Linkbase Document. Inline XBRL Taxonomy Extension Labels Linkbase Document. Inline XBRL Taxonomy Extension Presentation Linkbase Document.": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Filed Herewith X": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Signature+ /s/ Mark Zuckerberg": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Signature+": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Signature+.1": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Title Chairman and Chief Executive Officer (Principal Executive Officer)": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Title": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Title.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Date January 29, 2025": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Date": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Date.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": false
+      },
+      "Signature /s/ Hock E. Tan": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      },
+      "Signature": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Signature.1": {
+        "dtype_family": "object",
+        "dtype_exact": "object",
+        "null_tokens": [
+          "NaN",
+          "None"
+        ],
+        "all_null": true
+      },
+      "Title Director": {
+        "dtype_family": "string",
+        "dtype_exact": "str",
+        "null_tokens": [
+          "pd.NA"
+        ],
+        "all_null": false
+      }
+    },
+    "row_count": 568,
+    "index_dtype_family": "integer",
+    "label": "Document.to_dataframe()"
   }
 }

@@ -7,7 +7,7 @@ Ground truth filings:
   - Arxis, Inc. (0001193125-26-106851) — DRS/A, S-1 underlying
 """
 import pytest
-from edgar.offerings.drs import DraftRegistrationStatement, _detect_underlying_form
+from edgar.offerings.prospectus.drs import DraftRegistrationStatement, _detect_underlying_form
 
 
 # ---------------------------------------------------------------------------
@@ -88,14 +88,14 @@ class TestUnderlyingFormDetection:
 class TestObjInfo:
 
     def test_drs_obj_info(self):
-        from edgar import get_obj_info
-        has_obj, class_name, desc = get_obj_info("DRS")
+        from edgar import _get_obj_info
+        has_obj, class_name, desc = _get_obj_info("DRS")
         assert has_obj is True
         assert class_name == 'DraftRegistrationStatement'
 
     def test_drs_a_obj_info(self):
-        from edgar import get_obj_info
-        has_obj, class_name, desc = get_obj_info("DRS/A")
+        from edgar import _get_obj_info
+        has_obj, class_name, desc = _get_obj_info("DRS/A")
         assert has_obj is True
         assert class_name == 'DraftRegistrationStatement'
 
@@ -122,7 +122,7 @@ class TestDraftRegistrationStatement:
         assert drs.registration_number == '377-09148'
 
         # Underlying object should be RegistrationS1
-        from edgar.offerings.registration_s1 import RegistrationS1
+        from edgar.offerings.prospectus.registration_s1 import RegistrationS1
         assert isinstance(drs.underlying_object, RegistrationS1)
 
     def test_f1_drs_texxon(self):
@@ -137,7 +137,7 @@ class TestDraftRegistrationStatement:
         assert drs.is_amendment is False
 
         # F-1 also delegates to RegistrationS1
-        from edgar.offerings.registration_s1 import RegistrationS1
+        from edgar.offerings.prospectus.registration_s1 import RegistrationS1
         assert isinstance(drs.underlying_object, RegistrationS1)
 
     def test_drs_amendment_arxis(self):

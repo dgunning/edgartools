@@ -40,7 +40,6 @@ from edgar.xbrl.core import (
 )
 from edgar.xbrl.models import Axis, Domain, PresentationNode, is_negated_label_role
 from edgar.xbrl.parsers import XBRLParser
-from edgar.xbrl.period_selector import select_periods
 from edgar.xbrl.periods import get_period_views
 from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
 from edgar.exceptions import NotFoundError
@@ -409,6 +408,8 @@ class XBRL:
         self._statement_by_role_uri = {}
         self._statement_by_role_name = {}
         self._all_statements_cached = None
+        # GH #1468: role URI -> the co-registrant member a face statement belongs to
+        self._coregistrant_members: Optional[Dict[str, str]] = None
 
         # SGML period_of_report for date discrepancy detection
         self._sgml_period_of_report: Optional[str] = None
@@ -1775,6 +1776,11 @@ class XBRL:
         # Find facts for any of these concept names
         all_relevant_facts = self._find_facts_for_element(node.element_name, period_filter)
 
+        # GH #1468: a co-registrant's own face statement reads that registrant's facts
+        coregistrant_member = self._coregistrant_member(statement_role)
+        if coregistrant_member:
+            all_relevant_facts = _project_coregistrant_facts(all_relevant_facts, coregistrant_member)
+
         # Group facts by period for better selection
         facts_by_period = {}
 
@@ -2503,6 +2509,70 @@ class XBRL:
 
         return best_fact
 
+    def _coregistrant_member(self, role: Optional[str]) -> Optional[str]:
+        """
+        Return the legal-entity member whose own face statement this role is, or None.
+
+        GH #1468: a filing for several registrants (AAL with American Airlines,
+        Inc.; Duke with its utilities) gives each subsidiary its own statement
+        roles. Their presentation trees list dei:LegalEntityAxis with the domain
+        and one member, so under XBRL rules the undimensioned facts -- the
+        parent's -- fill the plain rows, and SEC's R-file viewer shows them that
+        way. The filing's HTML shows only the subsidiary. A role counts as the
+        subsidiary's own statement when it:
+
+        - is a face statement (FilingSummary 'Statements' menu, or a classified
+          statement type when the filing has no FilingSummary),
+        - names exactly one dei:LegalEntityAxis member, and
+        - has a sibling face statement of the same kind without the axis, which
+          is the parent's.
+
+        The sibling check matters: Simon Property, NextEra and Dominion file one
+        combined role per statement holding the parent's facts plus one
+        subsidiary member, and that role is the parent's own statement. Notes
+        and details roles with a single member legitimately show both entities
+        and are never matched.
+        """
+        if not role:
+            return None
+        if self._coregistrant_members is None:
+            self._coregistrant_members = self._find_coregistrant_members()
+        return self._coregistrant_members.get(role)
+
+    def _find_coregistrant_members(self) -> Dict[str, str]:
+        has_filing_summary = bool(self._filing_summary_menu_categories)
+        face_types = set(statement_to_concepts)
+
+        def is_face(statement: Dict[str, Any]) -> bool:
+            if has_filing_summary:
+                return (statement.get('menu_category') or '').lower() == 'statements'
+            statement_type = statement.get('type') or ''
+            return statement_type.removesuffix('Parenthetical') in face_types
+
+        def kind(statement: Dict[str, Any]) -> Tuple[Any, Any, bool]:
+            parenthetical = 'parenthetical' in (statement.get('definition') or '').lower()
+            return statement.get('primary_concept'), statement.get('type'), parenthetical
+
+        candidates = {}
+        plain_kinds = []
+        for statement in self.get_all_statements():
+            tree = self.presentation_trees.get(statement['role'])
+            if tree is None or not is_face(statement):
+                continue
+            members = _legal_entity_members(tree.all_nodes)
+            if members is None:
+                plain_kinds.append(kind(statement))
+            elif len(members) == 1:
+                candidates[statement['role']] = (members[0], kind(statement))
+
+        coregistrant_members = {}
+        for role, (member, (concept, statement_type, parenthetical)) in candidates.items():
+            if any((concept == plain_concept or (statement_type and statement_type == plain_type))
+                   and parenthetical == plain_parenthetical
+                   for plain_concept, plain_type, plain_parenthetical in plain_kinds):
+                coregistrant_members[role] = member
+        return coregistrant_members
+
     def _find_facts_for_element(self, element_name: str, period_filter: Optional[str] = None,
                                 dimensions: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
@@ -2852,9 +2922,15 @@ class XBRL:
         if parenthetical and 'parenthetical' not in statement_title.lower():
             statement_title = f"{statement_title} (Parenthetical)"
 
-        # Get periods to display using unified period selection
-        periods_to_display = select_periods(
-            self, actual_statement_type, max_periods=4
+        # GH #1469: honour period_filter the way Statement.to_dataframe()
+        # does, and let an instant-only note choose its own instants.
+        # period_view stays unwired here: its views can name periods that
+        # reporting_periods lacks, which would drop columns (edgartools-vsmia).
+        from edgar.xbrl.periods import determine_periods_to_display
+        periods_to_display = determine_periods_to_display(
+            self, actual_statement_type,
+            period_filter=period_filter,
+            statement_data=statement_data
         )
 
         # Render the statement
@@ -3445,3 +3521,50 @@ class XBRL:
         """
         from edgar.richtools import Docs
         return Docs(self)
+
+
+_LEGAL_ENTITY_AXIS = 'dei_LegalEntityAxis'
+
+
+def _legal_entity_members(nodes: Dict[str, PresentationNode]) -> Optional[List[str]]:
+    """Return the dei:LegalEntityAxis members under a presentation tree, or None without the axis."""
+    axis = nodes.get(_LEGAL_ENTITY_AXIS)
+    if axis is None:
+        return None
+    members = []
+    pending = list(axis.children)
+    while pending:
+        element_id = pending.pop()
+        if not element_id.endswith('Domain'):
+            members.append(element_id)
+        node = nodes.get(element_id)
+        if node is not None:
+            pending.extend(node.children)
+    return members
+
+
+def _project_coregistrant_facts(facts: Dict[str, Any], member: str) -> Dict[str, Any]:
+    """
+    Keep one co-registrant's facts and present them as the statement's own (GH #1468).
+
+    A fact tagged with the member loses that axis and keeps any other (equity
+    components, consolidation items), so it lands on the plain row or the same
+    breakdown row the parent's fact would. Undimensioned facts are the
+    parent's, and facts for other legal entities belong to other statements;
+    both are dropped.
+    """
+    projected = {}
+    for context_id, wrapped_fact in facts.items():
+        dimension_info = wrapped_fact['dimension_info']
+        own = [info for info in dimension_info
+               if info['dimension'].replace(':', '_') == _LEGAL_ENTITY_AXIS
+               and info['member'].replace(':', '_') == member]
+        if not own:
+            continue
+        remaining = [info for info in dimension_info if info not in own]
+        projected[context_id] = {
+            **wrapped_fact,
+            'dimension_info': remaining,
+            'dimension_key': ", ".join(sorted(info['format_key'] for info in remaining)),
+        }
+    return projected

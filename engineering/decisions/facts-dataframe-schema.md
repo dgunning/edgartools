@@ -147,6 +147,13 @@ changes what `.dtype` reports and moves those columns' null sentinel from `NaN`
 to `pd.NA`. That is precisely the class of change #929 asked to be told about in
 advance, so it goes in the breaking window with a migration-guide entry.
 
+**Landed 2026-10-16** (GH #1100, `rsyt.2` and `7wtj.1` together). Both XBRL columns
+are pinned. So is `is_dimensioned`, as `boolean`: it is always populated as numpy
+`bool`, so an empty result (declared `boolean`) disagreed with a populated one, the
+zero-row form of this bug. On the entity path `fiscal_year`, `is_audited` and
+`is_estimated` are pinned as `Int64`/`boolean` and `NULL_DTYPES` is gone, because
+the declared dtype now holds a null itself. The stitching path keeps its own spec.
+
 Every schema change here gets its own CHANGELOG entry, per the commitment in
 [gh-929 comment 5170334125](https://github.com/dgunning/edgartools/issues/929#issuecomment-5170334125).
 

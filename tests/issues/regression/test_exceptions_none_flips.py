@@ -259,35 +259,57 @@ def test_the_error_handling_guide_exists():
     assert GUIDE.exists(), f"{GUIDE} is referenced from mkdocs.yml and upgrade/6.0.md"
 
 
-def test_every_exception_the_guide_names_exists():
-    """A guide that teaches a handler for a class we do not raise is worse than
-    no guide: the `except` clause silently never fires.
+REMOVED_SECTION = "## Names removed in 6.0"
 
-    Resolution spans more than `edgar.exceptions` on purpose. Two classes live
-    elsewhere by design — `SSLVerificationError` categorises an httpx error to
-    build its message, and `edgar.exceptions` admits no third-party type — and
-    the deprecated spellings resolve through their own modules' `__getattr__`.
-    A test that only looked in one module would report those as missing.
-    """
+
+def _guide_parts():
+    """The guide split into (everything else, the removed-names section)."""
+    text = GUIDE.read_text()
+    assert REMOVED_SECTION in text, f"{GUIDE} lost its '{REMOVED_SECTION}' section"
+    before, after = text.split(REMOVED_SECTION, 1)
+    removed, _, rest = after.partition("\n## ")
+    return before + rest, removed
+
+
+def _exception_names(text):
+    named = set(re.findall(r"\b([A-Z][A-Za-z]*(?:Error|Warning|Exception))\b", text))
+    builtins_and_stdlib = {"ValueError", "LookupError", "KeyError", "ConnectionError",
+                           "FutureWarning", "DeprecationWarning", "AttributeError", "TypeError",
+                           "ImportError"}
+    return named - builtins_and_stdlib
+
+
+def _resolves(name):
+    """Resolution spans more than `edgar.exceptions` on purpose: `SSLVerificationError`
+    lives in edgar.httprequests because it categorises an httpx error, and
+    `edgar.exceptions` admits no third-party type. The modules listed are every
+    one that resolved a deprecated spelling in 5.x."""
     import importlib
 
     modules = [importlib.import_module(name) for name in (
         "edgar.exceptions", "edgar", "edgar.httprequests", "edgar.dates",
         "edgar.core", "edgar.xbrl.exceptions", "edgar.sgml.sgml_parser",
-        "edgar.entity.entity_facts",
+        "edgar.entity", "edgar.entity.core", "edgar.entity.entity_facts",
     )]
+    return any(getattr(module, name, None) is not None for module in modules)
 
-    named = set(re.findall(r"\b([A-Z][A-Za-z]*(?:Error|Warning|Exception))\b", GUIDE.read_text()))
-    builtins_and_stdlib = {"ValueError", "LookupError", "KeyError", "ConnectionError",
-                           "FutureWarning", "DeprecationWarning", "AttributeError", "TypeError"}
 
-    def resolves(name):
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", DeprecationWarning)
-            return any(getattr(module, name, None) is not None for module in modules)
-
-    unknown = sorted(name for name in named - builtins_and_stdlib if not resolves(name))
+def test_every_exception_the_guide_names_exists():
+    """A guide that teaches a handler for a class we do not raise is worse than
+    no guide: the `except` clause silently never fires."""
+    body, _ = _guide_parts()
+    unknown = sorted(name for name in _exception_names(body) if not _resolves(name))
     assert not unknown, f"the guide names exception classes that do not exist: {unknown}"
+
+
+def test_the_names_the_guide_says_were_removed_are_gone():
+    """The removed-names table is a claim about 6.0. If one of them still
+    resolved, the table would be wrong in the other direction."""
+    _, removed = _guide_parts()
+    old_names = re.findall(r"^\| `(\w+)` \|", removed, re.MULTILINE)
+    assert len(old_names) == 7, old_names
+    still_there = [name for name in old_names if _resolves(name)]
+    assert not still_there, f"the guide says these were removed, but they resolve: {still_there}"
 
 
 @pytest.mark.parametrize("index", range(len(_python_blocks(GUIDE.read_text()))))

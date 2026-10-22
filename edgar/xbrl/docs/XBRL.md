@@ -383,11 +383,11 @@ print(f"Fiscal Period: {entity_info.get('document_fiscal_period_focus')}")
 ### Missing Statements
 
 ```python
-from edgar.xbrl.xbrl import StatementNotFound
+from edgar.exceptions import StatementNotFoundError
 
 try:
     equity = xbrl.statements.statement_of_equity()
-except StatementNotFound:
+except StatementNotFoundError:
     print("Statement of equity not available in this filing")
     equity = None
 ```
@@ -527,7 +527,7 @@ trend_df = pd.DataFrame(revenue_trend)
    ```python
    try:
        stmt = xbrl.statements.equity_statement()
-   except StatementNotFound:
+   except StatementNotFoundError:
        stmt = None
    ```
 

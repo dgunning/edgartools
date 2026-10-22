@@ -71,7 +71,7 @@ def _financials_over(df):
     """A Financials whose cash flow statement is `df`, with no network behind it."""
 
     class _Fin(Financials):
-        def cash_flow_statement(self, include_dimensions=None, view=None):
+        def cash_flow_statement(self, *, view=None):
             return _FakeStatement(df)
 
     # xb only has to be non-None: every code path under test checks it and then
@@ -170,7 +170,9 @@ def _leading_date(column):
 
 
 @pytest.mark.network
-@pytest.mark.parametrize("ticker", ["MSFT", "KO", "NVDA", "JNJ", "XOM"])
+# Exxon by CIK: ticker XOM now names ExxonMobil Holdings Corp (2115436), which has
+# no 10-K yet. Exxon Mobil Corp (34088) filed the 10-Ks this test was written against.
+@pytest.mark.parametrize("ticker", ["MSFT", "KO", "NVDA", "JNJ", 34088])
 def test_the_filers_that_already_worked_still_do(ticker):
     """No regression on the five whose labels happened to match.
 

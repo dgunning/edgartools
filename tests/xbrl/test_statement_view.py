@@ -4,7 +4,6 @@ Tests for StatementView enum functionality (GH-574 / edgartools-dvel).
 This tests the StatementView feature that replaces the confusing
 include_dimensions boolean parameter with semantic view modes.
 """
-import warnings
 import pytest
 from edgar.xbrl import StatementView, normalize_view
 
@@ -51,8 +50,12 @@ class TestStatementViewEnum:
             normalize_view(123)
 
 
-class TestStatementViewDeprecation:
-    """Test deprecation warnings for include_dimensions parameter."""
+class TestIncludeDimensionsRemoved:
+    """include_dimensions was removed in 6.0; passing it to a real statement fails.
+
+    The full matrix of removed entry points, and the positional-slot checks, is in
+    tests/xbrl/test_xbrl_include_dimensions_removed.py, which runs offline.
+    """
 
     @pytest.fixture
     def xbrl(self):
@@ -62,51 +65,17 @@ class TestStatementViewDeprecation:
         filing = Company("AAPL").get_filings(form="10-K").latest()
         return filing.xbrl()
 
-    def test_include_dimensions_emits_deprecation_warning(self, xbrl):
-        """Test that include_dimensions emits DeprecationWarning."""
+    def test_include_dimensions_raises_type_error(self, xbrl):
         income = xbrl.statements.income_statement()
 
-        with warnings.catch_warnings(record=True) as w:
-            warnings.simplefilter("always")
+        with pytest.raises(TypeError, match="include_dimensions"):
             income.to_dataframe(include_dimensions=True)
 
-            assert len(w) == 1
-            assert issubclass(w[0].category, DeprecationWarning)
-            assert "include_dimensions is deprecated" in str(w[0].message)
+        with pytest.raises(TypeError, match="include_dimensions"):
+            income.render(include_dimensions=False)
 
-    def test_include_dimensions_true_maps_to_detailed(self, xbrl):
-        """Test that include_dimensions=True maps to DETAILED view."""
-        income = xbrl.statements.income_statement()
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            df_old = income.to_dataframe(include_dimensions=True)
-
-        df_new = income.to_dataframe(view=StatementView.DETAILED)
-
-        assert len(df_old) == len(df_new)
-
-    def test_include_dimensions_false_maps_to_standard(self, xbrl):
-        """Test that include_dimensions=False maps to STANDARD view."""
-        income = xbrl.statements.income_statement()
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore")
-            df_old = income.to_dataframe(include_dimensions=False)
-
-        df_new = income.to_dataframe(view=StatementView.STANDARD)
-
-        assert len(df_old) == len(df_new)
-
-    def test_view_and_include_dimensions_raises_error(self, xbrl):
-        """Test that specifying both view and include_dimensions raises ValueError."""
-        income = xbrl.statements.income_statement()
-
-        with pytest.raises(ValueError, match="Cannot specify both"):
-            income.to_dataframe(view=StatementView.STANDARD, include_dimensions=True)
-
-        with pytest.raises(ValueError, match="Cannot specify both"):
-            income.render(view=StatementView.DETAILED, include_dimensions=False)
+        with pytest.raises(TypeError, match="include_dimensions"):
+            xbrl.statements.income_statement(include_dimensions=True)
 
 
 class TestStatementViewBehavior:
@@ -226,7 +195,7 @@ class TestStatementViewAccessors:
 
     def test_cashflow_statement_accepts_view(self, xbrl):
         """Test cashflow_statement accessor accepts view parameter."""
-        cf = xbrl.statements.cashflow_statement(view='standard')
+        cf = xbrl.statements.cash_flow_statement(view='standard')
         assert cf is not None
 
         df = cf.to_dataframe()

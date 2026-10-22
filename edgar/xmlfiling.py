@@ -18,6 +18,7 @@ from functools import cached_property
 from typing import Any, Optional, TYPE_CHECKING
 
 from lxml import etree
+from edgar.xmltools import xml_parser
 from rich import box
 from rich.console import Group
 from rich.panel import Panel
@@ -176,7 +177,7 @@ class XmlFiling:
             return None
 
         try:
-            root = etree.fromstring(xml_str.encode() if isinstance(xml_str, str) else xml_str)
+            root = etree.fromstring(xml_str.encode() if isinstance(xml_str, str) else xml_str, parser=xml_parser())
             _strip_namespaces(root)
 
             form_data_el = root.find('formData')
@@ -268,16 +269,17 @@ class XmlFiling:
             return None
 
         try:
-            import httpx2
+            from edgar.config import SEC_ARCHIVE_URL
+            from edgar.httpclient import http_client
             acc = self._filing.accession_no.replace('-', '')
             cik = self._filing.cik
-            url = f'https://www.sec.gov/Archives/edgar/data/{cik}/{acc}/{prefix}/primary_doc.xml'
-            resp = httpx2.get(
-                url,
-                headers={'User-Agent': 'EdgarTools support@edgartools.io'},
-                follow_redirects=True,
-                timeout=15,
-            )
+            url = f'{SEC_ARCHIVE_URL}/data/{cik}/{acc}/{prefix}/primary_doc.xml'
+            # The shared client: the user's identity, the rate limiter and the
+            # cache. This used to call httpx2.get with edgartools' own address as
+            # the User-Agent, so SEC saw the project rather than the user
+            # (edgartools-ot9sn).
+            with http_client() as client:
+                resp = client.get(url, follow_redirects=True)
             if resp.status_code == 200:
                 return resp.text
         except Exception:

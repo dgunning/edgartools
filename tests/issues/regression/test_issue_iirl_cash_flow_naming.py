@@ -14,8 +14,8 @@ THE CONTRACT THIS PINS. ``cash_flow_statement`` is canonical, because it is the
 name that matches ``income_statement`` and ``balance_sheet`` — the whole
 complaint was that one member of that trio was spelled differently. Every
 object that exposes an income statement exposes it under that name.
-``cashflow_statement`` and ``cash_flow()`` still work and warn; 6.0 removes
-them (bead edgartools-07lk.23, which stages the break additively in 5.x first).
+``cashflow_statement`` and ``cash_flow()`` were deprecated in 5.x and removed in
+6.0 (bead edgartools-07lk.22.1); no statement class may offer them any more.
 
 Written as a sweep over the package rather than a list of imports on purpose. A
 hand-written list is what let this drift in the first place: five of these
@@ -81,57 +81,16 @@ def test_every_statement_class_has_the_canonical_name(name, cls):
 
 
 @pytest.mark.parametrize("name,cls", _statement_classes(), ids=lambda v: v if isinstance(v, str) else "")
-def test_deprecated_spellings_are_not_the_canonical_method(name, cls):
-    """A deprecated alias must delegate, not *be* the implementation.
-
-    If the alias and the canonical name resolve to the same function object,
-    then either the deprecation warning fires on the supported call path or the
-    alias forwards to itself. Both happened while this was being fixed: a
-    rename left ``cash_flow_statement`` defined twice in five classes, the
-    second one shadowing the implementation and calling itself.
-    """
-    canonical = getattr(cls, CANONICAL)
+def test_deprecated_spellings_are_removed(name, cls):
+    """6.0 removed the deprecated aliases; calling them raises AttributeError."""
     for alias in DEPRECATED:
-        if not hasattr(cls, alias):
-            continue
-        assert getattr(cls, alias) is not canonical, (
-            f"{name}.{alias} IS {name}.{CANONICAL} — the alias does not "
-            f"delegate, so it either warns on the supported path or recurses"
-        )
-
-
-@pytest.mark.parametrize("name,cls", _statement_classes(), ids=lambda v: v if isinstance(v, str) else "")
-def test_deprecated_spellings_warn_and_name_their_replacement(name, cls):
-    """Warn on the deprecated call, and say what to use instead.
-
-    Checked on the unbound function with a dummy self, so no filing is fetched:
-    the warning fires before any work happens.
-    """
-    for alias in DEPRECATED:
-        if not hasattr(cls, alias):
-            continue
-        func = getattr(cls, alias)
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
-            try:
-                func(object())
-            except Exception:
-                # Delegating into a bare object() fails — after the warning.
-                pass
-        messages = [str(w.message) for w in caught
-                    if issubclass(w.category, DeprecationWarning)]
-        assert messages, f"{name}.{alias}() is deprecated but emits no DeprecationWarning"
-        assert any(CANONICAL in m for m in messages), (
-            f"{name}.{alias}() warns without naming {CANONICAL}: {messages}"
+        assert not hasattr(cls, alias), (
+            f"{name}.{alias} was removed in 6.0; use {CANONICAL}()"
         )
 
 
 def test_canonical_name_does_not_warn():
-    """The supported spelling must be silent, or the deprecation is noise.
-
-    Uses Statements, which carries both spellings, so this is the exact pair
-    where a delegation written the wrong way round would warn on every call.
-    """
+    """The supported spelling must be silent."""
     from edgar.xbrl.statements import Statements
 
     with warnings.catch_warnings(record=True) as caught:
@@ -169,27 +128,17 @@ def _module_sources():
             continue
 
 
-def test_no_internal_caller_reaches_for_the_deprecated_attribute():
-    """`x.cashflow_statement` may appear only inside the wrapper of that name."""
+def test_no_internal_caller_reaches_for_the_removed_attribute():
+    """`x.cashflow_statement` no longer exists, so nothing in edgar/ may touch it."""
     import ast
 
     class Visitor(ast.NodeVisitor):
         def __init__(self, path):
             self.path = path
-            self.scope = []
             self.offenders = []
 
-        def visit_FunctionDef(self, node):
-            self.scope.append(node.name)
-            self.generic_visit(node)
-            self.scope.pop()
-
-        visit_AsyncFunctionDef = visit_FunctionDef  # noqa: N815
-
         def visit_Attribute(self, node):
-            deprecated = node.attr == "cashflow_statement"
-            in_own_wrapper = bool(self.scope) and self.scope[-1] == node.attr
-            if deprecated and not in_own_wrapper:
+            if node.attr == "cashflow_statement":
                 self.offenders.append(f"{self.path}:{node.lineno}")
             self.generic_visit(node)
 
@@ -200,8 +149,8 @@ def test_no_internal_caller_reaches_for_the_deprecated_attribute():
         offenders.extend(visitor.offenders)
 
     assert not offenders, (
-        "edgartools calls its own deprecated spelling, which warns the user "
-        f"about a method they never called: {offenders}"
+        "edgartools reaches for a removed method spelling and would raise "
+        f"AttributeError: {offenders}"
     )
 
 
@@ -233,14 +182,8 @@ def test_no_method_name_table_lists_the_deprecated_spelling():
     )
 
 
-def test_viewer_accepts_either_spelling_for_the_same_statement():
-    """`FilingViewer.compare_context` used the name twice, and disagreed with itself.
-
-    The keyword table was keyed on the old spelling while the method lookup ran
-    against the object, so the canonical name found no viewer report ("No viewer
-    report found matching 'cash_flow_statement'") and the old one reached a
-    deprecated method. Both spellings now take the canonical path.
-    """
+def test_viewer_uses_the_canonical_spelling_only():
+    """`FilingViewer.compare_context` resolves the canonical name; the old one is gone."""
     from types import SimpleNamespace
 
     from edgar.xbrl.viewer import FilingViewer
@@ -248,32 +191,18 @@ def test_viewer_accepts_either_spelling_for_the_same_statement():
     report = SimpleNamespace(short_name="CONSOLIDATED STATEMENTS OF CASH FLOWS",
                              text=lambda: "VIEWER CASH FLOW ROWS")
     viewer = SimpleNamespace(financial_statements=[report])
-
     calls = []
 
     def cash_flow_statement():
         calls.append("cash_flow_statement")
         return None
 
-    def cashflow_statement():  # must never be the one that runs
-        calls.append("cashflow_statement")
-        return None
+    xbrl = SimpleNamespace(statements=SimpleNamespace(cash_flow_statement=cash_flow_statement))
 
-    xbrl = SimpleNamespace(statements=SimpleNamespace(
-        cash_flow_statement=cash_flow_statement,
-        cashflow_statement=cashflow_statement,
-    ))
+    out = FilingViewer.compare_context(viewer, xbrl, statement="cash_flow_statement")
+    assert "VIEWER CASH FLOW ROWS" in out
+    assert calls == ["cash_flow_statement"]
 
-    for spelling in ("cash_flow_statement", "cashflow_statement"):
-        calls.clear()
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter("always")
-            out = FilingViewer.compare_context(viewer, xbrl, statement=spelling)
-
-        assert "VIEWER CASH FLOW ROWS" in out, (
-            f"compare_context({spelling!r}) failed to find the viewer's cash flow report"
-        )
-        assert calls == ["cash_flow_statement"], (
-            f"compare_context({spelling!r}) dispatched to {calls}, not the canonical name"
-        )
-        assert not [w for w in caught if issubclass(w.category, DeprecationWarning)]
+    out = FilingViewer.compare_context(viewer, xbrl, statement="cashflow_statement")
+    assert "Error getting XBRL statement" in out
+    assert calls == ["cash_flow_statement"]

@@ -2,6 +2,11 @@
 
 **Measured**: 2026-08-03 · edgartools 5.45.1 · Python 3.11.6 · macOS (darwin 25.5.0)
 **Harness**: `scripts/perf_baseline/` · **Raw data**: `timings.json`, `schemas.json`
+**`schemas.json` re-taken 2026-10-16** with the 6.0 dtype changes (GH #1100,
+edgartools-7wtj.1), as the facts-schema decision requires. `timings.json` and the
+tables below still describe 5.45.1. The re-take also absorbs the schema changes
+that shipped from 5.46.0 to 5.62.0, among them the declared fact-query columns
+and `Document.to_dataframe()`.
 
 This is the reference point every 6.0 performance change is measured against.
 5.45.1 is the right place to take it: 5.45.0 changed extracted text for nearly

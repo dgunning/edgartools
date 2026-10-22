@@ -58,6 +58,11 @@ INDUSTRY_FUNCTIONS = {
 }
 
 
+# The same ceiling for named and industry comparisons: each company costs a
+# full facts download, so `limit` must not reach the whole industry list.
+_MAX_COMPANIES = 10
+
+
 @tool(
     name="edgar_compare",
     description="""Use this to compare companies side-by-side on financial metrics, or analyze an industry sector with automatic peer selection.
@@ -99,8 +104,10 @@ Examples:
         },
         "limit": {
             "type": "integer",
-            "description": "Max companies for industry comparison (default 5)",
-            "default": 5
+            "description": "Max companies for industry comparison (default 5, max 10)",
+            "default": 5,
+            "minimum": 1,
+            "maximum": _MAX_COMPANIES
         }
     },
     required=[]
@@ -124,9 +131,10 @@ async def edgar_compare(
     try:
         # Determine which companies to compare
         if identifiers:
-            companies_to_compare = identifiers[:10]  # Max 10
+            companies_to_compare = identifiers[:_MAX_COMPANIES]
         elif industry:
-            companies_to_compare = await _get_industry_companies(industry, limit)
+            companies_to_compare = await _get_industry_companies(
+                industry, min(max(int(limit), 1), _MAX_COMPANIES))
             if not companies_to_compare:
                 return error(
                     f"No companies found for industry: {industry}",

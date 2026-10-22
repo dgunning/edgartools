@@ -100,6 +100,10 @@ class TableMetadata:
     period_type: Optional[str] = None  # 'instant' or 'duration'
 
 
+_ZERO_MARKERS = frozenset(['—', '-', '–', '‒'])
+_NO_VALUE_MARKERS = frozenset(['N/A', 'n/a', 'NA', 'nm', 'NM', '*', '**'])
+
+
 class FinancialTableExtractor:
     """Extract financial tables from HTML reports as pandas DataFrames"""
 
@@ -368,10 +372,13 @@ class FinancialTableExtractor:
         # Clean the value
         clean_value = value.strip()
 
-        # Check for special markers and empty values
-        empty_markers = ['—', '-', '–', '—', '‒', 'N/A', 'n/a', 'NA', 'nm', 'NM', '*', '**']
-        if clean_value in empty_markers or not clean_value:
+        # A dash is the financial-table convention for zero. A blank cell, "N/A" or "NM" is
+        # not: the filing gives no value there (an equity roll-forward leaves its Total column
+        # blank on most rows), so it is NaN rather than a fabricated 0.0 (edgartools-nfk3).
+        if clean_value in _ZERO_MARKERS:
             return 0.0
+        if not clean_value or clean_value in _NO_VALUE_MARKERS:
+            return float('nan')
 
         # Remove currency symbols, whitespace, and other common symbols
         # Keep negative sign and decimal points

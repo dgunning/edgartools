@@ -35,10 +35,10 @@ def _reported_total(persons, figure: str) -> Optional[Union[int, float]]:
     """
     A filing's total for an ownership figure, or None when a person it counts leaves the figure out.
 
-    The same max() over the persons not flagged ``is_aggregate_exclude_shares`` that
-    ``total_shares`` and ``total_percent`` take, which read an unreported figure as 0;
-    ``_aggregation_basis`` says whether that max is the group's total. A filing with
-    no reporting-person rows reports no figure either.
+    The max() over the persons not flagged ``is_aggregate_exclude_shares`` that
+    ``total_shares`` and ``total_percent`` return; ``_aggregation_basis`` says whether
+    that max is the group's total. A filing with no reporting-person rows reports no
+    figure either. When every person is excluded the total is 0.
     """
     if not persons:
         return None
@@ -96,31 +96,43 @@ class ReportingPerson:
     Represents a single reporting person from the SC 13D or SC 13G filing.
     Joint filers will have multiple ReportingPerson instances.
 
-    An ownership figure the filing does not report holds a placeholder 0 and is
-    named in ``unreported_fields``; ``reported()`` returns None for it instead.
-    A reported 0 stays 0 in both. edgartools 6.0 will make the fields themselves
-    None for an unreported figure.
+    An ownership figure the filing does not report is None and is named in
+    ``unreported_fields``; a reported 0 stays 0. An amendment may leave any figure
+    out, and a pre-2025 filing read from its SGML header reports none of them.
+    A figure passed as None is added to ``unreported_fields``, and one named there
+    is set to None, so the two always agree.
     """
     cik: str
     name: str
     citizenship: str
-    sole_voting_power: int
-    shared_voting_power: int
-    sole_dispositive_power: int
-    shared_dispositive_power: int
-    aggregate_amount: int
-    percent_of_class: float
+    sole_voting_power: Optional[int]
+    shared_voting_power: Optional[int]
+    sole_dispositive_power: Optional[int]
+    shared_dispositive_power: Optional[int]
+    aggregate_amount: Optional[int]
+    percent_of_class: Optional[float]
     type_of_reporting_person: str
     fund_type: Optional[str] = None
     comment: Optional[str] = None
     member_of_group: Optional[str] = None  # "a" = group member (joint filer), "b" = separate filer
     is_aggregate_exclude_shares: bool = False  # True if shares excluded from aggregate count
     no_cik: bool = False  # True if reporting person has no CIK assigned
-    unreported_fields: FrozenSet[str] = frozenset()  # ownership figures the filing leaves out (placeholder 0)
+    unreported_fields: FrozenSet[str] = frozenset()  # ownership figures the filing leaves out (None)
+
+    def __post_init__(self):
+        unreported = {figure for figure in self.unreported_fields if figure in _OWNERSHIP_FIGURES}
+        unreported.update(figure for figure in _OWNERSHIP_FIGURES if getattr(self, figure) is None)
+        for figure in unreported:
+            object.__setattr__(self, figure, None)
+        object.__setattr__(self, 'unreported_fields', frozenset(unreported))
 
     def reported(self, figure: str) -> Optional[Union[int, float]]:
         """
         An ownership figure as the filing reports it, or None when the filing leaves it out.
+
+        The same value as the attribute itself (``person.reported('aggregate_amount')``
+        is ``person.aggregate_amount``); kept from 5.x, where the attribute held a
+        placeholder 0, and for looking a figure up by name.
 
         Args:
             figure: One of ``sole_voting_power``, ``shared_voting_power``,
@@ -135,13 +147,17 @@ class ReportingPerson:
         return getattr(self, figure)
 
     @property
-    def total_voting_power(self) -> int:
-        """Total voting power (sole + shared)"""
+    def total_voting_power(self) -> Optional[int]:
+        """Total voting power (sole + shared), or None when the filing leaves either out"""
+        if self.sole_voting_power is None or self.shared_voting_power is None:
+            return None
         return self.sole_voting_power + self.shared_voting_power
 
     @property
-    def total_dispositive_power(self) -> int:
-        """Total dispositive power (sole + shared)"""
+    def total_dispositive_power(self) -> Optional[int]:
+        """Total dispositive power (sole + shared), or None when the filing leaves either out"""
+        if self.sole_dispositive_power is None or self.shared_dispositive_power is None:
+            return None
         return self.sole_dispositive_power + self.shared_dispositive_power
 
 

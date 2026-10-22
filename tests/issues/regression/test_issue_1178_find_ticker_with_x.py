@@ -55,8 +55,10 @@ def test_find_source_uses_the_inclusive_ticker_class():
     assert 'r"^[A-Z]{1,5}([.-][A-Z])?$"' in text
 
 
+# XOM moved to ExxonMobil Holdings Corp (CIK 2115436) on 2026-07-01; Exxon Mobil
+# Corp (34088) filed its 25-NSE that day. SEC's company_tickers.json maps XOM to 2115436.
 @pytest.mark.network
-@pytest.mark.parametrize("ticker,cik", [("XOM", 34088), ("AXP", 4962), ("FIX", 1035983)])
+@pytest.mark.parametrize("ticker,cik", [("XOM", 2115436), ("AXP", 4962), ("FIX", 1035983)])
 def test_find_resolves_x_tickers_to_companies(ticker, cik):
     result = edgar.find(ticker)
     assert isinstance(result, edgar.Entity)

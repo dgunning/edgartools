@@ -121,7 +121,7 @@ class TestStructuralFilteringWithRealData:
         xbrl = filing.xbrl()
 
         income = xbrl.statements.income_statement()
-        df = income.to_dataframe(include_dimensions=False)
+        df = income.to_dataframe(view='standard')
 
         # Check that no structural patterns appear in labels
         for pattern in ['[Axis]', '[Domain]', '[Table]', '[Line Items]']:
@@ -142,7 +142,7 @@ class TestStructuralFilteringWithRealData:
         xbrl = filing.xbrl()
 
         bs = xbrl.statements.balance_sheet()
-        df = bs.to_dataframe(include_dimensions=False)
+        df = bs.to_dataframe(view='standard')
 
         # Check that no structural patterns appear in labels
         for pattern in ['[Axis]', '[Domain]', '[Table]', '[Line Items]', '[Abstract]']:
@@ -162,7 +162,7 @@ class TestStructuralFilteringWithRealData:
         xbrl = filing.xbrl()
 
         income = xbrl.statements.income_statement()
-        df = income.to_dataframe(include_dimensions=False)
+        df = income.to_dataframe(view='standard')
 
         # Should still have abstract rows for section headers
         abstract_rows = df[df['abstract'] == True]
@@ -184,7 +184,7 @@ class TestStructuralFilteringWithRealData:
         income = xbrl.statements.income_statement()
 
         # Get dataframe (with filtering)
-        df = income.to_dataframe(include_dimensions=False)
+        df = income.to_dataframe(view='standard')
 
         # Get raw data (without filtering)
         raw_data = income.get_raw_data()

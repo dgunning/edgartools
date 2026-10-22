@@ -57,7 +57,7 @@ class TestEntityStatements:
     
     def test_cash_flow_basic_functionality(self, test_company):
         """Test basic cash flow statement functionality."""
-        cash_flow = test_company.cash_flow(annual=True, periods=4)
+        cash_flow = test_company.cash_flow_statement(annual=True, periods=4)
         
         assert cash_flow is not None
         assert hasattr(cash_flow, 'periods')
@@ -100,7 +100,7 @@ class TestEntityStatements:
         """Test that all statement types show consistent periods."""
         balance_sheet = test_company.balance_sheet(annual=True, periods=4)
         income_statement = test_company.income_statement(annual=True, periods=4)
-        cash_flow = test_company.cash_flow(annual=True, periods=4)
+        cash_flow = test_company.cash_flow_statement(annual=True, periods=4)
         
         # All statements should have the same periods
         assert balance_sheet.periods == income_statement.periods, (

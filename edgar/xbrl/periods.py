@@ -364,7 +364,8 @@ def determine_periods_to_display(
     xbrl_instance,
     statement_type: str,
     period_filter: Optional[str] = None,
-    period_view: Optional[str] = None
+    period_view: Optional[str] = None,
+    statement_data: Optional[List[Dict[str, Any]]] = None
 ) -> List[Tuple[str, str]]:
     """
     Determine which periods should be displayed for a statement.
@@ -377,6 +378,8 @@ def determine_periods_to_display(
         statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
         period_filter: Optional period key to filter by specific reporting period
         period_view: Optional name of a predefined period view
+        statement_data: Optional rows from get_statement(), passed to
+            select_periods so an instant-only note gets instant columns
 
     Returns:
         List of tuples with period keys and labels to display
@@ -407,7 +410,7 @@ def determine_periods_to_display(
     # Use unified period selection system with fallback to legacy logic
     try:
         from edgar.xbrl.period_selector import select_periods
-        return select_periods(xbrl_instance, statement_type)
+        return select_periods(xbrl_instance, statement_type, statement_data=statement_data)
     except Exception as e:
         # Log the error and fall back to legacy logic
         import logging

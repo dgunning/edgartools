@@ -15,7 +15,7 @@ import pytest
 from edgar._filings import Filing
 from edgar.attachments import Attachment, Attachments
 from edgar.sgml.sgml_common import FilingSGML
-from edgar.sgml.sgml_parser import SECIdentityError, SECFilingNotFoundError
+from edgar.sgml.sgml_parser import SECIdentityError, FilingNotFoundError
 
 
 class TestHomepageFallback:
@@ -53,11 +53,11 @@ class TestHomepageFallback:
                 filing.sgml()
 
     def test_sgml_does_not_fallback_on_filing_not_found(self):
-        """SECFilingNotFoundError should propagate, not fall back."""
+        """FilingNotFoundError should propagate, not fall back."""
         filing = self._make_filing()
 
-        with patch.object(FilingSGML, 'from_filing', side_effect=SECFilingNotFoundError("not found")):
-            with pytest.raises(SECFilingNotFoundError):
+        with patch.object(FilingSGML, 'from_filing', side_effect=FilingNotFoundError("not found")):
+            with pytest.raises(FilingNotFoundError):
                 filing.sgml()
 
     def test_sgml_does_not_fallback_on_network_error(self):

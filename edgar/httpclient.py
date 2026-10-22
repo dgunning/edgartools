@@ -1,6 +1,7 @@
 import locale
 import os
 import re
+import warnings
 from contextlib import asynccontextmanager, contextmanager
 from typing import AsyncGenerator, Generator, Literal, Optional
 
@@ -184,6 +185,37 @@ def get_truststore_context():
     return truststore.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
 
 
+CertSource = Literal["os-store", "SSL_CERT_FILE", "SSL_CERT_DIR", "custom", "disabled"]
+
+
+def get_cert_source(verify=None) -> CertSource:
+    """
+    Name where certificate verification takes its trusted CAs from.
+
+    With verify=True, httpx2 reads SSL_CERT_FILE, then SSL_CERT_DIR, and
+    otherwise the operating system's trust store (httpcore2.default_ssl_context).
+    It never reads certifi or REQUESTS_CA_BUNDLE. An explicit truststore
+    context, from use_system_certs=True, is the OS store and ignores SSL_CERT_*.
+
+    Args:
+        verify: The verify value to describe. Defaults to the shared client's.
+    """
+    if verify is None:
+        verify = HTTP_MGR.httpx_params.get("verify", True)
+    if verify is False:
+        return "disabled"
+    if verify is True:
+        if os.environ.get("SSL_CERT_FILE"):
+            return "SSL_CERT_FILE"
+        if os.environ.get("SSL_CERT_DIR"):
+            return "SSL_CERT_DIR"
+        return "os-store"
+    import truststore
+    if isinstance(verify, truststore.SSLContext):
+        return "os-store"
+    return "custom"
+
+
 def get_edgar_http_timeout() -> Optional[float]:
     """
     Default request timeout in seconds for the internal httpx2 client.
@@ -209,32 +241,70 @@ def get_edgar_http_timeout() -> Optional[float]:
     return value
 
 
+def _validate_rate_limit(value, source: str) -> int:
+    """A positive whole number of requests per second, or ValidationError.
+
+    pyrate-limiter guards its rate only with ``assert``, so under ``python -O``
+    a zero or negative rate silently disables throttling (30 requests in 0.00 s)
+    and without ``-O`` it fails with a bare AssertionError.
+    """
+    from edgar.exceptions import ValidationError
+    try:
+        rate = int(str(value).strip())
+    except (TypeError, ValueError):
+        rate = None
+    if rate is None or rate < 1:
+        raise ValidationError(
+            f"{source} must be a whole number of requests per second, at least 1 "
+            f"(SEC allows 10; the default is 9), got {value!r}",
+            parameter=source,
+            invalid_value=value,
+        )
+    return rate
+
+
 def get_edgar_rate_limit_per_sec():
     """
     Returns the rate limit in requests per second.
     Defaults to 9 requests/sec (SEC's rate limit).
     Use higher values for custom mirrors with relaxed limits.
+
+    Raises ValidationError if EDGAR_RATE_LIMIT_PER_SEC is not a whole number >= 1.
     """
-    return int(os.environ.get("EDGAR_RATE_LIMIT_PER_SEC", "9"))
+    return _validate_rate_limit(os.environ.get("EDGAR_RATE_LIMIT_PER_SEC", "9"),
+                                "EDGAR_RATE_LIMIT_PER_SEC")
+
+
+_ssl_disabled_warned = False
+
+
+def _warn_if_ssl_verification_disabled(verify, stacklevel: int = 3) -> None:
+    """Warn once per process when certificate verification is turned off."""
+    global _ssl_disabled_warned
+    if verify is not False or _ssl_disabled_warned:
+        return
+    _ssl_disabled_warned = True
+    warnings.warn(
+        "SSL certificate verification is disabled (EDGAR_VERIFY_SSL=false or "
+        "configure_http(verify_ssl=False)); responses from SEC can be intercepted "
+        "or altered in transit. Prefer configure_http(use_system_certs=True) "
+        "behind a corporate proxy.",
+        UserWarning,
+        stacklevel=stacklevel,
+    )
 
 
 def _create_rate_limiter(requests_per_second: int):
-    """Create a rate limiter compatible with both pyrate-limiter 3.x and 4.x.
+    """Create the shared rate limiter: requests_per_second per second, blocking.
 
-    pyrate-limiter 4.0 removed max_delay, raise_when_fail, and retry_until_max_delay
-    parameters from Limiter.__init__(). This function handles both API versions.
-    See: https://github.com/dgunning/edgartools/issues/640
+    A full bucket makes try_acquire() wait for a free slot rather than refuse the
+    request, which is pyrate-limiter 4's default and how we stay under SEC's limit.
     """
     from pyrate_limiter import Duration, InMemoryBucket, Limiter, Rate
 
+    requests_per_second = _validate_rate_limit(requests_per_second, "requests_per_second")
     rate = Rate(requests_per_second, Duration.SECOND)
-    bucket = InMemoryBucket([rate])
-    try:
-        # pyrate-limiter 3.x API
-        return Limiter(bucket, max_delay=Duration.DAY, raise_when_fail=False, retry_until_max_delay=True)
-    except TypeError:
-        # pyrate-limiter 4.0+ removed these parameters
-        return Limiter(bucket)
+    return Limiter(InMemoryBucket([rate]))
 
 
 def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> HttpxThrottleCache:
@@ -257,6 +327,7 @@ def get_http_mgr(cache_enabled: bool = True, request_per_sec_limit: int = 9) -> 
         http_mgr.httpx_params["verify"] = get_truststore_context()
     else:
         http_mgr.httpx_params["verify"] = get_edgar_verify_ssl()
+    _warn_if_ssl_verification_disabled(http_mgr.httpx_params["verify"])
 
     # Default to HTTP/1.1 (http2=False). HTTP/2 multiplexes every request over a
     # single TCP connection, so a mid-stream reset from cloud egress fails all
@@ -291,6 +362,30 @@ def http_client(**kwargs) -> Generator[httpx2.Client, None, None]:
         yield client
 
 
+@contextmanager
+def uncached_http_client(**kwargs) -> Generator[httpx2.Client, None, None]:
+    """A short-lived client that skips the HTTP cache and nothing else.
+
+    It sends the user's identity, honours the configured SSL, proxy and timeout
+    settings, and draws from the same rate limiter as every other request. Use
+    it to refetch a response the cache may have stored bad (#672).
+
+    `http_client(bypass_cache=True)` cannot do this: the shared client is
+    created once, and httpxthrottlecache ignores `bypass_cache` after that, so
+    the flag silently had no effect. Opening a bare `httpx2.Client` instead
+    skipped the rate limiter as well (edgartools-ot9sn).
+    """
+    params = HTTP_MGR.httpx_params.copy()
+    HTTP_MGR._populate_user_agent(params)
+    params.update(**kwargs)
+    HTTP_MGR._normalize_timeout(params)
+    params["transport"] = HTTP_MGR._get_transport(
+        bypass_cache=True, httpx_transport_params=HTTP_MGR._get_httpx_transport_params(params)
+    )
+    with httpx2.Client(**params) as client:
+        yield client
+
+
 def get_http_params():
     return HTTP_MGR._populate_user_agent(HTTP_MGR.httpx_params.copy())
 
@@ -314,11 +409,11 @@ def configure_http(
 
     Args:
         verify_ssl: Enable/disable SSL certificate verification.
-                   Set to False if use_system_certs doesn't resolve your SSL issues.
                    WARNING: Disabling SSL verification reduces security.
-        use_system_certs: Use the OS native certificate store via the truststore library.
-                         This is the recommended approach for corporate networks with
-                         SSL inspection, as it uses certificates managed by your OS.
+        use_system_certs: Verify against the OS native certificate store via the
+                         truststore library. From 6.0 that is already the default;
+                         passing True also makes the client ignore SSL_CERT_FILE
+                         and SSL_CERT_DIR.
         proxy: HTTP/HTTPS proxy URL (e.g., "http://proxy.company.com:8080").
                Supports authentication: "http://user:pass@proxy.company.com:8080"
         timeout: Request timeout in seconds (default: 30.0). Passing None
@@ -331,11 +426,11 @@ def configure_http(
                ConnectionTerminated). Set to True to opt back into HTTP/2.
 
     Examples:
-        # Use OS certificate store (recommended for corporate networks)
+        # Use the OS certificate store even when SSL_CERT_FILE is set
         from edgar import configure_http
         configure_http(use_system_certs=True)
 
-        # Disable SSL verification (fallback if system certs don't work)
+        # Disable SSL verification (last resort)
         configure_http(verify_ssl=False)
 
         # Disable system certs and SSL verification
@@ -373,10 +468,14 @@ def configure_http(
     elif verify_ssl is not None:
         HTTP_MGR.httpx_params["verify"] = verify_ssl
         settings_changed = True
+    _warn_if_ssl_verification_disabled(HTTP_MGR.httpx_params.get("verify", True))
 
     if proxy is not None:
-        # Configure proxy for httpx2
-        HTTP_MGR.httpx_params["proxy"] = proxy
+        # The proxy belongs on the innermost transport, under the cache and the rate
+        # limiter. As a client param, httpx2 mounts its own proxy transport for all://
+        # in front of the supplied transport, and every request skips both.
+        HTTP_MGR.proxy = proxy
+        HTTP_MGR.httpx_params.pop("proxy", None)
         settings_changed = True
 
     if http2 is not None:
@@ -419,7 +518,9 @@ def get_http_config() -> dict:
     Get current HTTP client configuration.
 
     Returns:
-        dict: Current configuration including verify_ssl, proxy, and timeout settings.
+        dict: Current configuration including verify_ssl, cert_source, proxy,
+        and timeout settings. cert_source is one of "os-store", "SSL_CERT_FILE",
+        "SSL_CERT_DIR", "custom" or "disabled" (see get_cert_source).
 
     Example:
         >>> from edgar import get_http_config
@@ -427,20 +528,15 @@ def get_http_config() -> dict:
         >>> print(f"SSL verification: {config['verify_ssl']}")
     """
     params = HTTP_MGR.httpx_params
-    verify = params.get("verify", True)
-
-    # Detect if truststore SSLContext is in use
-    using_system_certs = False
-    try:
-        import truststore
-        using_system_certs = isinstance(verify, truststore.SSLContext)
-    except ImportError:
-        pass
+    cert_source = get_cert_source(params.get("verify", True))
 
     return {
-        "verify_ssl": verify if not using_system_certs else True,
-        "use_system_certs": using_system_certs,
-        "proxy": params.get("proxy"),
+        "verify_ssl": cert_source != "disabled",
+        # True whenever the OS store is what verifies, which is the default
+        # from 6.0, not only after configure_http(use_system_certs=True).
+        "use_system_certs": cert_source == "os-store",
+        "cert_source": cert_source,
+        "proxy": HTTP_MGR.proxy,
         "timeout": params.get("timeout"),
         "http2": params.get("http2", False),
     }
