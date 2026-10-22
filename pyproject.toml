@@ -71,6 +71,10 @@ dependencies = [
   # 0.6.1 clamps it.
   "httpxthrottlecache[httpx]>=0.6.1",
   "truststore>=0.9.0",
+  # httpx verifies against certifi's bundle unless EDGAR_USE_SYSTEM_CERTS is set,
+  # so certifi's age is edgartools' trust store. 2026.10.19 drops the emSign ECC
+  # Root CA - G3, whose CAs had compromised private keys (2026-10-20 advisory).
+  "certifi>=2026.10.19",
 ]
 dynamic = ["version"]
 

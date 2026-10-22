@@ -57,6 +57,11 @@ def _normalize_item_number(item_str: str) -> str:
 # references ("as described in Item 8.01") into items. (edgartools-l6cl)
 _ITEM_ANCHOR = r'(?:^[ \t]*|[-=_─–—]{5,}[ \t]*)'
 
+# The label before an item number. Filers write "Item 5.02", "Item - 5.02" (0000710782-24-000005),
+# "Item: 5.02" and "Item–5.02" alike, so a dash, en dash, em dash or colon is optional. Finding an
+# item, starting it and ending it all use this label, so the three cannot disagree.
+_ITEM_LABEL = r'Item\s*[-–—:]?\s*'
+
 
 def _extract_items_from_text(text: str) -> List[str]:
     """
@@ -68,6 +73,7 @@ def _extract_items_from_text(text: str) -> List[str]:
 
     Pattern matches:
     - Modern: "Item 2.02", "ITEM 2.02", "Item 2. 02"
+    - Dash heading: "Item - 2.02", "Item – 2.02", "Item: 2.02"
     - Legacy: "Item 1", "Item 4"
     - Case insensitive, handles line breaks
 
@@ -103,7 +109,7 @@ def _extract_items_from_text(text: str) -> List[str]:
     # - "Item 1-Item 4" (Item 4, only one dash — not a rule, not at line start)
     # - Mid-sentence references to items
     pattern = re.compile(
-        _ITEM_ANCHOR + r'Item\s+(\d+\.?\s*\d*)',
+        _ITEM_ANCHOR + _ITEM_LABEL + r'(\d+\.?\s*\d*)',
         re.IGNORECASE | re.MULTILINE
     )
     matches = pattern.findall(text)
@@ -212,7 +218,7 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
     # Must sit at an item-header anchor (line start, or after a horizontal rule)
     # to avoid matching mid-sentence references
     item_pattern = re.compile(
-        rf'{_ITEM_ANCHOR}(Item\s+{re.escape(item_num)}[\s\.:\-]*)',
+        rf'{_ITEM_ANCHOR}({_ITEM_LABEL}{re.escape(item_num)}[\s\.:\-]*)',
         re.IGNORECASE | re.MULTILINE
     )
 
@@ -227,7 +233,7 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
     # Step 3: Find end position
     # Look for next "Item X" pattern
     next_item_pattern = re.compile(
-        _ITEM_ANCHOR + r'Item\s+\d+\.?\s*\d*[\s\.:\-]',
+        _ITEM_ANCHOR + _ITEM_LABEL + r'\d+\.?\s*\d*[\s\.:\-]',
         re.IGNORECASE | re.MULTILINE
     )
     next_match = next_item_pattern.search(filing_text, match.end(1))

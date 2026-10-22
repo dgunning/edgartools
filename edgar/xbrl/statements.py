@@ -33,6 +33,8 @@ INVENTORY_CONCEPTS = ('us-gaap_InventoryNet', 'us-gaap_InventoryGross')
 # Apple, Microsoft — fall through to the ASC 606 tag, which is their top line.
 REVENUE_CONCEPTS = (
     'us-gaap_Revenues',
+    # A bank's top line; also searched by Financials.get_revenue (edgartools-u9yc9)
+    'us-gaap_RevenuesNetOfInterestExpense',
     'us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax',
     'us-gaap_RevenueFromContractWithCustomerIncludingAssessedTax',
     'us-gaap_SalesRevenueNet',
@@ -91,6 +93,17 @@ def _period_kinds(item: Dict[str, Any]) -> set:
     return {str(key).split('_', 1)[0] for key in (item.get('values') or {})}
 
 
+def _display_signs(item: Dict[str, Any]) -> set:
+    """The signs an item's values are shown with: {1}, {-1} or both.
+
+    ``preferred_signs`` maps a period to -1 where the presentation linkbase asks
+    for a negated label and +1 otherwise. A period with no entry is shown as filed,
+    which is the same as +1, so a missing or zero sign counts as +1.
+    """
+    signs = item.get('preferred_signs') or {}
+    return {signs.get(key) or 1 for key in (item.get('values') or {})}
+
+
 def _merge_complementary_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     """Merge adjacent same-label rows whose period values are complementary.
 
@@ -103,6 +116,7 @@ def _merge_complementary_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]
     1. Two rows share the same label (and same level/abstract status)
     2. They appear within a short distance of each other (adjacent or nearly so)
     3. Their period values don't conflict (one has a value where the other has None)
+    4. Their values are shown with the same sign (see ``_display_signs``)
     """
     if not data or len(data) < 2:
         return data
@@ -155,6 +169,18 @@ def _merge_complementary_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]
             # complementarity test below is satisfied trivially.
             if _period_kinds(a_item) != _period_kinds(b_item):
                 continue
+            # A row shown negated and a row shown as filed are probably not two
+            # observations of one series either: rows that disagree on sign look
+            # like an increase beside a decrease that happen to share a label.
+            # That is an assumption, not a measurement -- the fixture corpus
+            # holds no cross-concept rename of a non-dimensional row to test it
+            # against, and Oracle is the only known cross-concept merge. Oracle
+            # labels both "Cumulative translation adjustments and other, net";
+            # merging them filed the FY2025 and FY2024 decreases under the
+            # increases concept with its +1 sign, and the decrease concept and
+            # its -1 sign were lost (GH #1471).
+            if _display_signs(a_item) != _display_signs(b_item):
+                continue
             # Check value complementarity
             a_vals = a_item.get('values', {})
             b_vals = b_item.get('values', {})
@@ -177,8 +203,10 @@ def _merge_complementary_rows(data: List[Dict[str, Any]]) -> List[Dict[str, Any]
             for key in all_keys:
                 if a_vals.get(key) is None and b_vals.get(key) is not None:
                     a_vals[key] = b_vals[key]
-            # Copy over any units/period_types from b that a is missing
-            for meta_key in ('units', 'period_types'):
+            # Copy over any units/period_types/preferred_signs from b that a is
+            # missing. preferred_signs is per period, so without it the periods
+            # that came from b lose their negation (GH #1471).
+            for meta_key in ('units', 'period_types', 'preferred_signs'):
                 a_meta = a_item.get(meta_key, {})
                 b_meta = b_item.get(meta_key, {})
                 if b_meta:
@@ -1287,7 +1315,8 @@ class Statement:
         periods_to_display = determine_periods_to_display(
             self.xbrl, statement_type,
             period_filter=period_filter,
-            period_view=period_view
+            period_view=period_view,
+            statement_data=raw_data
         )
 
         if not periods_to_display:

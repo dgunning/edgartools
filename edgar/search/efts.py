@@ -22,7 +22,7 @@ import random
 import re
 import time
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from typing import List, Optional, Union
 
 logger = logging.getLogger(__name__)
@@ -590,13 +590,15 @@ def search_filings(
             items = [items]
         params["items"] = ",".join(items)
 
-    # Date range
+    # Date range. EFTS applies dateRange=custom only when it gets BOTH startdt and
+    # enddt; with one of them it silently searches every year. Measured
+    # 2026-10-16: q=tariff, forms=10-K, startdt=2025-01-01 alone returned 10,000+
+    # hits led by 2010 and 2003 filings; with enddt added, 3,841 hits, all
+    # 2025-26 (edgartools-329yu). So an open end is closed here.
     if start_date or end_date:
         params["dateRange"] = "custom"
-        if start_date:
-            params["startdt"] = start_date
-        if end_date:
-            params["enddt"] = end_date
+        params["startdt"] = start_date or EFTS_EARLIEST_DATE
+        params["enddt"] = end_date or _efts_latest_date()
 
     # Resolve CIK from ticker if given
     resolved_cik = None
@@ -619,6 +621,41 @@ def search_filings(
         _params=params,
         _offset=0,
     )
+
+
+# The first filings in EDGAR full-text search: EFTS covers 2001 onward.
+EFTS_EARLIEST_DATE = "2001-01-01"
+
+
+def _efts_latest_date() -> str:
+    """An end date that includes everything filed so far.
+
+    Tomorrow rather than today: EFTS dates filings in US Eastern time, and a
+    caller west of it, or on a clock that is slightly behind, would otherwise
+    cut off the filings SEC has already posted for its current day.
+    """
+    return (date.today() + timedelta(days=1)).isoformat()
+
+
+def _check_date(name: str, value) -> Optional[str]:
+    """Return `value` as a YYYY-MM-DD string, or None when no date was given.
+
+    A `date` or `datetime` is formatted; an empty string counts as no date, as it
+    did before this check. Anything else that is not a YYYY-MM-DD date raises
+    `InvalidDateError`: EFTS answers a malformed date with an error body, which
+    `_efts_payload` would report as a failed request, but a malformed date is the
+    caller's mistake, so it is rejected here before any request is made.
+    """
+    if value is None or value == "":
+        return None
+    if isinstance(value, date):
+        return (value.date() if isinstance(value, datetime) else value).isoformat()
+    try:
+        datetime.strptime(value, "%Y-%m-%d")
+    except (TypeError, ValueError) as e:
+        raise InvalidDateError(f"{name} must be a YYYY-MM-DD date, got {value!r}",
+                               parameter=name, invalid_value=value) from e
+    return value
 
 
 def _resolve_cik_from_ticker(ticker: str) -> str:

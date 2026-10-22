@@ -12,6 +12,15 @@ from edgar.documents.table_nodes import TableNode
 from edgar.documents.utils.table_matrix import TableMatrix
 
 
+def _escape_pipe_cell(text: str) -> str:
+    """Escape a pipe-table cell so its text cannot change the table's shape.
+
+    Backslashes go first, so the backslash added before each pipe is not
+    doubled again.
+    """
+    return text.replace('\\', '\\\\').replace('|', '\\|')
+
+
 class MarkdownRenderer:
     """
     Renders parsed documents to Markdown format.
@@ -282,21 +291,44 @@ class MarkdownRenderer:
             combined_headers = self._combine_multi_row_headers(expanded_headers)
             filtered_headers = [combined_headers[i] if i < len(combined_headers) else "" for i in content_columns]
 
-            # Keep flat-header output compatible, including its existing escape
-            # limitations; escape the newly flattened grouped header paths.
-            if len(node.headers) >= 2:
-                filtered_headers = [header.replace('\\', '\\\\').replace('|', '\\|')
-                                    for header in filtered_headers]
+            # A literal pipe would open a column and a lone backslash would
+            # escape the next character, in flat headers as in grouped ones
+            # (GH #1483).
+            filtered_headers = [_escape_pipe_cell(header) for header in filtered_headers]
             row_md = "| " + " | ".join(filtered_headers) + " |"
             rows.append(row_md)
 
             # Add separator
             separator = "| " + " | ".join(["---"] * len(filtered_headers)) + " |"
             rows.append(separator)
+        elif expanded_data_rows:
+            # GH #1484: a headerless table has no labels of its own. Promote the
+            # first non-empty data row to the header, so the output is a valid
+            # pipe table with a delimiter row and real column labels instead of
+            # a blank header bar on every layout table (GH #1524 review).
+            # A table with a single non-empty row (a page footer, a footnote)
+            # keeps its plain row: promoting it would leave a header with a
+            # lone delimiter under it and nothing in the body.
+            non_empty = [index for index, row in enumerate(expanded_data_rows)
+                         if any(row[column].strip() for column in content_columns if column < len(row))]
+            if len(non_empty) > 1:
+                promoted_index = non_empty[0]
+                promoted_row = expanded_data_rows[promoted_index]
+                promoted = [promoted_row[column] if column < len(promoted_row) else ""
+                            for column in content_columns]
+                # Promoted labels must stay on one line, and literal pipes
+                # must not create header columns. Escape backslashes first.
+                promoted = [_escape_pipe_cell(" ".join(cell.split())) for cell in promoted]
+                rows.append("| " + " | ".join(promoted) + " |")
+                rows.append("| " + " | ".join(["---"] * len(content_columns)) + " |")
+                expanded_data_rows = expanded_data_rows[promoted_index + 1:]
 
         # Render data rows
         for expanded_row in expanded_data_rows:
             filtered_row = [expanded_row[i] if i < len(expanded_row) else "" for i in content_columns]
+            # A pipe-table row must stay on one line, so collapse the whitespace
+            # in each cell (line breaks from <br> or several paragraphs too).
+            filtered_row = [_escape_pipe_cell(' '.join(cell.split())) for cell in filtered_row]
 
             # Only add rows with meaningful content
             if any(cell.strip() for cell in filtered_row):

@@ -40,7 +40,6 @@ from edgar.xbrl.core import (
 )
 from edgar.xbrl.models import Axis, Domain, PresentationNode, is_negated_label_role
 from edgar.xbrl.parsers import XBRLParser
-from edgar.xbrl.period_selector import select_periods
 from edgar.xbrl.periods import get_period_views
 from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
 from edgar.exceptions import NotFoundError
@@ -2838,9 +2837,15 @@ class XBRL:
         if parenthetical:
             statement_title = f"{statement_title} (Parenthetical)"
 
-        # Get periods to display using unified period selection
-        periods_to_display = select_periods(
-            self, actual_statement_type, max_periods=4
+        # GH #1469: honour period_filter the way Statement.to_dataframe()
+        # does, and let an instant-only note choose its own instants.
+        # period_view stays unwired here: its views can name periods that
+        # reporting_periods lacks, which would drop columns (edgartools-vsmia).
+        from edgar.xbrl.periods import determine_periods_to_display
+        periods_to_display = determine_periods_to_display(
+            self, actual_statement_type,
+            period_filter=period_filter,
+            statement_data=statement_data
         )
 
         # Render the statement

@@ -359,8 +359,11 @@ def configure_http(
         settings_changed = True
 
     if proxy is not None:
-        # Configure proxy for httpx
-        HTTP_MGR.httpx_params["proxy"] = proxy
+        # The proxy belongs on the innermost transport, under the cache and the rate
+        # limiter. As a client param, httpx mounts its own proxy transport for all://
+        # in front of the supplied transport, and every request skips both.
+        HTTP_MGR.proxy = proxy
+        HTTP_MGR.httpx_params.pop("proxy", None)
         settings_changed = True
 
     if http2 is not None:
@@ -424,7 +427,7 @@ def get_http_config() -> dict:
     return {
         "verify_ssl": verify if not using_system_certs else True,
         "use_system_certs": using_system_certs,
-        "proxy": params.get("proxy"),
+        "proxy": HTTP_MGR.proxy,
         "timeout": params.get("timeout"),
         "http2": params.get("http2", False),
     }

@@ -69,7 +69,11 @@ AAPL_METRICS = {
 JPM_NONE_METRICS = ['operating_income', 'current_assets', 'current_liabilities',
                     'capital_expenditures', 'free_cash_flow', 'current_ratio']
 JPM_VALUES = {
-    'revenue': 68837000000.0,
+    # Total net revenue, us-gaap:RevenuesNetOfInterestExpense FY2023, accession
+    # 0000019617-24-000225 (data.sec.gov companyconcept). This pin was 68,837M,
+    # JPM's noninterest revenue, snapshotted from get_revenue() before
+    # edgartools-u9yc9 fixed it to read the bank total.
+    'revenue': 158104000000.0,
     'net_income': 49552000000.0,
     'total_assets': 3875393000000.0,
     'total_liabilities': 3547515000000.0,

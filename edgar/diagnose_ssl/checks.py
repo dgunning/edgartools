@@ -111,7 +111,7 @@ def get_proxy_config() -> ProxyConfig:
     # Check runtime-configured proxy
     try:
         from edgar.httpclient import HTTP_MGR
-        config.configured_proxy = HTTP_MGR.httpx_params.get("proxy")
+        config.configured_proxy = HTTP_MGR.proxy
     except Exception:
         pass
 
@@ -379,7 +379,7 @@ def test_http_request_configured() -> Tuple[bool, Optional[int], Optional[str]]:
 
         # Get user's configured settings
         verify = HTTP_MGR.httpx_params.get("verify", True)
-        proxy = HTTP_MGR.httpx_params.get("proxy")
+        proxy = HTTP_MGR.proxy
         timeout = HTTP_MGR.httpx_params.get("timeout", 10.0)
 
         headers = {"User-Agent": get_identity()}

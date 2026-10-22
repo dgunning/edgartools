@@ -614,21 +614,26 @@ def test_configure_http_proxy():
 
     # Store original value
     original_proxy = HTTP_MGR.httpx_params.get("proxy")
+    original_mgr_proxy = HTTP_MGR.proxy
 
     try:
-        # Set proxy
+        # Set proxy: it goes on the transport under the cache and rate limiter,
+        # not into the client params (where httpx2 would mount over them)
         configure_http(proxy="http://proxy.example.com:8080")
-        assert HTTP_MGR.httpx_params["proxy"] == "http://proxy.example.com:8080"
+        assert HTTP_MGR.proxy == "http://proxy.example.com:8080"
+        assert "proxy" not in HTTP_MGR.httpx_params
 
         # Verify via get_http_config
         config = get_http_config()
         assert config["proxy"] == "http://proxy.example.com:8080"
     finally:
         # Restore original value
+        HTTP_MGR.proxy = original_mgr_proxy
         if original_proxy is None:
             HTTP_MGR.httpx_params.pop("proxy", None)
         else:
             HTTP_MGR.httpx_params["proxy"] = original_proxy
+        HTTP_MGR.close()
 
 
 def test_configure_http_timeout():

@@ -46,6 +46,13 @@ def _duration_bucket(days: int) -> str:
     return 'y'       # annual
 
 
+def _period_column_name(period) -> str:
+    """The column name ``RenderedStatement.to_dataframe()`` gives a period."""
+    if period.end_date:
+        return f"{period.end_date} ({period.quarter})" if period.quarter else period.end_date
+    return period.label
+
+
 def _order_period_columns(rendered, df_period_columns: List[str]) -> List[str]:
     """Order a rendered statement's period columns most-relevant-first.
 
@@ -66,11 +73,7 @@ def _order_period_columns(rendered, df_period_columns: List[str]) -> List[str]:
 
     entries = []
     for period in periods:
-        # Reconstruct the column name to_dataframe() assigns to this period.
-        if period.end_date:
-            name = f"{period.end_date} ({period.quarter})" if period.quarter else period.end_date
-        else:
-            name = period.label
+        name = _period_column_name(period)
         if name not in valid:
             continue
         end = _parse_iso_date(period.end_date)
@@ -401,7 +404,12 @@ class Financials:
                 # iteration order deterministic across runs (otherwise a filer
                 # whose statement contains multiple mapped concepts can return
                 # different values depending on Python hash randomization).
-                xbrl_concepts = sorted(standardizer.mappings.get(std_concept_name, []))
+                # A name that is already an XBRL concept (``us-gaap_...``) is
+                # searched as itself, for concepts the mappings do not carry.
+                if std_concept_name.startswith(('us-gaap_', 'us-gaap:')):
+                    xbrl_concepts = [std_concept_name]
+                else:
+                    xbrl_concepts = sorted(standardizer.mappings.get(std_concept_name, []))
 
                 # Search for any of these concepts in the dataframe
                 for xbrl_concept in xbrl_concepts:
@@ -431,6 +439,60 @@ class Financials:
 
         except Exception as e:
             log.debug(f"Error getting standardized concept by XBRL: {e}")
+            return None
+
+    def _is_bank_income_statement(self) -> bool:
+        """True when the income statement is laid out as a bank's.
+
+        Banks split revenue into net interest income and noninterest income;
+        a us-gaap:NoninterestIncome row on the face statement is the marker.
+        """
+        try:
+            _, df = self._render_statement_frame('income')
+        except Exception as e:
+            log.debug(f"Error rendering the income statement: {e}")
+            return False
+        if df is None or df.empty or 'concept' not in df.columns:
+            return False
+        concepts = df['concept'].astype(str).str.replace('us-gaap:', 'us-gaap_', regex=False)
+        return bool((concepts == 'us-gaap_NoninterestIncome').any())
+
+    def _filed_total_for_statement_period(self, concept: str,
+                                          period_offset: int = 0) -> Optional[Union[int, float]]:
+        """The non-dimensional value of ``concept`` for the income statement's period.
+
+        The period is the one ``period_offset`` selects among the statement's
+        columns, so this answers for the same period as the face-statement
+        lookups. Segment values of the concept are dimensioned and excluded.
+        None when the filing has no such fact, or more than one distinct value.
+        """
+        if self.xb is None:
+            return None
+        try:
+            rendered, df = self._render_statement_frame('income')
+            if df is None or df.empty:
+                return None
+            period_columns = _order_period_columns(
+                rendered, [col for col in df.columns if col not in _NON_PERIOD_COLUMNS])
+            if len(period_columns) <= period_offset:
+                return None
+            column = period_columns[period_offset]
+            period = next((p for p in rendered.periods if _period_column_name(p) == column), None)
+            if period is None or not period.start_date or not period.end_date:
+                return None
+            facts = self.xb.facts.query().by_concept(concept, exact=True).to_dataframe()
+            if facts is None or facts.empty:
+                return None
+            rows = facts[(~facts['is_dimensioned'].astype(bool))
+                         & (facts['period_start'].astype(str) == str(period.start_date))
+                         & (facts['period_end'].astype(str) == str(period.end_date))]
+            values = rows['numeric_value'].dropna().unique()
+            if len(values) != 1:
+                return None
+            value = values[0]
+            return int(value) if float(value).is_integer() else float(value)
+        except Exception as e:
+            log.debug(f"Error reading the filed {concept} fact: {e}")
             return None
 
     def _get_standardized_concept_value(self, statement_type: str, concept_patterns: list,
@@ -530,14 +592,35 @@ class Financials:
         # the fixture corpus, both concepts resolve in no filing at different
         # values, and 7 filings (Apple, Microsoft, Amazon, Tesla) resolve only
         # the contract concept and are unchanged.
+        #
+        # Banks report their top line as total revenue net of interest expense
+        # (us-gaap:RevenuesNetOfInterestExpense), which the 'Revenue' mapping
+        # does not carry. It has to be searched before contract revenue: on a
+        # bank's face statement, contract revenue is one fee line. Without it,
+        # Wells Fargo's FY2025 revenue came back as its $16.1B "Fee income"
+        # instead of $83.7B, and JPMorgan's fell through to the label patterns
+        # below, which took "Noninterest revenue" ($87.0B of $182.4B)
+        # (edgartools-u9yc9).
         result = self._get_standardized_concept_by_xbrl(
             'income',
-            ['Revenue', 'Contract Revenue'],
+            ['Revenue', 'us-gaap_RevenuesNetOfInterestExpense', 'Contract Revenue'],
             period_offset
         )
 
         if result is not None:
             return result
+
+        # On a bank's statement every "... revenue" label is a component
+        # (card revenue, noninterest revenue, ...), so the label patterns below
+        # can only return part of the top line: U.S. Bancorp presents no total
+        # at all, and the patterns returned its $1.7B card revenue. Such a bank
+        # can still file the total off the face statement, as a
+        # non-dimensional us-gaap:Revenues fact (U.S. Bancorp $28,656M and
+        # Capital One $53,434M for FY2025), so read that, or report nothing
+        # (edgartools-hmj0j). Summing the face rows is not a substitute: U.S.
+        # Bancorp's net interest income plus noninterest income is $28,540M.
+        if self._is_bank_income_statement():
+            return self._filed_total_for_statement_period('us-gaap:Revenues', period_offset)
 
         # Fallback to label-based search for edge cases
         patterns = [

@@ -1,0 +1,1 @@
+- **`Financials.get_revenue()` reads a bank's filed total when its income statement has no total row.** U.S. Bancorp and Capital One returned None; they now return the filing's non-dimensional `us-gaap:Revenues` fact for the statement's period, U.S. Bancorp $28,656M for FY2025.
