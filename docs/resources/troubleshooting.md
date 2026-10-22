@@ -75,10 +75,11 @@ edgartools already verifies against your OS certificate store, so the error mean
 
 2. **Point `SSL_CERT_FILE` at a CA bundle** holding the corporate CA and the public roots, set before the first request:
 ```bash
-pip install certifi   # only a source of the public roots
+pip install --upgrade "certifi>=2026.10.19"   # only a source of the public roots
 cat "$(python -m certifi)" /path/to/corporate-ca.crt > ~/combined-bundle.pem
 export SSL_CERT_FILE="$HOME/combined-bundle.pem"
 ```
+The file is a copy, so upgrading certifi does not change it: rebuild it after certifi updates. A bundle built from certifi older than 2026.10.19 still trusts the emSign ECC Root CA - G3, removed in October 2026 after its private keys were found to be compromised. `diagnose_ssl()` reports a bundle that still holds it.
 
 3. **Disable SSL verification (Last resort)**:
 ```python

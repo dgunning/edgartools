@@ -347,11 +347,13 @@ def _describe_cert_source(diag: SSLDiagnostic) -> str:
 
 def _combined_bundle_steps(diag: SSLDiagnostic) -> str:
     """Shell steps that build an SSL_CERT_FILE holding the corporate CA and the public roots."""
+    # certifi only supplies the public roots here; it is not what verifies. The floor keeps
+    # the roots CA bundles have since distrusted (emSign, October 2026) out of a new copy.
+    steps = ['     pip install --upgrade "certifi>=2026.10.19"']
     if diag.certifi_path:
-        steps = [f'     cat "{diag.certifi_path}" \\']
+        steps.append(f'     cat "{diag.certifi_path}" \\')
     else:
-        # certifi only supplies the public roots here; it is not what verifies
-        steps = ["     pip install certifi", '     cat "$(python -m certifi)" \\']
+        steps.append('     cat "$(python -m certifi)" \\')
     steps += [
         "         /path/to/corporate-ca.crt > ~/combined-bundle.pem",
         '     export SSL_CERT_FILE="$HOME/combined-bundle.pem"',

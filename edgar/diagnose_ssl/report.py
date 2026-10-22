@@ -54,6 +54,8 @@ class CertificateConfig:
     certifi_path: Optional[str] = None
     bundle_exists: bool = False
     bundle_size_kb: Optional[int] = None
+    # Labels of distrusted roots found in the SSL_CERT_FILE / SSL_CERT_DIR that replaces the OS store
+    distrusted_roots: List[str] = field(default_factory=list)
 
 
 @dataclass
