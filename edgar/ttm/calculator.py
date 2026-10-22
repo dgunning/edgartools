@@ -84,7 +84,7 @@ class TTMMetric:
     Attributes:
         concept: XBRL concept identifier (e.g., 'us-gaap:Revenue')
         label: Human-readable label (e.g., 'Revenue')
-        value: TTM value (sum of 4 quarters)
+        value: TTM value (sum of 4 quarters; the average for share counts and rates)
         unit: Unit of measurement (e.g., 'USD', 'shares')
         as_of_date: Date of most recent quarter in TTM window
         periods: List of fiscal periods included [(2023, 'Q3'), (2023, 'Q4'), ...]
@@ -148,7 +148,8 @@ class TTMCalculator:
         """Calculate TTM value as of a specific date.
 
         Selects the 4 most recent consecutive quarters ending on or before
-        the as_of date and sums their values. Quarters are obtained via
+        the as_of date and sums their values (share counts and rates are
+        averaged instead, see `_aggregate_window`). Quarters are obtained via
         quarterization, which derives Q2, Q3, and Q4 from YTD and annual facts
         when discrete quarterly filings are not available.
 
@@ -185,8 +186,9 @@ class TTMCalculator:
         # 4. Check for gaps in quarterly data
         has_gaps = self._check_for_gaps(ttm_quarters)
 
-        # 5. Sum quarterly values to get TTM
-        ttm_value = sum(q.numeric_value for q in ttm_quarters)
+        # 5. Aggregate the window: flows are summed, levels (share counts, rates)
+        #    are averaged -- the same rule calculate_ttm_trend applies (GH #1698)
+        ttm_value = self._aggregate_window(ttm_quarters)
 
         # 6. Check if any quarters were derived (vs. reported)
         has_calculated_q4 = any(
@@ -310,27 +312,18 @@ class TTMCalculator:
         total_available = len(sorted_facts) - 3  # Number of possible TTM windows
         num_to_calculate = min(periods, total_available)
 
-        # A share count or a rate is a level that persists, not a flow that
-        # accumulates, so the trailing-twelve-month figure is the window's average
-        # rather than its total (bead edgartools-djwu).
-        averaged = self._is_window_average_concept(sorted_facts[0]) if sorted_facts else False
-
-        def aggregate(window):
-            total = sum(q.numeric_value for q in window)
-            return total / len(window) if averaged and window else total
-
         # Calculate from most recent backwards
         for offset in range(num_to_calculate):
             i = len(sorted_facts) - 1 - offset
             # TTM window: quarters [i-3, i-2, i-1, i] (4 quarters)
             ttm_window = sorted_facts[i-3:i+1]
-            ttm_value = aggregate(ttm_window)
+            ttm_value = self._aggregate_window(ttm_window)
 
             # Calculate YoY growth (compare to TTM from 4 quarters ago)
             yoy_growth = None
             if i >= 7:  # Need 8 total quarters for YoY comparison
                 prior_ttm_window = sorted_facts[i-7:i-3]
-                prior_ttm = aggregate(prior_ttm_window)
+                prior_ttm = self._aggregate_window(prior_ttm_window)
                 # Only calculate YoY for positive prior values (negative = losses)
                 if prior_ttm > 0:
                     yoy_growth = (ttm_value - prior_ttm) / prior_ttm
@@ -476,6 +469,20 @@ class TTMCalculator:
                 filtered.append(fact)
 
         return filtered
+
+    def _aggregate_window(self, window: List[FinancialFact]) -> float:
+        """Combine a TTM window's quarters into one trailing-twelve-month value.
+
+        A share count or a rate is a level that persists, not a flow that
+        accumulates, so its trailing-twelve-month figure is the window's average
+        rather than its total (bead edgartools-djwu). Both `calculate_ttm` and
+        `calculate_ttm_trend` aggregate through here so they cannot disagree
+        (GH #1698).
+        """
+        total = sum(q.numeric_value for q in window)
+        if window and self._is_window_average_concept(window[0]):
+            return total / len(window)
+        return total
 
     def _is_window_average_concept(self, fact: FinancialFact) -> bool:
         """Should this concept's TTM value be the window's average rather than its sum?
