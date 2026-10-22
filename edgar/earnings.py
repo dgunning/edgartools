@@ -919,6 +919,29 @@ class _CleanColumn:
         return self.header
 
 
+_AGGREGATE_REVENUE_LABELS = frozenset({
+    'revenue', 'revenues', 'net revenue', 'net revenues', 'net sales', 'sales',
+    'revenues, net', 'revenue, net', 'sales, net', 'net sales and revenues',
+    'sales and revenues', 'sales and other operating revenues',
+})
+
+
+def _revenue_label_rank(label_lower: str) -> int:
+    """Rank an income-statement label as a revenue row (lower is better, 3 = not revenue).
+
+    0: a "Total ..." revenue/sales row; 1: a bare aggregate label ("Net sales");
+    2: any other label containing a revenue/sales word (a component or loose match).
+    """
+    label = label_lower.strip().rstrip(':').lstrip('$ ').strip()
+    if 'revenue' not in label and 'sales' not in label:
+        return 3
+    if label.startswith('total') and 'cost' not in label and 'expense' not in label:
+        return 0
+    if label in _AGGREGATE_REVENUE_LABELS:
+        return 1
+    return 2
+
+
 class EarningsRelease:
     """
     Parser for 8-K earnings release exhibits.
@@ -1137,8 +1160,8 @@ class EarningsRelease:
             return result
         result['period'] = str(col)
 
-        # Extract revenue — first row matching revenue patterns
-        revenue_patterns = ['revenue', 'net sales', 'total revenue', 'net revenue', 'sales']
+        # Extract revenue — best-ranked row (see _revenue_label_rank), first row within a rank
+        revenue_rank = 3
         net_income_patterns = ['net income', 'net loss', 'net earnings', 'net income (loss)']
 
         df = inc.dataframe
@@ -1148,13 +1171,11 @@ class EarningsRelease:
             if not isinstance(val, (int, float)):
                 continue
 
-            # Revenue (first match)
-            if result['revenue'] is None:
-                for pat in revenue_patterns:
-                    if pat in label_lower:
-                        scaled = val * inc.scale.value if inc.get_row_type(str(idx_label), pos) == RowType.AMOUNT and inc.scale != Scale.UNITS else val
-                        result['revenue'] = scaled
-                        break
+            # Revenue: a total row beats component rows ("New and used equipment sales")
+            rank = _revenue_label_rank(label_lower)
+            if rank < revenue_rank:
+                revenue_rank = rank
+                result['revenue'] = val * inc.scale.value if inc.get_row_type(str(idx_label), pos) == RowType.AMOUNT and inc.scale != Scale.UNITS else val
 
             # Net income (first match)
             if result['net_income'] is None:
