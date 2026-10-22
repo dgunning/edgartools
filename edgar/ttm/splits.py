@@ -91,7 +91,10 @@ def apply_split_adjustments(facts: List[FinancialFact], splits: List[Dict[str, A
         concept_lower = f.concept.lower()
 
         # Identify adjustables
-        is_per_share = '/share' in unit_lower or 'earningspershare' in concept_lower
+        # The entity-facts parser normalises SEC "USD/shares" to "USD per share",
+        # so per-share must be recognised from the unit, not just the concept name.
+        is_per_share = ('/share' in unit_lower or 'per share' in unit_lower
+                        or 'earningspershare' in concept_lower)
         is_shares = 'shares' in unit_lower and not is_per_share
 
         if not (is_per_share or is_shares):
