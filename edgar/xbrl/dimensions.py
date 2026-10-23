@@ -400,12 +400,7 @@ def classify_dimension_with_confidence(
     structural_axes = STATEMENT_STRUCTURAL_AXES.get(statement_type, set()) if statement_type else set()
 
     # Check if we can use definition linkbase (Tier 1)
-    use_definition_linkbase = (
-        xbrl is not None and
-        role_uri is not None and
-        hasattr(xbrl, 'has_definition_linkbase_for_role') and
-        xbrl.has_definition_linkbase_for_role(role_uri)
-    )
+    use_definition_linkbase = _uses_definition_linkbase(xbrl, role_uri)
 
     # Tier 1b: without a definition linkbase, the role's presentation tree
     # lists the axes the statement prints; any other axis comes from a note
@@ -413,56 +408,89 @@ def classify_dimension_with_confidence(
     presented_axes = _presented_axes(xbrl, role_uri) if not use_definition_linkbase else None
 
     for dim_info in dim_metadata:
-        dimension = dim_info.get('dimension', '')
-        prefix, axis_name = _normalize_axis_name(dimension)
+        breakdown = _classify_breakdown_axis(dim_info.get('dimension', ''), structural_axes,
+                                             use_definition_linkbase, presented_axes, xbrl, role_uri)
+        if breakdown is not None:
+            return breakdown
 
-        # Check if this is a structural axis for this statement type
-        if axis_name in structural_axes:
-            continue  # Not a breakdown for this statement
+    return _face_classification(dim_metadata, use_definition_linkbase)
 
-        # TIER 1: Definition Linkbase (Authoritative) - HIGH confidence
-        if use_definition_linkbase:
-            if xbrl.is_dimension_valid_for_role(dimension, role_uri):
-                continue  # Dimension is valid per definition linkbase
-            else:
-                return (
-                    'breakdown',
-                    DimensionConfidence.HIGH,
-                    f'{axis_name} not declared in definition linkbase for this role'
-                )
 
-        if presented_axes is not None:
-            names_members = presented_axes.get(dimension.replace(':', '_'))
-            if names_members is None:
-                return (
-                    'breakdown',
-                    DimensionConfidence.HIGH,
-                    f'{axis_name} not presented in this role'
-                )
-            if names_members:
-                continue
+def _uses_definition_linkbase(xbrl: Optional[Any], role_uri: Optional[str]) -> bool:
+    """Whether the filing's definition linkbase covers this role (Tier 1)."""
+    return (
+        xbrl is not None and
+        role_uri is not None and
+        hasattr(xbrl, 'has_definition_linkbase_for_role') and
+        xbrl.has_definition_linkbase_for_role(role_uri)
+    )
 
-        # TIER 2: Heuristic Fallback - MEDIUM confidence for explicit lists
-        # 1. Check FACE_AXES first (should show on face)
-        if axis_name in FACE_AXES:
-            continue  # This is a face dimension, check next
 
-        # 2. Check explicit BREAKDOWN_AXES
-        if axis_name in BREAKDOWN_AXES or f'{prefix}:{axis_name}' in BREAKDOWN_AXES:
+def _classify_breakdown_axis(
+    dimension: str,
+    structural_axes: Set[str],
+    use_definition_linkbase: bool,
+    presented_axes: Optional[Dict[str, bool]],
+    xbrl: Optional[Any],
+    role_uri: Optional[str]
+) -> Optional[Tuple[str, DimensionConfidence, str]]:
+    """The breakdown classification one axis forces, or None when the axis allows the face."""
+    prefix, axis_name = _normalize_axis_name(dimension)
+
+    # Check if this is a structural axis for this statement type
+    if axis_name in structural_axes:
+        return None  # Not a breakdown for this statement
+
+    # TIER 1: Definition Linkbase (Authoritative) - HIGH confidence
+    if use_definition_linkbase:
+        if xbrl.is_dimension_valid_for_role(dimension, role_uri):
+            return None  # Dimension is valid per definition linkbase
+        else:
             return (
                 'breakdown',
-                DimensionConfidence.MEDIUM,
-                f'{axis_name} in BREAKDOWN_AXES list'
+                DimensionConfidence.HIGH,
+                f'{axis_name} not declared in definition linkbase for this role'
             )
 
-        # 3. Check pattern-based detection - LOW confidence
-        if _matches_breakdown_pattern(axis_name):
+    if presented_axes is not None:
+        names_members = presented_axes.get(dimension.replace(':', '_'))
+        if names_members is None:
             return (
                 'breakdown',
-                DimensionConfidence.LOW,
-                f'{axis_name} matches breakdown pattern'
+                DimensionConfidence.HIGH,
+                f'{axis_name} not presented in this role'
             )
+        if names_members:
+            return None
 
+    # TIER 2: Heuristic Fallback - MEDIUM confidence for explicit lists
+    # 1. Check FACE_AXES first (should show on face)
+    if axis_name in FACE_AXES:
+        return None  # This is a face dimension, check next
+
+    # 2. Check explicit BREAKDOWN_AXES
+    if axis_name in BREAKDOWN_AXES or f'{prefix}:{axis_name}' in BREAKDOWN_AXES:
+        return (
+            'breakdown',
+            DimensionConfidence.MEDIUM,
+            f'{axis_name} in BREAKDOWN_AXES list'
+        )
+
+    # 3. Check pattern-based detection - LOW confidence
+    if _matches_breakdown_pattern(axis_name):
+        return (
+            'breakdown',
+            DimensionConfidence.LOW,
+            f'{axis_name} matches breakdown pattern'
+        )
+    return None
+
+
+def _face_classification(
+    dim_metadata: List[Dict[str, Any]],
+    use_definition_linkbase: bool
+) -> Tuple[str, DimensionConfidence, str]:
+    """The face classification of an item whose axes forced no breakdown."""
     # If we get here with definition linkbase, it's a face value with HIGH confidence
     if use_definition_linkbase:
         return (

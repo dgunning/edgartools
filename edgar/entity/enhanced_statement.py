@@ -2658,37 +2658,8 @@ class EnhancedStatementBuilder:
         node = nodes.get(concept, {})
         tree_concepts = tree_concepts or set()
 
-        # Get values for each period
-        # Check both original concept and normalized version
-        values = {}
-        has_any_value = False
-        for period in periods:
-            # Try original concept first
-            fact = period_maps[period].get(concept)
-            # If not found, try normalized version
-            if not fact:
-                normalized = self._normalize_concept(concept)
-                fact = period_maps[period].get(normalized)
-                if fact is not None:
-                    raw = fact.concept.split(':', 1)[-1]
-                    if raw != concept and raw in tree_concepts:
-                        fact = None
-
-            if fact:
-                values[period] = fact.numeric_value
-                has_any_value = True
-            else:
-                values[period] = None
-
-        # Get label from first fact or node
-        label = None
-        for period in periods:
-            fact = period_maps[period].get(concept)
-            if fact:
-                label = fact.label
-                break
-        if not label:
-            label = node.get('label', concept)
+        values, has_any_value = self._canonical_values(concept, period_maps, periods, tree_concepts)
+        label = self._canonical_label(concept, node, period_maps, periods)
 
         # Process children first to see if any have values
         children_items = []
@@ -2737,6 +2708,52 @@ class EnhancedStatementBuilder:
         )
 
         return item
+
+    def _canonical_values(self,
+                          concept: str,
+                          period_maps: Dict[str, Dict[str, FinancialFact]],
+                          periods: List[str],
+                          tree_concepts: Set[str]) -> Tuple[Dict[str, Any], bool]:
+        """A canonical item's value per period, and whether any period has one."""
+        # Get values for each period
+        # Check both original concept and normalized version
+        values = {}
+        has_any_value = False
+        for period in periods:
+            # Try original concept first
+            fact = period_maps[period].get(concept)
+            # If not found, try normalized version
+            if not fact:
+                normalized = self._normalize_concept(concept)
+                fact = period_maps[period].get(normalized)
+                if fact is not None:
+                    raw = fact.concept.split(':', 1)[-1]
+                    if raw != concept and raw in tree_concepts:
+                        fact = None
+
+            if fact:
+                values[period] = fact.numeric_value
+                has_any_value = True
+            else:
+                values[period] = None
+        return values, has_any_value
+
+    @staticmethod
+    def _canonical_label(concept: str,
+                         node: Dict[str, Any],
+                         period_maps: Dict[str, Dict[str, FinancialFact]],
+                         periods: List[str]) -> str:
+        """A canonical item's label: the first fact's, else the node's."""
+        # Get label from first fact or node
+        label = None
+        for period in periods:
+            fact = period_maps[period].get(concept)
+            if fact:
+                label = fact.label
+                break
+        if not label:
+            label = node.get('label', concept)
+        return label
 
     def _add_orphan_facts(self,
                          period_maps: Dict[str, Dict[str, FinancialFact]],

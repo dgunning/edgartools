@@ -2489,23 +2489,12 @@ class XBRL:
             return None
 
         # Guard: don't synthesize totals for per-share or ratio concepts
-        element = self.element_catalog.get(element_id_normalized)
-        if element:
-            dt = (element.data_type or '').lower()
-            if 'pershare' in dt or 'pure' in dt:
-                return None
+        if self._is_per_share_or_ratio_concept(element_id_normalized):
+            return None
 
         dim_facts = self._facts_in_statement_scope(dim_facts, member_parents or {})
 
-        from collections import defaultdict
-        axis_groups = defaultdict(list)
-        for cid, wf in dim_facts:
-            dim_info = wf['dimension_info']
-            val = wf['fact'].numeric_value
-            if val is not None:
-                axis = dim_info[0].get('dimension', '')
-                axis_groups[axis].append((cid, wf, val))
-
+        axis_groups = self._group_by_axis(dim_facts)
         if not axis_groups:
             return None
 
@@ -2518,38 +2507,9 @@ class XBRL:
         axis_key = best_axis[0][1]['dimension_info'][0].get('dimension', '').replace(':', '_')
         parents = (member_parents or {}).get(axis_key)
         if parents:
-            present = {(entry[1]['dimension_info'][0].get('member') or '').replace(':', '_')
-                       for entry in best_axis}
+            best_axis = self._outermost_members(best_axis, parents)
 
-            def nested_in_present(member):
-                seen = set()
-                parent = parents.get(member)
-                while parent and parent not in seen:
-                    if parent in present:
-                        return True
-                    seen.add(parent)
-                    parent = parents.get(parent)
-                return False
-
-            best_axis = [entry for entry in best_axis
-                         if not nested_in_present(
-                             (entry[1]['dimension_info'][0].get('member') or '').replace(':', '_'))]
-
-        # The catalog only types the filer's own extension concepts, so a
-        # us-gaap per-share concept passes the check above untyped. The facts'
-        # units say it for every concept: a divide unit (USD per share) or a
-        # pure one (a percentage) is an intensive amount that does not add up.
-        # Constellation Brands' basic EPS came out as 19.92, the Class A 10.44
-        # and Class B 9.48 added together (GH #1683). One member alone is a
-        # filed value, not a sum.
-        if len(best_axis) > 1 and any(self._is_non_additive_unit(entry[1]['fact'].unit_ref)
-                                      for entry in best_axis):
-            return None
-
-        # Amounts in different units do not add: MXN 327M and USD 19M are not
-        # 346M of anything (GH #1689). Nor is a smaller axis then a better
-        # answer, so there is no total.
-        if len({entry[1]['fact'].unit_ref for entry in best_axis}) > 1:
+        if self._units_do_not_add(best_axis):
             return None
 
         # Sharing an axis does not make members disjoint. A statement of
@@ -2560,71 +2520,149 @@ class XBRL:
         # filed $98,879,000,000, because the four components, their
         # ParentMember subtotal, the noncontrolling interest and the issuer's
         # own total member were all added together (gh #1281).
-        aggregates, components = [], []
-        for entry in best_axis:
-            member = (entry[1]['dimension_info'][0].get('member') or '')
-            (aggregates if _is_aggregate_member(member) else components).append(entry)
+        aggregates, components = self._split_aggregate_members(best_axis)
 
         if aggregates:
-            # The filing states its own total; report that rather than adding
-            # anything up. Never fall through to the sum here: an aggregate and
-            # its own components in one group is exactly the double count.
-            #
-            # Which aggregate is THE total is settled by agreement with the
-            # components when there are any, since a filing can carry several
-            # nested subtotals -- Disney files ParentMember at 95,008 AND a
-            # total-equity member at 98,879, and only the latter covers the
-            # whole axis.
-            component_total = sum(v for _, _, v in components)
-            if components:
-                scale = max((abs(v) for _, _, v in best_axis), default=0)
-                tolerance = max(abs(component_total), scale) * 1e-6
-                for cid, wf, value in aggregates:
-                    if abs(value - component_total) <= tolerance:
-                        return self._filed_total(value, wf['fact'], cid)
-
-            # Either the group is nothing but an aggregate -- Coca-Cola tags
-            # shareowners' equity solely against ParentMember, so there is no
-            # arithmetic to do and no ambiguity -- or several aggregates are
-            # present and none reconciles, which happens when the members are
-            # not parts of one whole at all (Apple's receivable concentration
-            # lists two named customers beside a carriers total). In both cases
-            # a filed total is a better answer than a sum that mixes levels,
-            # so prefer the filer's explicitly named total.
-            named = [e for e in aggregates
-                     if 'total' in (e[1]['dimension_info'][0].get('member') or '').lower()]
-            cid, wf, value = max(named or aggregates, key=lambda e: abs(e[2]))
-            return self._filed_total(value, wf['fact'], cid)
+            return self._aggregate_total(best_axis, aggregates, components)
 
         # No aggregate members: a genuine disjoint breakdown, which is the case
         # this helper was added for (gh #646 -- Disney's own cost of services
         # and cost of products summing to total costs).
-        if len(best_axis) > 1 and parents and not self._presented_members_covered(best_axis, parents,
-                                                                                    element_id_normalized):
-            return None
-
-        # On an axis the statement does not present there is no hierarchy to
-        # say the members are disjoint; one that is the sum of others is a
-        # subtotal beside its parts (GH #1703).
-        if not parents and _contains_a_subtotal([v for _, _, v in best_axis]):
+        if self._breakdown_sum_misleads(best_axis, parents, element_id_normalized):
             return None
 
         if len(best_axis) == 1:
             cid, wf, value = best_axis[0]
             return self._filed_total(value, wf['fact'], cid)
 
+        return self._summed_total(best_axis)
+
+    def _is_per_share_or_ratio_concept(self, element_id) -> bool:
+        """Whether the catalog types this concept as per-share or pure."""
+        element = self.element_catalog.get(element_id)
+        if not element:
+            return False
+        dt = (element.data_type or '').lower()
+        return 'pershare' in dt or 'pure' in dt
+
+    @staticmethod
+    def _group_by_axis(dim_facts):
+        """(context_id, fact, value) entries of the numeric facts, grouped by axis."""
+        from collections import defaultdict
+        axis_groups = defaultdict(list)
+        for cid, wf in dim_facts:
+            dim_info = wf['dimension_info']
+            val = wf['fact'].numeric_value
+            if val is not None:
+                axis = dim_info[0].get('dimension', '')
+                axis_groups[axis].append((cid, wf, val))
+        return axis_groups
+
+    @staticmethod
+    def _outermost_members(entries, parents):
+        """The entries whose member is not nested under another entry's member."""
+        present = {(entry[1]['dimension_info'][0].get('member') or '').replace(':', '_')
+                   for entry in entries}
+
+        def nested_in_present(member):
+            seen = set()
+            parent = parents.get(member)
+            while parent and parent not in seen:
+                if parent in present:
+                    return True
+                seen.add(parent)
+                parent = parents.get(parent)
+            return False
+
+        return [entry for entry in entries
+                if not nested_in_present(
+                    (entry[1]['dimension_info'][0].get('member') or '').replace(':', '_'))]
+
+    def _units_do_not_add(self, entries) -> bool:
+        """Whether the entries' units rule out adding them up."""
+        # The catalog only types the filer's own extension concepts, so a
+        # us-gaap per-share concept passes the check above untyped. The facts'
+        # units say it for every concept: a divide unit (USD per share) or a
+        # pure one (a percentage) is an intensive amount that does not add up.
+        # Constellation Brands' basic EPS came out as 19.92, the Class A 10.44
+        # and Class B 9.48 added together (GH #1683). One member alone is a
+        # filed value, not a sum.
+        if len(entries) > 1 and any(self._is_non_additive_unit(entry[1]['fact'].unit_ref)
+                                    for entry in entries):
+            return True
+
+        # Amounts in different units do not add: MXN 327M and USD 19M are not
+        # 346M of anything (GH #1689). Nor is a smaller axis then a better
+        # answer, so there is no total.
+        return len({entry[1]['fact'].unit_ref for entry in entries}) > 1
+
+    @staticmethod
+    def _split_aggregate_members(entries):
+        """Split entries into (aggregate members, component members)."""
+        aggregates, components = [], []
+        for entry in entries:
+            member = (entry[1]['dimension_info'][0].get('member') or '')
+            (aggregates if _is_aggregate_member(member) else components).append(entry)
+        return aggregates, components
+
+    def _aggregate_total(self, entries, aggregates, components) -> Dict[str, Any]:
+        """The filed total among the aggregate members of an axis."""
+        # The filing states its own total; report that rather than adding
+        # anything up. Never fall through to the sum here: an aggregate and
+        # its own components in one group is exactly the double count.
+        #
+        # Which aggregate is THE total is settled by agreement with the
+        # components when there are any, since a filing can carry several
+        # nested subtotals -- Disney files ParentMember at 95,008 AND a
+        # total-equity member at 98,879, and only the latter covers the
+        # whole axis.
+        component_total = sum(v for _, _, v in components)
+        if components:
+            scale = max((abs(v) for _, _, v in entries), default=0)
+            tolerance = max(abs(component_total), scale) * 1e-6
+            for cid, wf, value in aggregates:
+                if abs(value - component_total) <= tolerance:
+                    return self._filed_total(value, wf['fact'], cid)
+
+        # Either the group is nothing but an aggregate -- Coca-Cola tags
+        # shareowners' equity solely against ParentMember, so there is no
+        # arithmetic to do and no ambiguity -- or several aggregates are
+        # present and none reconciles, which happens when the members are
+        # not parts of one whole at all (Apple's receivable concentration
+        # lists two named customers beside a carriers total). In both cases
+        # a filed total is a better answer than a sum that mixes levels,
+        # so prefer the filer's explicitly named total.
+        named = [e for e in aggregates
+                 if 'total' in (e[1]['dimension_info'][0].get('member') or '').lower()]
+        cid, wf, value = max(named or aggregates, key=lambda e: abs(e[2]))
+        return self._filed_total(value, wf['fact'], cid)
+
+    def _breakdown_sum_misleads(self, entries, parents, element_id) -> bool:
+        """Whether adding a disjoint breakdown would give a partial or double count."""
+        if len(entries) > 1 and parents and not self._presented_members_covered(entries, parents,
+                                                                                element_id):
+            return True
+
+        # On an axis the statement does not present there is no hierarchy to
+        # say the members are disjoint; one that is the sum of others is a
+        # subtotal beside its parts (GH #1703).
+        return not parents and _contains_a_subtotal([v for _, _, v in entries])
+
+    @staticmethod
+    def _summed_total(entries) -> Dict[str, Any]:
+        """A synthetic-total result that adds up the entries."""
         # A sum is no filed fact: it carries no single context or fact id, its
         # precision is that of its least precise component, and it says it was
         # computed (GH #1689).
-        component_facts = [wf['fact'] for _, wf, _ in best_axis]
+        component_facts = [wf['fact'] for _, wf, _ in entries]
         precisions = [normalize_decimals(f.decimals) for f in component_facts]
         finite = [d for d in precisions if isinstance(d, int)]
         return {
-            'total': sum(v for _, _, v in best_axis),
+            'total': sum(v for _, _, v in entries),
             'computed': True,
             'fact': None,
             'context_id': None,
-            'component_context_ids': [cid for cid, _, _ in best_axis],
+            'component_context_ids': [cid for cid, _, _ in entries],
             'unit_ref': component_facts[0].unit_ref,
             'decimals': min(finite) if finite else next((d for d in precisions if d is not None), None),
         }
@@ -2652,43 +2690,59 @@ class XBRL:
         is a zero, not a gap. The caller applies this to sums only; one
         member's fact is a filed value.
         """
-        context = self.contexts.get(entries[0][0])
-        period = getattr(context, 'period', None) if context is not None else None
-        period_type = period.get('type') if isinstance(period, dict) else getattr(period, 'type', None)
-        if period_type != 'instant':
+        if self._context_period_type(entries[0][0]) != 'instant':
             return True
 
         present = {(entry[1]['dimension_info'][0].get('member') or '').replace(':', '_') for entry in entries}
+        children = self._member_children(parents)
+
+        uncovered = [m for m in parents
+                     if not m.endswith('Domain') and not self._member_covered(m, present, parents, children)]
+        if not uncovered:
+            return True
+        enclosing = self._enclosing_members
+        summed_enclosing = set().union(*(enclosing(m, parents) for m in present))
+        axis = (entries[0][1]['dimension_info'][0].get('dimension') or '').replace(':', '_')
+        elsewhere = self._members_carrying(element_id, axis) if element_id else set()
+        return not any(m in elsewhere or enclosing(m, parents) & summed_enclosing for m in uncovered)
+
+    def _context_period_type(self, context_id) -> Optional[str]:
+        """The period type ('instant' or 'duration') of a context, if known."""
+        context = self.contexts.get(context_id)
+        period = getattr(context, 'period', None) if context is not None else None
+        return period.get('type') if isinstance(period, dict) else getattr(period, 'type', None)
+
+    @staticmethod
+    def _member_children(parents) -> Dict[str, List[str]]:
+        """The members nested directly under each member."""
         children: Dict[str, List[str]] = {}
         for member, parent in parents.items():
             if parent:
                 children.setdefault(parent, []).append(member)
+        return children
 
-        def covered(member, seen=()):
-            if member in present:
-                return True
-            parent = parents.get(member)
-            while parent:
-                if parent in present:
-                    return True
-                parent = parents.get(parent)
-            kids = [k for k in children.get(member, []) if k not in seen]
-            return bool(kids) and all(covered(k, seen + (member,)) for k in kids)
-
-        def enclosing(member):
-            found, parent = set(), parents.get(member)
-            while parent and parent not in found:
-                found.add(parent)
-                parent = parents.get(parent)
-            return found
-
-        uncovered = [m for m in parents if not m.endswith('Domain') and not covered(m)]
-        if not uncovered:
+    @staticmethod
+    def _member_covered(member, present, parents, children, seen=()) -> bool:
+        """Whether a member, a member it nests under, or every member nested under it has a fact."""
+        if member in present:
             return True
-        summed_enclosing = set().union(*(enclosing(m) for m in present))
-        axis = (entries[0][1]['dimension_info'][0].get('dimension') or '').replace(':', '_')
-        elsewhere = self._members_carrying(element_id, axis) if element_id else set()
-        return not any(m in elsewhere or enclosing(m) & summed_enclosing for m in uncovered)
+        parent = parents.get(member)
+        while parent:
+            if parent in present:
+                return True
+            parent = parents.get(parent)
+        kids = [k for k in children.get(member, []) if k not in seen]
+        return bool(kids) and all(XBRL._member_covered(k, present, parents, children, seen + (member,))
+                                  for k in kids)
+
+    @staticmethod
+    def _enclosing_members(member, parents) -> Set[str]:
+        """Every member a member nests under."""
+        found, parent = set(), parents.get(member)
+        while parent and parent not in found:
+            found.add(parent)
+            parent = parents.get(parent)
+        return found
 
     def _members_carrying(self, element_id, axis) -> Set[str]:
         """The members of an axis that carry a fact of this concept in any context."""
