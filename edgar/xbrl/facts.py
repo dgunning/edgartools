@@ -1560,21 +1560,31 @@ class FactsView:
             if element_id in self.xbrl.element_catalog:
                 element = self.xbrl.element_catalog[element_id]
 
-                # preferred_label comes from the first presentation tree that
-                # carries one; statement membership comes from the index built
-                # above, which holds every role the element appears in rather
-                # than only the first one reached.
-                preferred_label = None
-                for tree in self.xbrl.presentation_trees.values():
-                    if element_id in tree.all_nodes:
-                        pres_node = tree.all_nodes[element_id]
-                        if pres_node.preferred_label:
-                            preferred_label = pres_node.preferred_label
-                            break
-
+                # Statement membership comes from the index built above, which
+                # holds every role the element appears in rather than only the
+                # first one reached.
                 memberships = element_to_statements.get(element_id, [])
                 statement_type_found = memberships[0][0] if memberships else None
                 statement_role_found = memberships[0][1] if memberships else None
+
+                # A preferredLabel belongs to one presentation arc, so a fact
+                # assigned to a statement takes it from that statement's role,
+                # and has none when that role's arc names none. Taking the first
+                # role that had one gave OHI's income-statement interest expense
+                # a disclosure role's negatedLabel (GH #1677). A fact with no
+                # statement keeps the first preferred label found in any role.
+                preferred_label = None
+                statement_tree = (self.xbrl.presentation_trees.get(statement_role_found)
+                                  if statement_role_found else None)
+                if statement_tree is not None and element_id in statement_tree.all_nodes:
+                    preferred_label = statement_tree.all_nodes[element_id].preferred_label
+                else:
+                    for tree in self.xbrl.presentation_trees.values():
+                        if element_id in tree.all_nodes:
+                            pres_node = tree.all_nodes[element_id]
+                            if pres_node.preferred_label:
+                                preferred_label = pres_node.preferred_label
+                                break
 
                 # Add label using the same selection logic as display_label
                 # but including the preferred_label we found above
