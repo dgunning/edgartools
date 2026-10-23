@@ -293,6 +293,8 @@ def _parse_period_header(header: str) -> Dict[str, object]:
     header = header.strip()
     if not header or header.startswith('Col_'):
         return empty
+    # A header built from stacked rows joins them with " - ": "September 30, - 2025"
+    header = re.sub(r'(\d{1,2}),?\s*-\s*((?:19|20)\d{2})\b', r'\1, \2', header)
 
     # Try duration pattern first
     m = _DURATION_HEADER.search(header)
@@ -713,14 +715,15 @@ class FinancialTable:
         records = []
         df = self.dataframe
 
-        for col in df.columns:
+        # Columns are read by position: two periods may share a label ("September 30,")
+        for col_pos, col in enumerate(df.columns):
             period_info = _parse_period_header(str(col))
 
             for pos, idx_label in enumerate(df.index):
                 label = str(idx_label)
                 row_type = self.get_row_type(label, pos)
 
-                raw_val = df.iloc[pos][col]
+                raw_val = df.iloc[pos, col_pos]
                 # Skip non-numeric cells (headers, subtitles, NaN)
                 numeric_val = None
                 if isinstance(raw_val, (int, float)):
@@ -1165,9 +1168,11 @@ class EarningsRelease:
         net_income_patterns = ['net income', 'net loss', 'net earnings', 'net income (loss)']
 
         df = inc.dataframe
+        # Read the column by position: a repeated period label would return several cells
+        col_pos = list(df.columns).index(col)
         for pos, idx_label in enumerate(df.index):
             label_lower = str(idx_label).lower().strip()
-            val = df.iloc[pos][col]
+            val = df.iloc[pos, col_pos]
             if not isinstance(val, (int, float)):
                 continue
 
@@ -1684,13 +1689,30 @@ def _is_scale_caption(content: str) -> bool:
 
 
 def _place_header_cells(header_rows) -> List[List[Tuple[int, int, str]]]:
-    """Grid position of every header cell as (start, end, text), from its colspan."""
+    """Grid position of every header cell as (start, end, text), honouring colspan and rowspan.
+
+    A cell with rowspan="2" (often the empty cell over the row labels) occupies the same
+    columns in the next header row, so that row's cells start after it (GH #1777).
+    """
+    # Spans come from filer HTML, so occupancy is kept as column intervals per row and a
+    # rowspan reaches only the header rows that exist; a rowspan="10000" colspan="1000"
+    # cell costs one interval per header row, not ten million grid cells.
+    n_rows = len(header_rows)
+    occupied: Dict[int, List[Tuple[int, int]]] = {}
     placed = []
-    for cells in header_rows:
+    for r, cells in enumerate(header_rows):
         col = 0
         row_cells = []
         for cell in cells:
+            moved = True
+            while moved:
+                moved = False
+                for (s, e) in occupied.get(r, ()):
+                    if s <= col < e:
+                        col, moved = e, True
             span = max(cell.colspan or 1, 1)
+            for dr in range(r + 1, min(r + max(cell.rowspan or 1, 1), n_rows)):
+                occupied.setdefault(dr, []).append((col, col + span))
             row_cells.append((col, col + span, cell.content.strip()))
             col += span
         placed.append(row_cells)
@@ -1755,11 +1777,21 @@ def _join_row_by_leaf(value_cells, leaves) -> Optional[Dict[int, str]]:
     """Join one row's value cells by the leaf they sit under; None when a cell does not line up."""
     joined: Dict[int, str] = {}
     digits: Dict[int, int] = {}
+    prefix = ''
+    last = None
     for (s, e, text) in value_cells:
         hits = _leaves_under(leaves, s, e)
+        if not hits and text in (')', '%', ')%', '%)') and last is not None:
+            # The closing ")" of "(636" printed in the spacer cell after it (GH #1777)
+            hits = [last]
+        elif not hits and text in ('$', '(', '$(', '€', '£', '¥'):
+            prefix += text
+            continue
         if len(hits) != 1:
             return None
         k = hits[0]
+        last = k
+        text, prefix = prefix + text, ''
         if any(ch.isdigit() for ch in text):
             digits[k] = digits.get(k, 0) + 1
             if digits[k] > 1:
