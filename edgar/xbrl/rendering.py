@@ -24,14 +24,16 @@ from edgar.richtools import repr_rich, rich_to_text
 from edgar.xbrl import standardization
 from edgar.xbrl.core import (
     INFINITE_PRECISION,
-    PERIOD_END_LABEL,
-    PERIOD_START_LABEL,
     decimals_for_scaling,
     determine_dominant_scale,
     format_date,
     format_value,
+    is_period_boundary_label_role,
+    is_period_end_label_role,
+    is_period_start_label_role,
     parse_date,
 )
+from edgar.xbrl.parsers.instance import _quarter_for_date
 
 # Import color schemes from entity package
 try:
@@ -1041,8 +1043,8 @@ def _format_period_labels(
                 if 80 <= duration_days <= 100:  # Quarterly period
                     fy_end_month = entity_info.get('fiscal_year_end_month') if entity_info else None
                     if fy_end_month:
-                        month_offset = (end_date_obj.month - fy_end_month - 1) % 12
-                        q_num = f"Q{(month_offset // 3) + 1}"
+                        # First-week ends of 52/53-week filers belong to the prior month (GH #1738)
+                        q_num = _quarter_for_date(end_date_obj, fy_end_month)
                     else:
                         # Fallback to calendar quarters if no fiscal year info
                         month = end_date_obj.month
@@ -1364,7 +1366,9 @@ def _create_units_note(
 # Originally the Income Statement and Cash Flow Statement (Issue #463); extended
 # to the Balance Sheet for contra accounts such as Treasury Stock (Issue #568) --
 # APD, JPM and XOM negate Treasury Stock, JPM also Allowance for Loan Losses.
-PRESENTATION_SIGN_STATEMENTS = ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet')
+# The comprehensive income statement too: AAL presents its pension OCI with a
+# negated label, and without the sign the components did not foot (GH #1676).
+PRESENTATION_SIGN_STATEMENTS = ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet', 'ComprehensiveIncome')
 
 
 def apply_presentation_sign(
@@ -1977,7 +1981,7 @@ def render_statement(
         # share the node label and can't be told apart otherwise).
         already_roll_forward = (
             not item.get('is_dimension')
-            and item.get('preferred_label') in (PERIOD_START_LABEL, PERIOD_END_LABEL)
+            and is_period_boundary_label_role(item.get('preferred_label'))
         )
         if statement_type == 'StatementOfEquity' and concept and not already_roll_forward:
             total_occurrences = concept_occurrence_count.get(concept, 1)
@@ -2055,9 +2059,8 @@ def render_statement(
             # Only non-dimensional rows carry a reliable per-reference label;
             # dimensional rows share the node label and use the equity logic above.
             item_preferred_label = None if item.get('is_dimension') else item.get('preferred_label')
-            if value == "" and period.end_date and item_preferred_label in (
-                    PERIOD_START_LABEL, PERIOD_END_LABEL):
-                if (item_preferred_label == PERIOD_START_LABEL
+            if value == "" and period.end_date and is_period_boundary_label_role(item_preferred_label):
+                if (is_period_start_label_role(item_preferred_label)
                         and getattr(period, 'start_date', None)):
                     from datetime import datetime, timedelta
                     try:
@@ -2068,7 +2071,7 @@ def render_statement(
                             value = item['values'].get(f"instant_{period.start_date}", "")
                     except (ValueError, AttributeError):
                         pass
-                if value == "" and item_preferred_label == PERIOD_END_LABEL:
+                if value == "" and is_period_end_label_role(item_preferred_label):
                     value = item['values'].get(f"instant_{period.end_date}", "")
 
             # Get comparison info for this item and period if available

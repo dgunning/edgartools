@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from lxml import etree as ET
 
-from edgar.xbrl.core import PERIOD_END_LABEL, PERIOD_START_LABEL, extract_element_id
+from edgar.xbrl.core import PERIOD_END_LABEL, PERIOD_START_LABEL, extract_element_id, is_period_boundary_label_role
 from edgar.xbrl.models import ElementCatalog, PresentationNode, PresentationTree, XBRLProcessingError
 from edgar.xmltools import xml_parser
 
@@ -19,7 +19,17 @@ from .base import BaseParser
 # Roll-forward label roles legitimately repeat the same concept under one parent
 # (e.g. cash flow's "Cash, beginning/ending balances"). These must NOT be
 # deduplicated even though both arcs collapse to a single element_id node.
-ROLL_FORWARD_LABELS = {PERIOD_START_LABEL, PERIOD_END_LABEL}
+# Includes the negated period roles (GH #1700). Kept for importers; the parser
+# itself tests roles with is_period_boundary_label_role, which matches these
+# and any other namespace version by local name.
+ROLL_FORWARD_LABELS = {
+    PERIOD_START_LABEL,
+    PERIOD_END_LABEL,
+    "http://www.xbrl.org/2009/role/negatedPeriodStartLabel",
+    "http://www.xbrl.org/2009/role/negatedPeriodEndLabel",
+    "http://xbrl.us/us-gaap/role/label/negatedPeriodStart",
+    "http://xbrl.us/us-gaap/role/label/negatedPeriodEnd",
+}
 
 
 class PresentationParser(BaseParser):
@@ -77,6 +87,19 @@ class PresentationParser(BaseParser):
             xlink_label = '{http://www.w3.org/1999/xlink}label'
             xlink_href = '{http://www.w3.org/1999/xlink}href'
 
+            # A role may be declared in more than one presentationLink; the arcs of
+            # every link with that role form one network (XBRL 2.1 section 3.5.3.9.7.3).
+            # Collect them per role and build each tree once, after the last link,
+            # so a later link does not replace an earlier one (GH #1745: IMAX's
+            # FY2018 cash-flow role is split across a 56-arc and a 1-arc link).
+            # An arc repeated with the same endpoints, order and preferred label is
+            # an equivalent relationship and is kept once. A period start/end arc
+            # is kept once per endpoints and label whatever its order, with the
+            # first order seen: the tree builder never de-duplicates those, so a
+            # repeat at another order would add a second "beginning" row.
+            relationships_by_role: Dict[str, List[Dict[str, Any]]] = {}
+            seen_arcs_by_role: Dict[str, set] = {}
+
             for link in presentation_links:
                 role = link.get(xlink_role)
                 if not role:
@@ -103,9 +126,9 @@ class PresentationParser(BaseParser):
                 # Optimize: Extract arcs using direct xpath with context
                 arcs = link.xpath('.//link:presentationArc', namespaces=nsmap)
 
-                # Create relationships map - pre-allocate with known size
-                relationships = []
+                relationships = relationships_by_role.setdefault(role, [])
                 relationships_append = relationships.append  # Local function reference for speed
+                seen_arcs = seen_arcs_by_role.setdefault(role, set())
 
                 # Process arcs with optimized locator lookups
                 for arc in arcs:
@@ -131,6 +154,14 @@ class PresentationParser(BaseParser):
                     from_element = extract_element_id(from_href)
                     to_element = extract_element_id(to_href)
 
+                    if is_period_boundary_label_role(preferred_label):
+                        arc_key = (from_element, to_element, None, preferred_label)
+                    else:
+                        arc_key = (from_element, to_element, order, preferred_label)
+                    if arc_key in seen_arcs:
+                        continue
+                    seen_arcs.add(arc_key)
+
                     # Add relationship using local function reference
                     relationships_append({
                         'from_element': from_element,
@@ -139,7 +170,8 @@ class PresentationParser(BaseParser):
                         'preferred_label': preferred_label
                     })
 
-                # Build presentation tree for this role if we have relationships
+            # Build one presentation tree per role from all of its links
+            for role, relationships in relationships_by_role.items():
                 if relationships:
                     self._build_presentation_tree(role, relationships)
 
@@ -249,7 +281,8 @@ class PresentationParser(BaseParser):
             # duplicate child reference would render the identical line item twice.
             # Keep the first occurrence (lowest order) and skip the rest.
             #
-            # Exception: roll-forward arcs (periodStart/periodEndLabel) repeat the
+            # Exception: roll-forward arcs (periodStart/periodEndLabel, and their
+            # negated forms, GH #1700) repeat the
             # same concept on purpose -- e.g. cash flow's "Cash, beginning/ending
             # balances" -- and statement rendering relies on both references being
             # present (first occurrence = beginning, later = ending). Never dedupe
@@ -259,7 +292,7 @@ class PresentationParser(BaseParser):
             for rel in children:
                 child_id = rel['to_element']
                 preferred_label = rel['preferred_label']
-                is_roll_forward = preferred_label in ROLL_FORWARD_LABELS
+                is_roll_forward = is_period_boundary_label_role(preferred_label)
 
                 if not is_roll_forward:
                     if child_id in seen_children:

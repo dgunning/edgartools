@@ -427,6 +427,10 @@ class XBRL:
         # Reverse index: element_name -> list of context_ids with facts (lazy-initialized)
         self._element_context_index = None
 
+        # Most-used iso4217 measure among this filing's facts (lazy; '' when there is none)
+        self._reporting_currency_cache: Optional[str] = None
+        self._currency_choice_logged = False
+
         # FilingSummary-based role categories (role_uri -> category string)
         self._filing_summary_categories: Dict[str, str] = {}
         # FilingSummary-based menu categories (role_uri -> MenuCategory string)
@@ -1744,6 +1748,11 @@ class XBRL:
                 balance = get_balance_type(element_id)
 
         # Get weight and calculation parent from calculation trees (Issue #463, #514, GH-712)
+        # A calculation relationship belongs to its own role (XBRL 2.1 section
+        # 3.5.3.9.7.3), so a statement row reads only the statement role's network
+        # and has no weight or parent when that network has no arc for it. Taking
+        # them from another role gave Sonoco's income-statement share count the
+        # EPS note's parent (GH #1702).
         calculation_parent = None
         if hasattr(self, 'calculation_trees') and self.calculation_trees:
             # GH-712: Prefer calc tree matching this statement's role URI
@@ -1754,8 +1763,8 @@ class XBRL:
                     weight = calc_node.weight
                     calculation_parent = calc_node.parent
 
-            # Fallback: iterate all calc trees if not found in statement's own tree
-            if weight is None:
+            # Fallback only when no statement role is known
+            if weight is None and not statement_role:
                 for calc_tree in self.calculation_trees.values():
                     if element_id_normalized in calc_tree.all_nodes:
                         calc_node = calc_tree.all_nodes[element_id_normalized]
@@ -1862,7 +1871,9 @@ class XBRL:
                         fact = wrapped_fact['fact']
                     else:
                         # Multiple non-dimensioned contexts for same period - select by precision
-                        best = max(non_dimensioned_facts_for_period,
+                        candidates = self._prefer_reporting_currency(
+                            non_dimensioned_facts_for_period, fact_of=lambda x: x[1]['fact'])
+                        best = max(candidates,
                                    key=lambda x: self._get_fact_precision(x[1]['fact']))
                         context_id, wrapped_fact = best
                         fact = wrapped_fact['fact']
@@ -1938,7 +1949,8 @@ class XBRL:
                         context_id, wrapped_fact = non_dim_facts[0]
                         fact = wrapped_fact['fact']
                     else:
-                        best = min(non_dim_facts,
+                        candidates = self._prefer_reporting_currency(non_dim_facts, fact_of=lambda x: x[1]['fact'])
+                        best = min(candidates,
                                    key=lambda x: (len(x[1]['dimension_info']),
                                                   -self._get_fact_precision(x[1]['fact'])))
                         context_id, wrapped_fact = best
@@ -2145,7 +2157,7 @@ class XBRL:
 
             # Post-process: apply member hierarchy from definition linkbase
             if dim_items_added:
-                self._apply_member_hierarchy(dim_items_added)
+                self._apply_member_hierarchy(dim_items_added, statement_role)
             # Now add to result in correct order
             result.extend(dim_items_added)
 
@@ -2161,7 +2173,8 @@ class XBRL:
                                       statement_role=statement_role,
                                       preferred_label_override=child_override)
 
-    def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]]) -> None:
+    def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]],
+                                statement_role: Optional[str] = None) -> None:
         """Adjust level of dimensional items based on definition linkbase member hierarchy.
 
         The definition linkbase defines member-to-member relationships (e.g.,
@@ -2179,6 +2192,13 @@ class XBRL:
         rows would collide and the earlier one would be dropped; the domain
         hierarchy cannot say which axis's row it nests, so neither is
         reordered and both pass through (edgartools-3h3q).
+
+        A domain-member network belongs to its extended link role (XBRL
+        Dimensions 1.0 section 2.4), so with ``statement_role`` given only that
+        role's member relationships nest rows. The union across roles nested
+        Tesla's "Services and other" under a subtotal member that only a note
+        declares (GH #1701). A role with no domain-member arcs falls back to the
+        union, so filings without a per-role definition network keep their nesting.
         """
         member_to_item = {}
         ambiguous = set()
@@ -2200,7 +2220,9 @@ class XBRL:
             return
 
         member_ids = set(member_to_item.keys())
-        domains = self.parser.domains
+        # A role with no domain-member arcs of its own (no definition network
+        # for the statement) keeps the cross-role union, as before GH #1701.
+        domains = (self.parser.domains_for_role(statement_role) if statement_role else None) or self.parser.domains
 
         # Find members that are parents of other members in our set
         member_children = {}
@@ -2462,6 +2484,8 @@ class XBRL:
         - INF (infinite precision) returns 1_000_000
         - Numeric decimals return their value (e.g., -6 for millions, 2 for hundredths)
         - None or invalid returns 0 (default/unknown precision)
+        - A valueless (nil) fact returns -2_000_000, below any valued fact, because
+          its missing decimals says nothing about precision (GH #1750)
 
         Args:
             fact: An XBRL Fact object with a decimals attribute
@@ -2469,6 +2493,8 @@ class XBRL:
         Returns:
             Integer precision value for comparison (higher = more precise)
         """
+        if fact.numeric_value is None and fact.value in (None, ''):
+            return -2_000_000  # Nil/valueless: never outranks a fact with a value
         if fact.decimals == 'INF':
             return 1_000_000  # Infinite precision = highest
         elif fact.decimals is not None:
@@ -2508,6 +2534,74 @@ class XBRL:
                 best_fact = fact
 
         return best_fact
+
+    def _currency_measure(self, unit_ref: Optional[str]) -> Optional[str]:
+        """The iso4217 measure a fact's unit denominates its value in, else None."""
+        return unit_currency_measure(self.parser.units.get(unit_ref)) if unit_ref else None
+
+    def _reporting_currency(self) -> Optional[str]:
+        """
+        The iso4217 measure most of this filing's facts are reported in.
+
+        A tie in the count goes to the currency of an undimensioned us-gaap:Assets
+        fact, then to the alphabetically first measure, so the choice never
+        depends on fact order.
+        """
+        if self._reporting_currency_cache is None:
+            counts: Dict[str, int] = {}
+            for fact in self.parser.facts.values():
+                measure = self._currency_measure(fact.unit_ref)
+                if measure:
+                    counts[measure] = counts.get(measure, 0) + 1
+            choice = ''
+            if counts:
+                top = max(counts.values())
+                tied = sorted(m for m, n in counts.items() if n == top)
+                choice = tied[0]
+                if len(tied) > 1:
+                    for fact in self.parser.facts.values():
+                        context = self.contexts.get(fact.context_ref)
+                        if (fact.element_id in ('us-gaap:Assets', 'us-gaap_Assets') and context is not None
+                                and not context.dimensions):
+                            measure = self._currency_measure(fact.unit_ref)
+                            if measure in tied:
+                                choice = measure
+                                break
+            self._reporting_currency_cache = choice
+        return self._reporting_currency_cache or None
+
+    def _prefer_reporting_currency(self, items: list, fact_of=None) -> list:
+        """
+        Narrow candidates in different units to those in the reporting currency.
+
+        Facts in different currencies are different data points (XBRL 2.1 §4.10,
+        U-Equal), but a statement cell holds one value. Ranking them by decimals
+        alone let a CAD or EUR amount replace the USD one in a USD statement
+        (GH #1704). Facts in other units stay reachable through xbrl.facts.
+
+        When duplicates differ by unit, the statement shows the reporting-currency
+        amount even where the foreign fact is the exact face amount (for example
+        EUR-denominated notes, such as Netflix's, tagged in EUR beside a USD
+        equivalent). A warning is logged once per filing when this happens.
+
+        ``fact_of`` maps an item to its Fact, for callers whose candidates are
+        wrapped (context id, fact dict) pairs; by default items are Facts.
+        """
+        fact_of = fact_of or (lambda item: item)
+        if len(items) < 2 or len({fact_of(i).unit_ref for i in items}) < 2:
+            return items
+        currency = self._reporting_currency()
+        preferred = [i for i in items if currency and self._currency_measure(fact_of(i).unit_ref) == currency]
+        if preferred and len(preferred) < len(items) and not self._currency_choice_logged:
+            kept = {id(i) for i in preferred}
+            dropped = sorted({str(fact_of(i).unit_ref) for i in items if id(i) not in kept})
+            log.warning(
+                "%s is reported in %s and in %s for the same period; statements show the %s amount. "
+                "All amounts remain in xbrl.facts. Logged once per filing (GH #1704).",
+                fact_of(items[0]).element_id, currency, ", ".join(dropped), currency,
+            )
+            self._currency_choice_logged = True
+        return preferred or items
 
     def _coregistrant_member(self, role: Optional[str]) -> Optional[str]:
         """
@@ -2594,7 +2688,7 @@ class XBRL:
         for context_id in context_ids:
             # Issue #564: Get ALL facts for this element/context and select the most precise
             facts_list = self.parser.get_facts_by_key(element_name, context_id)
-            fact = self._select_most_precise_fact(facts_list)
+            fact = self._select_most_precise_fact(self._prefer_reporting_currency(facts_list))
 
             if fact:
                 # If period filter is specified, check if context matches period

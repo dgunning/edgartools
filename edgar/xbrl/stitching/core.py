@@ -96,6 +96,9 @@ class StatementStitcher:
         self.ordering_manager = None  # Will be initialized during stitching
         self.original_statement_order = []  # Track original order for hierarchy context
         self.concept_to_label_map = {}  # Maps concept IDs to label keys (persists across statements)
+        # Every value each filing reports for a concept, comparative columns
+        # included, so merges can check that two lines are the same amount (GH #1685)
+        self.value_evidence = defaultdict(dict)  # {concept: {period: value}}
 
     def stitch_statements(
         self,
@@ -127,6 +130,7 @@ class StatementStitcher:
         self.concept_metadata = {}
         self.original_statement_order = []
         self.concept_to_label_map = {}  # Reset concept-to-label mapping for each stitch
+        self.value_evidence = defaultdict(dict)
 
         # Initialize ordering manager for this statement type
         statement_type = statements[0].get('statement_type', 'IncomeStatement') if statements else 'IncomeStatement'
@@ -503,6 +507,12 @@ class StatementStitcher:
                         if ps is not None:
                             self.concept_metadata[concept_key]['preferred_sign'] = ps
 
+            # Keep every reported value, selected or not, as merge evidence.
+            # Statements arrive newest first, so the first value seen wins.
+            for period_id, value in (item.get('values') or {}).items():
+                if value is not None:
+                    self.value_evidence[concept_key].setdefault(period_id, value)
+
             # Store values for relevant periods
             for period_id in relevant_periods:
                 if period_id in self.periods:  # Only include selected periods
@@ -561,6 +571,70 @@ class StatementStitcher:
         return a in b or b in a
 
     @staticmethod
+    def _values_agree(pv, sv) -> bool:
+        """Equal, or within the 0.1% rounding tolerance."""
+        return pv == sv or (pv != 0 and abs((pv - sv) / pv) < 0.001)
+
+    def _evidence_for(self, concept_key: str) -> Dict[str, Any]:
+        """All reported values for a concept: stitched cells plus comparative columns."""
+        evidence = dict(self.value_evidence.get(concept_key, {}))
+        for period_id, value_data in self.data.get(concept_key, {}).items():
+            if value_data.get('value') is not None:
+                evidence[period_id] = value_data['value']
+        return evidence
+
+    def _shown_to_be_same_amount(self, key_a: str, key_b: str) -> bool:
+        """True only when the filings report both lines for at least one common
+        period and every such period agrees.
+
+        Having no period in common is not evidence that two lines are the same
+        measure: cash and cash equivalents, cash plus short-term investments and
+        available-for-sale securities all standardize to one bucket (GH #1685).
+        """
+        a = self._evidence_for(key_a)
+        b = self._evidence_for(key_b)
+        shared = [p for p in a if p in b]
+        if not shared:
+            return False
+        return all(self._values_agree(a[p], b[p]) for p in shared)
+
+    @staticmethod
+    def _activity_stem(bare_name: str, suffix: str) -> Optional[str]:
+        """'NetCashProvidedByUsedInOperatingActivitiesContinuingOperations' ->
+        'CashProvidedByUsedInOperatingActivities' (suffix and leading 'Net' removed)."""
+        if not bare_name.endswith(suffix):
+            return None
+        stem = bare_name[:-len(suffix)]
+        return stem[3:] if stem.startswith('Net') else stem
+
+    def _continuing_differs_from_total(self, key_a: str, key_b: str) -> bool:
+        """True when one key is an activity's continuing-operations amount and the
+        filing reports nonzero discontinued-operations cash for that activity in
+        a period the continuing amount would fill (GH #1690).
+
+        There the continuing amount is not the total, so merging it into the
+        total row would understate the total by the discontinued amount.
+        """
+        suffix = 'ContinuingOperations'
+        bare_a, bare_b = self._bare_concept_name(key_a), self._bare_concept_name(key_b)
+        if bare_a.endswith(suffix) == bare_b.endswith(suffix):
+            return False
+        continuing_key = key_a if bare_a.endswith(suffix) else key_b
+        stem = self._activity_stem(self._bare_concept_name(continuing_key), suffix)
+        continuing_periods = set(self.data.get(continuing_key, {}))
+        for other_key in set(self.data) | set(self.value_evidence):
+            other_bare = self._bare_concept_name(other_key)
+            other_stem = self._activity_stem(other_bare, 'DiscontinuedOperations')
+            # The aggregate line does not say which activity it belongs to, so a
+            # nonzero aggregate blocks every activity's merge.
+            if other_bare != 'CashProvidedByUsedInDiscontinuedOperations' and other_stem != stem:
+                continue
+            discontinued = self._evidence_for(other_key)
+            if any(discontinued.get(p) for p in continuing_periods):
+                return True
+        return False
+
+    @staticmethod
     def _overlap_values_agree(primary_data: Dict, secondary_data: Dict, overlap_periods: Set) -> bool:
         """Check whether overlapping period values agree (same economic line item).
 
@@ -597,6 +671,9 @@ class StatementStitcher:
                 secondary_ps = self.concept_metadata[secondary_key].get('preferred_sign')
                 if secondary_ps is not None:
                     self.concept_metadata[primary_key]['preferred_sign'] = secondary_ps
+        # Carry the secondary's evidence so later merges in a chain can use it
+        for period_id, value in self.value_evidence.pop(secondary_key, {}).items():
+            self.value_evidence[primary_key].setdefault(period_id, value)
         # Remove the secondary entry
         if secondary_key in self.data:
             del self.data[secondary_key]
@@ -616,12 +693,16 @@ class StatementStitcher:
         2. Any overlapping period values agree (or there is no overlap).
 
         This prevents unrelated sub-items that happen to map to the same standard
-        concept from being incorrectly merged (Issue #642).
+        concept from being incorrectly merged (Issue #642). A continuing-operations
+        amount is not merged into its total where the filing reports nonzero
+        discontinued-operations cash for that activity and period (GH #1690).
 
         Additionally, concepts whose standard concepts are declared equivalent
         (via _EQUIVALENT_STANDARD_CONCEPTS) are grouped together and merged
-        without the variant-name check — value agreement on overlapping periods
-        is still enforced (Issue #610).
+        without the variant-name check (Issue #610). Because that bucket holds
+        distinct measures (cash, cash plus short-term investments, securities),
+        such a pair merges only when the filings report both for a common period
+        with agreeing values; no common period is not enough (GH #1685).
         """
         standard_to_keys = defaultdict(list)
         for concept_key, metadata in self.concept_metadata.items():
@@ -661,6 +742,10 @@ class StatementStitcher:
                         # is the identity signal; skip the variant name check.
                         # For regular groups, require name containment (Issue #642).
                         if not skip_variant_check and not self._are_concept_name_variants(a_key, b_key):
+                            continue
+                        if skip_variant_check and not self._shown_to_be_same_amount(a_key, b_key):
+                            continue
+                        if self._continuing_differs_from_total(a_key, b_key):
                             continue
                         a_data = self.data.get(a_key, {})
                         b_data = self.data.get(b_key, {})

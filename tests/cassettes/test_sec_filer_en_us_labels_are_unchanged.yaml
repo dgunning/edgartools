@@ -1,0 +1,474 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/16868/000110465926010352/cni-20251231_lab.xml
+  response:
+    body:
+      string: "<?xml version=\"1.0\" encoding=\"US-ASCII\" standalone=\"no\"?>\n    <!--
+        Field: Doc-Info; Name: Generator; Value: GoFiler Complete; Version: 6.4a -->\n
+        \   <!-- Field: Doc-Info; Name: VendorURI; Value: https://www.novaworks.com
+        -->\n    <!-- Field: Doc-Info; Name: Status; Value: 0x00000000 -->\n<link:linkbase
+        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xlink=\"http://www.w3.org/1999/xlink\"
+        xmlns:link=\"http://www.xbrl.org/2003/linkbase\" xmlns:xbrli=\"http://www.xbrl.org/2003/instance\"
+        xsi:schemaLocation=\"http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd\">\n
+        \   <link:roleRef xlink:type=\"simple\" xlink:href=\"http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedLabel\"
+        roleURI=\"http://www.xbrl.org/2009/role/negatedLabel\" />\n    <link:roleRef
+        xlink:type=\"simple\" xlink:href=\"http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedPeriodEndLabel\"
+        roleURI=\"http://www.xbrl.org/2009/role/negatedPeriodEndLabel\" />\n    <link:roleRef
+        xlink:type=\"simple\" xlink:href=\"http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedPeriodStartLabel\"
+        roleURI=\"http://www.xbrl.org/2009/role/negatedPeriodStartLabel\" />\n    <link:roleRef
+        xlink:type=\"simple\" xlink:href=\"http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedTotalLabel\"
+        roleURI=\"http://www.xbrl.org/2009/role/negatedTotalLabel\" />\n    <link:roleRef
+        xlink:type=\"simple\" xlink:href=\"http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedNetLabel\"
+        roleURI=\"http://www.xbrl.org/2009/role/negatedNetLabel\" />\n    <link:roleRef
+        xlink:type=\"simple\" xlink:href=\"http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedTerseLabel\"
+        roleURI=\"http://www.xbrl.org/2009/role/negatedTerseLabel\" />\n    <link:roleRef
+        xlink:type=\"simple\" xlink:href=\"http://www.xbrl.org/lrr/role/net-2009-12-16.xsd#netLabel\"
+        roleURI=\"http://www.xbrl.org/2009/role/netLabel\" />\n    <link:labelLink
+        xlink:type=\"extended\" xlink:role=\"http://www.xbrl.org/2003/role/link\">\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityAddressesAddressTypeAxis\"
+        xlink:label=\"dei_EntityAddressesAddressTypeAxis\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_EntityAddressesAddressTypeAxis\"
+        xlink:to=\"dei_EntityAddressesAddressTypeAxis_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityAddressesAddressTypeAxis_lbl\" xml:lang=\"en-US\">Entity
+        Addresses, Address Type [Axis]</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_BusinessContactMember\"
+        xlink:label=\"dei_BusinessContactMember\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_BusinessContactMember\" xlink:to=\"dei_BusinessContactMember_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_BusinessContactMember_lbl\" xml:lang=\"en-US\">Business
+        Contact [Member]</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityAddressesTable\"
+        xlink:label=\"dei_EntityAddressesTable\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityAddressesTable\" xlink:to=\"dei_EntityAddressesTable_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityAddressesTable_lbl\" xml:lang=\"en-US\">Entity Addresses
+        [Table]</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentInformationLineItems\"
+        xlink:label=\"dei_DocumentInformationLineItems\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_DocumentInformationLineItems\"
+        xlink:to=\"dei_DocumentInformationLineItems_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentInformationLineItems_lbl\" xml:lang=\"en-US\">Document
+        Information [Line Items]</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentType\"
+        xlink:label=\"dei_DocumentType\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_DocumentType\" xlink:to=\"dei_DocumentType_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentType_lbl\" xml:lang=\"en-US\">Document Type</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_AmendmentFlag\"
+        xlink:label=\"dei_AmendmentFlag\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_AmendmentFlag\" xlink:to=\"dei_AmendmentFlag_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_AmendmentFlag_lbl\" xml:lang=\"en-US\">Amendment Flag</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_AmendmentDescription\"
+        xlink:label=\"dei_AmendmentDescription\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_AmendmentDescription\" xlink:to=\"dei_AmendmentDescription_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_AmendmentDescription_lbl\" xml:lang=\"en-US\">Amendment
+        Description</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentRegistrationStatement\"
+        xlink:label=\"dei_DocumentRegistrationStatement\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_DocumentRegistrationStatement\"
+        xlink:to=\"dei_DocumentRegistrationStatement_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentRegistrationStatement_lbl\" xml:lang=\"en-US\">Document
+        Registration Statement</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentAnnualReport\"
+        xlink:label=\"dei_DocumentAnnualReport\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_DocumentAnnualReport\" xlink:to=\"dei_DocumentAnnualReport_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentAnnualReport_lbl\" xml:lang=\"en-US\">Document Annual
+        Report</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentQuarterlyReport\"
+        xlink:label=\"dei_DocumentQuarterlyReport\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_DocumentQuarterlyReport\" xlink:to=\"dei_DocumentQuarterlyReport_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentQuarterlyReport_lbl\" xml:lang=\"en-US\">Document
+        Quarterly Report</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentTransitionReport\"
+        xlink:label=\"dei_DocumentTransitionReport\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_DocumentTransitionReport\" xlink:to=\"dei_DocumentTransitionReport_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentTransitionReport_lbl\" xml:lang=\"en-US\">Document
+        Transition Report</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentShellCompanyReport\"
+        xlink:label=\"dei_DocumentShellCompanyReport\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_DocumentShellCompanyReport\" xlink:to=\"dei_DocumentShellCompanyReport_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentShellCompanyReport_lbl\" xml:lang=\"en-US\">Document
+        Shell Company Report</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentShellCompanyEventDate\"
+        xlink:label=\"dei_DocumentShellCompanyEventDate\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_DocumentShellCompanyEventDate\"
+        xlink:to=\"dei_DocumentShellCompanyEventDate_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentShellCompanyEventDate_lbl\" xml:lang=\"en-US\">Document
+        Shell Company Event Date</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentPeriodStartDate\"
+        xlink:label=\"dei_DocumentPeriodStartDate\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_DocumentPeriodStartDate\" xlink:to=\"dei_DocumentPeriodStartDate_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentPeriodStartDate_lbl\" xml:lang=\"en-US\">Document
+        Period Start Date</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentPeriodEndDate\"
+        xlink:label=\"dei_DocumentPeriodEndDate\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_DocumentPeriodEndDate\" xlink:to=\"dei_DocumentPeriodEndDate_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentPeriodEndDate_lbl\" xml:lang=\"en-US\">Document
+        Period End Date</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentFiscalPeriodFocus\"
+        xlink:label=\"dei_DocumentFiscalPeriodFocus\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_DocumentFiscalPeriodFocus\" xlink:to=\"dei_DocumentFiscalPeriodFocus_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentFiscalPeriodFocus_lbl\" xml:lang=\"en-US\">Document
+        Fiscal Period Focus</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentFiscalYearFocus\"
+        xlink:label=\"dei_DocumentFiscalYearFocus\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_DocumentFiscalYearFocus\" xlink:to=\"dei_DocumentFiscalYearFocus_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentFiscalYearFocus_lbl\" xml:lang=\"en-US\">Document
+        Fiscal Year Focus</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_CurrentFiscalYearEndDate\"
+        xlink:label=\"dei_CurrentFiscalYearEndDate\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_CurrentFiscalYearEndDate\" xlink:to=\"dei_CurrentFiscalYearEndDate_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_CurrentFiscalYearEndDate_lbl\" xml:lang=\"en-US\">Current
+        Fiscal Year End Date</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityFileNumber\"
+        xlink:label=\"dei_EntityFileNumber\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityFileNumber\" xlink:to=\"dei_EntityFileNumber_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityFileNumber_lbl\" xml:lang=\"en-US\">Entity File Number</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityRegistrantName\"
+        xlink:label=\"dei_EntityRegistrantName\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityRegistrantName\" xlink:to=\"dei_EntityRegistrantName_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityRegistrantName_lbl\" xml:lang=\"en-US\">Entity Registrant
+        Name</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityCentralIndexKey\"
+        xlink:label=\"dei_EntityCentralIndexKey\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityCentralIndexKey\" xlink:to=\"dei_EntityCentralIndexKey_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityCentralIndexKey_lbl\" xml:lang=\"en-US\">Entity Central
+        Index Key</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityPrimarySicNumber\"
+        xlink:label=\"dei_EntityPrimarySicNumber\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityPrimarySicNumber\" xlink:to=\"dei_EntityPrimarySicNumber_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityPrimarySicNumber_lbl\" xml:lang=\"en-US\">Entity Primary
+        SIC Number</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityTaxIdentificationNumber\"
+        xlink:label=\"dei_EntityTaxIdentificationNumber\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_EntityTaxIdentificationNumber\"
+        xlink:to=\"dei_EntityTaxIdentificationNumber_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityTaxIdentificationNumber_lbl\" xml:lang=\"en-US\">Entity
+        Tax Identification Number</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityIncorporationStateCountryCode\"
+        xlink:label=\"dei_EntityIncorporationStateCountryCode\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_EntityIncorporationStateCountryCode\"
+        xlink:to=\"dei_EntityIncorporationStateCountryCode_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityIncorporationStateCountryCode_lbl\" xml:lang=\"en-US\">Entity
+        Incorporation, State or Country Code</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityAddressAddressLine1\"
+        xlink:label=\"dei_EntityAddressAddressLine1\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityAddressAddressLine1\" xlink:to=\"dei_EntityAddressAddressLine1_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityAddressAddressLine1_lbl\" xml:lang=\"en-US\">Entity
+        Address, Address Line One</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityAddressAddressLine2\"
+        xlink:label=\"dei_EntityAddressAddressLine2\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityAddressAddressLine2\" xlink:to=\"dei_EntityAddressAddressLine2_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityAddressAddressLine2_lbl\" xml:lang=\"en-US\">Entity
+        Address, Address Line Two</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityAddressAddressLine3\"
+        xlink:label=\"dei_EntityAddressAddressLine3\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityAddressAddressLine3\" xlink:to=\"dei_EntityAddressAddressLine3_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityAddressAddressLine3_lbl\" xml:lang=\"en-US\">Entity
+        Address, Address Line Three</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityAddressCityOrTown\"
+        xlink:label=\"dei_EntityAddressCityOrTown\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityAddressCityOrTown\" xlink:to=\"dei_EntityAddressCityOrTown_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityAddressCityOrTown_lbl\" xml:lang=\"en-US\">Entity
+        Address, City or Town</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityAddressStateOrProvince\"
+        xlink:label=\"dei_EntityAddressStateOrProvince\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_EntityAddressStateOrProvince\"
+        xlink:to=\"dei_EntityAddressStateOrProvince_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityAddressStateOrProvince_lbl\" xml:lang=\"en-US\">Entity
+        Address, State or Province</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityAddressCountry\"
+        xlink:label=\"dei_EntityAddressCountry\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityAddressCountry\" xlink:to=\"dei_EntityAddressCountry_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityAddressCountry_lbl\" xml:lang=\"en-US\">Entity Address,
+        Country</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityAddressPostalZipCode\"
+        xlink:label=\"dei_EntityAddressPostalZipCode\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityAddressPostalZipCode\" xlink:to=\"dei_EntityAddressPostalZipCode_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityAddressPostalZipCode_lbl\" xml:lang=\"en-US\">Entity
+        Address, Postal Zip Code</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_CountryRegion\"
+        xlink:label=\"dei_CountryRegion\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_CountryRegion\" xlink:to=\"dei_CountryRegion_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_CountryRegion_lbl\" xml:lang=\"en-US\">Country Region</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_CityAreaCode\"
+        xlink:label=\"dei_CityAreaCode\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_CityAreaCode\" xlink:to=\"dei_CityAreaCode_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_CityAreaCode_lbl\" xml:lang=\"en-US\">City Area Code</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_LocalPhoneNumber\"
+        xlink:label=\"dei_LocalPhoneNumber\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_LocalPhoneNumber\" xlink:to=\"dei_LocalPhoneNumber_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_LocalPhoneNumber_lbl\" xml:lang=\"en-US\">Local Phone Number</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_Extension\"
+        xlink:label=\"dei_Extension\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_Extension\" xlink:to=\"dei_Extension_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_Extension_lbl\" xml:lang=\"en-US\">Extension</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_WrittenCommunications\"
+        xlink:label=\"dei_WrittenCommunications\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_WrittenCommunications\" xlink:to=\"dei_WrittenCommunications_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_WrittenCommunications_lbl\" xml:lang=\"en-US\">Written Communications</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_SolicitingMaterial\"
+        xlink:label=\"dei_SolicitingMaterial\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_SolicitingMaterial\" xlink:to=\"dei_SolicitingMaterial_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_SolicitingMaterial_lbl\" xml:lang=\"en-US\">Soliciting Material</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_PreCommencementTenderOffer\"
+        xlink:label=\"dei_PreCommencementTenderOffer\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_PreCommencementTenderOffer\" xlink:to=\"dei_PreCommencementTenderOffer_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_PreCommencementTenderOffer_lbl\" xml:lang=\"en-US\">Pre-commencement
+        Tender Offer</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_PreCommencementIssuerTenderOffer\"
+        xlink:label=\"dei_PreCommencementIssuerTenderOffer\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_PreCommencementIssuerTenderOffer\"
+        xlink:to=\"dei_PreCommencementIssuerTenderOffer_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_PreCommencementIssuerTenderOffer_lbl\" xml:lang=\"en-US\">Pre-commencement
+        Issuer Tender Offer</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_Security12bTitle\"
+        xlink:label=\"dei_Security12bTitle\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_Security12bTitle\" xlink:to=\"dei_Security12bTitle_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_Security12bTitle_lbl\" xml:lang=\"en-US\">Title of 12(b)
+        Security</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_NoTradingSymbolFlag\"
+        xlink:label=\"dei_NoTradingSymbolFlag\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_NoTradingSymbolFlag\" xlink:to=\"dei_NoTradingSymbolFlag_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_NoTradingSymbolFlag_lbl\" xml:lang=\"en-US\">No Trading
+        Symbol Flag</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_TradingSymbol\"
+        xlink:label=\"dei_TradingSymbol\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_TradingSymbol\" xlink:to=\"dei_TradingSymbol_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_TradingSymbol_lbl\" xml:lang=\"en-US\">Trading Symbol</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_SecurityExchangeName\"
+        xlink:label=\"dei_SecurityExchangeName\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_SecurityExchangeName\" xlink:to=\"dei_SecurityExchangeName_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_SecurityExchangeName_lbl\" xml:lang=\"en-US\">Security Exchange
+        Name</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_Security12gTitle\"
+        xlink:label=\"dei_Security12gTitle\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_Security12gTitle\" xlink:to=\"dei_Security12gTitle_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_Security12gTitle_lbl\" xml:lang=\"en-US\">Title of 12(g)
+        Security</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_SecurityReportingObligation\"
+        xlink:label=\"dei_SecurityReportingObligation\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_SecurityReportingObligation\" xlink:to=\"dei_SecurityReportingObligation_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_SecurityReportingObligation_lbl\" xml:lang=\"en-US\">Security
+        Reporting Obligation</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_AnnualInformationForm\"
+        xlink:label=\"dei_AnnualInformationForm\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_AnnualInformationForm\" xlink:to=\"dei_AnnualInformationForm_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_AnnualInformationForm_lbl\" xml:lang=\"en-US\">Annual Information
+        Form</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_AuditedAnnualFinancialStatements\"
+        xlink:label=\"dei_AuditedAnnualFinancialStatements\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_AuditedAnnualFinancialStatements\"
+        xlink:to=\"dei_AuditedAnnualFinancialStatements_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_AuditedAnnualFinancialStatements_lbl\" xml:lang=\"en-US\">Audited
+        Annual Financial Statements</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityWellKnownSeasonedIssuer\"
+        xlink:label=\"dei_EntityWellKnownSeasonedIssuer\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_EntityWellKnownSeasonedIssuer\"
+        xlink:to=\"dei_EntityWellKnownSeasonedIssuer_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityWellKnownSeasonedIssuer_lbl\" xml:lang=\"en-US\">Entity
+        Well-known Seasoned Issuer</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityVoluntaryFilers\"
+        xlink:label=\"dei_EntityVoluntaryFilers\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityVoluntaryFilers\" xlink:to=\"dei_EntityVoluntaryFilers_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityVoluntaryFilers_lbl\" xml:lang=\"en-US\">Entity Voluntary
+        Filers</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityCurrentReportingStatus\"
+        xlink:label=\"dei_EntityCurrentReportingStatus\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_EntityCurrentReportingStatus\"
+        xlink:to=\"dei_EntityCurrentReportingStatus_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityCurrentReportingStatus_lbl\" xml:lang=\"en-US\">Entity
+        Current Reporting Status</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityInteractiveDataCurrent\"
+        xlink:label=\"dei_EntityInteractiveDataCurrent\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_EntityInteractiveDataCurrent\"
+        xlink:to=\"dei_EntityInteractiveDataCurrent_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityInteractiveDataCurrent_lbl\" xml:lang=\"en-US\">Entity
+        Interactive Data Current</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityFilerCategory\"
+        xlink:label=\"dei_EntityFilerCategory\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityFilerCategory\" xlink:to=\"dei_EntityFilerCategory_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityFilerCategory_lbl\" xml:lang=\"en-US\">Entity Filer
+        Category</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntitySmallBusiness\"
+        xlink:label=\"dei_EntitySmallBusiness\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntitySmallBusiness\" xlink:to=\"dei_EntitySmallBusiness_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntitySmallBusiness_lbl\" xml:lang=\"en-US\">Entity Small
+        Business</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityEmergingGrowthCompany\"
+        xlink:label=\"dei_EntityEmergingGrowthCompany\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityEmergingGrowthCompany\" xlink:to=\"dei_EntityEmergingGrowthCompany_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityEmergingGrowthCompany_lbl\" xml:lang=\"en-US\">Entity
+        Emerging Growth Company</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityExTransitionPeriod\"
+        xlink:label=\"dei_EntityExTransitionPeriod\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityExTransitionPeriod\" xlink:to=\"dei_EntityExTransitionPeriod_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityExTransitionPeriod_lbl\" xml:lang=\"en-US\">Elected
+        Not To Use the Extended Transition Period</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentAccountingStandard\"
+        xlink:label=\"dei_DocumentAccountingStandard\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_DocumentAccountingStandard\" xlink:to=\"dei_DocumentAccountingStandard_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentAccountingStandard_lbl\" xml:lang=\"en-US\">Document
+        Accounting Standard</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_OtherReportingStandardItemNumber\"
+        xlink:label=\"dei_OtherReportingStandardItemNumber\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_OtherReportingStandardItemNumber\"
+        xlink:to=\"dei_OtherReportingStandardItemNumber_lbl\" xlink:type=\"arc\" />\n
+        \     <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_OtherReportingStandardItemNumber_lbl\" xml:lang=\"en-US\">Other
+        Reporting Standard Item Number</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityShellCompany\"
+        xlink:label=\"dei_EntityShellCompany\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityShellCompany\" xlink:to=\"dei_EntityShellCompany_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityShellCompany_lbl\" xml:lang=\"en-US\">Entity Shell
+        Company</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityPublicFloat\"
+        xlink:label=\"dei_EntityPublicFloat\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_EntityPublicFloat\" xlink:to=\"dei_EntityPublicFloat_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityPublicFloat_lbl\" xml:lang=\"en-US\">Entity Public
+        Float</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityBankruptcyProceedingsReportingCurrent\"
+        xlink:label=\"dei_EntityBankruptcyProceedingsReportingCurrent\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_EntityBankruptcyProceedingsReportingCurrent\"
+        xlink:to=\"dei_EntityBankruptcyProceedingsReportingCurrent_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityBankruptcyProceedingsReportingCurrent_lbl\" xml:lang=\"en-US\">Entity
+        Bankruptcy Proceedings, Reporting Current</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_EntityCommonStockSharesOutstanding\"
+        xlink:label=\"dei_EntityCommonStockSharesOutstanding\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_EntityCommonStockSharesOutstanding\"
+        xlink:to=\"dei_EntityCommonStockSharesOutstanding_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_EntityCommonStockSharesOutstanding_lbl\" xml:lang=\"en-US\">Entity
+        Common Stock, Shares Outstanding</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_DocumentsIncorporatedByReferenceTextBlock\"
+        xlink:label=\"dei_DocumentsIncorporatedByReferenceTextBlock\" />\n      <link:labelArc
+        xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\" xlink:from=\"dei_DocumentsIncorporatedByReferenceTextBlock\"
+        xlink:to=\"dei_DocumentsIncorporatedByReferenceTextBlock_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_DocumentsIncorporatedByReferenceTextBlock_lbl\" xml:lang=\"en-US\">Documents
+        Incorporated by Reference [Text Block]</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_ContactPersonnelName\"
+        xlink:label=\"dei_ContactPersonnelName\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_ContactPersonnelName\" xlink:to=\"dei_ContactPersonnelName_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_ContactPersonnelName_lbl\" xml:lang=\"en-US\">Contact Personnel
+        Name</link:label>\n      <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_IcfrAuditorAttestationFlag\"
+        xlink:label=\"dei_IcfrAuditorAttestationFlag\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_IcfrAuditorAttestationFlag\" xlink:to=\"dei_IcfrAuditorAttestationFlag_lbl\"
+        xlink:type=\"arc\" />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_IcfrAuditorAttestationFlag_lbl\" xml:lang=\"en-US\">ICFR
+        Auditor Attestation Flag</link:label>\n      <link:loc xlink:type=\"locator\"
+        xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_AuditorName\"
+        xlink:label=\"dei_AuditorName\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_AuditorName\" xlink:to=\"dei_AuditorName_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_AuditorName_lbl\" xml:lang=\"en-US\">Auditor Name</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_AuditorLocation\"
+        xlink:label=\"dei_AuditorLocation\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_AuditorLocation\" xlink:to=\"dei_AuditorLocation_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_AuditorLocation_lbl\" xml:lang=\"en-US\">Auditor Location</link:label>\n
+        \     <link:loc xlink:type=\"locator\" xlink:href=\"https://xbrl.sec.gov/dei/2025/dei-2025.xsd#dei_AuditorFirmId\"
+        xlink:label=\"dei_AuditorFirmId\" />\n      <link:labelArc xlink:arcrole=\"http://www.xbrl.org/2003/arcrole/concept-label\"
+        xlink:from=\"dei_AuditorFirmId\" xlink:to=\"dei_AuditorFirmId_lbl\" xlink:type=\"arc\"
+        />\n      <link:label xlink:type=\"resource\" xlink:role=\"http://www.xbrl.org/2003/role/label\"
+        xlink:label=\"dei_AuditorFirmId_lbl\" xml:lang=\"en-US\">Auditor Firm ID</link:label>\n
+        \   </link:labelLink>\n</link:linkbase>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      cache-control:
+      - no-cache, no-store, no-transform, proxy-revalidate
+      connection:
+      - keep-alive
+      content-length:
+      - '38531'
+      content-security-policy:
+      - frame-ancestors 'self'
+      content-type:
+      - text/xml
+      date:
+      - Fri, 23 Oct 2026 02:54:35 GMT
+      etag:
+      - '"f25336f11067332b833a5bcd216d3c70-gzip"'
+      last-modified:
+      - Wed, 04 Feb 2026 21:51:13 GMT
+      permissions-policy:
+      - geolocation=(), microphone=(), camera=()
+      pragma:
+      - no-cache
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      set-cookie:
+      - _abck=292F4B80E817075A77CA20CE471482A5~-1~YAAQpRghF4bsl2WhAQAATIKuZhD+UB9FPbQEOmd/8xh5WR2pcpEU0S/znG+TwHpgLlzxKPENUFLOzhqL++1UMzk+zhc3AzrjAXNNqiVi1/ipcz0XsegX5KZje/lbFdG/jtAghL60rojMIZzezS++l7YwRmiNfEqPjYSK8IeVj7FMSfFpDc1rPwthgC8tl1bOqXlSjjYX4cg4zmhD8XJUYINFzNSRRPeKxiOF3gOEmgRs7Kr0yW0JI3MpYsCOEIFU48E2+DnfHgreC7PijNWP8gisL56R5y7FlteSJNsys/VPS8wuZgDv0XlWgw+yWr8I02eWOMYsZHr1sj6NQG3jLLHj61OsIs53Bzn+vHvEunF60xTU8NwHYaxZOAEclAy3QmRUNi9HC4JEIJDYzDRXzid+WxTRuUf5PkB884/7S87fm1zHRr4SFHukVW0/afRz22/irR370Kmp5Q==~-1~-1~-1~-1~-1;
+        Domain=.sec.gov; Path=/; Expires=Sat, 23 Oct 2027 02:54:35 GMT; Max-Age=31536000;
+        SameSite=None; Secure
+      - bm_sz=E9166254594C98067CF95D59A98ED1DE~YAAQpRghF4fsl2WhAQAATIKuZgG3oqaZ5YzKLypQpMpKzL/2O91BVk/NCW2GHzdrwu2cWv96pKH0DPHgtvINl4pCQkmlgQqNlqrfc7yF24pPz6DSBkTjS9eneEBQyulGmaNfXNzyTwRsLAGxFSKPnv10n8BlI72WL5V1GbYmDmBMXaKGtIimLGtgWd0XN2kuw9EAfXyhSL7aZkRUKGrjxXzMdCpyECGoaiZ4tabhfy3uQAk8HhfSfJjebTAKU2DoRatfezcC/rVR65Dd7FB/xCc/oC1+OebcR3cg7UswI2cL8IqGdFr4xm8eCc713nMlgl8XGMqgHBM8TmTvHgZREWz+MiJQJFpfMPKoy0Legw4KcM67aUl1HpmsmRx1YBxOAJZdqWn++RHrJ2hb3Q==~3425604~3687237;
+        Domain=.sec.gov; Path=/; Expires=Fri, 23 Oct 2026 06:54:35 GMT; Max-Age=14400;
+        SameSite=None; Secure
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - 65fpZbq3OG4s+JXht6tBq3VCw5IcOXyd4wUXdB5g2LMtk6sSFgg6GpvC/QMvN0KIcGIcbDwPVFU=
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - KS47S5DYHDYGFS2J
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - UL8j3aoLtytue2Wv9duUK.AryutmRbaW
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

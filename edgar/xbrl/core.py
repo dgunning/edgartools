@@ -15,6 +15,35 @@ PERIOD_END_LABEL = "http://www.xbrl.org/2003/role/periodEndLabel"
 TOTAL_LABEL = "http://www.xbrl.org/2003/role/totalLabel"
 
 
+def _period_boundary_name(role: Optional[str]) -> str:
+    """Local name of a label role, lower-cased, without a leading 'negated'."""
+    if not role:
+        return ''
+    name = role.rsplit('/', 1)[-1].lower()
+    return name[len('negated'):] if name.startswith('negated') else name
+
+
+def is_period_start_label_role(role: Optional[str]) -> bool:
+    """
+    Report whether a preferred-label role marks a roll-forward's opening balance.
+
+    True for periodStartLabel and its negated forms (the 2009 LRR's
+    negatedPeriodStartLabel and the legacy xbrl.us '.../label/negatedPeriodStart'),
+    matched by local name like `is_negated_label_role` (GH #1700).
+    """
+    return _period_boundary_name(role).startswith('periodstart')
+
+
+def is_period_end_label_role(role: Optional[str]) -> bool:
+    """Report whether a preferred-label role marks a roll-forward's closing balance (see above)."""
+    return _period_boundary_name(role).startswith('periodend')
+
+
+def is_period_boundary_label_role(role: Optional[str]) -> bool:
+    """Report whether a preferred-label role is a period start or period end role, negated or not."""
+    return is_period_start_label_role(role) or is_period_end_label_role(role)
+
+
 def iso4217_code(measure: Optional[str]) -> Optional[str]:
     """Return the ISO 4217 code of an ``iso4217:`` unit measure, else ``None``."""
     if measure and measure.startswith('iso4217:'):

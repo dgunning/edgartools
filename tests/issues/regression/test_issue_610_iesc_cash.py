@@ -31,7 +31,9 @@ class TestEquivalentStandardConceptMerge:
 
         Args:
             concepts: list of dicts with keys:
-                key, standard_concept, periods (dict of period->value)
+                key, standard_concept, periods (dict of period->value), and
+                optional comparatives: values the filing reports for periods
+                not selected into the stitched view (merge evidence, GH #1685)
         """
         stitcher = StatementStitcher()
         for c in concepts:
@@ -40,6 +42,7 @@ class TestEquivalentStandardConceptMerge:
                 p: {'value': v, 'decimals': -3}
                 for p, v in c['periods'].items()
             }
+            stitcher.value_evidence[key] = dict(c.get('comparatives', {}))
             stitcher.concept_metadata[key] = {
                 'standard_concept': c['standard_concept'],
                 'level': 0,
@@ -52,12 +55,18 @@ class TestEquivalentStandardConceptMerge:
 
     def test_three_cash_concepts_merge_to_one(self):
         """Three concepts with two different-but-equivalent standard concepts
-        should merge into a single row when overlapping values agree."""
+        should merge into a single row when overlapping values agree.
+
+        Each filing's comparative column overlaps the next filing, as in IESC's
+        10-Ks (2023-09-30 is 75,770,000 under both CashAndCashEquivalentsAtCarrying
+        Value and CashCashEquivalentsAndShortTermInvestments). Since GH #1685 that
+        agreeing common period is required to merge."""
         stitcher = self._make_stitcher_with_data([
             {
                 'key': 'us-gaap:CashAndCashEquivalentsAtCarryingValue',
                 'standard_concept': 'CashAndMarketableSecurities',
                 'periods': {'2025': 100, '2024': 90},
+                'comparatives': {'2023': 70},
             },
             {
                 'key': 'us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents',
@@ -68,6 +77,7 @@ class TestEquivalentStandardConceptMerge:
                 'key': 'us-gaap:CashCashEquivalentsAndShortTermInvestments',
                 'standard_concept': 'CashAndMarketableSecurities',
                 'periods': {'2023': 70},
+                'comparatives': {'2022': 50},
             },
         ])
 
@@ -121,6 +131,7 @@ class TestEquivalentStandardConceptMerge:
                 'key': 'us-gaap:CashAndCashEquivalentsAtCarryingValue',
                 'standard_concept': 'CashAndMarketableSecurities',
                 'periods': {'2024': 100, '2023': 70},
+                'comparatives': {'2022': 50},
             },
         ])
 
