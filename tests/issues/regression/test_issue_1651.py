@@ -14,7 +14,7 @@ returns the rate as filed (1.31), ``to_usd()`` multiplies by a USD-per-home rate
 and divides by a home-per-USD one, and ``repr()`` names the direction. A pure
 number does not state its direction, so reading it as USD per home unit is an
 assumption, and ``extraction_warnings`` says so. A pure-number rate with no
-currency member at all is not used.
+currency member is used only when the table names no other currency.
 
 Ground truth: GSK plc FY2025 20-F, accession 0001131399-26-000004, note 5
 "Exchange rates": "Average rates: US$/£ 1.31 1.28 1.24" (2025, 2024, 2023). The
@@ -221,8 +221,11 @@ def test_a_lone_pure_rate_with_no_currency_is_used_when_unambiguous():
     converter = _pure("CAD", 1.33, year=2019, member=None)
     assert converter.to_usd(133, 2019) == pytest.approx(100.0)
     assert ("the average rate for 2019 (1.33) names no currency (srt:CurrencyAxis); "
-            "it was read as a USD rate because that is its only plausible reading"
-            ) in converter.extraction_warnings
+            "it was read as a USD rate because the table holds no rate that names "
+            "another currency") in converter.extraction_warnings
+    assert converter.rate_basis[(2019, "average")] == (
+        "CAD per USD (only plausible reading; names no currency, and no other "
+        "currency is named beside it)")
 
 
 def test_a_lone_pure_rate_with_no_currency_is_refused_when_ambiguous():
@@ -259,3 +262,88 @@ def test_home_per_usd_divide_units_above_ten_are_not_per_100(home, value, year):
     converter = CurrencyConverter(stub)
     assert converter.to_usd(value, year) == pytest.approx(1.0)
     assert converter.rate_basis[(year, "average")] == f"{home} per USD (only plausible reading)"
+
+
+# ---------------------------------------------------------------------------
+# Review round 2. Rates that name no currency, and per-1 against per-100 for a
+# target other than USD. By construction.
+# ---------------------------------------------------------------------------
+
+def test_an_unnamed_rate_beside_named_currencies_is_not_assumed_to_be_usd():
+    # 0.8466 is a GBP per EUR rate; with a yen rate named beside it, the
+    # unnamed row could be any currency. It used to be read as USD per EUR,
+    # turning EUR 100 into USD 84.66 (about USD 108 at the time).
+    converter = _pure("EUR", 0.8466, year=2024, member=None, siblings=[("JPY", 163.8)])
+    assert converter.to_usd(100, 2024) is None
+    assert ("the average rate for 2024 (0.8466) was not used: it names no currency "
+            "(srt:CurrencyAxis), and the table also holds rates for JPY, so it may "
+            "be any currency's") in converter.extraction_warnings
+
+
+def test_an_unnamed_rate_beside_named_currencies_is_refused_even_when_one_reading_fits():
+    # 1.18 EUR per GBP fits only as USD per GBP, but the yen row shows the table
+    # holds several currencies. It used to give GBP 100 = USD 118.
+    converter = _pure("GBP", 1.18, year=2024, member=None, siblings=[("JPY", 193.0)])
+    assert converter.to_usd(100, 2024) is None
+
+
+def _sek_target(numerator, denominator, value):
+    stub = _StubXBRL({}, value)
+    stub.units = {"home": {"type": "simple", "measure": "iso4217:EUR"},
+                  "u": {"type": "divide", "numerator": [f"iso4217:{numerator}"],
+                        "denominator": [f"iso4217:{denominator}"]}}
+    stub.facts = _Facts({"ifrs-full:AverageForeignExchangeRate": pd.DataFrame({
+        "unit_ref": ["u"], "context_ref": ["c-1"],
+        "period_start": ["2024-01-01"], "period_end": ["2024-12-31"],
+        "numeric_value": [value],
+    })})
+    stub.facts.to_dataframe = lambda: pd.DataFrame({"unit_ref": ["home"]})
+    return CurrencyConverter(stub, target_currency="SEK")
+
+
+def test_a_cross_rate_that_fits_per_1_and_per_100_is_refused():
+    # 11.4 SEK per EUR in a unit tagged EUR/SEK. As SEK per EUR (11.4) and as
+    # EUR per 100 SEK (8.77 SEK per EUR) both are plausible for EUR to SEK; the
+    # unit gives a direction, never a scale. It used to read 100 EUR as 877 SEK.
+    converter = _sek_target("EUR", "SEK", 11.4)
+    assert converter.to_usd(100, 2024) is None
+    assert ("the average rate for 2024 (11.4) was not used: it is plausible as "
+            "SEK per EUR or EUR per 100 SEK, and nothing in the filing says which"
+            ) in converter.extraction_warnings
+
+
+def test_a_cross_rate_its_unit_can_settle_is_still_read():
+    # 0.0877 EUR per SEK fits only one way round: the per-100 reading is not
+    # among the candidates, so nothing is ambiguous.
+    converter = _sek_target("EUR", "SEK", 0.0877)
+    assert converter.to_usd(100, 2024) == pytest.approx(100 / 0.0877)
+
+
+# ---------------------------------------------------------------------------
+# Review round 2: the bands, from FRED (Federal Reserve H.10 daily rates; OECD
+# monthly averages where H.10 has none) and BCRP for PEN, fetched 2026-10-23.
+# ---------------------------------------------------------------------------
+
+@pytest.mark.parametrize("home, value", [
+    ("INR", 96.82),     # FRED DEXINUS 2026-05-20, the rupee's low (old band ended at 95.2)
+    ("ILS", 2.9014),    # FRED CCUSMA02ILM618N, May 2026 monthly average (old band ended at 2.94)
+    ("MYR", 4.0790),    # FRED DEXMAUS 2026-10-16 (no band before)
+    ("THB", 33.43),     # FRED DEXTHUS 2026-10-16 (no band before)
+    ("LKR", 331.25),    # FRED DEXSLUS 2026-10-16 (no band before)
+])
+def test_recent_home_per_usd_rates_are_inside_their_bands(home, value):
+    converter = _pure(home, value, year=2026)
+    assert converter.to_usd(value, 2026) == pytest.approx(1.0)
+
+
+def test_only_near_parity_bands_fit_both_directions_and_none_fits_per_100():
+    from edgar.xbrl.currency import _USD_PER_UNIT
+    both_ways = set()
+    for code, (low, high) in _USD_PER_UNIT.items():
+        assert low < high
+        if 1 / high <= high and 1 / low >= low:
+            both_ways.add(code)
+        assert not (100 / high <= high and 100 / low >= low), code
+        assert not (low / 100 <= high and high / 100 >= low), code
+    # GBP's low edge is 1.03, above GBP per USD at the pound's 2022 low.
+    assert both_ways == {"EUR", "CHF", "CAD", "AUD"}

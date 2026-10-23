@@ -163,39 +163,53 @@ _READINGS = {
     _HOME_PER_100_USD: lambda value: 100 / value,
 }
 
-# USD per 1 unit of each currency: a band around everything it traded at from
-# 2000 to 2026, padded. A rate is read the way that lands it in its band; the
-# bands are far narrower than 100x, so "per 1" and "per 100" never both fit.
+# USD per 1 unit of each currency: everything it traded at from 2000 to 2026,
+# padded by 10% (the observed low / 1.1, the high x 1.1). A rate is read the
+# way that lands it in its band. Against USD the bands are far narrower than
+# 100x, so "per 1" and "per 100" never both fit; for a cross rate (a target
+# other than USD) they can, and such a rate is not used.
 # Near-parity currencies (EUR, CHF, CAD, AUD) can fit both "USD per home" and
 # "home per USD"; such a rate is used only if the filing itself says which.
+# GBP's low edge is 1.03, not 1.07 / 1.1, so that GBP per USD never fits too.
 # Volatile currencies (ARS, TRY, VES, NGN, EGP, ...) are left out on purpose:
 # no band would be narrow enough to tell the readings apart.
+# Sources, fetched 2026-10-23: Federal Reserve H.10 daily noon rates via FRED
+# (series DEXUSEU, DEXUSUK, DEXSZUS, DEXJPUS, DEXCAUS, DEXUSAL, DEXUSNZ,
+# DEXDNUS, DEXSDUS, DEXNOUS, DEXCHUS, DEXHKUS, DEXSIUS, DEXKOUS, DEXTAUS,
+# DEXINUS, DEXSFUS, DEXBZUS, DEXMXUS, DEXMAUS, DEXTHUS, DEXSLUS); OECD monthly
+# averages via FRED for currencies H.10 does not publish (IDR CCUSMA02IDM618N,
+# ILS CCUSMA02ILM618N, CLP CCUSMA02CLM618N, COP COLCCUSMA02STM, RUB
+# CCUSMA02RUM618N), which understate daily extremes; Banco Central de Reserva
+# del Peru daily interbank rate for PEN (series PD04640PD).
 _USD_PER_UNIT = {
-    'EUR': (0.75, 1.75),
-    'GBP': (0.95, 2.30),
-    'CHF': (0.50, 1.50),
-    'JPY': (0.0055, 0.0145),
-    'CAD': (0.58, 1.15),
-    'AUD': (0.45, 1.15),
-    'NZD': (0.36, 0.95),
-    'DKK': (0.10, 0.235),
-    'SEK': (0.075, 0.18),
-    'NOK': (0.075, 0.21),
-    'CNY': (0.11, 0.175),
-    'HKD': (0.125, 0.131),
-    'SGD': (0.50, 0.85),
-    'KRW': (0.0006, 0.00125),
-    'TWD': (0.027, 0.038),
-    'INR': (0.0105, 0.0275),
-    'IDR': (0.000055, 0.00013),
-    'ILS': (0.19, 0.34),
-    'ZAR': (0.045, 0.18),
-    'BRL': (0.15, 0.70),
-    'MXN': (0.038, 0.12),
-    'CLP': (0.00095, 0.0025),
-    'COP': (0.00018, 0.0006),
-    'PEN': (0.24, 0.40),
-    'RUB': (0.008, 0.045),
+    'EUR': (0.75, 1.80),
+    'GBP': (1.03, 2.40),
+    'CHF': (0.49, 1.60),
+    'JPY': (0.0055, 0.015),
+    'CAD': (0.56, 1.20),
+    'AUD': (0.43, 1.30),
+    'NZD': (0.35, 0.97),
+    'DKK': (0.10, 0.24),
+    'SEK': (0.075, 0.19),
+    'NOK': (0.075, 0.23),
+    'CNY': (0.10, 0.19),
+    'HKD': (0.11, 0.15),
+    'SGD': (0.49, 0.92),
+    'KRW': (0.00057, 0.00125),
+    'TWD': (0.025, 0.040),
+    'INR': (0.0093, 0.029),
+    'IDR': (0.000050, 0.00016),
+    'ILS': (0.18, 0.38),
+    'ZAR': (0.045, 0.20),
+    'BRL': (0.14, 0.72),
+    'MXN': (0.036, 0.13),
+    'CLP': (0.0009, 0.0025),
+    'COP': (0.00018, 0.00065),
+    'PEN': (0.215, 0.435),
+    'RUB': (0.008, 0.048),
+    'MYR': (0.185, 0.375),
+    'THB': (0.0195, 0.0385),
+    'LKR': (0.0024, 0.0153),
 }
 
 
@@ -432,8 +446,10 @@ class CurrencyConverter:
         self._factors = {}
         self._basis = {}
         for year, kind, value, quote, named in selected:
+            named_in_table = {code for (k, _), rows in siblings.items() if k == kind
+                              for code, _ in rows}
             reading, how = self._read_rate(year, kind, value, quote, named,
-                                           siblings.get((kind, year), []))
+                                           siblings.get((kind, year), []), named_in_table)
             if reading is None:
                 continue
             rates.setdefault(year, ExchangeRate(year=year))
@@ -450,10 +466,23 @@ class CurrencyConverter:
             _HOME_PER_100_USD: f"{home} per 100 {target}",
         }[reading]
 
-    def _read_rate(self, year, kind, value, quote, named, siblings):
+    def _read_rate(self, year, kind, value, quote, named, siblings, named_in_table=()):
         """Decide how one rate reads. Returns ``(reading, how)``, or ``(None, None)``
-        with the reason in extraction_warnings: this never guesses."""
+        with the reason in extraction_warnings: this never guesses.
+
+        ``named_in_table`` holds the other currencies the same rate table names.
+        """
         where = f"the {kind} rate for {year} ({value})"
+        if not named and named_in_table:
+            # A rate with no currency member, in a table that names others,
+            # could be any of them: GBP per EUR beside a named yen rate is not a
+            # USD rate (GH #1651 review).
+            self._extraction_warnings.append(
+                f"{where} was not used: it names no currency ({_CURRENCY_AXIS}), and "
+                f"the table also holds rates for {', '.join(sorted(named_in_table))}, "
+                f"so it may be any currency's"
+            )
+            return None, None
         bounds = _plausible_range(self.home_currency, self.target_currency)
         if bounds is None:
             self._extraction_warnings.append(
@@ -505,6 +534,10 @@ class CurrencyConverter:
                 )
         else:
             narrowed = [r for r in fits if hint is not None and r in hint]
+            if quote != _PURE and _HOME_PER_100_USD in fits:
+                # A unit gives a direction, never a scale: EUR/SEK 11.4 fits as
+                # SEK per EUR and as EUR per 100 SEK (GH #1651 review).
+                narrowed = []
             if len(narrowed) != 1:
                 self._extraction_warnings.append(
                     f"{where} was not used: it is plausible as {labels}, and nothing "
@@ -514,10 +547,11 @@ class CurrencyConverter:
             reading = narrowed[0]
             how = f"plausible either way, settled by {hint_source}"
         if not named:
-            how += "; names no currency, read as " + self.target_currency
+            how += "; names no currency, and no other currency is named beside it"
             self._extraction_warnings.append(
                 f"{where} names no currency ({_CURRENCY_AXIS}); it was read as a "
-                f"{self.target_currency} rate because that is its only plausible reading"
+                f"{self.target_currency} rate because the table holds no rate that "
+                f"names another currency"
             )
         return reading, how
 
