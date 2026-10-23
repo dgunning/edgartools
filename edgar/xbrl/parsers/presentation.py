@@ -87,6 +87,19 @@ class PresentationParser(BaseParser):
             xlink_label = '{http://www.w3.org/1999/xlink}label'
             xlink_href = '{http://www.w3.org/1999/xlink}href'
 
+            # A role may be declared in more than one presentationLink; the arcs of
+            # every link with that role form one network (XBRL 2.1 section 3.5.3.9.7.3).
+            # Collect them per role and build each tree once, after the last link,
+            # so a later link does not replace an earlier one (GH #1745: IMAX's
+            # FY2018 cash-flow role is split across a 56-arc and a 1-arc link).
+            # An arc repeated with the same endpoints, order and preferred label is
+            # an equivalent relationship and is kept once. A period start/end arc
+            # is kept once per endpoints and label whatever its order, with the
+            # first order seen: the tree builder never de-duplicates those, so a
+            # repeat at another order would add a second "beginning" row.
+            relationships_by_role: Dict[str, List[Dict[str, Any]]] = {}
+            seen_arcs_by_role: Dict[str, set] = {}
+
             for link in presentation_links:
                 role = link.get(xlink_role)
                 if not role:
@@ -113,9 +126,9 @@ class PresentationParser(BaseParser):
                 # Optimize: Extract arcs using direct xpath with context
                 arcs = link.xpath('.//link:presentationArc', namespaces=nsmap)
 
-                # Create relationships map - pre-allocate with known size
-                relationships = []
+                relationships = relationships_by_role.setdefault(role, [])
                 relationships_append = relationships.append  # Local function reference for speed
+                seen_arcs = seen_arcs_by_role.setdefault(role, set())
 
                 # Process arcs with optimized locator lookups
                 for arc in arcs:
@@ -141,6 +154,14 @@ class PresentationParser(BaseParser):
                     from_element = extract_element_id(from_href)
                     to_element = extract_element_id(to_href)
 
+                    if is_period_boundary_label_role(preferred_label):
+                        arc_key = (from_element, to_element, None, preferred_label)
+                    else:
+                        arc_key = (from_element, to_element, order, preferred_label)
+                    if arc_key in seen_arcs:
+                        continue
+                    seen_arcs.add(arc_key)
+
                     # Add relationship using local function reference
                     relationships_append({
                         'from_element': from_element,
@@ -149,7 +170,8 @@ class PresentationParser(BaseParser):
                         'preferred_label': preferred_label
                     })
 
-                # Build presentation tree for this role if we have relationships
+            # Build one presentation tree per role from all of its links
+            for role, relationships in relationships_by_role.items():
                 if relationships:
                     self._build_presentation_tree(role, relationships)
 
