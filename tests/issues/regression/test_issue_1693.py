@@ -26,8 +26,11 @@ pytestmark = pytest.mark.regression
 FIXTURE = Path(__file__).resolve().parents[2] / "fixtures" / "entity" / "snow_facts.json"
 CONTRACT_LIABILITY = "ContractWithCustomerLiabilityRevenueRecognized"
 
+# The issue also names NetIncomeLossAvailableToCommonStockholdersBasic. It stays
+# derivable: net income less preferred dividends adds up unless participating
+# securities share undistributed earnings, and it is the basic EPS numerator whose
+# derived Q4 a derived Q4 EPS needs (GH #1692).
 ISSUE_CONCEPTS = [
-    "us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic",
     "us-gaap:UndistributedEarningsLossAllocatedToParticipatingSecuritiesBasic",
     "us-gaap:DistributedEarnings",
     "us-gaap:ContractWithCustomerLiabilityRevenueRecognized",
@@ -50,8 +53,9 @@ def test_concepts_whose_quarters_do_not_add_up_are_not_derivable(concept):
     assert TTMCalculator([])._is_additive_concept(fact) is False
 
 
-def test_ordinary_monetary_flow_is_still_derivable():
-    fact = _fact("us-gaap:Revenues", 1.0, date(2025, 1, 1), date(2025, 12, 31), "FY")
+@pytest.mark.parametrize("concept", ["us-gaap:Revenues", "us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic"])
+def test_ordinary_monetary_flow_is_still_derivable(concept):
+    fact = _fact(concept, 1.0, date(2025, 1, 1), date(2025, 12, 31), "FY")
     assert TTMCalculator([])._is_additive_concept(fact) is True
 
 

@@ -77,8 +77,11 @@ MAX_SPLIT_DURATION_DAYS = 31  # Maximum duration for a valid split fact (instant
 # - The rest are measured for another period than the reporting interval.
 # This is a reviewed list, not a classification of the taxonomy; concepts not on
 # it keep the unit-based rule in `_is_additive_concept`.
+# NetIncomeLossAvailableToCommonStockholdersBasic is deliberately NOT listed: it is
+# net income less preferred dividends, which add up, unless participating
+# securities share undistributed earnings. It is the basic EPS numerator, and its
+# derived Q4 is what a derived Q4 EPS divides (GH #1692).
 NON_ADDITIVE_DURATION_CONCEPTS = frozenset({
-    "NetIncomeLossAvailableToCommonStockholdersBasic",
     "UndistributedEarningsLossAllocatedToParticipatingSecuritiesBasic",
     "DistributedEarnings",
     "ContractWithCustomerLiabilityRevenueRecognized",
@@ -87,6 +90,50 @@ NON_ADDITIVE_DURATION_CONCEPTS = frozenset({
     "ManagingMemberOrGeneralPartnerSubsequentDistributionAmount",
     "PreviouslyEstimatedDevelopmentCostsIncurred",
 })
+
+# Numerators for derived EPS, best first (GH #1692). Basic EPS divides income
+# available to common stockholders (ASC 260-10-45-10, -11); the diluted
+# numerator starts from it (ASC 260-10-45-16). NetIncomeLoss is only a stand-in.
+EPS_NUMERATOR_CONCEPTS = {
+    "basic": (
+        "NetIncomeLossAvailableToCommonStockholdersBasic",
+        "NetIncomeLoss",
+    ),
+    "diluted": (
+        "NetIncomeLossAvailableToCommonStockholdersDiluted",
+        "NetIncomeLossAvailableToCommonStockholdersBasic",
+        "NetIncomeLoss",
+    ),
+}
+
+
+def numerator_agrees_within(preferred: List[FinancialFact], substitute: List[FinancialFact],
+                            start: date, end: date) -> bool:
+    """May ``substitute`` stand in for the ``preferred`` EPS numerator over [start, end]?
+
+    Yes unless the filer's own facts say they differ: some period overlapping the
+    span is tagged with both concepts and the latest-filed values disagree (a
+    preferred dividend, say, separates income available to common from net
+    income). Periods tagged with only one of them are no evidence either way.
+    """
+    def latest_by_period(facts):
+        best = {}
+        for f in facts:
+            if f.period_type != 'duration' or f.period_start is None or f.period_end is None:
+                continue
+            if f.numeric_value is None or f.period_end < start or f.period_start > end:
+                continue
+            key = (f.period_start, f.period_end)
+            if key not in best or (f.filing_date or date.min) > (best[key].filing_date or date.min):
+                best[key] = f
+        return best
+
+    substitutes = latest_by_period(substitute)
+    for key, fact in latest_by_period(preferred).items():
+        other = substitutes.get(key)
+        if other is not None and abs(fact.numeric_value - other.numeric_value) > max(1.0, 1e-6 * abs(other.numeric_value)):
+            return False
+    return True
 
 
 class DurationBucket:

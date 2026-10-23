@@ -7,7 +7,7 @@ analytics and AI-ready interfaces.
 
 import warnings
 from collections import OrderedDict, defaultdict
-from datetime import date
+from datetime import date, timedelta
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Union as TypingUnion
 
@@ -1641,7 +1641,7 @@ class EntityFacts:
 
     def _prepare_quarterly_facts(self, facts: List[FinancialFact]) -> List[FinancialFact]:
         """Enhance facts with derived quarter-level duration facts for TTM/quarterly views."""
-        from edgar.ttm.calculator import TTMCalculator
+        from edgar.ttm.calculator import EPS_NUMERATOR_CONCEPTS, TTMCalculator, numerator_agrees_within
         from edgar.entity.enhanced_statement import (
             detect_fiscal_year_end,
             is_forward_looking_schedule,
@@ -1693,10 +1693,12 @@ class EntityFacts:
                         collected.extend(concept_facts[prefixed])
             return collected
 
-        net_income_facts = _collect_facts([
-            "NetIncomeLoss",
-            "NetIncomeLossAvailableToCommonStockholdersBasic",
-        ])
+        # EPS numerators, best first, kept apart so one derivation never pairs one
+        # concept's year with another's quarters (GH #1692)
+        numerators = {
+            kind: [facts for facts in (_collect_facts([name]) for name in names) if facts]
+            for kind, names in EPS_NUMERATOR_CONCEPTS.items()
+        }
         shares_basic = _collect_facts([
             "WeightedAverageNumberOfSharesOutstandingBasic",
             "WeightedAverageNumberOfShareOutstandingBasicAndDiluted",
@@ -1725,25 +1727,33 @@ class EntityFacts:
                         return True
             return False
 
-        if net_income_facts and shares_basic:
-            calc = TTMCalculator(net_income_facts)
-            for eps_fact in calc.derive_eps_for_quarter(
-                net_income_facts,
-                shares_basic,
-                "us-gaap:EarningsPerShareBasic",
-            ):
-                if not _has_eps_for_period(eps_fact.concept, eps_fact.period_end, eps_fact.fiscal_period):
-                    derived_facts.append(eps_fact)
+        def _fiscal_year_start(facts: List[FinancialFact], year_end: date) -> date:
+            for fact in facts:
+                if fact.period_end == year_end and fact.period_start and fact.fiscal_period == "FY":
+                    return fact.period_start
+            return year_end - timedelta(days=364)
 
-        if net_income_facts and shares_diluted:
-            calc = TTMCalculator(net_income_facts)
-            for eps_fact in calc.derive_eps_for_quarter(
-                net_income_facts,
-                shares_diluted,
-                "us-gaap:EarningsPerShareDiluted",
-            ):
-                if not _has_eps_for_period(eps_fact.concept, eps_fact.period_end, eps_fact.fiscal_period):
-                    derived_facts.append(eps_fact)
+        for kind, eps_concept, shares in (("basic", "us-gaap:EarningsPerShareBasic", shares_basic),
+                                          ("diluted", "us-gaap:EarningsPerShareDiluted", shares_diluted)):
+            if not shares:
+                continue
+            candidates = numerators[kind]
+            decided = set()
+            for rank, numerator_facts in enumerate(candidates):
+                calc = TTMCalculator(numerator_facts)
+                for eps_fact in calc.derive_eps_for_quarter(numerator_facts, shares, eps_concept):
+                    if eps_fact.period_end in decided:
+                        continue
+                    decided.add(eps_fact.period_end)
+                    # A lesser numerator (net income) stands in only where the
+                    # filer's facts for that fiscal year do not show it differing
+                    # from income available to common stockholders.
+                    year_start = _fiscal_year_start(numerator_facts, eps_fact.period_end)
+                    if not all(numerator_agrees_within(better, numerator_facts, year_start, eps_fact.period_end)
+                               for better in candidates[:rank]):
+                        continue
+                    if not _has_eps_for_period(eps_fact.concept, eps_fact.period_end, eps_fact.fiscal_period):
+                        derived_facts.append(eps_fact)
 
         return facts + derived_facts
 

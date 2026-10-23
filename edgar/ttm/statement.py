@@ -18,7 +18,12 @@ from edgar.entity.unit_handling import (
     is_per_share_label,
     is_share_count_label,
 )
-from edgar.ttm.calculator import DurationBucket, TTMCalculator
+from edgar.ttm.calculator import (
+    EPS_NUMERATOR_CONCEPTS,
+    DurationBucket,
+    TTMCalculator,
+    numerator_agrees_within,
+)
 
 
 def _is_per_share_item(item: dict) -> bool:
@@ -123,6 +128,49 @@ def _window_share_count(window: List[FinancialFact], quarter_counts: dict, annua
         weighted += count * days
         total_days += days
     return weighted / total_days if total_days else None
+
+
+def _numerator_series(facts: List[FinancialFact]) -> dict:
+    """One EPS numerator concept's facts, indexed for TTM windows."""
+    calc = TTMCalculator(facts)
+    annual = {}
+    for fact in calc._filter_by_duration(DurationBucket.ANNUAL):
+        if fact.numeric_value is None:
+            continue
+        held = annual.get(fact.period_end)
+        if held is None or (fact.filing_date or date.min) > (held.filing_date or date.min):
+            annual[fact.period_end] = fact
+    return {
+        "facts": facts,
+        "quarters": {q.period_end: q for q in calc._filter_quarterly_facts() if q.numeric_value is not None},
+        "annual": annual,
+    }
+
+
+def _window_numerator(window: List[FinancialFact], series: List[dict]) -> Optional[float]:
+    """TTM EPS numerator for one window, from the best numerator concept (GH #1692).
+
+    ``series`` is ordered best first (income available to common stockholders
+    before net income). A window that is a fiscal year uses the year's filed
+    value, otherwise the four quarters are summed; all from ONE concept. A
+    lesser concept stands in only where the filer's facts do not show it
+    differing from the better one in this window; otherwise there is no EPS.
+    """
+    start, end = window[0].period_start, window[-1].period_end
+    for rank, candidate in enumerate(series):
+        year = candidate["annual"].get(end)
+        if year is not None and year.period_start and start and abs((year.period_start - start).days) <= 7:
+            value = year.numeric_value
+        elif all(q.period_end in candidate["quarters"] for q in window):
+            value = sum(candidate["quarters"][q.period_end].numeric_value for q in window)
+        else:
+            continue
+        span_start = start or end
+        if all(numerator_agrees_within(better["facts"], candidate["facts"], span_start, end)
+               for better in series[:rank]):
+            return value
+        return None
+    return None
 
 
 @dataclass
@@ -381,10 +429,6 @@ class TTMStatementBuilder:
             return int(fy) if pd.notna(fy) else int(row["as_of_date"].year)
 
         def _trend_for_eps(eps_concept: str, max_periods: int) -> Optional[pd.DataFrame]:
-            net_income_concepts = [
-                "NetIncomeLoss",
-                "NetIncomeLossAvailableToCommonStockholdersBasic",
-            ]
             shares_basic_concepts = [
                 "WeightedAverageNumberOfSharesOutstandingBasic",
                 "WeightedAverageNumberOfShareOutstandingBasicAndDiluted",
@@ -395,16 +439,21 @@ class TTMStatementBuilder:
                 "WeightedAverageNumberOfShareOutstandingBasicAndDiluted",
             ]
 
-            net_income_facts = None
-            for concept in net_income_concepts:
-                net_income_facts = _get_concept_facts(concept)
-                if net_income_facts:
-                    break
-
-            if not net_income_facts:
-                return None
-
             is_diluted = "diluted" in eps_concept.lower()
+            # Basic EPS divides income available to common stockholders, not net
+            # income; the diluted numerator starts from it (GH #1692).
+            numerators = []
+            for concept in EPS_NUMERATOR_CONCEPTS["diluted" if is_diluted else "basic"]:
+                concept_facts = _get_concept_facts(concept)
+                if concept_facts:
+                    numerators.append((concept, concept_facts))
+            if not numerators:
+                return None
+            # Windows are laid out on net income's quarters (the widest series);
+            # each window's numerator is then chosen by _window_numerator.
+            net_income_facts = dict(numerators).get("NetIncomeLoss") or numerators[0][1]
+            numerator_series = [_numerator_series(f) for _, f in numerators]
+
             shares_facts = None
             share_candidates = shares_diluted_concepts if is_diluted else shares_basic_concepts
             for concept in share_candidates:
@@ -479,7 +528,9 @@ class TTMStatementBuilder:
                 if not avg_shares:
                     continue
 
-                ttm_income = sum(q.numeric_value for q in window if q.numeric_value is not None)
+                ttm_income = _window_numerator(window, numerator_series)
+                if ttm_income is None:
+                    continue
 
                 as_of_fact = window[-1]
                 label_fy = calculate_fiscal_year_for_label(
