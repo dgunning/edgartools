@@ -17,6 +17,7 @@ Usage:
     concept.children       # [ProductRevenue, ServiceRevenue]
     concept.statements     # ['Income Statement']
 """
+import html
 from typing import Dict, List, Optional, TYPE_CHECKING
 
 from rich.panel import Panel
@@ -31,6 +32,12 @@ if TYPE_CHECKING:
     from edgar.sgml.concept_extractor import ConceptReport, ConceptRow
 
 __all__ = ['Concept', 'ConceptGraph']
+
+
+def _normalize_label(text: str) -> str:
+    """Compare an R*.htm row label with a MetaLinks role label: entities decoded,
+    whitespace collapsed, case folded (GH #1733)."""
+    return ' '.join(html.unescape(text).split()).casefold()
 
 
 class Concept:
@@ -109,15 +116,58 @@ class Concept:
         prior-year value for concepts whose primary-period fact is absent
         (GH #810).
         """
-        rows = self._graph._get_rows_for_concept(self.id)
-        if not rows:
+        row = self._primary_row()
+        if row is None or row.primary_period is None:
             return None
-        for row in rows:
+        return row.values.get(row.primary_period) or None
+
+    def _primary_row(self) -> Optional['ConceptRow']:
+        """The first non-dimensional, non-abstract row with values."""
+        for row in self._graph._get_rows_for_concept(self.id):
             if not row.is_dimensional and not row.is_abstract and row.values:
-                if row.primary_period is None:
-                    return None
-                return row.values.get(row.primary_period) or None
+                return row
         return None
+
+    def _fact_numeric_value(self, report_key: Optional[str] = None) -> Optional[float]:
+        """Primary-period fact value as shown in one report, display sign undone.
+
+        Validation must read every number of a calculation from the report being
+        checked: the first row across all reports can be another statement's
+        period (net income's three-month value in a six-month cash flow).
+
+        R*.htm shows a row presented with a negated label role (e.g.
+        ``negatedLabel``) with its sign flipped, so the display number is not the
+        fact. Calculation weights apply to the fact (XBRL 2.1 section 5.2.5.2).
+        When the row's label text is shared by a negated and a non-negated role,
+        the role cannot be told apart and the display value is returned (GH #1733).
+
+        With ``report_key``, a concept that has no row in that report has no value
+        there: None, so the check is skipped rather than fed another report's number.
+        """
+        if report_key:
+            report = self._graph._concept_reports.get(report_key)
+            row = None if report is None else next(
+                (r for r in report.rows
+                 if r.concept_id == self.id and not r.is_dimensional
+                 and not r.is_abstract and r.values), None)
+        else:
+            row = self._primary_row()
+        if row is None or row.primary_period is None:
+            return None
+        display = row.values.get(row.primary_period)
+        value = parse_numeric(display) if display else None
+        if value is None:
+            return None
+        row_label = _normalize_label(row.label)
+        negated = plain = False
+        for role, text in self._tag.role_labels.items():
+            if _normalize_label(text) != row_label:
+                continue
+            if role.lower().startswith('negated'):
+                negated = True
+            else:
+                plain = True
+        return -value if negated and not plain else value
 
     @property
     def values(self) -> Dict[str, str]:
@@ -463,12 +513,13 @@ class ConceptGraph:
             for root_tag in roots:
                 self._validate_recursive(
                     root_tag.tag_id, meta_report.role, meta_report.short_name,
-                    tolerance, results, visited
+                    tolerance, results, visited, meta_report.report_key
                 )
         return results
 
     def _validate_recursive(self, tag_id: str, role: str, role_name: str,
-                            tolerance: float, results: list, visited: set):
+                            tolerance: float, results: list, visited: set,
+                            report_key: Optional[str] = None):
         """Recursively validate a concept and all its calculation descendants."""
         if tag_id in visited:
             return
@@ -481,7 +532,7 @@ class ConceptGraph:
         parent_concept = self._get_or_create_concept(tag_id)
         if not parent_concept:
             return
-        parent_val = parent_concept.numeric_value
+        parent_val = parent_concept._fact_numeric_value(report_key)
         if parent_val is None:
             return
 
@@ -492,7 +543,7 @@ class ConceptGraph:
             if not child_concept:
                 all_parsed = False
                 break
-            child_val = child_concept.numeric_value
+            child_val = child_concept._fact_numeric_value(report_key)
             if child_val is None:
                 all_parsed = False
                 break
@@ -514,7 +565,7 @@ class ConceptGraph:
         # Recurse into children
         for child_tag in children_tags:
             self._validate_recursive(
-                child_tag.tag_id, role, role_name, tolerance, results, visited
+                child_tag.tag_id, role, role_name, tolerance, results, visited, report_key
             )
 
     # --- Stats ---

@@ -18,7 +18,7 @@ The data is structured as:
     }
 """
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
 __all__ = ['MetaLinks', 'TagDefinition', 'CalculationEntry', 'MetaLinksReport', 'AuthRef']
@@ -49,6 +49,9 @@ class TagDefinition:
     presentation: List[str]
     calculations: Dict[str, CalculationEntry]
     auth_ref_ids: List[str]
+    # Every label role's text (e.g. 'label', 'negatedLabel'), so a displayed row
+    # label can be traced back to the role that produced it (GH #1733).
+    role_labels: Dict[str, str] = field(default_factory=dict)
 
     @property
     def namespace(self) -> str:
@@ -231,6 +234,8 @@ class MetaLinks:
                 presentation=tag_data.get('presentation', []),
                 calculations=calculations,
                 auth_ref_ids=tag_data.get('auth_ref', []),
+                role_labels={role: text for role, text in lang_data.items()
+                             if role != 'documentation' and isinstance(text, str)},
             )
 
         # Parse reports
