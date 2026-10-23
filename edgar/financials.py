@@ -1040,8 +1040,14 @@ class Financials:
             >>> q_shares = quarterly.get_shares_outstanding_basic()
         """
         # Search by XBRL concept name - more reliable than label matching
+        # A filer whose basic and diluted counts are the same (a loss year, or no
+        # dilutive securities) tags one row with the combined element, whose
+        # us-gaap name has a singular "Share" that no plural pattern matches
+        # (gh #1668: 10x Genomics' FY2019 10-K got None for 39,091,366). It goes
+        # before the period-end CommonStockSharesOutstanding fallback.
         concept_patterns = [
             r'WeightedAverageNumberOfSharesOutstandingBasic',
+            r'WeightedAverageNumberOfShareOutstandingBasicAndDiluted',
             r'CommonStockSharesOutstanding',  # Fallback for some filings
         ]
         return self._get_concept_value('income', concept_patterns, period_offset)
@@ -1076,6 +1082,8 @@ class Financials:
         concept_patterns = [
             r'WeightedAverageNumberOfDilutedSharesOutstanding',
             r'WeightedAverageNumberOfSharesOutstandingDiluted',  # Alternative naming
+            # One count serving as both denominators (gh #1668); see the basic getter.
+            r'WeightedAverageNumberOfShareOutstandingBasicAndDiluted',
         ]
         return self._get_concept_value('income', concept_patterns, period_offset)
 
