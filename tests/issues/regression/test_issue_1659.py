@@ -67,6 +67,27 @@ def test_label_fallback_never_matches_the_combined_caption():
     ]).get_stockholders_equity() == 3313051000
 
 
+# Shell plc FY2025 20-F (accession 0001628280-26-017024), consolidated balance
+# sheet at 2025-12-31, read from the filing's XBRL.
+SHELL_TOTAL_LIABILITIES_AND_EQUITY = (
+    'ifrs-full_EquityAndLiabilities', 'Total liabilities and equity', 370350000000)
+SHELL_PARENT = ('ifrs-full_EquityAttributableToOwnersOfParent',
+                'Equity attributable to Shell plc shareholders', 174392000000)
+SHELL_TOTAL = ('ifrs-full_Equity', 'Total equity', 175319000000)
+
+
+@pytest.mark.fast
+def test_ifrs_parent_equity_wins_over_total_equity():
+    # IFRS splits equity like ASC 810 (IAS 1.54(q)-(r)); before the IFRS
+    # concepts were looked up, the label fallback returned "Total equity",
+    # which includes Shell's $927M non-controlling interest.
+    shell = _stub([SHELL_PARENT, SHELL_TOTAL, SHELL_TOTAL_LIABILITIES_AND_EQUITY])
+    assert shell.get_stockholders_equity() == 174392000000
+
+    total_only = _stub([SHELL_TOTAL, SHELL_TOTAL_LIABILITIES_AND_EQUITY])
+    assert total_only.get_stockholders_equity() == 175319000000
+
+
 def _filed_equity(financials, period_key):
     return {Decimal(f["value"]) for f in financials.xb.facts.query()
             .by_concept("us-gaap:StockholdersEquity", exact=True)

@@ -368,9 +368,9 @@ class Financials:
                 # iteration order deterministic across runs (otherwise a filer
                 # whose statement contains multiple mapped concepts can return
                 # different values depending on Python hash randomization).
-                # A name that is already an XBRL concept (``us-gaap_...``) is
+                # A name that is already an XBRL concept (``us-gaap_...``, ``ifrs-full_...``) is
                 # searched as itself, for concepts the mappings do not carry.
-                if std_concept_name.startswith(('us-gaap_', 'us-gaap:')):
+                if std_concept_name.startswith(('us-gaap_', 'us-gaap:', 'ifrs-full_', 'ifrs-full:')):
                     xbrl_concepts = [std_concept_name]
                 else:
                     xbrl_concepts = sorted(standardizer.mappings.get(std_concept_name, []))
@@ -759,10 +759,15 @@ class Financials:
         # Attributable to Parent", which no pattern matched, so it got None.
         # The parent-attributable total comes first; the NCI-inclusive total is
         # the answer only when the filing has no parent total (#1442).
+        # IFRS (IAS 1.54(q)-(r)) splits equity the same way: Shell's FY2025
+        # 20-F files EquityAttributableToOwnersOfParent $174.392B beside
+        # Equity (total, with NCI) $175.319B.
         value = self._get_standardized_concept_by_xbrl(
             'balance',
             ["Total Stockholders' Equity",
-             'us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest'],
+             'ifrs-full_EquityAttributableToOwnersOfParent',
+             'us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest',
+             'ifrs-full_Equity'],
             period_offset)
         if value is not None:
             return value
