@@ -1415,8 +1415,12 @@ def find_earnings_exhibits(attachments: 'Attachments') -> List['Attachment']:
     for attachment in attachments:
         desc = (attachment.description or "").upper()
         doc = (attachment.document or "").lower()
+        doc_type = (attachment.document_type or "").upper()
 
-        is_ex99 = (re.search(r'EX-99', desc, re.IGNORECASE)
+        # The SEC document type is authoritative; description and filename catch
+        # exhibits filed under a generic type (GH #1776).
+        is_ex99 = (doc_type.startswith('EX-99')
+                   or re.search(r'EX-99', desc, re.IGNORECASE)
                    or re.search(r'ex-?99', doc, re.IGNORECASE))
         if not is_ex99:
             continue
@@ -1425,10 +1429,14 @@ def find_earnings_exhibits(attachments: 'Attachments') -> List['Attachment']:
         if attachment.is_html():
             candidates.append(attachment)
 
-    # Sort by exhibit number (EX-99.1 before EX-99.2, etc.)
+    # Sort by exhibit number (EX-99 and EX-99.1 before EX-99.2, etc.), read from the
+    # document type first, then the description
     def _exhibit_sort_key(att):
-        desc = (att.description or "")
-        m = re.search(r'EX-99\.?(\d+)', desc, re.IGNORECASE)
+        for text in (att.document_type or "", att.description or ""):
+            m = re.match(r'\s*EX-99(?:\.0*(\d+))?\b', text, re.IGNORECASE)
+            if m:
+                return int(m.group(1)) if m.group(1) else 1
+        m = re.search(r'EX-99\.?(\d+)', att.description or "", re.IGNORECASE)
         return int(m.group(1)) if m else 99
     candidates.sort(key=_exhibit_sort_key)
 
