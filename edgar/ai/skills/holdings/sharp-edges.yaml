@@ -7,7 +7,7 @@ sharp_edges:
     solution: |
       # WRONG: "Who holds Apple?" - don't iterate 8,000+ filings
       # RIGHT: "What does Berkshire hold?" - filter by filer
-      filing = get_filings(form="13F-HR").filter(company="BERKSHIRE")[0]
+      filing = get_filings(form="13F-HR").filter(cik=1067983)[0]  # Berkshire Hathaway's CIK
       holdings = filing.obj().holdings
     detection_pattern: 'for.*in.*get_filings.*13F.*:.*\.obj\(\)'
 
