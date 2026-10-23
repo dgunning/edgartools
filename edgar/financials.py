@@ -890,12 +890,25 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
         Returns:
-            Current assets value if found, None otherwise
+            Current assets value if found, None otherwise. An unclassified
+            balance sheet has no current total and returns None.
         """
+        # Identify the concept, not the filer's prose, as get_total_assets
+        # does. The label path alone returned a company subtotal placed above
+        # the real total (gh #1661): r'Total Current Assets' matched "Total
+        # current assets before funds held for clients", so ADP's FY2026 10-K
+        # returned $8.603B against a filed us-gaap:AssetsCurrent of $52.561B.
+        value = self._get_standardized_concept_by_xbrl(
+            'balance', ['Total Current Assets'], period_offset)
+        if value is not None:
+            return value
+
+        # Label fallback for a filer whose total is present but unmapped,
+        # anchored at both ends so no subtotal or component matches.
         patterns = [
-            r'Total Current Assets',
-            r'^Current Assets',
-            r'Assets Current'
+            r'^Total Current Assets$',
+            r'^Current Assets,? Total$',
+            r'^Assets,? Current,? Total$',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
@@ -907,12 +920,21 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
         Returns:
-            Current liabilities value if found, None otherwise
+            Current liabilities value if found, None otherwise. An unclassified
+            balance sheet has no current total and returns None.
         """
+        # Concept first, for the reason given in get_current_assets (gh #1661):
+        # ADP's "Total current liabilities before client funds obligations"
+        # ($5.609B) sat above its filed us-gaap:LiabilitiesCurrent ($50.025B).
+        value = self._get_standardized_concept_by_xbrl(
+            'balance', ['Total Current Liabilities'], period_offset)
+        if value is not None:
+            return value
+
         patterns = [
-            r'Total Current Liabilities',
-            r'^Current Liabilities',
-            r'Liabilities Current'
+            r'^Total Current Liabilities$',
+            r'^Current Liabilities,? Total$',
+            r'^Liabilities,? Current,? Total$',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
