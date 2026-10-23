@@ -28,6 +28,7 @@ from rich.console import Group, Text
 from rich.panel import Panel
 from rich.table import Table
 
+from edgar.offerings.prospectus.lifecycle import related_by_file_number
 from edgar.richtools import repr_rich
 # Re-imported here so `from edgar.offerings.prospectus.registration_s4 import
 # S4CoverPage, S4OfferingType, ...` keeps resolving.
@@ -209,13 +210,9 @@ class RegistrationS4:
             return None
 
         try:
-            from edgar.entity import Company
-            company = Company(self._filing.cik)
-            return company.get_filings(
-                file_number=file_number,
-                sort_by=[("filing_date", "ascending")],
-                trigger_full_load=False,
-            )
+            return related_by_file_number(
+                self._filing.cik, file_number, [("filing_date", "ascending")],
+                lambda r: any(f.accession_no == self._filing.accession_no for f in r))
         except Exception as e:
             log.debug("Failed to get related filings for %s: %s", self._filing.accession_no, e)
             return None

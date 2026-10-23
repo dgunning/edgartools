@@ -9,7 +9,7 @@ from typing import List, Optional, TYPE_CHECKING
 from edgar.offerings.prospectus._render import ProspectusRenderMixin
 from edgar.offerings.prospectus._sections import ProspectusSectionsMixin
 from edgar.offerings.prospectus.deal import Deal, _extract_amendment_number
-from edgar.offerings.prospectus.lifecycle import ShelfLifecycle
+from edgar.offerings.prospectus.lifecycle import ShelfLifecycle, has_shelf_form, related_by_file_number
 from edgar.offerings.prospectus.models import (
     CoverPageData,
     OfferingType,
@@ -409,17 +409,32 @@ class Prospectus424B(ProspectusSectionsMixin, ProspectusRenderMixin):
             # Use trigger_full_load=False to avoid paginating through the entire
             # filing history — shelf registrations expire after 3 years so the
             # relevant filings are almost always in the most recent ~1000.
-            file_number = self._cover_page.registration_number
-            if file_number:
-                from edgar.entity import Company
-                company = Company(self._filing.cik)
-                related = company.get_filings(
-                    file_number=file_number,
-                    sort_by=[("filing_date", "ascending"), ("accession_number", "ascending")],
-                    trigger_full_load=False,
-                )
-                if related is not None and not related.empty:
+            # A joint filing lists several file numbers (issuer and co-registrant), and
+            # only one of them may carry the shelf (GH #1707): try each until one does.
+            def candidate_numbers():
+                yield self._cover_page.registration_number
+                try:  # read only if needed; the cover parser also tolerates a missing header
+                    yield from self._filing.header.file_numbers
+                except Exception:
+                    return
+
+            first_found = None
+            seen = set()
+            for file_number in candidate_numbers():
+                if not file_number or file_number in seen:
+                    continue
+                seen.add(file_number)
+                related = related_by_file_number(
+                    self._filing.cik, file_number,
+                    [("filing_date", "ascending"), ("accession_number", "ascending")],
+                    has_shelf_form)
+                if related is None or related.empty:
+                    continue
+                if has_shelf_form(related):
                     return ShelfLifecycle(self._filing, related)
+                first_found = first_found or related
+            if first_found is not None:
+                return ShelfLifecycle(self._filing, first_found)
             # Fallback to generic related_filings if no file number on cover page
             related = self._filing.related_filings()
             if related is None or related.empty:

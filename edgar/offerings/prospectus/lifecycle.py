@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from datetime import date
 from functools import cached_property
-from typing import List, Optional, TYPE_CHECKING
+from typing import Callable, List, Optional, TYPE_CHECKING
 
 from rich import box
 from rich.console import Group, Text
@@ -31,6 +31,27 @@ _SHELF_BASE_FORMS = {'S-3', 'S-3ASR', 'F-3', 'F-3ASR', 'S-1'}
 _TAKEDOWN_FORMS = {'424B1', '424B2', '424B3', '424B4', '424B5', '424B7', '424B8'}
 
 _ASR_BASE_FORMS = {'S-3ASR', 'F-3ASR'}
+
+
+def has_shelf_form(filings) -> bool:
+    """True when the family contains a shelf-base filing (S-3, F-3, S-1 ...)."""
+    return any(f.form.replace('/A', '') in _SHELF_BASE_FORMS for f in filings)
+
+
+def related_by_file_number(cik, file_number: str, sort_by,
+                           is_complete: Callable[['Filings'], bool]) -> Optional['Filings']:
+    """Filings under ``file_number``, reading the full history only when needed.
+
+    The recent-window fast path (``trigger_full_load=False``) is accepted only
+    when ``is_complete`` holds for it; otherwise the full history is loaded, so a
+    shelf older than the window is not silently lost (GH #1707).
+    """
+    from edgar.entity import Company
+    company = Company(cik)
+    related = company.get_filings(file_number=file_number, sort_by=sort_by, trigger_full_load=False)
+    if related is not None and not related.empty and not is_complete(related):
+        related = company.get_filings(file_number=file_number, sort_by=sort_by, trigger_full_load=True)
+    return related
 # 'RW' withdraws the registration; 'RW WD' rescinds an earlier 'RW' (the
 # registration is then NOT withdrawn). 'AW' withdraws only an amendment, not the
 # registration, so it is deliberately excluded.
