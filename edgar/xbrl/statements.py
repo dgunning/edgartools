@@ -46,6 +46,11 @@ REVENUE_CONCEPTS = (
 STRUCTURAL_LABEL_PATTERNS = ['[Axis]', '[Domain]', '[Member]', '[Line Items]', '[Table]', '[Abstract]']
 STRUCTURAL_CONCEPT_SUFFIXES = ('Axis', 'Domain', 'Member', 'LineItems', 'Table')
 
+# Working columns that carry each row's own display sign from
+# _build_dataframe_from_raw_data() to _add_metadata_columns() (GH #1657).
+_ROW_SIGN = '_row_preferred_sign'
+_ROW_HAS_VALUES = '_row_has_values'
+
 
 def is_xbrl_structural_element(item: Dict[str, Any]) -> bool:
     """
@@ -1529,6 +1534,13 @@ class Statement:
                                                  (key for key, _ in periods_to_display))
                 row['point_in_time'] = get_is_point_in_time(period_type)
 
+            # GH #1657: this occurrence's own display sign. preferredLabel sits
+            # on the arc, so a concept presented twice can be negated once and
+            # shown as-is the second time. Read by _add_metadata_columns().
+            row_signs = item.get('preferred_signs') or {}
+            row[_ROW_SIGN] = next(iter(row_signs.values())) if row_signs else None
+            row[_ROW_HAS_VALUES] = bool(item.get('values'))
+
             # Add structural columns
             row['level'] = item.get('level', 0)
             row['abstract'] = item.get('is_abstract', False)
@@ -1727,7 +1739,15 @@ class Statement:
         # Add metadata columns
         df['balance'] = df['concept'].map(balance_map)
         df['weight'] = df['concept'].map(weight_map)
-        df['preferred_sign'] = df['concept'].map(preferred_sign_map)
+        # GH #1657: a row with values takes its own occurrence's sign; the
+        # concept's first occurrence speaks only for rows with nothing to sign.
+        concept_signs = df['concept'].map(preferred_sign_map)
+        if _ROW_SIGN in df.columns:
+            own_signs = df.pop(_ROW_SIGN)
+            has_values = df.pop(_ROW_HAS_VALUES).astype(bool)
+            df['preferred_sign'] = own_signs.where(has_values, concept_signs)
+        else:
+            df['preferred_sign'] = concept_signs
         df['parent_concept'] = df['concept'].map(parent_concept_map)
         df['parent_abstract_concept'] = df['concept'].map(parent_abstract_concept_map)
 
