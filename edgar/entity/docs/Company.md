@@ -50,13 +50,21 @@ company = Company("0000320193")     # Zero-padded
 ### Checking if Found
 
 ```python
-company = Company("INVALID")
+from edgar.exceptions import CompanyNotFoundError
 
+# A ticker or name that matches no company raises
+try:
+    company = Company("INVALID")
+except CompanyNotFoundError:
+    print("Company not found")
+
+# A numeric CIK the SEC has no record of does not raise; check not_found
+company = Company(9999999999)
 if company.not_found:
     print("Company not found")
 ```
 
-Note: `Company()` does not raise an error for invalid input. It creates a placeholder entity. Always check `not_found` when user input is involved.
+Note: only a numeric CIK builds a placeholder entity without raising. Catch `CompanyNotFoundError` when the input is a ticker or a name, and check `not_found` when it is a CIK.
 
 ## Properties
 
@@ -409,9 +417,11 @@ if company.is_operating_company():
 ### Company Not Found
 
 ```python
-company = Company("INVALID")
+from edgar.exceptions import CompanyNotFoundError
 
-if company.not_found:
+try:
+    company = Company("INVALID")
+except CompanyNotFoundError:
     print("Company does not exist")
     exit()
 ```

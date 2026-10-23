@@ -561,8 +561,8 @@ except CompanyNotFoundError:
 except ValueError as e:
     print(f"Invalid identifier: {e}")
 
-# Check if company was found
-company = Company("MAYBE_INVALID")
+# A CIK the SEC has no record of does not raise; check not_found
+company = Company(9999999999)
 if company.not_found:
     print("Company data not available")
 else:
