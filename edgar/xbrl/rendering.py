@@ -32,6 +32,7 @@ from edgar.xbrl.core import (
     format_value,
     parse_date,
 )
+from edgar.xbrl.parsers.instance import _quarter_for_date
 
 # Import color schemes from entity package
 try:
@@ -1041,8 +1042,8 @@ def _format_period_labels(
                 if 80 <= duration_days <= 100:  # Quarterly period
                     fy_end_month = entity_info.get('fiscal_year_end_month') if entity_info else None
                     if fy_end_month:
-                        month_offset = (end_date_obj.month - fy_end_month - 1) % 12
-                        q_num = f"Q{(month_offset // 3) + 1}"
+                        # First-week ends of 52/53-week filers belong to the prior month (GH #1738)
+                        q_num = _quarter_for_date(end_date_obj, fy_end_month)
                     else:
                         # Fallback to calendar quarters if no fiscal year info
                         month = end_date_obj.month

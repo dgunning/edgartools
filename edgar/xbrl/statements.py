@@ -18,6 +18,7 @@ from edgar.richtools import repr_rich
 from edgar.xbrl.dimensions import is_breakdown_dimension
 from edgar.exceptions import ParsingError, StatementNotFoundError
 from edgar.xbrl.presentation import StatementView, ViewType, normalize_view
+from edgar.xbrl.parsers.instance import _quarter_for_date
 
 # Concept candidates for the ratio/trend helpers. Ordered: the first candidate
 # present in a statement wins. GH #1241 — the previous single-name lookups
@@ -1318,8 +1319,8 @@ class Statement:
                         if hasattr(self, 'xbrl') and self.xbrl and hasattr(self.xbrl, 'entity_info') and self.xbrl.entity_info:
                             fy_end_month = self.xbrl.entity_info.get('fiscal_year_end_month')
                         if fy_end_month:
-                            month_offset = (d1.month - fy_end_month - 1) % 12
-                            q = f"Q{(month_offset // 3) + 1}"
+                            # First-week ends of 52/53-week filers belong to the prior month (GH #1738)
+                            q = _quarter_for_date(d1, fy_end_month)
                         else:
                             month = d1.month
                             q = "Q1" if month <= 3 or month == 12 else \
