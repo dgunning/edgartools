@@ -63,6 +63,10 @@ _STRUCTURAL_ELEMENTS = frozenset({
     f"{LINKBASE_NS}footnoteLink",
 })
 
+# Axes whose member names another legal entity: a DEI fact on one of them is a
+# co-registrant's, not the filer's (GH #1420, #1710).
+_ENTITY_AXES = ('dei:LegalEntityAxis', 'srt:ConsolidatedEntitiesAxis')
+
 
 class InstanceParser(BaseParser):
     """Parser for XBRL instance documents."""
@@ -302,26 +306,13 @@ class InstanceParser(BaseParser):
                     # Get segment dimensions if present
                     segment_elem = entity_elem.find('.//{http://www.xbrl.org/2003/instance}segment')
                     if segment_elem is not None:
-                        # Extract explicit dimensions
-                        for dim_elem in segment_elem.findall('.//{http://xbrl.org/2006/xbrldi}explicitMember'):
-                            dimension = dim_elem.get('dimension')
-                            value = dim_elem.text
-                            if dimension and value:
-                                context.dimensions[dimension] = value
+                        self._read_dimension_members(segment_elem, context.dimensions)
 
-                        # Extract typed dimensions
-                        for dim_elem in segment_elem.findall('.//{http://xbrl.org/2006/xbrldi}typedMember'):
-                            dimension = dim_elem.get('dimension')
-                            if dimension:
-                                # The typed dimension value is the text content of the first child element
-                                for child in dim_elem:
-                                    # Extract the text content, which contains the actual typed member value
-                                    if child.text and child.text.strip():
-                                        context.dimensions[dimension] = child.text.strip()
-                                    else:
-                                        # Fallback to tag if no text content
-                                        context.dimensions[dimension] = child.tag
-                                    break
+                # Dimensions may also sit in the context's scenario (XBRL Dimensions 1.0 §3.1.4.1);
+                # without them a scenario-qualified fact reads as the undimensioned total.
+                scenario_elem = context_elem.find('{http://www.xbrl.org/2003/instance}scenario')
+                if scenario_elem is not None:
+                    self._read_dimension_members(scenario_elem, context.dimensions)
 
                 # Extract period information
                 period_elem = context_elem.find('.//{http://www.xbrl.org/2003/instance}period')
@@ -357,6 +348,27 @@ class InstanceParser(BaseParser):
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting contexts: {str(e)}") from e
 
+    @staticmethod
+    def _read_dimension_members(container: ET.Element, dimensions: Dict[str, str]) -> None:
+        """Read explicit and typed dimension members from a segment or scenario element."""
+        for dim_elem in container.findall('.//{http://xbrl.org/2006/xbrldi}explicitMember'):
+            dimension = dim_elem.get('dimension')
+            value = dim_elem.text
+            if dimension and value:
+                dimensions[dimension] = value
+
+        for dim_elem in container.findall('.//{http://xbrl.org/2006/xbrldi}typedMember'):
+            dimension = dim_elem.get('dimension')
+            if dimension:
+                # The typed dimension value is the text content of the first child element
+                for child in dim_elem:
+                    if child.text and child.text.strip():
+                        dimensions[dimension] = child.text.strip()
+                    else:
+                        # Fallback to tag if no text content
+                        dimensions[dimension] = child.tag
+                    break
+
     def _extract_units(self, root: ET.Element) -> None:
         """Extract units from instance document."""
         try:
@@ -383,10 +395,13 @@ class InstanceParser(BaseParser):
                     measure_elem = unit_elem.find('{http://www.xbrl.org/2003/instance}measure')
                     if measure_elem is None:
                         measure_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}measure')
-                    if measure_elem is not None and measure_elem.text:
+                    # Strip: a pretty-printed <measure> carries whitespace that
+                    # breaks every iso4217: prefix test downstream (GH #1704).
+                    measure_text = (measure_elem.text or '').strip() if measure_elem is not None else ''
+                    if measure_text:
                         self.units[unit_id] = {
                             'type': 'simple',
-                            'measure': measure_elem.text
+                            'measure': measure_text
                         }
                     continue
 
@@ -397,8 +412,8 @@ class InstanceParser(BaseParser):
 
                     if numerator_elem is not None and denominator_elem is not None:
                         # Get measures
-                        numerator_measures = [elem.text for elem in numerator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text]
-                        denominator_measures = [elem.text for elem in denominator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text]
+                        numerator_measures = [elem.text.strip() for elem in numerator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text and elem.text.strip()]
+                        denominator_measures = [elem.text.strip() for elem in denominator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text and elem.text.strip()]
 
                         self.units[unit_id] = {
                             'type': 'divide',
@@ -789,6 +804,10 @@ class InstanceParser(BaseParser):
             # report. Keeping whichever fact came last named Duke Energy's
             # combined 10-K after Piedmont Natural Gas, the last of its seven
             # co-registrants, beside Duke Energy's own CIK (GH #1420).
+            # Lamar's combined 10-Q puts its co-registrant on
+            # srt:ConsolidatedEntitiesAxis instead, so both entity axes count
+            # (GH #1710). A class-of-stock member alone does not: it qualifies
+            # the filer's own securities.
             self.dei_facts: Dict[str, Fact] = {}
             co_registrant_facts: Dict[str, Fact] = {}
             for fact in self.facts.values():
@@ -800,7 +819,7 @@ class InstanceParser(BaseParser):
                 else:
                     continue
                 context = self.contexts.get(fact.context_ref)
-                if context is not None and 'dei:LegalEntityAxis' in context.dimensions:
+                if context is not None and any(axis in context.dimensions for axis in _ENTITY_AXES):
                     co_registrant_facts[concept] = fact
                 else:
                     self.dei_facts[concept] = fact

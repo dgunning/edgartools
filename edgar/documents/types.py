@@ -172,7 +172,14 @@ class XBRLFact:
 
     @property
     def numeric_value(self) -> Optional[float]:
-        """Get numeric value if applicable."""
+        """Get numeric value if applicable.
+
+        Only a fact with a unit (ix:nonFraction) is numeric. An ix:nonNumeric
+        identifier such as a CIK parses as a float but is text (GH #1755), the
+        same rule the instance parser applies.
+        """
+        if not self.unit_ref:
+            return None
         try:
             # Remove commas and convert
             clean_value = self.value.replace(',', '')
