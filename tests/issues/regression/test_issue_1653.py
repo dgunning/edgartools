@@ -131,3 +131,54 @@ def test_home_per_usd_divide_unit_keeps_the_old_conversion():
         {"U_1": _divide("iso4217:EUR", "iso4217:USD")}, ["U_1"], [0.8855],
     ))
     assert converter.to_usd(0.8855, 2025) == pytest.approx(1.0)
+
+
+# ---------------------------------------------------------------------------
+# Review follow-up: a unit's measure order is a hint, not the truth. Some
+# filers write it backwards; values from SEC companyfacts (scan.log).
+# ---------------------------------------------------------------------------
+
+class _OneRateXBRL:
+    contexts: dict = {}
+
+    def __init__(self, home, numerator, denominator, value, year, kind):
+        self.units = {"home": {"type": "simple", "measure": f"iso4217:{home}"},
+                      "u": _divide(f"iso4217:{numerator}", f"iso4217:{denominator}")}
+        date = f"{year}-12-31"
+        frame = pd.DataFrame({
+            "unit_ref": ["u"], "context_ref": ["c-1"],
+            "period_end": [date if kind == "average" else float("nan")],
+            "period_instant": [float("nan") if kind == "average" else date],
+            "numeric_value": [value],
+        })
+        concept = ("ifrs-full:AverageForeignExchangeRate" if kind == "average"
+                   else "ifrs-full:ClosingForeignExchangeRate")
+
+        class _Q(_Query):
+            def to_dataframe(self):
+                return frame if self._concept == concept else pd.DataFrame()
+
+        facts = _Facts(frame)
+        facts.query = lambda: _Q(frame)
+        facts.to_dataframe = lambda: pd.DataFrame({"unit_ref": ["home"]})
+        self.facts = facts
+
+
+@pytest.mark.parametrize("filer, home, num, den, value, year, kind, reading", [
+    # Ecopetrol 20-F, closing 2024-12-31: unit USD/COP, value 4,409.15 COP per USD
+    ("Ecopetrol", "COP", "USD", "COP", 4409.15, 2024, "closing", "COP per USD"),
+    # Andina 20-F, closing 2025-12-31: unit USD/CLP, value 907.13 CLP per USD
+    ("Andina", "CLP", "USD", "CLP", 907.13, 2025, "closing", "CLP per USD"),
+    # Genmab 20-F, average 2024: unit DKK/USD, value 0.1452 USD per DKK
+    ("Genmab", "DKK", "DKK", "USD", 0.1452, 2024, "average", "USD per DKK"),
+])
+def test_a_backwards_unit_is_overruled_by_the_only_plausible_reading(
+        filer, home, num, den, value, year, kind, reading):
+    converter = CurrencyConverter(_OneRateXBRL(home, num, den, value, year, kind))
+    expected_usd = value if reading.startswith("USD") else 1 / value
+    assert converter.to_usd(1, year, rate_type=kind) == pytest.approx(expected_usd)
+    assert converter.rate_basis[(year, kind)] == (
+        f"{reading} (only plausible reading; its unit says the opposite)")
+    assert (f"the {kind} rate for {year} ({value}) is plausible only as {reading}, "
+            f"which its unit contradicts; it was read as {reading}"
+            ) in converter.extraction_warnings

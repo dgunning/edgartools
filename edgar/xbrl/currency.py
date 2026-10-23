@@ -358,6 +358,7 @@ class CurrencyConverter:
             USD per EUR unit is 'Unit_Divide_USD_EUR_yMgaKio6_...', which no id
             pattern matched (GH #1653). The measure's local name is compared,
             since some filers use an extension measure (Vodafone's 'vod:EUR').
+            The order is only a hint: _read_rate() checks it against the value.
             """
             unit = units.get(unit_ref)
             if unit is None:
@@ -462,13 +463,25 @@ class CurrencyConverter:
             return None, None
         if len(fits) == 1:
             reading = fits[0]
-            if hint is not None and reading not in hint:
-                self._extraction_warnings.append(
-                    f"{where} was not used: it is plausible only as "
-                    f"{self._reading_label(reading)}, which {hint_source} contradicts"
-                )
-                return None, None
             how = "only plausible reading"
+            if hint is not None and reading not in hint:
+                label = self._reading_label(reading)
+                if quote == _PURE:
+                    # Other currencies' rates pointing elsewhere: the data
+                    # disagrees with itself, so nothing is trusted.
+                    self._extraction_warnings.append(
+                        f"{where} was not used: it is plausible only as {label}, "
+                        f"which {hint_source} contradicts"
+                    )
+                    return None, None
+                # A unit's measure order is a hint, not the truth: Ecopetrol
+                # tags 4,409 COP per USD as USD/COP, Genmab 0.1452 USD per DKK
+                # as DKK/USD (GH #1653 review). The value can only be one thing.
+                how += "; its unit says the opposite"
+                self._extraction_warnings.append(
+                    f"{where} is plausible only as {label}, which its unit "
+                    f"contradicts; it was read as {label}"
+                )
         else:
             narrowed = [r for r in fits if hint is not None and r in hint]
             if len(narrowed) != 1:
