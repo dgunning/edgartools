@@ -14,6 +14,7 @@ Analyze SEC filings and financial statements.
 | core (this directory) | Company lookup, filings, search |
 | [financials/](./financials/) | Financial statements and metrics |
 | [reports/](./reports/) | 10-K/10-Q/8-K section extraction |
+| [funds/](./funds/) | Mutual funds, ETFs, NPORT/N-CEN/N-CSR |
 | [holdings/](./holdings/) | 13F institutional holdings |
 | [ownership/](./ownership/) | Form 3/4/5 insider transactions |
 | [xbrl/](./xbrl/) | Low-level XBRL facts and concepts |

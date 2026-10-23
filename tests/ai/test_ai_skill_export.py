@@ -547,26 +547,42 @@ def test_package_skill_custom_output():
 # ============================================================================
 
 
+def _can_create_symlinks(directory: Path) -> bool:
+    """True when this account may create symlinks (Windows needs a privilege for it)."""
+    try:
+        (directory / "probe-link").symlink_to(directory)
+    except OSError:
+        return False
+    return True
+
+
 @pytest.mark.fast
 def test_install_skill_uses_symlinks():
-    """Test that install_skill() uses symlinks for auto-sync."""
+    """install_skill(use_symlinks=True) links where links can be made and copies where they cannot."""
     from edgar.ai import install_skill
 
     with tempfile.TemporaryDirectory() as tmpdir:
         output_dir = Path(tmpdir)
+        can_link = _can_create_symlinks(output_dir)
 
         # Install with symlinks (default)
         skill_dir = install_skill(to=output_dir, quiet=True, use_symlinks=True)
 
-        # Check that skill files are symlinks
         skill_md = skill_dir / "SKILL.md"
         assert skill_md.exists(), "SKILL.md should exist"
-        assert skill_md.is_symlink(), "SKILL.md should be a symlink"
-
-        # Check that subdirectories are symlinks
         financials_dir = skill_dir / "financials"
         assert financials_dir.exists(), "financials/ should exist"
-        assert financials_dir.is_symlink(), "financials/ should be a symlink"
+
+        if can_link:
+            # Skill files and subdirectories are symlinks into the package
+            assert skill_md.is_symlink(), "SKILL.md should be a symlink"
+            assert financials_dir.is_symlink(), "financials/ should be a symlink"
+        else:
+            # Documented fallback: a copy of the same contents
+            assert not skill_md.is_symlink(), "SKILL.md should be a copy where symlinks are not allowed"
+            assert not financials_dir.is_symlink(), "financials/ should be a copy where symlinks are not allowed"
+            assert (financials_dir / "skill.yaml").exists()
+        assert skill_md.read_text(encoding="utf-8").startswith("---")
 
         # Check that api-reference is NOT a symlink (it's copied)
         api_ref_dir = skill_dir / "api-reference"

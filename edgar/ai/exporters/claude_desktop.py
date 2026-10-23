@@ -75,7 +75,7 @@ def export_claude_desktop(skill, output_dir: Optional[Path] = None, create_zip: 
 
     # Copy skill subdirectories (financials/, holdings/, etc.)
     skills_parent = content_dir.parent  # edgar/ai/skills/
-    skill_subdirs = ['financials', 'holdings', 'ownership', 'reports', 'xbrl']
+    skill_subdirs = ['financials', 'funds', 'holdings', 'ownership', 'reports', 'xbrl']
     for subdir_name in skill_subdirs:
         subdir = skills_parent / subdir_name
         if subdir.exists() and subdir.is_dir():

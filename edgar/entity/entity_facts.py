@@ -803,6 +803,13 @@ class EntityFacts:
         facts sharing a ``period_end`` but representing different reporting
         windows (e.g., a 3-month Q2 vs. a 6-month YTD H1) remain distinguishable.
 
+        The concept resolves the way ``get_fact()`` does: a qualified name
+        (``'us-gaap:Assets'``), a bare local name (``'Assets'``) or a lowercased
+        label (``'assets'``) selects exactly that concept. Only text that names
+        no concept and has no taxonomy prefix (``'Net Income'``) falls back to a
+        substring search over concept names and labels; that fallback can mix
+        several concepts in one series, so it warns and names them.
+
         Args:
             concept: Concept name or label
             periods: Number of periods to retrieve
@@ -814,8 +821,32 @@ class EntityFacts:
         from edgar.entity.query import FactQuery
         query = FactQuery(self._facts, self._fact_index)
 
+        # A bare name used to be substring-matched, so time_series('Assets')
+        # returned AssetsCurrent, AmortizationOfIntangibleAssets... rows with no
+        # way to tell them apart (GH #1658). The index holds local names (#1217),
+        # so resolve exactly first, exactly as get_fact() does.
+        by_concept = self._fact_index['by_concept']
+        if concept in by_concept:
+            key, exact = concept, True
+        elif concept.lower() in by_concept:
+            key, exact = concept.lower(), True
+        else:
+            key, exact = concept, ":" in concept
+            if not exact and not getattr(self, '_suppress_warnings', False):
+                needle = concept.lower()
+                matched = sorted({f.concept for f in self._facts
+                                  if needle in f.concept.lower()
+                                  or (f.label and needle in f.label.lower())})
+                if matched:
+                    shown = ', '.join(matched[:5]) + (f" (+{len(matched) - 5} more)" if len(matched) > 5 else "")
+                    warnings.warn(
+                        f"No concept named '{concept}'; time_series() fell back to a substring "
+                        f"match over {len(matched)} concepts: {shown}. Pass a concept name "
+                        f"(see search_concepts('{concept}')) for a single-concept series.",
+                        stacklevel=2)
+
         df = query \
-            .by_concept(concept, exact=":" in concept) \
+            .by_concept(key, exact=exact) \
             .sort_by('filing_date', ascending=False) \
             .to_dataframe('period_start', 'period_end', 'numeric_value',
                           'fiscal_period', 'fiscal_year') \
@@ -2371,27 +2402,117 @@ class EntityFacts:
 
         return analysis
 
+    def _revenue_growth_yoy(self, annual_only: bool = False) -> Optional[Dict[str, Any]]:
+        """Year-over-year revenue growth for the latest reported period, like for like.
+
+        Both observations share one concept, one unit and one period length (a
+        quarter or a year), and the prior one ends a year before the current one.
+        The current period is the latest revenue period the company reports; if
+        it has no comparable prior period, the answer is None rather than an
+        older or mismatched pair.
+
+        The growth paths used to take the first two rows of
+        ``time_series('Revenue')``: whatever concepts the substring matched, in
+        any unit, period length or order. Snowflake's Q1 read -17.96% from two
+        deferred-revenue rows against a filed +25.75% (GH #1671).
+
+        Args:
+            annual_only: Compare fiscal years only. Otherwise the latest period of
+                either length is used, a year when a quarter and a year end together.
+
+        Returns:
+            Dict with ``value`` (percent, 2 dp), ``concept``, ``unit``,
+            ``duration``, ``current_period_end``, ``prior_period_end``,
+            ``current`` and ``prior``; or None when no like-for-like pair exists.
+        """
+        from edgar.ttm.calculator import ANNUAL_MAX_DAYS, ANNUAL_MIN_DAYS, QUARTER_MAX_DAYS, QUARTER_MIN_DAYS
+
+        def length_of(fact):
+            if fact.period_start is None or fact.period_end is None or fact.numeric_value is None:
+                return None
+            days = (fact.period_end - fact.period_start).days
+            if ANNUAL_MIN_DAYS <= days <= ANNUAL_MAX_DAYS:
+                return 'annual'
+            if not annual_only and QUARTER_MIN_DAYS <= days <= QUARTER_MAX_DAYS:
+                return 'quarterly'
+            return None
+
+        # (concept, unit, length, period_end) -> the latest-filed fact for it
+        observations: Dict[tuple, FinancialFact] = {}
+        for variant in _REVENUE_VARIANTS:
+            for fact in self._fact_index['by_concept'].get(variant, []):
+                length = length_of(fact)
+                if length is None:
+                    continue
+                key = (fact.concept, fact.unit, length, fact.period_end)
+                held = observations.get(key)
+                if held is None or (fact.filing_date or date.min) > (held.filing_date or date.min):
+                    observations[key] = fact
+        if not observations:
+            return None
+
+        # The latest period reported under any revenue name; a year outranks a
+        # quarter ending the same day.
+        latest_end = max(k[3] for k in observations)
+        lengths = {k[2] for k in observations if k[3] == latest_end}
+        length = 'annual' if 'annual' in lengths else 'quarterly'
+
+        pairs = []
+        for (concept, unit, obs_length, end), current in observations.items():
+            if end != latest_end or obs_length != length:
+                continue
+            priors = [f for (c, u, ln, e), f in observations.items()
+                      if c == concept and u == unit and ln == length
+                      and ANNUAL_MIN_DAYS <= (end - e).days <= ANNUAL_MAX_DAYS]
+            if not priors:
+                continue
+            prior = max(priors, key=lambda f: f.period_end)
+            if not prior.numeric_value:
+                continue  # growth from nil revenue is undefined
+            local = concept.rsplit(':', 1)[-1]
+            rank = _REVENUE_VARIANTS.index(local) if local in _REVENUE_VARIANTS else len(_REVENUE_VARIANTS)
+            pairs.append((unit != 'USD', rank, current, prior))
+        if not pairs:
+            return None
+
+        # USD first, then the variant order; but a same-period total many times
+        # larger is the consolidated figure the ranked name is a slice of.
+        pairs.sort(key=lambda p: (p[0], p[1]))
+        chosen = pairs[0]
+        for pair in pairs[1:]:
+            if pair[2].unit == chosen[2].unit and is_consolidated_total_over(
+                    pair[2].numeric_value, chosen[2].numeric_value):
+                chosen = pair
+        _, _, current, prior = chosen
+        growth = (current.numeric_value - prior.numeric_value) / abs(prior.numeric_value) * 100
+        return {
+            "value": round(growth, 2),
+            "concept": current.concept,
+            "unit": current.unit,
+            "duration": length,
+            "current_period_end": current.period_end.isoformat(),
+            "prior_period_end": prior.period_end.isoformat(),
+            "current": current.numeric_value,
+            "prior": prior.numeric_value,
+        }
+
     def _analyze_growth(self) -> Dict[str, Any]:
         """Analyze growth trends"""
-        # Get revenue time series
-        revenue_series = self.time_series('Revenue', periods=8)
-
-        if len(revenue_series) >= 2:
-            # Calculate year-over-year growth
-            latest = revenue_series.iloc[0]['numeric_value']
-            prior = revenue_series.iloc[1]['numeric_value']
-
-            if prior and prior != 0:
-                growth_rate = ((latest - prior) / prior) * 100
-                return {
-                    "revenue_growth_yoy": {
-                        "value": round(growth_rate, 2),
-                        "unit": "percent",
-                        "period_comparison": f"{revenue_series.iloc[0]['fiscal_period']} vs {revenue_series.iloc[1]['fiscal_period']}"
-                    }
-                }
-
-        return {"message": "Insufficient data for growth analysis"}
+        growth = self._revenue_growth_yoy()
+        if growth is None:
+            return {"message": "Year-over-year revenue growth not available: no revenue figure "
+                               "for the latest period has a prior-year figure of the same "
+                               "concept, unit and period length"}
+        span = "fiscal year" if growth["duration"] == "annual" else "quarter"
+        return {
+            "revenue_growth_yoy": {
+                "value": growth["value"],
+                "unit": "percent",
+                "period_comparison": f"{span} ended {growth['current_period_end']} vs "
+                                     f"{span} ended {growth['prior_period_end']}",
+                "concept": growth["concept"],
+            }
+        }
 
     def _analyze_liquidity(self) -> Dict[str, Any]:
         """Analyze liquidity metrics"""

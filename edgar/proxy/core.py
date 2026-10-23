@@ -500,7 +500,8 @@ class ProxyStatement:
             >>> proxy = filing.obj()
             >>> list(proxy.sections)
             ['proxy_summary', 'corporate_governance', ...]
-            >>> proxy.sections['compensation_discussion_and_analysis'].text()[:40]
+            >>> cda = proxy.sections.get('compensation_discussion_and_analysis')
+            >>> cda.text()[:40] if cda is not None else None
             'Compensation Discussion and Analysis ...'
         """
         doc = self.document

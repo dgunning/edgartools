@@ -9,7 +9,10 @@ tables from 10-K, 10-Q, 8-K, proxy statements, 13D/G, 13F, and other forms.
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any, Optional
+import pandas as pd
+
 from edgar import find
 from edgar.ai.mcp.tools.base import (
     tool,
@@ -76,6 +79,9 @@ FORM_EXTRACTORS = {"10-K", "10-Q", "8-K", "DEF 14A", "SC 13D", "SC 13G", "SC 13D
 
 # Rows of a 13F-HR ``holdings`` section returned when the caller sets no ``limit``.
 DEFAULT_HOLDINGS_LIMIT = 30
+
+# Share of the 6,000-character section cap given to each 8-K earnings statement.
+EARNINGS_STATEMENT_CHARS = 1800
 
 
 @tool(
@@ -254,13 +260,6 @@ async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HO
     extracted = {}
 
     try:
-        # Get the typed object (TenK, TenQ, EightK, etc.)
-        obj = filing.obj()
-
-        if obj is None:
-            extracted["error"] = f"Could not parse {filing.form} filing into a structured object"
-            return extracted
-
         if "all" in sections:
             # Extract all available sections
             sections_to_extract = _get_section_list(filing.form)
@@ -268,8 +267,29 @@ async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HO
             available = _get_section_list(filing.form)
             sections_to_extract = [s for s in sections if s != "summary" or "summary" in available]
 
+        # Get the typed object (TenK, TenQ, EightK, etc.). ``full_text`` reads the
+        # filing's own text and needs none, so a form with no typed object still
+        # serves it.
+        obj = None
+        if any(s != "full_text" for s in sections_to_extract):
+            obj = filing.obj()
+            if obj is None:
+                extracted["error"] = f"Could not parse {filing.form} filing into a structured object"
+                sections_to_extract = [s for s in sections_to_extract if s == "full_text"]
+
         for section in sections_to_extract:
-            content = _extract_section(obj, filing.form, section, limit=limit)
+            if section == "full_text":
+                # Typed filing objects do not all support ``obj['full_text']``
+                # (40-F returns None, 6-K and registration statements raise), so
+                # read the filing's own text, and say so when there is none.
+                # A failure here is reported for this section only.
+                try:
+                    content = filing.text() or "Full text is not available for this filing."
+                except Exception as e:
+                    logger.warning(f"Could not read full text: {e}")
+                    content = f"Could not read the filing's full text: {e}"
+            else:
+                content = _extract_section(obj, filing.form, section, limit=limit)
             if content:
                 text = str(content)
                 if _is_13f_holdings(filing.form, section):
@@ -422,8 +442,14 @@ def _extract_8k_section(obj, section: str) -> Optional[str]:
 
     elif section == "press_release":
         try:
-            if hasattr(obj, 'press_releases') and obj.press_releases:
-                return str(obj.press_releases)
+            press_releases = getattr(obj, 'press_releases', None)
+            if press_releases:
+                # ``str(press_releases)`` renders the attachments table, not the release.
+                text = press_releases[0].text()
+                if text:
+                    # The converted text pads tables with runs of blanks that
+                    # would spend the section cap on layout.
+                    return re.sub(r"[ \t]{2,}", " ", text)
             if hasattr(obj, 'has_press_release') and not obj.has_press_release:
                 return "No press release attached to this 8-K."
         except Exception as e:
@@ -434,24 +460,45 @@ def _extract_8k_section(obj, section: str) -> Optional[str]:
         try:
             if hasattr(obj, 'has_earnings') and not obj.has_earnings:
                 return "This 8-K does not contain earnings data."
+            # ``CurrentReport.income_statement`` and friends are properties that
+            # return a FinancialTable, or None when the release has no such table.
             parts = []
-            if hasattr(obj, 'earnings') and obj.earnings:
-                parts.append("Earnings data available")
-            for name, method in [("Income Statement", "income_statement"),
-                                 ("Balance Sheet", "balance_sheet"),
-                                 ("Cash Flow", "cash_flow_statement")]:
-                try:
-                    stmt = getattr(obj, method)()
-                    if stmt is not None:
-                        parts.append(f"\n=== {name} ===\n{stmt}")
-                except Exception:
-                    pass
-            return "\n".join(parts) if parts else None
+            for name, attr in [("Income Statement", "income_statement"),
+                               ("Balance Sheet", "balance_sheet"),
+                               ("Cash Flow", "cash_flow_statement")]:
+                table = getattr(obj, attr, None)
+                if table:
+                    # Each statement gets its own share of the 6,000-character
+                    # section cap, so a long income statement cannot push the
+                    # balance sheet and cash flow out of the response.
+                    body = truncate_text(_format_earnings_table(table), max_chars=EARNINGS_STATEMENT_CHARS)
+                    parts.append(f"=== {name} ===\n{body}")
+                else:
+                    parts.append(f"=== {name} ===\nNot found in this earnings release.")
+            return "\n\n".join(parts)
         except Exception as e:
             logger.debug(f"Could not extract earnings: {e}")
         return None
 
     return None
+
+
+def _format_earnings_table(table) -> str:
+    """Render a ``FinancialTable`` as one compact line per row.
+
+    The markdown export pads every cell to the widest label, which would spend
+    most of the section cap on blanks.
+    """
+    df = table.dataframe
+    lines = []
+    if table.scale.name != "UNITS":
+        lines.append(f"(amounts in {table.scale.name.lower()}; per-share and share counts as filed)")
+    lines.append("Item | " + " | ".join(" ".join(str(c).split()) for c in df.columns))
+    for label, row in df.iterrows():
+        cells = ["" if pd.isna(v) else (format(v, ",.10g") if isinstance(v, (int, float)) else str(v))
+                 for v in row]
+        lines.append(f"{label} | " + " | ".join(cells))
+    return "\n".join(lines)
 
 
 def _extract_proxy_section(obj, section: str) -> Optional[str]:

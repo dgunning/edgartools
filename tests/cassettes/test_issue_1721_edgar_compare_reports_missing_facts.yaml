@@ -1,0 +1,78 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/api/xbrl/companyfacts/CIK0000104599.json
+  response:
+    body:
+      string: '<?xml version="1.0" encoding="UTF-8"?>
+
+        <Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message><Key>api/xbrl/companyfacts/CIK0000104599.json</Key><RequestId>498VHRVWTRGYW27S</RequestId><HostId>r1XFMsSUD6GBkNjMfRiK32VtOamQVuvV8JP0QnQK/0RMPHI0UoFiXxEHOBivqaVuVJMlEorbOOBlpszOyz0Ip8cyqqpr4rJ2</HostId></Error>'
+    headers:
+      connection:
+      - keep-alive
+      content-length:
+      - '331'
+      content-type:
+      - application/xml
+      date:
+      - Fri, 23 Oct 2026 11:47:13 GMT
+      strict-transport-security:
+      - max-age=31536000 ; preload
+      x-amz-apigw-id:
+      - FshiXEe1IAMEDSg=
+      x-amzn-requestid:
+      - f6386257-1dc5-4e84-bce3-ab1152cd1a0f
+      x-amzn-trace-id:
+      - Root=1-6adb4941-ff90c5c8596ecd81bfc46c25
+    status:
+      code: 404
+      message: Not Found
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/api/xbrl/companyfacts/CIK0000104599.json
+  response:
+    body:
+      string: '<?xml version="1.0" encoding="UTF-8"?>
+
+        <Error><Code>NoSuchKey</Code><Message>The specified key does not exist.</Message><Key>api/xbrl/companyfacts/CIK0000104599.json</Key><RequestId>498VHRVWTRGYW27S</RequestId><HostId>r1XFMsSUD6GBkNjMfRiK32VtOamQVuvV8JP0QnQK/0RMPHI0UoFiXxEHOBivqaVuVJMlEorbOOBlpszOyz0Ip8cyqqpr4rJ2</HostId></Error>'
+    headers:
+      connection:
+      - keep-alive
+      content-length:
+      - '331'
+      content-type:
+      - application/xml
+      date:
+      - Fri, 23 Oct 2026 11:47:13 GMT
+      strict-transport-security:
+      - max-age=31536000 ; preload
+      x-amz-apigw-id:
+      - FshiXEe1IAMEDSg=
+      x-amzn-requestid:
+      - f6386257-1dc5-4e84-bce3-ab1152cd1a0f
+      x-amzn-trace-id:
+      - Root=1-6adb4941-ff90c5c8596ecd81bfc46c25
+    status:
+      code: 404
+      message: Not Found
+version: 1

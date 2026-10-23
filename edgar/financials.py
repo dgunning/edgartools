@@ -1230,7 +1230,16 @@ class Financials:
         Get a dictionary of common financial metrics using standardized labels.
 
         Returns:
-            Dictionary containing available financial metrics
+            Dictionary containing available financial metrics. Two keys are
+            ratios computed from the others:
+
+            - ``current_ratio``: ``current_assets / current_liabilities``.
+            - ``debt_to_assets``: ``total_liabilities / total_assets``, a
+              fraction (0.82 means 82%). The numerator is all liabilities
+              (``us-gaap:Liabilities``), including payables, deferred revenue,
+              lease and tax liabilities, not only borrowings. For a
+              borrowings-only ratio, divide the filing's debt concepts by
+              ``total_assets``.
 
         Example:
             >>> company = Company('AAPL')

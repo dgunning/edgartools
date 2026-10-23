@@ -63,7 +63,7 @@ xbrl = filing.xbrl()
 
 repurchase_program_facts = (
     xbrl.facts.query()
-    .by_concept("StockRepurchasedDuringPeriodValue", exact=True)
+    .by_concept("us-gaap:StockRepurchasedDuringPeriodValue", exact=True)
     .with_dimensions()
     .to_dataframe()
 )
@@ -110,7 +110,7 @@ xbrls = XBRLS.from_filings(filings)
 # Facts across five years
 all_repurchase_facts = (
     xbrls.facts.query()
-    .by_concept("StockRepurchasedDuringPeriodValue", exact=True)
+    .by_concept("us-gaap:StockRepurchasedDuringPeriodValue", exact=True)
     .with_dimensions()
     .to_dataframe()
 )
@@ -132,14 +132,14 @@ The consequence is that a 10-K XBRL instance may contain both concepts, and both
 # Face statement concept only
 face_facts = (
     xbrl.facts.query()
-    .by_concept("StockRepurchasedAndRetiredDuringPeriodValue", exact=True)
+    .by_concept("us-gaap:StockRepurchasedAndRetiredDuringPeriodValue", exact=True)
     .to_dataframe()
 )
 
 # Note-level concept only
 note_facts = (
     xbrl.facts.query()
-    .by_concept("StockRepurchasedDuringPeriodValue", exact=True)
+    .by_concept("us-gaap:StockRepurchasedDuringPeriodValue", exact=True)
     .with_dimensions()
     .to_dataframe()
 )
@@ -179,7 +179,7 @@ xbrl = filing.xbrl()
 
 program_facts = (
     xbrl.facts.query()
-    .by_concept("StockRepurchasedDuringPeriodValue", exact=True)
+    .by_concept("us-gaap:StockRepurchasedDuringPeriodValue", exact=True)
     .with_dimensions()
     .to_dataframe()
 )

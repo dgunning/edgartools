@@ -11,7 +11,7 @@ patterns:
     when: Analyze institutional investor portfolio
     code: |
       filings = get_filings(form="13F-HR", year=2024, quarter=3)
-      filing = filings.filter(company="BERKSHIRE HATHAWAY")[0]
+      filing = filings.filter(cik=1067983)[0]   # Berkshire Hathaway; find a CIK with find_company("...")
       thirteenf = filing.obj()
 
   - name: Holdings Data

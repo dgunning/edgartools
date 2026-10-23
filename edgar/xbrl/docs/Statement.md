@@ -65,36 +65,70 @@ text_output = income.text()
 df = income.to_dataframe()
 
 # DataFrame structure:
-# - Index: Line item labels or concepts
-# - Columns: Period dates
-# - Values: Financial amounts
+# - Index: a plain RangeIndex (0, 1, 2, ...), one row per line item
+# - Columns: concept, label, standard_concept, then one column per period
+#   (such as '2023-09-30 (FY)'), then display metadata (level, abstract,
+#   dimension, balance, ...)
+# - Values: financial amounts in the period columns, text in the others
+```
+
+The period columns are the ones that start with a year. Most examples below work on `amounts()`, a label-indexed frame of just the periods, newest first:
+
+```python
+def amounts(statement, **kwargs):
+    """Label-indexed frame holding only the period columns of a statement."""
+    df = statement.to_dataframe(**kwargs)
+    periods = [c for c in df.columns if c[:4].isdigit()]
+    table = df.set_index("label")[periods]
+    # A label can repeat (Apple lists "Marketable securities" under current and
+    # non-current assets); keep the first row, which is the one listed first.
+    return table[~table.index.duplicated(keep="first")]
+
+df = amounts(income)
+df.loc["Net sales"]    # that line item across periods (labels are the company's own)
+df.columns.tolist()    # ['2023-09-30 (FY)', '2022-09-24 (FY)', '2021-09-25 (FY)']
 ```
 
 ### With Period Filter
 
-```python
-# Filter to specific periods
-df = income.to_dataframe(period_filter='2024')
+`period_filter` takes a period key, not a year: `duration_START_END` for flow statements and `instant_DATE` for balance sheets. The keys are listed in `xbrl.reporting_periods`.
 
-# Only includes periods matching the filter
+```python
+# Keep one fiscal year of the income statement
+df = income.to_dataframe(period_filter='duration_2022-09-25_2023-09-30')
+# Only the '2023-09-30 (FY)' period column remains
+
+# Keep one balance sheet date
+df = balance.to_dataframe(period_filter='instant_2023-09-30')
 ```
+
+A key that matches nothing, such as `'2023'`, returns an empty frame.
 
 ### Accessing Specific Data
 
 ```python
-# Convert to DataFrame for easy analysis
-df = income.to_dataframe()
+# Label-indexed frame of the period columns (see amounts() above)
+df = amounts(income)
 
 # Access specific line items
-revenue = df.loc['Revenue']
-net_income = df.loc['Net Income']
+revenue = df.loc['Net sales']
+net_income = df.loc['Net income']
 
 # Access specific periods
-current_period = df.iloc[:, 0]  # First column (most recent)
-prior_period = df.iloc[:, 1]    # Second column
+current_period = df.iloc[:, 0]  # First period column (most recent)
+prior_period = df.iloc[:, 1]    # Second period column
+current_period = df['2023-09-30 (FY)']  # Or by its header
 
 # Specific cell
-current_revenue = df.loc['Revenue', df.columns[0]]
+current_revenue = df.loc['Net sales', df.columns[0]]
+```
+
+To find a line item whatever the company calls it, use `standard_concept` on the full frame:
+
+```python
+full = income.to_dataframe()
+periods = [c for c in full.columns if c[:4].isdigit()]
+revenue = full.loc[full['standard_concept'] == 'Revenue', periods[0]].iloc[0]
 ```
 
 ## Statement Properties
@@ -102,10 +136,11 @@ current_revenue = df.loc['Revenue', df.columns[0]]
 ### Available Periods
 
 ```python
-# Get list of periods in the statement
-periods = statement.periods
+# The periods are the dated columns of the DataFrame
+df = statement.to_dataframe()
+periods = [c for c in df.columns if c[:4].isdigit()]
 
-# Each period is a date string (YYYY-MM-DD)
+# Each period column is headed by its end date, e.g. '2023-09-30 (FY)'
 for period in periods:
     print(f"Data available for: {period}")
 ```
@@ -114,8 +149,8 @@ for period in periods:
 
 ```python
 # Get statement information
-name = statement.name           # Statement display name
-concept = statement.concept     # XBRL concept identifier
+concept = statement.primary_concept   # XBRL concept identifier, e.g. 'us-gaap_IncomeStatementAbstract'
+role = statement.role_or_type         # Role URI, e.g. 'http://www.apple.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS'
 ```
 
 ### Raw Data Access
@@ -161,8 +196,8 @@ markdown_text = statement.text()
 ### Calculate Growth Rates
 
 ```python
-# Convert to DataFrame
-df = income.to_dataframe()
+# Label-indexed frame of the period columns
+df = amounts(income)
 
 # Calculate period-over-period growth
 if len(df.columns) >= 2:
@@ -186,15 +221,15 @@ if len(df.columns) >= 2:
 
 ```python
 # Get income statement metrics
-df = income.to_dataframe()
+df = amounts(income)
 
 # Extract key metrics from most recent period
 current = df.iloc[:, 0]
 
 metrics = {
-    'Revenue': current.get('Revenue', 0),
-    'Operating Income': current.get('Operating Income', 0),
-    'Net Income': current.get('Net Income', 0),
+    'Revenue': current.get('Net sales', 0),
+    'Operating Income': current.get('Operating income', 0),
+    'Net Income': current.get('Net income', 0),
 }
 
 # Calculate derived metrics
@@ -210,31 +245,31 @@ if metrics['Revenue'] > 0:
 ### Filter Line Items
 
 ```python
-# Convert to DataFrame
-df = balance.to_dataframe()
+# Label-indexed frame of the period columns
+df = amounts(balance)
 
 # Filter for specific items
 asset_items = df[df.index.str.contains('Asset', case=False)]
 liability_items = df[df.index.str.contains('Liabilit', case=False)]
 
 # Get subtotals
-if 'Current Assets' in df.index:
-    current_assets = df.loc['Current Assets']
+if 'Total current assets' in df.index:
+    current_assets = df.loc['Total current assets']
 ```
 
 ### Time Series Analysis
 
 ```python
 # Get multiple periods
-df = income.to_dataframe()
+df = amounts(income)
 
 # Plot revenue trend
-if 'Revenue' in df.index:
-    revenue_series = df.loc['Revenue']
+if 'Net sales' in df.index:
+    revenue_series = df.loc['Net sales']
 
-    # Convert to numeric and plot
+    # Oldest period first, then plot
     import matplotlib.pyplot as plt
-    revenue_series.plot(kind='line', title='Revenue Trend')
+    revenue_series[::-1].plot(kind='line', title='Revenue Trend')
     plt.show()
 ```
 
@@ -245,7 +280,7 @@ if 'Revenue' in df.index:
 ```python
 # Get income statement
 income = xbrl.statements.income_statement()
-df = income.to_dataframe()
+df = amounts(income)
 
 # Ensure we have at least 2 periods
 if len(df.columns) >= 2:
@@ -258,7 +293,7 @@ if len(df.columns) >= 2:
     })
 
     # Show key metrics
-    key_items = ['Revenue', 'Operating Income', 'Net Income']
+    key_items = ['Net sales', 'Operating income', 'Net income']
     for item in key_items:
         if item in comparison.index:
             print(f"\n{item}:")
@@ -272,7 +307,7 @@ if len(df.columns) >= 2:
 statement = xbrl.statements.income_statement()
 
 # Convert and save
-df = statement.to_dataframe()
+df = amounts(statement)
 df.to_csv('income_statement.csv')
 
 print(f"Exported {len(df)} line items across {len(df.columns)} periods")
@@ -285,15 +320,15 @@ print(f"Exported {len(df)} line items across {len(df.columns)} periods")
 income = xbrl.statements.income_statement()
 balance = xbrl.statements.balance_sheet()
 
-# Convert to DataFrames
-income_df = income.to_dataframe()
-balance_df = balance.to_dataframe()
+# Label-indexed frames of the period columns
+income_df = amounts(income)
+balance_df = amounts(balance)
 
 # Extract values (most recent period)
-revenue = income_df.loc['Revenue', income_df.columns[0]]
-net_income = income_df.loc['Net Income', income_df.columns[0]]
-total_assets = balance_df.loc['Assets', balance_df.columns[0]]
-total_equity = balance_df.loc['Equity', balance_df.columns[0]]
+revenue = income_df.loc['Net sales', income_df.columns[0]]
+net_income = income_df.loc['Net income', income_df.columns[0]]
+total_assets = balance_df.loc['Total assets', balance_df.columns[0]]
+total_equity = balance_df.loc['Total shareholders’ equity', balance_df.columns[0]]
 
 # Calculate ratios
 ratios = {
@@ -311,8 +346,8 @@ for ratio, value in ratios.items():
 ### Search for Specific Items
 
 ```python
-# Get statement as DataFrame
-df = income.to_dataframe()
+# Get statement as a label-indexed DataFrame
+df = amounts(income)
 
 # Search for items containing keywords
 research_costs = df[df.index.str.contains('Research', case=False)]
@@ -330,14 +365,16 @@ research_concepts = [
 
 ```python
 # Get statement
-df = balance.to_dataframe()
+df = amounts(balance)
 
 # Define categories (adjust based on actual labels)
 current_asset_categories = [
-    'Cash and Cash Equivalents',
-    'Accounts Receivable',
-    'Inventory',
-    'Other Current Assets'
+    'Cash and cash equivalents',
+    'Marketable securities',
+    'Accounts receivable, net',
+    'Vendor non-trade receivables',
+    'Inventories',
+    'Other current assets'
 ]
 
 # Sum categories
@@ -348,8 +385,8 @@ current_assets_sum = sum([
 ])
 
 # Verify against reported total
-if 'Current Assets' in df.index:
-    reported_total = df.loc['Current Assets', df.columns[0]]
+if 'Total current assets' in df.index:
+    reported_total = df.loc['Total current assets', df.columns[0]]
     print(f"Calculated: {current_assets_sum}")
     print(f"Reported: {reported_total}")
     print(f"Difference: {current_assets_sum - reported_total}")
@@ -361,7 +398,7 @@ if 'Current Assets' in df.index:
 
 ```python
 # Statement integrates seamlessly with pandas
-df = statement.to_dataframe()
+df = amounts(statement)
 
 # Use all pandas functionality
 summary = df.describe()
@@ -375,8 +412,8 @@ rolling_avg = df.T.rolling(window=4).mean()
 import numpy as np
 
 # Convert to numpy array for numerical operations
-df = statement.to_dataframe()
-values = df.values
+df = amounts(statement)
+values = df.dropna().to_numpy(dtype=float)
 
 # Numerical analysis
 mean_values = np.mean(values, axis=1)
@@ -388,10 +425,10 @@ growth_rates = np.diff(values, axis=1) / values[:, :-1]
 
 ```python
 # Prepare data for plotting
-df = income.to_dataframe()
+df = amounts(income)
 
 # Select key items
-plot_items = ['Revenue', 'Operating Income', 'Net Income']
+plot_items = ['Net sales', 'Operating income', 'Net income']
 plot_data = df.loc[plot_items].T
 
 # Plot with matplotlib
@@ -411,14 +448,14 @@ plt.show()
 
 ```python
 # Check if item exists before accessing
-df = statement.to_dataframe()
+df = amounts(statement)
 
 if 'Revenue' in df.index:
     revenue = df.loc['Revenue']
 else:
     print("Revenue not found in statement")
     # Try alternative names
-    for alt in ['Revenues', 'Total Revenue', 'Net Revenue']:
+    for alt in ['Revenues', 'Total Revenue', 'Net sales']:
         if alt in df.index:
             revenue = df.loc[alt]
             break
@@ -436,7 +473,7 @@ def find_item(df, possible_names):
     return None
 
 # Usage
-revenue_names = ['Revenue', 'Revenues', 'Total Revenue', 'Net Sales']
+revenue_names = ['Revenue', 'Revenues', 'Total Revenue', 'Net sales']
 revenue = find_item(df, revenue_names)
 
 if revenue is not None:
@@ -449,7 +486,7 @@ else:
 
 ```python
 # Check data availability
-df = statement.to_dataframe()
+df = amounts(statement)
 
 # Check for null values
 missing_data = df.isnull().sum()
@@ -460,14 +497,14 @@ if missing_data.any():
 # Fill missing with 0 or forward fill
 df_filled = df.fillna(0)  # Replace NaN with 0
 # or
-df_filled = df.fillna(method='ffill')  # Forward fill
+df_filled = df.ffill()  # Forward fill
 ```
 
 ## Best Practices
 
 1. **Always convert to DataFrame for analysis**:
    ```python
-   df = statement.to_dataframe()  # Easier to work with
+   df = amounts(statement)  # Label-indexed, period columns only
    ```
 
 2. **Check item names before accessing**:
@@ -487,16 +524,17 @@ df_filled = df.fillna(method='ffill')  # Forward fill
 
 4. **Validate calculated values**:
    ```python
-   # Check against reported totals
-   calculated = sum(components)
-   reported = df.loc['Total']
+   # Check against reported totals (current period)
+   df = amounts(income)
+   calculated = df.loc[['Products', 'Services']].iloc[:, 0].sum()
+   reported = df.loc['Net sales'].iloc[0]
    assert abs(calculated - reported) < 0.01, "Mismatch!"
    ```
 
 5. **Use period filters appropriately**:
    ```python
-   # Filter to specific years
-   df_2024 = statement.to_dataframe(period_filter='2024')
+   # Filter to one fiscal year (a period key, not a bare year)
+   df_fy = statement.to_dataframe(period_filter='duration_2022-09-25_2023-09-30')
    ```
 
 ## Performance Tips
@@ -505,20 +543,19 @@ df_filled = df.fillna(method='ffill')  # Forward fill
 
 ```python
 # Cache the DataFrame if using repeatedly
-df_cache = statement.to_dataframe()
+df_cache = amounts(statement)
 
 # Reuse cached version
-revenue = df_cache.loc['Revenue']
-net_income = df_cache.loc['Net Income']
+revenue = df_cache.loc['Net sales']
+net_income = df_cache.loc['Net income']
 # ... more operations
 ```
 
 ### Selective Period Loading
 
 ```python
-# If you only need recent data
-current_only = xbrl.current_period.income_statement()
-df = current_only.to_dataframe()  # Smaller, faster
+# If you only need one period, filter to its key
+df = amounts(income, period_filter='duration_2022-09-25_2023-09-30')  # Smaller, faster
 ```
 
 ## Troubleshooting
@@ -546,8 +583,8 @@ matching = df[df.index.str.contains('keyword', case=False)]
 raw = statement.get_raw_data()
 print(f"Statement has {len(raw)} items")
 
-# Check periods
-print(f"Available periods: {statement.periods}")
+# Check periods (the dated columns)
+print(f"Available periods: {[c for c in statement.to_dataframe().columns if c[:4].isdigit()]}")
 ```
 
 ### "Index error when accessing columns"

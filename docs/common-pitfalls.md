@@ -213,7 +213,7 @@ for filing in get_filings(form="13F-HR"):
         print(filing.company)
 
 # RIGHT: Filter by filer first
-filing = get_filings(form="13F-HR").filter(company="BERKSHIRE")[0]
+filing = get_filings(form="13F-HR").filter(cik=1067983)[0]  # Berkshire Hathaway's CIK
 holdings = filing.obj().holdings
 ```
 

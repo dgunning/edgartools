@@ -31,8 +31,10 @@ sharp_edges:
       # Pattern match (recommended)
       facts = xbrl.facts.get_facts_by_concept("Revenue")
 
-      # Exact match
-      facts = xbrl.facts.get_facts_by_concept("Revenues", exact=True)
+      # Exact match: the filed QName, prefix included. "Revenues" alone returns 0 rows,
+      # and a filer may tag another revenue concept (Apple tags
+      # us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax, not us-gaap:Revenues).
+      facts = xbrl.facts.get_facts_by_concept("us-gaap:Revenues", exact=True)
 
       # Or use Financials API which normalizes
       revenue = company.get_financials().get_revenue()
@@ -41,22 +43,24 @@ sharp_edges:
     summary: Segment breakdowns return multiple values per period
     severity: medium
     solution: |
+      facts = xbrl.facts.get_facts()                            # List of dicts
       segment_facts = xbrl.facts.get_facts_with_dimensions()    # Detail
-      totals_only = [f for f in facts if not f.get('dimensions')]  # Filter
+      totals_only = [f for f in facts if not f.get('is_dimensioned')]  # Filter
 
   - id: period-vs-instant
     summary: Income items are duration, balance sheet items are instant
     severity: medium
     solution: |
-      for fact in facts:
+      for fact in xbrl.facts.get_facts():
           if 'period_start' in fact:  # Duration (income, cash flow)
               print(f"{fact['period_start']} to {fact['period_end']}")
-          else:                        # Instant (balance sheet)
-              print(f"As of {fact['period_end']}")
+          else:                        # Instant (balance sheet): period_instant, no period_end
+              print(f"As of {fact['period_instant']}")
 
   - id: units-and-decimals
     summary: Check units and decimals for correct scale
     severity: low
     solution: |
       for fact in xbrl.facts.get_facts():
-          print(f"Value: {fact['value']}, Unit: {fact['unit']}")
+          # unit_ref is the filing's unit id ("usd", "shares", "number"); currency is set for money
+          print(f"Value: {fact['value']}, Unit: {fact['unit_ref']}, Currency: {fact.get('currency')}")

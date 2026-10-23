@@ -15,6 +15,7 @@ from edgar.ai.mcp.tools.base import (
     error,
     resolve_company,
     get_error_suggestions,
+    ERROR_SUGGESTIONS,
 )
 
 logger = logging.getLogger(__name__)
@@ -162,7 +163,10 @@ async def edgar_compare(
         for ident in companies_to_compare:
             company_data = await _compare_company(ident, metrics, periods, annual)
             if "error" in company_data:
-                errors.append({"identifier": ident, "error": company_data["error"]})
+                entry = {"identifier": ident, "error": company_data["error"]}
+                if "error_code" in company_data:
+                    entry["error_code"] = company_data["error_code"]
+                errors.append(entry)
             else:
                 comparisons.append(company_data)
 
@@ -243,6 +247,14 @@ async def _compare_company(
             result["financials_error"] = str(e)
             return result
 
+        if facts is None:
+            # ``Entity.get_facts()`` returns None when the SEC has no company facts.
+            return {
+                "error": f"No company facts found for CIK {company.cik}",
+                "error_code": "NO_FACTS_DATA",
+                "suggestions": ERROR_SUGGESTIONS["CompanyFactsNotFoundError"],
+            }
+
         extracted = {}
         # Track raw values for derived metric computation
         _revenue_val = None
@@ -298,17 +310,18 @@ async def _compare_company(
                 if _gross_profit_val is not None:
                     extracted["gross_margin"] = f"{_gross_profit_val / _revenue_val * 100:.1f}%"
 
-        # Compute revenue growth if requested (uses time_series for YoY)
+        # Revenue growth: one concept, unit and period length, a year apart.
+        # The first two rows of time_series("Revenue") mixed concepts and
+        # periods, e.g. NVIDIA -25.2% from deferred revenue (GH #1671).
         if "growth" in metrics:
             try:
-                ts = facts.time_series("Revenue", periods=(periods + 1) * 5)
-                if ts is not None and not ts.empty:
-                    # Filter to annual periods only
-                    annual_ts = ts[ts['fiscal_period'] == 'FY'] if annual else ts
-                    if len(annual_ts) >= 2:
-                        values = annual_ts['numeric_value'].tolist()
-                        if len(values) >= 2 and values[0] is not None and values[1] is not None and values[1] != 0:
-                            extracted["revenue_growth_yoy"] = f"{(values[0] - values[1]) / abs(values[1]) * 100:.1f}%"
+                growth = facts._revenue_growth_yoy(annual_only=annual)
+                if growth is None:
+                    extracted["revenue_growth_yoy"] = "not available"
+                else:
+                    extracted["revenue_growth_yoy"] = f"{growth['value']:.1f}%"
+                    extracted["revenue_growth_period"] = (
+                        f"{growth['current_period_end']} vs {growth['prior_period_end']}")
             except Exception as e:
                 logger.debug(f"Could not compute growth for {identifier}: {e}")
 

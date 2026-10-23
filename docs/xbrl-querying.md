@@ -65,13 +65,17 @@ You can filter facts by their concept names, which are unique identifiers for fi
 # Find revenue-related facts
 revenue_query = xb.query().by_concept("us-gaap:Revenues")
 ```
-The namespace e.g. `us-gaap:` is optional, so you can use just the concept name like `Revenues`.
+The namespace e.g. `us-gaap:` is optional for the default partial match, so you can use just the concept name like `Revenues`.
 
 Querying by concept does a partial regex match on the concept name
 
 `by_concept('RevenueFrom')` matches `us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax` and `us-gaap:RevenueFromContractWithCustomerTextBlock`
 
-Use `exact=True` to match the full concept name exactly.
+Use `exact=True` to match the full concept name exactly. An exact match needs the prefix: `by_concept('us-gaap:Assets', exact=True)` finds the filed concept, and `by_concept('Assets', exact=True)` returns no rows.
+
+```python
+assets = xb.query().by_concept("us-gaap:Assets", exact=True)
+```
 
 
 ### By Label

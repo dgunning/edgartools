@@ -19,6 +19,7 @@ from edgar.ai.mcp.tools.base import (
     format_filing_summary,
     get_error_suggestions,
     truncate_text,
+    ERROR_SUGGESTIONS,
 )
 
 logger = logging.getLogger(__name__)
@@ -103,6 +104,13 @@ async def edgar_company(
         # Financials - income, balance, cash flow
         if "financials" in include:
             result["financials"] = _build_financials(company, periods, period)
+            if "error_code" in result["financials"]:
+                # Same top-level ``errors`` list that edgar_compare uses for a company it could not read
+                result["errors"] = [{
+                    "section": "financials",
+                    "error": result["financials"]["error"],
+                    "error_code": result["financials"]["error_code"],
+                }]
 
         # Recent filings
         if "filings" in include:
@@ -118,7 +126,8 @@ async def edgar_company(
             next_steps.append("Add 'financials' to include for financial statements")
         if "ownership" not in include:
             next_steps.append("Add 'ownership' to include for insider/institutional data")
-        next_steps.append("Use edgar_compare to compare with peer companies")
+        if "errors" not in result:
+            next_steps.append("Use edgar_compare to compare with peer companies")
         next_steps.append("Use edgar_read to read specific filing sections (risk factors, MD&A, etc.)")
 
         return success(result, next_steps=next_steps)
@@ -176,6 +185,12 @@ def _build_financials(company, periods: int, period: str) -> dict:
         # Annual/Quarterly mode: use EntityFacts directly
         annual = (period == 'annual')
         facts = company.get_facts()
+        if facts is None:
+            # ``Entity.get_facts()`` returns None when the SEC has no company facts.
+            financials["error"] = f"No company facts found for CIK {company.cik}"
+            financials["error_code"] = "NO_FACTS_DATA"
+            financials["suggestions"] = ERROR_SUGGESTIONS["CompanyFactsNotFoundError"]
+            return financials
 
         # Income Statement
         try:

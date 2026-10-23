@@ -16,6 +16,7 @@ from edgar.ai.mcp.tools.base import (
     error,
     resolve_company,
     get_error_suggestions,
+    ERROR_SUGGESTIONS,
 )
 
 logger = logging.getLogger(__name__)
@@ -206,6 +207,13 @@ async def edgar_trends(
     try:
         company = resolve_company(identifier)
         facts = company.get_facts()
+        if facts is None:
+            # ``Entity.get_facts()`` returns None when the SEC has no company facts.
+            return error(
+                f"No company facts found for CIK {company.cik}",
+                suggestions=ERROR_SUGGESTIONS["CompanyFactsNotFoundError"],
+                error_code="NO_FACTS_DATA"
+            )
 
         trends = {}
 

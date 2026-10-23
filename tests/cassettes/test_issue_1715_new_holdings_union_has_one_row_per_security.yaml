@@ -1,0 +1,944 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1067983/000095012325005701/0000950123-25-005701.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0000950123-25-005701.txt : 20250515\n<SEC-HEADER>0000950123-25-005701.hdr.sgml
+        : 20250515\n<ACCEPTANCE-DATETIME>20250515160643\nACCESSION NUMBER:\t\t0000950123-25-005701\nCONFORMED
+        SUBMISSION TYPE:\t13F-HR\nPUBLIC DOCUMENT COUNT:\t\t2\nCONFORMED PERIOD OF
+        REPORT:\t20250331\nFILED AS OF DATE:\t\t20250515\nDATE AS OF CHANGE:\t\t20250515\nEFFECTIVENESS
+        DATE:\t\t20250515\n\nFILER:\n\n\tCOMPANY DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tBERKSHIRE
+        HATHAWAY INC\n\t\tCENTRAL INDEX KEY:\t\t\t0001067983\n\t\tSTANDARD INDUSTRIAL
+        CLASSIFICATION:\tFIRE, MARINE & CASUALTY INSURANCE [6331]\n\t\tORGANIZATION
+        NAME:           \t02 Finance\n\t\tEIN:\t\t\t\t470813844\n\t\tSTATE OF INCORPORATION:\t\t\tDE\n\t\tFISCAL
+        YEAR END:\t\t\t1231\n\n\tFILING VALUES:\n\t\tFORM TYPE:\t\t13F-HR\n\t\tSEC
+        ACT:\t\t1934 Act\n\t\tSEC FILE NUMBER:\t028-04545\n\t\tFILM NUMBER:\t\t25952817\n\n\tBUSINESS
+        ADDRESS:\t\n\t\tSTREET 1:\t\t3555 FARNAM STREET\n\t\tCITY:\t\t\tOMAHA\n\t\tSTATE:\t\t\tNE\n\t\tZIP:\t\t\t68131\n\t\tBUSINESS
+        PHONE:\t\t4023461400\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\t3555 FARNAM STREET\n\t\tCITY:\t\t\tOMAHA\n\t\tSTATE:\t\t\tNE\n\t\tZIP:\t\t\t68131\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tNBH INC\n\t\tDATE OF NAME CHANGE:\t19980810\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>13F-HR\n<SEQUENCE>1\n<FILENAME>primary_doc.xml\n<TEXT>\n<XML>\n<?xml
+        version=\"1.0\" encoding=\"UTF-8\"?>\n<edgarSubmission xsi:schemaLocation=\"http://www.sec.gov/edgar/thirteenffiler
+        eis_13F_Filer.xsd\" xmlns=\"http://www.sec.gov/edgar/thirteenffiler\" xmlns:ns1=\"http://www.sec.gov/edgar/common\"
+        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n  <schemaVersion>X0202</schemaVersion>\n
+        \ <headerData>\n    <submissionType>13F-HR</submissionType>\n    <filerInfo>\n
+        \     <liveTestFlag>LIVE</liveTestFlag>\n      <flags>\n        <confirmingCopyFlag>false</confirmingCopyFlag>\n
+        \       <returnCopyFlag>true</returnCopyFlag>\n        <overrideInternetFlag>false</overrideInternetFlag>\n
+        \     </flags>\n      <filer>\n        <credentials>\n          <cik>0001067983</cik>\n
+        \         <ccc>XXXXXXXX</ccc>\n        </credentials>\n      </filer>\n      <periodOfReport>03-31-2025</periodOfReport>\n
+        \   </filerInfo>\n  </headerData>\n  <formData>\n    <coverPage>\n      <reportCalendarOrQuarter>03-31-2025</reportCalendarOrQuarter>\n
+        \     <filingManager>\n        <name>Berkshire Hathaway Inc</name>\n        <address>\n
+        \         <ns1:street1>3555 Farnam Street</ns1:street1>\n          <ns1:city>Omaha</ns1:city>\n
+        \         <ns1:stateOrCountry>NE</ns1:stateOrCountry>\n          <ns1:zipCode>68131</ns1:zipCode>\n
+        \       </address>\n      </filingManager>\n      <reportType>13F HOLDINGS
+        REPORT</reportType>\n      <form13FFileNumber>028-04545</form13FFileNumber>\n
+        \     <provideInfoForInstruction5>N</provideInfoForInstruction5>\n    </coverPage>\n
+        \   <signatureBlock>\n      <name>Marc D. Hamburg</name>\n      <title>Senior
+        Vice President</title>\n      <phone>402-346-1400</phone>\n      <signature>Marc
+        D. Hamburg</signature>\n      <city>Omaha</city>\n      <stateOrCountry>NE</stateOrCountry>\n
+        \     <signatureDate>05-15-2025</signatureDate>\n    </signatureBlock>\n    <summaryPage>\n
+        \     <otherIncludedManagersCount>14</otherIncludedManagersCount>\n      <tableEntryTotal>110</tableEntryTotal>\n
+        \     <tableValueTotal>258701144516</tableValueTotal>\n      <isConfidentialOmitted>true</isConfidentialOmitted>\n
+        \     <otherManagers2Info>\n        <otherManager2>\n          <sequenceNumber>1</sequenceNumber>\n
+        \         <otherManager>\n            <form13FFileNumber>28-2226</form13FFileNumber>\n
+        \           <name>Berkshire Hathaway Homestate Insurance Co.</name>\n          </otherManager>\n
+        \       </otherManager2>\n        <otherManager2>\n          <sequenceNumber>2</sequenceNumber>\n
+        \         <otherManager>\n            <form13FFileNumber>28-5678</form13FFileNumber>\n
+        \           <name>Berkshire Hathaway Life Insurance Co of Nebraska</name>\n
+        \         </otherManager>\n        </otherManager2>\n        <otherManager2>\n
+        \         <sequenceNumber>3</sequenceNumber>\n          <otherManager>\n            <form13FFileNumber>28-14389</form13FFileNumber>\n
+        \           <name>BH Finance LLC</name>\n          </otherManager>\n        </otherManager2>\n
+        \       <otherManager2>\n          <sequenceNumber>4</sequenceNumber>\n          <otherManager>\n
+        \           <form13FFileNumber>28-554</form13FFileNumber>\n            <name>Buffett
+        Warren E</name>\n          </otherManager>\n        </otherManager2>\n        <otherManager2>\n
+        \         <sequenceNumber>5</sequenceNumber>\n          <otherManager>\n            <form13FFileNumber>28-1517</form13FFileNumber>\n
+        \           <name>Columbia Insurance Co</name>\n          </otherManager>\n
+        \       </otherManager2>\n        <otherManager2>\n          <sequenceNumber>6</sequenceNumber>\n
+        \         <otherManager>\n            <form13FFileNumber>28-06102</form13FFileNumber>\n
+        \           <name>Cypress Insurance Co</name>\n          </otherManager>\n
+        \       </otherManager2>\n        <otherManager2>\n          <sequenceNumber>7</sequenceNumber>\n
+        \         <otherManager>\n            <form13FFileNumber>28-04922</form13FFileNumber>\n
+        \           <name>General Re Corp</name>\n          </otherManager>\n        </otherManager2>\n
+        \       <otherManager2>\n          <sequenceNumber>8</sequenceNumber>\n          <otherManager>\n
+        \           <form13FFileNumber>28-852</form13FFileNumber>\n            <name>GEICO
+        Corp</name>\n          </otherManager>\n        </otherManager2>\n        <otherManager2>\n
+        \         <sequenceNumber>9</sequenceNumber>\n          <otherManager>\n            <form13FFileNumber>28-12941</form13FFileNumber>\n
+        \           <name>Medical Protective Corp</name>\n          </otherManager>\n
+        \       </otherManager2>\n        <otherManager2>\n          <sequenceNumber>10</sequenceNumber>\n
+        \         <otherManager>\n            <form13FFileNumber>28-1066</form13FFileNumber>\n
+        \           <name>National Fire &amp; Marine Insurance Co</name>\n          </otherManager>\n
+        \       </otherManager2>\n        <otherManager2>\n          <sequenceNumber>11</sequenceNumber>\n
+        \         <otherManager>\n            <form13FFileNumber>28-718</form13FFileNumber>\n
+        \           <name>National Indemnity Co</name>\n          </otherManager>\n
+        \       </otherManager2>\n        <otherManager2>\n          <sequenceNumber>12</sequenceNumber>\n
+        \         <otherManager>\n            <form13FFileNumber>28-5006</form13FFileNumber>\n
+        \           <name>National Liability &amp; Fire Insurance Co</name>\n          </otherManager>\n
+        \       </otherManager2>\n        <otherManager2>\n          <sequenceNumber>13</sequenceNumber>\n
+        \         <otherManager>\n            <form13FFileNumber>28-11222</form13FFileNumber>\n
+        \           <name>Nebraska Furniture Mart</name>\n          </otherManager>\n
+        \       </otherManager2>\n        <otherManager2>\n          <sequenceNumber>14</sequenceNumber>\n
+        \         <otherManager>\n            <form13FFileNumber>28-12947</form13FFileNumber>\n
+        \           <name>U.S. Investment Corp</name>\n          </otherManager>\n
+        \       </otherManager2>\n      </otherManagers2Info>\n    </summaryPage>\n
+        \ </formData>\n</edgarSubmission>\n</XML>\n</TEXT>\n</DOCUMENT>\n<DOCUMENT>\n<TYPE>INFORMATION
+        TABLE\n<SEQUENCE>2\n<FILENAME>form13fInfoTable.xml\n<DESCRIPTION>INFORMATION
+        TABLE FOR FORM 13F\n<TEXT>\n<XML>\n<informationTable xmlns=\"http://www.sec.gov/edgar/document/thirteenf/informationtable\"
+        xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\">\n   <infoTable>\n
+        \      <nameOfIssuer>ALLY FINL INC</nameOfIssuer>\n       <titleOfClass>COM</titleOfClass>\n
+        \      <cusip>02005N100</cusip>\n       <value>463886547</value>\n       <shrsOrPrnAmt>\n
+        \          <sshPrnamt>12719675</sshPrnamt>\n           <sshPrnamtType>SH</sshPrnamtType>\n
+        \      </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>12719675</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>ALLY FINL INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>02005N100</cusip>\n
+        \      <value>102257321</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>2803875</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>2803875</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>ALLY FINL INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>02005N100</cusip>\n
+        \      <value>154202454</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>4228200</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,5</otherManager>\n       <votingAuthority>\n           <Sole>4228200</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>ALLY FINL INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>02005N100</cusip>\n
+        \      <value>114406390</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3137000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>3137000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>ALLY FINL INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>02005N100</cusip>\n
+        \      <value>176378038</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>4836250</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,10</otherManager>\n       <votingAuthority>\n           <Sole>4836250</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>ALLY FINL INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>02005N100</cusip>\n
+        \      <value>46499250</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1275000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>1275000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>AMAZON COM INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>023135106</cusip>\n
+        \      <value>1469568240</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>7724000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>7724000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>AMAZON COM INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>023135106</cusip>\n
+        \      <value>433031760</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>2276000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>2276000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>AMERICAN EXPRESS CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>025816109</cusip>\n
+        \      <value>309391895</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1149942</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>1149942</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>AMERICAN EXPRESS CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>025816109</cusip>\n
+        \      <value>40104874157</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>149061045</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>149061045</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>AMERICAN EXPRESS CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>025816109</cusip>\n
+        \      <value>376592783</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1399713</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,13</otherManager>\n       <votingAuthority>\n           <Sole>1399713</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>153713960</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>692000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>692000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>852979200</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3840000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>1,2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>3840000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>7552420</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>34000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>34000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>7713242120</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>34724000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,5</otherManager>\n       <votingAuthority>\n           <Sole>34724000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>605082120</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>2724000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,6</otherManager>\n       <votingAuthority>\n           <Sole>2724000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>3450123160</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>15532000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,7</otherManager>\n       <votingAuthority>\n           <Sole>15532000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>13670543924</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>61542988</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>61542988</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>1600224520</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>7204000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,5,9</otherManager>\n       <votingAuthority>\n           <Sole>7204000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>3214665360</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>14472000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,10</otherManager>\n       <votingAuthority>\n           <Sole>14472000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>33929693776</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>152747012</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>152747012</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>602416560</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>2712000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,12</otherManager>\n       <votingAuthority>\n           <Sole>2712000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>APPLE INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>037833100</cusip>\n
+        \      <value>838762880</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3776000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,14</otherManager>\n       <votingAuthority>\n           <Sole>3776000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>ATLANTA BRAVES HLDGS
+        INC</nameOfIssuer>\n       <titleOfClass>COM SER C</titleOfClass>\n       <cusip>047726302</cusip>\n
+        \      <value>4329762</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>108217</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>108217</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>ATLANTA BRAVES HLDGS
+        INC</nameOfIssuer>\n       <titleOfClass>COM SER C</titleOfClass>\n       <cusip>047726302</cusip>\n
+        \      <value>3875649</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>96867</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>96867</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>ATLANTA BRAVES HLDGS
+        INC</nameOfIssuer>\n       <titleOfClass>COM SER C</titleOfClass>\n       <cusip>047726302</cusip>\n
+        \      <value>597309</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>14929</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>14929</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>ATLANTA BRAVES HLDGS
+        INC</nameOfIssuer>\n       <titleOfClass>COM SER C</titleOfClass>\n       <cusip>047726302</cusip>\n
+        \      <value>145316</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3632</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>3632</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>BANK AMER CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>060505104</cusip>\n
+        \      <value>163581600</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3920000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>3920000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>BANK AMER CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>060505104</cusip>\n
+        \      <value>496587000</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>11900000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>1,2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>11900000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>BANK AMER CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>060505104</cusip>\n
+        \      <value>6071715</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>145500</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>145500</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>BANK AMER CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>060505104</cusip>\n
+        \      <value>5842200000</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>140000000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>3,4,5</otherManager>\n       <votingAuthority>\n           <Sole>140000000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>BANK AMER CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>060505104</cusip>\n
+        \      <value>233688000</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>5600000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,5</otherManager>\n       <votingAuthority>\n           <Sole>5600000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>BANK AMER CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>060505104</cusip>\n
+        \      <value>87633000</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>2100000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,6</otherManager>\n       <votingAuthority>\n           <Sole>2100000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>BANK AMER CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>060505104</cusip>\n
+        \      <value>876330000</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>21000000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,7</otherManager>\n       <votingAuthority>\n           <Sole>21000000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>BANK AMER CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>060505104</cusip>\n
+        \      <value>12969684000</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>310800000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>310800000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>BANK AMER CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>060505104</cusip>\n
+        \      <value>5246295600</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>125720000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>125720000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>BANK AMER CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>060505104</cusip>\n
+        \      <value>24538534</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>588031</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,12</otherManager>\n       <votingAuthority>\n           <Sole>588031</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>BANK AMER CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>060505104</cusip>\n
+        \      <value>408954000</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>9800000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,14</otherManager>\n       <votingAuthority>\n           <Sole>9800000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CAPITAL ONE FINL CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>14040H105</cusip>\n
+        \      <value>347700891</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1939213</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>1939213</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CAPITAL ONE FINL CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>14040H105</cusip>\n
+        \      <value>551130009</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3073787</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,5</otherManager>\n       <votingAuthority>\n           <Sole>3073787</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CAPITAL ONE FINL CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>14040H105</cusip>\n
+        \      <value>383164100</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>2137000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>2137000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CHARTER COMMUNICATIONS
+        INC N</nameOfIssuer>\n       <titleOfClass>CL A</titleOfClass>\n       <cusip>16119P108</cusip>\n
+        \      <value>731258969</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1984259</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>1984259</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CHEVRON CORP NEW</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>166764100</cusip>\n
+        \      <value>2938281727</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>17564001</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,5</otherManager>\n       <votingAuthority>\n           <Sole>17564001</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CHEVRON CORP NEW</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>166764100</cusip>\n
+        \      <value>10271606</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>61400</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,6</otherManager>\n       <votingAuthority>\n           <Sole>61400</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CHEVRON CORP NEW</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>166764100</cusip>\n
+        \      <value>349970680</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>2092000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,7</otherManager>\n       <votingAuthority>\n           <Sole>2092000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CHEVRON CORP NEW</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>166764100</cusip>\n
+        \      <value>5439803726</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>32517208</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>32517208</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CHEVRON CORP NEW</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>166764100</cusip>\n
+        \      <value>478181736</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>2858400</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,5,9</otherManager>\n       <votingAuthority>\n           <Sole>2858400</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CHEVRON CORP NEW</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>166764100</cusip>\n
+        \      <value>10301638737</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>61579525</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>61579525</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CHEVRON CORP NEW</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>166764100</cusip>\n
+        \      <value>324208020</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1938000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,14</otherManager>\n       <votingAuthority>\n           <Sole>1938000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>COCA COLA CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>191216100</cusip>\n
+        \      <value>57296000</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>800000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>800000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>COCA COLA CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>191216100</cusip>\n
+        \      <value>26604753</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>371471</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>1,2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>371471</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>COCA COLA CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>191216100</cusip>\n
+        \      <value>6087700</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>85000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>85000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>COCA COLA CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>191216100</cusip>\n
+        \      <value>5749882784</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>80283200</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,5</otherManager>\n       <votingAuthority>\n           <Sole>80283200</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>COCA COLA CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>191216100</cusip>\n
+        \      <value>130634880</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1824000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,6</otherManager>\n       <votingAuthority>\n           <Sole>1824000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>COCA COLA CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>191216100</cusip>\n
+        \      <value>1032130144</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>14411200</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>14411200</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>COCA COLA CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>191216100</cusip>\n
+        \      <value>1073612448</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>14990400</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,10</otherManager>\n       <votingAuthority>\n           <Sole>14990400</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>COCA COLA CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>191216100</cusip>\n
+        \      <value>20248601851</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>282722729</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>282722729</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>COCA COLA CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>191216100</cusip>\n
+        \      <value>254394240</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3552000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,12</otherManager>\n       <votingAuthority>\n           <Sole>3552000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>COCA COLA CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>191216100</cusip>\n
+        \      <value>68755200</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>960000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,13</otherManager>\n       <votingAuthority>\n           <Sole>960000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CONSTELLATION BRANDS
+        INC</nameOfIssuer>\n       <titleOfClass>CL A</titleOfClass>\n       <cusip>21036P108</cusip>\n
+        \      <value>73408000</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>400000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>400000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CONSTELLATION BRANDS
+        INC</nameOfIssuer>\n       <titleOfClass>CL A</titleOfClass>\n       <cusip>21036P108</cusip>\n
+        \      <value>2130483680</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>11609000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>11609000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>DAVITA INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>23918K108</cusip>\n
+        \      <value>2574804501</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>16832088</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>16832088</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>DAVITA INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>23918K108</cusip>\n
+        \      <value>2800940511</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>18310391</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>18310391</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>DIAGEO P L C</nameOfIssuer>\n
+        \      <titleOfClass>SPON ADR NEW</titleOfClass>\n       <cusip>25243Q205</cusip>\n
+        \      <value>23865923</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>227750</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,7</otherManager>\n       <votingAuthority>\n           <Sole>227750</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>DOMINOS PIZZA INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>25754A201</cusip>\n
+        \      <value>1204040643</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>2620613</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>2620613</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>HEICO CORP NEW</nameOfIssuer>\n
+        \      <titleOfClass>CL A</titleOfClass>\n       <cusip>422806208</cusip>\n
+        \      <value>245165705</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1162088</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>1162088</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>JEFFERIES FINL GROUP
+        INC</nameOfIssuer>\n       <titleOfClass>COM</titleOfClass>\n       <cusip>47233W109</cusip>\n
+        \      <value>23225702</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>433558</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,10</otherManager>\n       <votingAuthority>\n           <Sole>433558</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>KRAFT HEINZ CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>500754106</cusip>\n
+        \      <value>9909067512</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>325634818</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>325634818</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>KROGER CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>501044101</cusip>\n
+        \      <value>1124133922</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>16607090</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>16607090</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>KROGER CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>501044101</cusip>\n
+        \      <value>52021863</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>768531</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>1,2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>768531</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>KROGER CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>501044101</cusip>\n
+        \      <value>363300285</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>5367119</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>5367119</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>KROGER CO</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>501044101</cusip>\n
+        \      <value>1845043929</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>27257260</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>27257260</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LENNAR CORP</nameOfIssuer>\n
+        \      <titleOfClass>CL B</titleOfClass>\n       <cusip>526057302</cusip>\n
+        \      <value>16641028</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>152572</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>152572</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM LBTY LIV S C</titleOfClass>\n       <cusip>531229722</cusip>\n
+        \      <value>248001117</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3639582</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>3639582</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM LBTY LIV S C</titleOfClass>\n       <cusip>531229722</cusip>\n
+        \      <value>9754718</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>143157</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>143157</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM LBTY LIV S C</titleOfClass>\n       <cusip>531229722</cusip>\n
+        \      <value>376790078</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>5529646</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>5529646</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM LBTY LIV S C</titleOfClass>\n       <cusip>531229722</cusip>\n
+        \      <value>11080927</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>162620</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,10</otherManager>\n       <votingAuthority>\n           <Sole>162620</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM LBTY LIV S C</titleOfClass>\n       <cusip>531229722</cusip>\n
+        \      <value>98302580</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1442656</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>1442656</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM LBTY LIV S A</titleOfClass>\n       <cusip>531229748</cusip>\n
+        \      <value>68026574</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1011698</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>1011698</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM LBTY LIV S A</titleOfClass>\n       <cusip>531229748</cusip>\n
+        \      <value>220868271</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3284775</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>3284775</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM LBTY LIV S A</titleOfClass>\n       <cusip>531229748</cusip>\n
+        \      <value>15690252</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>233347</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,10</otherManager>\n       <votingAuthority>\n           <Sole>233347</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM LBTY LIV S A</titleOfClass>\n       <cusip>531229748</cusip>\n
+        \      <value>30713080</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>456768</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>456768</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM SER C FRMLA</titleOfClass>\n       <cusip>531229854</cusip>\n
+        \      <value>301065448</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3344800</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>3344800</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM SER C FRMLA</titleOfClass>\n       <cusip>531229854</cusip>\n
+        \      <value>3760618</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>41780</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>41780</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY MEDIA CORP DEL</nameOfIssuer>\n
+        \      <titleOfClass>COM SER C FRMLA</titleOfClass>\n       <cusip>531229854</cusip>\n
+        \      <value>11289054</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>125420</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>125420</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LOUISIANA PAC CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>546347105</cusip>\n
+        \      <value>121402930</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1319884</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>1319884</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LOUISIANA PAC CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>546347105</cusip>\n
+        \      <value>399644730</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>4344909</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>4344909</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>MASTERCARD INC</nameOfIssuer>\n
+        \      <titleOfClass>CL A</titleOfClass>\n       <cusip>57636Q104</cusip>\n
+        \      <value>2185161502</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3986648</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>3986648</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>MOODYS CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>615369105</cusip>\n
+        \      <value>33576249</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>72100</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>1,2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>72100</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>MOODYS CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>615369105</cusip>\n
+        \      <value>5576138530</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>11973928</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>11973928</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>MOODYS CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>615369105</cusip>\n
+        \      <value>5878754138</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>12623750</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>12623750</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>NVR INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>62944T105</cusip>\n
+        \      <value>80499662</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>11112</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,5</otherManager>\n       <votingAuthority>\n           <Sole>11112</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>OCCIDENTAL PETE CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>674599105</cusip>\n
+        \      <value>13077509034</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>264941431</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>264941431</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>POOL CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>73278L105</cusip>\n
+        \      <value>124156500</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>390000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>390000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>POOL CORP</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>73278L105</cusip>\n
+        \      <value>341907900</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1074000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>1074000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>SIRIUS XM HOLDINGS INC</nameOfIssuer>\n
+        \      <titleOfClass>COMMON STOCK</titleOfClass>\n       <cusip>829933100</cusip>\n
+        \      <value>360379345</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>15984890</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>15984890</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>SIRIUS XM HOLDINGS INC</nameOfIssuer>\n
+        \      <titleOfClass>COMMON STOCK</titleOfClass>\n       <cusip>829933100</cusip>\n
+        \      <value>2167030382</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>96120221</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>96120221</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>SIRIUS XM HOLDINGS INC</nameOfIssuer>\n
+        \      <titleOfClass>COMMON STOCK</titleOfClass>\n       <cusip>829933100</cusip>\n
+        \      <value>29905740</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1326491</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,10</otherManager>\n       <votingAuthority>\n           <Sole>1326491</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>SIRIUS XM HOLDINGS INC</nameOfIssuer>\n
+        \      <titleOfClass>COMMON STOCK</titleOfClass>\n       <cusip>829933100</cusip>\n
+        \      <value>143050054</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>6345090</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>6345090</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>T-MOBILE US INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>872590104</cusip>\n
+        \      <value>1035673603</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>3883145</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>3883145</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>VERISIGN INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>92343E102</cusip>\n
+        \      <value>1338643055</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>5272947</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>5272947</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>VERISIGN INC</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>92343E102</cusip>\n
+        \      <value>2035258781</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>8016933</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>8016933</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>VISA INC</nameOfIssuer>\n
+        \      <titleOfClass>COM CL A</titleOfClass>\n       <cusip>92826C839</cusip>\n
+        \      <value>2907927832</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>8297460</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>8297460</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>AON PLC</nameOfIssuer>\n
+        \      <titleOfClass>SHS CL A</titleOfClass>\n       <cusip>G0403H108</cusip>\n
+        \      <value>919503360</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>2304000</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>2304000</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>AON PLC</nameOfIssuer>\n
+        \      <titleOfClass>SHS CL A</titleOfClass>\n       <cusip>G0403H108</cusip>\n
+        \      <value>17482537</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>43806</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>2,4,11</otherManager>\n       <votingAuthority>\n           <Sole>43806</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>AON PLC</nameOfIssuer>\n
+        \      <titleOfClass>SHS CL A</titleOfClass>\n       <cusip>G0403H108</cusip>\n
+        \      <value>699283103</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1752194</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>1752194</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY LATIN AMERICA
+        LTD</nameOfIssuer>\n       <titleOfClass>COM CL A</titleOfClass>\n       <cusip>G9001E102</cusip>\n
+        \      <value>6365492</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1005607</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4</otherManager>\n       <votingAuthority>\n           <Sole>1005607</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY LATIN AMERICA
+        LTD</nameOfIssuer>\n       <titleOfClass>COM CL A</titleOfClass>\n       <cusip>G9001E102</cusip>\n
+        \      <value>10287421</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1625185</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>1625185</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>LIBERTY LATIN AMERICA
+        LTD</nameOfIssuer>\n       <titleOfClass>COM CL C</titleOfClass>\n       <cusip>G9001E128</cusip>\n
+        \      <value>7973764</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>1284020</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,8,11</otherManager>\n       <votingAuthority>\n           <Sole>1284020</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n   <infoTable>\n       <nameOfIssuer>CHUBB LIMITED</nameOfIssuer>\n
+        \      <titleOfClass>COM</titleOfClass>\n       <cusip>H1467J104</cusip>\n
+        \      <value>8163932430</value>\n       <shrsOrPrnAmt>\n           <sshPrnamt>27033784</sshPrnamt>\n
+        \          <sshPrnamtType>SH</sshPrnamtType>\n       </shrsOrPrnAmt>\n       <investmentDiscretion>DFND</investmentDiscretion>\n
+        \      <otherManager>4,11</otherManager>\n       <votingAuthority>\n           <Sole>27033784</Sole>\n
+        \          <Shared>0</Shared>\n           <None>0</None>\n       </votingAuthority>\n
+        \  </infoTable>\n</informationTable>\n</XML>\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      cache-control:
+      - no-cache, no-store, no-transform, proxy-revalidate
+      connection:
+      - keep-alive
+      content-length:
+      - '68700'
+      content-security-policy:
+      - frame-ancestors 'self'
+      content-type:
+      - text/plain
+      date:
+      - Fri, 23 Oct 2026 02:51:50 GMT
+      etag:
+      - '"f065cf590bddeae82465390bf0f6088c-gzip"'
+      last-modified:
+      - Thu, 15 May 2025 20:07:10 GMT
+      permissions-policy:
+      - geolocation=(), microphone=(), camera=()
+      pragma:
+      - no-cache
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - 7OroGDj7PMfN9QHbXALf3QQTULD7ny7PnxnH5b1PKzyezfhL41Wkl4Qxydf7BwAp8rxx12rK6KS1EfZRWbN2G1IryRPnMBw5
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - ZZRBB8SHF9D1S3MG
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - Mch0DZ7h7Mgf1Hqm5t_vFfF1Y6QdsVHS
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1067983/000095012325008361/0000950123-25-008361.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0000950123-25-008361.txt : 20250814\n<SEC-HEADER>0000950123-25-008361.hdr.sgml
+        : 20250814\n<ACCEPTANCE-DATETIME>20250814161002\nACCESSION NUMBER:\t\t0000950123-25-008361\nCONFORMED
+        SUBMISSION TYPE:\t13F-HR/A\nPUBLIC DOCUMENT COUNT:\t\t2\nCONFORMED PERIOD
+        OF REPORT:\t20250331\nFILED AS OF DATE:\t\t20250814\nDATE AS OF CHANGE:\t\t20250814\nEFFECTIVENESS
+        DATE:\t\t20250814\n\nFILER:\n\n\tCOMPANY DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tBERKSHIRE
+        HATHAWAY INC\n\t\tCENTRAL INDEX KEY:\t\t\t0001067983\n\t\tSTANDARD INDUSTRIAL
+        CLASSIFICATION:\tFIRE, MARINE & CASUALTY INSURANCE [6331]\n\t\tORGANIZATION
+        NAME:           \t02 Finance\n\t\tEIN:\t\t\t\t470813844\n\t\tSTATE OF INCORPORATION:\t\t\tDE\n\t\tFISCAL
+        YEAR END:\t\t\t1231\n\n\tFILING VALUES:\n\t\tFORM TYPE:\t\t13F-HR/A\n\t\tSEC
+        ACT:\t\t1934 Act\n\t\tSEC FILE NUMBER:\t028-04545\n\t\tFILM NUMBER:\t\t251219038\n\n\tBUSINESS
+        ADDRESS:\t\n\t\tSTREET 1:\t\t3555 FARNAM STREET\n\t\tCITY:\t\t\tOMAHA\n\t\tSTATE:\t\t\tNE\n\t\tZIP:\t\t\t68131\n\t\tBUSINESS
+        PHONE:\t\t4023461400\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\t3555 FARNAM STREET\n\t\tCITY:\t\t\tOMAHA\n\t\tSTATE:\t\t\tNE\n\t\tZIP:\t\t\t68131\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tNBH INC\n\t\tDATE OF NAME CHANGE:\t19980810\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>13F-HR/A\n<SEQUENCE>1\n<FILENAME>primary_doc.xml\n<TEXT>\n<XML>\n<?xml
+        version=\"1.0\" encoding=\"UTF-8\"?>\n<edgarSubmission xsi:schemaLocation=\"http://www.sec.gov/edgar/thirteenffiler
+        eis_13F_Filer.xsd\" xmlns:ns1=\"http://www.sec.gov/edgar/common\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+        xmlns=\"http://www.sec.gov/edgar/thirteenffiler\">\n  <schemaVersion>X0202</schemaVersion>\n
+        \ <headerData>\n    <submissionType>13F-HR/A</submissionType>\n    <filerInfo>\n
+        \     <liveTestFlag>LIVE</liveTestFlag>\n      <flags/>\n      <filer>\n        <credentials>\n
+        \         <cik>0001067983</cik>\n          <ccc>XXXXXXXX</ccc>\n        </credentials>\n
+        \     </filer>\n      <periodOfReport>03-31-2025</periodOfReport>\n    </filerInfo>\n
+        \ </headerData>\n  <formData>\n    <coverPage>\n      <reportCalendarOrQuarter>03-31-2025</reportCalendarOrQuarter>\n
+        \     <isAmendment>true</isAmendment>\n      <amendmentNo>1</amendmentNo>\n
+        \     <amendmentInfo>\n        <amendmentType>NEW HOLDINGS</amendmentType>\n
+        \       <confDeniedExpired>true</confDeniedExpired>\n        <dateDeniedExpired>08-14-2025</dateDeniedExpired>\n
+        \       <dateReported>05-15-2025</dateReported>\n        <reasonForNonConfidentiality>Confidential
+        Treatment Expired</reasonForNonConfidentiality>\n      </amendmentInfo>\n
+        \     <filingManager>\n        <name>Berkshire Hathaway Inc</name>\n        <address>\n
+        \         <ns1:street1>3555 Farnam Street</ns1:street1>\n          <ns1:city>Omaha</ns1:city>\n
+        \         <ns1:stateOrCountry>NE</ns1:stateOrCountry>\n          <ns1:zipCode>68131</ns1:zipCode>\n
+        \       </address>\n      </filingManager>\n      <reportType>13F HOLDINGS
+        REPORT</reportType>\n      <form13FFileNumber>028-04545</form13FFileNumber>\n
+        \     <provideInfoForInstruction5>N</provideInfoForInstruction5>\n    </coverPage>\n
+        \   <signatureBlock>\n      <name>Marc D. Hamburg</name>\n      <title>Senior
+        Vice President</title>\n      <phone>402-346-1400</phone>\n      <signature>Marc
+        D. Hamburg</signature>\n      <city>Omaha</city>\n      <stateOrCountry>NE</stateOrCountry>\n
+        \     <signatureDate>08-14-2025</signatureDate>\n    </signatureBlock>\n    <summaryPage>\n
+        \     <otherIncludedManagersCount>2</otherIncludedManagersCount>\n      <tableEntryTotal>4</tableEntryTotal>\n
+        \     <tableValueTotal>1106550356</tableValueTotal>\n      <isConfidentialOmitted>false</isConfidentialOmitted>\n
+        \     <otherManagers2Info>\n        <otherManager2>\n          <sequenceNumber>4</sequenceNumber>\n
+        \         <otherManager>\n            <form13FFileNumber>28-554</form13FFileNumber>\n
+        \           <name>Buffett Warren E</name>\n          </otherManager>\n        </otherManager2>\n
+        \       <otherManager2>\n          <sequenceNumber>11</sequenceNumber>\n          <otherManager>\n
+        \           <form13FFileNumber>28-718</form13FFileNumber>\n            <name>National
+        Indemnity Co</name>\n          </otherManager>\n        </otherManager2>\n
+        \     </otherManagers2Info>\n    </summaryPage>\n  </formData>\n</edgarSubmission>\n</XML>\n</TEXT>\n</DOCUMENT>\n<DOCUMENT>\n<TYPE>INFORMATION
+        TABLE\n<SEQUENCE>2\n<FILENAME>43981.xml\n<DESCRIPTION>INFORMATION TABLE FOR
+        FORM 13F\n<TEXT>\n<XML>\n<informationTable xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+        xmlns=\"http://www.sec.gov/edgar/document/thirteenf/informationtable\">\n
+        \ <infoTable>\n    <nameOfIssuer>D R HORTON INC</nameOfIssuer>\n    <titleOfClass>COM</titleOfClass>\n
+        \   <cusip>23331A109</cusip>\n    <value>192267725</value>\n    <shrsOrPrnAmt>\n
+        \     <sshPrnamt>1512371</sshPrnamt>\n      <sshPrnamtType>SH</sshPrnamtType>\n
+        \   </shrsOrPrnAmt>\n    <investmentDiscretion>DFND</investmentDiscretion>\n
+        \   <otherManager>4,11</otherManager>\n    <votingAuthority>\n      <Sole>1512371</Sole>\n
+        \     <Shared>0</Shared>\n      <None>0</None>\n    </votingAuthority>\n  </infoTable>\n
+        \ <infoTable>\n    <nameOfIssuer>LENNAR CORP</nameOfIssuer>\n    <titleOfClass>CL
+        A</titleOfClass>\n    <cusip>526057104</cusip>\n    <value>221522186</value>\n
+        \   <shrsOrPrnAmt>\n      <sshPrnamt>1929972</sshPrnamt>\n      <sshPrnamtType>SH</sshPrnamtType>\n
+        \   </shrsOrPrnAmt>\n    <investmentDiscretion>DFND</investmentDiscretion>\n
+        \   <otherManager>4,11</otherManager>\n    <votingAuthority>\n      <Sole>1929972</Sole>\n
+        \     <Shared>0</Shared>\n      <None>0</None>\n    </votingAuthority>\n  </infoTable>\n
+        \ <infoTable>\n    <nameOfIssuer>LENNAR CORP</nameOfIssuer>\n    <titleOfClass>CL
+        B</titleOfClass>\n    <cusip>526057302</cusip>\n    <value>22032</value>\n
+        \   <shrsOrPrnAmt>\n      <sshPrnamt>202</sshPrnamt>\n      <sshPrnamtType>SH</sshPrnamtType>\n
+        \   </shrsOrPrnAmt>\n    <investmentDiscretion>DFND</investmentDiscretion>\n
+        \   <otherManager>4,11</otherManager>\n    <votingAuthority>\n      <Sole>202</Sole>\n
+        \     <Shared>0</Shared>\n      <None>0</None>\n    </votingAuthority>\n  </infoTable>\n
+        \ <infoTable>\n    <nameOfIssuer>NUCOR CORP</nameOfIssuer>\n    <titleOfClass>COM</titleOfClass>\n
+        \   <cusip>670346105</cusip>\n    <value>692738413</value>\n    <shrsOrPrnAmt>\n
+        \     <sshPrnamt>5756510</sshPrnamt>\n      <sshPrnamtType>SH</sshPrnamtType>\n
+        \   </shrsOrPrnAmt>\n    <investmentDiscretion>DFND</investmentDiscretion>\n
+        \   <otherManager>4,11</otherManager>\n    <votingAuthority>\n      <Sole>5756510</Sole>\n
+        \     <Shared>0</Shared>\n      <None>0</None>\n    </votingAuthority>\n  </infoTable>\n</informationTable>\n</XML>\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      cache-control:
+      - no-cache, no-store, no-transform, proxy-revalidate
+      connection:
+      - keep-alive
+      content-length:
+      - '6369'
+      content-security-policy:
+      - frame-ancestors 'self'
+      content-type:
+      - text/plain
+      date:
+      - Fri, 23 Oct 2026 02:51:50 GMT
+      etag:
+      - '"94785ade665125f90d5e482d5018c8d0-gzip"'
+      last-modified:
+      - Thu, 14 Aug 2025 20:17:35 GMT
+      permissions-policy:
+      - geolocation=(), microphone=(), camera=()
+      pragma:
+      - no-cache
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - f4ipG/svRSmVdt5CYfj23H8xBoQ5xhLyU9cDcANPAj7FF2XST6HRKF8fz+gqcCoteDhWF1zqm/S8fNaT6TtTLgeVZhpuV77B
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - T6J9BXS0ESP76RQC
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - k2hmDSEUi3KhglnlbRJzUd0J7J1wnj.J
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

@@ -21,6 +21,7 @@ skills/
 │   ├── skill.yaml      # Core patterns
 │   └── sharp-edges.yaml
 ├── financials/         # Financial statements
+├── funds/              # Mutual funds and ETFs
 ├── holdings/           # 13F institutional holdings
 ├── ownership/          # Form 3/4/5 insider trades
 ├── reports/            # 10-K/Q/8-K sections
@@ -34,6 +35,7 @@ skills/
 |-------|---------|
 | **core** | Company lookup, filings, search |
 | **financials** | get_financials(), statements, metrics |
+| **funds** | Mutual fund and ETF lookup, portfolios |
 | **holdings** | 13F portfolio analysis |
 | **ownership** | Insider transaction summaries |
 | **reports** | Report section extraction |

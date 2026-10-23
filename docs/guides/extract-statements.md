@@ -268,10 +268,12 @@ print(f"Net Income: ${metrics['net_income']:,.0f}")
 print(f"Total Assets: ${metrics['total_assets']:,.0f}")
 
 # Plus calculated ratios
-print(f"Current Ratio: {metrics['current_ratio']:.2f}")
-print(f"Debt to Assets: {metrics['debt_to_assets']:.2f}")
+print(f"Current Ratio: {metrics['current_ratio']:.2f}")        # current assets / current liabilities
+print(f"Debt to Assets: {metrics['debt_to_assets']:.2f}")      # total liabilities / total assets
 print(f"Free Cash Flow: ${metrics['free_cash_flow']:,.0f}")
 ```
+
+`debt_to_assets` is **total liabilities divided by total assets**, as a fraction (Apple's fiscal 2023 balance sheet gives 290,437 / 352,583 = 0.82). Total liabilities include operating payables, deferred revenue, lease and tax liabilities, so the figure is higher than a ratio of borrowings alone (Apple's commercial paper and term debt are about 0.32 of assets).
 
 ### Cross-Company Analysis Made Simple
 

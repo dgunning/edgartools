@@ -186,15 +186,15 @@ df = income.to_dataframe()
 # Query returns DataFrame directly
 df = xbrl.facts.query().by_concept('Revenue').to_dataframe()
 
-# DataFrame columns:
-# - concept: XBRL concept name
+# DataFrame columns include:
+# - concept: XBRL concept name (e.g., 'us-gaap:Assets')
 # - label: Human-readable label
-# - value: Fact value
-# - period: Period identifier
-# - start: Period start date (for duration)
-# - end: Period end date
-# - unit: Unit of measure (e.g., USD)
-# - dimensions: Dimensional breakdowns (if any)
+# - value: Fact value as text
+# - numeric_value: Fact value as a number (NaN for text facts)
+# - period_start, period_end: Dates of a duration fact
+# - period_instant: Date of an instant fact (duration facts leave it empty)
+# - unit_ref, currency: Unit of measure (e.g., 'usd', 'USD')
+# - is_dimensioned: True for facts that carry a dimensional breakdown
 ```
 
 ## Advanced Patterns
@@ -208,12 +208,12 @@ categories = xbrl.statements.get_statements_by_category()
 # View all disclosures
 disclosures = categories['disclosure']
 for disc in disclosures:
-    print(f"{disc['index']}: {disc['title']}")
+    print(f"{disc['index']}: {disc['definition']}")
 
 # View all notes
 notes = categories['note']
 for note in notes:
-    print(f"{note['index']}: {note['title']}")
+    print(f"{note['index']}: {note['definition']}")
 
 # Get core financial statements
 core_statements = categories['statement']
@@ -221,7 +221,7 @@ core_statements = categories['statement']
 # Or list all statements to find specific ones
 all_statements = xbrl.get_all_statements()
 for stmt in all_statements:
-    print(f"{stmt['type']}: {stmt['title']}")
+    print(f"{stmt['type']}: {stmt['definition']}")
 
 # Access by exact name or index
 risk_factors = xbrl.statements['RiskFactorsDisclosure']
@@ -236,25 +236,30 @@ first_disclosure = xbrl.statements[disclosures[0]['index']]
 income = xbrl.statements.income_statement()
 df = income.to_dataframe()
 
+# The period columns are the dated ones, newest first
+periods = [c for c in df.columns if c[:4].isdigit()]
+
 # Calculate year-over-year growth
-if len(df.columns) >= 2:
-    current = df.iloc[:, 0]
-    prior = df.iloc[:, 1]
-    growth = ((current - prior) / prior * 100).round(2)
-    print(f"Revenue growth: {growth.loc['Revenue']}%")
+if len(periods) >= 2:
+    sales = df[df['label'] == 'Net sales']
+    growth = ((sales[periods[0]] - sales[periods[1]]) / sales[periods[1]] * 100).round(2)
+    print(f"Revenue growth: {growth.iloc[0]}%")
 ```
 
 ### Working with Dimensions
 
 ```python
 # Query facts with specific dimensional breakdowns
+# by_dimension takes the axis; filter on its member with a second argument
 segment_revenue = (xbrl.facts.query()
-    .by_concept('Revenue')
-    .by_dimension('Segment', 'ProductSegment')
+    .by_concept('us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax')
+    .by_dimension('srt:ProductOrServiceAxis')
     .to_dataframe())
 
-# Group by dimensions
-segment_totals = segment_revenue.groupby('dimensions')['value'].sum()
+# The frame gains dimension, member and dim_<axis> columns.
+# Sum the latest fiscal year by member; numeric_value holds numbers, value holds text.
+latest = segment_revenue[segment_revenue['period_end'] == segment_revenue['period_end'].max()]
+segment_totals = latest.groupby('member')['numeric_value'].sum()
 ```
 
 ### Custom Fact Filtering
@@ -263,9 +268,9 @@ segment_totals = segment_revenue.groupby('dimensions')['value'].sum()
 # Use custom filter function
 large_amounts = xbrl.facts.query().by_value(lambda v: abs(v) > 1000000).to_dataframe()
 
-# Custom filter with lambda
+# Custom filter with lambda: duration facts carry period_end, instant facts period_instant
 recent_facts = xbrl.facts.query().by_custom(
-    lambda fact: fact['end'] >= '2024-01-01'
+    lambda fact: (fact.get('period_end') or fact.get('period_instant') or '') >= '2022-01-01'
 ).to_dataframe()
 ```
 
@@ -277,11 +282,14 @@ recent_facts = xbrl.facts.query().by_custom(
 # Method 1: Via statement
 income = xbrl.statements.income_statement()
 df = income.to_dataframe()
-revenue = df.loc['Revenue']
+revenue = df[df['label'] == 'Net sales']   # one row; the period columns hold the amounts
 
-# Method 2: Via facts query
-revenue_facts = xbrl.facts.query().by_concept('Revenues').to_dataframe()
-latest_revenue = revenue_facts.iloc[0]['value']
+# Method 2: Via facts query (use the concept the filer tagged, with its prefix)
+revenue_facts = (xbrl.facts.query()
+    .by_concept('us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax', exact=True)
+    .to_dataframe())
+totals = revenue_facts[~revenue_facts['is_dimensioned']].sort_values('period_end', ascending=False)
+latest_revenue = totals.iloc[0]['numeric_value']
 ```
 
 ### Compare Current vs Prior Year
@@ -289,19 +297,20 @@ latest_revenue = revenue_facts.iloc[0]['value']
 ```python
 # Get current period data
 current = xbrl.current_period
-current_income = current.income_statement()
-current_df = current_income.to_dataframe()
+current_df = current.income_statement(as_statement=False)
 
 # Get full multi-period data
 full_income = xbrl.statements.income_statement()
 full_df = full_income.to_dataframe()
 
-# Compare
-if len(full_df.columns) >= 2:
+# Compare the dated period columns, newest first
+periods = [c for c in full_df.columns if c[:4].isdigit()]
+if len(periods) >= 2:
+    amounts = full_df.set_index('label')[periods[:2]]
     comparison = pd.DataFrame({
-        'Current': full_df.iloc[:, 0],
-        'Prior': full_df.iloc[:, 1],
-        'Change': full_df.iloc[:, 0] - full_df.iloc[:, 1]
+        'Current': amounts.iloc[:, 0],
+        'Prior': amounts.iloc[:, 1],
+        'Change': amounts.iloc[:, 0] - amounts.iloc[:, 1]
     })
     print(comparison)
 ```
@@ -311,7 +320,7 @@ if len(full_df.columns) >= 2:
 ```python
 # Find debt-related disclosures
 all_statements = xbrl.get_all_statements()
-debt_statements = [s for s in all_statements if 'debt' in s['title'].lower()]
+debt_statements = [s for s in all_statements if 'debt' in s['definition'].lower()]
 
 # Access first debt disclosure
 if debt_statements:
@@ -339,23 +348,26 @@ for name, stmt in statements_to_export.items():
 
 ```python
 # Extract key metrics from multiple statements
+def latest(statement, label):
+    """Most recent value of the line item with this label (the company's own label)."""
+    df = statement.to_dataframe()
+    period = next(c for c in df.columns if c[:4].isdigit())
+    return df.loc[df['label'] == label, period].iloc[0]
+
 metrics = {}
 
 # Revenue and profit from income statement
 income = xbrl.statements.income_statement()
-income_df = income.to_dataframe()
-metrics['Revenue'] = income_df.loc['Revenue', income_df.columns[0]]
-metrics['Net Income'] = income_df.loc['Net Income', income_df.columns[0]]
+metrics['Revenue'] = latest(income, 'Net sales')
+metrics['Net Income'] = latest(income, 'Net income')
 
 # Assets from balance sheet
 balance = xbrl.statements.balance_sheet()
-balance_df = balance.to_dataframe()
-metrics['Total Assets'] = balance_df.loc['Assets', balance_df.columns[0]]
+metrics['Total Assets'] = latest(balance, 'Total assets')
 
 # Cash flow from operations
 cashflow = xbrl.statements.cash_flow_statement()
-cashflow_df = cashflow.to_dataframe()
-metrics['Operating Cash Flow'] = cashflow_df.loc['Operating Activities', cashflow_df.columns[0]]
+metrics['Operating Cash Flow'] = latest(cashflow, 'Cash generated by operating activities')
 
 # Create summary DataFrame
 summary = pd.DataFrame([metrics])
@@ -371,11 +383,11 @@ print(summary)
 entity_info = xbrl.entity_info
 
 print(f"Company: {entity_info.get('entity_name')}")
-print(f"Ticker: {entity_info.get('trading_symbol')}")
-print(f"CIK: {entity_info.get('entity_identifier')}")
+print(f"Ticker: {entity_info.get('ticker')}")
+print(f"CIK: {entity_info.get('identifier')}")
 print(f"Form: {entity_info.get('document_type')}")
-print(f"Fiscal Year: {entity_info.get('document_fiscal_year_focus')}")
-print(f"Fiscal Period: {entity_info.get('document_fiscal_period_focus')}")
+print(f"Fiscal Year: {entity_info.get('fiscal_year')}")
+print(f"Fiscal Period: {entity_info.get('fiscal_period')}")
 ```
 
 ## Error Handling
@@ -444,7 +456,7 @@ revenue = (xbrl.facts.query()
 
 # Less efficient: broad query then filter
 all_facts = xbrl.facts.query().to_dataframe()
-revenue = all_facts[all_facts['concept'] == 'Revenue']
+revenue = all_facts[all_facts['concept'].str.contains('Revenue')]
 ```
 
 ## Data Structure Reference
@@ -465,15 +477,18 @@ revenue = all_facts[all_facts['concept'] == 'Revenue']
 
 When you convert facts to a DataFrame using `.to_dataframe()`, you get:
 
-- `concept`: XBRL element name (e.g., 'Revenues', 'Assets')
+- `concept`: XBRL element name with its prefix (e.g., 'us-gaap:Assets')
 - `label`: Human-readable label
-- `value`: Fact value (numeric or text)
-- `period`: Period identifier
-- `start`: Period start date (for duration periods)
-- `end`: Period end date
-- `unit`: Unit of measure (e.g., 'USD', 'shares')
-- `dimensions`: Dictionary of dimensional breakdowns
+- `value`: Fact value as text
+- `numeric_value`: Fact value as a number (NaN for text facts)
+- `period_key`: Period identifier (e.g., 'duration_2022-09-25_2023-09-30')
+- `period_start`, `period_end`: Dates of a duration fact
+- `period_instant`: Date of an instant fact
+- `unit_ref`: The filing's unit id (e.g., 'usd', 'shares'); `currency` holds 'USD' when it is a currency
+- `is_dimensioned`: True when the fact has a dimensional breakdown
 - `decimals`: Precision indicator
+
+Queries filtered with `by_dimension()` add `dimension`, `member` and one `dim_<axis>` column per axis.
 
 ## Integration with Other Classes
 
@@ -492,16 +507,19 @@ xbrl = filing.xbrl()
 
 ```python
 # Get multiple filings and compare XBRL data
-filings = company.get_filings(form="10-Q", count=4)
+filings = company.get_filings(form="10-Q").head(4)
 
 revenue_trend = []
 for filing in filings:
     xbrl = filing.xbrl()
-    revenue = xbrl.facts.query().by_concept('Revenue').to_dataframe()
+    revenue = (xbrl.facts.query()
+        .by_concept('us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax', exact=True)
+        .to_dataframe())
+    revenue = revenue[~revenue['is_dimensioned']]
     if not revenue.empty:
         revenue_trend.append({
             'filing_date': filing.filing_date,
-            'revenue': revenue.iloc[0]['value']
+            'revenue': revenue.iloc[0]['numeric_value']
         })
 
 trend_df = pd.DataFrame(revenue_trend)
@@ -526,7 +544,7 @@ trend_df = pd.DataFrame(revenue_trend)
 3. **Handle missing data gracefully**:
    ```python
    try:
-       stmt = xbrl.statements.equity_statement()
+       stmt = xbrl.statements.statement_of_equity()
    except StatementNotFoundError:
        stmt = None
    ```
