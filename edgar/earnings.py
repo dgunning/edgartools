@@ -27,7 +27,7 @@ from enum import Enum
 from functools import cached_property
 from html import escape as html_escape
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -38,6 +38,13 @@ logger = logging.getLogger(__name__)
 # Pre-compiled regex patterns for performance
 _QUARTER_PATTERN = re.compile(r'(Dec|Sep|Jun|Mar)\w*\s*\d+,?\s*(\d{4})')
 _YEAR_PATTERN = re.compile(r'\b(19|20)\d{2}\b')
+_CHANGE_COLUMN = re.compile(r'%|\bchange\b|\bchg\b|\bpercent\b|\bvs\b\.?', re.IGNORECASE)
+
+
+def _is_change_column(label: str) -> bool:
+    """A percent or change column ("% Change", "2025 vs 2024", "... - 2025 - %"), from any part
+    of its header path. A year in the label does not make it a period (GH #1780)."""
+    return any(_CHANGE_COLUMN.search(part) for part in str(label).split(' - '))
 _SCALE_BILLIONS = re.compile(r'\b(in\s+)?billions?\b', re.IGNORECASE)
 _SCALE_MILLIONS = re.compile(r'\b(in\s+)?millions?\b', re.IGNORECASE)
 _SCALE_THOUSANDS = re.compile(r'\b(in\s+)?thousands?\b', re.IGNORECASE)
@@ -293,6 +300,8 @@ def _parse_period_header(header: str) -> Dict[str, object]:
     header = header.strip()
     if not header or header.startswith('Col_'):
         return empty
+    # A header built from stacked rows joins them with " - ": "September 30, - 2025"
+    header = re.sub(r'(\d{1,2}),?\s*-\s*((?:19|20)\d{2})\b', r'\1, \2', header)
 
     # Try duration pattern first
     m = _DURATION_HEADER.search(header)
@@ -713,14 +722,18 @@ class FinancialTable:
         records = []
         df = self.dataframe
 
-        for col in df.columns:
+        # Columns are read by position: two periods may share a label ("September 30,")
+        for col_pos, col in enumerate(df.columns):
             period_info = _parse_period_header(str(col))
+            # A "% Change" column holds percentages, not amounts for a period (GH #1780)
+            if _is_change_column(col):
+                continue
 
             for pos, idx_label in enumerate(df.index):
                 label = str(idx_label)
                 row_type = self.get_row_type(label, pos)
 
-                raw_val = df.iloc[pos][col]
+                raw_val = df.iloc[pos, col_pos]
                 # Skip non-numeric cells (headers, subtitles, NaN)
                 numeric_val = None
                 if isinstance(raw_val, (int, float)):
@@ -919,6 +932,59 @@ class _CleanColumn:
         return self.header
 
 
+_AGGREGATE_REVENUE_LABELS = frozenset({
+    'revenue', 'revenues', 'net revenue', 'net revenues', 'net sales', 'sales',
+    'revenues, net', 'revenue, net', 'sales, net', 'net sales and revenues',
+    'sales and revenues', 'sales and other operating revenues',
+})
+
+
+def _revenue_label_rank(label_lower: str) -> int:
+    """Rank an income-statement label as a revenue row (lower is better, 3 = not revenue).
+
+    0: a "Total ..." revenue/sales row; 1: a bare aggregate label ("Net sales");
+    2: any other label containing a revenue/sales word (a component or loose match).
+    """
+    label = label_lower.strip().rstrip(':').lstrip('$ ').strip()
+    if 'revenue' not in label and 'sales' not in label:
+        return 3
+    if label.startswith('total') and 'cost' not in label and 'expense' not in label:
+        return 0
+    if label in _AGGREGATE_REVENUE_LABELS:
+        return 1
+    return 2
+
+
+_RECONCILIATION_LABEL = re.compile(r'adjusted|non-gaap|ebitda|^gaap\b')
+
+
+def _income_statement_rank(table: 'FinancialTable') -> tuple:
+    """
+    Rank an income-statement candidate; the highest rank is the primary statement.
+
+    Taking the table with the most rows picked segment tables (Mueller Water: one period,
+    a column per segment), reconciliations (Graphic Packaging's Adjusted EBITDA table) and
+    operating-metric tables (Groupon) over the statement of operations (GH #1781). In order:
+    has a revenue row and a net income row; is not a reconciliation (a quarter or more of
+    its labels say adjusted, non-GAAP, EBITDA or start with GAAP; a statement ending in a
+    couple of adjusted lines is still a statement); is not one period split by segment
+    (two or more columns parse to the same single period; a header the period parser cannot
+    read, such as "2025" or "Q3 2025", counts as unknown, not as split); then rows.
+    """
+    df = table.dataframe
+    labels = [str(label).lower().strip() for label in df.index]
+    has_revenue = any(_revenue_label_rank(label) < 3 for label in labels)
+    has_net_income = any(p in label for label in labels for p in ('net income', 'net loss', 'net earnings'))
+    reconciliation = sum(bool(_RECONCILIATION_LABEL.search(label)) for label in labels) >= 0.25 * max(len(labels), 1)
+    parsed = []
+    for col in df.columns:
+        info = _parse_period_header(str(col))
+        if info['period_end']:
+            parsed.append((info['period_end'], info['duration_months']))
+    split_by_segment = len(parsed) >= 2 and len(set(parsed)) == 1
+    return (has_revenue + has_net_income, not reconciliation, not split_by_segment, df.shape[0])
+
+
 class EarningsRelease:
     """
     Parser for 8-K earnings release exhibits.
@@ -1055,10 +1121,10 @@ class EarningsRelease:
 
     @property
     def income_statement(self) -> Optional[FinancialTable]:
-        """Get the primary income statement table."""
+        """Get the primary income statement table (see ``_income_statement_rank``)."""
         candidates = [t for t in self.tables if t.statement_type == StatementType.INCOME_STATEMENT]
         if candidates:
-            return max(candidates, key=lambda t: t.dataframe.shape[0])
+            return max(candidates, key=_income_statement_rank)
         return None
 
     @property
@@ -1137,24 +1203,24 @@ class EarningsRelease:
             return result
         result['period'] = str(col)
 
-        # Extract revenue — first row matching revenue patterns
-        revenue_patterns = ['revenue', 'net sales', 'total revenue', 'net revenue', 'sales']
+        # Extract revenue — best-ranked row (see _revenue_label_rank), first row within a rank
+        revenue_rank = 3
         net_income_patterns = ['net income', 'net loss', 'net earnings', 'net income (loss)']
 
         df = inc.dataframe
+        # Read the column by position: a repeated period label would return several cells
+        col_pos = list(df.columns).index(col)
         for pos, idx_label in enumerate(df.index):
             label_lower = str(idx_label).lower().strip()
-            val = df.iloc[pos][col]
+            val = df.iloc[pos, col_pos]
             if not isinstance(val, (int, float)):
                 continue
 
-            # Revenue (first match)
-            if result['revenue'] is None:
-                for pat in revenue_patterns:
-                    if pat in label_lower:
-                        scaled = val * inc.scale.value if inc.get_row_type(str(idx_label), pos) == RowType.AMOUNT and inc.scale != Scale.UNITS else val
-                        result['revenue'] = scaled
-                        break
+            # Revenue: a total row beats component rows ("New and used equipment sales")
+            rank = _revenue_label_rank(label_lower)
+            if rank < revenue_rank:
+                revenue_rank = rank
+                result['revenue'] = val * inc.scale.value if inc.get_row_type(str(idx_label), pos) == RowType.AMOUNT and inc.scale != Scale.UNITS else val
 
             # Net income (first match)
             if result['net_income'] is None:
@@ -1394,8 +1460,12 @@ def find_earnings_exhibits(attachments: 'Attachments') -> List['Attachment']:
     for attachment in attachments:
         desc = (attachment.description or "").upper()
         doc = (attachment.document or "").lower()
+        doc_type = (attachment.document_type or "").upper()
 
-        is_ex99 = (re.search(r'EX-99', desc, re.IGNORECASE)
+        # The SEC document type is authoritative; description and filename catch
+        # exhibits filed under a generic type (GH #1776).
+        is_ex99 = (doc_type.startswith('EX-99')
+                   or re.search(r'EX-99', desc, re.IGNORECASE)
                    or re.search(r'ex-?99', doc, re.IGNORECASE))
         if not is_ex99:
             continue
@@ -1404,10 +1474,14 @@ def find_earnings_exhibits(attachments: 'Attachments') -> List['Attachment']:
         if attachment.is_html():
             candidates.append(attachment)
 
-    # Sort by exhibit number (EX-99.1 before EX-99.2, etc.)
+    # Sort by exhibit number (EX-99 and EX-99.1 before EX-99.2, etc.), read from the
+    # document type first, then the description
     def _exhibit_sort_key(att):
-        desc = (att.description or "")
-        m = re.search(r'EX-99\.?(\d+)', desc, re.IGNORECASE)
+        for text in (att.document_type or "", att.description or ""):
+            m = re.match(r'\s*EX-99(?:\.0*(\d+))?\b', text, re.IGNORECASE)
+            if m:
+                return int(m.group(1)) if m.group(1) else 1
+        m = re.search(r'EX-99\.?(\d+)', att.description or "", re.IGNORECASE)
         return int(m.group(1)) if m else 99
     candidates.sort(key=_exhibit_sort_key)
 
@@ -1539,13 +1613,19 @@ def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> S
             elif 'in billions' in label_lower or '(billions)' in label_lower:
                 return Scale.BILLIONS
 
-    # 6. Check preceding sibling nodes (scale text often in a paragraph before the table)
-    if hasattr(table_node, 'parent') and table_node.parent and hasattr(table_node.parent, 'children'):
-        siblings = table_node.parent.children
+    # 6. Check preceding sibling nodes (scale text often in a paragraph before the table).
+    # A table is often the only child of a wrapper <div>; its caption then precedes the
+    # wrapper, so climb through one-child wrappers first (GH #1779).
+    node = table_node
+    parent = getattr(node, 'parent', None)
+    while parent is not None and len(getattr(parent, 'children', None) or []) == 1 and parent.parent is not None:
+        node, parent = parent, parent.parent
+    if parent is not None and getattr(parent, 'children', None):
+        siblings = parent.children
         for idx, child in enumerate(siblings):
-            if child is table_node:
-                # Check up to 3 preceding siblings
-                for si in range(max(0, idx - 3), idx):
+            if child is node:
+                # Check up to 3 preceding siblings, nearest first
+                for si in range(idx - 1, max(0, idx - 3) - 1, -1):
                     sib = siblings[si]
                     sib_text = sib.content or ''
                     if not sib_text and hasattr(sib, 'text') and callable(sib.text):
@@ -1578,6 +1658,11 @@ def _extract_title(table_node) -> Optional[str]:
 
 
 def _extract_date_headers_from_rows(table_node) -> List[str]:
+    """Date column headers found in early data rows (see ``_find_date_header_rows``)."""
+    return _find_date_header_rows(table_node)[0]
+
+
+def _find_date_header_rows(table_node) -> Tuple[List[str], List[int]]:
     """
     Extract date column headers from early data rows.
 
@@ -1588,6 +1673,8 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
 
     Also handles split date rows where month/day is on one row and
     year is on the next (e.g., Nvidia's "October 26," + "2025").
+
+    Returns the headers and the indices of the rows they came from.
     """
     # Month pattern for detecting partial dates (month + day, no year)
     month_pattern = re.compile(
@@ -1611,7 +1698,7 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
 
         for content in non_empty:
             # Skip scale descriptions
-            if content.startswith("(In ") or content.startswith("(Dollars"):
+            if _is_scale_caption(content):
                 continue
 
             # Check for complete date pattern (contains year)
@@ -1627,7 +1714,7 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
 
         # If we found complete dates without numeric data, use them
         if dates_found and not has_numeric:
-            return dates_found
+            return dates_found, [i]
 
         # If we found partial dates, check if next row has years to combine
         if partial_dates and not has_numeric and i + 1 < len(rows):
@@ -1640,9 +1727,150 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
             if years and len(years) == len(partial_dates):
                 # Combine partial dates with years
                 combined = [f"{date} {year}" for date, year in zip(partial_dates, years)]
-                return combined
+                return combined, [i, i + 1]
 
-    return []
+    return [], []
+
+
+# A scale caption such as "In millions, except per share amounts", "(IN THOUSANDS, ...)" or
+# "($ In Millions, ...)" describes the units; it is never a period column (GH #1775).
+_SCALE_CAPTION = re.compile(r'^\(?\s*\$?\s*(?:in|dollars|amounts|figures)\b', re.IGNORECASE)
+
+
+def _is_scale_caption(content: str) -> bool:
+    return bool(_SCALE_CAPTION.match(content))
+
+
+def _place_header_cells(header_rows) -> List[List[Tuple[int, int, str]]]:
+    """Grid position of every header cell as (start, end, text), honouring colspan and rowspan.
+
+    A cell with rowspan="2" (often the empty cell over the row labels) occupies the same
+    columns in the next header row, so that row's cells start after it (GH #1777).
+    """
+    # Spans come from filer HTML, so occupancy is kept as column intervals per row and a
+    # rowspan reaches only the header rows that exist; a rowspan="10000" colspan="1000"
+    # cell costs one interval per header row, not ten million grid cells.
+    n_rows = len(header_rows)
+    occupied: Dict[int, List[Tuple[int, int]]] = {}
+    placed = []
+    for r, cells in enumerate(header_rows):
+        col = 0
+        row_cells = []
+        for cell in cells:
+            moved = True
+            while moved:
+                moved = False
+                for (s, e) in occupied.get(r, ()):
+                    if s <= col < e:
+                        col, moved = e, True
+            span = max(cell.colspan or 1, 1)
+            for dr in range(r + 1, min(r + max(cell.rowspan or 1, 1), n_rows)):
+                occupied.setdefault(dr, []).append((col, col + span))
+            row_cells.append((col, col + span, cell.content.strip()))
+            col += span
+        placed.append(row_cells)
+    return placed
+
+
+def _align_by_position(header_rows, value_rows, label_end: int):
+    """
+    Put each value cell under the header column above it, by grid position.
+
+    Header labels and value cells used to be compacted separately and zipped left to right,
+    so a header cell that is not a period (a scale caption) or a period header that was not
+    read shifted every value one column (GH #1775). Here each leaf header (the lowest header
+    cell over a grid column) is a column, labelled with the header cells above it, and the
+    cells of a value ("$", "38,198", "%") are joined under the leaf they sit in.
+
+    Returns (column labels, rows of joined cell text), or None when the value cells do not
+    line up with the headers; the caller then keeps the left-to-right layout.
+    """
+    cells, leaves = _leaf_header_cells(header_rows, label_end)
+    if not leaves:
+        return None
+
+    rows = []
+    used = set()
+    for value_cells in value_rows:
+        joined = _join_row_by_leaf(value_cells, leaves)
+        if joined is None:
+            return None
+        used.update(joined)
+        rows.append(joined)
+
+    keep = sorted(used)
+    if not keep:
+        return None
+    labels = [_leaf_label(cells, leaves[k]) for k in keep]
+    return labels, [[_joined_value(row.get(k)) for k in keep] for row in rows]
+
+
+def _leaf_header_cells(header_rows, label_end: int):
+    """Non-empty, non-caption header cells as (row, start, end, text), and the leaves among them:
+    cells with no header cell below them, starting after the row-label column, sorted by start."""
+    placed = _place_header_cells(header_rows)
+    cells = [(r, s, e, text) for r, row in enumerate(placed) for (s, e, text) in row
+             if text and not _is_scale_caption(text)]
+    leaves = [c for c in cells
+              if c[1] >= label_end
+              and not any(o[0] > c[0] and o[1] < c[2] and o[2] > c[1] for o in cells)]
+    leaves.sort(key=lambda c: c[1])
+    return cells, leaves
+
+
+def _leaves_under(leaves, s: int, e: int) -> List[int]:
+    """Indices of the leaves whose columns hold a cell's start, else those it overlaps."""
+    hits = [k for k, leaf in enumerate(leaves) if leaf[1] <= s < leaf[2]]
+    if not hits:
+        hits = [k for k, leaf in enumerate(leaves) if leaf[1] < e and s < leaf[2]]
+    return hits
+
+
+def _join_row_by_leaf(value_cells, leaves) -> Optional[Dict[int, str]]:
+    """Join one row's value cells by the leaf they sit under; None when a cell does not line up."""
+    joined: Dict[int, str] = {}
+    digits: Dict[int, int] = {}
+    prefix = ''
+    last = None
+    for (s, e, text) in value_cells:
+        hits = _leaves_under(leaves, s, e)
+        if not hits and text in (')', '%', ')%', '%)') and last is not None:
+            # The closing ")" of "(636" printed in the spacer cell after it (GH #1777)
+            hits = [last]
+        elif not hits and text in ('$', '(', '$(', '€', '£', '¥'):
+            prefix += text
+            continue
+        if len(hits) != 1:
+            return None
+        k = hits[0]
+        last = k
+        text, prefix = prefix + text, ''
+        if any(ch.isdigit() for ch in text):
+            digits[k] = digits.get(k, 0) + 1
+            if digits[k] > 1:
+                return None
+        joined[k] = joined.get(k, '') + text
+    return joined
+
+
+def _leaf_label(cells, leaf) -> str:
+    """A leaf header's label: the header cells above it, top down, then its own text."""
+    r, s, _, text = leaf
+    parts = []
+    for (r2, s2, e2, t2) in cells:
+        if r2 < r and s2 <= s < e2 and t2 not in parts:
+            parts.append(t2)
+    parts = [p for p in parts if p != text] + [text]
+    return " - ".join(parts)
+
+
+def _joined_value(text: Optional[str]) -> Optional[str]:
+    """A dash placeholder with its "%" or "$" beside it ("—%") is still a placeholder."""
+    if text and not any(ch.isdigit() for ch in text):
+        bare = text.strip('$%() ')
+        if bare in ('—', '-', '–'):
+            return bare
+    return text
 
 
 def _extract_clean_dataframe(table_node) -> pd.DataFrame:
@@ -1659,21 +1887,24 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
 
     # Fallback: try to extract date headers from early data rows
     date_headers_from_rows = []
+    date_header_rows = []
     if not header_cols:
-        date_headers_from_rows = _extract_date_headers_from_rows(table_node)
+        date_headers_from_rows, date_header_rows = _find_date_header_rows(table_node)
 
     row_labels = []
     row_data = []
     row_parent_contexts = []  # Parent context for each data row (for row type classification)
+    row_positions = []  # Grid positions of each data row's value cells
+    label_ends = []  # Grid column where each data row's label cell ends
     current_parent_context = ''  # Tracks the most recent label-only row
 
     # Track if we should skip date-header rows from data
     skip_date_rows = bool(date_headers_from_rows)
 
-    for row in table_node.rows:
+    for row_idx, row in enumerate(table_node.rows):
         cells = row.cells
         non_empty = [c for c in cells if c.content.strip()]
-        if not non_empty:
+        if not non_empty or row_idx in date_header_rows:
             continue
 
         # Skip rows that only contain dates (already used as headers)
@@ -1693,8 +1924,7 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
                     _YEAR_PATTERN.search(c) or
                     month_pattern.match(c) or
                     year_only_pattern.match(c) or
-                    c.startswith("(In ") or
-                    c.startswith("(Dollars")
+                    _is_scale_caption(c)
                     for c in non_empty_contents
                 )
                 and any(
@@ -1707,16 +1937,22 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
 
         label_cell = None
         data_cells = []
+        positioned_cells = []  # (grid start, grid end, text) of each value cell
+        label_cell_end = 0
+        col = 0
 
         for cell in cells:
             content = cell.content.strip()
+            start, col = col, col + max(cell.colspan or 1, 1)
             if not content:
                 continue
 
             if label_cell is None and not _is_numeric_or_currency(content):
                 label_cell = content
+                label_cell_end = col
             else:
                 data_cells.append(content)
+                positioned_cells.append((start, col, content))
 
         if label_cell and data_cells:
             row_labels.append(label_cell)
@@ -1724,12 +1960,28 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
             row_parent_contexts.append(current_parent_context)
             merged_data = _merge_currency_symbols(data_cells)
             row_data.append(merged_data)
-        elif label_cell and not data_cells:
-            # Label-only row (e.g., "Earnings per share:") — track as parent context
+            row_positions.append(positioned_cells)
+            label_ends.append(label_cell_end)
+        elif label_cell and not data_cells and not _is_scale_caption(label_cell):
+            # Label-only row (e.g., "Earnings per share:") — track as parent context.
+            # A scale caption ("(in millions, except per share amounts)") is not one:
+            # it made "Net sales" a per-share row, so it was left unscaled (GH #1781).
             current_parent_context = label_cell
 
     if not row_data:
         return pd.DataFrame()
+
+    aligned = None
+    # Header rows: the table's own, or the date row found among its data rows. A "% Change"
+    # cell in that row is a column too, so its values stay out of the period columns (GH #1780).
+    header_rows = table_node.headers or [table_node.rows[i].cells for i in date_header_rows]
+    if header_rows:
+        label_end = max(set(label_ends), key=label_ends.count)
+        aligned = _align_by_position(header_rows, row_positions, label_end)
+    if aligned is not None:
+        columns, padded_data = aligned
+        df = pd.DataFrame(padded_data, columns=columns)
+        return _finish_dataframe(df, row_labels, row_parent_contexts)
 
     num_cols = len(header_cols) if header_cols else max(len(r) for r in row_data)
 
@@ -1756,7 +2008,11 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
         columns.extend([f"Col_{i}" for i in range(len(columns), len(padded_data[0]))])
 
     df = pd.DataFrame(padded_data, columns=columns[:len(padded_data[0])] if padded_data else columns)
+    return _finish_dataframe(df, row_labels, row_parent_contexts)
 
+
+def _finish_dataframe(df: pd.DataFrame, row_labels: List[str], row_parent_contexts: List[str]) -> pd.DataFrame:
+    """Set row labels, object dtype and parsed numbers on an extracted table."""
     if row_labels and len(row_labels) >= len(df):
         df.index = row_labels[:len(df)]
         df.index.name = "Item"

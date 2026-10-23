@@ -60,6 +60,11 @@ _ITEM_ANCHOR = r'(?:^[ \t]*|[-=_─–—]{5,}[ \t]*)'
 # item, starting it and ending it all use this label, so the three cannot disagree.
 _ITEM_LABEL = r'Item\s*[-–—:]?\s*'
 
+# An 8-K item number: "2.02", "9. 01" (Apple-style spacing) or a legacy bare "1"-"9". The whole
+# number must match, so "ITEM 2024 performance awards" and "Item 401(k)" are not items and do not
+# end the item before them. Every item parser uses this pattern (GH #1772, #1773).
+_ITEM_NUMBER = r'[1-9](?:\s*\.\s*\d{1,2})?(?!\d)'
+
 
 def _extract_items_from_text(text: str) -> List[str]:
     """
@@ -107,7 +112,7 @@ def _extract_items_from_text(text: str) -> List[str]:
     # - "Item 1-Item 4" (Item 4, only one dash — not a rule, not at line start)
     # - Mid-sentence references to items
     pattern = re.compile(
-        _ITEM_ANCHOR + _ITEM_LABEL + r'(\d+\.?\s*\d*)',
+        _ITEM_ANCHOR + _ITEM_LABEL + '(' + _ITEM_NUMBER + ')',
         re.IGNORECASE | re.MULTILINE
     )
     matches = pattern.findall(text)
@@ -215,12 +220,15 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
     # Pattern matches: "Item 9", "Item 9.", "Item 9:", "Item 9.02", etc.
     # Must sit at an item-header anchor (line start, or after a horizontal rule)
     # to avoid matching mid-sentence references
+    # The number found must be the whole item number asked for, so "Item 5" does not start at
+    # "Item 5.02".
     item_pattern = re.compile(
-        rf'{_ITEM_ANCHOR}({_ITEM_LABEL}{re.escape(item_num)}[\s\.:\-]*)',
+        rf'{_ITEM_ANCHOR}({_ITEM_LABEL}({_ITEM_NUMBER})[\s\.:\-]*)',
         re.IGNORECASE | re.MULTILINE
     )
 
-    match = item_pattern.search(filing_text)
+    match = next((m for m in item_pattern.finditer(filing_text)
+                  if _normalize_item_number(m.group(2)) == item_num), None)
     if not match:
         return None
 
@@ -231,7 +239,7 @@ def _extract_item_content_from_text(filing_text: str, item_name: str) -> Optiona
     # Step 3: Find end position
     # Look for next "Item X" pattern
     next_item_pattern = re.compile(
-        _ITEM_ANCHOR + _ITEM_LABEL + r'\d+\.?\s*\d*[\s\.:\-]',
+        _ITEM_ANCHOR + _ITEM_LABEL + _ITEM_NUMBER + r'[\s\.:\-]',
         re.IGNORECASE | re.MULTILINE
     )
     next_match = next_item_pattern.search(filing_text, match.end(1))
