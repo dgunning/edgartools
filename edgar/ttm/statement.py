@@ -4,7 +4,7 @@ Provides TTMStatement and TTMStatementBuilder for creating
 trailing twelve month financial statements.
 """
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from typing import Callable, List, Optional, Tuple
 
 import pandas as pd
@@ -29,6 +29,100 @@ def _is_per_share_item(item: dict) -> bool:
 def _is_share_count_item(item: dict) -> bool:
     """True when a statement line item holds a number of shares."""
     return is_share_count_label(item.get('concept', ''), item.get('label', ''))
+
+
+def _period_days(start: date, end: date) -> int:
+    """Length of a duration period in days, both ends included."""
+    return (end - start).days + 1
+
+
+def _quarter_share_count(quarter: FinancialFact, quarter_counts: dict, annual_counts: dict,
+                         cumulative_counts: Optional[dict] = None) -> Optional[float]:
+    """Weighted-average share count for one quarter of a TTM window.
+
+    A filed three-month count is used as is. A fiscal-year count is never put in
+    a quarter's place: when the quarter closes a fiscal year and has no
+    three-month count (10-Ks rarely tag one), its count is solved from the
+    fiscal-year count and the year's other three quarters, weighting each period
+    by its days, which is how the year's weighted average is built (ASC
+    260-10-45-10). Failing that, it is solved the same way from the filer's
+    cumulative counts: the period through the quarter's end less the period
+    through the day before it starts (Q4 = FY - 9M, Q3 = 9M - 6M). Returns None
+    when neither is possible (GH #1691).
+    """
+    filed = quarter_counts.get(quarter.period_end)
+    if filed is not None:
+        return filed.numeric_value
+    if quarter.period_start is None:
+        return None
+
+    year = annual_counts.get(quarter.period_end)
+    if year is not None and year.period_start is not None:
+        others = [f for end, f in quarter_counts.items()
+                  if year.period_start < end < quarter.period_start and f.period_start
+                  and f.period_start >= year.period_start]
+        year_days = _period_days(year.period_start, year.period_end)
+        quarter_days = _period_days(quarter.period_start, quarter.period_end)
+        other_days = sum(_period_days(f.period_start, f.period_end) for f in others)
+        if len(others) == 3 and abs(other_days + quarter_days - year_days) <= 3:
+            solved = (year.numeric_value * year_days
+                      - sum(f.numeric_value * _period_days(f.period_start, f.period_end) for f in others)) / quarter_days
+            if solved > 0:
+                return solved
+
+    return _solve_from_cumulative(quarter, cumulative_counts or {})
+
+
+def _solve_from_cumulative(quarter: FinancialFact, cumulative_counts: dict) -> Optional[float]:
+    """A quarter's count from two cumulative counts sharing a start (GH #1691).
+
+    ``cumulative_counts`` maps (period_start, period_end) to a share fact. The
+    weighted average through the quarter's end, times its days, less the one
+    through the day before the quarter starts, is the quarter's share-days.
+    """
+    prior_end = quarter.period_start - timedelta(days=1)
+    quarter_days = _period_days(quarter.period_start, quarter.period_end)
+    for (start, end), through in cumulative_counts.items():
+        if end != quarter.period_end or start >= quarter.period_start:
+            continue
+        before = cumulative_counts.get((start, prior_end))
+        if before is None:
+            continue
+        solved = (through.numeric_value * _period_days(start, end)
+                  - before.numeric_value * _period_days(start, prior_end)) / quarter_days
+        if solved > 0:
+            return solved
+    return None
+
+
+def _window_share_count(window: List[FinancialFact], quarter_counts: dict, annual_counts: dict,
+                        cumulative_counts: Optional[dict] = None) -> Optional[float]:
+    """Weighted-average share count over a four-quarter TTM window (GH #1691).
+
+    A window that is a fiscal year uses that year's filed count, so its EPS is
+    the filed annual EPS. Any other window weights its quarters' counts by their
+    days. ``quarter_counts`` and ``annual_counts`` map period_end to a three-month
+    and a fiscal-year share fact; ``cumulative_counts`` (see _share_count_maps)
+    lets a quarter with no count of its own be solved. Returns None when a
+    quarter has no count.
+    """
+    start, end = window[0].period_start, window[-1].period_end
+    year = annual_counts.get(end)
+    if year is not None and year.period_start and start and abs((year.period_start - start).days) <= 7:
+        return year.numeric_value
+
+    weighted = 0.0
+    total_days = 0
+    for quarter in window:
+        if quarter.period_start is None:
+            return None
+        count = _quarter_share_count(quarter, quarter_counts, annual_counts, cumulative_counts)
+        if count is None:
+            return None
+        days = _period_days(quarter.period_start, quarter.period_end)
+        weighted += count * days
+        total_days += days
+    return weighted / total_days if total_days else None
 
 
 @dataclass
@@ -357,42 +451,35 @@ class TTMStatementBuilder:
 
             share_annual = shares_calc._filter_by_duration(DurationBucket.ANNUAL)
             shares_by_end_annual = {}
-            shares_by_year_annual = {}
             for fact in share_annual:
                 key = fact.period_end
                 if key not in shares_by_end_annual or (
                     fact.filing_date and shares_by_end_annual[key].filing_date and fact.filing_date > shares_by_end_annual[key].filing_date
                 ):
                     shares_by_end_annual[key] = fact
-                if fact.fiscal_year:
-                    existing = shares_by_year_annual.get(fact.fiscal_year)
-                    if not existing or (
-                        fact.filing_date and existing.filing_date and fact.filing_date > existing.filing_date
-                    ):
-                        shares_by_year_annual[fact.fiscal_year] = fact
+            shares_by_end = {k: f for k, f in shares_by_end.items() if f.numeric_value is not None}
+            shares_by_end_annual = {k: f for k, f in shares_by_end_annual.items() if f.numeric_value is not None}
+            # Every cumulative count by (start, end), so a quarter with no count
+            # of its own can be solved from two of them (GH #1691).
+            shares_cumulative = {}
+            for bucket in (DurationBucket.QUARTER, DurationBucket.YTD_6M, DurationBucket.YTD_9M, DurationBucket.ANNUAL):
+                for fact in shares_calc._filter_by_duration(bucket):
+                    if fact.numeric_value is None or fact.period_start is None:
+                        continue
+                    key = (fact.period_start, fact.period_end)
+                    held = shares_cumulative.get(key)
+                    if held is None or (fact.filing_date and held.filing_date and fact.filing_date > held.filing_date):
+                        shares_cumulative[key] = fact
 
             rows = []
             for i in range(3, len(ni_quarters)):
                 window = ni_quarters[i - 3:i + 1]
-                window_ends = [q.period_end for q in window]
-                window_shares = []
-                for quarter in window:
-                    end = quarter.period_end
-                    share_fact = shares_by_end.get(end) or shares_by_end_annual.get(end)
-                    if not share_fact and quarter.fiscal_period == "Q4":
-                        share_fact = shares_by_year_annual.get(quarter.fiscal_year)
-                    if not share_fact or share_fact.numeric_value is None:
-                        window_shares = []
-                        break
-                    window_shares.append(share_fact.numeric_value)
-
-                if not window_shares:
+                # A fiscal-year count never fills a quarter's slot (GH #1691)
+                avg_shares = _window_share_count(window, shares_by_end, shares_by_end_annual, shares_cumulative)
+                if not avg_shares:
                     continue
 
                 ttm_income = sum(q.numeric_value for q in window if q.numeric_value is not None)
-                avg_shares = sum(window_shares) / len(window_shares)
-                if avg_shares == 0:
-                    continue
 
                 as_of_fact = window[-1]
                 label_fy = calculate_fiscal_year_for_label(
