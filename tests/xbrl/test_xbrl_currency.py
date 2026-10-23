@@ -83,6 +83,27 @@ class TestExchangeRate:
         assert "2024" in repr_str
 
 
+def _bntx_converter(average=1.0824, closing=1.0389):
+    """BioNTech's 2024 rates as its 20-F (0001776985-26-000049) states them:
+    USD per EUR (1.0824 is also SAP's filed USD per EUR average for 2024).
+
+    These tests used to build the converter as "1.0824 EUR per USD" and assert
+    1000 EUR = 923.85 USD. That reading was false (GH #1651): 1000 EUR is
+    1082.40 USD. The direction is now held per rate, so it is set here.
+    """
+    converter = CurrencyConverter.__new__(CurrencyConverter)
+    converter.home_currency = "EUR"
+    converter.target_currency = "USD"
+    converter.exchange_rates = {2024: ExchangeRate(year=2024, average=average, closing=closing)}
+    converter._factors = {}
+    converter._basis = {}
+    for kind, value in (("average", average), ("closing", closing)):
+        if value is not None:
+            converter._factors[(2024, kind)] = value          # USD per 1 EUR
+            converter._basis[(2024, kind)] = ("USD per EUR", "set by hand")
+    return converter
+
+
 class TestCurrencyConverterUnit:
     """Unit tests for CurrencyConverter (no network)."""
 
@@ -112,19 +133,11 @@ class TestCurrencyConverterUnit:
 
     def test_to_usd_conversion_direct_format(self):
         """Test conversion with direct rate format (like BNTX EUR rates)."""
-        converter = CurrencyConverter.__new__(CurrencyConverter)
-        converter.home_currency = "EUR"
-        converter.target_currency = "USD"
-        converter._rate_scale = 1.0
-        converter.exchange_rates = {
-            2024: ExchangeRate(year=2024, average=1.0824, closing=1.0389),
-        }
+        converter = _bntx_converter()
 
-        # 1.0824 EUR per USD means 1 USD = 1.0824 EUR
-        # So 1000 EUR = 1000 / 1.0824 = ~923.85 USD
+        # 1.0824 USD per EUR, so 1000 EUR = 1000 * 1.0824 = 1082.40 USD
         result = converter.to_usd(1000, 2024, rate_type='average')
-        assert result is not None
-        assert abs(result - 923.85) < 0.1
+        assert result == pytest.approx(1082.4)
 
     def test_to_usd_missing_year(self):
         """Test conversion returns None for missing year."""
@@ -237,16 +250,10 @@ class TestCurrencyConverterUnit:
 
     def test_repr_direct_scale_format(self):
         """Test __repr__ with direct rate scale (rates < 10)."""
-        converter = CurrencyConverter.__new__(CurrencyConverter)
-        converter.home_currency = "EUR"
-        converter.target_currency = "USD"
-        converter._rate_scale = 1.0  # Direct rate format
-        converter.exchange_rates = {
-            2024: ExchangeRate(year=2024, average=1.0824, closing=1.0389),
-        }
+        converter = _bntx_converter()
 
         repr_str = repr(converter)
-        assert "EUR per USD" in repr_str  # Not "per 100"
+        assert "Rates (USD per EUR)" in repr_str  # Not "per 100", not EUR per USD
         assert "1.0824" in repr_str
         assert "1.0389" in repr_str
 
@@ -381,38 +388,23 @@ class TestCurrencyConverterUnit:
 
     def test_to_usd_with_direct_scale(self):
         """Test to_usd conversion with direct rate scale."""
-        converter = CurrencyConverter.__new__(CurrencyConverter)
-        converter.home_currency = "EUR"
-        converter.target_currency = "USD"
-        converter._rate_scale = 1.0
-        converter.exchange_rates = {
-            2024: ExchangeRate(year=2024, average=1.0824, closing=1.0389),
-        }
+        converter = _bntx_converter()
 
-        # 1.0824 EUR per USD means 1000 EUR = 1000 / 1.0824 = ~923.85 USD
+        # 1.0824 USD per EUR: 1000 EUR = 1082.40 USD
         result = converter.to_usd(1000, 2024, rate_type='average')
-        assert result is not None
-        assert abs(result - 923.85) < 0.1
+        assert result == pytest.approx(1082.4)
 
-        # Test closing rate
+        # Closing 1.0389 USD per EUR: 1000 EUR = 1038.90 USD
         result = converter.to_usd(1000, 2024, rate_type='closing')
-        assert result is not None
-        assert abs(result - 962.56) < 0.1
+        assert result == pytest.approx(1038.9)
 
     def test_from_usd_with_direct_scale(self):
         """Test from_usd conversion with direct rate scale."""
-        converter = CurrencyConverter.__new__(CurrencyConverter)
-        converter.home_currency = "EUR"
-        converter.target_currency = "USD"
-        converter._rate_scale = 1.0
-        converter.exchange_rates = {
-            2024: ExchangeRate(year=2024, average=1.0824),
-        }
+        converter = _bntx_converter(closing=None)
 
-        # 1.0824 EUR per USD means 1000 USD = 1000 * 1.0824 = 1082.4 EUR
+        # 1.0824 USD per EUR: 1000 USD = 1000 / 1.0824 = 923.87 EUR
         result = converter.from_usd(1000, 2024, rate_type='average')
-        assert result is not None
-        assert abs(result - 1082.4) < 0.01
+        assert result == pytest.approx(923.8729, abs=1e-4)
 
 
 @pytest.mark.network
