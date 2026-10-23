@@ -9,6 +9,7 @@ tables from 10-K, 10-Q, 8-K, proxy statements, 13D/G, 13F, and other forms.
 from __future__ import annotations
 
 import logging
+import re
 from typing import Any, Optional
 import pandas as pd
 
@@ -441,8 +442,14 @@ def _extract_8k_section(obj, section: str) -> Optional[str]:
 
     elif section == "press_release":
         try:
-            if hasattr(obj, 'press_releases') and obj.press_releases:
-                return str(obj.press_releases)
+            press_releases = getattr(obj, 'press_releases', None)
+            if press_releases:
+                # ``str(press_releases)`` renders the attachments table, not the release.
+                text = press_releases[0].text()
+                if text:
+                    # The converted text pads tables with runs of blanks that
+                    # would spend the section cap on layout.
+                    return re.sub(r"[ \t]{2,}", " ", text)
             if hasattr(obj, 'has_press_release') and not obj.has_press_release:
                 return "No press release attached to this 8-K."
         except Exception as e:
