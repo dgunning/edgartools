@@ -63,10 +63,15 @@ def detect_splits(facts: List[FinancialFact]) -> List[Dict[str, Any]]:
             split_key = (f.period_end.year, f.numeric_value)
             candidates[split_key].append(f)
 
-    # For each split event, pick the fact with the best date
+    # For each split event, pick the fact with the best date. Among facts of the
+    # same kind, take the LATEST date: a filer tags one split on its
+    # announcement and its effective date (GOOGL: 2022-02-01 and 2022-07-15),
+    # and per-share facts filed in between are still on the pre-split basis.
+    # Taking the first listed dated GOOGL's split by the announcement, so those
+    # facts were never adjusted (GH #1696).
     splits = []
     for (_year, ratio), fact_group in candidates.items():
-        best = min(fact_group, key=_split_fact_priority)
+        best = min(fact_group, key=lambda f: (_split_fact_priority(f), -f.period_end.toordinal()))
         splits.append({
             'date': best.period_end,
             'ratio': ratio
