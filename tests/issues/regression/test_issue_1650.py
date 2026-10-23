@@ -236,3 +236,66 @@ def test_zero_and_non_finite_rates_are_unusable_and_reported(value):
     assert converter.to_usd(100, 2025) is None          # was ZeroDivisionError for 0
     assert ("1 average exchange rate fact(s) had no usable value "
             "(empty, zero or not finite) and were not used") in converter.extraction_warnings
+
+
+# ---------------------------------------------------------------------------
+# Review follow-up: the year end is the filer's, not the calendar's. By
+# construction: a March year-end INR filer (as Tata Motors and Wipro are) whose
+# table also holds a September interim rate in the same calendar year.
+# ---------------------------------------------------------------------------
+
+class _MarchYearEndXBRL(_RowsXBRL):
+    units = {"home": {"type": "simple", "measure": "iso4217:INR"},
+             "number": {"type": "simple", "measure": "xbrli:pure"}}
+
+    def __init__(self, period_end="2024-03-31", **rows):
+        super().__init__(**rows)
+        self.entity_info = {"document_period_end_date": period_end,
+                            "fiscal_year_end_month": None, "fiscal_year_end_day": None}
+        self.facts.to_dataframe = lambda: pd.DataFrame({"unit_ref": ["home"]})
+
+
+def _period_warnings(converter):
+    return [w for w in converter.extraction_warnings if "period end" in w]
+
+
+def test_a_march_year_end_closing_rate_beats_a_later_interim_rate():
+    converter = CurrencyConverter(_MarchYearEndXBRL(closing=[
+        {"value": 83.4, "instant": "2024-03-31"},   # fiscal year end
+        {"value": 83.8, "instant": "2024-09-30"},   # interim, later in 2024
+    ]))
+    assert converter.get_rate(2024, "closing") == 83.4
+    assert _period_warnings(converter) == []
+
+
+def test_a_march_year_end_full_year_average_beats_a_later_half_year():
+    converter = CurrencyConverter(_MarchYearEndXBRL(average=[
+        {"value": 82.8, "start": "2023-04-01", "end": "2024-03-31"},   # the fiscal year
+        {"value": 83.5, "start": "2024-04-01", "end": "2024-09-30"},   # a half year
+    ]))
+    assert converter.get_rate(2024, "average") == 82.8
+    assert _period_warnings(converter) == []
+
+
+def test_a_rate_not_at_the_period_end_is_used_with_a_warning():
+    converter = CurrencyConverter(_MarchYearEndXBRL(closing=[
+        {"value": 83.8, "instant": "2024-09-30"},
+    ]))
+    assert converter.get_rate(2024, "closing") == 83.8
+    assert ("no closing USD rate for 2024 is dated at the filing's period end "
+            "(--03-31); the one dated 2024-09-30 was used") in converter.extraction_warnings
+
+
+def test_without_a_period_end_the_longest_average_wins_and_the_choice_is_reported():
+    # A filing with no DocumentPeriodEndDate: the full year still beats a later
+    # half year, which the "latest date first" order got wrong.
+    xbrl = _MarchYearEndXBRL(average=[
+        {"value": 82.8, "start": "2023-04-01", "end": "2024-03-31"},
+        {"value": 83.5, "start": "2024-04-01", "end": "2024-09-30"},
+    ])
+    xbrl.entity_info = {}
+    converter = CurrencyConverter(xbrl)
+    assert converter.get_rate(2024, "average") == 82.8
+    assert ("the filing states no period end; of the average USD rates for 2024 "
+            "dated 2024-03-31, 2024-09-30, the one dated 2024-03-31 was used"
+            ) in converter.extraction_warnings

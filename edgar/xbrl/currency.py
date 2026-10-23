@@ -105,6 +105,27 @@ def _days(start, end) -> float:
     return 0.0 if math.isnan(days) else days
 
 
+def _near_period_end(day: str, anchor: tuple, tolerance: int = 7) -> bool:
+    """True when ``day`` (YYYY-MM-DD) falls within ``tolerance`` days of the
+    ``(month, day)`` anchor in any year: a 52-53 week year ends a few days
+    either side of its nominal date."""
+    try:
+        when = pd.Timestamp(day)
+    except (TypeError, ValueError):
+        return False
+    if pd.isna(when):
+        return False
+    month, dom = anchor
+    for year in (when.year - 1, when.year, when.year + 1):
+        try:
+            end = pd.Timestamp(year=year, month=month, day=dom)
+        except ValueError:  # 29 February in a common year
+            end = pd.Timestamp(year=year, month=month, day=28)
+        if abs((when - end).days) <= tolerance:
+            return True
+    return False
+
+
 def _local_name(qname: str) -> str:
     """``'currency:USD'`` -> ``'USD'``."""
     return qname.rsplit(':', 1)[-1]
@@ -500,6 +521,29 @@ class CurrencyConverter:
             )
         return reading, how
 
+    def _period_end_anchor(self) -> Optional[tuple]:
+        """``(month, day)`` of the filing's period end, or None if it states none.
+
+        DocumentPeriodEndDate first: for a 20-F it is the fiscal year end, for
+        an interim report the interim date, which is what the report's own rates
+        are dated at. Then CurrentFiscalYearEndDate.
+        """
+        info = getattr(self.xbrl, 'entity_info', None)
+        if not isinstance(info, dict):
+            return None
+        end = info.get('document_period_end_date')
+        if end:
+            try:
+                when = pd.Timestamp(end)
+            except (TypeError, ValueError):
+                when = None
+            if when is not None and not pd.isna(when):
+                return when.month, when.day
+        month, day = info.get('fiscal_year_end_month'), info.get('fiscal_year_end_day')
+        if isinstance(month, int) and isinstance(day, int):
+            return month, day
+        return None
+
     def _fact_dimensions(self, row) -> Dict[str, str]:
         """The dimensions of a fact's context, e.g. ``{'srt:CurrencyAxis': 'currency:USD'}``."""
         context = self.xbrl.contexts.get(row.get('context_ref'))
@@ -566,20 +610,39 @@ class CurrencyConverter:
                 'days': _days(row.get('period_start'), period_date),
             })
 
+        anchor = self._period_end_anchor()
         selected = []
         for year, facts in candidates.items():
             # The translation rate has the fewest other dimensions; of those, the
-            # one at the year end (not an interim or IFRS transition date), and for
-            # an average the full-year period rather than a half year.
+            # one at the filing's period end (not an interim or IFRS transition
+            # date), and for an average the longest period ending there. The
+            # period end is the filer's: a March year end's 31 March rate, not a
+            # later September rate in the same calendar year (GH #1650 review).
             # A fact naming the currency beats one that does not.
             if any(f['named'] for f in facts):
                 facts = [f for f in facts if f['named']]
             fewest = min(f['extra'] for f in facts)
             facts = [f for f in facts if f['extra'] == fewest]
-            latest = max(f['date'] for f in facts)
-            facts = [f for f in facts if f['date'] == latest]
+            dates = sorted({f['date'] for f in facts})
+            at_end = [f for f in facts if anchor and _near_period_end(f['date'], anchor)]
+            if at_end:
+                facts = at_end
+            # The longest period first, so a half year never beats the full year.
             longest = max(f['days'] for f in facts)
             facts = [f for f in facts if f['days'] == longest]
+            latest = max(f['date'] for f in facts)
+            facts = [f for f in facts if f['date'] == latest]
+            if anchor and not at_end:
+                self._extraction_warnings.append(
+                    f"no {kind} {target} rate for {year} is dated at the filing's "
+                    f"period end (--{anchor[0]:02d}-{anchor[1]:02d}); the one dated "
+                    f"{latest} was used"
+                )
+            elif not anchor and len(dates) > 1:
+                self._extraction_warnings.append(
+                    f"the filing states no period end; of the {kind} {target} rates "
+                    f"for {year} dated {', '.join(dates)}, the one dated {latest} was used"
+                )
             quotes = {f['quote'] for f in facts}
             value = _agreed_value([(f['value'], f['decimals']) for f in facts])
             values = sorted({f['value'] for f in facts})
