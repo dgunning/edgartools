@@ -565,9 +565,18 @@ class Financials:
         # instead of $83.7B, and JPMorgan's fell through to the label patterns
         # below, which took "Noninterest revenue" ($87.0B of $182.4B)
         # (edgartools-u9yc9).
+        #
+        # Utilities tag their operating revenue total
+        # us-gaap:RegulatedAndUnregulatedOperatingRevenue, which no revenue
+        # mapping carries and whose captions ("Operating revenues") match no
+        # label pattern, so NextEra's Q2 2026 10-Q returned None for $7,534M
+        # and MGE Energy's returned its $29.6M "Gas revenue" component for a
+        # $161.2M total (gh #1665). It is a total, so it goes before contract
+        # revenue, which a utility can report as one of its components.
         result = self._get_standardized_concept_by_xbrl(
             'income',
-            ['Revenue', 'us-gaap_RevenuesNetOfInterestExpense', 'Contract Revenue'],
+            ['Revenue', 'us-gaap_RevenuesNetOfInterestExpense',
+             'us-gaap_RegulatedAndUnregulatedOperatingRevenue', 'Contract Revenue'],
             period_offset
         )
 
