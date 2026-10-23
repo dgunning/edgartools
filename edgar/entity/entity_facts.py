@@ -1699,11 +1699,12 @@ class EntityFacts:
         ])
         shares_basic = _collect_facts([
             "WeightedAverageNumberOfSharesOutstandingBasic",
-            "WeightedAverageNumberOfSharesOutstandingBasicAndDiluted",
+            "WeightedAverageNumberOfShareOutstandingBasicAndDiluted",
         ])
         shares_diluted = _collect_facts([
             "WeightedAverageNumberOfDilutedSharesOutstanding",
             "WeightedAverageNumberOfSharesOutstandingDiluted",
+            "WeightedAverageNumberOfShareOutstandingBasicAndDiluted",
         ])
 
         def _has_eps_for_period(concept_name: str, period_end: date, fiscal_period: str) -> bool:

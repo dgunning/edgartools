@@ -293,11 +293,12 @@ class TTMStatementBuilder:
             ]
             shares_basic_concepts = [
                 "WeightedAverageNumberOfSharesOutstandingBasic",
-                "WeightedAverageNumberOfSharesOutstandingBasicAndDiluted",
+                "WeightedAverageNumberOfShareOutstandingBasicAndDiluted",
             ]
             shares_diluted_concepts = [
                 "WeightedAverageNumberOfDilutedSharesOutstanding",
                 "WeightedAverageNumberOfSharesOutstandingDiluted",
+                "WeightedAverageNumberOfShareOutstandingBasicAndDiluted",
             ]
 
             net_income_facts = None
