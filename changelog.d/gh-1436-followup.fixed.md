@@ -1,0 +1,1 @@
+**Total investments and securities disclosures no longer standardize as cash.** Sixteen more securities entries led with the cash concept, so Allstate's FY2025 cash group summed to $83,915M against the filed $678M. Held-to-maturity and available-for-sale carrying values are now investments, and the other 14 have no standard concept. (GH #1436)

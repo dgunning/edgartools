@@ -68,7 +68,7 @@ The number of standardized concepts varies by provider:
 
 | Standard Concept | Display Name | XBRL Tags | Examples |
 |------------------|--------------|-----------|----------|
-| `CashAndMarketableSecurities` | Cash and Cash Equivalents | 61 | `AssetBackedSecuritiesAtCarryingValue`, `AvailableForSaleDebtSecuritiesAmortizedCostBasis`, `AvailableForSaleSecurities`, ... |
+| `CashAndMarketableSecurities` | Cash and Cash Equivalents | 22 | `AssetBackedSecuritiesAtCarryingValue`, `Cash`, `CashAndCashEquivalentsAtCarryingValue`, ... |
 | `TradeReceivables` | Accounts Receivable | 34 | `AccountsAndNotesReceivableNet`, `AccountsAndOtherReceivablesNetCurrent`, `AccountsNotesAndLoansReceivableNetCurrent`, ... |
 | `Inventories` | Inventory | 66 | `AgriculturalRelatedInventory`, `AgriculturalRelatedInventoryFeedAndSupplies`, `AgriculturalRelatedInventoryGrowingCrops`, ... |
 | `DeferredTaxCurrentAssets` | Deferred Tax Assets, Current | 44 | `DeferredIncomeTaxesAndOtherAssetsCurrent`, `DeferredIncomeTaxesAndOtherTaxReceivableCurrent`, `DeferredTaxAssetsDeferredIncome`, ... |
