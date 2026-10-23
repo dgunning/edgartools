@@ -2150,7 +2150,7 @@ class XBRL:
 
             # Post-process: apply member hierarchy from definition linkbase
             if dim_items_added:
-                self._apply_member_hierarchy(dim_items_added)
+                self._apply_member_hierarchy(dim_items_added, statement_role)
             # Now add to result in correct order
             result.extend(dim_items_added)
 
@@ -2166,7 +2166,8 @@ class XBRL:
                                       statement_role=statement_role,
                                       preferred_label_override=child_override)
 
-    def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]]) -> None:
+    def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]],
+                                statement_role: Optional[str] = None) -> None:
         """Adjust level of dimensional items based on definition linkbase member hierarchy.
 
         The definition linkbase defines member-to-member relationships (e.g.,
@@ -2184,6 +2185,13 @@ class XBRL:
         rows would collide and the earlier one would be dropped; the domain
         hierarchy cannot say which axis's row it nests, so neither is
         reordered and both pass through (edgartools-3h3q).
+
+        A domain-member network belongs to its extended link role (XBRL
+        Dimensions 1.0 section 2.4), so with ``statement_role`` given only that
+        role's member relationships nest rows. The union across roles nested
+        Tesla's "Services and other" under a subtotal member that only a note
+        declares (GH #1701). A role with no domain-member arcs falls back to the
+        union, so filings without a per-role definition network keep their nesting.
         """
         member_to_item = {}
         ambiguous = set()
@@ -2205,7 +2213,9 @@ class XBRL:
             return
 
         member_ids = set(member_to_item.keys())
-        domains = self.parser.domains
+        # A role with no domain-member arcs of its own (no definition network
+        # for the statement) keeps the cross-role union, as before GH #1701.
+        domains = (self.parser.domains_for_role(statement_role) if statement_role else None) or self.parser.domains
 
         # Find members that are parents of other members in our set
         member_children = {}
