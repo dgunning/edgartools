@@ -66,6 +66,28 @@ STALE_THRESHOLD_DAYS = 185
 MAX_SPLIT_LAG_DAYS = 280  # Maximum days between period_end and filing_date for valid split
 MAX_SPLIT_DURATION_DAYS = 31  # Maximum duration for a valid split fact (instant or short)
 
+# Monetary duration concepts whose quarters are not defined to add up to the
+# year, so a quarter cannot be derived by subtraction (Q4 = FY - 9M, Q2 = 6M - Q1)
+# (GH #1693). Keyed by local name. Their unit (USD) says nothing about this; the
+# concept definition does:
+# - Two-class EPS allocations are made separately for each period (ASC 260-10-45-60B).
+# - Revenue recognized out of a contract liability counts the balance at the start
+#   of the period (ASC 606-10-50-8(b)): Snowflake's three FY2025 quarters sum to
+#   1,994.7M against a nine-month figure of 1,600M.
+# - The rest are measured for another period than the reporting interval.
+# This is a reviewed list, not a classification of the taxonomy; concepts not on
+# it keep the unit-based rule in `_is_additive_concept`.
+NON_ADDITIVE_DURATION_CONCEPTS = frozenset({
+    "NetIncomeLossAvailableToCommonStockholdersBasic",
+    "UndistributedEarningsLossAllocatedToParticipatingSecuritiesBasic",
+    "DistributedEarnings",
+    "ContractWithCustomerLiabilityRevenueRecognized",
+    "DeferredIncomeRevenueRecognized",
+    "BusinessAcquisitionsPurchasePriceAllocationYearOfAcquisitionNetEffectOnIncome",
+    "ManagingMemberOrGeneralPartnerSubsequentDistributionAmount",
+    "PreviouslyEstimatedDevelopmentCostsIncurred",
+})
+
 
 class DurationBucket:
     """Duration classification buckets for period facts."""
@@ -531,6 +553,8 @@ class TTMCalculator:
 
         Returns False for:
         - Instant facts (Assets, Equity) - point-in-time, not flows
+        - Concepts in NON_ADDITIVE_DURATION_CONCEPTS - monetary, but their
+          quarters do not add up to the year by definition (GH #1693)
         - Share counts (UnitType.SHARES) - not additive
         - Ratios/Rates (UnitType.RATIO) - averages, not sums
         - Per-share metrics (EPS) - derived from Income/Shares, shares change
@@ -545,7 +569,12 @@ class TTMCalculator:
             log.debug(f"Skipping derivation for {fact.concept}: instant period type")
             return False
 
-        # 2. Unit Type Check
+        # 2. Concept definition: some monetary flows do not add up over time
+        if fact.concept.split(':')[-1] in NON_ADDITIVE_DURATION_CONCEPTS:
+            log.debug(f"Skipping derivation for {fact.concept}: quarters do not add up to the year")
+            return False
+
+        # 3. Unit Type Check
         if not fact.unit:
             return True  # Assume additive if no unit (rare)
 
