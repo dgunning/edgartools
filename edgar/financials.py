@@ -922,9 +922,12 @@ class Financials:
         # none of the five, so this returned None for Apple entirely (GH #1083).
         # Which of those five a filer happens to hit is an accident of house
         # style; the XBRL concept is the same for all of them.
+        # IFRS files the same total as CashFlowsFromUsedInOperatingActivities,
+        # which the mapping does not carry; Shell ("Cash flow from operating
+        # activities") and BP matched no label pattern and got None (gh #1785).
         result = self._get_standardized_concept_by_xbrl(
             'cashflow',
-            ['Net Cash from Operating Activities'],
+            ['Net Cash from Operating Activities', 'ifrs-full_CashFlowsFromUsedInOperatingActivities'],
             period_offset
         )
 
@@ -968,13 +971,27 @@ class Financials:
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
+        The basis is the investing-activities line for cash paid to acquire
+        property, plant and equipment (with intangibles where the filer reports
+        them as one line, as IFRS allows). It is not a broader "cash capital
+        expenditure" subtotal that adds investments in joint ventures or
+        securities (Shell's), and never a noncash accrual.
+
         Returns:
-            Capital expenditures value if found, None otherwise
+            Capital expenditures as a filed magnitude if found, None otherwise
         """
-        # First try concept-based search using standardization mappings
+        # First try concept-based search using standardization mappings, then
+        # the IFRS purchase lines the mapping does not carry: TSMC's 20-F
+        # captions its row just "Property, plant and equipment" under
+        # "Acquisitions of", which no label pattern can safely match (gh #1785).
         result = self._get_standardized_concept_by_xbrl(
             'cashflow',
-            ['Payments for Property, Plant and Equipment'],
+            ['Payments for Property, Plant and Equipment',
+             'ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities',
+             'ifrs-full_PurchaseOfPropertyPlantAndEquipmentIntangibleAssetsOtherThanGoodwill'
+             'InvestmentPropertyAndOtherNoncurrentAssets',
+             # Shell's "Capital expenditure" line
+             'ifrs-full_PurchaseOfOtherLongtermAssetsClassifiedAsInvestingActivities'],
             period_offset
         )
 
