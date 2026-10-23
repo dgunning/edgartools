@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from lxml import etree as ET
 
-from edgar.xbrl.core import PERIOD_END_LABEL, PERIOD_START_LABEL, extract_element_id
+from edgar.xbrl.core import PERIOD_END_LABEL, PERIOD_START_LABEL, extract_element_id, is_period_boundary_label_role
 from edgar.xbrl.models import ElementCatalog, PresentationNode, PresentationTree, XBRLProcessingError
 from edgar.xmltools import xml_parser
 
@@ -19,7 +19,17 @@ from .base import BaseParser
 # Roll-forward label roles legitimately repeat the same concept under one parent
 # (e.g. cash flow's "Cash, beginning/ending balances"). These must NOT be
 # deduplicated even though both arcs collapse to a single element_id node.
-ROLL_FORWARD_LABELS = {PERIOD_START_LABEL, PERIOD_END_LABEL}
+# Includes the negated period roles (GH #1700). Kept for importers; the parser
+# itself tests roles with is_period_boundary_label_role, which matches these
+# and any other namespace version by local name.
+ROLL_FORWARD_LABELS = {
+    PERIOD_START_LABEL,
+    PERIOD_END_LABEL,
+    "http://www.xbrl.org/2009/role/negatedPeriodStartLabel",
+    "http://www.xbrl.org/2009/role/negatedPeriodEndLabel",
+    "http://xbrl.us/us-gaap/role/label/negatedPeriodStart",
+    "http://xbrl.us/us-gaap/role/label/negatedPeriodEnd",
+}
 
 
 class PresentationParser(BaseParser):
@@ -249,7 +259,8 @@ class PresentationParser(BaseParser):
             # duplicate child reference would render the identical line item twice.
             # Keep the first occurrence (lowest order) and skip the rest.
             #
-            # Exception: roll-forward arcs (periodStart/periodEndLabel) repeat the
+            # Exception: roll-forward arcs (periodStart/periodEndLabel, and their
+            # negated forms, GH #1700) repeat the
             # same concept on purpose -- e.g. cash flow's "Cash, beginning/ending
             # balances" -- and statement rendering relies on both references being
             # present (first occurrence = beginning, later = ending). Never dedupe
@@ -259,7 +270,7 @@ class PresentationParser(BaseParser):
             for rel in children:
                 child_id = rel['to_element']
                 preferred_label = rel['preferred_label']
-                is_roll_forward = preferred_label in ROLL_FORWARD_LABELS
+                is_roll_forward = is_period_boundary_label_role(preferred_label)
 
                 if not is_roll_forward:
                     if child_id in seen_children:

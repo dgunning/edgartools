@@ -1253,8 +1253,8 @@ class Statement:
             view: StatementView controlling which dimensional data to include.
                   Used for STANDARD vs DETAILED filtering logic.
         """
-        from edgar.xbrl.core import (PERIOD_END_LABEL, PERIOD_START_LABEL,
-                                     get_unit_display_name, row_metadata_value)
+        from edgar.xbrl.core import (get_unit_display_name, is_period_end_label_role,
+                                     is_period_start_label_role, row_metadata_value)
         from edgar.xbrl.core import is_point_in_time as get_is_point_in_time
         from edgar.xbrl.periods import determine_periods_to_display
         from edgar.xbrl.rendering import _is_html, html_to_text
@@ -1450,8 +1450,10 @@ class Statement:
                 # dimensional rows share the node's label and use the occurrence-
                 # based equity logic below instead.
                 item_preferred_label = None if item.get('is_dimension') else item.get('preferred_label')
-                is_period_start = item_preferred_label == PERIOD_START_LABEL
-                if value is None and item_preferred_label in (PERIOD_START_LABEL, PERIOD_END_LABEL):
+                # Negated period roles count too (GH #1700).
+                is_period_start = is_period_start_label_role(item_preferred_label)
+                is_period_end = is_period_end_label_role(item_preferred_label)
+                if value is None and (is_period_start or is_period_end):
                     if is_period_start and start_date:
                         # Beginning balance: instant at the day before period start
                         try:
@@ -1462,7 +1464,7 @@ class Statement:
                                 value = values_dict.get(f"instant_{start_date}")
                         except (ValueError, AttributeError):
                             pass
-                    if value is None and item_preferred_label == PERIOD_END_LABEL and end_date:
+                    if value is None and is_period_end and end_date:
                         value = values_dict.get(f"instant_{end_date}")
 
                 # Issue #572/#583: For Statement of Equity, match instant facts when duration key is empty
