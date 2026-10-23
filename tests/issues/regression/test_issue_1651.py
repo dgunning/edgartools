@@ -347,3 +347,29 @@ def test_only_near_parity_bands_fit_both_directions_and_none_fits_per_100():
         assert not (low / 100 <= high and high / 100 >= low), code
     # GBP's low edge is 1.03, above GBP per USD at the pound's 2022 low.
     assert both_ways == {"EUR", "CHF", "CAD", "AUD"}
+
+
+# ---------------------------------------------------------------------------
+# Review round 3: which named rows make an unnamed rate ambiguous. By construction.
+# ---------------------------------------------------------------------------
+
+def test_a_home_currency_row_does_not_make_an_unnamed_rate_ambiguous():
+    # A row tagged EUR at 1.0 in an EUR filing is the home currency, not another.
+    converter = _pure("GBP", 1.278, year=2024, member=None, siblings=[("GBP", 1.0)])
+    assert converter.to_usd(100, 2024) == pytest.approx(127.8)
+
+
+def test_another_currency_named_only_in_another_year_does_not_count():
+    # A yen row for 2023 says nothing about the 2024 table.
+    converter = _pure("GBP", 1.278, year=2024, member=None)
+    frame = converter.xbrl.facts.query().by_concept(
+        "ifrs-full:AverageForeignExchangeRate").to_dataframe()
+    extra = frame.iloc[[0]].copy()
+    extra["context_ref"], extra["numeric_value"] = "c-jpy", 193.0
+    extra["period_start"], extra["period_end"] = "2023-01-01", "2023-12-31"
+    converter.xbrl.contexts["c-jpy"] = _Context({"srt:CurrencyAxis": "currency:JPY"})
+    converter.xbrl.facts = _Facts({"ifrs-full:AverageForeignExchangeRate":
+                                   pd.concat([frame, extra], ignore_index=True)})
+    converter.xbrl.facts.to_dataframe = lambda: pd.DataFrame({"unit_ref": ["home"]})
+    converter = CurrencyConverter(converter.xbrl)
+    assert converter.to_usd(100, 2024) == pytest.approx(127.8)

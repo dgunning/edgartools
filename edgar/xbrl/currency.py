@@ -470,8 +470,11 @@ class CurrencyConverter:
         self._factors = {}
         self._basis = {}
         for year, kind, value, quote, named in selected:
-            named_in_table = {code for (k, _), rows in siblings.items() if k == kind
-                              for code, _ in rows}
+            # Other currencies the same year's table of this kind names. A row
+            # tagged with the home currency is not another currency, and a
+            # row from another year says nothing about this one.
+            named_in_table = {code for code, _ in siblings.get((kind, year), [])
+                              if code != home}
             reading, how = self._read_rate(year, kind, value, quote, named,
                                            siblings.get((kind, year), []), named_in_table)
             if reading is None:
@@ -494,7 +497,8 @@ class CurrencyConverter:
         """Decide how one rate reads. Returns ``(reading, how)``, or ``(None, None)``
         with the reason in extraction_warnings: this never guesses.
 
-        ``named_in_table`` holds the other currencies the same rate table names.
+        ``named_in_table`` holds the other currencies (not the home currency)
+        that the same year's table of this kind names.
         """
         where = f"the {kind} rate for {year} ({value})"
         if not named and named_in_table:
