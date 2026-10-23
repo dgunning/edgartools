@@ -1,7 +1,19 @@
 {
+  "AvailableForSaleDebtSecuritiesAmortizedCostBasis": null,
+  "AvailableForSaleSecurities": [
+    "LongtermInvestments",
+    "ShortTermInvestments"
+  ],
+  "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedGainLossBeforeTax": null,
+  "AvailableForSaleSecuritiesAmortizedCost": null,
   "AvailableForSaleSecuritiesCurrent": [
     "ShortTermInvestments"
   ],
+  "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue": null,
+  "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue": null,
+  "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue": null,
+  "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue": null,
+  "AvailableForSaleSecuritiesDebtMaturitiesWithoutSingleMaturityDateFairValue": null,
   "AvailableForSaleSecuritiesDebtSecurities": [
     "LongtermInvestments",
     "ShortTermInvestments"
@@ -9,9 +21,11 @@
   "AvailableForSaleSecuritiesEquitySecuritiesCurrent": [
     "ShortTermInvestments"
   ],
+  "AvailableForSaleSecuritiesFairValueDisclosure": null,
   "AvailableforsaleSecuritiesRestrictedNoncurrent": [
     "LongtermInvestments"
   ],
+  "DebtSecuritiesAvailableForSaleAmortizedCostCurrent": null,
   "DebtSecuritiesAvailableForSaleExcludingAccruedInterest": [
     "LongtermInvestments",
     "ShortTermInvestments"
@@ -52,9 +66,17 @@
     "ShortTermInvestments",
     "LongtermInvestments"
   ],
+  "HeldToMaturitySecurities": [
+    "LongtermInvestments",
+    "ShortTermInvestments"
+  ],
+  "HeldToMaturitySecuritiesAccumulatedUnrecognizedHoldingGain": null,
+  "HeldToMaturitySecuritiesAccumulatedUnrecognizedHoldingLoss": null,
   "HeldToMaturitySecuritiesCurrent": [
     "ShortTermInvestments"
   ],
+  "HeldToMaturitySecuritiesFairValue": null,
+  "Investments": null,
   "MarketableSecurities": [
     "LongtermInvestments",
     "ShortTermInvestments"

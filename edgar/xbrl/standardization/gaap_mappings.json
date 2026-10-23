@@ -3315,69 +3315,23 @@
     "first_year": null,
     "last_year": null
   },
-  "AvailableForSaleDebtSecuritiesAmortizedCostBasis": {
-    "standard_tags": [
-      "CashAndMarketableSecurities"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 212,
-    "occurrence_rate": 0.024,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
   "AvailableForSaleSecurities": {
     "standard_tags": [
-      "CashAndMarketableSecurities"
+      "LongtermInvestments",
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 13,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.167,
     "years_present": 2,
     "first_year": 2021,
-    "last_year": 2022
-  },
-  "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedGainLossBeforeTax": {
-    "standard_tags": [
-      "CashAndMarketableSecurities"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "AvailableForSaleSecuritiesAmortizedCost": {
-    "standard_tags": [
-      "CashAndMarketableSecurities"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2021,
-    "last_year": 2021
+    "last_year": 2022,
+    "ambiguous": true
   },
   "AvailableForSaleSecuritiesCurrent": {
     "standard_tags": [
@@ -3394,92 +3348,6 @@
     "years_present": 2,
     "first_year": 2021,
     "last_year": 2022
-  },
-  "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue": {
-    "standard_tags": [
-      "CashAndMarketableSecurities",
-      "LongtermInvestments"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null,
-    "ambiguous": true
-  },
-  "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue": {
-    "standard_tags": [
-      "CashAndMarketableSecurities"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue": {
-    "standard_tags": [
-      "CashAndMarketableSecurities",
-      "LongtermInvestments"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null,
-    "ambiguous": true
-  },
-  "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue": {
-    "standard_tags": [
-      "CashAndMarketableSecurities"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "AvailableForSaleSecuritiesDebtMaturitiesWithoutSingleMaturityDateFairValue": {
-    "standard_tags": [
-      "CashAndMarketableSecurities",
-      "LongtermInvestments"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null,
-    "ambiguous": true
   },
   "AvailableForSaleSecuritiesDebtSecurities": {
     "standard_tags": [
@@ -3562,22 +3430,6 @@
     "years_present": 1,
     "first_year": 2021,
     "last_year": 2021
-  },
-  "AvailableForSaleSecuritiesFairValueDisclosure": {
-    "standard_tags": [
-      "CashAndMarketableSecurities"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
   },
   "AvailableForSaleSecuritiesGrossRealizedGainLossNet": {
     "standard_tags": [
@@ -8992,22 +8844,6 @@
     "years_present": 2,
     "first_year": 2021,
     "last_year": 2022
-  },
-  "DebtSecuritiesAvailableForSaleAmortizedCostCurrent": {
-    "standard_tags": [
-      "CashAndMarketableSecurities"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 15,
-    "occurrence_rate": 0.002,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
   },
   "DebtSecuritiesAvailableForSaleAmortizedCostExcludingAccruedInterestAfterAllowanceForCreditLossCurrent": {
     "standard_tags": [
@@ -19485,54 +19321,20 @@
   },
   "HeldToMaturitySecurities": {
     "standard_tags": [
-      "CashAndMarketableSecurities",
-      "LongtermInvestments"
+      "LongtermInvestments",
+      "ShortTermInvestments"
     ],
-    "display_name": "Cash and Cash Equivalents",
+    "display_name": "Long-Term Investments",
     "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 177,
     "occurrence_rate": 0.02,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025,
-    "ambiguous": true
-  },
-  "HeldToMaturitySecuritiesAccumulatedUnrecognizedHoldingGain": {
-    "standard_tags": [
-      "CashAndMarketableSecurities"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.25,
-    "years_present": 3,
-    "first_year": 2021,
-    "last_year": 2023
-  },
-  "HeldToMaturitySecuritiesAccumulatedUnrecognizedHoldingLoss": {
-    "standard_tags": [
-      "CashAndMarketableSecurities",
-      "LongtermInvestments"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2023,
-    "last_year": 2023,
     "ambiguous": true
   },
   "HeldToMaturitySecuritiesCurrent": {
@@ -19550,24 +19352,6 @@
     "years_present": 4,
     "first_year": 2021,
     "last_year": 2024
-  },
-  "HeldToMaturitySecuritiesFairValue": {
-    "standard_tags": [
-      "CashAndMarketableSecurities",
-      "LongtermInvestments"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 251,
-    "occurrence_rate": 0.028,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "ambiguous": true
   },
   "HeldToMaturitySecuritiesNoncurrent": {
     "standard_tags": [
@@ -24200,24 +23984,6 @@
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025
-  },
-  "Investments": {
-    "standard_tags": [
-      "CashAndMarketableSecurities",
-      "LongtermInvestments"
-    ],
-    "display_name": "Cash and Cash Equivalents",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 395,
-    "occurrence_rate": 0.044,
-    "temporal_consistency": 0.75,
-    "years_present": 9,
-    "first_year": 2017,
-    "last_year": 2025,
-    "ambiguous": true
   },
   "InvestmentsAndOtherNoncurrentAssets": {
     "standard_tags": [

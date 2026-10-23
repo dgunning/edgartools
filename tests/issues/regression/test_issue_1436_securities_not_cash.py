@@ -4,6 +4,17 @@ These corrected mappings identify investments and leave the current
 held-to-maturity credit-loss allowance unmapped. Offline filing fixtures pin
 the reported cash, investment and asset values.
 
+A follow-up corrects 16 more entries the reporter listed on 2026-10-07. Two
+carrying values on the balance sheet (AvailableForSaleSecurities,
+HeldToMaturitySecurities) become investments, resolved by section. The
+measurement-basis, maturity-bucket and unrealized gain/loss disclosures, and the
+mixed "Total investments" (us-gaap:Investments), have no standard concept. Before
+it, Allstate's FY2025 cash group summed to $83,915M against $678M of filed cash.
+The cash concept keeps "Cash and Cash Equivalents" even though CashAndCashEquivalents
+(the cash-flow total) shares it: CashAndMarketableSecurities holds the plain cash
+tags, CashAndCashEquivalentsAtCarryingValue among them (~6,700 companies), so a
+"Marketable Securities" label would misname almost every company's cash line.
+
 GitHub Issue: https://github.com/dgunning/edgartools/issues/1436
 GitHub Issue: https://github.com/dgunning/edgartools/issues/1417
 """
@@ -13,6 +24,7 @@ from pathlib import Path
 
 import pytest
 
+from edgar.httprequests import download_file
 from edgar.xbrl import XBRL
 from edgar.xbrl.standardization import reverse_index as reverse_index_module
 from edgar.xbrl.standardization.core import ConceptMapper, MappingStore, standardize_statement
@@ -27,7 +39,7 @@ _STANDARDIZATION = Path(reverse_index_module.__file__).parent
 DISPLAY_NAMES = json.loads((_STANDARDIZATION / "display_names.json").read_text(encoding="utf-8"))
 GAAP_MAPPINGS = json.loads((_STANDARDIZATION / "gaap_mappings.json").read_text(encoding="utf-8"))
 
-SECURITIES_TAGS = [
+ORIGINAL_TAGS = [
     "AvailableForSaleSecuritiesCurrent",
     "AvailableForSaleSecuritiesDebtSecurities",
     "AvailableForSaleSecuritiesEquitySecuritiesCurrent",
@@ -59,6 +71,28 @@ SECURITIES_TAGS = [
     "TradingSecuritiesOther",
 ]
 
+# The reporter's 2026-10-07 comment on the issue: 16 more entries that led with the cash concept.
+FOLLOWUP_TAGS = [
+    "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+    "AvailableForSaleSecurities",
+    "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedGainLossBeforeTax",
+    "AvailableForSaleSecuritiesAmortizedCost",
+    "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue",
+    "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+    "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue",
+    "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+    "AvailableForSaleSecuritiesDebtMaturitiesWithoutSingleMaturityDateFairValue",
+    "AvailableForSaleSecuritiesFairValueDisclosure",
+    "DebtSecuritiesAvailableForSaleAmortizedCostCurrent",
+    "HeldToMaturitySecurities",
+    "HeldToMaturitySecuritiesAccumulatedUnrecognizedHoldingGain",
+    "HeldToMaturitySecuritiesAccumulatedUnrecognizedHoldingLoss",
+    "HeldToMaturitySecuritiesFairValue",
+    "Investments",
+]
+
+SECURITIES_TAGS = ORIGINAL_TAGS + FOLLOWUP_TAGS
+
 INDUSTRIES = sorted({code for _, _, code in _FF48_SIC_RANGES})
 STATEMENT_TYPES = ["BalanceSheet", "http://example.com/role/ConsolidatedBalanceSheets", ""]
 PAIRED_TAGS = [tag for tag, concepts in EXPECTED.items() if concepts and len(concepts) == 2]
@@ -76,7 +110,9 @@ def mapper():
 
 def test_expected_file_covers_the_corrected_entries():
     assert set(SECURITIES_TAGS) == set(EXPECTED)
-    assert len(SECURITIES_TAGS) == 29
+    assert len(ORIGINAL_TAGS) == 29
+    assert len(FOLLOWUP_TAGS) == 16
+    assert len(SECURITIES_TAGS) == len(set(SECURITIES_TAGS)) == 45
     assert len(INDUSTRIES) == 48
 
 
@@ -284,3 +320,98 @@ def test_coca_cola_short_term_investments_are_not_cash(ko_fy2023):
         "us-gaap_MarketableSecurities": 1_300_000_000,
     }
     assert "us-gaap_MarketableSecurities" not in _rows(ko_fy2023, "CashAndMarketableSecurities", "2023-12-31")
+
+
+# --- Follow-up: the reporter's 2026-10-07 entries and the cash label ---
+
+
+def test_followup_lookups(index):
+    """Each entry, spelled out independently of the expected-mapping fixture."""
+    for tag in ("AvailableForSaleSecurities", "HeldToMaturitySecurities"):
+        result = index.lookup(f"us-gaap:{tag}")
+        assert result is not None, tag
+        assert result.standard_concepts == ["LongtermInvestments", "ShortTermInvestments"], tag
+        assert result.display_names == ["Long-Term Investments", "Short-Term Investments"], tag
+        assert result.is_ambiguous is True, tag
+    for tag in (
+        "AvailableForSaleDebtSecuritiesAmortizedCostBasis",
+        "AvailableForSaleSecuritiesAccumulatedGrossUnrealizedGainLossBeforeTax",
+        "AvailableForSaleSecuritiesAmortizedCost",
+        "AvailableForSaleSecuritiesDebtMaturitiesAfterFiveThroughTenYearsFairValue",
+        "AvailableForSaleSecuritiesDebtMaturitiesAfterOneThroughFiveYearsFairValue",
+        "AvailableForSaleSecuritiesDebtMaturitiesAfterTenYearsFairValue",
+        "AvailableForSaleSecuritiesDebtMaturitiesWithinOneYearFairValue",
+        "AvailableForSaleSecuritiesDebtMaturitiesWithoutSingleMaturityDateFairValue",
+        "AvailableForSaleSecuritiesFairValueDisclosure",
+        "DebtSecuritiesAvailableForSaleAmortizedCostCurrent",
+        "HeldToMaturitySecuritiesAccumulatedUnrecognizedHoldingGain",
+        "HeldToMaturitySecuritiesAccumulatedUnrecognizedHoldingLoss",
+        "HeldToMaturitySecuritiesFairValue",
+        "Investments",
+    ):
+        assert index.lookup(f"us-gaap:{tag}") is None, tag
+        assert tag not in GAAP_MAPPINGS, tag
+
+
+@pytest.mark.parametrize("section, concept", [("Current Assets", "ShortTermInvestments"), ("Non-Current Assets", "LongtermInvestments")])
+def test_held_to_maturity_securities_take_the_side_of_their_section(index, section, concept):
+    context = {"statement_type": "BalanceSheet", "section": section}
+    assert index.get_standard_concept("us-gaap_HeldToMaturitySecurities", context) == concept
+
+
+def test_cash_concept_keeps_its_label(index):
+    """The plain cash line keeps "Cash and Cash Equivalents" (decided on #1436, 2026-10-23).
+
+    CashAndMarketableSecurities is where CashAndCashEquivalentsAtCarryingValue and the
+    other plain cash tags land, so renaming it would misname almost every company's
+    cash. Separating it from CashAndCashEquivalents means moving those tags, which is
+    its own change.
+    """
+    assert DISPLAY_NAMES["CashAndMarketableSecurities"] == "Cash and Cash Equivalents"
+    result = index.lookup("us-gaap:CashAndCashEquivalentsAtCarryingValue")
+    assert result is not None
+    assert result.standard_concepts == ["CashAndMarketableSecurities"]
+    assert result.display_names == ["Cash and Cash Equivalents"]
+
+
+def test_only_cash_entries_remain_on_the_cash_concept():
+    """After the follow-up, exactly 22 entries lead with the cash concept, all labelled as cash."""
+    led_by_cash = {
+        tag: entry["display_name"]
+        for tag, entry in GAAP_MAPPINGS.items()
+        if isinstance(entry, dict) and entry.get("standard_tags", [None])[0] == "CashAndMarketableSecurities"
+    }
+    assert len(led_by_cash) == 22
+    assert set(led_by_cash.values()) == {"Cash and Cash Equivalents"}
+
+
+# Allstate's FY2025 10-K. The schema, presentation and label linkbases and the instance (13.5 MB)
+# render the balance sheet; the calculation and definition linkbases are not needed. Without the
+# label linkbase the rendered frame comes back with empty value cells.
+ALL_10K_FOLDER = "https://www.sec.gov/Archives/edgar/data/899051/000089905126000031/"
+ALL_10K_XBRL_FILES = ("all-20251231.xsd", "all-20251231_pre.xml", "all-20251231_lab.xml", "all-20251231_htm.xml")
+
+
+@pytest.mark.vcr
+def test_allstate_total_investments_are_not_cash(tmp_path):
+    """Allstate FY2025 10-K, 0000899051-26-000031, statement of financial position at 2025-12-31.
+
+    Filed: Total investments $83,237M and Cash $678M. Both rows carried CashAndMarketableSecurities,
+    so the cash group summed to $83,915M. The mixed total now has no standard concept, and its
+    components keep theirs.
+    """
+    for name in ALL_10K_XBRL_FILES:
+        (tmp_path / name).write_text(download_file(ALL_10K_FOLDER + name), encoding="utf-8")
+    statement = XBRL.from_directory(tmp_path).statements["BalanceSheet"]
+    assert statement is not None
+    frame = statement.render(standard=True).to_dataframe()
+    frame = frame[~frame["dimension"]]
+
+    assert _rows(frame, "CashAndMarketableSecurities", "2025-12-31") == {"us-gaap_Cash": 678_000_000}
+    total = frame[frame["concept"] == "us-gaap_Investments"]
+    assert total["2025-12-31"].tolist() == [83_237_000_000]
+    assert total["standard_concept"].isna().all()
+    assert _rows(frame, "LongtermInvestments", "2025-12-31") == {
+        "us-gaap_DebtSecuritiesAvailableForSaleExcludingAccruedInterest": 59_115_000_000,
+        "us-gaap_OtherInvestments": 1_114_000_000,
+    }
