@@ -27,7 +27,7 @@ from enum import Enum
 from functools import cached_property
 from html import escape as html_escape
 from pathlib import Path
-from typing import TYPE_CHECKING, Dict, List, Optional, Union
+from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
@@ -1674,6 +1674,120 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
     return []
 
 
+# A scale caption such as "In millions, except per share amounts", "(IN THOUSANDS, ...)" or
+# "($ In Millions, ...)" describes the units; it is never a period column (GH #1775).
+_SCALE_CAPTION = re.compile(r'^\(?\s*\$?\s*(?:in|dollars|amounts|figures)\b', re.IGNORECASE)
+
+
+def _is_scale_caption(content: str) -> bool:
+    return bool(_SCALE_CAPTION.match(content))
+
+
+def _place_header_cells(header_rows) -> List[List[Tuple[int, int, str]]]:
+    """Grid position of every header cell as (start, end, text), from its colspan."""
+    placed = []
+    for cells in header_rows:
+        col = 0
+        row_cells = []
+        for cell in cells:
+            span = max(cell.colspan or 1, 1)
+            row_cells.append((col, col + span, cell.content.strip()))
+            col += span
+        placed.append(row_cells)
+    return placed
+
+
+def _align_by_position(header_rows, value_rows, label_end: int):
+    """
+    Put each value cell under the header column above it, by grid position.
+
+    Header labels and value cells used to be compacted separately and zipped left to right,
+    so a header cell that is not a period (a scale caption) or a period header that was not
+    read shifted every value one column (GH #1775). Here each leaf header (the lowest header
+    cell over a grid column) is a column, labelled with the header cells above it, and the
+    cells of a value ("$", "38,198", "%") are joined under the leaf they sit in.
+
+    Returns (column labels, rows of joined cell text), or None when the value cells do not
+    line up with the headers; the caller then keeps the left-to-right layout.
+    """
+    cells, leaves = _leaf_header_cells(header_rows, label_end)
+    if not leaves:
+        return None
+
+    rows = []
+    used = set()
+    for value_cells in value_rows:
+        joined = _join_row_by_leaf(value_cells, leaves)
+        if joined is None:
+            return None
+        used.update(joined)
+        rows.append(joined)
+
+    keep = sorted(used)
+    if not keep:
+        return None
+    labels = [_leaf_label(cells, leaves[k]) for k in keep]
+    return labels, [[_joined_value(row.get(k)) for k in keep] for row in rows]
+
+
+def _leaf_header_cells(header_rows, label_end: int):
+    """Non-empty, non-caption header cells as (row, start, end, text), and the leaves among them:
+    cells with no header cell below them, starting after the row-label column, sorted by start."""
+    placed = _place_header_cells(header_rows)
+    cells = [(r, s, e, text) for r, row in enumerate(placed) for (s, e, text) in row
+             if text and not _is_scale_caption(text)]
+    leaves = [c for c in cells
+              if c[1] >= label_end
+              and not any(o[0] > c[0] and o[1] < c[2] and o[2] > c[1] for o in cells)]
+    leaves.sort(key=lambda c: c[1])
+    return cells, leaves
+
+
+def _leaves_under(leaves, s: int, e: int) -> List[int]:
+    """Indices of the leaves whose columns hold a cell's start, else those it overlaps."""
+    hits = [k for k, leaf in enumerate(leaves) if leaf[1] <= s < leaf[2]]
+    if not hits:
+        hits = [k for k, leaf in enumerate(leaves) if leaf[1] < e and s < leaf[2]]
+    return hits
+
+
+def _join_row_by_leaf(value_cells, leaves) -> Optional[Dict[int, str]]:
+    """Join one row's value cells by the leaf they sit under; None when a cell does not line up."""
+    joined: Dict[int, str] = {}
+    digits: Dict[int, int] = {}
+    for (s, e, text) in value_cells:
+        hits = _leaves_under(leaves, s, e)
+        if len(hits) != 1:
+            return None
+        k = hits[0]
+        if any(ch.isdigit() for ch in text):
+            digits[k] = digits.get(k, 0) + 1
+            if digits[k] > 1:
+                return None
+        joined[k] = joined.get(k, '') + text
+    return joined
+
+
+def _leaf_label(cells, leaf) -> str:
+    """A leaf header's label: the header cells above it, top down, then its own text."""
+    r, s, _, text = leaf
+    parts = []
+    for (r2, s2, e2, t2) in cells:
+        if r2 < r and s2 <= s < e2 and t2 not in parts:
+            parts.append(t2)
+    parts = [p for p in parts if p != text] + [text]
+    return " - ".join(parts)
+
+
+def _joined_value(text: Optional[str]) -> Optional[str]:
+    """A dash placeholder with its "%" or "$" beside it ("—%") is still a placeholder."""
+    if text and not any(ch.isdigit() for ch in text):
+        bare = text.strip('$%() ')
+        if bare in ('—', '-', '–'):
+            return bare
+    return text
+
+
 def _extract_clean_dataframe(table_node) -> pd.DataFrame:
     """
     Extract a clean DataFrame from a TableNode using Cell metadata.
@@ -1694,6 +1808,8 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
     row_labels = []
     row_data = []
     row_parent_contexts = []  # Parent context for each data row (for row type classification)
+    row_positions = []  # Grid positions of each data row's value cells
+    label_ends = []  # Grid column where each data row's label cell ends
     current_parent_context = ''  # Tracks the most recent label-only row
 
     # Track if we should skip date-header rows from data
@@ -1736,16 +1852,22 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
 
         label_cell = None
         data_cells = []
+        positioned_cells = []  # (grid start, grid end, text) of each value cell
+        label_cell_end = 0
+        col = 0
 
         for cell in cells:
             content = cell.content.strip()
+            start, col = col, col + max(cell.colspan or 1, 1)
             if not content:
                 continue
 
             if label_cell is None and not _is_numeric_or_currency(content):
                 label_cell = content
+                label_cell_end = col
             else:
                 data_cells.append(content)
+                positioned_cells.append((start, col, content))
 
         if label_cell and data_cells:
             row_labels.append(label_cell)
@@ -1753,12 +1875,23 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
             row_parent_contexts.append(current_parent_context)
             merged_data = _merge_currency_symbols(data_cells)
             row_data.append(merged_data)
+            row_positions.append(positioned_cells)
+            label_ends.append(label_cell_end)
         elif label_cell and not data_cells:
             # Label-only row (e.g., "Earnings per share:") — track as parent context
             current_parent_context = label_cell
 
     if not row_data:
         return pd.DataFrame()
+
+    aligned = None
+    if table_node.headers:
+        label_end = max(set(label_ends), key=label_ends.count)
+        aligned = _align_by_position(table_node.headers, row_positions, label_end)
+    if aligned is not None:
+        columns, padded_data = aligned
+        df = pd.DataFrame(padded_data, columns=columns)
+        return _finish_dataframe(df, row_labels, row_parent_contexts)
 
     num_cols = len(header_cols) if header_cols else max(len(r) for r in row_data)
 
@@ -1785,7 +1918,11 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
         columns.extend([f"Col_{i}" for i in range(len(columns), len(padded_data[0]))])
 
     df = pd.DataFrame(padded_data, columns=columns[:len(padded_data[0])] if padded_data else columns)
+    return _finish_dataframe(df, row_labels, row_parent_contexts)
 
+
+def _finish_dataframe(df: pd.DataFrame, row_labels: List[str], row_parent_contexts: List[str]) -> pd.DataFrame:
+    """Set row labels, object dtype and parsed numbers on an extracted table."""
     if row_labels and len(row_labels) >= len(df):
         df.index = row_labels[:len(df)]
         df.index.name = "Item"
