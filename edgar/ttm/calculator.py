@@ -290,14 +290,24 @@ class TTMCalculator:
             is_stale=is_stale, window_end=window_end, reference_date=reference_date
         )
 
-        # 9. Build and return result
+        # 9. Build and return result. Label each quarter's fiscal year from its
+        #    period_end and the fiscal year-end month, as calculate_ttm_trend does
+        #    (GH #793): a quarter re-filed as a comparative carries the LATER
+        #    filing's fiscal_year, so AAPL's quarter ending 2022-12-31 read as
+        #    (2024, 'Q1') (GH #1699).
+        from edgar.entity.enhanced_statement import (
+            calculate_fiscal_year_for_label,
+            detect_fiscal_year_end,
+        )
+        fiscal_year_end_month = detect_fiscal_year_end(self.facts)
         return TTMMetric(
             concept=ttm_quarters[0].concept,
             label=ttm_quarters[0].label,
             value=ttm_value,
             unit=ttm_quarters[0].unit,
             as_of_date=window_end,  # Most recent quarter
-            periods=[(q.fiscal_year, q.fiscal_period) for q in ttm_quarters],
+            periods=[(calculate_fiscal_year_for_label(q.period_end, fiscal_year_end_month), q.fiscal_period)
+                     for q in ttm_quarters],
             period_facts=ttm_quarters,
             has_gaps=has_gaps,
             has_calculated_q4=has_calculated_q4,
@@ -383,6 +393,12 @@ class TTMCalculator:
 
         Derived facts have ``calculation_context`` set to the derivation method
         (e.g., 'derived_q4_fy_minus_ytd9').
+
+        Each quarter is the LATEST-filed fact for its period (a reported quarter,
+        or one derived from the latest-filed annual or year-to-date fact). Its
+        ``accession``, ``filing_date`` and ``fiscal_year`` are that filing's, so a
+        quarter repeated as a comparative carries the later filing's metadata, not
+        the filing that first reported it (GH #1699).
 
         Returns:
             Quarterly facts sorted by period_end descending.

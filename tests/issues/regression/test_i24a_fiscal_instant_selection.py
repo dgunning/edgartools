@@ -148,10 +148,14 @@ def test_the_validator_tolerates_a_52_53_week_year_end_crossing_a_month():
     """
     from edgar.entity.enhanced_statement import detect_fiscal_year_end  # noqa: F401
 
-    # The February year end of a January-FYE filer, which strict month matching
-    # rejects and the current default admits.
+    # The February year end of a January-FYE filer. Marvell's 10-K
+    # 0001835632-25-000057 tags DocumentFiscalYearFocus 2025 with
+    # DocumentPeriodEndDate 2025-02-01, so (2025, 2025-02-01) is valid and the
+    # earlier pinned False was wrong. Since GH #1699 calculate_fiscal_year_for_label
+    # gives a year end a week of drift into the next month, so the detected
+    # month (1) admits it too.
     assert validate_fiscal_year_period_end(2025, date(2025, 2, 1)) is True
-    assert validate_fiscal_year_period_end(2025, date(2025, 2, 1), 1) is False
+    assert validate_fiscal_year_period_end(2025, date(2025, 2, 1), 1) is True
 
 
 # --- ground truth from the live filing ------------------------------------
