@@ -214,7 +214,7 @@ def _install_skill_symlinks(skill, target_dir: 'Path') -> bool:
             (target_dir / item.name).symlink_to(item)
 
     # Symlink skill subdirectories
-    skill_subdirs = ['financials', 'holdings', 'ownership', 'reports', 'xbrl']
+    skill_subdirs = ['financials', 'funds', 'holdings', 'ownership', 'reports', 'xbrl']
     for subdir_name in skill_subdirs:
         subdir = skills_parent / subdir_name
         if subdir.exists() and subdir.is_dir():
