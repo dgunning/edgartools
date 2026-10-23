@@ -60,6 +60,7 @@ hatch run check-regression-provenance     # CI runs this before tests
 **Never:**
 - weaken, skip or delete a test to make it pass (CI rejects `pytest.skip` under `tests/issues/regression/`)
 - hand-edit a cassette
+- use `git stash` in a worktree: every worktree shares one `refs/stash`, so parallel agents pop each other's changes (save with `git diff > file` instead)
 - invent a filing value you did not read from SEC
 - open, comment on or merge GitHub issues or PRs without the human you work for reviewing them first
 
@@ -75,4 +76,7 @@ hatch run check-regression-provenance     # CI runs this before tests
      --jq '[.[] | select(any(.files[]; .path=="edgar/xbrl/standardization/gaap_mappings.json")) | .number]'
    ```
 3. Use one PR per issue. Several related fixes start with one umbrella issue that proposes a merge order. Keep at most three of your PRs open at a time.
+   Exception: when the maintainer asks for a batch, open one draft PR per subsystem area instead. Each PR keeps one commit
+   per issue, each with its own regression test and its own `Fixes #N`, so any single fix can be reverted. The three-PR
+   limit does not apply to that batch, and every PR passes an agent review before the maintainer reads it.
 4. Fill in the PR template's Verification section, and name the AI tool and model you used. That is not a confession; it tells the reviewer where to start.
