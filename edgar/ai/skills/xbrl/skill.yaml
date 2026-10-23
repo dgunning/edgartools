@@ -13,8 +13,8 @@ patterns:
       xbrl = company.get_filings(form="10-K")[0].xbrl()  # Returns XBRL or None
 
       xbrl.entity_name                  # Company name
-      xbrl.fiscal_year                  # e.g., 2024
-      xbrl.fiscal_period                # FY, Q1, Q2, Q3, Q4
+      xbrl.entity_info["fiscal_year"]   # e.g., "2024" (a string)
+      xbrl.entity_info["fiscal_period"] # FY, Q1, Q2, Q3, Q4
 
   - name: Statements
     when: Get financial statements from XBRL
@@ -23,15 +23,15 @@ patterns:
       xbrl.statements.balance_sheet()
       xbrl.statements.cash_flow_statement()
 
-      xbrl.statements.names             # ['IncomeStatement', 'BalanceSheet', ...]
+      list(xbrl.statements.statement_by_type)  # ['IncomeStatement', 'BalanceSheet', ...]
 
   - name: Facts Access
     when: Query individual facts or search concepts
     code: |
       facts = xbrl.facts
 
-      facts.get_facts_by_concept("Revenue")           # Pattern match
-      facts.get_facts_by_concept("Assets", exact=True) # Exact match
+      facts.get_facts_by_concept("Revenue")                     # Pattern match (substring)
+      facts.get_facts_by_concept("us-gaap:Assets", exact=True)  # Exact match: needs the prefix, "Assets" alone returns 0 rows
       facts.get_facts_with_dimensions()               # Segment breakdowns
       facts.get_facts_by_fiscal_period(2024, "FY")    # Specific period
 
@@ -49,14 +49,20 @@ patterns:
   - name: Concept History
     when: Track a value over time
     code: |
-      history = xbrl.facts.facts_history("Revenue")  # DataFrame: period_end, value
+      # Name the concept the filer tagged, with its prefix ("Revenue" alone returns 0 rows)
+      history = xbrl.facts.facts_history("us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax")
+      # DataFrame: label, period_end, numeric_value, unit_ref, fiscal_period, fiscal_year.
+      # Segment rows are included without their axis or member; use by_dimension() for those.
 
   - name: Raw Fact Details
     when: Need fact metadata (units, decimals, context)
     code: |
       all_facts = xbrl.facts.get_facts()  # List of enriched dicts
-      # Each fact: concept, value, unit, decimals, period_start, period_end,
-      # dimensions (if any), context_ref
+      # Each fact: concept, value, numeric_value, unit_ref, currency, decimals, context_ref,
+      #   period_start + period_end (duration) or period_instant (instant),
+      #   is_dimensioned (dimensioned facts add dimension, member and dim_<axis> keys)
+      # unit_ref is the filing's unit id ("usd", "shares", "number"); currency is "USD" for
+      # money and None otherwise.
 
   - name: Calculation Linkbase as DataFrame
     when: Need per-filer concept hierarchy, extension → us-gaap mapping, or signed weights
