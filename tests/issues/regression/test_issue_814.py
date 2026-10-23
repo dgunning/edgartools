@@ -98,10 +98,14 @@ def test_ifrs_filer_resolves_via_profit_or_loss_concept():
         .filter(accession_number='0000312069-24-000026')[0]
     )
     net_income = filing.obj().financials.get_net_income()
-    assert net_income == 5_323_000_000.0, (
-        f"BCS FY2023 20-F net income: expected 5,323,000,000 (ifrs-full:ProfitLoss "
-        f"'Profit after tax' row), got {net_income}. None means the IFRS concept "
-        f"mapping or namespace strip has regressed."
+    # 5,259,000,000 is ifrs-full:ProfitLossAttributableToOwnersOfParent ("Total
+    # equity holders of the parent"). This asserted 5,323,000,000, the
+    # ifrs-full:ProfitLoss "Profit after tax" row, until GH #1688 made the
+    # getter return the parent's share: profit after tax less 64,000,000 NCI.
+    assert net_income == 5_259_000_000.0, (
+        f"BCS FY2023 20-F net income: expected 5,259,000,000 (ifrs-full:"
+        f"ProfitLossAttributableToOwnersOfParent), got {net_income}. None means the "
+        f"IFRS concept lookup or namespace strip has regressed."
     )
 
 

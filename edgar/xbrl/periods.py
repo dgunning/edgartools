@@ -270,6 +270,16 @@ def _filter_instant_periods_with_facts(xbrl_instance, periods: List[Dict[str, An
     return [p for p in periods if p['key'] in kept]
 
 
+def _fiscal_period_focus(entity_info: Dict[str, Any]) -> Optional[str]:
+    """dei:DocumentFiscalPeriodFocus, except that FY on a quarterly document is
+    dropped: the focus tag alone does not make a 10-Q annual (GH #1678, the same
+    rule period_selector applies)."""
+    focus = entity_info.get('fiscal_period')
+    if focus == 'FY' and entity_info.get('quarterly_report'):
+        return None
+    return focus
+
+
 def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]:
     """
     Get available period views for a statement type.
@@ -290,7 +300,7 @@ def get_period_views(xbrl_instance, statement_type: str) -> List[Dict[str, Any]]
 
     # Get useful entity info for period selection
     entity_info = xbrl_instance.entity_info
-    fiscal_period_focus = entity_info.get('fiscal_period')
+    fiscal_period_focus = _fiscal_period_focus(entity_info)
     annual_report = fiscal_period_focus == 'FY'
 
     # Get all periods
@@ -420,7 +430,7 @@ def determine_periods_to_display(
     # If no specific periods requested, use default logic based on statement type
     all_periods = xbrl_instance.reporting_periods
     entity_info = xbrl_instance.entity_info
-    fiscal_period_focus = entity_info.get('fiscal_period')
+    fiscal_period_focus = _fiscal_period_focus(entity_info)
     document_period_end_date = xbrl_instance.period_of_report
 
     # Filter periods by statement type
@@ -431,7 +441,7 @@ def determine_periods_to_display(
         instant_periods = sort_periods(instant_periods, 'instant')
 
         # Get fiscal information for better period matching
-        fiscal_period_focus = entity_info.get('fiscal_period')
+        fiscal_period_focus = _fiscal_period_focus(entity_info)
         fiscal_year_focus = entity_info.get('fiscal_year')
         fiscal_year_end_month = entity_info.get('fiscal_year_end_month')
         fiscal_year_end_day = entity_info.get('fiscal_year_end_day')

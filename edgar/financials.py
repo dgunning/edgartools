@@ -368,9 +368,9 @@ class Financials:
                 # iteration order deterministic across runs (otherwise a filer
                 # whose statement contains multiple mapped concepts can return
                 # different values depending on Python hash randomization).
-                # A name that is already an XBRL concept (``us-gaap_...``) is
+                # A name that is already an XBRL concept (``us-gaap_...``, ``ifrs-full_...``) is
                 # searched as itself, for concepts the mappings do not carry.
-                if std_concept_name.startswith(('us-gaap_', 'us-gaap:')):
+                if std_concept_name.startswith(('us-gaap_', 'us-gaap:', 'ifrs-full_', 'ifrs-full:')):
                     xbrl_concepts = [std_concept_name]
                 else:
                     xbrl_concepts = sorted(standardizer.mappings.get(std_concept_name, []))
@@ -460,7 +460,8 @@ class Financials:
             return None
 
     def _get_standardized_concept_value(self, statement_type: str, concept_patterns: list,
-                                      period_offset: int = 0) -> Optional[Union[int, float]]:
+                                      period_offset: int = 0,
+                                      exclude_concepts: Optional[str] = None) -> Optional[Union[int, float]]:
         """
         Helper method to extract standardized concept values from financial statements.
 
@@ -468,6 +469,8 @@ class Financials:
             statement_type: Type of statement ('income', 'balance', 'cashflow')
             concept_patterns: List of label patterns to search for (case-insensitive)
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
+            exclude_concepts: Regex (case-insensitive); rows whose concept matches
+                it are never returned, whatever their label
 
         Returns:
             The concept value if found, None otherwise
@@ -486,6 +489,9 @@ class Financials:
             # Filter out abstract rows - they never have values
             if 'abstract' in df.columns:
                 df = df[~df['abstract']].copy()
+
+            if exclude_concepts and 'concept' in df.columns:
+                df = df[~df['concept'].astype(str).str.contains(exclude_concepts, case=False, na=False)]
 
             # Find the concept using pattern matching
             for pattern in concept_patterns:
@@ -539,6 +545,19 @@ class Financials:
             >>> revenue = financials.get_revenue()  # Most recent revenue
             >>> prev_revenue = financials.get_revenue(1)  # Previous period revenue
         """
+        # The lookups below read the income statement up to three times; render
+        # it once for this call, and discard the memo on exit as
+        # get_financial_metrics() does, unless that call already installed one.
+        if self._statement_frame_memo is not None:
+            return self._get_revenue(period_offset)
+        self._statement_frame_memo = {}
+        try:
+            return self._get_revenue(period_offset)
+        finally:
+            self._statement_frame_memo = None
+
+    def _get_revenue(self, period_offset: int) -> Optional[Union[int, float]]:
+        """The body of get_revenue(), run with a per-call memo installed."""
         # First try concept-based search using standardization mappings.
         #
         # The filed TOTAL comes first. A contract-revenue fact can be one
@@ -565,9 +584,18 @@ class Financials:
         # instead of $83.7B, and JPMorgan's fell through to the label patterns
         # below, which took "Noninterest revenue" ($87.0B of $182.4B)
         # (edgartools-u9yc9).
+        #
+        # Utilities tag their operating revenue total
+        # us-gaap:RegulatedAndUnregulatedOperatingRevenue, which no revenue
+        # mapping carries and whose captions ("Operating revenues") match no
+        # label pattern, so NextEra's Q2 2026 10-Q returned None for $7,534M
+        # and MGE Energy's returned its $29.6M "Gas revenue" component for a
+        # $161.2M total (gh #1665). It is a total, so it goes before contract
+        # revenue, which a utility can report as one of its components.
         result = self._get_standardized_concept_by_xbrl(
             'income',
-            ['Revenue', 'us-gaap_RevenuesNetOfInterestExpense', 'Contract Revenue'],
+            ['Revenue', 'us-gaap_RevenuesNetOfInterestExpense',
+             'us-gaap_RegulatedAndUnregulatedOperatingRevenue'],
             period_offset
         )
 
@@ -583,8 +611,18 @@ class Financials:
         # Capital One $53,434M for FY2025), so read that, or report nothing
         # (edgartools-hmj0j). Summing the face rows is not a substitute: U.S.
         # Bancorp's net interest income plus noninterest income is $28,540M.
+        #
+        # This runs before the contract-revenue search, not after it: on a
+        # bank's face statement contract revenue is a fee line inside
+        # noninterest income, so Auburn National's FY2023 10-K returned its
+        # $603K "Service charge on deposit accounts" as total revenue and never
+        # reached this check (gh #1666).
         if self._is_bank_income_statement():
             return self._filed_total_for_statement_period('us-gaap:Revenues', period_offset)
+
+        result = self._get_standardized_concept_by_xbrl('income', ['Contract Revenue'], period_offset)
+        if result is not None:
+            return result
 
         # Fallback to label-based search for edge cases
         patterns = [
@@ -609,7 +647,10 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
         Returns:
-            Net income value if found, None otherwise
+            Net income attributable to the parent if found, None otherwise.
+            Where the statement files only consolidated profit (us-gaap or
+            IFRS ProfitLoss) and a noncontrolling-interest row, the parent
+            amount is ProfitLoss less that row; with no such row, ProfitLoss.
 
         Example:
             >>> company = Company('AAPL')
@@ -618,36 +659,92 @@ class Financials:
         """
         # First try concept-based search using standardization mappings.
         # 'Net Income' covers us-gaap_NetIncome / us-gaap_NetIncomeLoss (the
-        # parent-attributable line for US GAAP filers reporting NCI).
-        # 'Profit or Loss' covers us-gaap_ProfitLoss and the IFRS variants
-        # (ifrs-full_ProfitLoss, ifrs-full_ProfitLossAttributableToOwnersOfParent)
-        # used by 20-F filers — these would otherwise miss when the row label
-        # is not "Net income" (e.g. "Profit after tax").
+        # parent-attributable line for US GAAP filers reporting NCI); IFRS
+        # files the same line as ProfitLossAttributableToOwnersOfParent.
         result = self._get_standardized_concept_by_xbrl(
             'income',
-            ['Net Income', 'Profit or Loss'],
+            ['Net Income', 'ifrs-full_ProfitLossAttributableToOwnersOfParent'],
             period_offset
         )
         if result is not None:
             return result
 
+        # 'Profit or Loss' (us-gaap_ProfitLoss, ifrs-full_ProfitLoss) is
+        # consolidated profit, INCLUDING the noncontrolling interest's share.
+        # Returned as is, it overstated parent net income by that share (gh
+        # #1688): Caterpillar's FY2025 10-K files ProfitLoss $8,882M and NCI
+        # $(2)M, so its parent amount is $8,884M; Interactive Brokers' Q2 2026
+        # 10-Q returned $1,338M for $312M; Toyota's 20-F returned ifrs
+        # ProfitLoss over the owners-of-parent line above. ProfitLoss less the
+        # NCI rows is NetIncomeLoss by definition (ASC 810-10-50-1A), the line
+        # the first lookup prefers; preferred dividends are not taken out.
+        result = self._get_standardized_concept_by_xbrl('income', ['Profit or Loss'], period_offset)
+        if result is not None:
+            return result - self._noncontrolling_interest_share(period_offset)
+
         # Fallback to label-based search for filers whose concept isn't in
         # the standardization map. Includes 'Net Loss' variants (filer reporting
         # a loss labels the row "Net loss attributable to ...") and 'Profit/Loss'
-        # for IFRS labels like "Profit (loss) for the year". All patterns
-        # explicitly exclude "noncontrolling" so we don't pick the NCI row.
-        patterns = [
-            r'Net Income$',
-            r'^Net Income(?!.*[Nn]oncontrolling)',
-            r'^Net Loss(?!.*[Nn]oncontrolling)',
-            r'Net Income.*Common',
-            r'Net Income.*Shareholders',
-            r'Net Loss.*Common',
-            r'Net Loss.*Shareholders',
-            r'Net Earnings',
-            r'Profit.*Loss(?!.*[Nn]oncontrolling)',
-        ]
+        # for IFRS labels like "Profit (loss) for the year". Every pattern
+        # excludes the noncontrolling-interest row, and the continuing and
+        # discontinued operations rows: "Net income (loss) from continuing
+        # operations" sits above the bottom line and differs from it by
+        # discontinued operations, net of tax (gh #1663).
+        not_net_income = r'^(?!.*(?:non-?\s?controlling|minority|continuing|discontinued))'
+        patterns = [not_net_income + pattern for pattern in (
+            r'.*Net Income$',
+            r'Net Income',
+            r'Net Loss',
+            r'.*Net Income.*Common',
+            r'.*Net Income.*Shareholders',
+            r'.*Net Loss.*Common',
+            r'.*Net Loss.*Shareholders',
+            r'.*Net Earnings',
+            r'.*Profit.*Loss',
+        )]
         return self._get_standardized_concept_value('income', patterns, period_offset)
+
+    # Each tier is one partition of the NCI share in net income, so the rows
+    # within a tier sum to it. Tiers are never combined: a redeemability split
+    # and an operations split each add up to the whole share.
+    _NCI_TOTAL = ('us-gaap_NetIncomeLossAttributableToNoncontrollingInterest',
+                  'ifrs-full_ProfitLossAttributableToNoncontrollingInterests')
+    _NCI_REIT_REDEEMABLE = ('us-gaap_NoncontrollingInterestInNetIncomeLossOperatingPartnershipsRedeemable',
+                            'us-gaap_NoncontrollingInterestInNetIncomeLossOtherNoncontrollingInterestsRedeemable',
+                            'us-gaap_NoncontrollingInterestInNetIncomeLossPreferredUnitHoldersRedeemable')
+    _NCI_BY_OPERATIONS = ('us-gaap_IncomeLossFromContinuingOperationsAttributableToNoncontrollingEntity',
+                          'us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxAttributableToNoncontrollingInterest')
+
+    def _noncontrolling_interest_share(self, period_offset: int = 0) -> Union[int, float]:
+        """The income statement's profit attributable to noncontrolling interests, 0 if none.
+
+        Tried in order, first tier present wins:
+        1. a total row (us-gaap or IFRS);
+        2. the redeemability split: nonredeemable plus redeemable, where the
+           redeemable part is its total row or, failing that, the REIT
+           holder rows (operating partnership, other partnerships, preferred
+           units) that compose it (Sempra files $141M and $4M);
+        3. the operations split: continuing plus discontinued operations.
+        """
+        def value(concept):
+            return self._get_standardized_concept_by_xbrl('income', [concept], period_offset)
+
+        def tier_sum(concepts):
+            values = [v for v in (value(c) for c in concepts) if v is not None]
+            return sum(values) if values else None
+
+        total = self._get_standardized_concept_by_xbrl('income', list(self._NCI_TOTAL), period_offset)
+        if total is not None:
+            return total
+
+        nonredeemable = value('us-gaap_NetIncomeLossAttributableToNonredeemableNoncontrollingInterest')
+        redeemable = value('us-gaap_NetIncomeLossAttributableToRedeemableNoncontrollingInterest')
+        if redeemable is None:
+            redeemable = tier_sum(self._NCI_REIT_REDEEMABLE)
+        if nonredeemable is not None or redeemable is not None:
+            return (nonredeemable or 0) + (redeemable or 0)
+
+        return tier_sum(self._NCI_BY_OPERATIONS) or 0
 
     def get_operating_income(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
@@ -673,12 +770,23 @@ class Financials:
         if result is not None:
             return result
 
-        # Fallback to label-based search for edge cases
+        # Label fallback for an operating subtotal on an unmapped concept. Both
+        # ends are anchored. r'Income.*Operations' matched "Income from
+        # continuing operations before income taxes", so IBM's FY2024 10-K,
+        # which presents no operating subtotal, returned its $5.797B pretax
+        # income (gh #1664); and an unanchored r'Operating Income$' matched
+        # banks' "Other operating income" and "Non-operating income". Pretax
+        # and continuing-operations income are different measures; a filing
+        # without an operating subtotal returns None, as banks already do.
+        # The amount is one or more of income/loss/profit/earnings in any sign
+        # ordering ("Income (loss)", "(Loss) income", "income/(loss)") with an
+        # optional ", net"; nothing else may follow it, so "... before income
+        # taxes" never matches.
+        amount = r'(?:\(?(?:Income|Loss|Profit|Earnings)\)?[\s/]*)+'
+        net = r'(?:,?\s*net)?\s*$'
         patterns = [
-            r'Operating Income$',
-            r'^Operating Income',
-            r'Income.*Operations',
-            r'Operating.*Income.*Loss',
+            r'^Operating\s+' + amount + net,
+            r'^' + amount + r'From Operations' + net,
         ]
         return self._get_standardized_concept_value('income', patterns, period_offset)
 
@@ -697,10 +805,24 @@ class Financials:
             >>> financials = company.get_financials()
             >>> total_assets = financials.get_total_assets()
         """
+        # Identify the concept, not the filer's prose, as get_total_liabilities
+        # does. The label path alone returned the current-assets subtotal
+        # (gh #1667): when the us-gaap:Assets row is labeled "Assets" or
+        # "Total consolidated assets", neither "Total Assets" pattern matches and
+        # the old r'Assets$' fallback hit "Total current assets", the first
+        # such row. NovaGold's 10-Q for 2026-08-31 returned $349.8M against a
+        # filed total of $573.3M.
+        value = self._get_standardized_concept_by_xbrl(
+            'balance', ['Total Assets'], period_offset)
+        if value is not None:
+            return value
+
+        # Label fallback for a filer whose total is present but unmapped,
+        # anchored at both ends so that no subtotal ("Total current assets",
+        # "Total other assets") can match.
         patterns = [
-            r'Total Assets$',      # Exact match
-            r'^Total Assets',      # Starts with
-            r'Assets$'             # Just "Assets"
+            r'^Total Assets$',
+            r'^Assets$',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
@@ -746,14 +868,40 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
         Returns:
-            Stockholders' equity value if found, None otherwise
+            Stockholders' equity attributable to the parent if found; equity
+            including noncontrolling interest when that is the only total
+            filed; None otherwise. A deficit is negative.
         """
+        # Identify the concept, not the filer's prose, as get_total_liabilities
+        # does. The label path alone returned the liabilities-and-equity total
+        # (gh #1659): r'Total.*Stockholders.*Equity' matches "Total liabilities
+        # and stockholders' equity (deficit)", so American Airlines' FY2025
+        # 10-K returned $61.774B -- its total assets -- for a $3.727B deficit.
+        # NovaGold labels its us-gaap:StockholdersEquity row "Equity,
+        # Attributable to Parent", which no pattern matched, so it got None.
+        # The parent-attributable total comes first; the NCI-inclusive total is
+        # the answer only when the filing has no parent total (#1442).
+        # IFRS (IAS 1.54(q)-(r)) splits equity the same way: Shell's FY2025
+        # 20-F files EquityAttributableToOwnersOfParent $174.392B beside
+        # Equity (total, with NCI) $175.319B.
+        value = self._get_standardized_concept_by_xbrl(
+            'balance',
+            ["Total Stockholders' Equity",
+             'ifrs-full_EquityAttributableToOwnersOfParent',
+             'us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest',
+             'ifrs-full_Equity'],
+            period_offset)
+        if value is not None:
+            return value
+
+        # Label fallback for a filer whose total is present but unmapped.
+        # Anchored at the start and excluding any caption that also names
+        # liabilities, so the combined total can never match.
         patterns = [
-            r'Total.*Stockholders.*Equity',
-            r'Stockholders.*Equity$',
-            r'Shareholders.*Equity',
-            r'Total.*Equity$',
-            r'^Equity$'
+            r'^Total (?!.*Liabilit)(?!.*Noncontrolling).*(?:Stockholders|Shareholders).*(?:Equity|Deficit)',
+            r'^(?:Stockholders|Shareholders)\W*\s(?:Equity|Deficit)$',
+            r'^Total (?!.*Liabilit).*Equity$',
+            r'^Equity$',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
@@ -774,9 +922,12 @@ class Financials:
         # none of the five, so this returned None for Apple entirely (GH #1083).
         # Which of those five a filer happens to hit is an accident of house
         # style; the XBRL concept is the same for all of them.
+        # IFRS files the same total as CashFlowsFromUsedInOperatingActivities,
+        # which the mapping does not carry; Shell ("Cash flow from operating
+        # activities") and BP matched no label pattern and got None (gh #1785).
         result = self._get_standardized_concept_by_xbrl(
             'cashflow',
-            ['Net Cash from Operating Activities'],
+            ['Net Cash from Operating Activities', 'ifrs-full_CashFlowsFromUsedInOperatingActivities'],
             period_offset
         )
 
@@ -820,27 +971,54 @@ class Financials:
         Args:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
+        The basis is the investing-activities line for cash paid to acquire
+        property, plant and equipment (with intangibles where the filer reports
+        them as one line, as IFRS allows). It is not a broader "cash capital
+        expenditure" subtotal that adds investments in joint ventures or
+        securities (Shell's), and never a noncash accrual.
+
         Returns:
-            Capital expenditures value if found, None otherwise
+            Capital expenditures as a filed magnitude if found, None otherwise
         """
-        # First try concept-based search using standardization mappings
+        # First try concept-based search using standardization mappings, then
+        # the IFRS purchase lines the mapping does not carry: TSMC's 20-F
+        # captions its row just "Property, plant and equipment" under
+        # "Acquisitions of", which no label pattern can safely match (gh #1785).
         result = self._get_standardized_concept_by_xbrl(
             'cashflow',
-            ['Payments for Property, Plant and Equipment'],
+            ['Payments for Property, Plant and Equipment',
+             'ifrs-full_PurchaseOfPropertyPlantAndEquipmentClassifiedAsInvestingActivities',
+             'ifrs-full_PurchaseOfPropertyPlantAndEquipmentIntangibleAssetsOtherThanGoodwill'
+             'InvestmentPropertyAndOtherNoncurrentAssets',
+             # Shell's "Capital expenditure" line
+             'ifrs-full_PurchaseOfOtherLongtermAssetsClassifiedAsInvestingActivities'],
             period_offset
         )
 
         if result is not None:
             return result
 
-        # Fallback to label-based search for edge cases
-        patterns = [
-            r'Capital Expenditures',
-            r'Additions.*property.*equipment',  # MSFT: "Additions to property and equipment"
-            r'Purchase.*Property',
-            r'Capex'
-        ]
-        return self._get_standardized_concept_value('cashflow', patterns, period_offset)
+        # Label fallback for a cash capex row on an unmapped concept. It must
+        # never return the supplemental noncash disclosure on the same
+        # statement: the unanchored r'Capital Expenditures' matched "Capital
+        # expenditures in accounts payable" (us-gaap
+        # CapitalExpendituresIncurredButNotYetPaid), which the display layer
+        # can also label plain "Capital Expenditures" (gh #1660). Thor's FY2026
+        # 10-K returned $6.3M for $152.4M of purchases, and Essential
+        # Utilities' free cash flow came out +$440M instead of -$73M. Noncash
+        # concepts are excluded by name, accrual captions by label, and the
+        # patterns are anchored at the start.
+        not_noncash = r'^(?!.*(?:accounts payable|accrued|unpaid|not yet paid|non-?cash|incurred))'
+        patterns = [not_noncash + pattern for pattern in (
+            r'Capital Expenditures?(?:,? net\b.*)?$',   # "..., net of grants"
+            r'(?:Purchases?|Additions?|Acquisitions?|Payments?|Expenditures?) (?:of|to|for|on) '
+            r'(?:property|fixed assets|capital expenditures?)',   # MSFT: "Additions to property and equipment"
+            r'Property,? plant,? and equipment additions',
+            r'Capex',
+        )]
+        return self._get_standardized_concept_value(
+            'cashflow', patterns, period_offset,
+            exclude_concepts=r'IncurredButNotYetPaid|NonCash')
 
     def get_current_assets(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
@@ -850,12 +1028,25 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
         Returns:
-            Current assets value if found, None otherwise
+            Current assets value if found, None otherwise. An unclassified
+            balance sheet has no current total and returns None.
         """
+        # Identify the concept, not the filer's prose, as get_total_assets
+        # does. The label path alone returned a company subtotal placed above
+        # the real total (gh #1661): r'Total Current Assets' matched "Total
+        # current assets before funds held for clients", so ADP's FY2026 10-K
+        # returned $8.603B against a filed us-gaap:AssetsCurrent of $52.561B.
+        value = self._get_standardized_concept_by_xbrl(
+            'balance', ['Total Current Assets'], period_offset)
+        if value is not None:
+            return value
+
+        # Label fallback for a filer whose total is present but unmapped,
+        # anchored at both ends so no subtotal or component matches.
         patterns = [
-            r'Total Current Assets',
-            r'^Current Assets',
-            r'Assets Current'
+            r'^Total Current Assets$',
+            r'^Current Assets,? Total$',
+            r'^Assets,? Current,? Total$',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
@@ -867,12 +1058,21 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
         Returns:
-            Current liabilities value if found, None otherwise
+            Current liabilities value if found, None otherwise. An unclassified
+            balance sheet has no current total and returns None.
         """
+        # Concept first, for the reason given in get_current_assets (gh #1661):
+        # ADP's "Total current liabilities before client funds obligations"
+        # ($5.609B) sat above its filed us-gaap:LiabilitiesCurrent ($50.025B).
+        value = self._get_standardized_concept_by_xbrl(
+            'balance', ['Total Current Liabilities'], period_offset)
+        if value is not None:
+            return value
+
         patterns = [
-            r'Total Current Liabilities',
-            r'^Current Liabilities',
-            r'Liabilities Current'
+            r'^Total Current Liabilities$',
+            r'^Current Liabilities,? Total$',
+            r'^Liabilities,? Current,? Total$',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
@@ -978,8 +1178,14 @@ class Financials:
             >>> q_shares = quarterly.get_shares_outstanding_basic()
         """
         # Search by XBRL concept name - more reliable than label matching
+        # A filer whose basic and diluted counts are the same (a loss year, or no
+        # dilutive securities) tags one row with the combined element, whose
+        # us-gaap name has a singular "Share" that no plural pattern matches
+        # (gh #1668: 10x Genomics' FY2019 10-K got None for 39,091,366). It goes
+        # before the period-end CommonStockSharesOutstanding fallback.
         concept_patterns = [
             r'WeightedAverageNumberOfSharesOutstandingBasic',
+            r'WeightedAverageNumberOfShareOutstandingBasicAndDiluted',
             r'CommonStockSharesOutstanding',  # Fallback for some filings
         ]
         return self._get_concept_value('income', concept_patterns, period_offset)
@@ -1014,6 +1220,8 @@ class Financials:
         concept_patterns = [
             r'WeightedAverageNumberOfDilutedSharesOutstanding',
             r'WeightedAverageNumberOfSharesOutstandingDiluted',  # Alternative naming
+            # One count serving as both denominators (gh #1668); see the basic getter.
+            r'WeightedAverageNumberOfShareOutstandingBasicAndDiluted',
         ]
         return self._get_concept_value('income', concept_patterns, period_offset)
 
