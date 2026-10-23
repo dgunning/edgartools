@@ -193,9 +193,11 @@ patterns:
                                            #  'compensation_discussion_and_analysis',
                                            #  'audit_matters', 'security_ownership', ...]
 
+      # Either key can be absent (Microsoft's 2025 proxy has neither), so test before .text()
       cda = proxy.section('compensation_discussion_and_analysis')  # Section | None
-      cda.text()                           # CD&A narrative (tens of thousands of chars)
-      proxy.sections['corporate_governance'].text()
+      cda_text = cda.text() if cda is not None else None           # CD&A narrative (tens of thousands of chars)
+      governance = proxy.sections.get('corporate_governance')
+      governance_text = governance.text() if governance is not None else None
 
       # Structured compensation/governance data (XBRL + HTML tables)
       proxy.executive_compensation         # Multi-year comp DataFrame
