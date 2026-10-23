@@ -270,17 +270,36 @@ income = xbrls.statements.income_statement(max_periods=10)
 
 ### Quarterly Analysis
 
-For quarterly trends, use 10-Q filings:
+10-Q filings can be stitched, but by default each 10-Q contributes one column: its
+year-to-date period. A Q1 column covers three months, a Q2 column six months and a Q3
+column nine months. The DataFrame keys these columns by end date only (`2023-07-01`),
+so check the period label before comparing columns. `statement_data["periods"]` and the
+rendered header show the duration (`Q3 YTD Jul 1, 2023`).
 
 ```python
-# Get last 8 quarters
 filings = company.get_filings(form="10-Q").head(8)
 xbrls = XBRLS.from_filings(filings)
 
-# Quarterly income statement
+# Default: one year-to-date column per 10-Q
 income = xbrls.statements.income_statement(max_periods=8)
-print(income)
+print(income.statement_data["periods"])
+# [('duration_2022-09-25_2023-07-01', 'Q3 YTD Jul 1, 2023'), ...]
 ```
+
+For three-month quarters, pass `include_quarterly=True`. Each 10-Q then contributes
+its discrete quarter and its year-to-date column. Columns that share an end date are
+keyed by their period label; a Q1 10-Q, whose quarter is its year to date, keeps a
+single end-date column:
+
+```python
+income = xbrls.statements.income_statement(max_periods=16, include_quarterly=True)
+df = income.to_dataframe()
+# Columns: 'Q3 Jul 1, 2023', 'Q3 YTD Jul 1, 2023', 'Q2 Apr 1, 2023', 'Q2 YTD Apr 1, 2023', ...
+```
+
+On Apple's 10-Q for the quarter ended July 1, 2023, the default column `2023-07-01`
+holds nine-month net sales of $293,787 million, while `include_quarterly=True` adds
+`Q3 Jul 1, 2023` with the quarter's $81,797 million.
 
 ### Manual Period Inspection
 
