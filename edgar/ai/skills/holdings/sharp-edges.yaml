@@ -72,10 +72,15 @@ sharp_edges:
       tf.is_amendment                   # bool
       tf.amendment_type                 # "RESTATEMENT" | "NEW HOLDINGS" | None
       tf.amendment_number               # int | None
-      # Berkshire 2025-Q1: original 13F-HR = 110 holdings; /A NEW HOLDINGS = 4.
-      # Correct current holdings is the UNION (114), not the 4-holding amendment.
+      # Berkshire 2025-Q1: original 13F-HR = 110 infotable entries (36 .holdings rows);
+      # /A NEW HOLDINGS = 4 entries (4 rows). Correct current holdings is the UNION:
+      # 114 entries, 39 securities. Lennar CL B is in both filings (152,572 + 202
+      # shares), so concatenating the two .holdings frames would list it twice (40 rows).
       if tf.amendment_type == "NEW HOLDINGS":
-          holdings = pd.concat([original.holdings, tf.holdings])  # combine, don't replace
+          entries = pd.concat([original.infotable, tf.infotable])       # 114 entries
+          holdings = entries.groupby(["Cusip", "PutCall"], as_index=False).agg(
+              Issuer=("Issuer", "first"), Class=("Class", "first"),
+              SharesPrnAmount=("SharesPrnAmount", "sum"), Value=("Value", "sum"))  # 39 rows
     detection_pattern: '13F-HR/A.*\.obj\(\)'
 
   - id: pre-2013-txt-row-completeness
