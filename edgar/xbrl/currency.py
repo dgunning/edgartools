@@ -66,6 +66,26 @@ def _first_date(row, *columns):
             return value
     return None
 
+
+def _local_name(qname: str) -> str:
+    """``'currency:USD'`` -> ``'USD'``."""
+    return qname.rsplit(':', 1)[-1]
+
+
+# (ExchangeRate field, concept, date columns in order of preference)
+_RATE_CONCEPTS = (
+    ('average', 'ifrs-full:AverageForeignExchangeRate', ('period_end',)),
+    # A closing rate is an instant fact: its date is period_instant, and
+    # period_end is an empty (NaN) cell.
+    ('closing', 'ifrs-full:ClosingForeignExchangeRate', ('period_end', 'period_instant')),
+)
+
+# Marks a warning that is a failure to read the facts (edgartools-35jj).
+_FAILED = 'could not be extracted'
+
+# The axis whose member names the currency a rate is quoted for.
+_CURRENCY_AXIS = 'srt:CurrencyAxis'
+
 __all__ = ['CurrencyConverter', 'ExchangeRate']
 
 
@@ -159,14 +179,17 @@ class CurrencyConverter:
         1. Currency-specific units like 'dkkPerUSD' with rates per 100 USD
         2. Pure ratio units ('number', 'pure') with direct exchange rates
 
+        A filing publishes one rate per currency, and often hedge-instrument
+        rates too, under the same concept. Only facts for the target currency
+        (``srt:CurrencyAxis``) that are not on a hedge axis are used; when the
+        remaining facts for a year disagree, no rate is kept for that year and
+        the disagreement is reported in ``extraction_warnings`` (GH #1650).
+
         Returns:
             Dict mapping year to ExchangeRate objects
         """
         rates: Dict[int, ExchangeRate] = {}
         self._extraction_warnings = []
-        # Rate facts of an accepted unit whose period gave no year. Skipping one
-        # silently left a filing's closing rates missing with no warning (GH #1652).
-        undated: Counter = Counter()
 
         # Build the expected unit_ref pattern for home currency to USD
         # e.g., 'dkkPerUSD', 'eurPerUSD'
@@ -189,76 +212,23 @@ class CurrencyConverter:
                 return True
             return False
 
-        # Extract average rates (for income statement / duration periods)
-        try:
-            avg_df = self.xbrl.facts.query().by_concept(
-                'ifrs-full:AverageForeignExchangeRate', exact=True
-            ).to_dataframe()
-
-            if not avg_df.empty:
-                for _, row in avg_df.iterrows():
-                    unit_ref = row.get('unit_ref', '')
-                    if is_valid_rate_unit(unit_ref):
-                        year = _extract_year(_first_date(row, 'period_end'))
-                        if year:
-                            value = row.get('numeric_value')
-                            if year not in rates:
-                                rates[year] = ExchangeRate(year=year)
-                            rates[year].average = value
-                        else:
-                            undated['average'] += 1
-        except Exception as e:
-            # Not "no average rates found": that is what an empty frame means.
-            # This is the extraction itself failing, which is indistinguishable
-            # from a filing that genuinely publishes no rate unless it is
-            # recorded (bead edgartools-35jj).
-            self._extraction_warnings.append(
-                f"average exchange rates could not be extracted: {type(e).__name__}: {e}"
-            )
-            log.warning(
-                "Could not extract %s foreign-exchange rates from the filing (%s). "
-                "to_usd() will return None for periods that depend on them rather "
-                "than converting with a wrong rate.", "average", e,
-            )
-
-        # Extract closing rates (for balance sheet / instant periods)
-        try:
-            close_df = self.xbrl.facts.query().by_concept(
-                'ifrs-full:ClosingForeignExchangeRate', exact=True
-            ).to_dataframe()
-
-            if not close_df.empty:
-                for _, row in close_df.iterrows():
-                    unit_ref = row.get('unit_ref', '')
-                    if is_valid_rate_unit(unit_ref):
-                        # A closing rate is an instant fact: its date is period_instant,
-                        # and period_end is an empty (NaN) cell.
-                        year = _extract_year(_first_date(row, 'period_end', 'period_instant'))
-                        if year:
-                            value = row.get('numeric_value')
-                            if year not in rates:
-                                rates[year] = ExchangeRate(year=year)
-                            rates[year].closing = value
-                        else:
-                            undated['closing'] += 1
-        except Exception as e:
-            # Not "no closing rates found": that is what an empty frame means.
-            # This is the extraction itself failing, which is indistinguishable
-            # from a filing that genuinely publishes no rate unless it is
-            # recorded (bead edgartools-35jj).
-            self._extraction_warnings.append(
-                f"closing exchange rates could not be extracted: {type(e).__name__}: {e}"
-            )
-            log.warning(
-                "Could not extract %s foreign-exchange rates from the filing (%s). "
-                "to_usd() will return None for periods that depend on them rather "
-                "than converting with a wrong rate.", "closing", e,
-            )
-
-        for kind, count in undated.items():
-            self._extraction_warnings.append(
-                f"{count} {kind} exchange rate fact(s) had no period date and were not used"
-            )
+        for kind, concept, date_columns in _RATE_CONCEPTS:
+            try:
+                df = self.xbrl.facts.query().by_concept(concept, exact=True).to_dataframe()
+                self._select_rates(df, kind, date_columns, is_valid_rate_unit, rates)
+            except Exception as e:
+                # Not "no rates found": that is what an empty frame means. This
+                # is the extraction itself failing, which is indistinguishable
+                # from a filing that genuinely publishes no rate unless it is
+                # recorded (bead edgartools-35jj).
+                self._extraction_warnings.append(
+                    f"{kind} exchange rates {_FAILED}: {type(e).__name__}: {e}"
+                )
+                log.warning(
+                    "Could not extract %s foreign-exchange rates from the filing (%s). "
+                    "to_usd() will return None for periods that depend on them rather "
+                    "than converting with a wrong rate.", kind, e,
+                )
 
         # Auto-detect rate scale by checking if rates look like "per 100" or direct
         # Rates > 10 are likely "per 100 USD" format, rates < 10 are direct rates
@@ -273,6 +243,67 @@ class CurrencyConverter:
                 self._rate_scale = 100.0
 
         return rates
+
+    def _fact_dimensions(self, row) -> Dict[str, str]:
+        """The dimensions of a fact's context, e.g. ``{'srt:CurrencyAxis': 'currency:USD'}``."""
+        context = self.xbrl.contexts.get(row.get('context_ref'))
+        return dict(context.dimensions) if context is not None else {}
+
+    def _select_rates(self, df, kind: str, date_columns, is_valid_rate_unit,
+                      rates: Dict[int, ExchangeRate]) -> None:
+        """Pick one ``kind`` rate per year from the facts of one rate concept."""
+        if df.empty:
+            return
+        target = self.target_currency.upper()
+        # year -> [(number of dimensions besides the currency axis, value)]
+        candidates: Dict[int, List[tuple]] = {}
+        hedge_rows: Counter = Counter()
+        # Rate facts of an accepted unit whose period gave no year. Skipping one
+        # silently left a filing's closing rates missing with no warning (GH #1652).
+        undated = 0
+
+        for _, row in df.iterrows():
+            if not is_valid_rate_unit(row.get('unit_ref', '')):
+                continue
+            dimensions = self._fact_dimensions(row)
+            member = dimensions.get(_CURRENCY_AXIS)
+            if member is not None and _local_name(member).upper() != target:
+                continue  # the rate of another currency, e.g. JPY for GSK
+            year = _extract_year(_first_date(row, *date_columns))
+            if not year:
+                undated += 1
+                continue
+            if any('hedg' in _local_name(axis).lower() for axis in dimensions):
+                # A hedging instrument's contracted rate, not a translation rate.
+                hedge_rows[year] += 1
+                continue
+            value = row.get('numeric_value')
+            if value is None or pd.isna(value):
+                continue
+            extra = len(dimensions) - (1 if member is not None else 0)
+            candidates.setdefault(year, []).append((extra, value))
+
+        for year, facts in candidates.items():
+            fewest = min(extra for extra, _ in facts)
+            values = sorted({value for extra, value in facts if extra == fewest})
+            if len(values) == 1:
+                rates.setdefault(year, ExchangeRate(year=year))
+                setattr(rates[year], kind, values[0])
+            else:
+                self._extraction_warnings.append(
+                    f"{len(values)} different {kind} {target} rates for {year} "
+                    f"({', '.join(str(v) for v in values)}); none was used"
+                )
+        for year, count in sorted(hedge_rows.items()):
+            if year not in candidates:
+                self._extraction_warnings.append(
+                    f"the only {kind} {target} rates for {year} are {count} "
+                    f"hedging-instrument rate(s), which were not used"
+                )
+        if undated:
+            self._extraction_warnings.append(
+                f"{undated} {kind} exchange rate fact(s) had no period date and were not used"
+            )
 
     def to_usd(
         self,
@@ -407,13 +438,20 @@ class CurrencyConverter:
     def has_warnings(self) -> bool:
         return bool(getattr(self, "_extraction_warnings", []))
 
+    def _extraction_failed(self) -> bool:
+        """True when a warning is a failure to read the facts, not a rate set aside."""
+        return any(_FAILED in w for w in self.extraction_warnings)
+
     def __repr__(self) -> str:
         if not self.has_rates:
             if self.has_warnings:
                 # "no rates found" would be a claim about the filing; this was a
-                # failure on our side and must not read as the filer's silence.
+                # failure on our side, or rates found and set aside (GH #1650),
+                # and must not read as the filer's silence.
+                status = ("rate extraction failed" if self._extraction_failed()
+                          else "no usable rates")
                 return (f"CurrencyConverter(home={self.home_currency}, "
-                        f"target={self.target_currency}, rate extraction failed: "
+                        f"target={self.target_currency}, {status}: "
                         f"{self.extraction_warnings[0]})")
             return f"CurrencyConverter(home={self.home_currency}, target={self.target_currency}, no rates found)"
 
@@ -462,7 +500,8 @@ class CurrencyConverter:
 
         if self.has_warnings:
             # An empty table and a table missing rows look identical; say which.
-            table.caption = (f"[red]Rate extraction failed "
+            status = "Rate extraction failed" if self._extraction_failed() else "Warnings"
+            table.caption = (f"[red]{status} "
                              f"({len(self.extraction_warnings)}): "
                              f"{self.extraction_warnings[0]}[/red]")
 
