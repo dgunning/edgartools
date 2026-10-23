@@ -599,6 +599,42 @@ class StatementStitcher:
         return all(self._values_agree(a[p], b[p]) for p in shared)
 
     @staticmethod
+    def _activity_stem(bare_name: str, suffix: str) -> Optional[str]:
+        """'NetCashProvidedByUsedInOperatingActivitiesContinuingOperations' ->
+        'CashProvidedByUsedInOperatingActivities' (suffix and leading 'Net' removed)."""
+        if not bare_name.endswith(suffix):
+            return None
+        stem = bare_name[:-len(suffix)]
+        return stem[3:] if stem.startswith('Net') else stem
+
+    def _continuing_differs_from_total(self, key_a: str, key_b: str) -> bool:
+        """True when one key is an activity's continuing-operations amount and the
+        filing reports nonzero discontinued-operations cash for that activity in
+        a period the continuing amount would fill (GH #1690).
+
+        There the continuing amount is not the total, so merging it into the
+        total row would understate the total by the discontinued amount.
+        """
+        suffix = 'ContinuingOperations'
+        bare_a, bare_b = self._bare_concept_name(key_a), self._bare_concept_name(key_b)
+        if bare_a.endswith(suffix) == bare_b.endswith(suffix):
+            return False
+        continuing_key = key_a if bare_a.endswith(suffix) else key_b
+        stem = self._activity_stem(self._bare_concept_name(continuing_key), suffix)
+        continuing_periods = set(self.data.get(continuing_key, {}))
+        for other_key in set(self.data) | set(self.value_evidence):
+            other_bare = self._bare_concept_name(other_key)
+            other_stem = self._activity_stem(other_bare, 'DiscontinuedOperations')
+            # The aggregate line does not say which activity it belongs to, so a
+            # nonzero aggregate blocks every activity's merge.
+            if other_bare != 'CashProvidedByUsedInDiscontinuedOperations' and other_stem != stem:
+                continue
+            discontinued = self._evidence_for(other_key)
+            if any(discontinued.get(p) for p in continuing_periods):
+                return True
+        return False
+
+    @staticmethod
     def _overlap_values_agree(primary_data: Dict, secondary_data: Dict, overlap_periods: Set) -> bool:
         """Check whether overlapping period values agree (same economic line item).
 
@@ -657,7 +693,9 @@ class StatementStitcher:
         2. Any overlapping period values agree (or there is no overlap).
 
         This prevents unrelated sub-items that happen to map to the same standard
-        concept from being incorrectly merged (Issue #642).
+        concept from being incorrectly merged (Issue #642). A continuing-operations
+        amount is not merged into its total where the filing reports nonzero
+        discontinued-operations cash for that activity and period (GH #1690).
 
         Additionally, concepts whose standard concepts are declared equivalent
         (via _EQUIVALENT_STANDARD_CONCEPTS) are grouped together and merged
@@ -706,6 +744,8 @@ class StatementStitcher:
                         if not skip_variant_check and not self._are_concept_name_variants(a_key, b_key):
                             continue
                         if skip_variant_check and not self._shown_to_be_same_amount(a_key, b_key):
+                            continue
+                        if self._continuing_differs_from_total(a_key, b_key):
                             continue
                         a_data = self.data.get(a_key, {})
                         b_data = self.data.get(b_key, {})
