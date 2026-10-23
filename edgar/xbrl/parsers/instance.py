@@ -63,6 +63,10 @@ _STRUCTURAL_ELEMENTS = frozenset({
     f"{LINKBASE_NS}footnoteLink",
 })
 
+# Axes whose member names another legal entity: a DEI fact on one of them is a
+# co-registrant's, not the filer's (GH #1420, #1710).
+_ENTITY_AXES = ('dei:LegalEntityAxis', 'srt:ConsolidatedEntitiesAxis')
+
 
 class InstanceParser(BaseParser):
     """Parser for XBRL instance documents."""
@@ -800,6 +804,10 @@ class InstanceParser(BaseParser):
             # report. Keeping whichever fact came last named Duke Energy's
             # combined 10-K after Piedmont Natural Gas, the last of its seven
             # co-registrants, beside Duke Energy's own CIK (GH #1420).
+            # Lamar's combined 10-Q puts its co-registrant on
+            # srt:ConsolidatedEntitiesAxis instead, so both entity axes count
+            # (GH #1710). A class-of-stock member alone does not: it qualifies
+            # the filer's own securities.
             self.dei_facts: Dict[str, Fact] = {}
             co_registrant_facts: Dict[str, Fact] = {}
             for fact in self.facts.values():
@@ -811,7 +819,7 @@ class InstanceParser(BaseParser):
                 else:
                     continue
                 context = self.contexts.get(fact.context_ref)
-                if context is not None and 'dei:LegalEntityAxis' in context.dimensions:
+                if context is not None and any(axis in context.dimensions for axis in _ENTITY_AXES):
                     co_registrant_facts[concept] = fact
                 else:
                     self.dei_facts[concept] = fact
