@@ -2404,6 +2404,15 @@ class XBRL:
             if 'pershare' in dt or 'pure' in dt:
                 return None
 
+        # The catalog only types the filer's own extension concepts, so a
+        # us-gaap per-share concept passes the check above untyped. The facts'
+        # units say it for every concept: a divide unit (USD per share) or a
+        # pure one (a percentage) is an intensive amount that does not add up.
+        # Constellation Brands' basic EPS came out as 19.92, the Class A 10.44
+        # and Class B 9.48 added together (GH #1683).
+        if any(self._is_non_additive_unit(wf['fact'].unit_ref) for _, wf in dim_facts):
+            return None
+
         from collections import defaultdict
         axis_groups = defaultdict(list)
         for cid, wf in dim_facts:
@@ -2474,6 +2483,20 @@ class XBRL:
             'fact': first_wf['fact'],
             'context_id': first_cid,
         }
+
+    def _is_non_additive_unit(self, unit_ref: Optional[str]) -> bool:
+        """Whether amounts in this unit are ratios that cannot be summed.
+
+        True for a divide unit (USD per share) and for xbrli:pure (percentages,
+        ratios). Shares, currencies and other simple measures add up.
+        """
+        unit = self.units.get(unit_ref) if unit_ref else None
+        if not unit:
+            return False
+        if unit.get('type') == 'divide':
+            return True
+        measure = (unit.get('measure') or '').split(':')[-1].lower()
+        return measure == 'pure'
 
     @staticmethod
     def _get_fact_precision(fact) -> int:
