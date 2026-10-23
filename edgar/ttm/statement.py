@@ -680,7 +680,10 @@ class TTMStatementBuilder:
                     # cover twelve months (a skipped quarter makes it ~15), so
                     # its sum is not a TTM value: leave the cell empty rather
                     # than print it under a TTM column (GH #1694).
-                    period_values[period_label] = None if row.get("has_gaps") else row["ttm_value"]
+                    # A per-share earnings line has no value outside a fiscal-year
+                    # window (NaN in the trend frame) (GH #1695).
+                    value = row["ttm_value"]
+                    period_values[period_label] = None if row.get("has_gaps") or pd.isna(value) else value
 
                 if base_period_labels:
                     values = {p: period_values.get(p) for p in base_period_labels}

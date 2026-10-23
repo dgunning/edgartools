@@ -12,8 +12,9 @@ Example:
     TTM Revenue: $391.0B
 
 """
+import re
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from typing import Callable, List, Optional, Tuple
 
 import pandas as pd
@@ -41,6 +42,10 @@ YTD_9M_MAX_DAYS = 329  # Non-overlapping with Annual
 # Annual: ~365 days (full fiscal year)
 ANNUAL_MIN_DAYS = 330
 ANNUAL_MAX_DAYS = 420
+
+# Per-share earnings concept names other than EarningsPerShare* (GH #1695).
+_PER_SHARE_EARNINGS_SUFFIX = re.compile(
+    r'per(basic|diluted|basicanddiluted)?share|peroutstandinglimitedpartnershipunit')
 
 # Consecutive quarters: days between quarter ends, and the span of a four-quarter
 # window. 52/53-week filers have 12/12/12/16 or 13/13/13/14-week quarters, and a
@@ -238,6 +243,11 @@ class TTMCalculator:
 
         """
 
+        # Per-share earnings: quarters do not add up to a year, so the value is
+        # a filed fiscal-year amount or there is none (GH #1695).
+        if self.facts and self._is_per_share_earnings_concept(self.facts[0]):
+            return self._per_share_earnings_ttm(as_of)
+
         # 1. Get quarterized facts (includes derived Q2, Q3, Q4 from YTD/annual)
         quarterly = self._filter_quarterly_facts()
 
@@ -293,6 +303,74 @@ class TTMCalculator:
             has_calculated_q4=has_calculated_q4,
             is_stale=is_stale,
             warning=warning
+        )
+
+    def _per_share_earnings_ttm(self, as_of: Optional[date]) -> TTMMetric:
+        """TTM of a per-share earnings concept: the filed fiscal-year amount (GH #1695).
+
+        Quarterly EPS need not add up to annual EPS (ASC 260-10-55-50), so the
+        twelve-month value exists only for a fiscal year. It is the latest
+        fiscal year ending on or before ``as_of`` (today if None), provided no
+        quarter has ended since (within a week). Otherwise the window is a
+        rolling one, which has no filed amount, and this raises.
+        """
+        from edgar.entity.enhanced_statement import (
+            calculate_fiscal_year_for_label,
+            detect_fiscal_year_end,
+        )
+        from edgar.exceptions import ValidationError
+
+        reference = as_of if as_of is not None else date.today()
+        concept = self.facts[0].concept
+        quarterly = [q for q in self._filter_quarterly_facts() if q.period_end <= reference]
+        years = [f for f in self._filter_by_duration(DurationBucket.ANNUAL)
+                 if f.period_end <= reference and f.period_start and f.numeric_value is not None]
+        if not years:
+            raise ValidationError(
+                f"{concept} is a per-share earnings amount: quarterly amounts do not add up to "
+                f"a twelve-month amount (ASC 260-10-55-50), and no fiscal-year amount was filed "
+                f"on or before {reference}.",
+                parameter="as_of", invalid_value=as_of)
+        year_end = max(f.period_end for f in years)
+        latest_quarter = max((q.period_end for q in quarterly), default=None)
+        if latest_quarter is not None and latest_quarter > year_end + timedelta(days=7):
+            raise ValidationError(
+                f"{concept} is a per-share earnings amount: quarterly amounts do not add up to "
+                f"a twelve-month amount (ASC 260-10-55-50). The twelve months ending "
+                f"{latest_quarter} are not a fiscal year, so no amount was filed for them.",
+                parameter="as_of", invalid_value=as_of,
+                suggestions=[f"Pass as_of={year_end.isoformat()} for the filed fiscal-year amount"])
+
+        fy = max((f for f in years if f.period_end == year_end),
+                 key=lambda f: (self._form_tier(f.form_type or ''), f.filing_date or date.min))
+        in_year = sorted((q for q in quarterly
+                          if q.period_start and q.period_start >= fy.period_start - timedelta(days=7)
+                          and q.period_end <= year_end + timedelta(days=7)),
+                         key=lambda q: q.period_end)
+        fiscal_year_end_month = detect_fiscal_year_end(self.facts)
+        if len(in_year) == 4 and not self._check_for_gaps(in_year):
+            period_facts = in_year
+            periods = [(calculate_fiscal_year_for_label(q.period_end, fiscal_year_end_month), q.fiscal_period)
+                       for q in in_year]
+        else:
+            period_facts = [fy]
+            periods = [(calculate_fiscal_year_for_label(year_end, fiscal_year_end_month), 'FY')]
+
+        is_stale = (reference - year_end).days > STALE_THRESHOLD_DAYS
+        warning = self._generate_warning(quarterly, period_facts, False, is_stale=is_stale,
+                                         window_end=year_end, reference_date=reference)
+        return TTMMetric(
+            concept=concept,
+            label=fy.label,
+            value=fy.numeric_value,
+            unit=fy.unit,
+            as_of_date=year_end,
+            periods=periods,
+            period_facts=period_facts,
+            has_gaps=False,
+            has_calculated_q4=False,
+            is_stale=is_stale,
+            warning=warning,
         )
 
     def quarterize(self) -> List[FinancialFact]:
@@ -390,11 +468,11 @@ class TTMCalculator:
 
             # Calculate YoY growth (compare to TTM from 4 quarters ago)
             yoy_growth = None
-            if i >= 7:  # Need 8 total quarters for YoY comparison
+            if i >= 7 and ttm_value is not None:  # Need 8 total quarters for YoY comparison
                 prior_ttm_window = sorted_facts[i-7:i-3]
                 prior_ttm = self._aggregate_window(prior_ttm_window)
                 # Only calculate YoY for positive prior values (negative = losses)
-                if prior_ttm > 0:
+                if prior_ttm is not None and prior_ttm > 0:
                     yoy_growth = (ttm_value - prior_ttm) / prior_ttm
 
             # Build result row. Derive the label fiscal_year from period_end + FYE
@@ -539,7 +617,7 @@ class TTMCalculator:
 
         return filtered
 
-    def _aggregate_window(self, window: List[FinancialFact]) -> float:
+    def _aggregate_window(self, window: List[FinancialFact]) -> Optional[float]:
         """Combine a TTM window's quarters into one trailing-twelve-month value.
 
         A share count or a rate is a level that persists, not a flow that
@@ -547,11 +625,53 @@ class TTMCalculator:
         rather than its total (bead edgartools-djwu). Both `calculate_ttm` and
         `calculate_ttm_trend` aggregate through here so they cannot disagree
         (GH #1698).
+
+        A per-share earnings amount (continuing or discontinued operations per
+        share) is a ratio for its own period, so quarters do not add up to the
+        year (ASC 260-10-55-50). Its value is the filed fiscal-year amount when
+        the window is a fiscal year, otherwise None (GH #1695).
         """
+        if window and self._is_per_share_earnings_concept(window[0]):
+            return self._filed_fiscal_year_value(window)
         total = sum(q.numeric_value for q in window)
         if window and self._is_window_average_concept(window[0]):
             return total / len(window)
         return total
+
+    def _is_per_share_earnings_concept(self, fact: FinancialFact) -> bool:
+        """Is this a per-share (or per-unit) earnings amount (GH #1695)?
+
+        EarningsPerShare*, IncomeLossFromContinuingOperationsPerBasicShare,
+        the discontinued-operations and *PerBasicAndDilutedShare concepts, and
+        NetIncomeLossPerOutstandingLimitedPartnershipUnit* are ratios for their
+        own period. Dividends or distributions per share are flows and keep
+        summing. (The TTM statement computes its EPS rows from income and
+        shares, not through here.)
+        """
+        name = fact.concept.split(':')[-1].lower()
+        if 'dividend' in name or 'distribut' in name:
+            return False
+        if not ('earningspershare' in name
+                or ('incomeloss' in name and _PER_SHARE_EARNINGS_SUFFIX.search(name))):
+            return False
+        if not fact.unit:
+            return False
+        from edgar.entity.unit_handling import UnitNormalizer
+        unit = str(fact.unit).lower()
+        return (UnitNormalizer.normalize_unit(str(fact.unit)) in UnitNormalizer.PER_SHARE_MAPPINGS
+                or '/share' in unit or 'per share' in unit or '/unit' in unit or 'per unit' in unit)
+
+    def _filed_fiscal_year_value(self, window: List[FinancialFact]) -> Optional[float]:
+        """The latest-filed fiscal-year amount that spans exactly this window, if any."""
+        start, end = window[0].period_start, window[-1].period_end
+        if start is None or end is None:
+            return None
+        years = [f for f in self._filter_by_duration(DurationBucket.ANNUAL)
+                 if f.period_end == end and f.period_start and f.numeric_value is not None
+                 and abs((f.period_start - start).days) <= 7]
+        if not years:
+            return None
+        return max(years, key=lambda f: (self._form_tier(f.form_type or ''), f.filing_date or date.min)).numeric_value
 
     def _is_window_average_concept(self, fact: FinancialFact) -> bool:
         """Should this concept's TTM value be the window's average rather than its sum?
