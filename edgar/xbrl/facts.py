@@ -1104,6 +1104,11 @@ class FactQuery:
             self._include_dimensions,
             self._include_contexts,
             self._include_element_info,
+            # limit() and sort_by() overwrite rather than append, so they go in by
+            # value; without them a cached frame ignored both (GH #1735).
+            self._limit,
+            self._sort_by,
+            self._sort_ascending,
             # getattr, not attribute access: StitchedFactQuery does not call
             # super().__init__() — it re-initialises the base attributes by hand
             # and misses this one, so a plain read raises AttributeError there.
