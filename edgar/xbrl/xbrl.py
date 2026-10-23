@@ -466,6 +466,7 @@ class XBRL:
 
         # Reverse index: element_name -> list of context_ids with facts (lazy-initialized)
         self._element_context_index = None
+        self._prefix_variant_keys = None
 
         # Most-used iso4217 measure among this filing's facts (lazy; '' when there is none)
         self._reporting_currency_cache: Optional[str] = None
@@ -912,6 +913,34 @@ class XBRL:
                 index[elem].append(fact.context_ref)
             self._element_context_index = index
         return self._element_context_index
+
+    def _fact_element_key(self, element_name: str) -> str:
+        """The key the instance's facts use for a linkbase element ID.
+
+        A linkbase names an element by its schema fragment, the instance by
+        its own prefix, and the two can differ. The FASB supplement schema
+        gives its elements 'us-gaap_' fragments while filings declare them as
+        us-gaap-supplement:, so Gladstone Investment's total expenses row was
+        blank although the three facts were filed (GH #1680). When the element
+        ID has no facts, a fact key with the same local name under a prefix
+        that extends the element's prefix ('us-gaap' -> 'us-gaap-supplement')
+        is used, provided exactly one exists.
+        """
+        index = self.element_context_index
+        if element_name in index or '_' not in element_name:
+            return element_name
+        if self._prefix_variant_keys is None:
+            variants: Dict[Tuple[str, str], List[str]] = {}
+            for key in index:
+                prefix, _, local = key.partition('_')
+                if '-' in prefix and local:
+                    base = prefix.split('-', 1)[0]
+                    variants.setdefault((base, local), []).append(key)
+            self._prefix_variant_keys = variants
+        prefix, _, local = element_name.partition('_')
+        candidates = [key for key in self._prefix_variant_keys.get((prefix.split('-', 1)[0], local), [])
+                      if key.partition('_')[0].startswith(prefix + '-')]
+        return candidates[0] if len(candidates) == 1 else element_name
 
     @classmethod
     def from_directory(cls, directory_path: Union[str, Path]) -> 'XBRL':
@@ -2944,6 +2973,7 @@ class XBRL:
         relevant_facts = {}
 
         # Use reverse index to only check contexts that actually have facts for this element
+        element_name = self._fact_element_key(element_name)
         context_ids = self.element_context_index.get(element_name, [])
         for context_id in context_ids:
             # Issue #564: Get ALL facts for this element/context and select the most precise

@@ -635,8 +635,10 @@ class Statement:
                 arcs.append(ExtensionArc(**base_kwargs))
                 continue
 
-            # Values-joined: emit one arc per context with a fact.
-            contexts = self.xbrl.element_context_index.get(element_id, [])
+            # Values-joined: emit one arc per context with a fact. The facts may
+            # sit under a prefix that extends the linkbase ID's (GH #1680).
+            fact_key = self.xbrl._fact_element_key(element_id)
+            contexts = self.xbrl.element_context_index.get(fact_key, [])
             if not contexts:
                 # No facts recorded — still emit the structural arc so callers
                 # can see the concept exists in the linkbase.
@@ -644,7 +646,7 @@ class Statement:
                 continue
 
             for ctx_ref in contexts:
-                fact = self.xbrl.parser.get_fact(element_id, ctx_ref)
+                fact = self.xbrl.parser.get_fact(fact_key, ctx_ref)
                 if fact is None:
                     continue
                 arcs.append(ExtensionArc(
