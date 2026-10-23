@@ -51,24 +51,28 @@ def _fy2023_column(df):
 
 def _values(df):
     """
-    FY2023 value per (concept, label).
+    FY2023 value per (concept, label, dimension).
 
     Keyed on the pair, not the concept alone: a concept legitimately appears on
     several rows of one statement (AAPL's balance sheet carries four
     us-gaap:StockholdersEquity rows, the total plus its dimensional breakdown),
     and the two accessors do not select the same set of rows — a difference in
-    row selection, unrelated to the sign this file is about.
+    row selection, unrelated to the sign this file is about. The dimension flag
+    is part of the key because a member row can share its face row's label
+    (AAPL's "Commercial paper": 5,985M on the face, 6,000M for the debt note's
+    CommercialPaperMember), and the two accessors need not both list it.
     """
     column = df[_fy2023_column(df)]
     return {
-        (concept, label): value
-        for concept, label, value in zip(df["concept"], df["label"], column, strict=True)
+        (concept, label, bool(dimension)): value
+        for concept, label, dimension, value in zip(df["concept"], df["label"], df["dimension"], column,
+                                                    strict=True)
     }
 
 
 def _only(values, concept):
     """The single value for a concept, asserting it has exactly one row."""
-    matches = [v for (c, _label), v in values.items() if c == concept]
+    matches = [v for (c, _label, _dimension), v in values.items() if c == concept]
     assert len(matches) == 1, f"{concept} appears on {len(matches)} rows"
     return matches[0]
 
@@ -118,7 +122,9 @@ def test_presentation_false_returns_the_filed_values(xbrl):
 def test_presentation_changes_only_negated_rows(xbrl):
     """
     The sign is applied where the presentation linkbase asks for it and nowhere
-    else — 13 of this cash flow statement's rows.
+    else — 12 of this cash flow statement's rows. (13 before GH #1670 dropped
+    the AwardTypeAxis RSU breakdown of the tax-withholding line, a note row the
+    statement's presentation tree does not show.)
     """
     rendered = xbrl.statements["CashFlowStatement"].render()
     presented = _values(rendered.to_dataframe())
@@ -126,12 +132,12 @@ def test_presentation_changes_only_negated_rows(xbrl):
 
     flipped = [
         concept
-        for (concept, label), value in raw.items()
+        for (concept, label, dimension), value in raw.items()
         if isinstance(value, (int, float))
-        and isinstance(presented[(concept, label)], (int, float))
-        and value != presented[(concept, label)]
+        and isinstance(presented[(concept, label, dimension)], (int, float))
+        and value != presented[(concept, label, dimension)]
     ]
-    assert len(flipped) == 13
+    assert len(flipped) == 12
     assert CAPEX in flipped
     # Net income is filed and displayed positive; it must not move.
     assert "us-gaap_NetIncomeLoss" not in flipped

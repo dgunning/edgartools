@@ -3715,6 +3715,27 @@ class XBRL:
         """
         return role_uri in self.tables and len(self.tables[role_uri]) > 0
 
+    def presented_axes_for_role(self, role_uri: str) -> Optional[Dict[str, bool]]:
+        """The axes a role's presentation tree shows, as 'prefix_AxisName'.
+
+        Each maps to whether the tree names members under it; an axis shown
+        with only its domain (Disney's dei_LegalEntityAxis > EntityDomain)
+        names none. None when the role has no presentation tree. A role
+        without a definition linkbase still lists, in its presentation tree,
+        every axis it prints; IFRS filers such as SAP file no hypercubes for
+        their face statements (GH #1670).
+        """
+        cache = self.__dict__.setdefault('_presented_axes_cache', {})
+        if role_uri not in cache:
+            tree = self.presentation_trees.get(role_uri)
+            if tree is None:
+                cache[role_uri] = None
+            else:
+                with_members = self._get_dimensional_member_parents(tree)
+                cache[role_uri] = {node_id.replace(':', '_'): node_id.replace(':', '_') in with_members
+                                   for node_id in tree.all_nodes if node_id.endswith('Axis')}
+        return cache[role_uri]
+
     def __rich__(self):
         """Rich representation for pretty printing in console."""
         return generate_rich_representation(self)

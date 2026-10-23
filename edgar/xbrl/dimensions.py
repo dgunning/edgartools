@@ -242,6 +242,13 @@ def _normalize_axis_name(dimension: str) -> tuple:
     return '', dimension
 
 
+def _presented_axes(xbrl: Optional[Any], role_uri: Optional[str]) -> Optional[Dict[str, bool]]:
+    """The role's presented axes, each mapped to whether it names members; None when unknown."""
+    if xbrl is None or role_uri is None or not hasattr(xbrl, 'presented_axes_for_role'):
+        return None
+    return xbrl.presented_axes_for_role(role_uri)
+
+
 def is_breakdown_dimension(item: Dict[str, Any], statement_type: Optional[str] = None,
                            xbrl: Optional[Any] = None, role_uri: Optional[str] = None) -> bool:
     """
@@ -289,6 +296,11 @@ def is_breakdown_dimension(item: Dict[str, Any], statement_type: Optional[str] =
         xbrl.has_definition_linkbase_for_role(role_uri)
     )
 
+    # Tier 1b: without a definition linkbase, the role's presentation tree
+    # lists the axes the statement prints; any other axis comes from a note
+    # that reuses the concept (GH #1670).
+    presented_axes = _presented_axes(xbrl, role_uri) if not use_definition_linkbase else None
+
     for dim_info in dim_metadata:
         dimension = dim_info.get('dimension', '')
         prefix, axis_name = _normalize_axis_name(dimension)
@@ -307,7 +319,15 @@ def is_breakdown_dimension(item: Dict[str, Any], statement_type: Optional[str] =
                 # This is a breakdown dimension (or note disclosure dimension)
                 return True
 
-        # TIER 2: Heuristic Fallback (when no definition linkbase)
+        if presented_axes is not None:
+            names_members = presented_axes.get(dimension.replace(':', '_'))
+            if names_members is None:
+                return True  # the statement does not present this axis
+            if names_members:
+                continue
+            # Presented with its domain alone: the heuristic below decides.
+
+        # TIER 2: Heuristic Fallback (when no definition linkbase or presentation tree)
         # 1. Check FACE_AXES first (should show on face)
         if axis_name in FACE_AXES:
             continue  # This is a face dimension, check next
@@ -387,6 +407,11 @@ def classify_dimension_with_confidence(
         xbrl.has_definition_linkbase_for_role(role_uri)
     )
 
+    # Tier 1b: without a definition linkbase, the role's presentation tree
+    # lists the axes the statement prints; any other axis comes from a note
+    # that reuses the concept (GH #1670).
+    presented_axes = _presented_axes(xbrl, role_uri) if not use_definition_linkbase else None
+
     for dim_info in dim_metadata:
         dimension = dim_info.get('dimension', '')
         prefix, axis_name = _normalize_axis_name(dimension)
@@ -405,6 +430,17 @@ def classify_dimension_with_confidence(
                     DimensionConfidence.HIGH,
                     f'{axis_name} not declared in definition linkbase for this role'
                 )
+
+        if presented_axes is not None:
+            names_members = presented_axes.get(dimension.replace(':', '_'))
+            if names_members is None:
+                return (
+                    'breakdown',
+                    DimensionConfidence.HIGH,
+                    f'{axis_name} not presented in this role'
+                )
+            if names_members:
+                continue
 
         # TIER 2: Heuristic Fallback - MEDIUM confidence for explicit lists
         # 1. Check FACE_AXES first (should show on face)

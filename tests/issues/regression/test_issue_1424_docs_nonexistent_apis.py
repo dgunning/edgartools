@@ -25,9 +25,10 @@ Two more were values rather than names, so nothing raised:
   ``standard`` "(default)". ``summary`` drops every dimensional row, including
   the Products and Services lines on the face of Apple's income statement, and
   ``standard`` is the default only when a statement is printed:
-  ``to_dataframe()`` returns ``detailed``. On NVIDIA's FY2026 10-K
-  (0001045810-26-000021) that is 21, 29 and 45 rows, and ``to_dataframe()``
-  returns the 45.
+  ``to_dataframe()`` returns ``detailed``. On Apple's FY2023 10-K income
+  statement that is 18, 22 and 42 rows, and ``to_dataframe()`` returns the 42.
+  (The test used NVIDIA's FY2026 10-K, 21/29/45, until GH #1670 dropped its
+  eight note revenue rows from ``standard``, leaving standard equal to summary.)
 
 The corrected examples run here, as written in the docs, against committed
 fixtures, and the touched pages are checked for calls that do not exist.
@@ -127,13 +128,13 @@ def test_pages_call_only_methods_that_exist(page):
 # --- Views: what each one is, and which is the default where ---------------------
 
 
-def test_to_dataframe_defaults_to_detailed_and_printing_to_standard(nvda):
-    income = nvda.statements.income_statement()
+def test_to_dataframe_defaults_to_detailed_and_printing_to_standard(aapl):
+    income = aapl.statements.income_statement()
 
     rows = {view: len(income.to_dataframe(view=view)) for view in ("summary", "standard", "detailed")}
-    assert rows == {"summary": 21, "standard": 29, "detailed": 45}
+    assert rows == {"summary": 18, "standard": 22, "detailed": 42}
     assert list(income.to_dataframe()["label"]) == list(income.to_dataframe(view="detailed")["label"])
-    assert len(income.render().rows) == len(income.render(view="standard").rows) == 29
+    assert len(income.render().rows) == len(income.render(view="standard").rows) == 22
 
 
 def test_summary_drops_the_face_lines_standard_keeps(aapl):
