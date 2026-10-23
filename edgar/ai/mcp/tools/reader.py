@@ -254,13 +254,6 @@ async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HO
     extracted = {}
 
     try:
-        # Get the typed object (TenK, TenQ, EightK, etc.)
-        obj = filing.obj()
-
-        if obj is None:
-            extracted["error"] = f"Could not parse {filing.form} filing into a structured object"
-            return extracted
-
         if "all" in sections:
             # Extract all available sections
             sections_to_extract = _get_section_list(filing.form)
@@ -268,8 +261,29 @@ async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HO
             available = _get_section_list(filing.form)
             sections_to_extract = [s for s in sections if s != "summary" or "summary" in available]
 
+        # Get the typed object (TenK, TenQ, EightK, etc.). ``full_text`` reads the
+        # filing's own text and needs none, so a form with no typed object still
+        # serves it.
+        obj = None
+        if any(s != "full_text" for s in sections_to_extract):
+            obj = filing.obj()
+            if obj is None:
+                extracted["error"] = f"Could not parse {filing.form} filing into a structured object"
+                sections_to_extract = [s for s in sections_to_extract if s == "full_text"]
+
         for section in sections_to_extract:
-            content = _extract_section(obj, filing.form, section, limit=limit)
+            if section == "full_text":
+                # Typed filing objects do not all support ``obj['full_text']``
+                # (40-F returns None, 6-K and registration statements raise), so
+                # read the filing's own text, and say so when there is none.
+                # A failure here is reported for this section only.
+                try:
+                    content = filing.text() or "Full text is not available for this filing."
+                except Exception as e:
+                    logger.warning(f"Could not read full text: {e}")
+                    content = f"Could not read the filing's full text: {e}"
+            else:
+                content = _extract_section(obj, filing.form, section, limit=limit)
             if content:
                 text = str(content)
                 if _is_13f_holdings(filing.form, section):
