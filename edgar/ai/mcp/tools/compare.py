@@ -15,6 +15,7 @@ from edgar.ai.mcp.tools.base import (
     error,
     resolve_company,
     get_error_suggestions,
+    ERROR_SUGGESTIONS,
 )
 
 logger = logging.getLogger(__name__)
@@ -162,7 +163,10 @@ async def edgar_compare(
         for ident in companies_to_compare:
             company_data = await _compare_company(ident, metrics, periods, annual)
             if "error" in company_data:
-                errors.append({"identifier": ident, "error": company_data["error"]})
+                entry = {"identifier": ident, "error": company_data["error"]}
+                if "error_code" in company_data:
+                    entry["error_code"] = company_data["error_code"]
+                errors.append(entry)
             else:
                 comparisons.append(company_data)
 
@@ -242,6 +246,14 @@ async def _compare_company(
         except Exception as e:
             result["financials_error"] = str(e)
             return result
+
+        if facts is None:
+            # ``Entity.get_facts()`` returns None when the SEC has no company facts.
+            return {
+                "error": f"No company facts found for CIK {company.cik}",
+                "error_code": "NO_FACTS_DATA",
+                "suggestions": ERROR_SUGGESTIONS["CompanyFactsNotFoundError"],
+            }
 
         extracted = {}
         # Track raw values for derived metric computation
