@@ -1504,12 +1504,17 @@ class XBRL:
 
         The presentation linkbase defines which dimensional members should appear
         on a statement. This function builds a mapping from axis to valid members
-        by examining the Domain nodes in the tree.
+        by walking everything the tree nests under each Axis node.
 
         Pattern in presentation tree:
         - Axis nodes (e.g., PropertyPlantAndEquipmentByTypeAxis) have Domain children
         - Domain nodes (e.g., PropertyPlantAndEquipmentTypeDomain) have Member children
-        - The valid members are the children of the Domain nodes
+        - Members may nest further members, at any depth
+
+        Only the domain's direct children used to count, so a face line the filer
+        nests under a member vanished from every view but DETAILED: Tesla's
+        Automotive sales, regulatory credits and leasing, which sit under
+        AutomotiveRevenuesMember (GH #1759).
 
         Args:
             tree: PresentationTree for the statement
@@ -1517,27 +1522,48 @@ class XBRL:
         Returns:
             Dict mapping axis names (normalized) to sets of valid member names (normalized)
         """
-        valid_members = {}
+        return {axis: set(parents) for axis, parents in self._get_dimensional_member_parents(tree).items()}
 
+    @staticmethod
+    def _get_dimensional_member_parents(tree) -> Dict[str, Dict[str, Optional[str]]]:
+        """Each axis's members in a presentation tree, mapped to the member they nest under.
+
+        Keyed by normalized axis, then normalized member. The parent is None for
+        the domain and for the domain's direct children (the top of the breakdown),
+        and otherwise the enclosing member, so a caller can tell a member from
+        the sub-members already inside it.
+        """
+        result: Dict[str, Dict[str, Optional[str]]] = {}
         for node_id, node in tree.all_nodes.items():
-            # Find Domain nodes - they contain valid members as children
-            if 'Domain' in node_id and node.children:
-                # Find the parent Axis node
-                # Domain nodes are children of Axis nodes
-                parent_node = tree.all_nodes.get(node.parent)
-                if parent_node and 'Axis' in node.parent:
-                    # Normalize axis name (remove prefix, use underscore)
-                    axis_name = node.parent.replace(':', '_')
-
-                    # Collect all member children (normalized)
-                    members = set()
-                    for child in node.children:
-                        # Normalize member name
-                        members.add(child.replace(':', '_'))
-
-                    valid_members[axis_name] = members
-
-        return valid_members
+            if not node_id.endswith('Axis') or not node.children:
+                continue
+            axis_name = node_id.replace(':', '_')
+            parents: Dict[str, Optional[str]] = {}
+            heads = set()
+            # The domain heads the breakdown; its children are top-level members.
+            stack = [(child, None, True) for child in node.children]
+            while stack:
+                child_id, parent_member, is_head = stack.pop()
+                member = child_id.replace(':', '_')
+                if member in parents:
+                    continue
+                parents[member] = parent_member
+                child_node = tree.all_nodes.get(child_id)
+                is_domain = is_head and 'Domain' in child_id
+                if is_domain:
+                    heads.add(member)
+                if child_node is None:
+                    continue
+                # A domain's children are the top level; below that, each
+                # member encloses its own children.
+                enclosing = None if is_domain else member
+                for grandchild in child_node.children:
+                    stack.append((grandchild, enclosing, False))
+            # An axis presented with its domain alone names no members, and
+            # does not restrict which ones a statement shows.
+            if set(parents) - heads:
+                result[axis_name] = parents
+        return result
 
     def get_statement(self, role_or_type: str,
                       period_filter: Optional[str] = None,
@@ -1579,7 +1605,9 @@ class XBRL:
 
         # Get valid dimensional members from presentation tree
         # This ensures we only show members that are actually defined in the linkbase
-        valid_dimensional_members = self._get_valid_dimensional_members(tree) if should_display_dimensions else {}
+        member_parents = self._get_dimensional_member_parents(tree)
+        valid_dimensional_members = ({axis: set(parents) for axis, parents in member_parents.items()}
+                                     if should_display_dimensions else {})
 
         # Generate line items recursively, from EVERY root the role declares.
         # Walking only tree.root_element_id left everything beneath the second
@@ -1591,7 +1619,7 @@ class XBRL:
         for root_id in tree.root_element_ids:
             self._generate_line_items(root_id, tree.all_nodes, line_items, period_filter, None,
                                       should_display_dimensions, valid_dimensional_members, view,
-                                      statement_role=found_role)
+                                      statement_role=found_role, member_parents=member_parents)
 
         # Apply revenue deduplication for income statements to fix Issue #438
         if actual_statement_type == 'IncomeStatement':
@@ -1658,7 +1686,8 @@ class XBRL:
                              valid_dimensional_members: Optional[Dict[str, Set[str]]] = None,
                              view: Optional['StatementView'] = None,
                              statement_role: Optional[str] = None,
-                             preferred_label_override: Optional[str] = None) -> None:
+                             preferred_label_override: Optional[str] = None,
+                             member_parents: Optional[Dict[str, Dict[str, Optional[str]]]] = None) -> None:
         """
         Recursively generate line items for a statement.
 
@@ -1681,6 +1710,9 @@ class XBRL:
                 roll-forward references that share one node but use different label
                 roles (e.g. cash-flow periodStart vs periodEnd balances).
                 (edgartools-0609)
+            member_parents: Each presented axis's members mapped to the member
+                they nest under (see _get_dimensional_member_parents), so a
+                synthesized total does not add a member to its own sub-members.
         """
         from edgar.xbrl.presentation import StatementView
         if element_id not in nodes:
@@ -1919,7 +1951,8 @@ class XBRL:
                         if is_valid:
                             filtered_dim_facts.append((cid, wf))
 
-                    synthetic = self._compute_synthetic_total(filtered_dim_facts, element_id_normalized)
+                    synthetic = self._compute_synthetic_total(filtered_dim_facts, element_id_normalized,
+                                                              member_parents)
                     if synthetic:
                         self._store_synthetic_total(synthetic, period_key, values, decimals,
                                                     units, period_types)
@@ -1964,7 +1997,8 @@ class XBRL:
                         (cid, wf) for cid, wf in period_facts
                         if wf['dimension_info'] and len(wf['dimension_info']) == 1
                     ]
-                    synthetic = self._compute_synthetic_total(dim_facts, element_id_normalized)
+                    synthetic = self._compute_synthetic_total(dim_facts, element_id_normalized,
+                                                              member_parents)
                     if synthetic:
                         self._store_synthetic_total(synthetic, period_key, values, decimals,
                                                     units, period_types)
@@ -2145,7 +2179,8 @@ class XBRL:
             self._generate_line_items(child_id, nodes, result, period_filter, current_path,
                                       should_display_dimensions, valid_dimensional_members, view,
                                       statement_role=statement_role,
-                                      preferred_label_override=child_override)
+                                      preferred_label_override=child_override,
+                                      member_parents=member_parents)
 
     def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]],
                                 statement_role: Optional[str] = None) -> None:
@@ -2355,7 +2390,7 @@ class XBRL:
 
         return line_items
 
-    def _compute_synthetic_total(self, dim_facts, element_id_normalized):
+    def _compute_synthetic_total(self, dim_facts, element_id_normalized, member_parents=None):
         """
         Issue #646: Compute a synthetic total from single-axis dimensional members.
 
@@ -2365,6 +2400,8 @@ class XBRL:
         Guards:
         - Skips per-share and ratio concepts (summing them is meaningless)
         - Expects only single-axis facts (caller must filter multi-axis facts)
+        - Skips members nested under another member that has a fact, when
+          member_parents (from _get_dimensional_member_parents) says so
 
         Returns None if not computable, else a dict with 'total', 'computed'
         (True for a sum, False when the total is one filed fact), 'unit_ref',
@@ -2404,6 +2441,29 @@ class XBRL:
 
         # Pick the axis with most members (most complete breakdown)
         best_axis = max(axis_groups.values(), key=len)
+
+        # A member the statement nests under another member is already inside
+        # it: Tesla's Automotive sales is part of AutomotiveRevenuesMember. Keep
+        # only the outermost members that carry a fact (GH #1759).
+        axis_key = best_axis[0][1]['dimension_info'][0].get('dimension', '').replace(':', '_')
+        parents = (member_parents or {}).get(axis_key)
+        if parents:
+            present = {(entry[1]['dimension_info'][0].get('member') or '').replace(':', '_')
+                       for entry in best_axis}
+
+            def nested_in_present(member):
+                seen = set()
+                parent = parents.get(member)
+                while parent and parent not in seen:
+                    if parent in present:
+                        return True
+                    seen.add(parent)
+                    parent = parents.get(parent)
+                return False
+
+            best_axis = [entry for entry in best_axis
+                         if not nested_in_present(
+                             (entry[1]['dimension_info'][0].get('member') or '').replace(':', '_'))]
 
         # Amounts in different units do not add: MXN 327M and USD 19M are not
         # 346M of anything (GH #1689). Nor is a smaller axis then a better
@@ -2458,6 +2518,10 @@ class XBRL:
         # No aggregate members: a genuine disjoint breakdown, which is the case
         # this helper was added for (gh #646 -- Disney's own cost of services
         # and cost of products summing to total costs).
+        if len(best_axis) > 1 and parents and not self._presented_members_covered(best_axis, parents,
+                                                                                    element_id_normalized):
+            return None
+
         if len(best_axis) == 1:
             cid, wf, value = best_axis[0]
             return self._filed_total(value, wf['fact'], cid)
@@ -2477,6 +2541,77 @@ class XBRL:
             'unit_ref': component_facts[0].unit_ref,
             'decimals': min(finite) if finite else next((d for d in precisions if d is not None), None),
         }
+
+    def _presented_members_covered(self, entries, parents, element_id=None) -> bool:
+        """Whether the members with facts make up every member the axis presents.
+
+        A balance is the sum of every component the statement presents. When a
+        presented component has no balance, the sum of the rest is a partial
+        that looks like a total: Coca-Cola files no common-stock component of
+        StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest,
+        so its 2021 year-end equity came out 23,100M against 24,860M filed. A
+        member counts as covered when it, a member it nests under, or every
+        member nested under it has a fact.
+
+        An uncovered member is a gap only when it belongs to this concept's
+        breakdown: it sits inside a member that also encloses a summed one
+        (Coca-Cola's common stock, beside capital surplus under ParentMember),
+        or it carries this concept in another context (Golub's unaffiliated
+        issuers, filed at other dates). Disney's derivative table presents
+        liability locations beside the asset ones; they never carry an asset
+        concept, so its 275M + 635M of gross derivative assets still adds up.
+
+        Flows are left alone: a component with no net income or dividend line
+        is a zero, not a gap. The caller applies this to sums only; one
+        member's fact is a filed value.
+        """
+        context = self.contexts.get(entries[0][0])
+        period = getattr(context, 'period', None) if context is not None else None
+        period_type = period.get('type') if isinstance(period, dict) else getattr(period, 'type', None)
+        if period_type != 'instant':
+            return True
+
+        present = {(entry[1]['dimension_info'][0].get('member') or '').replace(':', '_') for entry in entries}
+        children: Dict[str, List[str]] = {}
+        for member, parent in parents.items():
+            if parent:
+                children.setdefault(parent, []).append(member)
+
+        def covered(member, seen=()):
+            if member in present:
+                return True
+            parent = parents.get(member)
+            while parent:
+                if parent in present:
+                    return True
+                parent = parents.get(parent)
+            kids = [k for k in children.get(member, []) if k not in seen]
+            return bool(kids) and all(covered(k, seen + (member,)) for k in kids)
+
+        def enclosing(member):
+            found, parent = set(), parents.get(member)
+            while parent and parent not in found:
+                found.add(parent)
+                parent = parents.get(parent)
+            return found
+
+        uncovered = [m for m in parents if not m.endswith('Domain') and not covered(m)]
+        if not uncovered:
+            return True
+        summed_enclosing = set().union(*(enclosing(m) for m in present))
+        axis = (entries[0][1]['dimension_info'][0].get('dimension') or '').replace(':', '_')
+        elsewhere = self._members_carrying(element_id, axis) if element_id else set()
+        return not any(m in elsewhere or enclosing(m) & summed_enclosing for m in uncovered)
+
+    def _members_carrying(self, element_id, axis) -> Set[str]:
+        """The members of an axis that carry a fact of this concept in any context."""
+        members = set()
+        for context_id in self.element_context_index.get(element_id, []):
+            context = self.contexts.get(context_id)
+            for dim, member in (getattr(context, 'dimensions', None) or {}).items():
+                if dim.replace(':', '_') == axis:
+                    members.add(str(member).replace(':', '_'))
+        return members
 
     def _store_synthetic_total(self, synthetic, period_key, values, decimals, units, period_types) -> None:
         """Write a `_compute_synthetic_total()` result into a line item's period maps."""
