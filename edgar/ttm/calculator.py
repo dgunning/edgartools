@@ -1178,7 +1178,7 @@ class TTMCalculator:
 
         """
         candidates = [q for q in quarters if q.period_end < before]
-        return max(candidates, key=lambda q: q.period_end) if candidates else None
+        return max(candidates, key=self._operand_rank) if candidates else None
 
     def _find_prior_ytd6(
         self,
@@ -1200,7 +1200,7 @@ class TTMCalculator:
 
         """
         candidates = [y for y in ytd_6m if y.period_end < before]
-        return max(candidates, key=lambda y: y.period_end) if candidates else None
+        return max(candidates, key=self._operand_rank) if candidates else None
 
     def _find_matching_ytd9(
         self,
@@ -1237,11 +1237,23 @@ class TTMCalculator:
             if y.period_start == period_start and y.period_end < before
         ]
         if candidates:
-            return max(candidates, key=lambda y: y.period_end)
+            return max(candidates, key=self._operand_rank)
 
         # Fallback: latest YTD_9M before the date
         candidates = [y for y in ytd_9m if y.period_end < before]
-        return max(candidates, key=lambda y: y.period_end) if candidates else None
+        return max(candidates, key=self._operand_rank) if candidates else None
+
+    def _operand_rank(self, fact: FinancialFact) -> tuple:
+        """Order derivation operands: latest period, then best source, then latest filing.
+
+        Two facts for the same period are the original and a recast (a later
+        filing restating it, for example after a disposal). Taking whichever was
+        listed first made a derived quarter depend on input order (GH #1675).
+        The latest filing is the one the annual fact it is paired with is most
+        likely restated to as well, and it matches `_deduplicate_by_period_end`,
+        which keeps the latest-filed annual fact's derived quarter.
+        """
+        return (fact.period_end, self._form_tier(fact.form_type or ''), fact.filing_date or date.min)
 
     def _create_derived_quarter(
         self,
