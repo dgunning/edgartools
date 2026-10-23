@@ -160,3 +160,79 @@ def test_rates_set_aside_do_not_read_as_an_extraction_failure():
     assert "no usable rates: the only average USD rates for 2025" in text
     assert "rate extraction failed" not in text
     assert "Rate extraction failed" not in converter.__rich__().caption
+
+
+# ---------------------------------------------------------------------------
+# Review follow-up: rounding, interim facts and unusable values
+# ---------------------------------------------------------------------------
+
+class _RowsXBRL:
+    """Facts given row by row, so each can carry its own period and decimals."""
+    units = _StubXBRL.units
+
+    def __init__(self, average=(), closing=()):
+        rows = list(average) + list(closing)
+        self.contexts = {f"c-{i}": _Context(r.get("dims", USD)) for i, r in enumerate(rows)}
+
+        def frame(part, offset):
+            return pd.DataFrame({
+                "unit_ref": ["number"] * len(part),
+                "context_ref": [f"c-{offset + i}" for i in range(len(part))],
+                "period_start": [r.get("start", float("nan")) for r in part],
+                "period_end": [r.get("end", float("nan")) for r in part],
+                "period_instant": [r.get("instant", float("nan")) for r in part],
+                "numeric_value": [r["value"] for r in part],
+                "decimals": [r.get("decimals", float("nan")) for r in part],
+            })
+        self.facts = _Facts({
+            "ifrs-full:AverageForeignExchangeRate": frame(list(average), 0),
+            "ifrs-full:ClosingForeignExchangeRate": frame(list(closing), len(list(average))),
+        })
+
+
+def test_rates_that_agree_to_their_stated_precision_are_one_rate():
+    # 1.31 stated to 2 decimals and 1.3077 to 4 are the same rate, rounded.
+    converter = CurrencyConverter(_RowsXBRL(average=[
+        {"value": 1.31, "decimals": "2", "start": "2025-01-01", "end": "2025-12-31"},
+        {"value": 1.3077, "decimals": "4", "start": "2025-01-01", "end": "2025-12-31"},
+    ]))
+    assert converter.get_rate(2025, "average") == 1.3077   # the more precise one
+    assert _selection_warnings(converter) == []
+
+
+def test_rates_that_differ_beyond_rounding_are_still_refused():
+    converter = CurrencyConverter(_RowsXBRL(average=[
+        {"value": 1.31, "decimals": "2", "start": "2025-01-01", "end": "2025-12-31"},
+        {"value": 1.3177, "decimals": "4", "start": "2025-01-01", "end": "2025-12-31"},
+    ]))
+    assert converter.get_rate(2025, "average") is None
+    assert any("none was used" in w for w in converter.extraction_warnings)
+
+
+def test_an_interim_closing_rate_does_not_veto_the_year_end_rate():
+    converter = CurrencyConverter(_RowsXBRL(closing=[
+        {"value": 1.27, "instant": "2025-06-30"},   # interim
+        {"value": 1.35, "instant": "2025-12-31"},   # year end
+        {"value": 1.21, "instant": "2025-01-01"},   # IFRS transition date
+    ]))
+    assert converter.get_rate(2025, "closing") == 1.35
+    assert _selection_warnings(converter) == []
+
+
+def test_a_half_year_average_does_not_veto_the_full_year_average():
+    converter = CurrencyConverter(_RowsXBRL(average=[
+        {"value": 1.27, "start": "2025-07-01", "end": "2025-12-31"},
+        {"value": 1.31, "start": "2025-01-01", "end": "2025-12-31"},
+    ]))
+    assert converter.get_rate(2025, "average") == 1.31
+
+
+@pytest.mark.parametrize("value", [0.0, float("nan"), float("inf")])
+def test_zero_and_non_finite_rates_are_unusable_and_reported(value):
+    converter = CurrencyConverter(_RowsXBRL(average=[
+        {"value": value, "start": "2025-01-01", "end": "2025-12-31"},
+    ]))
+    assert converter.get_rate(2025, "average") is None
+    assert converter.to_usd(100, 2025) is None          # was ZeroDivisionError for 0
+    assert ("1 average exchange rate fact(s) had no usable value "
+            "(empty, zero or not finite) and were not used") in converter.extraction_warnings

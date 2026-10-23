@@ -24,6 +24,7 @@ Example usage:
     usd_revenue = converter.to_usd(dkk_revenue, 2024, rate_type='average')
 """
 
+import math
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date, datetime
@@ -65,6 +66,43 @@ def _first_date(row, *columns):
         if value is not None and not pd.isna(value):
             return value
     return None
+
+
+def _precision(decimals) -> float:
+    """A fact's ``decimals`` as a number: 'INF' or unknown is exact (inf)."""
+    try:
+        return float(decimals)
+    except (TypeError, ValueError):
+        return math.inf
+
+
+def _agreed_value(values) -> Optional[float]:
+    """One rate from ``(value, decimals)`` pairs that agree to their stated precision.
+
+    1.31 (decimals 2) and 1.3077 (decimals 4) are one rate, rounded; the most
+    precise is kept. Values that differ by more than half a unit in the last
+    stated place give None (GH #1650 review).
+    """
+    pairs = []
+    for value, decimals in values:
+        precision = _precision(decimals)
+        pairs.append((value, math.inf if math.isnan(precision) else precision))
+    pairs.sort(key=lambda pair: pair[1], reverse=True)
+    best, _ = pairs[0]
+    for value, precision in pairs[1:]:
+        tolerance = 0.0 if math.isinf(precision) else 0.5 * 10 ** -precision
+        if abs(value - best) > tolerance + 1e-12:
+            return None
+    return best
+
+
+def _days(start, end) -> float:
+    """Length of a duration fact in days, or 0 when it has no start."""
+    try:
+        days = float((pd.Timestamp(end) - pd.Timestamp(start)).days)
+    except (TypeError, ValueError):
+        return 0.0
+    return 0.0 if math.isnan(days) else days
 
 
 def _local_name(qname: str) -> str:
@@ -337,6 +375,9 @@ class CurrencyConverter:
         # Pure-number rates with no currency member: neither the currency nor
         # the direction is stated, so they cannot be used safely (GH #1651).
         unnamed = 0
+        # Empty, zero or non-finite values: a zero rate passed an `is None`
+        # check and to_usd() then divided by it.
+        unusable = 0
 
         for _, row in df.iterrows():
             quote = unit_quote(row.get('unit_ref', ''))
@@ -349,7 +390,8 @@ class CurrencyConverter:
             if quote == _PURE and member is None:
                 unnamed += 1
                 continue
-            year = _extract_year(_first_date(row, *date_columns))
+            period_date = _first_date(row, *date_columns)
+            year = _extract_year(period_date)
             if not year:
                 undated += 1
                 continue
@@ -358,18 +400,32 @@ class CurrencyConverter:
                 hedge_rows[year] += 1
                 continue
             value = row.get('numeric_value')
-            if value is None or pd.isna(value):
+            if value is None or pd.isna(value) or not math.isfinite(value) or value == 0:
+                unusable += 1
                 continue
             extra = len(dimensions) - (1 if member is not None else 0)
-            candidates.setdefault(year, []).append((extra, value, quote))
+            candidates.setdefault(year, []).append({
+                'extra': extra, 'value': value, 'quote': quote,
+                'decimals': row.get('decimals'), 'date': str(period_date)[:10],
+                'days': _days(row.get('period_start'), period_date),
+            })
 
         selected = []
         for year, facts in candidates.items():
-            fewest = min(extra for extra, _, _ in facts)
-            best = sorted({(value, quote) for extra, value, quote in facts if extra == fewest})
-            values = [value for value, _ in best]
-            if len(best) == 1:
-                selected.append((year, kind) + best[0])
+            # The translation rate has the fewest other dimensions; of those, the
+            # one at the year end (not an interim or IFRS transition date), and for
+            # an average the full-year period rather than a half year.
+            fewest = min(f['extra'] for f in facts)
+            facts = [f for f in facts if f['extra'] == fewest]
+            latest = max(f['date'] for f in facts)
+            facts = [f for f in facts if f['date'] == latest]
+            longest = max(f['days'] for f in facts)
+            facts = [f for f in facts if f['days'] == longest]
+            quotes = {f['quote'] for f in facts}
+            value = _agreed_value([(f['value'], f['decimals']) for f in facts])
+            values = sorted({f['value'] for f in facts})
+            if len(quotes) == 1 and value is not None:
+                selected.append((year, kind, value, quotes.pop()))
             else:
                 self._extraction_warnings.append(
                     f"{len(values)} different {kind} {target} rates for {year} "
@@ -384,6 +440,11 @@ class CurrencyConverter:
         if undated:
             self._extraction_warnings.append(
                 f"{undated} {kind} exchange rate fact(s) had no period date and were not used"
+            )
+        if unusable:
+            self._extraction_warnings.append(
+                f"{unusable} {kind} exchange rate fact(s) had no usable value "
+                f"(empty, zero or not finite) and were not used"
             )
         if unnamed:
             self._extraction_warnings.append(
