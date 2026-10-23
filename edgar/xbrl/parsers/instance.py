@@ -302,26 +302,13 @@ class InstanceParser(BaseParser):
                     # Get segment dimensions if present
                     segment_elem = entity_elem.find('.//{http://www.xbrl.org/2003/instance}segment')
                     if segment_elem is not None:
-                        # Extract explicit dimensions
-                        for dim_elem in segment_elem.findall('.//{http://xbrl.org/2006/xbrldi}explicitMember'):
-                            dimension = dim_elem.get('dimension')
-                            value = dim_elem.text
-                            if dimension and value:
-                                context.dimensions[dimension] = value
+                        self._read_dimension_members(segment_elem, context.dimensions)
 
-                        # Extract typed dimensions
-                        for dim_elem in segment_elem.findall('.//{http://xbrl.org/2006/xbrldi}typedMember'):
-                            dimension = dim_elem.get('dimension')
-                            if dimension:
-                                # The typed dimension value is the text content of the first child element
-                                for child in dim_elem:
-                                    # Extract the text content, which contains the actual typed member value
-                                    if child.text and child.text.strip():
-                                        context.dimensions[dimension] = child.text.strip()
-                                    else:
-                                        # Fallback to tag if no text content
-                                        context.dimensions[dimension] = child.tag
-                                    break
+                # Dimensions may also sit in the context's scenario (XBRL Dimensions 1.0 §3.1.4.1);
+                # without them a scenario-qualified fact reads as the undimensioned total.
+                scenario_elem = context_elem.find('{http://www.xbrl.org/2003/instance}scenario')
+                if scenario_elem is not None:
+                    self._read_dimension_members(scenario_elem, context.dimensions)
 
                 # Extract period information
                 period_elem = context_elem.find('.//{http://www.xbrl.org/2003/instance}period')
@@ -356,6 +343,27 @@ class InstanceParser(BaseParser):
 
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting contexts: {str(e)}") from e
+
+    @staticmethod
+    def _read_dimension_members(container: ET.Element, dimensions: Dict[str, str]) -> None:
+        """Read explicit and typed dimension members from a segment or scenario element."""
+        for dim_elem in container.findall('.//{http://xbrl.org/2006/xbrldi}explicitMember'):
+            dimension = dim_elem.get('dimension')
+            value = dim_elem.text
+            if dimension and value:
+                dimensions[dimension] = value
+
+        for dim_elem in container.findall('.//{http://xbrl.org/2006/xbrldi}typedMember'):
+            dimension = dim_elem.get('dimension')
+            if dimension:
+                # The typed dimension value is the text content of the first child element
+                for child in dim_elem:
+                    if child.text and child.text.strip():
+                        dimensions[dimension] = child.text.strip()
+                    else:
+                        # Fallback to tag if no text content
+                        dimensions[dimension] = child.tag
+                    break
 
     def _extract_units(self, root: ET.Element) -> None:
         """Extract units from instance document."""
