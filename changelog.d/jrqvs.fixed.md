@@ -1,1 +1,0 @@
-**EntityFacts revenue returned a component of revenue instead of the filed total.** `get_revenue()` and the income statement's Total Revenue tried contract revenue before `Revenues`, so GM's FY2025 revenue read $167,971M ("Automotive") instead of $185,019M. They now read `Revenues` first, as `Financials.get_revenue()` does; 10 of 106 large filers change. (bead edgartools-jrqvs)
