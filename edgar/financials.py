@@ -539,6 +539,19 @@ class Financials:
             >>> revenue = financials.get_revenue()  # Most recent revenue
             >>> prev_revenue = financials.get_revenue(1)  # Previous period revenue
         """
+        # The lookups below read the income statement up to three times; render
+        # it once for this call, and discard the memo on exit as
+        # get_financial_metrics() does, unless that call already installed one.
+        if self._statement_frame_memo is not None:
+            return self._get_revenue(period_offset)
+        self._statement_frame_memo = {}
+        try:
+            return self._get_revenue(period_offset)
+        finally:
+            self._statement_frame_memo = None
+
+    def _get_revenue(self, period_offset: int) -> Optional[Union[int, float]]:
+        """The body of get_revenue(), run with a per-call memo installed."""
         # First try concept-based search using standardization mappings.
         #
         # The filed TOTAL comes first. A contract-revenue fact can be one
@@ -576,7 +589,7 @@ class Financials:
         result = self._get_standardized_concept_by_xbrl(
             'income',
             ['Revenue', 'us-gaap_RevenuesNetOfInterestExpense',
-             'us-gaap_RegulatedAndUnregulatedOperatingRevenue', 'Contract Revenue'],
+             'us-gaap_RegulatedAndUnregulatedOperatingRevenue'],
             period_offset
         )
 
@@ -592,8 +605,18 @@ class Financials:
         # Capital One $53,434M for FY2025), so read that, or report nothing
         # (edgartools-hmj0j). Summing the face rows is not a substitute: U.S.
         # Bancorp's net interest income plus noninterest income is $28,540M.
+        #
+        # This runs before the contract-revenue search, not after it: on a
+        # bank's face statement contract revenue is a fee line inside
+        # noninterest income, so Auburn National's FY2023 10-K returned its
+        # $603K "Service charge on deposit accounts" as total revenue and never
+        # reached this check (gh #1666).
         if self._is_bank_income_statement():
             return self._filed_total_for_statement_period('us-gaap:Revenues', period_offset)
+
+        result = self._get_standardized_concept_by_xbrl('income', ['Contract Revenue'], period_offset)
+        if result is not None:
+            return result
 
         # Fallback to label-based search for edge cases
         patterns = [
