@@ -1,0 +1,377 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/320193/000114036126038674/0001140361-26-038674.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0001140361-26-038674.txt : 20261005\n<SEC-HEADER>0001140361-26-038674.hdr.sgml
+        : 20261005\n<ACCEPTANCE-DATETIME>20261005184245\nACCESSION NUMBER:\t\t0001140361-26-038674\nCONFORMED
+        SUBMISSION TYPE:\t4\nPUBLIC DOCUMENT COUNT:\t\t1\nCONFORMED PERIOD OF REPORT:\t20261001\nFILED
+        AS OF DATE:\t\t20261005\nDATE AS OF CHANGE:\t\t20261005\n\nREPORTING-OWNER:\t\n\n\tOWNER
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tCOOK TIMOTHY D\n\t\tCENTRAL INDEX
+        KEY:\t\t\t0001214156\n\t\tORGANIZATION NAME:           \t\n\n\tFILING VALUES:\n\t\tFORM
+        TYPE:\t\t4\n\t\tSEC ACT:\t\t1934 Act\n\t\tSEC FILE NUMBER:\t001-36743\n\t\tFILM
+        NUMBER:\t\t261441914\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\tC/O APPLE INC\n\t\tSTREET
+        2:\t\tONE APPLE PARK WAY\n\t\tCITY:\t\t\tCUPERTINO\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95014\n\nISSUER:\t\t\n\n\tCOMPANY
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tApple Inc.\n\t\tCENTRAL INDEX KEY:\t\t\t0000320193\n\t\tSTANDARD
+        INDUSTRIAL CLASSIFICATION:\tELECTRONIC COMPUTERS [3571]\n\t\tORGANIZATION
+        NAME:           \t06 Technology\n\t\tEIN:\t\t\t\t942404110\n\t\tSTATE OF INCORPORATION:\t\t\tCA\n\t\tFISCAL
+        YEAR END:\t\t\t0926\n\n\tBUSINESS ADDRESS:\t\n\t\tSTREET 1:\t\tONE APPLE PARK
+        WAY\n\t\tCITY:\t\t\tCUPERTINO\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95014\n\t\tBUSINESS
+        PHONE:\t\t(408) 996-1010\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\tONE APPLE
+        PARK WAY\n\t\tCITY:\t\t\tCUPERTINO\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95014\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tAPPLE INC\n\t\tDATE OF NAME CHANGE:\t20070109\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tAPPLE COMPUTER INC\n\t\tDATE OF NAME
+        CHANGE:\t19970808\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>4\n<SEQUENCE>1\n<FILENAME>form4.xml\n<DESCRIPTION>FORM
+        4\n<TEXT>\n<XML>\n<?xml version=\"1.0\"?>\n<ownershipDocument>\n\n    <schemaVersion>X0609</schemaVersion>\n\n
+        \   <documentType>4</documentType>\n\n    <periodOfReport>2026-10-01</periodOfReport>\n\n
+        \   <issuer>\n        <issuerCik>0000320193</issuerCik>\n        <issuerName>Apple
+        Inc.</issuerName>\n        <issuerTradingSymbol>AAPL</issuerTradingSymbol>\n
+        \       <issuerForeignTradingSymbol></issuerForeignTradingSymbol>\n    </issuer>\n\n
+        \   <reportingOwner>\n        <reportingOwnerId>\n            <rptOwnerCik>0001214156</rptOwnerCik>\n
+        \           <rptOwnerName>COOK TIMOTHY D</rptOwnerName>\n        </reportingOwnerId>\n
+        \       <reportingOwnerAddress>\n            <rptOwnerNonUSAddressFlag>false</rptOwnerNonUSAddressFlag>\n
+        \           <rptOwnerStreet1>ONE APPLE PARK WAY</rptOwnerStreet1>\n            <rptOwnerStreet2></rptOwnerStreet2>\n
+        \           <rptOwnerCity>CUPERTINO</rptOwnerCity>\n            <rptOwnerState>CA</rptOwnerState>\n
+        \           <rptOwnerZipCode>95014</rptOwnerZipCode>\n            <rptOwnerStateDescription></rptOwnerStateDescription>\n
+        \       </reportingOwnerAddress>\n        <reportingOwnerRelationship>\n            <isDirector>true</isDirector>\n
+        \           <isOfficer>true</isOfficer>\n            <isTenPercentOwner>false</isTenPercentOwner>\n
+        \           <isOther>false</isOther>\n            <officerTitle>Executive
+        Chair</officerTitle>\n        </reportingOwnerRelationship>\n    </reportingOwner>\n\n
+        \   <aff10b5One>true</aff10b5One>\n\n    <nonDerivativeTable>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-10-01</value>\n
+        \           </transactionDate>\n            <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>M</transactionCode>\n                <equitySwapInvolved>false</equitySwapInvolved>\n
+        \           </transactionCoding>\n            <transactionAmounts>\n                <transactionShares>\n
+        \                   <value>374541</value>\n                </transactionShares>\n
+        \               <transactionPricePerShare>\n                    <footnoteId
+        id=\"F1\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>A</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>3654959</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                    <footnoteId id=\"F2\"/>\n
+        \               </directOrIndirectOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \               <footnoteId id=\"F3\"/>\n            </securityTitle>\n            <transactionDate>\n
+        \               <value>2026-10-01</value>\n            </transactionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>F</transactionCode>\n                <equitySwapInvolved>false</equitySwapInvolved>\n
+        \           </transactionCoding>\n            <transactionAmounts>\n                <transactionShares>\n
+        \                   <value>199038</value>\n                </transactionShares>\n
+        \               <transactionPricePerShare>\n                    <value>330.32</value>\n
+        \               </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>3455921</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                    <footnoteId id=\"F2\"/>\n
+        \               </directOrIndirectOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \               <footnoteId id=\"F4\"/>\n            </securityTitle>\n            <transactionDate>\n
+        \               <value>2026-10-02</value>\n            </transactionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>false</equitySwapInvolved>\n
+        \           </transactionCoding>\n            <transactionAmounts>\n                <transactionShares>\n
+        \                   <value>23143</value>\n                </transactionShares>\n
+        \               <transactionPricePerShare>\n                    <value>331.44</value>\n
+        \                   <footnoteId id=\"F5\"/>\n                </transactionPricePerShare>\n
+        \               <transactionAcquiredDisposedCode>\n                    <value>D</value>\n
+        \               </transactionAcquiredDisposedCode>\n            </transactionAmounts>\n
+        \           <postTransactionAmounts>\n                <sharesOwnedFollowingTransaction>\n
+        \                   <value>3432778</value>\n                </sharesOwnedFollowingTransaction>\n
+        \           </postTransactionAmounts>\n            <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                    <footnoteId id=\"F2\"/>\n
+        \               </directOrIndirectOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \               <footnoteId id=\"F4\"/>\n            </securityTitle>\n            <transactionDate>\n
+        \               <value>2026-10-02</value>\n            </transactionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>false</equitySwapInvolved>\n
+        \           </transactionCoding>\n            <transactionAmounts>\n                <transactionShares>\n
+        \                   <value>39492</value>\n                </transactionShares>\n
+        \               <transactionPricePerShare>\n                    <value>332.16</value>\n
+        \                   <footnoteId id=\"F6\"/>\n                </transactionPricePerShare>\n
+        \               <transactionAcquiredDisposedCode>\n                    <value>D</value>\n
+        \               </transactionAcquiredDisposedCode>\n            </transactionAmounts>\n
+        \           <postTransactionAmounts>\n                <sharesOwnedFollowingTransaction>\n
+        \                   <value>3393286</value>\n                </sharesOwnedFollowingTransaction>\n
+        \           </postTransactionAmounts>\n            <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                    <footnoteId id=\"F2\"/>\n
+        \               </directOrIndirectOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \               <footnoteId id=\"F4\"/>\n            </securityTitle>\n            <transactionDate>\n
+        \               <value>2026-10-02</value>\n            </transactionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>false</equitySwapInvolved>\n
+        \           </transactionCoding>\n            <transactionAmounts>\n                <transactionShares>\n
+        \                   <value>88239</value>\n                </transactionShares>\n
+        \               <transactionPricePerShare>\n                    <value>333.26</value>\n
+        \                   <footnoteId id=\"F7\"/>\n                </transactionPricePerShare>\n
+        \               <transactionAcquiredDisposedCode>\n                    <value>D</value>\n
+        \               </transactionAcquiredDisposedCode>\n            </transactionAmounts>\n
+        \           <postTransactionAmounts>\n                <sharesOwnedFollowingTransaction>\n
+        \                   <value>3305047</value>\n                </sharesOwnedFollowingTransaction>\n
+        \           </postTransactionAmounts>\n            <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                    <footnoteId id=\"F2\"/>\n
+        \               </directOrIndirectOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \               <footnoteId id=\"F4\"/>\n            </securityTitle>\n            <transactionDate>\n
+        \               <value>2026-10-02</value>\n            </transactionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>false</equitySwapInvolved>\n
+        \           </transactionCoding>\n            <transactionAmounts>\n                <transactionShares>\n
+        \                   <value>40879</value>\n                </transactionShares>\n
+        \               <transactionPricePerShare>\n                    <value>333.94</value>\n
+        \                   <footnoteId id=\"F8\"/>\n                </transactionPricePerShare>\n
+        \               <transactionAcquiredDisposedCode>\n                    <value>D</value>\n
+        \               </transactionAcquiredDisposedCode>\n            </transactionAmounts>\n
+        \           <postTransactionAmounts>\n                <sharesOwnedFollowingTransaction>\n
+        \                   <value>3264168</value>\n                </sharesOwnedFollowingTransaction>\n
+        \           </postTransactionAmounts>\n            <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                    <footnoteId id=\"F2\"/>\n
+        \               </directOrIndirectOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-10-02</value>\n
+        \           </transactionDate>\n            <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>G</transactionCode>\n                <equitySwapInvolved>false</equitySwapInvolved>\n
+        \           </transactionCoding>\n            <transactionAmounts>\n                <transactionShares>\n
+        \                   <value>26325</value>\n                </transactionShares>\n
+        \               <transactionPricePerShare>\n                    <value>0</value>\n
+        \               </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>3237843</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                    <footnoteId id=\"F2\"/>\n
+        \               </directOrIndirectOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeTransaction>\n    </nonDerivativeTable>\n\n    <derivativeTable>\n
+        \       <derivativeTransaction>\n            <securityTitle>\n                <value>Restricted
+        Stock Unit</value>\n            </securityTitle>\n            <conversionOrExercisePrice>\n
+        \               <footnoteId id=\"F1\"/>\n            </conversionOrExercisePrice>\n
+        \           <transactionDate>\n                <value>2026-10-01</value>\n
+        \           </transactionDate>\n            <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>M</transactionCode>\n                <equitySwapInvolved>false</equitySwapInvolved>\n
+        \           </transactionCoding>\n            <transactionAmounts>\n                <transactionShares>\n
+        \                   <value>374541</value>\n                </transactionShares>\n
+        \               <transactionPricePerShare>\n                    <footnoteId
+        id=\"F1\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <exerciseDate>\n                <footnoteId
+        id=\"F9\"/>\n                <footnoteId id=\"F10\"/>\n                <footnoteId
+        id=\"F11\"/>\n                <footnoteId id=\"F12\"/>\n            </exerciseDate>\n
+        \           <expirationDate>\n                <footnoteId id=\"F9\"/>\n                <footnoteId
+        id=\"F10\"/>\n                <footnoteId id=\"F11\"/>\n                <footnoteId
+        id=\"F12\"/>\n            </expirationDate>\n            <underlyingSecurity>\n
+        \               <underlyingSecurityTitle>\n                    <value>Common
+        Stock</value>\n                </underlyingSecurityTitle>\n                <underlyingSecurityShares>\n
+        \                   <value>374541</value>\n                </underlyingSecurityShares>\n
+        \           </underlyingSecurity>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>0</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </derivativeTransaction>\n    </derivativeTable>\n\n
+        \   <footnotes>\n        <footnote id=\"F1\">Each restricted stock unit (&quot;RSU&quot;)
+        represents the right to receive, at settlement, one share of common stock.
+        This transaction represents the settlement of RSUs in shares of common stock
+        on their scheduled vesting date.</footnote>\n        <footnote id=\"F2\">These
+        shares are held through Mr. Cook's trust.</footnote>\n        <footnote id=\"F3\">Shares
+        withheld by Apple to satisfy tax withholding requirements on vesting of RSUs.</footnote>\n
+        \       <footnote id=\"F4\">This transaction was made pursuant to a Rule 10b5-1
+        trading plan adopted by the reporting person on May 28, 2026.</footnote>\n
+        \       <footnote id=\"F5\">This transaction was executed in multiple trades
+        at prices ranging from $330.66 to $331.655; the price reported above reflects
+        the weighted average sale price. The reporting person hereby undertakes to
+        provide full information regarding the number of shares and prices at which
+        the transactions were effected upon request to the SEC staff, Apple, or a
+        security holder of Apple.</footnote>\n        <footnote id=\"F6\">This transaction
+        was executed in multiple trades at prices ranging from $331.66 to $332.65;
+        the price reported above reflects the weighted average sale price. The reporting
+        person hereby undertakes to provide full information regarding the number
+        of shares and prices at which the transactions were effected upon request
+        to the SEC staff, Apple, or a security holder of Apple.</footnote>\n        <footnote
+        id=\"F7\">This transaction was executed in multiple trades at prices ranging
+        from $332.66 to $333.655; the price reported above reflects the weighted average
+        sale price. The reporting person hereby undertakes to provide full information
+        regarding the number of shares and prices at which the transactions were effected
+        upon request to the SEC staff, Apple, or a security holder of Apple.</footnote>\n
+        \       <footnote id=\"F8\">This transaction was executed in multiple trades
+        at prices ranging from $333.66 to $334.50; the price reported above reflects
+        the weighted average sale price. The reporting person hereby undertakes to
+        provide full information regarding the number of shares and prices at which
+        the transactions were effected upon request to the SEC staff, Apple, or a
+        security holder of Apple.</footnote>\n        <footnote id=\"F9\">This award
+        was granted on October 1, 2023, for a target number of 219,030 RSUs. The award
+        settled on October 1, 2026, applying a percentage of the target number of
+        RSUs that was determined based on Apple's total shareholder return (&quot;TSR&quot;)
+        relative to the other companies in the S&amp;P 500 from the first day of Apple's
+        fiscal year 2024 and ending with the last day of Apple's fiscal year 2026.</footnote>\n
+        \       <footnote id=\"F10\">TSR is calculated based on the change in a company's
+        stock price during the performance period, taking into account any dividends
+        paid during that period, which are assumed to be reinvested in the stock.
+        In accordance with the terms of the award, the beginning value used for calculating
+        TSR is the average closing stock price for the first 20 trading days of the
+        performance period. Apple's beginning value was calculated to be $175.08.
+        Similarly, the ending value used for calculating TSR is the average closing
+        price for the final 20 trading days of the performance period. Apple's ending
+        value was calculated to be $333.82.</footnote>\n        <footnote id=\"F11\">This
+        award provided that if Apple's relative TSR performance was ranked at or above
+        the 85th percentile for companies in the S&amp;P 500 for the performance period,
+        200% of the target number of RSUs vest. If Apple's performance was ranked
+        at or above the 55th percentile, 100% of the target number of RSUs vest. If
+        Apple's performance was ranked at or above the 25th percentile, 25% of the
+        target number of RSUs vest, and if Apple's performance was ranked below the
+        25th percentile, 0% of the target number of RSUs vest. If Apple's performance
+        was between these levels, the portion of the restricted stock units that vest
+        would be determined on a straight-line basis (i.e., linearly interpolated)
+        between the two nearest vesting percentages.</footnote>\n        <footnote
+        id=\"F12\">Apple's TSR for the three-year performance period was 90.67%, which
+        ranked 115 of the 480 companies that were included in the S&amp;P 500 for
+        the performance period and placed Apple in the 76.20th percentile. Therefore,
+        374,541 RSUs subject to performance requirements vested.</footnote>\n    </footnotes>\n\n
+        \   <ownerSignature>\n        <signatureName>/s/ Sam Whittington, Attorney-in-Fact
+        for Timothy D. Cook</signatureName>\n        <signatureDate>2026-10-05</signatureDate>\n
+        \   </ownerSignature>\n</ownershipDocument>\n</XML>\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      cache-control:
+      - no-cache, no-store, no-transform, proxy-revalidate
+      connection:
+      - keep-alive
+      content-length:
+      - '20288'
+      content-security-policy:
+      - frame-ancestors 'self'
+      content-type:
+      - text/plain
+      date:
+      - Fri, 23 Oct 2026 02:52:22 GMT
+      etag:
+      - '"b7d4a6f256f69120d4cba34389cbfe89-gzip"'
+      last-modified:
+      - Mon, 05 Oct 2026 22:43:12 GMT
+      permissions-policy:
+      - geolocation=(), microphone=(), camera=()
+      pragma:
+      - no-cache
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - a11SuKT3pibDJx7BILle1sbQX6SWmtS7NlZ8pv7MDsumes80+UlGpRabFxTP0BkwxrfZtApNO9Q=
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - PENDING
+      x-amz-request-id:
+      - 5Q5CBKS4GMKN8SV0
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - bMA4d0C9aXemm5nGh_31UBqpWhluGKJ1
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK0001214156.json
+  response:
+    body:
+      string: '{"cik":"0001214156","entityType":"other","sic":"","sicDescription":"","ownerOrg":"","insiderTransactionForOwnerExists":1,"insiderTransactionForIssuerExists":0,"name":"COOK
+        TIMOTHY D","tickers":[],"exchanges":[],"ein":null,"lei":null,"description":"","website":"","investorWebsite":"","category":"","fiscalYearEnd":null,"stateOfIncorporation":"","stateOfIncorporationDescription":"","addresses":{"mailing":{"street1":"C/O
+        APPLE INC","street2":"ONE APPLE PARK WAY","city":"CUPERTINO","stateOrCountry":"CA","zipCode":"95014","stateOrCountryDescription":"CA","isForeignLocation":0,"foreignStateTerritory":null,"country":null,"countryCode":null},"business":{"street1":null,"street2":null,"city":null,"stateOrCountry":null,"zipCode":null,"stateOrCountryDescription":null,"isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null}},"phone":null,"flags":"","formerNames":[],"filings":{"recent":{"accessionNumber":["0001140361-26-038674","0001959173-26-007235","0001140361-26-038021","0000320187-26-000147","0000320187-26-000049","0001140361-26-013190","0001959173-26-002757","0000320187-25-000146","0001214156-25-000011","0001959173-25-006313","0001959173-25-006307","0001214156-25-000009","0000320187-25-000076","0000320193-25-000043","0001959173-25-002460","0000320193-24-000109","0001959173-24-006827","0000320193-24-000101","0001127602-24-023796","0000320193-24-000049","0001959173-24-002769","0000320193-23-000089","0001959173-23-004170","0001127602-23-024189","0001127602-23-023087","0000320193-23-000048","0000320193-22-000089","0001127602-22-022378","0001127602-21-026859","0000320193-21-000081","0000320193-21-000073","0000320193-21-000071","0001127602-20-030206","0000320193-20-000074","0001127602-20-025463","0000320193-20-000066","0000320193-20-000064","0001127602-20-000714","0000320193-20-000002","0001127602-19-028946","0000320193-19-000090","0000320193-19-000088","0000320187-18-000187","0000320193-18-000115","0000320193-18-000113","0000320187-17-000156","0000320193-17-000021","0001628280-17-000889","0001628280-17-000744","0001628280-17-000550","0001628280-17-000379","0001628280-17-000312","0000320187-16-000351","0001628280-16-019324","0001628280-16-019269","0000320187-15-000234","0001209191-15-079403","0001209191-15-078971","0001209191-15-078195","0000320187-15-000222","0000320187-15-000210","0000320187-15-000171","0001209191-15-067882","0000320187-15-000143","0000320187-15-000139","0001181431-15-007652","0001181431-14-032544","0000320187-14-000132","0001181431-14-030218","0001181431-14-006584","0000320187-13-000166","0001181431-13-046662","0001127602-13-021029","0001127602-13-004083","0000320187-12-000142","0001181431-12-019840","0001181431-12-016500","0001181431-12-005460","0000320187-11-000124","0001181431-11-047180","0001181431-11-017983","0001181431-11-007305","0000320187-10-000198","0001181431-10-047835","0000320187-10-000121","0001181431-10-040666","0001181431-10-030846","0001181431-10-018242","0001181431-10-016055","0000320187-09-000135","0001181431-09-033906","0001181431-08-054629","0000320187-08-000101","0001181431-08-021474","0001181431-08-021473","0001181431-08-021472","0001181431-08-021471","0001181431-08-021470","0001181431-08-021469","0001181431-08-021468","0001181431-08-021467","0001181431-08-021466","0000320187-07-000198","0000320187-06-000132","0001181431-06-020293","0001181431-06-020292","0001181431-06-020291","0001181431-06-020290","0001181431-06-020289","0001181431-05-067466","0000320187-05-000158","0000320187-05-000151","0001181431-05-003945","0001181431-05-003944","0001181431-05-003942","0001181431-05-003941","0001181431-05-003940","0001181431-05-003938","0001181431-05-003937","0001181431-05-003935","0001181431-04-022564","0001181431-04-022563","0001181431-04-022100","0001181431-04-022099","0001181431-04-022097","0001181431-04-022096","0001181431-04-022095","0001181431-04-022094","0001181431-04-022093","0001181431-04-021664","0001181431-04-021663","0001181431-04-021661","0001181431-04-021659","0001181431-04-021654","0001181431-04-021649","0001181431-04-021646","0001181431-04-017700"],"filingDate":["2026-10-05","2026-10-02","2026-09-29","2026-09-10","2026-04-14","2026-04-03","2026-04-02","2025-12-23","2025-10-03","2025-10-02","2025-10-02","2025-09-30","2025-09-11","2025-04-03","2025-04-02","2024-10-03","2024-10-02","2024-10-01","2024-09-11","2024-04-03","2024-04-02","2023-10-03","2023-10-03","2023-09-14","2023-08-22","2023-04-04","2022-09-27","2022-09-13","2021-10-08","2021-09-28","2021-08-26","2021-08-24","2020-12-01","2020-09-29","2020-09-18","2020-08-25","2020-08-24","2020-01-03","2020-01-02","2019-09-23","2019-08-27","2019-08-26","2018-09-24","2018-08-28","2018-08-21","2017-09-25","2017-08-28","2017-02-03","2017-02-01","2017-01-27","2017-01-24","2017-01-19","2016-09-26","2016-08-31","2016-08-26","2015-12-30","2015-11-10","2015-11-06","2015-11-03","2015-11-02","2015-10-13","2015-09-18","2015-08-25","2015-07-30","2015-07-30","2015-05-29","2014-09-23","2014-09-22","2014-08-26","2014-02-12","2013-10-03","2013-08-27","2013-06-21","2013-02-04","2012-09-24","2012-03-27","2012-03-12","2012-02-02","2011-09-20","2011-08-26","2011-03-14","2011-02-03","2010-12-27","2010-09-23","2010-09-21","2010-08-05","2010-06-02","2010-03-25","2010-03-12","2009-10-06","2009-07-02","2008-09-26","2008-09-23","2008-03-26","2008-03-26","2008-03-26","2008-03-26","2008-03-26","2008-03-26","2008-03-26","2008-03-26","2008-03-26","2007-09-19","2006-09-18","2006-03-28","2006-03-28","2006-03-28","2006-03-28","2006-03-28","2005-12-16","2005-11-21","2005-11-21","2005-01-20","2005-01-20","2005-01-20","2005-01-20","2005-01-20","2005-01-20","2005-01-20","2005-01-20","2004-04-27","2004-04-27","2004-04-23","2004-04-23","2004-04-23","2004-04-23","2004-04-23","2004-04-23","2004-04-23","2004-04-21","2004-04-21","2004-04-21","2004-04-21","2004-04-21","2004-04-21","2004-04-21","2004-03-26"],"reportDate":["2026-10-01","","2026-09-27","2026-09-08","2026-04-10","2026-04-01","","2025-12-22","2025-10-01","","","2025-09-28","2025-09-09","2025-04-01","","2024-10-01","","2024-09-29","2024-09-10","2024-04-01","","2023-10-01","","2023-09-12","2023-08-21","2023-04-01","2022-09-25","2022-09-09","2021-10-06","2021-09-26","2021-08-24","2021-08-20","2020-11-30","2020-09-27","2020-09-17","2020-08-24","2020-08-20","2020-01-02","2019-12-27","2019-09-19","2019-08-24","2019-08-22","2018-09-20","2018-08-24","2018-08-21","2017-09-21","2017-08-24","2017-02-02","2017-01-30","2017-01-25","2017-01-20","2017-01-17","2016-09-22","2016-08-29","2016-08-24","2015-12-29","2015-11-09","2015-11-04","2015-10-30","2015-10-29","2015-10-09","2015-09-17","2015-08-24","2015-07-29","2015-07-29","2015-05-28","2014-09-21","2014-09-18","2014-08-24","2014-01-31","2013-09-19","2013-08-24","2013-06-21","2013-01-31","2012-09-20","2012-03-24","2012-03-10","2012-01-31","2011-09-19","2011-08-24","2011-03-10","2011-01-31","2010-12-21","2010-09-21","2010-09-20","2010-07-30","2010-05-28","2010-03-24","2010-03-10","2009-09-21","2009-06-26","2008-09-26","2008-09-22","2008-03-24","2008-03-24","2008-03-24","2008-03-24","2008-03-24","2008-03-24","2008-03-24","2008-03-24","2008-03-24","2007-09-17","2006-09-18","2006-03-24","2006-03-24","2006-03-24","2006-03-24","2006-03-24","2005-12-14","2005-11-17","2005-11-17","2005-01-18","2005-01-18","2005-01-18","2005-01-18","2005-01-18","2005-01-18","2005-01-18","2005-01-18","2004-04-23","2004-04-23","2004-04-22","2004-04-22","2004-04-22","2004-04-21","2004-04-21","2004-04-21","2004-04-21","2004-04-20","2004-04-20","2004-04-20","2004-04-19","2004-04-19","2004-04-19","2004-04-19","2004-03-24"],"acceptanceDateTime":["2026-10-06T02:42:45.000Z","2026-10-03T00:20:06.000Z","2026-09-30T02:30:23.000Z","2026-09-11T01:19:35.000Z","2026-04-15T00:25:45.000Z","2026-04-04T02:30:41.000Z","2026-04-03T00:07:16.000Z","2025-12-24T02:25:32.000Z","2025-10-04T02:33:53.000Z","2025-10-03T00:25:37.000Z","2025-10-03T00:09:12.000Z","2025-10-01T02:32:09.000Z","2025-09-12T00:50:45.000Z","2025-04-04T02:32:18.000Z","2025-04-03T00:12:31.000Z","2024-10-04T02:30:30.000Z","2024-10-03T00:05:41.000Z","2024-10-02T02:34:48.000Z","2024-09-12T00:34:15.000Z","2024-04-04T02:31:43.000Z","2024-04-03T00:17:55.000Z","2023-10-04T05:04:27.000Z","2023-10-03T19:53:25.000Z","2023-09-15T00:35:51.000Z","2023-08-23T00:59:22.000Z","2023-04-05T02:31:55.000Z","2022-09-28T05:50:27.000Z","2022-09-14T00:18:22.000Z","2021-10-09T00:18:55.000Z","2021-09-29T02:32:38.000Z","2021-08-27T02:30:46.000Z","2021-08-25T02:31:03.000Z","2020-12-02T02:19:48.000Z","2020-09-30T02:33:25.000Z","2020-09-19T01:14:54.000Z","2020-08-26T02:45:23.000Z","2020-08-25T02:31:05.000Z","2020-01-04T02:33:23.000Z","2020-01-03T04:31:18.000Z","2019-09-24T00:28:18.000Z","2019-08-28T02:30:31.000Z","2019-08-27T00:31:31.000Z","2018-09-25T00:49:28.000Z","2018-08-29T02:31:28.000Z","2018-08-22T03:01:37.000Z","2017-09-26T00:45:00.000Z","2017-08-29T04:00:34.000Z","2017-02-04T04:32:16.000Z","2017-02-02T04:31:20.000Z","2017-01-28T04:30:55.000Z","2017-01-25T04:30:37.000Z","2017-01-20T04:33:14.000Z","2016-09-27T02:12:49.000Z","2016-09-01T02:31:42.000Z","2016-08-27T00:53:09.000Z","2015-12-30T22:58:25.000Z","2015-11-11T04:30:58.000Z","2015-11-07T04:31:01.000Z","2015-11-04T04:47:00.000Z","2015-11-03T02:32:10.000Z","2015-10-13T22:23:25.000Z","2015-09-18T20:55:29.000Z","2015-08-26T05:51:16.000Z","2015-07-31T04:41:29.000Z","2015-07-31T02:08:30.000Z","2015-05-30T02:53:07.000Z","2014-09-24T02:34:46.000Z","2014-09-23T01:00:46.000Z","2014-08-27T05:32:58.000Z","2014-02-13T04:35:28.000Z","2013-10-04T01:06:47.000Z","2013-08-28T02:34:59.000Z","2013-06-22T01:19:20.000Z","2013-02-05T04:37:54.000Z","2012-09-25T02:27:33.000Z","2012-03-28T04:54:52.000Z","2012-03-13T03:01:28.000Z","2012-02-03T05:05:50.000Z","2011-09-20T21:41:44.000Z","2011-08-27T01:08:53.000Z","2011-03-15T04:01:11.000Z","2011-02-04T06:31:47.000Z","2010-12-27T20:30:46.000Z","2010-09-24T01:52:59.000Z","2010-09-22T00:50:10.000Z","2010-08-06T04:02:52.000Z","2010-06-03T01:12:31.000Z","2010-03-26T04:06:31.000Z","2010-03-13T02:40:02.000Z","2009-10-07T02:24:25.000Z","2009-07-03T01:30:05.000Z","2008-09-27T04:34:03.000Z","2008-09-23T23:12:05.000Z","2008-03-27T05:45:09.000Z","2008-03-27T05:43:07.000Z","2008-03-27T05:42:31.000Z","2008-03-27T05:40:56.000Z","2008-03-27T05:40:01.000Z","2008-03-27T05:39:23.000Z","2008-03-27T05:37:32.000Z","2008-03-27T05:35:44.000Z","2008-03-27T05:35:02.000Z","2007-09-20T00:52:59.000Z","2006-09-19T00:49:14.000Z","2006-03-29T04:19:01.000Z","2006-03-29T04:18:35.000Z","2006-03-29T04:18:19.000Z","2006-03-29T04:17:52.000Z","2006-03-29T04:17:25.000Z","2005-12-17T05:58:15.000Z","2005-11-22T02:47:57.000Z","2005-11-22T00:10:26.000Z","2005-01-21T03:22:50.000Z","2005-01-21T03:22:18.000Z","2005-01-21T03:21:29.000Z","2005-01-21T03:20:34.000Z","2005-01-21T03:19:47.000Z","2005-01-21T03:19:04.000Z","2005-01-21T03:18:22.000Z","2005-01-21T03:17:37.000Z","2004-04-28T03:16:08.000Z","2004-04-28T03:15:29.000Z","2004-04-24T03:23:59.000Z","2004-04-24T03:23:22.000Z","2004-04-24T03:22:52.000Z","2004-04-24T03:21:58.000Z","2004-04-24T03:21:26.000Z","2004-04-24T03:20:31.000Z","2004-04-24T03:20:02.000Z","2004-04-22T03:17:13.000Z","2004-04-22T03:16:16.000Z","2004-04-22T03:15:19.000Z","2004-04-22T03:14:05.000Z","2004-04-22T03:13:20.000Z","2004-04-22T03:12:19.000Z","2004-04-22T03:11:31.000Z","2004-03-27T02:58:08.000Z"],"act":["34","","34","34","34","34","","34","34","","","34","34","34","","34","","34","34","34","","34","","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","","","","","","","","","","","","","","","","",""],"form":["4","144","4","4","4","4","144","4","4","144/A","144","4","4","4","144","4","144","4","4","4","144","4","144","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4/A","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","3","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4"],"fileNumber":["001-36743","","001-36743","001-10635","001-10635","001-36743","","001-10635","001-36743","","","001-36743","001-10635","001-36743","","001-36743","","001-36743","001-10635","001-36743","","001-36743","","001-10635","001-10635","001-36743","001-36743","001-10635","001-10635","001-36743","001-36743","001-36743","001-10635","001-36743","001-10635","001-36743","001-36743","001-10635","001-36743","001-10635","001-36743","001-36743","001-10635","001-36743","001-36743","001-10635","001-36743","001-36743","001-36743","001-36743","001-36743","001-36743","001-10635","001-36743","001-36743","001-10635","001-36743","001-36743","001-36743","001-10635","001-10635","001-10635","001-36743","001-10635","001-10635","001-36743","000-10030","001-10635","000-10030","000-10030","001-10635","000-10030","000-10030","000-10030","001-10635","000-10030","000-10030","000-10030","001-10635","000-10030","000-10030","000-10030","001-10635","000-10030","001-10635","000-10030","000-10030","000-10030","000-10030","001-10635","000-10030","000-10030","001-10635","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","001-10635","001-10635","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","001-10635","001-10635","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030","000-10030"],"filmNumber":["261441914","","261425107","261372011","26861107","26839260","","251600951","251375302","","","251361900","251309101","25811428","","241352977","","241344755","241293014","24820694","","231306389","","231255554","231194380","23800179","221272670","221240952","211315518","211288779","211213657","211203208","201361056","201210089","201184687","201133762","201129035","20506010","20502695","191108321","191058794","191053296","181084026","181042672","181031183","171100200","171055877","17573540","17566207","17555092","17544758","17537142","161903066","161864224","161855312","151312938","151220101","151213593","151195072","151191017","151155794","151115023","151074559","151017687","151017495","15900891","141116940","141114485","141066369","14602075","131134509","131063863","13927996","13571503","121107470","12718484","12685409","12567523","111099091","111060648","11686870","11572257","101273648","101087446","101082983","10996006","10873625","10705691","10678268","091108972","09928546","081092323","081084407","08713400","08713397","08713396","08713392","08713391","08713390","08713388","08713386","08713385","071125082","061096141","06716289","06716288","06716287","06716286","06716285","051271059","051218527","051217537","05539490","05539486","05539480","05539472","05539465","05539457","05539450","05539443","04758244","04758239","04752353","04752352","04752351","04752350","04752348","04752346","04752344","04746495","04746494","04746493","04746491","04746489","04746487","04746485","04693562"],"items":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],"core_type":["4","144","4","4","4","4","144","4","4","144/A","144","4","4","4","144","4","144","4","4","4","144","4","144","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4/A","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","3","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4"],"size":[20288,5724,8259,4778,6701,25322,4652,5226,19105,4681,4655,8130,4643,21372,4654,18949,4661,8154,4653,15012,4652,22080,4594,4571,7106,13367,7916,4539,5940,7919,16851,5473,13610,7919,4505,26381,5315,12450,4956,4687,17062,9564,4711,16927,5228,5847,18859,4763,9467,7664,7658,7658,4713,11009,19338,8877,4865,8089,12818,8878,8844,4714,11639,4969,8882,4993,12900,4719,9983,5115,5033,8794,9461,4913,6182,31074,18073,4977,5032,5525,16179,9585,8680,5797,5445,5357,4898,18342,5887,5443,5565,5815,5494,19020,45644,45648,45648,45645,45654,44269,44291,47975,5541,5541,30098,51279,51278,51274,51280,5792,6690,3254,23845,51076,51071,51076,51073,51070,51069,51074,33000,48124,48124,53321,51144,48124,48122,48120,51148,23930,53319,51146,53306,53311,51146,51144,5769],"isXBRL":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"isInlineXBRL":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"isXBRLNumeric":[0,0,0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"primaryDocument":["xslF345X06/form4.xml","xsl144X01/primary_doc.xml","xslF345X06/form4.xml","xslF345X06/form4.xml","xslF345X06/form4.xml","xslF345X06/form4.xml","xsl144X01/primary_doc.xml","xslF345X05/form4.xml","xslF345X05/wk-form4_1759530830.xml","xsl144X01/primary_doc.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1759271527.xml","xslF345X05/form4.xml","xslF345X05/wk-form4_1743719531.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1727994624.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1727822082.xml","xslF345X05/form4.xml","xslF345X05/wk-form4_1712183493.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1696381457.xml","xsl144X01/primary_doc.xml","xslF345X05/form4.xml","xslF345X05/form4.xml","xslF345X04/wf-form4_168064750462974.xml","xslF345X03/wf-form4_166432981128707.xml","xslF345X03/form4.xml","xslF345X03/form4.xml","xslF345X03/wf-form4_163286834378268.xml","xslF345X03/wf-form4_163001701613155.xml","xslF345X03/wf-form4_162984422696515.xml","xslF345X03/form4.xml","xslF345X03/wf-form4_160141879027128.xml","xslF345X03/form4.xml","xslF345X03/wf-form4_159839550969947.xml","xslF345X03/wf-form4_159830825188983.xml","xslF345X03/form4.xml","xslF345X03/wf-form4_157800786035380.xml","xslF345X03/form4.xml","xslF345X03/wf-form4_156694501621463.xml","xslF345X03/wf-form4_156685147551694.xml","xslF345X03/edgardoc.xml","xslF345X03/wf-form4_153549547286956.xml","xslF345X03/wf-form4_153489248141557.xml","xslF345X03/edgardoc.xml","xslF345X03/wf-form4_150396481887759.xml","xslF345X03/wf-form4_148616472318268.xml","xslF345X03/wf-form4_148599186687884.xml","xslF345X03/wf-form4_148555984128421.xml","xslF345X03/wf-form4_148530062501951.xml","xslF345X03/wf-form4_148486878103532.xml","xslF345X03/edgardoc.xml","xslF345X03/wf-form4_147268268998840.xml","xslF345X03/wf-form4_147224477588332.xml","xslF345X03/edgardoc.xml","xslF345X03/doc4.xml","xslF345X03/doc4.xml","xslF345X03/doc4.xml","xslF345X03/edgardoc.xml","xslF345X03/edgardoc.xml","xslF345X03/edgardoc.xml","xslF345X03/doc4.xml","xslF345X03/edgardoc.xml","xslF345X03/edgardoc.xml","xslF345X03/rrd425353.xml","xslF345X03/rrd416531.xml","xslF345X03/edgardoc.xml","xslF345X03/rrd415064.xml","xslF345X03/rrd401059.xml","xslF345X03/edgardoc.xml","xslF345X03/rrd388589.xml","xslF345X03/form4.xml","xslF345X03/form4.xml","xslF345X03/edgardoc.xml","xslF345X03/rrd339694.xml","xslF345X03/rrd337933.xml","xslF345X03/rrd331008.xml","xslF345X03/edgardoc.xml","xslF345X03/rrd320669.xml","xslF345X03/rrd303631.xml","xslF345X03/rrd298351.xml","xslF345X03/edgardoc.xml","xslF345X03/rrd286668.xml","xslF345X03/edgardoc.xml","xslF345X03/rrd282463.xml","xslF345X03/rrd277473.xml","xslF345X03/rrd270790.xml","xslF345X03/rrd269608.xml","xslF345X03/edgardoc.xml","xslF345X03/rrd247216.xml","xslF345X03/rrd219562.xml","xslF345X03/edgardoc.xml","xslF345X02/rrd200869.xml","xslF345X02/rrd200868.xml","xslF345X02/rrd200867.xml","xslF345X02/rrd200866.xml","xslF345X02/rrd200864.xml","xslF345X02/rrd200801.xml","xslF345X02/rrd200797.xml","xslF345X02/rrd200792.xml","xslF345X02/rrd200777.xml","xslF345X02/edgardoc.xml","xslF345X02/edgardoc.xml","xslF345X02/rrd112483.xml","xslF345X02/rrd112482.xml","xslF345X02/rrd112481.xml","xslF345X02/rrd112480.xml","xslF345X02/rrd112476.xml","xslF345X02/rrd97015.xml","xslF345X02/edgardoc.xml","xslF345X02/edgardoc.xml","xslF345X02/rrd65160.xml","xslF345X02/rrd65155.xml","xslF345X02/rrd65148.xml","xslF345X02/rrd65145.xml","xslF345X02/rrd65139.xml","xslF345X02/rrd65137.xml","xslF345X02/rrd65136.xml","xslF345X02/rrd65113.xml","xslF345X02/rrd40616.xml","xslF345X02/rrd40615.xml","xslF345X02/rrd40222.xml","xslF345X02/rrd40221.xml","xslF345X02/rrd40220.xml","xslF345X02/rrd40219.xml","xslF345X02/rrd40218.xml","xslF345X02/rrd40216.xml","xslF345X02/rrd40212.xml","xslF345X02/rrd40080.xml","xslF345X02/rrd40077.xml","xslF345X02/rrd40076.xml","xslF345X02/rrd40022.xml","xslF345X02/rrd40018.xml","xslF345X02/rrd40017.xml","xslF345X02/rrd40012.xml","xslF345X02/rrd33556.xml"],"primaryDocDescription":["FORM
+        4","","FORM 4","PRIMARY DOCUMENT","PRIMARY DOCUMENT","FORM 4","","PRIMARY
+        DOCUMENT","FORM 4","","","FORM 4","PRIMARY DOCUMENT","FORM 4","","FORM 4","","FORM
+        4","PRIMARY DOCUMENT","FORM 4","","FORM 4","","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","FORM 4","FORM 4","PRIMARY DOCUMENT","PRIMARY DOCUMENT","FORM 4","FORM
+        4","FORM 4","PRIMARY DOCUMENT","FORM 4","PRIMARY DOCUMENT","FORM 4","FORM
+        4","PRIMARY DOCUMENT","FORM 4","PRIMARY DOCUMENT","FORM 4","FORM 4","PRIMARY
+        DOCUMENT","FORM 4","FORM 4","PRIMARY DOCUMENT","FORM 4","FORM 4","FORM 4","FORM
+        4","FORM 4","FORM 4","PRIMARY DOCUMENT","FORM 4","FORM 4","PRIMARY DOCUMENT","FORM
+        4 SUBMISSION","FORM 4 SUBMISSION","FORM 4 SUBMISSION","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","FORM 4 SUBMISSION","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","2015.05.29 COOK FORM 4 - GIFT","2014.09.24 COOK FORM 4 - RSU VESTING
+        AND 10B5-1 SALE","PRIMARY DOCUMENT","2014.08.24 COOK FORM 4 RSU VESTING","14.01.31
+        COOK FORM 4 - ESPP PURCHASE","PRIMARY DOCUMENT","FORM 4","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","FORM 4: T. COOK 03/24/12 RSU VEST AND 3/26/12
+        10B5-1 PLAN DISPOSITION","FORM 4: T. COOK 03/10/12 RSU VEST AND 3/12/12 10B5-1
+        PLAN DISPOSITION","FORM 4:  T. COOK 1/31/12 ESPP PURCHASE","PRIMARY DOCUMENT","FORM
+        4:  T. COOK 08/24/11 RSU GRANT","FORM 4: T. COOK 03/10/11 RSU VEST AND 3/11/11
+        10B5-1 PLAN DISPOSITION","FORM 4:  T. COOK 1/31/11 ESPP PURCHASE","PRIMARY
+        DOCUMENT","FORM 4:  T. COOK 09/21/10 RSU GRANT","PRIMARY DOCUMENT","FORM 4:  T.
+        COOK 07/30/10 ESPP PURCHASE","FORM 4:  T. COOK 05/28/10 CHARITIABLE GIFT","FORM
+        4: T. COOK 03/24/10 RSU VEST AND 3/25/10 10B5-1 PLAN DISPOSITION","FORM 4:  T.
+        COOK 03/10/10 RSU GRANT","PRIMARY DOCUMENT","FORM 4:  T. COOK 6/26/09 ESPP","FORM
+        4:  T. COOK 09/26/08 RSU GRANT","PRIMARY DOCUMENT","FORM 4:  T. COOK 03/24/08
+        RSU VEST P9","FORM 4:  T. COOK 03/24/08 RSU VEST P8","FORM 4:  T. COOK 03/24/08
+        RSU VEST P7","FORM 4:  T. COOK 03/24/08 RSU VEST P6","FORM 4:  T. COOK 03/24/08
+        RSU VEST P5","FORM 4:  T. COOK 03/24/08 RSU VEST P4","FORM 4:  T. COOK 03/24/08
+        RSU VEST P3","FORM 4:  T. COOK 03/24/08 RSU VEST P2","FORM 4:  T. COOK 03/24/08
+        RSU VEST P1","PRIMARY DOCUMENT","PRIMARY DOCUMENT","","","","","","","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","","","","","","","","","","","","","","","","","","","","","","","","",""]},"files":[]}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      connection:
+      - keep-alive
+      content-length:
+      - '25019'
+      content-type:
+      - application/json
+      date:
+      - Fri, 23 Oct 2026 02:52:22 GMT
+      strict-transport-security:
+      - max-age=31536000 ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-apigw-id:
+      - FrTMEHg2oAMEGCA=
+      x-amzn-requestid:
+      - 03d599c6-77c5-4f08-9188-c3eb96b3b3c1
+      x-amzn-trace-id:
+      - Root=1-6adacbe6-b6be0861712f28fd7937ed9e
+    status:
+      code: 200
+      message: OK
+version: 1

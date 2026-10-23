@@ -40,12 +40,17 @@ patterns:
       df = summary.to_dataframe(detailed=False)  # Aggregated summary row
 
   - name: Screen Large Transactions
-    when: Find significant insider activity
+    when: Find large insider purchases or sales
     code: |
       for filing in company.get_filings(form="4")[:30]:
           summary = filing.obj().get_ownership_summary()
-          if summary.net_change > 10000 and summary.net_value > 100000:
-              print(f"{summary.insider_name}: {summary.net_change:,} shares (${summary.net_value:,.0f})")
+          # abs(): net_change and net_value are negative for net sales
+          if abs(summary.net_change) > 10000 and abs(summary.net_value) > 100000:
+              print(f"{summary.insider_name}: {summary.net_change:+,} shares ({summary.net_value:+,.0f} USD)")
+    note: |
+      net_change and net_value are open-market purchases (code P) minus open-market sales (code S)
+      only. Grants, RSU settlements (M), tax withholding (F) and gifts (G) are not in them.
+      For purchases only, test net_change > 10000 without abs().
 
   - name: Form 3 and 5
     when: Initial ownership or annual summary
