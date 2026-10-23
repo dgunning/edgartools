@@ -831,15 +831,7 @@ class StatementResolver:
             # An explicit parenthetical request must not settle for the main statement.
             score -= 80
 
-        # GH #1648: a co-registrant's own face statement (a subsidiary filing
-        # alongside the parent, e.g. Transco in Williams' 10-Q) is never THE
-        # statement of the filing while the parent's own role exists. Name
-        # scoring alone preferred Transco's "Statement of Net Income" over
-        # Williams' "Statement of Comprehensive Income".
-        # Duck-typed: callers (and tests) hand the resolver light XBRL stand-ins.
-        coregistrant_member = getattr(self.xbrl, '_coregistrant_member', None)
-        if coregistrant_member is not None and coregistrant_member(stmt.get('role')):
-            score -= 200
+        score -= self._coregistrant_penalty(stmt)
 
         # Prefer "Consolidated" statements (primary statements)
         if 'consolidated' in role_def or 'consolidated' in role_uri:
@@ -877,6 +869,20 @@ class StatementResolver:
                     log.debug(f"Statement validation failed for {statement_type}: {reason}")
 
         return score
+
+    def _coregistrant_penalty(self, stmt: Dict[str, Any]) -> int:
+        """Score penalty for a co-registrant's own face statement (GH #1648).
+
+        A subsidiary filing alongside the parent (Transco in Williams' 10-Q) has
+        its own face statements, and they are never THE statement of the filing
+        while the parent's role exists. Name scoring alone preferred Transco's
+        "Statement of Net Income" over Williams' "Statement of Comprehensive Income".
+        Duck-typed: callers (and tests) hand the resolver light XBRL stand-ins.
+        """
+        coregistrant_member = getattr(self.xbrl, '_coregistrant_member', None)
+        if coregistrant_member is not None and coregistrant_member(stmt.get('role')):
+            return 200
+        return 0
 
     def _match_by_role_pattern(self, statement_type: str, is_parenthetical: bool = False) -> Tuple[List[Dict[str, Any]], Optional[str], float]:
         """
