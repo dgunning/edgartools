@@ -641,7 +641,10 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
 
         Returns:
-            Net income value if found, None otherwise
+            Net income attributable to the parent if found, None otherwise.
+            Where the statement files only consolidated profit (us-gaap or
+            IFRS ProfitLoss) and a noncontrolling-interest row, the parent
+            amount is ProfitLoss less that row; with no such row, ProfitLoss.
 
         Example:
             >>> company = Company('AAPL')
@@ -650,18 +653,28 @@ class Financials:
         """
         # First try concept-based search using standardization mappings.
         # 'Net Income' covers us-gaap_NetIncome / us-gaap_NetIncomeLoss (the
-        # parent-attributable line for US GAAP filers reporting NCI).
-        # 'Profit or Loss' covers us-gaap_ProfitLoss and the IFRS variants
-        # (ifrs-full_ProfitLoss, ifrs-full_ProfitLossAttributableToOwnersOfParent)
-        # used by 20-F filers — these would otherwise miss when the row label
-        # is not "Net income" (e.g. "Profit after tax").
+        # parent-attributable line for US GAAP filers reporting NCI); IFRS
+        # files the same line as ProfitLossAttributableToOwnersOfParent.
         result = self._get_standardized_concept_by_xbrl(
             'income',
-            ['Net Income', 'Profit or Loss'],
+            ['Net Income', 'ifrs-full_ProfitLossAttributableToOwnersOfParent'],
             period_offset
         )
         if result is not None:
             return result
+
+        # 'Profit or Loss' (us-gaap_ProfitLoss, ifrs-full_ProfitLoss) is
+        # consolidated profit, INCLUDING the noncontrolling interest's share.
+        # Returned as is, it overstated parent net income by that share (gh
+        # #1688): Caterpillar's FY2025 10-K files ProfitLoss $8,882M and NCI
+        # $(2)M, so its parent amount is $8,884M; Interactive Brokers' Q2 2026
+        # 10-Q returned $1,338M for $312M; Toyota's 20-F returned ifrs
+        # ProfitLoss over the owners-of-parent line above. ProfitLoss less the
+        # NCI rows is NetIncomeLoss by definition (ASC 810-10-50-1A), the line
+        # the first lookup prefers; preferred dividends are not taken out.
+        result = self._get_standardized_concept_by_xbrl('income', ['Profit or Loss'], period_offset)
+        if result is not None:
+            return result - self._noncontrolling_interest_share(period_offset)
 
         # Fallback to label-based search for filers whose concept isn't in
         # the standardization map. Includes 'Net Loss' variants (filer reporting
@@ -684,6 +697,48 @@ class Financials:
             r'.*Profit.*Loss',
         )]
         return self._get_standardized_concept_value('income', patterns, period_offset)
+
+    # Each tier is one partition of the NCI share in net income, so the rows
+    # within a tier sum to it. Tiers are never combined: a redeemability split
+    # and an operations split each add up to the whole share.
+    _NCI_TOTAL = ('us-gaap_NetIncomeLossAttributableToNoncontrollingInterest',
+                  'ifrs-full_ProfitLossAttributableToNoncontrollingInterests')
+    _NCI_REIT_REDEEMABLE = ('us-gaap_NoncontrollingInterestInNetIncomeLossOperatingPartnershipsRedeemable',
+                            'us-gaap_NoncontrollingInterestInNetIncomeLossOtherNoncontrollingInterestsRedeemable',
+                            'us-gaap_NoncontrollingInterestInNetIncomeLossPreferredUnitHoldersRedeemable')
+    _NCI_BY_OPERATIONS = ('us-gaap_IncomeLossFromContinuingOperationsAttributableToNoncontrollingEntity',
+                          'us-gaap_IncomeLossFromDiscontinuedOperationsNetOfTaxAttributableToNoncontrollingInterest')
+
+    def _noncontrolling_interest_share(self, period_offset: int = 0) -> Union[int, float]:
+        """The income statement's profit attributable to noncontrolling interests, 0 if none.
+
+        Tried in order, first tier present wins:
+        1. a total row (us-gaap or IFRS);
+        2. the redeemability split: nonredeemable plus redeemable, where the
+           redeemable part is its total row or, failing that, the REIT
+           holder rows (operating partnership, other partnerships, preferred
+           units) that compose it (Sempra files $141M and $4M);
+        3. the operations split: continuing plus discontinued operations.
+        """
+        def value(concept):
+            return self._get_standardized_concept_by_xbrl('income', [concept], period_offset)
+
+        def tier_sum(concepts):
+            values = [v for v in (value(c) for c in concepts) if v is not None]
+            return sum(values) if values else None
+
+        total = self._get_standardized_concept_by_xbrl('income', list(self._NCI_TOTAL), period_offset)
+        if total is not None:
+            return total
+
+        nonredeemable = value('us-gaap_NetIncomeLossAttributableToNonredeemableNoncontrollingInterest')
+        redeemable = value('us-gaap_NetIncomeLossAttributableToRedeemableNoncontrollingInterest')
+        if redeemable is None:
+            redeemable = tier_sum(self._NCI_REIT_REDEEMABLE)
+        if nonredeemable is not None or redeemable is not None:
+            return (nonredeemable or 0) + (redeemable or 0)
+
+        return tier_sum(self._NCI_BY_OPERATIONS) or 0
 
     def get_operating_income(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
