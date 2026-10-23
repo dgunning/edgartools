@@ -391,10 +391,13 @@ class InstanceParser(BaseParser):
                     measure_elem = unit_elem.find('{http://www.xbrl.org/2003/instance}measure')
                     if measure_elem is None:
                         measure_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}measure')
-                    if measure_elem is not None and measure_elem.text:
+                    # Strip: a pretty-printed <measure> carries whitespace that
+                    # breaks every iso4217: prefix test downstream (GH #1704).
+                    measure_text = (measure_elem.text or '').strip() if measure_elem is not None else ''
+                    if measure_text:
                         self.units[unit_id] = {
                             'type': 'simple',
-                            'measure': measure_elem.text
+                            'measure': measure_text
                         }
                     continue
 
@@ -405,8 +408,8 @@ class InstanceParser(BaseParser):
 
                     if numerator_elem is not None and denominator_elem is not None:
                         # Get measures
-                        numerator_measures = [elem.text for elem in numerator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text]
-                        denominator_measures = [elem.text for elem in denominator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text]
+                        numerator_measures = [elem.text.strip() for elem in numerator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text and elem.text.strip()]
+                        denominator_measures = [elem.text.strip() for elem in denominator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text and elem.text.strip()]
 
                         self.units[unit_id] = {
                             'type': 'divide',
