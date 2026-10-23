@@ -1921,21 +1921,8 @@ class XBRL:
 
                     synthetic = self._compute_synthetic_total(filtered_dim_facts, element_id_normalized)
                     if synthetic:
-                        values[period_key] = synthetic['total']
-                        fact = synthetic['fact']
-                        context_id = synthetic['context_id']
-
-                        fact_decimals = normalize_decimals(fact.decimals)
-                        if fact_decimals is not None:
-                            decimals[period_key] = fact_decimals
-
-                        units[period_key] = fact.unit_ref
-
-                        if context_id in self.contexts:
-                            context = self.contexts[context_id]
-                            if hasattr(context, 'period') and context.period:
-                                pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
-                                period_types[period_key] = pt
+                        self._store_synthetic_total(synthetic, period_key, values, decimals,
+                                                    units, period_types)
 
             else:
                 # For standard financial statements, prefer non-dimensioned facts
@@ -1979,21 +1966,8 @@ class XBRL:
                     ]
                     synthetic = self._compute_synthetic_total(dim_facts, element_id_normalized)
                     if synthetic:
-                        values[period_key] = synthetic['total']
-                        fact = synthetic['fact']
-                        context_id = synthetic['context_id']
-
-                        fact_decimals = normalize_decimals(fact.decimals)
-                        if fact_decimals is not None:
-                            decimals[period_key] = fact_decimals
-
-                        units[period_key] = fact.unit_ref
-
-                        if context_id in self.contexts:
-                            context = self.contexts[context_id]
-                            if hasattr(context, 'period') and context.period:
-                                pt = context.period.get('type') if isinstance(context.period, dict) else getattr(context.period, 'type', None)
-                                period_types[period_key] = pt
+                        self._store_synthetic_total(synthetic, period_key, values, decimals,
+                                                    units, period_types)
 
         # Create preferred_signs dict for all periods (same value for all periods of this concept)
         preferred_signs = {}
@@ -2392,7 +2366,10 @@ class XBRL:
         - Skips per-share and ratio concepts (summing them is meaningless)
         - Expects only single-axis facts (caller must filter multi-axis facts)
 
-        Returns dict with 'total', 'fact', 'context_id' or None if not computable.
+        Returns None if not computable, else a dict with 'total', 'computed'
+        (True for a sum, False when the total is one filed fact), 'unit_ref',
+        'decimals' and 'component_context_ids'. 'fact' and 'context_id' name
+        the filed fact, and are None for a sum.
         """
         if not dim_facts:
             return None
@@ -2428,6 +2405,12 @@ class XBRL:
         # Pick the axis with most members (most complete breakdown)
         best_axis = max(axis_groups.values(), key=len)
 
+        # Amounts in different units do not add: MXN 327M and USD 19M are not
+        # 346M of anything (GH #1689). Nor is a smaller axis then a better
+        # answer, so there is no total.
+        if len({entry[1]['fact'].unit_ref for entry in best_axis}) > 1:
+            return None
+
         # Sharing an axis does not make members disjoint. A statement of
         # shareholders' equity breaks equity down by component AND carries the
         # filer's own subtotals as members of the same axis, so adding
@@ -2457,7 +2440,7 @@ class XBRL:
                 tolerance = max(abs(component_total), scale) * 1e-6
                 for cid, wf, value in aggregates:
                     if abs(value - component_total) <= tolerance:
-                        return {'total': value, 'fact': wf['fact'], 'context_id': cid}
+                        return self._filed_total(value, wf['fact'], cid)
 
             # Either the group is nothing but an aggregate -- Coca-Cola tags
             # shareowners' equity solely against ParentMember, so there is no
@@ -2470,18 +2453,55 @@ class XBRL:
             named = [e for e in aggregates
                      if 'total' in (e[1]['dimension_info'][0].get('member') or '').lower()]
             cid, wf, value = max(named or aggregates, key=lambda e: abs(e[2]))
-            return {'total': value, 'fact': wf['fact'], 'context_id': cid}
+            return self._filed_total(value, wf['fact'], cid)
 
         # No aggregate members: a genuine disjoint breakdown, which is the case
         # this helper was added for (gh #646 -- Disney's own cost of services
         # and cost of products summing to total costs).
-        total = sum(v for _, _, v in best_axis)
-        first_cid, first_wf, _ = best_axis[0]
+        if len(best_axis) == 1:
+            cid, wf, value = best_axis[0]
+            return self._filed_total(value, wf['fact'], cid)
 
+        # A sum is no filed fact: it carries no single context or fact id, its
+        # precision is that of its least precise component, and it says it was
+        # computed (GH #1689).
+        component_facts = [wf['fact'] for _, wf, _ in best_axis]
+        precisions = [normalize_decimals(f.decimals) for f in component_facts]
+        finite = [d for d in precisions if isinstance(d, int)]
         return {
-            'total': total,
-            'fact': first_wf['fact'],
-            'context_id': first_cid,
+            'total': sum(v for _, _, v in best_axis),
+            'computed': True,
+            'fact': None,
+            'context_id': None,
+            'component_context_ids': [cid for cid, _, _ in best_axis],
+            'unit_ref': component_facts[0].unit_ref,
+            'decimals': min(finite) if finite else next((d for d in precisions if d is not None), None),
+        }
+
+    def _store_synthetic_total(self, synthetic, period_key, values, decimals, units, period_types) -> None:
+        """Write a `_compute_synthetic_total()` result into a line item's period maps."""
+        values[period_key] = synthetic['total']
+        if synthetic['decimals'] is not None:
+            decimals[period_key] = synthetic['decimals']
+        units[period_key] = synthetic['unit_ref']
+        # Every component shares the period, so any one context gives its type.
+        context = self.contexts.get(synthetic['component_context_ids'][0])
+        if context is not None and getattr(context, 'period', None):
+            period = context.period
+            period_types[period_key] = (period.get('type') if isinstance(period, dict)
+                                        else getattr(period, 'type', None))
+
+    @staticmethod
+    def _filed_total(value, fact, context_id) -> Dict[str, Any]:
+        """A synthetic-total result that is one filed fact, not a sum."""
+        return {
+            'total': value,
+            'computed': False,
+            'fact': fact,
+            'context_id': context_id,
+            'component_context_ids': [context_id],
+            'unit_ref': fact.unit_ref,
+            'decimals': normalize_decimals(fact.decimals),
         }
 
     def _is_non_additive_unit(self, unit_ref: Optional[str]) -> bool:
