@@ -409,9 +409,32 @@ class CurrencyConverter:
                     return _HOME_PER_TARGET
                 if numerator == [target] and denominator == [home]:
                     return _TARGET_PER_HOME
-                return None  # another currency pair, e.g. SAP's AUD per EUR
+                return None  # another pair, e.g. SAP's AUD per EUR: a sibling
             if _local_name(unit.get('measure') or '').lower() == 'pure':
                 return _PURE
+            return None
+
+        def sibling_currency(unit_ref: str, member: Optional[str]) -> Optional[str]:
+            """The other currency a rate in this unit and member is for, or None.
+
+            A pure rate needs its member (GSK's yen row); a divide unit of the
+            home currency and another names it itself (SAP's AUD per EUR). A
+            divide unit's order is ignored here: the value is tested every way.
+            """
+            code = _local_name(member).upper() if member else None
+            unit = units.get(unit_ref)
+            if unit is not None and unit.get('type') == 'divide':
+                measures = {_local_name(m).upper()
+                            for m in unit.get('numerator', []) + unit.get('denominator', [])}
+                others = measures - {home}
+                if home not in measures or len(others) != 1:
+                    return None
+                other = others.pop()
+                if other == target or (code is not None and code != other):
+                    return None
+                return other
+            if code is not None and code != target and unit_quote(unit_ref) == _PURE:
+                return code
             return None
 
         selected: List[tuple] = []
@@ -419,7 +442,8 @@ class CurrencyConverter:
         for kind, concept, date_columns in _RATE_CONCEPTS:
             try:
                 df = self.xbrl.facts.query().by_concept(concept, exact=True).to_dataframe()
-                selected.extend(self._select_rates(df, kind, date_columns, unit_quote, siblings))
+                selected.extend(self._select_rates(df, kind, date_columns, unit_quote,
+                                                   sibling_currency, siblings))
             except Exception as e:
                 # Not "no rates found": that is what an empty frame means. This
                 # is the extraction itself failing, which is indistinguishable
@@ -495,15 +519,18 @@ class CurrencyConverter:
         fits = [r for r, factor in _READINGS.items() if low <= factor(value) <= high]
         labels = ' or '.join(self._reading_label(r) for r in fits)
 
-        # In-filing signals: the unit's numerator and denominator, then the
-        # other currencies' rates in the same table.
+        # In-filing signals, strongest first: the other currencies' rates in the
+        # same table, then the unit's numerator and denominator. A unit is only
+        # a hint, since filers write it backwards (GH #1653 review), and it
+        # gives a direction, never a scale.
+        siblings_say = _sibling_readings(self.home_currency, siblings)
+        from_siblings = "the other currencies' rates in the filing"
         if quote == _TARGET_PER_HOME:
-            hint, hint_source = {_USD_PER_HOME}, "its unit"
+            unit_says = {_USD_PER_HOME}
         elif quote == _HOME_PER_TARGET:
-            hint, hint_source = {_HOME_PER_USD, _HOME_PER_100_USD}, "its unit"
+            unit_says = {_HOME_PER_USD, _HOME_PER_100_USD}
         else:
-            hint = _sibling_readings(self.home_currency, siblings)
-            hint_source = "the other currencies' rates in the filing"
+            unit_says = None
 
         if not fits:
             self._extraction_warnings.append(
@@ -513,31 +540,33 @@ class CurrencyConverter:
             return None, None
         if len(fits) == 1:
             reading = fits[0]
+            label = self._reading_label(reading)
             how = "only plausible reading"
-            if hint is not None and reading not in hint:
-                label = self._reading_label(reading)
-                if quote == _PURE:
-                    # Other currencies' rates pointing elsewhere: the data
-                    # disagrees with itself, so nothing is trusted.
-                    self._extraction_warnings.append(
-                        f"{where} was not used: it is plausible only as {label}, "
-                        f"which {hint_source} contradicts"
-                    )
-                    return None, None
-                # A unit's measure order is a hint, not the truth: Ecopetrol
-                # tags 4,409 COP per USD as USD/COP, Genmab 0.1452 USD per DKK
-                # as DKK/USD (GH #1653 review). The value can only be one thing.
+            if siblings_say is not None and reading not in siblings_say:
+                # Other currencies' rates pointing elsewhere: the data
+                # disagrees with itself, so nothing is trusted.
+                self._extraction_warnings.append(
+                    f"{where} was not used: it is plausible only as {label}, "
+                    f"which {from_siblings} contradict"
+                )
+                return None, None
+            if unit_says is not None and reading not in unit_says:
+                # Ecopetrol tags 4,409 COP per USD as USD/COP, Genmab 0.1452 USD
+                # per DKK as DKK/USD. The value can only be one thing.
                 how += "; its unit says the opposite"
                 self._extraction_warnings.append(
                     f"{where} is plausible only as {label}, which its unit "
                     f"contradicts; it was read as {label}"
                 )
         else:
-            narrowed = [r for r in fits if hint is not None and r in hint]
-            if quote != _PURE and _HOME_PER_100_USD in fits:
-                # A unit gives a direction, never a scale: EUR/SEK 11.4 fits as
-                # SEK per EUR and as EUR per 100 SEK (GH #1651 review).
-                narrowed = []
+            if siblings_say is not None:
+                narrowed, source = [r for r in fits if r in siblings_say], from_siblings
+            elif unit_says is not None and _HOME_PER_100_USD not in fits:
+                narrowed, source = [r for r in fits if r in unit_says], "its unit"
+            else:
+                # Nothing, or a unit asked to choose a scale: EUR/SEK 11.4 fits
+                # as SEK per EUR and as EUR per 100 SEK (GH #1651 review).
+                narrowed, source = [], None
             if len(narrowed) != 1:
                 self._extraction_warnings.append(
                     f"{where} was not used: it is plausible as {labels}, and nothing "
@@ -545,7 +574,14 @@ class CurrencyConverter:
                 )
                 return None, None
             reading = narrowed[0]
-            how = f"plausible either way, settled by {hint_source}"
+            how = f"plausible either way, settled by {source}"
+            if source == from_siblings and unit_says is not None and reading not in unit_says:
+                label = self._reading_label(reading)
+                how += "; its unit says the opposite"
+                self._extraction_warnings.append(
+                    f"{where} is plausible as {labels}; {from_siblings} say {label}, "
+                    f"which its unit contradicts"
+                )
         if not named:
             how += "; names no currency, and no other currency is named beside it"
             self._extraction_warnings.append(
@@ -583,14 +619,14 @@ class CurrencyConverter:
         context = self.xbrl.contexts.get(row.get('context_ref'))
         return dict(context.dimensions) if context is not None else {}
 
-    def _select_rates(self, df, kind: str, date_columns, unit_quote,
+    def _select_rates(self, df, kind: str, date_columns, unit_quote, sibling_currency,
                       siblings: Dict[tuple, List[tuple]]) -> List[tuple]:
         """Pick one ``kind`` rate per year from the facts of one rate concept.
 
         Returns ``(year, kind, value, quote, named)`` tuples, ``named`` saying the
-        fact carries a currency member. Pure-number rates of other currencies are
-        added to ``siblings[(kind, year)]`` as ``(currency, value)``: they show
-        which way the filing quotes its rates.
+        fact carries a currency member. Rates of other currencies, pure or in a
+        divide unit, are added to ``siblings[(kind, year)]`` as
+        ``(currency, value)``: they show which way the filing quotes its rates.
         """
         if df.empty:
             return []
@@ -606,21 +642,22 @@ class CurrencyConverter:
         unusable = 0
 
         for _, row in df.iterrows():
-            quote = unit_quote(row.get('unit_ref', ''))
-            if quote is None:
-                continue
+            unit_ref = row.get('unit_ref', '')
             dimensions = self._fact_dimensions(row)
             member = dimensions.get(_CURRENCY_AXIS)
             hedged = any('hedg' in _local_name(axis).lower() for axis in dimensions)
-            if member is not None and _local_name(member).upper() != target:
+            other = sibling_currency(unit_ref, member)
+            if other is not None or (member is not None and _local_name(member).upper() != target):
                 # The rate of another currency, e.g. JPY for GSK. Not used, but
-                # a pure one shows the filing's convention (198 JPY per GBP).
+                # it shows the filing's convention (198 JPY per GBP).
                 value = row.get('numeric_value')
                 year = _extract_year(_first_date(row, *date_columns))
-                if (quote == _PURE and not hedged and year and value is not None
+                if (other is not None and not hedged and year and value is not None
                         and math.isfinite(value) and value > 0):
-                    siblings.setdefault((kind, year), []).append(
-                        (_local_name(member).upper(), value))
+                    siblings.setdefault((kind, year), []).append((other, value))
+                continue
+            quote = unit_quote(unit_ref)
+            if quote is None:
                 continue
             period_date = _first_date(row, *date_columns)
             year = _extract_year(period_date)

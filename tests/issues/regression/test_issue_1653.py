@@ -182,3 +182,61 @@ def test_a_backwards_unit_is_overruled_by_the_only_plausible_reading(
     assert (f"the {kind} rate for {year} ({value}) is plausible only as {reading}, "
             f"which its unit contradicts; it was read as {reading}"
             ) in converter.extraction_warnings
+
+
+# ---------------------------------------------------------------------------
+# Review round 2: the other currencies' rates outrank the unit, and rates in
+# divide units count among them. By construction: EUR home, 2024 averages.
+# ---------------------------------------------------------------------------
+
+class _Context:
+    def __init__(self, dimensions):
+        self.dimensions = dimensions
+
+
+class _TableXBRL:
+    """An EUR filing's 2024 average-rate table, one row per (unit, member, value)."""
+
+    def __init__(self, units, rows):
+        self.units = {"home": {"type": "simple", "measure": "iso4217:EUR"},
+                      "number": {"type": "simple", "measure": "xbrli:pure"}, **units}
+        self.contexts = {f"c-{i}": _Context({"srt:CurrencyAxis": member} if member else {})
+                         for i, (_, member, _) in enumerate(rows)}
+        frame = pd.DataFrame({
+            "unit_ref": [unit for unit, _, _ in rows],
+            "context_ref": [f"c-{i}" for i in range(len(rows))],
+            "period_start": ["2024-01-01"] * len(rows),
+            "period_end": ["2024-12-31"] * len(rows),
+            "numeric_value": [value for _, _, value in rows],
+        })
+        facts = _Facts(frame)
+        facts.to_dataframe = lambda: pd.DataFrame({"unit_ref": ["home"]})
+        self.facts = facts
+
+
+def test_other_currencies_outrank_a_backwards_unit():
+    # 1.0824 USD per EUR, tagged EUR/USD; the yen row (163.8 JPY per EUR) shows
+    # the table quotes foreign currency per euro. The unit used to decide first
+    # and gave EUR 100 = USD 92.39, with no warning.
+    converter = CurrencyConverter(_TableXBRL(
+        {"eur_usd": _divide("iso4217:EUR", "iso4217:USD")},
+        [("eur_usd", "currency:USD", 1.0824), ("number", "currency:JPY", 163.8)],
+    ))
+    assert converter.to_usd(100, 2024) == pytest.approx(108.24)
+    assert converter.rate_basis[(2024, "average")] == (
+        "USD per EUR (plausible either way, settled by the other currencies' rates "
+        "in the filing; its unit says the opposite)")
+    assert ("the average rate for 2024 (1.0824) is plausible as USD per EUR or EUR "
+            "per USD; the other currencies' rates in the filing say USD per EUR, "
+            "which its unit contradicts") in converter.extraction_warnings
+
+
+@pytest.mark.parametrize("member", [None, "currency:JPY"])
+def test_a_divide_unit_sibling_settles_a_near_parity_rate(member):
+    # The yen rate in a JPY/EUR unit, with or without its currency member, now
+    # counts; it used to be dropped, leaving 1.0824 ambiguous and unused.
+    converter = CurrencyConverter(_TableXBRL(
+        {"jpy_eur": _divide("iso4217:JPY", "iso4217:EUR")},
+        [("number", "currency:USD", 1.0824), ("jpy_eur", member, 163.8)],
+    ))
+    assert converter.to_usd(100, 2024) == pytest.approx(108.24)
