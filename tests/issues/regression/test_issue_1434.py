@@ -106,9 +106,10 @@ def test_a_misplaced_line_still_follows_the_noncurrent_side(index):
     """
     A receivable that lands in a 'Non-Current Liabilities' block matches neither
     candidate's section, so the words decide. 'Non-Current' is not 'current',
-    and 'NonOperating' is not 'NonCurrent'.
+    and 'NonOperating' is not 'NonCurrent'. (This used AccountsReceivableRelatedParties
+    until GH #1438 moved it to trade receivables, whose pair has no 'NonOperating' trap.)
     """
-    assert resolve(index, "AccountsReceivableRelatedParties", "Non-Current Liabilities") == "OtherNonOperatingNonCurrentAssets"
+    assert resolve(index, "NotesReceivableNet", "Non-Current Liabilities") == "OtherNonOperatingNonCurrentAssets"
 
 
 def test_nonoperating_in_a_candidate_is_not_a_noncurrent_hint(tmp_path):

@@ -463,14 +463,14 @@
   },
   "AccountsReceivableRelatedParties": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets",
-      "OtherNonOperatingNonCurrentAssets"
+      "TradeReceivables",
+      "OtherOperatingNonCurrentAssets"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Accounts Receivable",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 31,
     "occurrence_rate": 0.003,
     "temporal_consistency": 0.167,
@@ -1191,14 +1191,14 @@
   },
   "AccruedRoyaltiesCurrentAndNoncurrent": {
     "standard_tags": [
-      "TradePayables",
+      "OtherOperatingCurrentLiabilities",
       "OtherOperatingNonCurrentLiabilities"
     ],
-    "display_name": "Accounts Payable",
+    "display_name": "Other Current Liabilities",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 8,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -2547,14 +2547,14 @@
   },
   "AllowanceForDoubtfulAccountsReceivable": {
     "standard_tags": [
-      "TradeReceivables",
+      "AllowanceForDoubtfulAccounts",
       "OtherOperatingNonCurrentAssets"
     ],
-    "display_name": "Accounts Receivable",
+    "display_name": "Allowance for Doubtful Accounts",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 273,
     "occurrence_rate": 0.03,
     "temporal_consistency": 0.417,
@@ -5945,14 +5945,14 @@
   },
   "ConstructionPayableCurrentAndNoncurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentLiabilities",
+      "TradePayables",
       "OtherOperatingNonCurrentLiabilities"
     ],
-    "display_name": "Other Current Liabilities",
+    "display_name": "Accounts Payable",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 8,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -6219,14 +6219,14 @@
   },
   "ContractWithCustomerReceivableBeforeAllowanceForCreditLoss": {
     "standard_tags": [
-      "TradeReceivables",
+      "AccountsReceivableGross",
       "OtherOperatingNonCurrentAssets"
     ],
-    "display_name": "Accounts Receivable",
+    "display_name": "Accounts Receivable, Gross",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -7733,14 +7733,14 @@
   },
   "CostsInExcessOfBillingsOnUncompletedContractsOrPrograms": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets",
+      "ContractAssets",
       "OtherOperatingNonCurrentAssets"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Contract Assets",
     "statement": "BalanceSheet",
     "section": "Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 4,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.417,
@@ -8457,19 +8457,21 @@
   },
   "CustomerFunds": {
     "standard_tags": [
-      "OtherOperatingCurrentLiabilities"
+      "OtherOperatingNonCurrentAssets",
+      "OtherOperatingCurrentAssets"
     ],
-    "display_name": "Other Current Liabilities",
+    "display_name": "Other Non-Current Assets",
     "statement": "BalanceSheet",
-    "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 2,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
     "years_present": 4,
     "first_year": 2021,
-    "last_year": 2024
+    "last_year": 2024,
+    "ambiguous": true
   },
   "CustomerLoyaltyProgramLiabilityCurrent": {
     "standard_tags": [
@@ -10215,14 +10217,14 @@
   },
   "DeferredRevenue": {
     "standard_tags": [
-      "OtherOperatingCurrentLiabilities",
-      "OngoingOperatingProvisions(WarrantiesEtc)"
+      "DeferredRevenueCurrent",
+      "DeferredRevenueNonCurrent"
     ],
-    "display_name": "Other Current Liabilities",
+    "display_name": "Deferred Revenue, Current",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 198,
     "occurrence_rate": 0.022,
     "temporal_consistency": 0.417,
@@ -12743,25 +12745,6 @@
     "first_year": 2017,
     "last_year": 2025
   },
-  "DerivativeLiabilityFairValueGrossAsset": {
-    "standard_tags": [
-      "OtherNonOperatingCurrentAssets",
-      "OtherNonOperatingCurrentLiabilities",
-      "OtherNonOperatingNonCurrentLiabilities"
-    ],
-    "display_name": "Other Non-Operating Current Assets",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null,
-    "ambiguous": true
-  },
   "DerivativeLiabilityFairValueOfCollateral": {
     "standard_tags": [
       "OtherNonOperatingCurrentAssets"
@@ -14750,19 +14733,21 @@
   },
   "DueToRelatedPartiesCurrentAndNoncurrent": {
     "standard_tags": [
-      "Liabilities"
+      "OtherNonOperatingCurrentLiabilities",
+      "OtherNonOperatingNonCurrentLiabilities"
     ],
-    "display_name": "Total Liabilities",
+    "display_name": "Other Non-Operating Current Liabilities",
     "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.309,
+    "section": "Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 137,
     "occurrence_rate": 0.015,
     "temporal_consistency": 0.167,
     "years_present": 2,
     "first_year": 2021,
-    "last_year": 2022
+    "last_year": 2022,
+    "ambiguous": true
   },
   "DueToRelatedPartiesNoncurrent": {
     "standard_tags": [
@@ -15199,14 +15184,14 @@
   },
   "EmployeeRelatedLiabilitiesCurrentAndNoncurrent": {
     "standard_tags": [
-      "RetirementRelatedCurrentLiabilities",
-      "RetirementRelatedNonCurrentLiabilities"
+      "AccruedCompensation",
+      "OtherOperatingNonCurrentLiabilities"
     ],
-    "display_name": "Retirement Related Liabilities, Current",
+    "display_name": "Accrued Compensation and Benefits",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 60,
     "occurrence_rate": 0.007,
     "temporal_consistency": 0.417,
@@ -28007,24 +27992,6 @@
     "first_year": 2021,
     "last_year": 2025
   },
-  "NotesReceivableGross": {
-    "standard_tags": [
-      "OtherNonOperatingCurrentAssets",
-      "OtherNonOperatingNonCurrentAssets"
-    ],
-    "display_name": "Other Non-Operating Current Assets",
-    "statement": "BalanceSheet",
-    "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 129,
-    "occurrence_rate": 0.014,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025,
-    "ambiguous": true
-  },
   "NotesReceivableNet": {
     "standard_tags": [
       "OtherNonOperatingCurrentAssets",
@@ -29125,19 +29092,21 @@
   },
   "OtherBorrowings": {
     "standard_tags": [
-      "Liabilities"
+      "ShortTermDebt",
+      "LongTermDebt"
     ],
-    "display_name": "Total Liabilities",
+    "display_name": "Short-Term Debt",
     "statement": "BalanceSheet",
-    "section": "Totals",
-    "is_total": true,
-    "confidence": 0.307,
+    "section": "Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 101,
     "occurrence_rate": 0.011,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025
+    "last_year": 2025,
+    "ambiguous": true
   },
   "OtherCashEquivalentsAtCarryingValue": {
     "standard_tags": [
@@ -30153,14 +30122,14 @@
   },
   "OtherEmployeeRelatedLiabilitiesCurrentAndNoncurrent": {
     "standard_tags": [
-      "RetirementRelatedCurrentLiabilities",
-      "RetirementRelatedNonCurrentLiabilities"
+      "OtherOperatingCurrentLiabilities",
+      "OtherOperatingNonCurrentLiabilities"
     ],
-    "display_name": "Retirement Related Liabilities, Current",
+    "display_name": "Other Current Liabilities",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 1,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.167,
@@ -33467,14 +33436,14 @@
   },
   "PrepaidExpenseCurrentAndNoncurrent": {
     "standard_tags": [
-      "OtherNonOperatingCurrentAssets",
+      "PrepaidExpenses",
       "OtherNonOperatingNonCurrentAssets"
     ],
-    "display_name": "Other Non-Operating Current Assets",
+    "display_name": "Prepaid Expenses",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 89,
     "occurrence_rate": 0.01,
     "temporal_consistency": 0.667,
@@ -37523,19 +37492,21 @@
   },
   "RestrictedCashAndCashEquivalents": {
     "standard_tags": [
-      "OtherOperatingCurrentAssets"
+      "RestrictedCashCurrent",
+      "RestrictedCashNonCurrent"
     ],
-    "display_name": "Other Current Assets",
+    "display_name": "Restricted Cash, Current",
     "statement": "BalanceSheet",
     "section": "Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 429,
     "occurrence_rate": 0.048,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025
+    "last_year": 2025,
+    "ambiguous": true
   },
   "RestrictedCashAndCashEquivalentsAtCarryingValue": {
     "standard_tags": [
@@ -38873,14 +38844,14 @@
   },
   "SalesAndExciseTaxPayableCurrentAndNoncurrent": {
     "standard_tags": [
-      "OtherOperatingCurrentLiabilities",
+      "TaxesPayable",
       "OtherOperatingNonCurrentLiabilities"
     ],
-    "display_name": "Other Current Liabilities",
+    "display_name": "Taxes Payable",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 12,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.333,
@@ -41991,19 +41962,21 @@
   },
   "WarrantsAndRightsOutstanding": {
     "standard_tags": [
-      "OngoingOperatingProvisions(WarrantiesEtc)"
+      "OtherNonOperatingNonCurrentLiabilities",
+      "OtherNonOperatingCurrentLiabilities"
     ],
-    "display_name": "Warranty and Other Provisions",
+    "display_name": "Other Non-Operating Non-Current Liabilities",
     "statement": "BalanceSheet",
     "section": "Non-Current Liabilities",
-    "is_total": true,
-    "confidence": 0.5,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 316,
     "occurrence_rate": 0.035,
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025
+    "last_year": 2025,
+    "ambiguous": true
   },
   "WaterProductionCosts": {
     "standard_tags": [
@@ -42183,14 +42156,14 @@
   },
   "WorkersCompensationLiabilityCurrentAndNoncurrent": {
     "standard_tags": [
-      "RetirementRelatedCurrentLiabilities",
-      "RetirementRelatedNonCurrentLiabilities"
+      "SelfInsuranceReserve",
+      "OtherOperatingNonCurrentLiabilities"
     ],
-    "display_name": "Retirement Related Liabilities, Current",
+    "display_name": "Self-Insurance Reserve",
     "statement": "BalanceSheet",
     "section": "Current Liabilities",
-    "is_total": true,
-    "confidence": 0.4,
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,

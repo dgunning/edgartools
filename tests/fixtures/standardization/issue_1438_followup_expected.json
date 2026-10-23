@@ -1,0 +1,72 @@
+{
+  "AccountsReceivableRelatedParties": [
+    "TradeReceivables",
+    "OtherOperatingNonCurrentAssets"
+  ],
+  "AccruedRoyaltiesCurrentAndNoncurrent": [
+    "OtherOperatingCurrentLiabilities",
+    "OtherOperatingNonCurrentLiabilities"
+  ],
+  "AllowanceForDoubtfulAccountsReceivable": [
+    "AllowanceForDoubtfulAccounts",
+    "OtherOperatingNonCurrentAssets"
+  ],
+  "ConstructionPayableCurrentAndNoncurrent": [
+    "TradePayables",
+    "OtherOperatingNonCurrentLiabilities"
+  ],
+  "ContractWithCustomerReceivableBeforeAllowanceForCreditLoss": [
+    "AccountsReceivableGross",
+    "OtherOperatingNonCurrentAssets"
+  ],
+  "CostsInExcessOfBillingsOnUncompletedContractsOrPrograms": [
+    "ContractAssets",
+    "OtherOperatingNonCurrentAssets"
+  ],
+  "CustomerFunds": [
+    "OtherOperatingNonCurrentAssets",
+    "OtherOperatingCurrentAssets"
+  ],
+  "DeferredRevenue": [
+    "DeferredRevenueCurrent",
+    "DeferredRevenueNonCurrent"
+  ],
+  "DerivativeLiabilityFairValueGrossAsset": null,
+  "DueToRelatedPartiesCurrentAndNoncurrent": [
+    "OtherNonOperatingCurrentLiabilities",
+    "OtherNonOperatingNonCurrentLiabilities"
+  ],
+  "EmployeeRelatedLiabilitiesCurrentAndNoncurrent": [
+    "AccruedCompensation",
+    "OtherOperatingNonCurrentLiabilities"
+  ],
+  "NotesReceivableGross": null,
+  "OtherBorrowings": [
+    "ShortTermDebt",
+    "LongTermDebt"
+  ],
+  "OtherEmployeeRelatedLiabilitiesCurrentAndNoncurrent": [
+    "OtherOperatingCurrentLiabilities",
+    "OtherOperatingNonCurrentLiabilities"
+  ],
+  "PrepaidExpenseCurrentAndNoncurrent": [
+    "PrepaidExpenses",
+    "OtherNonOperatingNonCurrentAssets"
+  ],
+  "RestrictedCashAndCashEquivalents": [
+    "RestrictedCashCurrent",
+    "RestrictedCashNonCurrent"
+  ],
+  "SalesAndExciseTaxPayableCurrentAndNoncurrent": [
+    "TaxesPayable",
+    "OtherOperatingNonCurrentLiabilities"
+  ],
+  "WarrantsAndRightsOutstanding": [
+    "OtherNonOperatingNonCurrentLiabilities",
+    "OtherNonOperatingCurrentLiabilities"
+  ],
+  "WorkersCompensationLiabilityCurrentAndNoncurrent": [
+    "SelfInsuranceReserve",
+    "OtherOperatingNonCurrentLiabilities"
+  ]
+}
