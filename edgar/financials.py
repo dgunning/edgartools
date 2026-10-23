@@ -705,12 +705,23 @@ class Financials:
         if result is not None:
             return result
 
-        # Fallback to label-based search for edge cases
+        # Label fallback for an operating subtotal on an unmapped concept. Both
+        # ends are anchored. r'Income.*Operations' matched "Income from
+        # continuing operations before income taxes", so IBM's FY2024 10-K,
+        # which presents no operating subtotal, returned its $5.797B pretax
+        # income (gh #1664); and an unanchored r'Operating Income$' matched
+        # banks' "Other operating income" and "Non-operating income". Pretax
+        # and continuing-operations income are different measures; a filing
+        # without an operating subtotal returns None, as banks already do.
+        # The amount is one or more of income/loss/profit/earnings in any sign
+        # ordering ("Income (loss)", "(Loss) income", "income/(loss)") with an
+        # optional ", net"; nothing else may follow it, so "... before income
+        # taxes" never matches.
+        amount = r'(?:\(?(?:Income|Loss|Profit|Earnings)\)?[\s/]*)+'
+        net = r'(?:,?\s*net)?\s*$'
         patterns = [
-            r'Operating Income$',
-            r'^Operating Income',
-            r'Income.*Operations',
-            r'Operating.*Income.*Loss',
+            r'^Operating\s+' + amount + net,
+            r'^' + amount + r'From Operations' + net,
         ]
         return self._get_standardized_concept_value('income', patterns, period_offset)
 
