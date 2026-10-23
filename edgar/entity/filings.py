@@ -123,6 +123,7 @@ class EntityFiling(Filing):
         """
         import re
 
+        from edgar.company_reports.current_report import _ITEM_LABEL, _ITEM_NUMBER, _normalize_item_number
         from edgar.documents.parser import HTMLParser
 
         # Only parse 8-K filings
@@ -138,30 +139,16 @@ class EntityFiling(Filing):
             doc = parser.parse(content)
             text = doc.text()
 
-            # Extract item numbers with their context to filter out "Not Applicable"
-            # Pattern captures: Item number and following text on same line
-            pattern = r'(?:ITEM|Item)\s+(\d+(?:\.\d+)?)\s*[:\.]?\s*([^\n]*)'
+            # Extract item numbers with their context to filter out "Not Applicable".
+            # The label and number patterns are CurrentReport's, so "Item - 5.02" and
+            # "Item 9. 01" are found and "Section 401(k)"-style numbers are not (GH #1773).
+            pattern = _ITEM_LABEL + '(' + _ITEM_NUMBER + r')\s*[:\.]?\s*([^\n]*)'
             matches = re.findall(pattern, text, re.IGNORECASE)
-
-            # Valid 8-K item numbers:
-            # - Modern format: X.XX where X is 1-9 (e.g., 1.01, 2.02, 5.02, 9.01)
-            # - Legacy format: single digit 1-9
-            # Invalid: 401, 404 (from Section 401(k) or Section 404 references)
-            def is_valid_8k_item(item: str) -> bool:
-                if '.' in item:
-                    parts = item.split('.')
-                    # Format: X.XX where first part is 1-9
-                    return len(parts) == 2 and parts[0] in '123456789' and len(parts[1]) <= 2
-                else:
-                    # Legacy format: single digit 1-9
-                    return item in '123456789'
 
             # Filter out items marked "Not Applicable" (common in legacy filings)
             substantive_items = []
             for item_num, description in matches:
-                # Skip invalid item numbers (like 401, 404 from Section references)
-                if not is_valid_8k_item(item_num):
-                    continue
+                item_num = _normalize_item_number(item_num)
                 desc_lower = description.lower().strip()
                 # Skip items explicitly marked as not applicable
                 if 'not applicable' in desc_lower:
