@@ -591,16 +591,20 @@ class CurrencyConverter:
             )
         return reading, how
 
-    def _period_end_anchor(self) -> Optional[tuple]:
-        """``(month, day)`` of the filing's period end, or None if it states none.
+    def _period_end_anchors(self) -> tuple:
+        """``(fiscal_year_end, report_end)``: where rates are dated, or None each.
 
-        DocumentPeriodEndDate first: for a 20-F it is the fiscal year end, for
-        an interim report the interim date, which is what the report's own rates
-        are dated at. Then CurrentFiscalYearEndDate.
+        ``fiscal_year_end`` is ``(month, day)`` from CurrentFiscalYearEndDate,
+        else from DocumentPeriodEndDate when the document is an annual report.
+        ``report_end`` is DocumentPeriodEndDate itself: an interim report's own
+        rates are dated there, but only in its own year. A September report's
+        prior-year closing rate is the December one, not September's
+        comparative (GH #1650 review).
         """
         info = getattr(self.xbrl, 'entity_info', None)
         if not isinstance(info, dict):
-            return None
+            return None, None
+        report_end = None
         end = info.get('document_period_end_date')
         if end:
             try:
@@ -608,11 +612,16 @@ class CurrencyConverter:
             except (TypeError, ValueError):
                 when = None
             if when is not None and not pd.isna(when):
-                return when.month, when.day
+                report_end = when
         month, day = info.get('fiscal_year_end_month'), info.get('fiscal_year_end_day')
         if isinstance(month, int) and isinstance(day, int):
-            return month, day
-        return None
+            return (month, day), report_end
+        document_type = str(info.get('document_type') or '').upper().split('/')[0]
+        annual = (info.get('annual_report') is True or info.get('fiscal_period') == 'FY'
+                  or document_type in ('10-K', '20-F', '40-F'))
+        if annual and report_end is not None:
+            return (report_end.month, report_end.day), report_end
+        return None, report_end
 
     def _fact_dimensions(self, row) -> Dict[str, str]:
         """The dimensions of a fact's context, e.g. ``{'srt:CurrencyAxis': 'currency:USD'}``."""
@@ -681,14 +690,19 @@ class CurrencyConverter:
                 'days': _days(row.get('period_start'), period_date),
             })
 
-        anchor = self._period_end_anchor()
+        fiscal_year_end, report_end = self._period_end_anchors()
         selected = []
         for year, facts in candidates.items():
+            if report_end is not None and report_end.year == year:
+                anchor = (report_end.month, report_end.day)
+            else:
+                anchor = fiscal_year_end
             # The translation rate has the fewest other dimensions; of those, the
             # one at the filing's period end (not an interim or IFRS transition
             # date), and for an average the longest period ending there. The
             # period end is the filer's: a March year end's 31 March rate, not a
-            # later September rate in the same calendar year (GH #1650 review).
+            # later September rate in the same calendar year; an interim
+            # report's own date counts only for its own year (GH #1650 review).
             # A fact naming the currency beats one that does not.
             if any(f['named'] for f in facts):
                 facts = [f for f in facts if f['named']]
@@ -710,8 +724,9 @@ class CurrencyConverter:
                     f"{latest} was used"
                 )
             elif not anchor and len(dates) > 1:
+                missing = "fiscal year end" if report_end is not None else "period end"
                 self._extraction_warnings.append(
-                    f"the filing states no period end; of the {kind} {target} rates "
+                    f"the filing states no {missing}; of the {kind} {target} rates "
                     f"for {year} dated {', '.join(dates)}, the one dated {latest} was used"
                 )
             quotes = {f['quote'] for f in facts}

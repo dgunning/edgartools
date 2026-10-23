@@ -299,3 +299,51 @@ def test_without_a_period_end_the_longest_average_wins_and_the_choice_is_reporte
     assert ("the filing states no period end; of the average USD rates for 2024 "
             "dated 2024-03-31, 2024-09-30, the one dated 2024-03-31 was used"
             ) in converter.extraction_warnings
+
+
+# ---------------------------------------------------------------------------
+# Review round 3: an interim filing's period end anchors only its own year.
+# By construction: a December year-end CAD filer's report for 2024-09-30,
+# with the prior year's closing rates at 2023-12-31 and 2023-09-30.
+# ---------------------------------------------------------------------------
+
+class _InterimXBRL(_RowsXBRL):
+    units = {"home": {"type": "simple", "measure": "iso4217:CAD"},
+             "number": {"type": "simple", "measure": "xbrli:pure"}}
+
+    def __init__(self, info, **rows):
+        super().__init__(**rows)
+        self.entity_info = info
+        self.facts.to_dataframe = lambda: pd.DataFrame({"unit_ref": ["home"]})
+
+
+_SEPTEMBER_REPORT = [
+    {"value": 1.3226, "instant": "2023-12-31"},   # 2023 fiscal year end
+    {"value": 1.3520, "instant": "2023-09-30"},   # 2023 comparative interim
+    {"value": 1.3500, "instant": "2024-09-30"},   # the report's own date
+]
+
+
+@pytest.mark.parametrize("info", [
+    {"document_period_end_date": "2024-09-30", "fiscal_year_end_month": 12,
+     "fiscal_year_end_day": 31, "annual_report": False},
+    # No CurrentFiscalYearEndDate: an interim report's own date says nothing
+    # about earlier years, so they fall back with a warning, never to September.
+    {"document_period_end_date": "2024-09-30", "fiscal_year_end_month": None,
+     "fiscal_year_end_day": None, "annual_report": False},
+])
+def test_an_interim_period_end_does_not_anchor_earlier_years(info):
+    converter = CurrencyConverter(_InterimXBRL(info, closing=_SEPTEMBER_REPORT))
+    assert converter.get_rate(2023, "closing") == 1.3226
+    assert converter.get_rate(2024, "closing") == 1.35
+
+
+def test_an_interim_period_end_anchors_its_own_year():
+    info = {"document_period_end_date": "2024-09-30", "fiscal_year_end_month": 12,
+            "fiscal_year_end_day": 31, "annual_report": False}
+    converter = CurrencyConverter(_InterimXBRL(info, closing=[
+        {"value": 1.3500, "instant": "2024-09-30"},
+        {"value": 1.3400, "instant": "2024-06-30"},
+    ]))
+    assert converter.get_rate(2024, "closing") == 1.35
+    assert _period_warnings(converter) == []
