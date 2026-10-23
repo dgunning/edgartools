@@ -186,7 +186,9 @@ class CurrencyConverter:
         - ifrs-full:ClosingForeignExchangeRate (for balance sheet)
 
         Handles two common patterns:
-        1. Currency-specific units like 'dkkPerUSD' with rates per 100 USD
+        1. Divide units of the home and target currency, either way round:
+           Novo's DKK/USD ('dkkPerUSD', 662 per 100 USD) or SAP's USD/EUR
+           (1.1293 USD per EUR)
         2. Pure ratio units ('number', 'pure') with direct exchange rates. These
            do not state a direction; one on the target currency's
            ``srt:CurrencyAxis`` member is read as target per 1 home unit, and a
@@ -204,24 +206,46 @@ class CurrencyConverter:
         rates: Dict[int, ExchangeRate] = {}
         self._extraction_warnings = []
 
-        # Build the expected unit_ref pattern for home currency to USD
-        # e.g., 'dkkPerUSD', 'eurPerUSD'
+        home = self.home_currency.upper()
+        target = self.target_currency.upper()
+
+        # Fallback for a unit_ref with no parsed unit: the id itself,
+        # e.g. 'dkkPerUSD', 'eurPerUSD'
         home_lower = self.home_currency.lower()
-        target_upper = self.target_currency.upper()
         expected_unit_patterns = [
-            f"{home_lower}Per{target_upper}",
-            f"{home_lower}_{target_upper}",
-            f"{home_lower}{target_upper}",
+            f"{home_lower}Per{target}",
+            f"{home_lower}_{target}",
+            f"{home_lower}{target}",
         ]
 
         # Also accept pure ratio units (some filers use 'number' or 'pure')
         pure_unit_patterns = ['number', 'pure', 'ratio']
+        units = self.xbrl.units
 
         def unit_quote(unit_ref: str) -> Optional[str]:
-            """How a rate in this unit is quoted: a quote constant, _PURE, or None."""
-            if any(pattern in unit_ref for pattern in expected_unit_patterns):
-                return _HOME_PER_TARGET
-            if unit_ref.lower() in pure_unit_patterns:
+            """How a rate in this unit is quoted: a quote constant, _PURE, or None.
+
+            Read from the unit's resolved measures, not its opaque id: SAP's
+            USD per EUR unit is 'Unit_Divide_USD_EUR_yMgaKio6_...', which no id
+            pattern matched (GH #1653). The measure's local name is compared,
+            since some filers use an extension measure (Vodafone's 'vod:EUR').
+            """
+            unit = units.get(unit_ref)
+            if unit is None:
+                if any(pattern in unit_ref for pattern in expected_unit_patterns):
+                    return _HOME_PER_TARGET
+                if unit_ref.lower() in pure_unit_patterns:
+                    return _PURE
+                return None
+            if unit.get('type') == 'divide':
+                numerator = [_local_name(m).upper() for m in unit.get('numerator', [])]
+                denominator = [_local_name(m).upper() for m in unit.get('denominator', [])]
+                if numerator == [home] and denominator == [target]:
+                    return _HOME_PER_TARGET
+                if numerator == [target] and denominator == [home]:
+                    return _TARGET_PER_HOME
+                return None  # another currency pair, e.g. SAP's AUD per EUR
+            if _local_name(unit.get('measure') or '').lower() == 'pure':
                 return _PURE
             return None
 
