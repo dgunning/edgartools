@@ -29,6 +29,8 @@ from dataclasses import dataclass, field
 from datetime import date, datetime
 from typing import TYPE_CHECKING, Dict, List, Optional, Union
 
+import pandas as pd
+
 from edgar.core import log
 from edgar.xbrl.core import unit_currency
 
@@ -48,6 +50,20 @@ def _extract_year(value) -> Optional[int]:
             return None
     if hasattr(value, 'year'):
         return value.year
+    return None
+
+
+def _first_date(row, *columns):
+    """The first of ``columns`` that holds a value in ``row``.
+
+    An empty cell in a facts frame is NaN, not None, and NaN is truthy, so
+    ``row.get('period_end') or row.get('period_instant')`` returns NaN for an
+    instant fact and never reaches its date (GH #1652).
+    """
+    for column in columns:
+        value = row.get(column)
+        if value is not None and not pd.isna(value):
+            return value
     return None
 
 __all__ = ['CurrencyConverter', 'ExchangeRate']
@@ -148,6 +164,9 @@ class CurrencyConverter:
         """
         rates: Dict[int, ExchangeRate] = {}
         self._extraction_warnings = []
+        # Rate facts of an accepted unit whose period gave no year. Skipping one
+        # silently left a filing's closing rates missing with no warning (GH #1652).
+        undated: Counter = Counter()
 
         # Build the expected unit_ref pattern for home currency to USD
         # e.g., 'dkkPerUSD', 'eurPerUSD'
@@ -180,13 +199,14 @@ class CurrencyConverter:
                 for _, row in avg_df.iterrows():
                     unit_ref = row.get('unit_ref', '')
                     if is_valid_rate_unit(unit_ref):
-                        period_end = row.get('period_end')
-                        year = _extract_year(period_end)
+                        year = _extract_year(_first_date(row, 'period_end'))
                         if year:
                             value = row.get('numeric_value')
                             if year not in rates:
                                 rates[year] = ExchangeRate(year=year)
                             rates[year].average = value
+                        else:
+                            undated['average'] += 1
         except Exception as e:
             # Not "no average rates found": that is what an empty frame means.
             # This is the extraction itself failing, which is indistinguishable
@@ -211,14 +231,16 @@ class CurrencyConverter:
                 for _, row in close_df.iterrows():
                     unit_ref = row.get('unit_ref', '')
                     if is_valid_rate_unit(unit_ref):
-                        # For instant periods, check period_end first (closing rate date)
-                        period_date = row.get('period_end') or row.get('period_instant')
-                        year = _extract_year(period_date)
+                        # A closing rate is an instant fact: its date is period_instant,
+                        # and period_end is an empty (NaN) cell.
+                        year = _extract_year(_first_date(row, 'period_end', 'period_instant'))
                         if year:
                             value = row.get('numeric_value')
                             if year not in rates:
                                 rates[year] = ExchangeRate(year=year)
                             rates[year].closing = value
+                        else:
+                            undated['closing'] += 1
         except Exception as e:
             # Not "no closing rates found": that is what an empty frame means.
             # This is the extraction itself failing, which is indistinguishable
@@ -231,6 +253,11 @@ class CurrencyConverter:
                 "Could not extract %s foreign-exchange rates from the filing (%s). "
                 "to_usd() will return None for periods that depend on them rather "
                 "than converting with a wrong rate.", "closing", e,
+            )
+
+        for kind, count in undated.items():
+            self._extraction_warnings.append(
+                f"{count} {kind} exchange rate fact(s) had no period date and were not used"
             )
 
         # Auto-detect rate scale by checking if rates look like "per 100" or direct
@@ -366,8 +393,9 @@ class CurrencyConverter:
         """Failures hit while reading exchange rates from the filing.
 
         Empty means the rates on this object are everything the filing published.
-        Non-empty means extraction failed and the rates may be incomplete, which
-        is not the same thing as a filer publishing no rate at all.
+        Non-empty means extraction failed, or that rate facts were found but not
+        used, so the rates may be incomplete, which is not the same thing as a
+        filer publishing no rate at all.
         """
         # getattr, not attribute access: instances built with __new__ (as the
         # unit tests and any pickling path do) never run the dataclass defaults,
