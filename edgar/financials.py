@@ -460,7 +460,8 @@ class Financials:
             return None
 
     def _get_standardized_concept_value(self, statement_type: str, concept_patterns: list,
-                                      period_offset: int = 0) -> Optional[Union[int, float]]:
+                                      period_offset: int = 0,
+                                      exclude_concepts: Optional[str] = None) -> Optional[Union[int, float]]:
         """
         Helper method to extract standardized concept values from financial statements.
 
@@ -468,6 +469,8 @@ class Financials:
             statement_type: Type of statement ('income', 'balance', 'cashflow')
             concept_patterns: List of label patterns to search for (case-insensitive)
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
+            exclude_concepts: Regex (case-insensitive); rows whose concept matches
+                it are never returned, whatever their label
 
         Returns:
             The concept value if found, None otherwise
@@ -486,6 +489,9 @@ class Financials:
             # Filter out abstract rows - they never have values
             if 'abstract' in df.columns:
                 df = df[~df['abstract']].copy()
+
+            if exclude_concepts and 'concept' in df.columns:
+                df = df[~df['concept'].astype(str).str.contains(exclude_concepts, case=False, na=False)]
 
             # Find the concept using pattern matching
             for pattern in concept_patterns:
@@ -975,14 +981,27 @@ class Financials:
         if result is not None:
             return result
 
-        # Fallback to label-based search for edge cases
-        patterns = [
-            r'Capital Expenditures',
-            r'Additions.*property.*equipment',  # MSFT: "Additions to property and equipment"
-            r'Purchase.*Property',
-            r'Capex'
-        ]
-        return self._get_standardized_concept_value('cashflow', patterns, period_offset)
+        # Label fallback for a cash capex row on an unmapped concept. It must
+        # never return the supplemental noncash disclosure on the same
+        # statement: the unanchored r'Capital Expenditures' matched "Capital
+        # expenditures in accounts payable" (us-gaap
+        # CapitalExpendituresIncurredButNotYetPaid), which the display layer
+        # can also label plain "Capital Expenditures" (gh #1660). Thor's FY2026
+        # 10-K returned $6.3M for $152.4M of purchases, and Essential
+        # Utilities' free cash flow came out +$440M instead of -$73M. Noncash
+        # concepts are excluded by name, accrual captions by label, and the
+        # patterns are anchored at the start.
+        not_noncash = r'^(?!.*(?:accounts payable|accrued|unpaid|not yet paid|non-?cash|incurred))'
+        patterns = [not_noncash + pattern for pattern in (
+            r'Capital Expenditures?(?:,? net\b.*)?$',   # "..., net of grants"
+            r'(?:Purchases?|Additions?|Acquisitions?|Payments?|Expenditures?) (?:of|to|for|on) '
+            r'(?:property|fixed assets|capital expenditures?)',   # MSFT: "Additions to property and equipment"
+            r'Property,? plant,? and equipment additions',
+            r'Capex',
+        )]
+        return self._get_standardized_concept_value(
+            'cashflow', patterns, period_offset,
+            exclude_concepts=r'IncurredButNotYetPaid|NonCash')
 
     def get_current_assets(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
