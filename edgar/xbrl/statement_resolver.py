@@ -831,6 +831,16 @@ class StatementResolver:
             # An explicit parenthetical request must not settle for the main statement.
             score -= 80
 
+        # GH #1648: a co-registrant's own face statement (a subsidiary filing
+        # alongside the parent, e.g. Transco in Williams' 10-Q) is never THE
+        # statement of the filing while the parent's own role exists. Name
+        # scoring alone preferred Transco's "Statement of Net Income" over
+        # Williams' "Statement of Comprehensive Income".
+        # Duck-typed: callers (and tests) hand the resolver light XBRL stand-ins.
+        coregistrant_member = getattr(self.xbrl, '_coregistrant_member', None)
+        if coregistrant_member is not None and coregistrant_member(stmt.get('role')):
+            score -= 200
+
         # Prefer "Consolidated" statements (primary statements)
         if 'consolidated' in role_def or 'consolidated' in role_uri:
             score += 30
