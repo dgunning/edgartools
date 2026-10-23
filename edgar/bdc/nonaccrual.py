@@ -373,6 +373,34 @@ def extract_nonaccrual(
     if filing is None:
         return None
 
+    result = _extract_nonaccrual_from_filing(filing, period)
+    if result is not None and _is_bdc_entity(source):
+        # A full-document 10-K/A supersedes the original; a cover-page or
+        # exhibit-only amendment carries no investment data and is ignored (GH #1713).
+        for amendment in _later_amendments(source, form, filing):
+            amended = _extract_nonaccrual_from_filing(amendment, period)
+            if amended is not None and amended.total_portfolio_fair_value:
+                return amended
+    return result
+
+
+def _is_bdc_entity(source) -> bool:
+    from edgar.bdc.reference import BDCEntity
+    return isinstance(source, BDCEntity)
+
+
+def _later_amendments(source, form: str, original) -> list:
+    """Amendments of ``original`` (same period), newest first."""
+    amendments = []
+    for f in source.get_filings(form=form):
+        if (f.form == f"{form}/A"
+                and f.period_of_report == original.period_of_report
+                and str(f.filing_date) >= str(original.filing_date)):
+            amendments.append(f)
+    return sorted(amendments, key=lambda f: str(f.filing_date), reverse=True)
+
+
+def _extract_nonaccrual_from_filing(filing, period: Optional[str] = None) -> Optional[NonAccrualResult]:
     xbrl = filing.xbrl()
     if xbrl is None:
         return None
@@ -382,13 +410,19 @@ def extract_nonaccrual(
     if period is None:
         period = getattr(filing, 'period_of_report', None)
 
-    return _extract_nonaccrual_from_xbrl(
+    result = _extract_nonaccrual_from_xbrl(
         xbrl,
         period=period,
         cik=filing.cik,
         entity_name=filing.company,
         accession_number=filing.accession_no,
     )
+    if result is not None and result.extraction_method == 'none' and not result.total_portfolio_fair_value:
+        result.warnings.append(
+            f"Filing {filing.accession_no} ({filing.form}) has no investment data; it may be an "
+            f"amendment without a schedule of investments, so no non-accrual figures were extracted."
+        )
+    return result
 
 
 def _extract_nonaccrual_from_xbrl(
@@ -720,7 +754,8 @@ def _resolve_filing(source, form: str = "10-K"):
     if isinstance(source, Filing):
         return source
     elif isinstance(source, BDCEntity):
-        filings = source.get_filings(form=form)
+        # Amendments often carry no investment data (e.g. ARCC's 10-K/A adds a subsidiary's statements)
+        filings = source.get_filings(form=form, amendments=False)
         if filings and len(filings) > 0:
             return filings.latest(1)
         return None
