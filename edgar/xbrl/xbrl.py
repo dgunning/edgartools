@@ -1748,6 +1748,11 @@ class XBRL:
                 balance = get_balance_type(element_id)
 
         # Get weight and calculation parent from calculation trees (Issue #463, #514, GH-712)
+        # A calculation relationship belongs to its own role (XBRL 2.1 section
+        # 3.5.3.9.7.3), so a statement row reads only the statement role's network
+        # and has no weight or parent when that network has no arc for it. Taking
+        # them from another role gave Sonoco's income-statement share count the
+        # EPS note's parent (GH #1702).
         calculation_parent = None
         if hasattr(self, 'calculation_trees') and self.calculation_trees:
             # GH-712: Prefer calc tree matching this statement's role URI
@@ -1758,8 +1763,8 @@ class XBRL:
                     weight = calc_node.weight
                     calculation_parent = calc_node.parent
 
-            # Fallback: iterate all calc trees if not found in statement's own tree
-            if weight is None:
+            # Fallback only when no statement role is known
+            if weight is None and not statement_role:
                 for calc_tree in self.calculation_trees.values():
                     if element_id_normalized in calc_tree.all_nodes:
                         calc_node = calc_tree.all_nodes[element_id_normalized]
@@ -2152,7 +2157,7 @@ class XBRL:
 
             # Post-process: apply member hierarchy from definition linkbase
             if dim_items_added:
-                self._apply_member_hierarchy(dim_items_added)
+                self._apply_member_hierarchy(dim_items_added, statement_role)
             # Now add to result in correct order
             result.extend(dim_items_added)
 
@@ -2168,7 +2173,8 @@ class XBRL:
                                       statement_role=statement_role,
                                       preferred_label_override=child_override)
 
-    def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]]) -> None:
+    def _apply_member_hierarchy(self, dim_items: List[Dict[str, Any]],
+                                statement_role: Optional[str] = None) -> None:
         """Adjust level of dimensional items based on definition linkbase member hierarchy.
 
         The definition linkbase defines member-to-member relationships (e.g.,
@@ -2186,6 +2192,13 @@ class XBRL:
         rows would collide and the earlier one would be dropped; the domain
         hierarchy cannot say which axis's row it nests, so neither is
         reordered and both pass through (edgartools-3h3q).
+
+        A domain-member network belongs to its extended link role (XBRL
+        Dimensions 1.0 section 2.4), so with ``statement_role`` given only that
+        role's member relationships nest rows. The union across roles nested
+        Tesla's "Services and other" under a subtotal member that only a note
+        declares (GH #1701). A role with no domain-member arcs falls back to the
+        union, so filings without a per-role definition network keep their nesting.
         """
         member_to_item = {}
         ambiguous = set()
@@ -2207,7 +2220,9 @@ class XBRL:
             return
 
         member_ids = set(member_to_item.keys())
-        domains = self.parser.domains
+        # A role with no domain-member arcs of its own (no definition network
+        # for the statement) keeps the cross-role union, as before GH #1701.
+        domains = (self.parser.domains_for_role(statement_role) if statement_role else None) or self.parser.domains
 
         # Find members that are parents of other members in our set
         member_children = {}

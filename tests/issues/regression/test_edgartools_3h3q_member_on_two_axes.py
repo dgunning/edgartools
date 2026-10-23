@@ -92,9 +92,9 @@ def test_the_hierarchy_never_drops_a_row_on_this_filing(jpm_xbrl):
     original = XBRL._apply_member_hierarchy
     losses = []
 
-    def probe(self, dim_items):
+    def probe(self, dim_items, *args, **kwargs):
         before = list(dim_items)
-        original(self, dim_items)
+        original(self, dim_items, *args, **kwargs)
         if sorted(map(id, before)) != sorted(map(id, dim_items)):
             losses.append([i.get("full_dimension_label") for i in before
                            if not any(x is i for x in dim_items)])

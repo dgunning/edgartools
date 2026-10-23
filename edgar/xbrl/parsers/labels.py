@@ -7,7 +7,7 @@ element labels for display purposes.
 
 import sys
 from pathlib import Path
-from typing import Dict, Union
+from typing import Dict, Optional, Tuple, Union
 
 from lxml import etree as ET
 
@@ -16,6 +16,42 @@ from edgar.xbrl.models import ElementCatalog, XBRLProcessingError
 from edgar.xmltools import xml_parser
 
 from .base import BaseParser
+
+
+def _english_rank(lang: str) -> Optional[int]:
+    """
+    Rank an xml:lang value among English variants: 0 for en-US, 1 for en, 2 for
+    any other en-* (en-GB, ...), None for a language that is not English.
+
+    XBRL 2.1 section 5.2.2.2 lets a label carry any language code, and the IFRS
+    taxonomy writes "en" (GH #1744). The code is matched without case.
+    """
+    lang = lang.lower()
+    if lang == 'en-us':
+        return 0
+    if lang == 'en':
+        return 1
+    if lang.startswith('en-'):
+        return 2
+    return None
+
+
+def _english_labels(labels_by_lang: Dict[str, Dict[str, str]]) -> Dict[str, Tuple[int, str]]:
+    """
+    A label resource set's English labels by role, each with its language rank.
+    An en-US label wins over en, and en over other English variants; empty when
+    no label is English.
+    """
+    best: Dict[str, Tuple[int, str]] = {}
+    for lang in sorted(labels_by_lang):
+        rank = _english_rank(lang)
+        if rank is None:
+            continue
+        for role, text in labels_by_lang[lang].items():
+            held = best.get(role)
+            if held is None or rank < held[0]:
+                best[role] = (rank, text)
+    return best
 
 
 class LabelsParser(BaseParser):
@@ -32,6 +68,12 @@ class LabelsParser(BaseParser):
 
         # Store references to data structures
         self.element_catalog = element_catalog
+
+        # Language rank of the label held for each (element, role). A filer may
+        # write one label resource per language, each with its own arc, so the
+        # en-US-first preference has to hold across arcs, not only inside one
+        # resource set (GH #1744).
+        self._label_ranks: Dict[Tuple[str, str], int] = {}
 
     def parse_labels(self, file_path: Union[str, Path]) -> None:
         """Parse label linkbase file and extract label information."""
@@ -134,9 +176,18 @@ class LabelsParser(BaseParser):
                 # Extract element ID from href
                 element_id = extract_element_id(href)
 
-                # Find labels for this element - check most likely case first
-                if 'en-US' in label_lookup[to_ref]:
-                    element_labels = label_lookup[to_ref]['en-US']
+                # Find this element's English labels (en-US, en, en-GB, ...).
+                # A lower-ranked language never replaces a label already held
+                # in a higher-ranked one, whichever arc came first.
+                ranked_labels = _english_labels(label_lookup[to_ref])
+                if ranked_labels:
+                    element_labels = {}
+                    for role, (rank, text) in ranked_labels.items():
+                        key = (element_id, role)
+                        held = self._label_ranks.get(key)
+                        if held is None or rank <= held:
+                            self._label_ranks[key] = rank
+                            element_labels[role] = text
 
                     # Optimize: Update catalog with minimal overhead
                     catalog_entry = self.element_catalog.get(element_id)
