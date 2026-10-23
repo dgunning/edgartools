@@ -308,6 +308,46 @@ _AGGREGATE_MEMBER_NAMES = frozenset({
 })
 
 
+# Axes whose members are not parts of one whole: the same figure for another
+# reporting entity (a parent-only or subsidiary column), another scenario, or
+# a restatement of it. Summing their members adds a figure to itself (GH #1703).
+_NON_ADDITIVE_AXES = frozenset({
+    'dei_LegalEntityAxis',
+    'srt_ConsolidatedEntitiesAxis',
+    'srt_ConsolidationItemsAxis',
+    'srt_RestatementAxis',
+    'srt_StatementScenarioAxis',
+    'us-gaap_StatementScenarioAxis',
+    'us-gaap_RelatedPartyTransactionsByRelatedPartyAxis',
+    'srt_CounterpartyNameAxis',
+})
+
+
+def _contains_a_subtotal(values: List[float], max_members: int = 12) -> bool:
+    """Whether one value equals the sum of two or more of the others.
+
+    Members on an axis the statement does not present carry no hierarchy to
+    say they are disjoint. When one of them is the sum of others, the axis
+    holds a subtotal beside its own parts (KB Home's construction and land
+    costs beside its housing and land detail), and adding everything counts
+    the parts twice (GH #1703). Past max_members the search is skipped.
+    """
+    # A zero is part of no double count: three zero members are not a subtotal.
+    values = [v for v in values if v]
+    if len(values) < 3 or len(values) > max_members:
+        return False
+    from itertools import combinations
+    scale = max(abs(v) for v in values)
+    tolerance = scale * 1e-6
+    for i, target in enumerate(values):
+        others = values[:i] + values[i + 1:]
+        for size in range(2, len(others) + 1):
+            for combo in combinations(others, size):
+                if abs(sum(combo) - target) <= tolerance:
+                    return True
+    return False
+
+
 def _is_aggregate_member(member: str) -> bool:
     """Whether a dimension member aggregates other members of its axis.
 
@@ -2418,14 +2458,7 @@ class XBRL:
             if 'pershare' in dt or 'pure' in dt:
                 return None
 
-        # The catalog only types the filer's own extension concepts, so a
-        # us-gaap per-share concept passes the check above untyped. The facts'
-        # units say it for every concept: a divide unit (USD per share) or a
-        # pure one (a percentage) is an intensive amount that does not add up.
-        # Constellation Brands' basic EPS came out as 19.92, the Class A 10.44
-        # and Class B 9.48 added together (GH #1683).
-        if any(self._is_non_additive_unit(wf['fact'].unit_ref) for _, wf in dim_facts):
-            return None
+        dim_facts = self._facts_in_statement_scope(dim_facts, member_parents or {})
 
         from collections import defaultdict
         axis_groups = defaultdict(list)
@@ -2464,6 +2497,17 @@ class XBRL:
             best_axis = [entry for entry in best_axis
                          if not nested_in_present(
                              (entry[1]['dimension_info'][0].get('member') or '').replace(':', '_'))]
+
+        # The catalog only types the filer's own extension concepts, so a
+        # us-gaap per-share concept passes the check above untyped. The facts'
+        # units say it for every concept: a divide unit (USD per share) or a
+        # pure one (a percentage) is an intensive amount that does not add up.
+        # Constellation Brands' basic EPS came out as 19.92, the Class A 10.44
+        # and Class B 9.48 added together (GH #1683). One member alone is a
+        # filed value, not a sum.
+        if len(best_axis) > 1 and any(self._is_non_additive_unit(entry[1]['fact'].unit_ref)
+                                      for entry in best_axis):
+            return None
 
         # Amounts in different units do not add: MXN 327M and USD 19M are not
         # 346M of anything (GH #1689). Nor is a smaller axis then a better
@@ -2520,6 +2564,12 @@ class XBRL:
         # and cost of products summing to total costs).
         if len(best_axis) > 1 and parents and not self._presented_members_covered(best_axis, parents,
                                                                                     element_id_normalized):
+            return None
+
+        # On an axis the statement does not present there is no hierarchy to
+        # say the members are disjoint; one that is the sum of others is a
+        # subtotal beside its parts (GH #1703).
+        if not parents and _contains_a_subtotal([v for _, _, v in best_axis]):
             return None
 
         if len(best_axis) == 1:
@@ -2612,6 +2662,38 @@ class XBRL:
                 if dim.replace(':', '_') == axis:
                     members.add(str(member).replace(':', '_'))
         return members
+
+    @staticmethod
+    def _facts_in_statement_scope(dim_facts, member_parents):
+        """The dimensional facts a statement's synthesized plain row may add up.
+
+        A concept's facts come from every disclosure that uses it, not only the
+        statement being built. Deutsche Bank's consolidated cash flow tags its
+        figures with dei:LegalEntityAxis = consolidatedBankEntityMember, and the
+        parent-only note uses the same concept with DeutscheBankAGMember; adding
+        both read operating cash flow 2024 as EUR -58,501 million against a
+        filed -28,584 million (GH #1703).
+
+        - On an axis the statement's presentation tree declares, only the
+          declared members are in scope, in every view (DETAILED relaxes which
+          dimensional rows are shown, not what the plain row adds up).
+        - When the concept has facts on a declared axis, those are the
+          statement's own breakdown and facts on other axes are out of scope.
+        - Otherwise, axes whose members are other entities, scenarios or
+          restatements of one figure (never parts of it) are out of scope.
+        """
+        def axis_and_member(wf):
+            dim = wf['dimension_info'][0]
+            return ((dim.get('dimension') or '').replace(':', '_'),
+                    (dim.get('member') or '').replace(':', '_'))
+
+        declared = [(cid, wf) for cid, wf in dim_facts
+                    if axis_and_member(wf)[0] in member_parents]
+        if declared:
+            return [(cid, wf) for cid, wf in declared
+                    if axis_and_member(wf)[1] in member_parents[axis_and_member(wf)[0]]]
+        return [(cid, wf) for cid, wf in dim_facts
+                if axis_and_member(wf)[0] not in _NON_ADDITIVE_AXES]
 
     def _store_synthetic_total(self, synthetic, period_key, values, decimals, units, period_types) -> None:
         """Write a `_compute_synthetic_total()` result into a line item's period maps."""
