@@ -38,6 +38,13 @@ logger = logging.getLogger(__name__)
 # Pre-compiled regex patterns for performance
 _QUARTER_PATTERN = re.compile(r'(Dec|Sep|Jun|Mar)\w*\s*\d+,?\s*(\d{4})')
 _YEAR_PATTERN = re.compile(r'\b(19|20)\d{2}\b')
+_CHANGE_COLUMN = re.compile(r'%|\bchange\b|\bchg\b|\bpercent\b|\bvs\b\.?', re.IGNORECASE)
+
+
+def _is_change_column(label: str) -> bool:
+    """A percent or change column ("% Change", "2025 vs 2024", "... - 2025 - %"), from any part
+    of its header path. A year in the label does not make it a period (GH #1780)."""
+    return any(_CHANGE_COLUMN.search(part) for part in str(label).split(' - '))
 _SCALE_BILLIONS = re.compile(r'\b(in\s+)?billions?\b', re.IGNORECASE)
 _SCALE_MILLIONS = re.compile(r'\b(in\s+)?millions?\b', re.IGNORECASE)
 _SCALE_THOUSANDS = re.compile(r'\b(in\s+)?thousands?\b', re.IGNORECASE)
@@ -718,6 +725,9 @@ class FinancialTable:
         # Columns are read by position: two periods may share a label ("September 30,")
         for col_pos, col in enumerate(df.columns):
             period_info = _parse_period_header(str(col))
+            # A "% Change" column holds percentages, not amounts for a period (GH #1780)
+            if _is_change_column(col):
+                continue
 
             for pos, idx_label in enumerate(df.index):
                 label = str(idx_label)
@@ -1612,6 +1622,11 @@ def _extract_title(table_node) -> Optional[str]:
 
 
 def _extract_date_headers_from_rows(table_node) -> List[str]:
+    """Date column headers found in early data rows (see ``_find_date_header_rows``)."""
+    return _find_date_header_rows(table_node)[0]
+
+
+def _find_date_header_rows(table_node) -> Tuple[List[str], List[int]]:
     """
     Extract date column headers from early data rows.
 
@@ -1622,6 +1637,8 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
 
     Also handles split date rows where month/day is on one row and
     year is on the next (e.g., Nvidia's "October 26," + "2025").
+
+    Returns the headers and the indices of the rows they came from.
     """
     # Month pattern for detecting partial dates (month + day, no year)
     month_pattern = re.compile(
@@ -1645,7 +1662,7 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
 
         for content in non_empty:
             # Skip scale descriptions
-            if content.startswith("(In ") or content.startswith("(Dollars"):
+            if _is_scale_caption(content):
                 continue
 
             # Check for complete date pattern (contains year)
@@ -1661,7 +1678,7 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
 
         # If we found complete dates without numeric data, use them
         if dates_found and not has_numeric:
-            return dates_found
+            return dates_found, [i]
 
         # If we found partial dates, check if next row has years to combine
         if partial_dates and not has_numeric and i + 1 < len(rows):
@@ -1674,9 +1691,9 @@ def _extract_date_headers_from_rows(table_node) -> List[str]:
             if years and len(years) == len(partial_dates):
                 # Combine partial dates with years
                 combined = [f"{date} {year}" for date, year in zip(partial_dates, years)]
-                return combined
+                return combined, [i, i + 1]
 
-    return []
+    return [], []
 
 
 # A scale caption such as "In millions, except per share amounts", "(IN THOUSANDS, ...)" or
@@ -1834,8 +1851,9 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
 
     # Fallback: try to extract date headers from early data rows
     date_headers_from_rows = []
+    date_header_rows = []
     if not header_cols:
-        date_headers_from_rows = _extract_date_headers_from_rows(table_node)
+        date_headers_from_rows, date_header_rows = _find_date_header_rows(table_node)
 
     row_labels = []
     row_data = []
@@ -1847,10 +1865,10 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
     # Track if we should skip date-header rows from data
     skip_date_rows = bool(date_headers_from_rows)
 
-    for row in table_node.rows:
+    for row_idx, row in enumerate(table_node.rows):
         cells = row.cells
         non_empty = [c for c in cells if c.content.strip()]
-        if not non_empty:
+        if not non_empty or row_idx in date_header_rows:
             continue
 
         # Skip rows that only contain dates (already used as headers)
@@ -1870,8 +1888,7 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
                     _YEAR_PATTERN.search(c) or
                     month_pattern.match(c) or
                     year_only_pattern.match(c) or
-                    c.startswith("(In ") or
-                    c.startswith("(Dollars")
+                    _is_scale_caption(c)
                     for c in non_empty_contents
                 )
                 and any(
@@ -1917,9 +1934,12 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
         return pd.DataFrame()
 
     aligned = None
-    if table_node.headers:
+    # Header rows: the table's own, or the date row found among its data rows. A "% Change"
+    # cell in that row is a column too, so its values stay out of the period columns (GH #1780).
+    header_rows = table_node.headers or [table_node.rows[i].cells for i in date_header_rows]
+    if header_rows:
         label_end = max(set(label_ends), key=label_ends.count)
-        aligned = _align_by_position(table_node.headers, row_positions, label_end)
+        aligned = _align_by_position(header_rows, row_positions, label_end)
     if aligned is not None:
         columns, padded_data = aligned
         df = pd.DataFrame(padded_data, columns=columns)
