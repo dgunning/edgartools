@@ -955,6 +955,36 @@ def _revenue_label_rank(label_lower: str) -> int:
     return 2
 
 
+_RECONCILIATION_LABEL = re.compile(r'adjusted|non-gaap|ebitda|^gaap\b')
+
+
+def _income_statement_rank(table: 'FinancialTable') -> tuple:
+    """
+    Rank an income-statement candidate; the highest rank is the primary statement.
+
+    Taking the table with the most rows picked segment tables (Mueller Water: one period,
+    a column per segment), reconciliations (Graphic Packaging's Adjusted EBITDA table) and
+    operating-metric tables (Groupon) over the statement of operations (GH #1781). In order:
+    has a revenue row and a net income row; is not a reconciliation (a quarter or more of
+    its labels say adjusted, non-GAAP, EBITDA or start with GAAP; a statement ending in a
+    couple of adjusted lines is still a statement); is not one period split by segment
+    (two or more columns parse to the same single period; a header the period parser cannot
+    read, such as "2025" or "Q3 2025", counts as unknown, not as split); then rows.
+    """
+    df = table.dataframe
+    labels = [str(label).lower().strip() for label in df.index]
+    has_revenue = any(_revenue_label_rank(label) < 3 for label in labels)
+    has_net_income = any(p in label for label in labels for p in ('net income', 'net loss', 'net earnings'))
+    reconciliation = sum(bool(_RECONCILIATION_LABEL.search(label)) for label in labels) >= 0.25 * max(len(labels), 1)
+    parsed = []
+    for col in df.columns:
+        info = _parse_period_header(str(col))
+        if info['period_end']:
+            parsed.append((info['period_end'], info['duration_months']))
+    split_by_segment = len(parsed) >= 2 and len(set(parsed)) == 1
+    return (has_revenue + has_net_income, not reconciliation, not split_by_segment, df.shape[0])
+
+
 class EarningsRelease:
     """
     Parser for 8-K earnings release exhibits.
@@ -1091,10 +1121,10 @@ class EarningsRelease:
 
     @property
     def income_statement(self) -> Optional[FinancialTable]:
-        """Get the primary income statement table."""
+        """Get the primary income statement table (see ``_income_statement_rank``)."""
         candidates = [t for t in self.tables if t.statement_type == StatementType.INCOME_STATEMENT]
         if candidates:
-            return max(candidates, key=lambda t: t.dataframe.shape[0])
+            return max(candidates, key=_income_statement_rank)
         return None
 
     @property
@@ -1932,8 +1962,10 @@ def _extract_clean_dataframe(table_node) -> pd.DataFrame:
             row_data.append(merged_data)
             row_positions.append(positioned_cells)
             label_ends.append(label_cell_end)
-        elif label_cell and not data_cells:
-            # Label-only row (e.g., "Earnings per share:") — track as parent context
+        elif label_cell and not data_cells and not _is_scale_caption(label_cell):
+            # Label-only row (e.g., "Earnings per share:") — track as parent context.
+            # A scale caption ("(in millions, except per share amounts)") is not one:
+            # it made "Net sales" a per-share row, so it was left unscaled (GH #1781).
             current_parent_context = label_cell
 
     if not row_data:
