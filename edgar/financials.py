@@ -666,19 +666,23 @@ class Financials:
         # Fallback to label-based search for filers whose concept isn't in
         # the standardization map. Includes 'Net Loss' variants (filer reporting
         # a loss labels the row "Net loss attributable to ...") and 'Profit/Loss'
-        # for IFRS labels like "Profit (loss) for the year". All patterns
-        # explicitly exclude "noncontrolling" so we don't pick the NCI row.
-        patterns = [
-            r'Net Income$',
-            r'^Net Income(?!.*[Nn]oncontrolling)',
-            r'^Net Loss(?!.*[Nn]oncontrolling)',
-            r'Net Income.*Common',
-            r'Net Income.*Shareholders',
-            r'Net Loss.*Common',
-            r'Net Loss.*Shareholders',
-            r'Net Earnings',
-            r'Profit.*Loss(?!.*[Nn]oncontrolling)',
-        ]
+        # for IFRS labels like "Profit (loss) for the year". Every pattern
+        # excludes the noncontrolling-interest row, and the continuing and
+        # discontinued operations rows: "Net income (loss) from continuing
+        # operations" sits above the bottom line and differs from it by
+        # discontinued operations, net of tax (gh #1663).
+        not_net_income = r'^(?!.*(?:non-?\s?controlling|minority|continuing|discontinued))'
+        patterns = [not_net_income + pattern for pattern in (
+            r'.*Net Income$',
+            r'Net Income',
+            r'Net Loss',
+            r'.*Net Income.*Common',
+            r'.*Net Income.*Shareholders',
+            r'.*Net Loss.*Common',
+            r'.*Net Loss.*Shareholders',
+            r'.*Net Earnings',
+            r'.*Profit.*Loss',
+        )]
         return self._get_standardized_concept_value('income', patterns, period_offset)
 
     def get_operating_income(self, period_offset: int = 0) -> Optional[Union[int, float]]:
