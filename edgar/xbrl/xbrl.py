@@ -1955,11 +1955,19 @@ class XBRL:
                             # Skip this dimensional fact - member not in presentation linkbase
                             continue
 
-                        # Use the dimension_key we already generated
-                        dim_key_str = dimension_key
+                        # Group by the members themselves, not only their labels:
+                        # two members of one axis can share a display label (GE
+                        # labels both SubsidiariesGeccMember and GECapitalMember
+                        # "GE Capital"), and grouping by label let one member's
+                        # amounts overwrite the other's (GH #1682).
+                        member_identity = tuple(sorted(
+                            (str(d.get('dimension', '')).replace(':', '_'),
+                             str(d.get('member', '')).replace(':', '_'))
+                            for d in dimension_info))
 
                         # Store dimensioned fact with the full dimension metadata
-                        dimensioned_facts[dim_key_str].append((period_key, fact, dimension_info))
+                        dimensioned_facts[(dimension_key, member_identity)].append(
+                            (period_key, fact, dimension_info))
                     else:
                         # Collect non-dimensioned facts to select most precise later
                         non_dimensioned_facts_for_period.append((context_id, wrapped_fact))
@@ -2137,7 +2145,7 @@ class XBRL:
             # Track dimensional items added for this concept (for hierarchy post-processing)
             dim_items_added = []
             # Add each dimension as a child line item with increased depth
-            for dim_key, facts_list in dimensioned_facts.items():
+            for (dim_key, _member_identity), facts_list in dimensioned_facts.items():
                 dim_values = {}
                 dim_decimals = {}
                 dim_units = {}  # Store unit_ref for each period
