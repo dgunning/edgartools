@@ -1744,6 +1744,11 @@ class XBRL:
                 balance = get_balance_type(element_id)
 
         # Get weight and calculation parent from calculation trees (Issue #463, #514, GH-712)
+        # A calculation relationship belongs to its own role (XBRL 2.1 section
+        # 3.5.3.9.7.3), so a statement row reads only the statement role's network
+        # and has no weight or parent when that network has no arc for it. Taking
+        # them from another role gave Sonoco's income-statement share count the
+        # EPS note's parent (GH #1702).
         calculation_parent = None
         if hasattr(self, 'calculation_trees') and self.calculation_trees:
             # GH-712: Prefer calc tree matching this statement's role URI
@@ -1754,8 +1759,8 @@ class XBRL:
                     weight = calc_node.weight
                     calculation_parent = calc_node.parent
 
-            # Fallback: iterate all calc trees if not found in statement's own tree
-            if weight is None:
+            # Fallback only when no statement role is known
+            if weight is None and not statement_role:
                 for calc_tree in self.calculation_trees.values():
                     if element_id_normalized in calc_tree.all_nodes:
                         calc_node = calc_tree.all_nodes[element_id_normalized]

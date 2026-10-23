@@ -2243,12 +2243,13 @@ class FactsView:
         if not hasattr(self.xbrl, 'calculation_trees'):
             return None
 
-        # GH-712: First try exact role URI match (most reliable)
-        if statement_role and statement_role in self.xbrl.calculation_trees:
-            calc_tree = self.xbrl.calculation_trees[statement_role]
-            node = calc_tree.all_nodes.get(element_id)
-            if node:
-                return node.weight
+        # GH-712: a fact assigned to a statement reads that statement role's
+        # calculation network only; another role's summation says nothing about
+        # this one (GH #1702). The fallbacks below are for unassigned facts.
+        if statement_role:
+            calc_tree = self.xbrl.calculation_trees.get(statement_role)
+            node = calc_tree.all_nodes.get(element_id) if calc_tree else None
+            return node.weight if node else None
 
         # Fallback: keyword matching on role URI
         for role_uri, calc_tree in self.xbrl.calculation_trees.items():
