@@ -1365,7 +1365,9 @@ def _create_units_note(
 # Originally the Income Statement and Cash Flow Statement (Issue #463); extended
 # to the Balance Sheet for contra accounts such as Treasury Stock (Issue #568) --
 # APD, JPM and XOM negate Treasury Stock, JPM also Allowance for Loan Losses.
-PRESENTATION_SIGN_STATEMENTS = ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet')
+# The comprehensive income statement too: AAL presents its pension OCI with a
+# negated label, and without the sign the components did not foot (GH #1676).
+PRESENTATION_SIGN_STATEMENTS = ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet', 'ComprehensiveIncome')
 
 
 def apply_presentation_sign(
