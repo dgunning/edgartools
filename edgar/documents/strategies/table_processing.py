@@ -244,7 +244,8 @@ class TableProcessor:
         consecutive_header_rows = 0
         data_rows_started = False
 
-        for tr in self._own_rows(rows_container):
+        ordered_rows = self._own_rows(rows_container)
+        for row_index, tr in enumerate(ordered_rows):
             # Skip if already processed in thead (identity, never id() - see above)
             if any(tr is head_row for head_row in thead_rows):
                 continue
@@ -299,8 +300,44 @@ class TableProcessor:
                         row_text = ' '.join(cell.text().strip() for cell in cells).strip()
                         row_text_lower = row_text.lower()
 
+                        # A lone cell spanning several columns is a title or group
+                        # row that labels the header rows below it, so it must not
+                        # end header detection. (#1485) A lone spanning cell is also
+                        # common as plain data, so only honour it when a header-like
+                        # row follows within two rows.
+                        #
+                        # "Header-like" cannot be _is_header_row alone: that same
+                        # predicate is what accepts amount rows -- it scores on the
+                        # ratio of label cells, and a row like "| $ | — | $ | 14,433"
+                        # is all punctuation and digits, so it passes as a label row.
+                        # A lone spanning data cell could then be vouched for by the
+                        # data row below it. A follower must now look like a period or
+                        # column label rather than carry figures.
+                        #
+                        # Measured on the 68 committed 10-K/10-Q fixtures (10,858
+                        # tables): the guard fires in 2,569 of them instead of 3,244.
+                        # The 675 lost tables are the point -- the follower was an
+                        # amount row, so a lone spanning label (often a year, or a
+                        # group header such as "Hedged assets/(liabilities):") was
+                        # being used to learn figures as headers. They revert to the
+                        # pre-#1485 behaviour of ending header detection there, which
+                        # is what main does for them today. Tables whose follower is
+                        # a real label row, the JPMorgan 10-Q case #1485 exists for,
+                        # still keep their headers.
+                        non_empty = [c for c in cells if c.text().strip()]
+                        is_title_or_group_row = (
+                            len(non_empty) == 1 and non_empty[0].colspan > 1
+                            and not self._row_holds_numbers(tr)
+                            and any(
+                                self._is_header_row(following)
+                                and self._looks_like_header_row(following)
+                                for following in ordered_rows[row_index + 1:row_index + 3]
+                            )
+                        )
+
                         # Don't consider this as "data started" if it's likely a header-related row
                         is_header_related = (
+                            is_title_or_group_row or
                             # Unit descriptions
                             '(in millions)' in row_text_lower or
                             '(in thousands)' in row_text_lower or
@@ -625,6 +662,34 @@ class TableProcessor:
         em-dash placeholder still counts as text, exactly as before.
         """
         return cell_text.translate(TableProcessor._FIGURE_ORNAMENTS).isdigit()
+
+    _NUMERIC_CELL = re.compile(
+        r'\$\s*[\d,.]+'            # a dollar amount
+        r'|\b\d{1,3}(,\d{3})+\b'     # thousands-grouped number
+        r'|\(\s*[\d,.]+\s*\)'       # parenthesised negative
+        r'|\b\d+\.\d+\b'            # bare decimal
+    )
+
+    def _row_holds_numbers(self, tr: HtmlElement) -> bool:
+        """True when any cell of the row carries a figure, not just a label."""
+        return any(
+            self._NUMERIC_CELL.search(_text_content(cell))
+            for cell in self._own_cells(tr)
+        )
+
+    def _looks_like_header_row(self, tr: HtmlElement) -> bool:
+        """Stricter than _is_header_row: a label row, not a row of figures.
+
+        _is_header_row accepts amount rows (its label ratio counts punctuation and
+        digits as labels), so it cannot be used to vouch for another row. This
+        predicate additionally requires the row to hold no figure at all and to
+        carry at least one ASCII letter -- a period label such as "Three Months
+        Ended June 30, 2026" or a metric label such as "Marketable securities".
+        """
+        if self._row_holds_numbers(tr):
+            return False
+        text = " ".join(_text_content(c) for c in self._own_cells(tr))
+        return any(ch.isalpha() and ch.isascii() for ch in text)
 
     def _is_header_row(self, tr: HtmlElement) -> bool:
         """Detect if row is likely a header row in SEC filings."""
