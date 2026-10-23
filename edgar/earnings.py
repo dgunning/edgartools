@@ -1583,13 +1583,19 @@ def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> S
             elif 'in billions' in label_lower or '(billions)' in label_lower:
                 return Scale.BILLIONS
 
-    # 6. Check preceding sibling nodes (scale text often in a paragraph before the table)
-    if hasattr(table_node, 'parent') and table_node.parent and hasattr(table_node.parent, 'children'):
-        siblings = table_node.parent.children
+    # 6. Check preceding sibling nodes (scale text often in a paragraph before the table).
+    # A table is often the only child of a wrapper <div>; its caption then precedes the
+    # wrapper, so climb through one-child wrappers first (GH #1779).
+    node = table_node
+    parent = getattr(node, 'parent', None)
+    while parent is not None and len(getattr(parent, 'children', None) or []) == 1 and parent.parent is not None:
+        node, parent = parent, parent.parent
+    if parent is not None and getattr(parent, 'children', None):
+        siblings = parent.children
         for idx, child in enumerate(siblings):
-            if child is table_node:
-                # Check up to 3 preceding siblings
-                for si in range(max(0, idx - 3), idx):
+            if child is node:
+                # Check up to 3 preceding siblings, nearest first
+                for si in range(idx - 1, max(0, idx - 3) - 1, -1):
                     sib = siblings[si]
                     sib_text = sib.content or ''
                     if not sib_text and hasattr(sib, 'text') and callable(sib.text):
