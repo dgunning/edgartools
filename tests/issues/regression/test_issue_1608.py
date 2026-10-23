@@ -97,7 +97,8 @@ class FakeFeed:
             "File": [f"https://www.sec.gov/Archives/edgar/Feed/{year}/QTR{quarter}/{n}" for n in names],
         })
 
-    async def download(self, client=None, url=None, data_directory=None, disable_progress=False):
+    async def download(self, client=None, url=None, data_directory=None, disable_progress=False,
+                       preserve_existing_filings=False):
         day = url.rsplit("/", 1)[-1][:8]
         self.downloaded.append(day)
         folder = Path(data_directory) / day
