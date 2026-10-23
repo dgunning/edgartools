@@ -86,6 +86,13 @@ _FAILED = 'could not be extracted'
 # The axis whose member names the currency a rate is quoted for.
 _CURRENCY_AXIS = 'srt:CurrencyAxis'
 
+# Which way a rate is quoted. Novo's dkkPerUSD unit states home currency per
+# target (662 DKK per 100 USD); GSK's note 5 states target per home (US$/£ 1.31).
+_HOME_PER_TARGET = 'home_per_target'
+_TARGET_PER_HOME = 'target_per_home'
+# A pure-number unit: the direction has to come from somewhere else.
+_PURE = 'pure'
+
 __all__ = ['CurrencyConverter', 'ExchangeRate']
 
 
@@ -131,6 +138,9 @@ class CurrencyConverter:
     target_currency: str = "USD"
     exchange_rates: Dict[int, ExchangeRate] = field(default_factory=dict, init=False)
     _rate_scale: float = field(default=100.0, init=False)  # Rates are per 100 USD
+    # How the stored rates are quoted. get_rate() returns the rate as filed, and
+    # to_usd()/from_usd() read this to divide or multiply (GH #1651).
+    _quote: str = field(default=_HOME_PER_TARGET, init=False)
     # Populated when rate extraction RAISED, as opposed to finding nothing.
     # Without it both outcomes present as "no rates found" (edgartools-35jj).
     _extraction_warnings: List[str] = field(default_factory=list, init=False)
@@ -177,7 +187,10 @@ class CurrencyConverter:
 
         Handles two common patterns:
         1. Currency-specific units like 'dkkPerUSD' with rates per 100 USD
-        2. Pure ratio units ('number', 'pure') with direct exchange rates
+        2. Pure ratio units ('number', 'pure') with direct exchange rates. These
+           do not state a direction; one on the target currency's
+           ``srt:CurrencyAxis`` member is read as target per 1 home unit, and a
+           warning says so (GH #1651). One with no currency member is not used.
 
         A filing publishes one rate per currency, and often hedge-instrument
         rates too, under the same concept. Only facts for the target currency
@@ -204,18 +217,19 @@ class CurrencyConverter:
         # Also accept pure ratio units (some filers use 'number' or 'pure')
         pure_unit_patterns = ['number', 'pure', 'ratio']
 
-        def is_valid_rate_unit(unit_ref: str) -> bool:
-            """Check if unit_ref indicates a valid exchange rate."""
+        def unit_quote(unit_ref: str) -> Optional[str]:
+            """How a rate in this unit is quoted: a quote constant, _PURE, or None."""
             if any(pattern in unit_ref for pattern in expected_unit_patterns):
-                return True
+                return _HOME_PER_TARGET
             if unit_ref.lower() in pure_unit_patterns:
-                return True
-            return False
+                return _PURE
+            return None
 
+        selected: List[tuple] = []
         for kind, concept, date_columns in _RATE_CONCEPTS:
             try:
                 df = self.xbrl.facts.query().by_concept(concept, exact=True).to_dataframe()
-                self._select_rates(df, kind, date_columns, is_valid_rate_unit, rates)
+                selected.extend(self._select_rates(df, kind, date_columns, unit_quote))
             except Exception as e:
                 # Not "no rates found": that is what an empty frame means. This
                 # is the extraction itself failing, which is indistinguishable
@@ -230,9 +244,42 @@ class CurrencyConverter:
                     "than converting with a wrong rate.", kind, e,
                 )
 
+        if not selected:
+            return rates
+
+        # A pure number does not say which way it is quoted. GSK (US$/£ 1.31)
+        # and BioNTech (1.0824 for 2024, which is SAP's USD per EUR rate) both
+        # tag the USD member with USD per 1 home unit, so that is how it is read.
+        assumed = any(quote == _PURE for *_, quote in selected)
+        selected = [(year, kind, value, _TARGET_PER_HOME if quote == _PURE else quote)
+                    for year, kind, value, quote in selected]
+
+        # One direction per converter. A filing quotes its rates one way; if the
+        # selected facts disagree, keep the majority and say what was dropped.
+        quotes = Counter(quote for _, _, _, quote in selected)
+        self._quote = quotes.most_common(1)[0][0]
+        for year, kind, value, quote in selected:
+            if quote != self._quote:
+                self._extraction_warnings.append(
+                    f"the {kind} rate for {year} ({value}) is quoted the other way "
+                    f"from the filing's other rates and was not used"
+                )
+                continue
+            rates.setdefault(year, ExchangeRate(year=year))
+            setattr(rates[year], kind, value)
+        if assumed and self._quote == _TARGET_PER_HOME:
+            # An assumption, not a reading of the filing, so it is stated.
+            self._extraction_warnings.append(
+                f"the rates use a pure-number unit, which does not state their direction; "
+                f"read as {self.target_currency} per 1 {self.home_currency}"
+            )
+
         # Auto-detect rate scale by checking if rates look like "per 100" or direct
         # Rates > 10 are likely "per 100 USD" format, rates < 10 are direct rates
-        if rates:
+        if self._quote == _TARGET_PER_HOME:
+            # Target per 1 home unit.
+            self._rate_scale = 1.0
+        elif rates:
             sample_rate = next(iter(rates.values()))
             rate_value = sample_rate.average or sample_rate.closing
             if rate_value and rate_value < 10:
@@ -249,26 +296,35 @@ class CurrencyConverter:
         context = self.xbrl.contexts.get(row.get('context_ref'))
         return dict(context.dimensions) if context is not None else {}
 
-    def _select_rates(self, df, kind: str, date_columns, is_valid_rate_unit,
-                      rates: Dict[int, ExchangeRate]) -> None:
-        """Pick one ``kind`` rate per year from the facts of one rate concept."""
+    def _select_rates(self, df, kind: str, date_columns, unit_quote) -> List[tuple]:
+        """Pick one ``kind`` rate per year from the facts of one rate concept.
+
+        Returns ``(year, kind, value, quote)`` tuples.
+        """
         if df.empty:
-            return
+            return []
         target = self.target_currency.upper()
-        # year -> [(number of dimensions besides the currency axis, value)]
+        # year -> [(number of dimensions besides the currency axis, value, quote)]
         candidates: Dict[int, List[tuple]] = {}
         hedge_rows: Counter = Counter()
         # Rate facts of an accepted unit whose period gave no year. Skipping one
         # silently left a filing's closing rates missing with no warning (GH #1652).
         undated = 0
+        # Pure-number rates with no currency member: neither the currency nor
+        # the direction is stated, so they cannot be used safely (GH #1651).
+        unnamed = 0
 
         for _, row in df.iterrows():
-            if not is_valid_rate_unit(row.get('unit_ref', '')):
+            quote = unit_quote(row.get('unit_ref', ''))
+            if quote is None:
                 continue
             dimensions = self._fact_dimensions(row)
             member = dimensions.get(_CURRENCY_AXIS)
             if member is not None and _local_name(member).upper() != target:
                 continue  # the rate of another currency, e.g. JPY for GSK
+            if quote == _PURE and member is None:
+                unnamed += 1
+                continue
             year = _extract_year(_first_date(row, *date_columns))
             if not year:
                 undated += 1
@@ -281,14 +337,15 @@ class CurrencyConverter:
             if value is None or pd.isna(value):
                 continue
             extra = len(dimensions) - (1 if member is not None else 0)
-            candidates.setdefault(year, []).append((extra, value))
+            candidates.setdefault(year, []).append((extra, value, quote))
 
+        selected = []
         for year, facts in candidates.items():
-            fewest = min(extra for extra, _ in facts)
-            values = sorted({value for extra, value in facts if extra == fewest})
-            if len(values) == 1:
-                rates.setdefault(year, ExchangeRate(year=year))
-                setattr(rates[year], kind, values[0])
+            fewest = min(extra for extra, _, _ in facts)
+            best = sorted({(value, quote) for extra, value, quote in facts if extra == fewest})
+            values = [value for value, _ in best]
+            if len(best) == 1:
+                selected.append((year, kind) + best[0])
             else:
                 self._extraction_warnings.append(
                     f"{len(values)} different {kind} {target} rates for {year} "
@@ -304,6 +361,12 @@ class CurrencyConverter:
             self._extraction_warnings.append(
                 f"{undated} {kind} exchange rate fact(s) had no period date and were not used"
             )
+        if unnamed:
+            self._extraction_warnings.append(
+                f"{unnamed} {kind} exchange rate fact(s) with a pure-number unit name no "
+                f"currency ({_CURRENCY_AXIS}) and were not used"
+            )
+        return selected
 
     def to_usd(
         self,
@@ -342,6 +405,9 @@ class CurrencyConverter:
         if rate is None:
             return None
 
+        if self._quote_direction() == _TARGET_PER_HOME:
+            # Rate is USD per home unit: USD = home_value * rate
+            return value * (rate / self._rate_scale)
         # Rate is "home currency per 100 USD"
         # To convert: USD = home_value / (rate / 100)
         return value / (rate / self._rate_scale)
@@ -379,9 +445,17 @@ class CurrencyConverter:
         if rate is None:
             return None
 
+        if self._quote_direction() == _TARGET_PER_HOME:
+            # Rate is USD per home unit: home = USD / rate
+            return value / (rate / self._rate_scale)
         # Rate is "home currency per 100 USD"
         # To convert: home = USD * (rate / 100)
         return value * (rate / self._rate_scale)
+
+    def _quote_direction(self) -> str:
+        # getattr: instances built with __new__ (the unit tests) skip the
+        # dataclass defaults; they predate quote detection and hold home per USD.
+        return getattr(self, '_quote', _HOME_PER_TARGET)
 
     @property
     def available_years(self) -> List[int]:
@@ -407,7 +481,10 @@ class CurrencyConverter:
             rate_type: 'average' or 'closing'
 
         Returns:
-            The exchange rate (home currency per 100 USD), or None if not available
+            The exchange rate as the filing states it, or None if not available.
+            It is home currency per 100 USD (Novo: 662 DKK) or per 1 USD, or,
+            when the filing quotes it the other way, USD per 1 home unit (GSK:
+            1.31 US$/£). ``repr()`` of the converter names the direction.
         """
         if year not in self.exchange_rates:
             return None
@@ -457,8 +534,10 @@ class CurrencyConverter:
 
         lines = [f"CurrencyConverter(home={self.home_currency}, target={self.target_currency})"]
 
-        # Format rate description based on scale
-        if self._rate_scale == 100.0:
+        # Format rate description based on direction and scale
+        if self._quote_direction() == _TARGET_PER_HOME:
+            rate_desc = f"{self.target_currency} per {self.home_currency}"
+        elif self._rate_scale == 100.0:
             rate_desc = f"{self.home_currency} per 100 {self.target_currency}"
         else:
             rate_desc = f"{self.home_currency} per {self.target_currency}"
