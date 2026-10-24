@@ -13,6 +13,13 @@ The stored text is the decimal quotient, not a float. ``9007199254740993``
 stays ``9007199254740993`` (the float of it is ``9007199254740992``), and the
 division does not use the caller's decimal context.
 
+The operands have to be xsd:decimal lexical forms: ASCII digits, an optional
+sign, and an optional fraction. ``Decimal`` also accepts an exponent
+(``1E-300000``), an underscore (``1_0``), and non-ASCII digits. Those stay
+in slash form with ``numeric_value`` unset. The exponent is rejected before
+any arithmetic, because ``1/1E-300000`` would otherwise scale a coefficient
+by ``10 ** 300000``.
+
 Real filing: Apple Inc. FY2023 Form 10-K, accession 0000320193-23-000106,
 instance ``aapl-20230930_htm.xml``. SEC full-text search for
 ``fractionItemType`` and for ``xbrli:numerator`` returned no hits, and this
@@ -24,6 +31,7 @@ filed value ``352583000000``. The prior year, context ``c-23`` (instant
 """
 import decimal
 import sys
+import time
 
 import pytest
 
@@ -362,6 +370,54 @@ def test_fraction_operand_includes_text_around_a_comment_or_processing_instructi
     instructed = facts["my_processingInstruction|C1"]
     assert instructed.value == "41"
     assert instructed.numeric_value == 41.0
+
+
+def test_operands_outside_the_xsd_decimal_lexical_space_keep_the_slash_form():
+    """An exponent, an underscore, or a non-ASCII digit is not an xsd:decimal.
+
+    ``Decimal`` accepts all three. ``1`` over ``1E-300000`` then builds a
+    coefficient of ``10 ** 300000`` inside the terminating-digit count, which
+    takes on the order of a minute. The lexical check rejects it first.
+    """
+    # Arabic-Indic digit one. Decimal accepts it and reads it as 1.
+    arabic_one = "\u0661"
+    started = time.perf_counter()
+    facts = _with_facts(f"""
+  <my:hugeExponent contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1</xbrli:numerator>
+    <xbrli:denominator>1E-300000</xbrli:denominator>
+  </my:hugeExponent>
+  <my:exponentNumer contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1E+2</xbrli:numerator>
+    <xbrli:denominator>1</xbrli:denominator>
+  </my:exponentNumer>
+  <my:underscore contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1_0</xbrli:numerator>
+    <xbrli:denominator>2</xbrli:denominator>
+  </my:underscore>
+  <my:arabicDigit contextRef="C1" unitRef="pure">
+    <xbrli:numerator>{arabic_one}</xbrli:numerator>
+    <xbrli:denominator>1</xbrli:denominator>
+  </my:arabicDigit>
+""")
+    elapsed = time.perf_counter() - started
+    assert elapsed < 1
+    huge = facts["my_hugeExponent|C1"]
+    assert huge.value == "1/1E-300000"
+    assert huge.numeric_value is None
+    assert huge.decimals is None
+    exponent = facts["my_exponentNumer|C1"]
+    assert exponent.value == "1E+2/1"
+    assert exponent.numeric_value is None
+    assert exponent.decimals is None
+    underscore = facts["my_underscore|C1"]
+    assert underscore.value == "1_0/2"
+    assert underscore.numeric_value is None
+    assert underscore.decimals is None
+    arabic = facts["my_arabicDigit|C1"]
+    assert arabic.value == f"{arabic_one}/1"
+    assert arabic.numeric_value is None
+    assert arabic.decimals is None
 
 
 # Apple Inc. FY2023 Form 10-K. Ordinary-fact control: this instance has no

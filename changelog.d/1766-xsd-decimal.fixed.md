@@ -1,0 +1,1 @@
+**An XBRL fraction operand in exponent form could stall parsing.** `Decimal` accepts `1E-300000`, which is not an xsd:decimal, and the terminating-digit count then built a coefficient of `10**300000` (about 82 seconds). Operands are checked against the xsd:decimal lexical form first, so `1/1E-300000` stays slash text with no numeric value. (GH #1766)

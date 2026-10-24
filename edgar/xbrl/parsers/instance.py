@@ -6,6 +6,7 @@ units, footnotes, and entity information extraction.
 """
 
 import math
+import re
 from datetime import datetime
 from decimal import MAX_EMAX, MIN_EMIN, ROUND_HALF_EVEN, Decimal, InvalidOperation, localcontext
 from decimal import Context as DecimalContext
@@ -209,6 +210,25 @@ def _exact_terminating_digits(numerator: Decimal, denominator: Decimal) -> Optio
     return _decimal_digit_count(coefficient)
 
 
+# XML Schema Part 2, the decimal lexical space. ASCII digits only, so a
+# non-ASCII digit such as Arabic-Indic one is rejected. ``Decimal`` accepts
+# those, and it also accepts an exponent and underscores. This production
+# does not.
+_XSD_DECIMAL_RE = re.compile(r'[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)')
+
+
+def _is_xsd_decimal(text: str) -> bool:
+    """Whether ``text`` is an xsd:decimal lexical form.
+
+    Surrounding whitespace is ignored. ``_fraction_item`` strips the operand
+    before this check and before the slash form is stored, which is the same
+    treatment ``  2 `` / `` 4 `` already gets, and the same one the decimal
+    type's collapse facet gives a leading or trailing space. A space that
+    survives that strip, such as one between digits, is not a decimal.
+    """
+    return _XSD_DECIMAL_RE.fullmatch(text.strip()) is not None
+
+
 def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], bool]]:
     """Read an ``xbrli:fractionItemType`` fact, or None when the element is not one.
 
@@ -223,8 +243,12 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], 
     unset only when that float overflows, or a nonzero quotient underflows to
     zero; the exact text stays in ``value``. A non-finite quotient
     (a zero denominator, or a non-decimal) leaves the numeric value unset and
-    keeps the two parts separated by ``/``. A nil fact, or a nil numerator or
-    denominator, is an absent value.
+    keeps the two parts separated by ``/``. A non-decimal includes anything
+    outside the xsd:decimal lexical space. ``Decimal`` would accept an
+    exponent, an underscore, or a non-ASCII digit, and a negative exponent
+    then scales a coefficient by ``10`` to that power. Surrounding whitespace
+    is stripped first, so ``  2 `` / `` 4 `` is still one half. A nil fact,
+    or a nil numerator or denominator, is an absent value.
 
     A terminating quotient (denominator ``2^a * 5^b`` in lowest terms) is
     stored in full. ``1/2**100`` needs 70 significant digits; 50 would drop
@@ -246,6 +270,11 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], 
     if not num_text or not den_text:
         return '', None, False
     slash = f'{num_text}/{den_text}'
+    # Before any Decimal arithmetic. ``Decimal`` accepts ``1E-300000``,
+    # ``1_0`` and non-ASCII digits, and a negative exponent then makes
+    # ``_exact_terminating_digits`` build ``10 ** n`` for that exponent.
+    if not _is_xsd_decimal(num_text) or not _is_xsd_decimal(den_text):
+        return slash, None, False
     try:
         # String construction is exact, so prec here does not round the
         # operands. The explicit context only shuts out the caller's traps
