@@ -1,0 +1,26 @@
+{
+  "EffectOfExchangeRateChangesOnCashAndCashEquivalents": [
+    "ForeignExchangeEffectOnCash"
+  ],
+  "ifrs-full_EffectOfExchangeRateChangesOnCashAndCashEquivalents": [
+    "ForeignExchangeEffectOnCash"
+  ],
+  "LesseeOperatingLeaseLiabilityPaymentsDueNextTwelveMonths": [
+    "OperatingLeaseCommitmentYear1"
+  ],
+  "LesseeOperatingLeaseLiabilityPaymentsDueYearTwo": [
+    "OperatingLeaseCommitmentYear2"
+  ],
+  "LesseeOperatingLeaseLiabilityPaymentsDueYearThree": [
+    "OperatingLeaseCommitmentYear3"
+  ],
+  "LesseeOperatingLeaseLiabilityPaymentsDueYearFour": [
+    "OperatingLeaseCommitmentYear4"
+  ],
+  "LesseeOperatingLeaseLiabilityPaymentsDueYearFive": [
+    "OperatingLeaseCommitmentYear5"
+  ],
+  "LesseeOperatingLeaseLiabilityPaymentsDueAfterYearFive": [
+    "OperatingLeaseCommitmentAfterYear5"
+  ]
+}
