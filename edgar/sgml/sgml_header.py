@@ -467,7 +467,8 @@ class FilingHeader:
         if self.subject_companies:
             numbers.extend(
                 [subject_company.filing_information.file_number for subject_company in self.subject_companies])
-        return list(set(numbers))
+        # Ordered de-dupe: set() order varies per process (hash randomization)
+        return list(dict.fromkeys(numbers))
 
     @classmethod
     def parse_submission_format_header(cls, parsed_data: Dict[str, Any]):

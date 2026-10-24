@@ -46,6 +46,7 @@ class TOCAnalyzer:
                   on forms with few items (e.g., 10-Q has only Items 1-6).
         """
         self.form = form
+        self._dfin_row_text_used = False
         # Per-form schema: bare-item cap, text-keyword item rules, and the
         # unmatched-text policy. Replaces the scattered `if self.form in (...)`
         # branches that baked 10-K shape into form-agnostic code (edgartools-fhno).
@@ -112,7 +113,13 @@ class TOCAnalyzer:
         if agent == 'Workiva':
             result = self._analyze_workiva_toc(html_content, tree=tree)
         elif agent == 'Donnelley':
+            self._dfin_row_text_used = False
             result = self._analyze_dfin_toc(html_content, tree=tree)
+            if result and self._dfin_row_text_used:
+                # Row-text recovery can leave a thin mapping that would suppress the
+                # generic scan; let the scan fill the gaps (GH #1749).
+                generic = self._analyze_generic_toc(html_content, tree=tree)
+                result = {**generic, **result}
         elif agent == 'Novaworks':
             result = self._analyze_novaworks_toc(html_content, tree=tree)
         elif agent == 'Toppan Merrill':
@@ -2055,6 +2062,15 @@ class TOCAnalyzer:
                     # Fall back to text if anchor doesn't have item pattern
                     if not parsed:
                         parsed = self._parse_item_from_text(text)
+
+                    # The item label can sit in a neighbouring cell ("Item 1." | link
+                    # "Financial Statements" | page) with no number in anchor or link
+                    # text (GH #1749); read it from the row text.
+                    if not parsed and len(links) == 1:
+                        row_parsed = self._parse_item_from_text(row_text)
+                        if row_parsed and not row_parsed.startswith('Part'):
+                            parsed = row_parsed
+                            self._dfin_row_text_used = True
 
                     if not parsed:
                         continue
