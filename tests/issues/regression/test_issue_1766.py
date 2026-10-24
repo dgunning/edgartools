@@ -119,6 +119,7 @@ def _facts():
 
 def test_one_third_is_the_quotient_not_the_digits_joined():
     fact = _facts()["my_oneThird|C1"]
+    # Non-terminating: half-even to 50 significant digits. ROUND_UP would end in 4.
     assert fact.value == "0." + "3" * 50
     assert fact.numeric_value == 1 / 3
     assert fact.numeric_value != 13
@@ -204,8 +205,10 @@ def test_fraction_outside_float_range_keeps_the_exact_decimal():
     # 1/10**400 is the digit 1 four hundred places right of the decimal point.
     assert underflow.value == "0." + "0" * 399 + "1"
     assert underflow.numeric_value is None
+    assert underflow.decimals == "INF"
     assert overflow.value == huge
     assert overflow.numeric_value is None
+    assert overflow.decimals == "INF"
 
 
 def test_fraction_value_is_exact_past_the_float_mantissa():
@@ -239,21 +242,64 @@ def test_fraction_value_is_exact_past_the_float_mantissa():
 
 
 def test_fraction_division_ignores_the_caller_decimal_context():
+    tiny = "1" + "0" * 100
     with decimal.localcontext() as ctx:
         ctx.prec = 2
+        ctx.rounding = decimal.ROUND_UP
+        ctx.Emax = 2
+        ctx.Emin = -9
         ctx.traps[decimal.Inexact] = True
-        facts = _with_facts("""
+        facts = _with_facts(f"""
   <my:pastMantissa contextRef="C1" unitRef="pure">
     <xbrli:numerator>9007199254740993</xbrli:numerator>
     <xbrli:denominator>1</xbrli:denominator>
   </my:pastMantissa>
+  <my:thousand contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1000</xbrli:numerator>
+    <xbrli:denominator>1</xbrli:denominator>
+  </my:thousand>
+  <my:tiny contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1</xbrli:numerator>
+    <xbrli:denominator>{tiny}</xbrli:denominator>
+  </my:tiny>
 """)
+        # ROUND_UP must not change the last digit of 1/3.
         assert facts["my_oneThird|C1"].value == "0." + "3" * 50
         assert facts["my_pastMantissa|C1"].value == "9007199254740993"
+        # Emax=2 would overflow 1000/1. Emin=-9 would underflow 10^-100 to 0.
+        thousand = facts["my_thousand|C1"]
+        assert thousand.value == "1000"
+        assert thousand.numeric_value == 1000.0
+        assert thousand.decimals == "INF"
+        tiny_fact = facts["my_tiny|C1"]
+        assert tiny_fact.value == "0." + "0" * 99 + "1"
+        assert tiny_fact.numeric_value == 1e-100
+        assert tiny_fact.decimals == "INF"
         assert ctx.prec == 2
+        assert ctx.rounding == decimal.ROUND_UP
+        assert ctx.Emax == 2
+        assert ctx.Emin == -9
         assert ctx.traps[decimal.Inexact]
         with pytest.raises(decimal.Inexact):
             decimal.Decimal(1) / decimal.Decimal(3)
+
+
+def test_terminating_quotient_of_one_over_two_to_the_hundred_is_exact():
+    """1/2**100 terminates. 5**100 has 70 digits, so 50 significant digits would drop the tail."""
+    power = 100
+    digits = str(5 ** power)
+    expected = "0." + "0" * (power - len(digits)) + digits
+    facts = _with_facts(f"""
+  <my:powerOfTwo contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1</xbrli:numerator>
+    <xbrli:denominator>{2 ** power}</xbrli:denominator>
+  </my:powerOfTwo>
+""")
+    fact = facts["my_powerOfTwo|C1"]
+    assert len(digits) == 70
+    assert fact.value == expected
+    assert fact.numeric_value == 2 ** -power
+    assert fact.decimals == "INF"
 
 
 def test_fraction_operand_includes_text_around_a_comment_or_processing_instruction():

@@ -7,7 +7,8 @@ units, footnotes, and entity information extraction.
 
 import math
 from datetime import datetime
-from decimal import Decimal, InvalidOperation, localcontext
+from decimal import MAX_EMAX, MIN_EMIN, ROUND_HALF_EVEN, Decimal, InvalidOperation, localcontext
+from decimal import Context as DecimalContext
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -114,7 +115,79 @@ def _format_decimal(value: Decimal) -> str:
     return text
 
 
-def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float]]]:
+def _decimal_context(prec: int) -> DecimalContext:
+    """Division context that does not inherit the caller's settings.
+
+    ``localcontext()`` with no argument copies the caller's rounding and
+    exponent limits. ``ROUND_UP`` would change the last digit of 1/3,
+    ``Emax=2`` overflows 1000/1, and ``Emin=-9`` underflows 10^-100 to zero.
+    """
+    return DecimalContext(
+        prec=prec,
+        rounding=ROUND_HALF_EVEN,
+        Emin=MIN_EMIN,
+        Emax=MAX_EMAX,
+        traps=[],
+        clamp=0,
+    )
+
+
+def _coefficient(value: Decimal) -> tuple[int, int]:
+    """Integer coefficient and base-10 exponent of a finite ``Decimal``."""
+    sign, digits, exponent = value.as_tuple()
+    coefficient = 0
+    for digit in digits:
+        coefficient = coefficient * 10 + digit
+    if sign:
+        coefficient = -coefficient
+    return coefficient, exponent
+
+
+def _exact_terminating_digits(numerator: Decimal, denominator: Decimal) -> Optional[int]:
+    """Significant digits of an exact quotient, or None when it does not terminate.
+
+    A reduced fraction terminates exactly when the denominator is ``2^a * 5^b``.
+    The digit count is the length of the integer that ``format(..., 'f')``
+    prints, with factors of ten folded into the exponent.
+    """
+    numerator_coeff, numerator_exp = _coefficient(numerator)
+    denominator_coeff, denominator_exp = _coefficient(denominator)
+    numerator_coeff = abs(numerator_coeff)
+    denominator_coeff = abs(denominator_coeff)
+    if denominator_coeff == 0:
+        return None
+    common = math.gcd(numerator_coeff, denominator_coeff)
+    numerator_coeff //= common
+    denominator_coeff //= common
+    shift = numerator_exp - denominator_exp
+    if shift > 0:
+        numerator_coeff *= 10 ** shift
+    elif shift < 0:
+        denominator_coeff *= 10 ** (-shift)
+    common = math.gcd(numerator_coeff, denominator_coeff)
+    numerator_coeff //= common
+    denominator_coeff //= common
+    twos = 0
+    while denominator_coeff % 2 == 0:
+        denominator_coeff //= 2
+        twos += 1
+    fives = 0
+    while denominator_coeff % 5 == 0:
+        denominator_coeff //= 5
+        fives += 1
+    if denominator_coeff != 1:
+        return None
+    coefficient = numerator_coeff
+    coefficient *= 1 << max(fives - twos, 0)
+    coefficient *= 5 ** max(twos - fives, 0)
+    if coefficient == 0:
+        return 1
+    while coefficient % 10 == 0:
+        coefficient //= 10
+    return len(str(coefficient))
+
+
+def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], bool]]:
     """Read an ``xbrli:fractionItemType`` fact, or None when the element is not one.
 
     A fraction item has no text of its own. Its value is the numerator divided
@@ -122,49 +195,64 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float]]]
     Joining the children's text reads 1/3 as 13, because blank text between the
     two elements is removed before ``itertext()`` runs (GH #1766).
 
-    ``value`` is the exact decimal quotient. ``numeric_value`` is that quotient
-    as a float, and is left unset when the float cannot represent it: a float
-    would round an integer past the mantissa, overflow to infinity, or
-    underflow to zero, and any of those is a different number. A quotient that
-    is not a finite decimal (a zero denominator, or a non-decimal) leaves the
-    numeric value unset and keeps the two parts separated by ``/`` so the
-    digits are not concatenated. A nil fact, or a nil numerator or denominator,
-    is an absent value: empty text and no numeric value.
+    The third item is True when the quotient is a finite decimal. The caller
+    then sets ``decimals`` to INF even if the float conversion cannot represent
+    that decimal. ``numeric_value`` is the float, and is left unset when the
+    float would round, overflow, or underflow to zero. A non-finite quotient
+    (a zero denominator, or a non-decimal) leaves the numeric value unset and
+    keeps the two parts separated by ``/``. A nil fact, or a nil numerator or
+    denominator, is an absent value.
 
-    The division runs in its own decimal context, with enough precision for the
-    operands and with traps cleared. The caller's precision and traps,
-    including ``Inexact``, must not change the quotient or abort the parse.
+    A terminating quotient (denominator ``2^a * 5^b`` in lowest terms) is
+    stored in full. ``1/2**100`` needs 70 significant digits; 50 would drop
+    the tail and still be marked INF. A non-terminating quotient is rounded
+    half-even to at least 50 significant digits, or to the operands' own
+    digit count when that is larger. ``1/3`` is therefore fifty 3s, not an
+    infinite expansion and not the ROUND_UP spelling that ends in 4.
     """
     numerator = _xbrli_child(element, 'numerator')
     denominator = _xbrli_child(element, 'denominator')
     if numerator is None or denominator is None:
         return None
     if _is_nil(element) or _is_nil(numerator) or _is_nil(denominator):
-        return '', None
+        return '', None, False
     # ``.text`` stops at a comment or processing instruction, so 1<!--c-->2
     # would be read as 1. The operand is the element's whole character content.
     num_text = ''.join(numerator.itertext()).strip()
     den_text = ''.join(denominator.itertext()).strip()
     if not num_text or not den_text:
-        return '', None
-    # 50 significant digits keeps 1/3 stable. A longer operand (a 60-digit
-    # integer, a 400-digit power of ten) needs at least its own digit count or
-    # the quotient is rounded before it is stored.
-    prec = max(50, _significant_digits(num_text) + _significant_digits(den_text))
+        return '', None, False
+    slash = f'{num_text}/{den_text}'
     try:
-        with localcontext() as ctx:
-            ctx.prec = prec
-            ctx.clear_traps()
-            quotient = Decimal(num_text) / Decimal(den_text)
+        # String construction is exact, so prec here does not round the
+        # operands. The explicit context only shuts out the caller's traps
+        # and exponent limits.
+        with localcontext(_decimal_context(1)):
+            numerator_value = Decimal(num_text)
+            denominator_value = Decimal(den_text)
+            invalid = (
+                not numerator_value.is_finite()
+                or not denominator_value.is_finite()
+                or denominator_value.is_zero()
+            )
+        if invalid:
+            return slash, None, False
+        exact = _exact_terminating_digits(numerator_value, denominator_value)
+        if exact is None:
+            # Non-terminating: do not grow without bound. 1/3 stays 50 digits.
+            prec = max(50, _significant_digits(num_text) + _significant_digits(den_text))
+        else:
+            prec = exact
+        quotient = _decimal_context(prec).divide(numerator_value, denominator_value)
     except (InvalidOperation, ZeroDivisionError, ValueError, TypeError):
-        return f'{num_text}/{den_text}', None
+        return slash, None, False
     if not quotient.is_finite():
-        return f'{num_text}/{den_text}', None
+        return slash, None, False
     value = _format_decimal(quotient)
     numeric = float(quotient)
     if not math.isfinite(numeric) or (numeric == 0.0 and quotient != 0):
-        return value, None
-    return value, numeric
+        return value, None, True
+    return value, numeric, True
 
 
 class InstanceParser(BaseParser):
@@ -659,8 +747,11 @@ class InstanceParser(BaseParser):
                 # a plain numeric fact does.
                 fraction = _fraction_item(element)
                 if fraction is not None:
-                    value, numeric_value = fraction
-                    if numeric_value is not None:
+                    value, numeric_value, evaluated = fraction
+                    # INF is the fraction's precision (§4.6.6), including when
+                    # the quotient does not fit in a float. A nil or non-finite
+                    # fraction did not evaluate, so its decimals stay as filed.
+                    if evaluated:
                         decimals = INFINITE_PRECISION
                 else:
                     # Get value - optimize string handling
