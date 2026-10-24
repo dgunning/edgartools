@@ -462,7 +462,6 @@ def pytest_collection_modifyitems(config, items):
     # explicit `network` marker from their authors (400 KB+ primary documents).
     REGRESSION_NETWORK_FILES = {
         'test_entityfacts_no_duplicate_quarterly_periods.py',
-        'test_issue_282_xbrl_api_regression.py',
         'test_issue_408_cashflow_empty_periods.py',
         'test_issue_416_segment_member_values.py',
         'test_issue_420_multi_year_income_statements.py',

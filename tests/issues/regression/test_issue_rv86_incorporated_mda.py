@@ -28,6 +28,7 @@ import pytest
 
 from edgar.documents import parse_html
 from edgar.documents.config import ParserConfig
+from tests._offline_filings import offline_filing
 
 MDA = re.compile(r"management.{0,3}s\s+discussion\s+and\s+analysis", re.IGNORECASE)
 
@@ -111,16 +112,23 @@ class TestSyntheticReattribution:
         assert 'narrative paragraph number 700' in item7.text()
 
 
-@pytest.mark.network
 class TestRealWorldIncorporatedMDA:
-    """Ground-truth assertions against the filings from GH #873 (pinned accessions)."""
+    """Ground-truth assertions against the filings from GH #873 (pinned accessions).
 
+    XOM's and JPM's full submissions are 30 MB and 72 MB, too large for a cassette,
+    so those two stay on the network. AAPL's replays the cassette
+    test_issue_826.py records for the same filing.
+    """
+
+    @pytest.fixture
+    def vcr_cassette_name(self):
+        return "filing_0000320193-25-000079"
+
+    @pytest.mark.network
     def test_exxonmobil_financial_section(self):
-        import edgar
-
         # XOM 10-K, period 2025-12-31. Item 7 was a 265-char pointer; the real
         # ~314KB MD&A was absorbed into part_iv_item_16.
-        ek = edgar.get_by_accession_number("0000034088-26-000045").obj()
+        ek = offline_filing("0000034088-26-000045").obj()
 
         item7 = ek["Item 7"] or ""
         assert len(item7) > 50000, f"XOM Item 7 not recovered ({len(item7)} chars)"
@@ -139,14 +147,13 @@ class TestRealWorldIncorporatedMDA:
             "XOM Item 16 missing — cannot verify the trailing-bucket clamp (GH #873)"
         assert len(item16.text()) < 100000, "XOM Item 16 still absorbing the Financial Section"
 
+    @pytest.mark.network
     def test_jpmorgan_mda_gap_fill(self):
-        import edgar
-
         # JPM 10-K, period 2025-12-31. Item 7 pointer "appears on pages 46-160";
         # the real ~999KB MD&A+financials absorbed into part_iv_item_15. JPM has
         # no "Management's Discussion and Analysis" deferred title link, so Item 7
         # is recovered via the end-extension gap-fill.
-        ek = edgar.get_by_accession_number("0001628280-26-008131").obj()
+        ek = offline_filing("0001628280-26-008131").obj()
 
         item7 = ek["Item 7"] or ""
         assert len(item7) > 50000, f"JPM Item 7 not recovered ({len(item7)} chars)"
@@ -166,12 +173,11 @@ class TestRealWorldIncorporatedMDA:
             "JPM Item 15 missing — cannot verify the trailing-bucket clamp (GH #873)"
         assert len(item15.text()) < 100000, "JPM Item 15 still absorbing the supplement"
 
+    @pytest.mark.vcr
     def test_apple_control_unchanged(self):
-        import edgar
-
         # AAPL 10-K, period 2025-09-27 — a normal filer whose Item 7 already holds
         # the ~18KB MD&A. The gate must NOT fire (no re-attribution, no inflation).
-        ek = edgar.get_by_accession_number("0000320193-25-000079").obj()
+        ek = offline_filing("0000320193-25-000079").obj()
 
         item7 = ek["Item 7"] or ""
         assert MDA.search(item7), "AAPL Item 7 missing MD&A"

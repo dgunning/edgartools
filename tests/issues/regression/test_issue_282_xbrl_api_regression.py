@@ -19,6 +19,18 @@ from edgar.xbrl.xbrl import XBRL
 
 
 
+@pytest.fixture
+def vcr_cassette_name():
+    """Every test here reads Apple's newest 10-K: 0000320193-25-000079 when recorded.
+
+    That is the filing test_issue_826.py and test_issue_rv86_incorporated_mda.py
+    read, so all three share its cassette; this file added Apple's submissions to
+    it (recorded 2026-10-24).
+    """
+    return "filing_0000320193-25-000079"
+
+
+@pytest.mark.vcr
 class TestIssue282XBRLAPIRegression:
     """Test that XBRL API works for extracting diluted shares data."""
 
