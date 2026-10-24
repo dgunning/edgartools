@@ -143,12 +143,34 @@ def _coefficient(value: Decimal) -> tuple[int, int]:
     return coefficient, exponent
 
 
+def _decimal_digit_count(number: int) -> int:
+    """Decimal digits of a non-negative int, without converting it to a string.
+
+    ``str`` of an int longer than the default 4300 digits raises ``ValueError``.
+    ``1/2**6200`` has a 4334-digit significand, so that conversion cannot be
+    the way the count is computed.
+    """
+    if number == 0:
+        return 1
+    # floor(log10(number)) + 1, from log2, then corrected against a power of
+    # ten. The log uses this context so the caller's precision cannot move it.
+    log_ctx = _decimal_context(50)
+    log10_2 = log_ctx.divide(log_ctx.ln(Decimal(2)), log_ctx.ln(Decimal(10)))
+    scaled = log_ctx.multiply(Decimal(number.bit_length() - 1), log10_2)
+    estimate = int(scaled) + 1
+    while 10 ** estimate <= number:
+        estimate += 1
+    while estimate > 1 and 10 ** (estimate - 1) > number:
+        estimate -= 1
+    return estimate
+
+
 def _exact_terminating_digits(numerator: Decimal, denominator: Decimal) -> Optional[int]:
     """Significant digits of an exact quotient, or None when it does not terminate.
 
     A reduced fraction terminates exactly when the denominator is ``2^a * 5^b``.
-    The digit count is the length of the integer that ``format(..., 'f')``
-    prints, with factors of ten folded into the exponent.
+    The digit count is the length of that significand after factors of ten are
+    folded into the exponent.
     """
     numerator_coeff, numerator_exp = _coefficient(numerator)
     denominator_coeff, denominator_exp = _coefficient(denominator)
@@ -184,7 +206,7 @@ def _exact_terminating_digits(numerator: Decimal, denominator: Decimal) -> Optio
         return 1
     while coefficient % 10 == 0:
         coefficient //= 10
-    return len(str(coefficient))
+    return _decimal_digit_count(coefficient)
 
 
 def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], bool]]:
@@ -239,7 +261,7 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], 
             return slash, None, False
         exact = _exact_terminating_digits(numerator_value, denominator_value)
         if exact is None:
-            # Non-terminating: do not grow without bound. 1/3 stays 50 digits.
+            # Terminating quotients are exact; recurring ones are rounded half-even to 50 significant digits. decimals stays INF.
             prec = max(50, _significant_digits(num_text) + _significant_digits(den_text))
         else:
             prec = exact
