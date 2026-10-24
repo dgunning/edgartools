@@ -14816,13 +14816,13 @@
   },
   "EffectOfExchangeRateChangesOnCashAndCashEquivalents": {
     "standard_tags": [
-      "NetChangeInCash"
+      "ForeignExchangeEffectOnCash"
     ],
-    "display_name": "Net Change in Cash",
+    "display_name": "Effect of Exchange Rate on Cash",
     "statement": "CashFlowStatement",
-    "section": null,
-    "is_total": true,
-    "confidence": 0.982,
+    "section": "Cash Flow Totals",
+    "is_total": false,
+    "confidence": 0.9,
     "company_count": 683,
     "occurrence_rate": 0.076,
     "temporal_consistency": 0.667,
@@ -24465,6 +24465,72 @@
     "years_present": 6,
     "first_year": 2020,
     "last_year": 2025
+  },
+  "LesseeOperatingLeaseLiabilityPaymentsDueAfterYearFive": {
+    "standard_tags": [
+      "OperatingLeaseCommitmentAfterYear5"
+    ],
+    "display_name": "Operating Lease Commitment, Thereafter",
+    "statement": "Commitments",
+    "section": "Operating Lease Commitments",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 2589
+  },
+  "LesseeOperatingLeaseLiabilityPaymentsDueNextTwelveMonths": {
+    "standard_tags": [
+      "OperatingLeaseCommitmentYear1"
+    ],
+    "display_name": "Operating Lease Commitment, Year 1",
+    "statement": "Commitments",
+    "section": "Operating Lease Commitments",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 3762
+  },
+  "LesseeOperatingLeaseLiabilityPaymentsDueYearFive": {
+    "standard_tags": [
+      "OperatingLeaseCommitmentYear5"
+    ],
+    "display_name": "Operating Lease Commitment, Year 5",
+    "statement": "Commitments",
+    "section": "Operating Lease Commitments",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 2782
+  },
+  "LesseeOperatingLeaseLiabilityPaymentsDueYearFour": {
+    "standard_tags": [
+      "OperatingLeaseCommitmentYear4"
+    ],
+    "display_name": "Operating Lease Commitment, Year 4",
+    "statement": "Commitments",
+    "section": "Operating Lease Commitments",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 3243
+  },
+  "LesseeOperatingLeaseLiabilityPaymentsDueYearThree": {
+    "standard_tags": [
+      "OperatingLeaseCommitmentYear3"
+    ],
+    "display_name": "Operating Lease Commitment, Year 3",
+    "statement": "Commitments",
+    "section": "Operating Lease Commitments",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 3489
+  },
+  "LesseeOperatingLeaseLiabilityPaymentsDueYearTwo": {
+    "standard_tags": [
+      "OperatingLeaseCommitmentYear2"
+    ],
+    "display_name": "Operating Lease Commitment, Year 2",
+    "statement": "Commitments",
+    "section": "Operating Lease Commitments",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 3690
   },
   "LeveragedLeasesNetInvestmentInLeveragedLeasesDisclosureInvestmentInLeveragedLeasesNet": {
     "standard_tags": [
@@ -42465,7 +42531,7 @@
   },
   "ifrs-full_EffectOfExchangeRateChangesOnCashAndCashEquivalents": {
     "standard_tags": [
-      "NetChangeInCash"
+      "ForeignExchangeEffectOnCash"
     ]
   },
   "ifrs-full_EmployeeBenefitsExpense": {
