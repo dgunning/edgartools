@@ -252,6 +252,78 @@ def _sibling_readings(home: str, siblings) -> Optional[set]:
             votes.add(fits[0])
     return votes if len(votes) == 1 else None
 
+_FROM_SIBLINGS = "the other currencies' rates in the filing"
+
+
+def _unit_readings(quote: Optional[str]) -> Optional[set]:
+    """The readings a rate's unit allows: a direction, never a scale, or None."""
+    if quote == _TARGET_PER_HOME:
+        return {_USD_PER_HOME}
+    if quote == _HOME_PER_TARGET:
+        return {_HOME_PER_USD, _HOME_PER_100_USD}
+    return None
+
+
+def _add_sibling(siblings: Dict[tuple, List[tuple]], kind: str, row, date_columns,
+                 other: Optional[str], hedged: bool) -> None:
+    """Add another currency's rate to ``siblings[(kind, year)]`` when it is usable."""
+    value = row.get('numeric_value')
+    year = _extract_year(_first_date(row, *date_columns))
+    if (other is not None and not hedged and year and value is not None
+            and math.isfinite(value) and value > 0):
+        siblings.setdefault((kind, year), []).append((other, value))
+
+
+def _rate_candidate(row, dimensions, member, quote, date_columns, hedged) -> tuple:
+    """Read one target-currency rate fact as ``(reason, year, fact)``.
+
+    ``fact`` is the candidate, or None with ``reason`` 'undated', 'hedged' or
+    'unusable'; a unit that is not a rate unit gives ``(None, None, None)``.
+    """
+    if quote is None:
+        return None, None, None
+    period_date = _first_date(row, *date_columns)
+    year = _extract_year(period_date)
+    if not year:
+        return 'undated', None, None
+    if hedged:
+        # A hedging instrument's contracted rate, not a translation rate.
+        return 'hedged', year, None
+    value = row.get('numeric_value')
+    if value is None or pd.isna(value) or not math.isfinite(value) or value == 0:
+        return 'unusable', year, None
+    extra = len(dimensions) - (1 if member is not None else 0)
+    return None, year, {
+        'extra': extra, 'value': value, 'quote': quote,
+        # A divide unit names the pair itself; a pure number needs the member.
+        'named': member is not None or quote != _PURE,
+        'decimals': row.get('decimals'), 'date': str(period_date)[:10],
+        'days': _days(row.get('period_start'), period_date),
+    }
+
+
+def _fewest_dimensions(facts: List[dict]) -> List[dict]:
+    """The facts with the fewest dimensions besides the currency axis."""
+    # A fact naming the currency beats one that does not.
+    if any(f['named'] for f in facts):
+        facts = [f for f in facts if f['named']]
+    fewest = min(f['extra'] for f in facts)
+    return [f for f in facts if f['extra'] == fewest]
+
+
+def _at_period_end(facts: List[dict], anchor) -> tuple:
+    """``(facts, at_end, latest)``: the facts at the period end when any are,
+    narrowed to the longest period and then the latest date."""
+    at_end = [f for f in facts if anchor and _near_period_end(f['date'], anchor)]
+    if at_end:
+        facts = at_end
+    # The longest period first, so a half year never beats the full year.
+    longest = max(f['days'] for f in facts)
+    facts = [f for f in facts if f['days'] == longest]
+    latest = max(f['date'] for f in facts)
+    facts = [f for f in facts if f['date'] == latest]
+    return facts, at_end, latest
+
 __all__ = ['CurrencyConverter', 'ExchangeRate']
 
 
@@ -501,6 +573,35 @@ class CurrencyConverter:
         that the same year's table of this kind names.
         """
         where = f"the {kind} rate for {year} ({value})"
+        fits = self._plausible_readings(where, value, named, named_in_table)
+        if fits is None:
+            return None, None
+
+        # In-filing signals, strongest first: the other currencies' rates in the
+        # same table, then the unit's numerator and denominator. A unit is only
+        # a hint, since filers write it backwards (GH #1653 review), and it
+        # gives a direction, never a scale.
+        siblings_say = _sibling_readings(self.home_currency, siblings)
+        unit_says = _unit_readings(quote)
+
+        if len(fits) == 1:
+            reading, how = self._settle_one_reading(where, fits[0], siblings_say, unit_says)
+        else:
+            reading, how = self._settle_readings(where, fits, siblings_say, unit_says)
+        if reading is None:
+            return None, None
+        if not named:
+            how += "; names no currency, and no other currency is named beside it"
+            self._extraction_warnings.append(
+                f"{where} names no currency ({_CURRENCY_AXIS}); it was read as a "
+                f"{self.target_currency} rate because the table holds no rate that "
+                f"names another currency"
+            )
+        return reading, how
+
+    def _plausible_readings(self, where, value, named, named_in_table) -> Optional[list]:
+        """The readings that put ``value`` in the pair's plausible range, or None
+        with the reason in extraction_warnings."""
         if not named and named_in_table:
             # A rate with no currency member, in a table that names others,
             # could be any of them: GBP per EUR beside a named yen rate is not a
@@ -510,7 +611,7 @@ class CurrencyConverter:
                 f"the table also holds rates for {', '.join(sorted(named_in_table))}, "
                 f"so it may be any currency's"
             )
-            return None, None
+            return None
         bounds = _plausible_range(self.home_currency, self.target_currency)
         if bounds is None:
             self._extraction_warnings.append(
@@ -518,80 +619,64 @@ class CurrencyConverter:
                 f"{self.target_currency} per {self.home_currency}, so its direction "
                 f"cannot be checked"
             )
-            return None, None
+            return None
         low, high = bounds
         fits = [r for r, factor in _READINGS.items() if low <= factor(value) <= high]
-        labels = ' or '.join(self._reading_label(r) for r in fits)
-
-        # In-filing signals, strongest first: the other currencies' rates in the
-        # same table, then the unit's numerator and denominator. A unit is only
-        # a hint, since filers write it backwards (GH #1653 review), and it
-        # gives a direction, never a scale.
-        siblings_say = _sibling_readings(self.home_currency, siblings)
-        from_siblings = "the other currencies' rates in the filing"
-        if quote == _TARGET_PER_HOME:
-            unit_says = {_USD_PER_HOME}
-        elif quote == _HOME_PER_TARGET:
-            unit_says = {_HOME_PER_USD, _HOME_PER_100_USD}
-        else:
-            unit_says = None
-
         if not fits:
             self._extraction_warnings.append(
                 f"{where} was not used: no reading of it is a plausible "
                 f"{self.target_currency} rate for {self.home_currency}"
             )
-            return None, None
-        if len(fits) == 1:
-            reading = fits[0]
-            label = self._reading_label(reading)
-            how = "only plausible reading"
-            if siblings_say is not None and reading not in siblings_say:
-                # Other currencies' rates pointing elsewhere: the data
-                # disagrees with itself, so nothing is trusted.
-                self._extraction_warnings.append(
-                    f"{where} was not used: it is plausible only as {label}, "
-                    f"which {from_siblings} contradict"
-                )
-                return None, None
-            if unit_says is not None and reading not in unit_says:
-                # Ecopetrol tags 4,409 COP per USD as USD/COP, Genmab 0.1452 USD
-                # per DKK as DKK/USD. The value can only be one thing.
-                how += "; its unit says the opposite"
-                self._extraction_warnings.append(
-                    f"{where} is plausible only as {label}, which its unit "
-                    f"contradicts; it was read as {label}"
-                )
-        else:
-            if siblings_say is not None:
-                narrowed, source = [r for r in fits if r in siblings_say], from_siblings
-            elif unit_says is not None and _HOME_PER_100_USD not in fits:
-                narrowed, source = [r for r in fits if r in unit_says], "its unit"
-            else:
-                # Nothing, or a unit asked to choose a scale: EUR/SEK 11.4 fits
-                # as SEK per EUR and as EUR per 100 SEK (GH #1651 review).
-                narrowed, source = [], None
-            if len(narrowed) != 1:
-                self._extraction_warnings.append(
-                    f"{where} was not used: it is plausible as {labels}, and nothing "
-                    f"in the filing says which"
-                )
-                return None, None
-            reading = narrowed[0]
-            how = f"plausible either way, settled by {source}"
-            if source == from_siblings and unit_says is not None and reading not in unit_says:
-                label = self._reading_label(reading)
-                how += "; its unit says the opposite"
-                self._extraction_warnings.append(
-                    f"{where} is plausible as {labels}; {from_siblings} say {label}, "
-                    f"which its unit contradicts"
-                )
-        if not named:
-            how += "; names no currency, and no other currency is named beside it"
+            return None
+        return fits
+
+    def _settle_one_reading(self, where, reading, siblings_say, unit_says):
+        """``(reading, how)`` for a rate with one plausible reading, or ``(None, None)``."""
+        label = self._reading_label(reading)
+        how = "only plausible reading"
+        if siblings_say is not None and reading not in siblings_say:
+            # Other currencies' rates pointing elsewhere: the data
+            # disagrees with itself, so nothing is trusted.
             self._extraction_warnings.append(
-                f"{where} names no currency ({_CURRENCY_AXIS}); it was read as a "
-                f"{self.target_currency} rate because the table holds no rate that "
-                f"names another currency"
+                f"{where} was not used: it is plausible only as {label}, "
+                f"which {_FROM_SIBLINGS} contradict"
+            )
+            return None, None
+        if unit_says is not None and reading not in unit_says:
+            # Ecopetrol tags 4,409 COP per USD as USD/COP, Genmab 0.1452 USD
+            # per DKK as DKK/USD. The value can only be one thing.
+            how += "; its unit says the opposite"
+            self._extraction_warnings.append(
+                f"{where} is plausible only as {label}, which its unit "
+                f"contradicts; it was read as {label}"
+            )
+        return reading, how
+
+    def _settle_readings(self, where, fits, siblings_say, unit_says):
+        """``(reading, how)`` for a rate plausible more than one way, or ``(None, None)``."""
+        labels = ' or '.join(self._reading_label(r) for r in fits)
+        if siblings_say is not None:
+            narrowed, source = [r for r in fits if r in siblings_say], _FROM_SIBLINGS
+        elif unit_says is not None and _HOME_PER_100_USD not in fits:
+            narrowed, source = [r for r in fits if r in unit_says], "its unit"
+        else:
+            # Nothing, or a unit asked to choose a scale: EUR/SEK 11.4 fits
+            # as SEK per EUR and as EUR per 100 SEK (GH #1651 review).
+            narrowed, source = [], None
+        if len(narrowed) != 1:
+            self._extraction_warnings.append(
+                f"{where} was not used: it is plausible as {labels}, and nothing "
+                f"in the filing says which"
+            )
+            return None, None
+        reading = narrowed[0]
+        how = f"plausible either way, settled by {source}"
+        if source == _FROM_SIBLINGS and unit_says is not None and reading not in unit_says:
+            label = self._reading_label(reading)
+            how += "; its unit says the opposite"
+            self._extraction_warnings.append(
+                f"{where} is plausible as {labels}; {_FROM_SIBLINGS} say {label}, "
+                f"which its unit contradicts"
             )
         return reading, how
 
@@ -644,15 +729,36 @@ class CurrencyConverter:
         if df.empty:
             return []
         target = self.target_currency.upper()
+        candidates, hedge_rows, skipped = self._collect_candidates(
+            df, kind, date_columns, unit_quote, sibling_currency, siblings)
+
+        fiscal_year_end, report_end = self._period_end_anchors()
+        selected = []
+        for year, facts in candidates.items():
+            rate = self._choose_rate(kind, target, year, facts, fiscal_year_end, report_end)
+            if rate is not None:
+                selected.append(rate)
+        self._warn_skipped(kind, target, candidates, hedge_rows, skipped)
+        return selected
+
+    def _collect_candidates(self, df, kind: str, date_columns, unit_quote, sibling_currency,
+                            siblings: Dict[tuple, List[tuple]]) -> tuple:
+        """Sort one rate concept's facts into ``(candidates, hedge_rows, skipped)``.
+
+        ``candidates`` maps year to the facts that may be its target rate,
+        ``hedge_rows`` counts hedge-axis rates per year and ``skipped`` counts
+        'undated' and 'unusable' facts. Other currencies' rates go to ``siblings``.
+        """
+        target = self.target_currency.upper()
         # year -> [(number of dimensions besides the currency axis, value, quote)]
         candidates: Dict[int, List[tuple]] = {}
         hedge_rows: Counter = Counter()
-        # Rate facts of an accepted unit whose period gave no year. Skipping one
-        # silently left a filing's closing rates missing with no warning (GH #1652).
-        undated = 0
-        # Empty, zero or non-finite values: a zero rate passed an `is None`
-        # check and to_usd() then divided by it.
-        unusable = 0
+        # 'undated': rate facts of an accepted unit whose period gave no year.
+        # Skipping one silently left a filing's closing rates missing with no
+        # warning (GH #1652).
+        # 'unusable': empty, zero or non-finite values: a zero rate passed an
+        # `is None` check and to_usd() then divided by it.
+        skipped: Counter = Counter()
 
         for _, row in df.iterrows():
             unit_ref = row.get('unit_ref', '')
@@ -663,92 +769,72 @@ class CurrencyConverter:
             if other is not None or (member is not None and _local_name(member).upper() != target):
                 # The rate of another currency, e.g. JPY for GSK. Not used, but
                 # it shows the filing's convention (198 JPY per GBP).
-                value = row.get('numeric_value')
-                year = _extract_year(_first_date(row, *date_columns))
-                if (other is not None and not hedged and year and value is not None
-                        and math.isfinite(value) and value > 0):
-                    siblings.setdefault((kind, year), []).append((other, value))
+                _add_sibling(siblings, kind, row, date_columns, other, hedged)
                 continue
-            quote = unit_quote(unit_ref)
-            if quote is None:
-                continue
-            period_date = _first_date(row, *date_columns)
-            year = _extract_year(period_date)
-            if not year:
-                undated += 1
-                continue
-            if hedged:
-                # A hedging instrument's contracted rate, not a translation rate.
+            reason, year, fact = _rate_candidate(row, dimensions, member, unit_quote(unit_ref),
+                                                 date_columns, hedged)
+            if fact is not None:
+                candidates.setdefault(year, []).append(fact)
+            elif reason == 'hedged':
                 hedge_rows[year] += 1
-                continue
-            value = row.get('numeric_value')
-            if value is None or pd.isna(value) or not math.isfinite(value) or value == 0:
-                unusable += 1
-                continue
-            extra = len(dimensions) - (1 if member is not None else 0)
-            candidates.setdefault(year, []).append({
-                'extra': extra, 'value': value, 'quote': quote,
-                # A divide unit names the pair itself; a pure number needs the member.
-                'named': member is not None or quote != _PURE,
-                'decimals': row.get('decimals'), 'date': str(period_date)[:10],
-                'days': _days(row.get('period_start'), period_date),
-            })
+            elif reason is not None:
+                skipped[reason] += 1
+        return candidates, hedge_rows, skipped
 
-        fiscal_year_end, report_end = self._period_end_anchors()
-        selected = []
-        for year, facts in candidates.items():
-            if report_end is not None and report_end.year == year:
-                anchor = (report_end.month, report_end.day)
-            else:
-                anchor = fiscal_year_end
-            # The translation rate has the fewest other dimensions; of those, the
-            # one at the filing's period end (not an interim or IFRS transition
-            # date), and for an average the longest period ending there. The
-            # period end is the filer's: a March year end's 31 March rate, not a
-            # later September rate in the same calendar year; an interim
-            # report's own date counts only for its own year (GH #1650 review).
-            # A fact naming the currency beats one that does not.
-            if any(f['named'] for f in facts):
-                facts = [f for f in facts if f['named']]
-            fewest = min(f['extra'] for f in facts)
-            facts = [f for f in facts if f['extra'] == fewest]
-            dates = sorted({f['date'] for f in facts})
-            at_end = [f for f in facts if anchor and _near_period_end(f['date'], anchor)]
-            if at_end:
-                facts = at_end
-            # The longest period first, so a half year never beats the full year.
-            longest = max(f['days'] for f in facts)
-            facts = [f for f in facts if f['days'] == longest]
-            latest = max(f['date'] for f in facts)
-            facts = [f for f in facts if f['date'] == latest]
-            if anchor and not at_end:
-                self._extraction_warnings.append(
-                    f"no {kind} {target} rate for {year} is dated at the filing's "
-                    f"period end (--{anchor[0]:02d}-{anchor[1]:02d}); the one dated "
-                    f"{latest} was used"
-                )
-            elif not anchor and len(dates) > 1:
-                missing = "fiscal year end" if report_end is not None else "period end"
-                self._extraction_warnings.append(
-                    f"the filing states no {missing}; of the {kind} {target} rates "
-                    f"for {year} dated {', '.join(dates)}, the one dated {latest} was used"
-                )
-            quotes = {f['quote'] for f in facts}
-            value = _agreed_value([(f['value'], f['decimals']) for f in facts])
-            values = sorted({f['value'] for f in facts})
-            if len(quotes) == 1 and value is not None:
-                selected.append((year, kind, value, quotes.pop(), facts[0]['named']))
-            else:
-                self._extraction_warnings.append(
-                    f"{len(values)} different {kind} {target} rates for {year} "
-                    f"({', '.join(str(v) for v in values)}); none was used"
-                )
+    def _choose_rate(self, kind: str, target: str, year: int, facts: List[dict],
+                     fiscal_year_end, report_end) -> Optional[tuple]:
+        """The ``(year, kind, value, quote, named)`` rate for one year, or None
+        with the reason in extraction_warnings."""
+        if report_end is not None and report_end.year == year:
+            anchor = (report_end.month, report_end.day)
+        else:
+            anchor = fiscal_year_end
+        # The translation rate has the fewest other dimensions; of those, the
+        # one at the filing's period end (not an interim or IFRS transition
+        # date), and for an average the longest period ending there. The
+        # period end is the filer's: a March year end's 31 March rate, not a
+        # later September rate in the same calendar year; an interim
+        # report's own date counts only for its own year (GH #1650 review).
+        facts = _fewest_dimensions(facts)
+        dates = sorted({f['date'] for f in facts})
+        facts, at_end, latest = _at_period_end(facts, anchor)
+        self._warn_off_anchor(kind, target, year, anchor, at_end, dates, latest, report_end)
+
+        quotes = {f['quote'] for f in facts}
+        value = _agreed_value([(f['value'], f['decimals']) for f in facts])
+        values = sorted({f['value'] for f in facts})
+        if len(quotes) == 1 and value is not None:
+            return (year, kind, value, quotes.pop(), facts[0]['named'])
+        self._extraction_warnings.append(
+            f"{len(values)} different {kind} {target} rates for {year} "
+            f"({', '.join(str(v) for v in values)}); none was used"
+        )
+        return None
+
+    def _warn_off_anchor(self, kind, target, year, anchor, at_end, dates, latest, report_end):
+        """Say when a year's rate is not dated at the period end, or no period end is known."""
+        if anchor and not at_end:
+            self._extraction_warnings.append(
+                f"no {kind} {target} rate for {year} is dated at the filing's "
+                f"period end (--{anchor[0]:02d}-{anchor[1]:02d}); the one dated "
+                f"{latest} was used"
+            )
+        elif not anchor and len(dates) > 1:
+            missing = "fiscal year end" if report_end is not None else "period end"
+            self._extraction_warnings.append(
+                f"the filing states no {missing}; of the {kind} {target} rates "
+                f"for {year} dated {', '.join(dates)}, the one dated {latest} was used"
+            )
+
+    def _warn_skipped(self, kind, target, candidates, hedge_rows, skipped):
+        """Report the rate facts of one concept that were set aside."""
         for year, count in sorted(hedge_rows.items()):
             if year not in candidates:
                 self._extraction_warnings.append(
                     f"the only {kind} {target} rates for {year} are {count} "
                     f"hedging-instrument rate(s), which were not used"
                 )
+        undated, unusable = skipped['undated'], skipped['unusable']
         if undated:
             self._extraction_warnings.append(
                 f"{undated} {kind} exchange rate fact(s) had no period date and were not used"
@@ -758,7 +844,6 @@ class CurrencyConverter:
                 f"{unusable} {kind} exchange rate fact(s) had no usable value "
                 f"(empty, zero or not finite) and were not used"
             )
-        return selected
 
     def to_usd(
         self,
