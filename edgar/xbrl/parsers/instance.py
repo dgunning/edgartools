@@ -7,7 +7,7 @@ units, footnotes, and entity information extraction.
 
 import math
 from datetime import datetime
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal, InvalidOperation, localcontext
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
@@ -90,11 +90,28 @@ def _xbrli_child(element: ET.Element, local_name: str) -> Optional[ET.Element]:
     return None
 
 
-def _format_fraction_value(numeric: float) -> str:
-    """Lexical form of a fraction's quotient. Whole numbers drop the trailing ``.0``."""
-    if numeric.is_integer():
-        return str(int(numeric))
-    return str(numeric)
+def _significant_digits(text: str) -> int:
+    """Significant digits in a decimal lexical form, at least one.
+
+    Used only to size the division context. A non-decimal still returns a
+    count; the division then fails and the caller keeps the slash form.
+    """
+    body = text.strip().lstrip('+-')
+    exponent = body.lower().find('e')
+    if exponent != -1:
+        body = body[:exponent]
+    body = body.replace('.', '', 1).lstrip('0')
+    return max(len(body), 1)
+
+
+def _format_decimal(value: Decimal) -> str:
+    """Fixed-point form of an exact quotient, without a trailing ``.0``."""
+    text = format(value, 'f')
+    if '.' in text:
+        text = text.rstrip('0').rstrip('.')
+    if text in ('', '-'):
+        return '0'
+    return text
 
 
 def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float]]]:
@@ -105,12 +122,18 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float]]]
     Joining the children's text reads 1/3 as 13, because blank text between the
     two elements is removed before ``itertext()`` runs (GH #1766).
 
-    A quotient that cannot be computed (a zero denominator, a non-decimal, or a
-    value that does not fit in a float) leaves the numeric value unset, the
-    same way ``float()`` leaves it unset for any other text that is not a
-    number, and keeps the two parts separated by ``/`` so the digits are not
-    concatenated into a different number. A nil fact, or a nil numerator or
-    denominator, is an absent value: empty text and no numeric value.
+    ``value`` is the exact decimal quotient. ``numeric_value`` is that quotient
+    as a float, and is left unset when the float cannot represent it: a float
+    would round an integer past the mantissa, overflow to infinity, or
+    underflow to zero, and any of those is a different number. A quotient that
+    is not a finite decimal (a zero denominator, or a non-decimal) leaves the
+    numeric value unset and keeps the two parts separated by ``/`` so the
+    digits are not concatenated. A nil fact, or a nil numerator or denominator,
+    is an absent value: empty text and no numeric value.
+
+    The division runs in its own decimal context, with enough precision for the
+    operands and with traps cleared. The caller's precision and traps,
+    including ``Inexact``, must not change the quotient or abort the parse.
     """
     numerator = _xbrli_child(element, 'numerator')
     denominator = _xbrli_child(element, 'denominator')
@@ -118,21 +141,30 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float]]]
         return None
     if _is_nil(element) or _is_nil(numerator) or _is_nil(denominator):
         return '', None
-    num_text = (numerator.text or '').strip()
-    den_text = (denominator.text or '').strip()
+    # ``.text`` stops at a comment or processing instruction, so 1<!--c-->2
+    # would be read as 1. The operand is the element's whole character content.
+    num_text = ''.join(numerator.itertext()).strip()
+    den_text = ''.join(denominator.itertext()).strip()
     if not num_text or not den_text:
         return '', None
+    # 50 significant digits keeps 1/3 stable. A longer operand (a 60-digit
+    # integer, a 400-digit power of ten) needs at least its own digit count or
+    # the quotient is rounded before it is stored.
+    prec = max(50, _significant_digits(num_text) + _significant_digits(den_text))
     try:
-        numerator_value = Decimal(num_text)
-        denominator_value = Decimal(den_text)
-        numeric = float(numerator_value / denominator_value)
+        with localcontext() as ctx:
+            ctx.prec = prec
+            ctx.clear_traps()
+            quotient = Decimal(num_text) / Decimal(den_text)
     except (InvalidOperation, ZeroDivisionError, ValueError, TypeError):
         return f'{num_text}/{den_text}', None
-    # A quotient that does not fit in a float must not become 0 or inf: that
-    # is a different number, the same failure as joining the digits.
-    if not math.isfinite(numeric) or (numeric == 0.0 and numerator_value != 0):
+    if not quotient.is_finite():
         return f'{num_text}/{den_text}', None
-    return _format_fraction_value(numeric), numeric
+    value = _format_decimal(quotient)
+    numeric = float(quotient)
+    if not math.isfinite(numeric) or (numeric == 0.0 and quotient != 0):
+        return value, None
+    return value, numeric
 
 
 class InstanceParser(BaseParser):

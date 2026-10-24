@@ -9,10 +9,24 @@ INF because a fraction item carries no ``decimals`` attribute (§4.6.6). The
 instance parser joined the children's text, and with blank text removed the
 digits ran together, so numerator 1 and denominator 3 were read as 13.
 
-No SEC filing is cited. The issue reports that no US GAAP, SRT or DEI concept
-uses ``fractionItemType`` and that none appeared in 80 sampled SEC instances, so
-the ground truth is the spec's own 1/3, not a filing value.
+The stored text is the decimal quotient, not a float. ``9007199254740993``
+stays ``9007199254740993`` (the float of it is ``9007199254740992``), and the
+division does not use the caller's decimal context.
+
+Real filing: Apple Inc. FY2023 Form 10-K, accession 0000320193-23-000106,
+instance ``aapl-20230930_htm.xml``. SEC full-text search for
+``fractionItemType`` and for ``xbrli:numerator`` returned no hits, and this
+instance contains neither, so it is not a fraction-item specimen. The control
+is an ordinary fact read from that instance before it was parsed:
+``us-gaap:Assets``, context ``c-22`` (instant 2023-09-30, no dimensions),
+filed value ``352583000000``. The prior year, context ``c-23`` (instant
+2022-09-24), is ``352755000000``.
 """
+import decimal
+
+import pytest
+
+from edgar.httprequests import download_text
 from edgar.xbrl import XBRL
 from edgar.xbrl.parsers.instance import InstanceParser
 
@@ -105,7 +119,7 @@ def _facts():
 
 def test_one_third_is_the_quotient_not_the_digits_joined():
     fact = _facts()["my_oneThird|C1"]
-    assert fact.value == "0.3333333333333333"
+    assert fact.value == "0." + "3" * 50
     assert fact.numeric_value == 1 / 3
     assert fact.numeric_value != 13
     assert fact.decimals == "INF"
@@ -173,11 +187,10 @@ def test_fraction_precision_is_infinite_and_outranks_a_rounded_duplicate():
     assert XBRL._select_most_precise_fact([Rounded(), fact]) is fact
 
 
-def test_fraction_outside_float_range_is_not_reported_as_zero_or_infinity():
+def test_fraction_outside_float_range_keeps_the_exact_decimal():
     huge = "1" + "0" * 400
-    xml = INSTANCE.replace(
-        "</xbrli:xbrl>",
-        f"""  <my:underflow contextRef="C1" unitRef="pure">
+    facts = _with_facts(f"""
+  <my:underflow contextRef="C1" unitRef="pure">
     <xbrli:numerator>1</xbrli:numerator>
     <xbrli:denominator>{huge}</xbrli:denominator>
   </my:underflow>
@@ -185,16 +198,120 @@ def test_fraction_outside_float_range_is_not_reported_as_zero_or_infinity():
     <xbrli:numerator>{huge}</xbrli:numerator>
     <xbrli:denominator>1</xbrli:denominator>
   </my:overflow>
-</xbrli:xbrl>""",
-    )
-    facts = {}
-    InstanceParser({}, facts, {}, {}, {}, {}, [], {}).parse_instance_content(xml)
+""")
     underflow = facts["my_underflow|C1"]
     overflow = facts["my_overflow|C1"]
-    assert underflow.value == f"1/{huge}"
+    # 1/10**400 is the digit 1 four hundred places right of the decimal point.
+    assert underflow.value == "0." + "0" * 399 + "1"
     assert underflow.numeric_value is None
-    assert overflow.value == f"{huge}/1"
+    assert overflow.value == huge
     assert overflow.numeric_value is None
+
+
+def test_fraction_value_is_exact_past_the_float_mantissa():
+    sixty = "9" * 60
+    facts = _with_facts(f"""
+  <my:pastMantissa contextRef="C1" unitRef="pure">
+    <xbrli:numerator>9007199254740993</xbrli:numerator>
+    <xbrli:denominator>1</xbrli:denominator>
+  </my:pastMantissa>
+  <my:extraBit contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1.0000000000000001</xbrli:numerator>
+    <xbrli:denominator>1</xbrli:denominator>
+  </my:extraBit>
+  <my:sixtyDigits contextRef="C1" unitRef="pure">
+    <xbrli:numerator>{sixty}</xbrli:numerator>
+    <xbrli:denominator>1</xbrli:denominator>
+  </my:sixtyDigits>
+""")
+    past = facts["my_pastMantissa|C1"]
+    assert past.value == "9007199254740993"
+    assert past.numeric_value == 9007199254740992.0
+    assert past.decimals == "INF"
+    extra = facts["my_extraBit|C1"]
+    assert extra.value == "1.0000000000000001"
+    assert extra.numeric_value == 1.0
+    assert facts["my_sixtyDigits|C1"].value == sixty
+    # 10**60 still fits in a float, but not as this integer. The stored text
+    # is the 60 nines; the float is only the numeric_value.
+    assert facts["my_sixtyDigits|C1"].numeric_value == 1e60
+    assert facts["my_sixtyDigits|C1"].value != str(facts["my_sixtyDigits|C1"].numeric_value)
+
+
+def test_fraction_division_ignores_the_caller_decimal_context():
+    with decimal.localcontext() as ctx:
+        ctx.prec = 2
+        ctx.traps[decimal.Inexact] = True
+        facts = _with_facts("""
+  <my:pastMantissa contextRef="C1" unitRef="pure">
+    <xbrli:numerator>9007199254740993</xbrli:numerator>
+    <xbrli:denominator>1</xbrli:denominator>
+  </my:pastMantissa>
+""")
+        assert facts["my_oneThird|C1"].value == "0." + "3" * 50
+        assert facts["my_pastMantissa|C1"].value == "9007199254740993"
+        assert ctx.prec == 2
+        assert ctx.traps[decimal.Inexact]
+        with pytest.raises(decimal.Inexact):
+            decimal.Decimal(1) / decimal.Decimal(3)
+
+
+def test_fraction_operand_includes_text_around_a_comment_or_processing_instruction():
+    facts = _with_facts("""
+  <my:commented contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1<!--c-->2</xbrli:numerator>
+    <xbrli:denominator>4</xbrli:denominator>
+  </my:commented>
+  <my:processingInstruction contextRef="C1" unitRef="pure">
+    <xbrli:numerator>8<?pi ?>2</xbrli:numerator>
+    <xbrli:denominator>2</xbrli:denominator>
+  </my:processingInstruction>
+""")
+    commented = facts["my_commented|C1"]
+    assert commented.value == "3"
+    assert commented.numeric_value == 3.0
+    assert commented.decimals == "INF"
+    instructed = facts["my_processingInstruction|C1"]
+    assert instructed.value == "41"
+    assert instructed.numeric_value == 41.0
+
+
+# Apple Inc. FY2023 Form 10-K. Ordinary-fact control: this instance has no
+# fraction item (see the module docstring). Filed values, read from the
+# instance XML: Assets 352583000000 at 2023-09-30 (context c-22) and
+# 352755000000 at 2022-09-24 (context c-23).
+APPLE_FY2023_10K_ACCESSION = "0000320193-23-000106"
+APPLE_FY2023_10K_INSTANCE = (
+    "https://www.sec.gov/Archives/edgar/data/320193/"
+    + APPLE_FY2023_10K_ACCESSION.replace("-", "")
+    + "/aapl-20230930_htm.xml"
+)
+
+
+@pytest.mark.vcr
+def test_apple_fy2023_10k_ordinary_assets_are_unchanged():
+    """Accession 0000320193-23-000106. us-gaap:Assets context c-22 is 352583000000."""
+    xml = download_text(APPLE_FY2023_10K_INSTANCE)
+    assert xml is not None and "352583000000" in xml
+    assert "fractionItemType" not in xml
+    # Default namespace and the xbrli prefix. This instance has neither.
+    assert "<numerator" not in xml
+    assert "<xbrli:numerator" not in xml
+    facts = {}
+    InstanceParser({}, facts, {}, {}, {}, {}, [], {}).parse_instance_content(xml)
+    assets = facts["us-gaap_Assets|c-22"]
+    assert assets.value == "352583000000"
+    assert assets.numeric_value == 352583000000.0
+    prior = facts["us-gaap_Assets|c-23"]
+    assert prior.value == "352755000000"
+    assert prior.numeric_value == 352755000000.0
+
+
+def _with_facts(extra: str):
+    facts = {}
+    xml = INSTANCE.replace("</xbrli:xbrl>", extra + "</xbrli:xbrl>")
+    InstanceParser({}, facts, {}, {}, {}, {}, [], {}).parse_instance_content(xml)
+    return facts
 
 
 def test_non_fraction_facts_are_unchanged():
