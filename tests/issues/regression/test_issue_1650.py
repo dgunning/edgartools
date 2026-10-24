@@ -1,0 +1,349 @@
+"""
+Regression test for GitHub Issue #1650: ``CurrencyConverter`` ignored the
+currency and hedge axes, so GSK's average rate came from EUR hedge and JPY rows.
+
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1650
+
+``ifrs-full:AverageForeignExchangeRate`` carries one fact per currency
+(``srt:CurrencyAxis``) and, in GSK's financial-instruments note, the contracted
+rates of its hedging instruments. The converter read every fact without looking
+at its dimensions and kept the last one per year: 1.19 (a EUR cross-currency
+swap) for 2025, 1.17 (a EUR forward) for 2024 and 175.0 (the yen rate) for 2023.
+It now keeps only facts for the target currency that are not on a hedge axis,
+prefers the one with no other dimension, and reports a year whose remaining facts
+disagree instead of picking one.
+
+Ground truth: GSK plc FY2025 20-F, accession 0001131399-26-000004, note 5
+"Exchange rates": average rates US$/£ 1.31 / 1.28 / 1.24 and period-end rates
+US$/£ 1.35 / 1.25 / 1.27 for 2025 / 2024 / 2023. They are the facts whose only
+dimension is ``srt:CurrencyAxis=currency:USD``.
+"""
+
+import pandas as pd
+import pytest
+
+from edgar.httprequests import download_file
+from edgar.xbrl import XBRL
+from edgar.xbrl.currency import CurrencyConverter
+
+pytestmark = [pytest.mark.regression]
+
+# The instance document alone carries the facts, contexts and units the
+# converter reads, so the cassette holds one 15.9 MB response.
+GSK_FOLDER = "https://www.sec.gov/Archives/edgar/data/1131399/000113139926000004/"
+GSK_INSTANCE = "gsk-20251231_htm.xml"
+GSK_CASSETTE = "currency_gsk_20f_0001131399-26-000004.yaml"
+
+
+@pytest.fixture(scope="module")
+def gsk_xbrl(vcr, tmp_path_factory):
+    folder = tmp_path_factory.mktemp("gsk")
+    with vcr.use_cassette(GSK_CASSETTE):
+        text = download_file(GSK_FOLDER + GSK_INSTANCE)
+    (folder / GSK_INSTANCE).write_text(text, encoding="utf-8")
+    return XBRL.from_directory(folder)
+
+
+def _selection_warnings(converter):
+    return [w for w in converter.extraction_warnings
+            if "none was used" in w or "hedging" in w]
+
+
+def test_gsk_rates_come_from_the_usd_translation_rows(gsk_xbrl):
+    converter = CurrencyConverter(gsk_xbrl)
+
+    assert converter.home_currency == "GBP"
+    # Note 5, average rates US$/£ (was 1.19 / 1.17 / 175.0)
+    assert converter.get_rate(2025, "average") == 1.31
+    assert converter.get_rate(2024, "average") == 1.28
+    assert converter.get_rate(2023, "average") == 1.24
+    # Note 5, period-end rates US$/£ (not the yen rows 211 / 197 / 180)
+    assert converter.get_rate(2025, "closing") == 1.35
+    assert converter.get_rate(2024, "closing") == 1.25
+    assert converter.get_rate(2023, "closing") == 1.27
+    assert _selection_warnings(converter) == []
+
+
+# ---------------------------------------------------------------------------
+# Offline: the selection rules, on hand-built facts
+# ---------------------------------------------------------------------------
+
+class _Context:
+    def __init__(self, dimensions):
+        self.dimensions = dimensions
+
+
+class _Query:
+    def __init__(self, frames):
+        self._frames = frames
+        self._concept = None
+
+    def by_concept(self, concept, exact=False):
+        self._concept = concept
+        return self
+
+    def to_dataframe(self):
+        return self._frames.get(self._concept, pd.DataFrame())
+
+
+class _Facts:
+    def __init__(self, frames):
+        self._frames = frames
+
+    def to_dataframe(self):
+        return pd.DataFrame({"unit_ref": ["gbp"]})
+
+    def query(self):
+        return _Query(self._frames)
+
+
+class _StubXBRL:
+    units = {"gbp": {"type": "simple", "measure": "iso4217:GBP"},
+             "number": {"type": "simple", "measure": "xbrli:pure"}}
+
+    def __init__(self, rows):
+        # rows: (dimensions, value), all average rates for 2025
+        self.contexts = {f"c-{i}": _Context(dims) for i, (dims, _) in enumerate(rows)}
+        frame = pd.DataFrame({
+            "unit_ref": ["number"] * len(rows),
+            "context_ref": [f"c-{i}" for i in range(len(rows))],
+            "period_end": ["2025-12-31"] * len(rows),
+            "period_instant": [float("nan")] * len(rows),
+            "numeric_value": [value for _, value in rows],
+        })
+        self.facts = _Facts({"ifrs-full:AverageForeignExchangeRate": frame})
+
+
+USD = {"srt:CurrencyAxis": "currency:USD"}
+EUR = {"srt:CurrencyAxis": "currency:EUR"}
+JPY = {"srt:CurrencyAxis": "currency:JPY"}
+USD_HEDGE = {"srt:CurrencyAxis": "currency:USD",
+             "ifrs-full:TypesOfHedgesAxis": "gsk:NetInvestmentHedgesMember",
+             "ifrs-full:HedgingInstrumentsAxis": "gsk:ForeignExchangeContractsMember"}
+EUR_HEDGE = {"srt:CurrencyAxis": "currency:EUR",
+             "ifrs-full:TypesOfHedgesAxis": "gsk:NetInvestmentHedgesMember"}
+
+
+def test_other_currencies_and_hedge_rows_are_not_used():
+    # GSK's 2025 shape, with the selected row first so "last row wins" fails.
+    converter = CurrencyConverter(_StubXBRL([
+        (USD, 1.31), (EUR, 1.17), (JPY, 198.0), (USD_HEDGE, 1.33), (EUR_HEDGE, 1.19),
+    ]))
+    assert converter.get_rate(2025, "average") == 1.31
+    assert _selection_warnings(converter) == []
+
+
+def test_the_fact_with_fewest_other_dimensions_wins():
+    risk = {"srt:CurrencyAxis": "currency:USD",
+            "ifrs-full:TypesOfRisksAxis": "ifrs-full:CurrencyRiskMember"}
+    converter = CurrencyConverter(_StubXBRL([(risk, 1.30), (USD, 1.31)]))
+    assert converter.get_rate(2025, "average") == 1.31
+
+
+def test_disagreeing_rates_are_reported_not_guessed():
+    converter = CurrencyConverter(_StubXBRL([(USD, 1.31), (USD, 1.29)]))
+    assert converter.get_rate(2025, "average") is None
+    assert "2 different average USD rates for 2025 (1.29, 1.31); none was used" \
+        in converter.extraction_warnings
+
+
+def test_a_year_with_only_hedge_rates_says_so():
+    converter = CurrencyConverter(_StubXBRL([(USD_HEDGE, 1.33), (EUR, 1.17)]))
+    assert converter.get_rate(2025, "average") is None
+    assert ("the only average USD rates for 2025 are 1 hedging-instrument rate(s), "
+            "which were not used") in converter.extraction_warnings
+
+
+def test_rates_set_aside_do_not_read_as_an_extraction_failure():
+    converter = CurrencyConverter(_StubXBRL([(USD_HEDGE, 1.33)]))
+    text = repr(converter)
+    assert "no usable rates: the only average USD rates for 2025" in text
+    assert "rate extraction failed" not in text
+    assert "Rate extraction failed" not in converter.__rich__().caption
+
+
+# ---------------------------------------------------------------------------
+# Review follow-up: rounding, interim facts and unusable values
+# ---------------------------------------------------------------------------
+
+class _RowsXBRL:
+    """Facts given row by row, so each can carry its own period and decimals."""
+    units = _StubXBRL.units
+
+    def __init__(self, average=(), closing=()):
+        rows = list(average) + list(closing)
+        self.contexts = {f"c-{i}": _Context(r.get("dims", USD)) for i, r in enumerate(rows)}
+
+        def frame(part, offset):
+            return pd.DataFrame({
+                "unit_ref": ["number"] * len(part),
+                "context_ref": [f"c-{offset + i}" for i in range(len(part))],
+                "period_start": [r.get("start", float("nan")) for r in part],
+                "period_end": [r.get("end", float("nan")) for r in part],
+                "period_instant": [r.get("instant", float("nan")) for r in part],
+                "numeric_value": [r["value"] for r in part],
+                "decimals": [r.get("decimals", float("nan")) for r in part],
+            })
+        self.facts = _Facts({
+            "ifrs-full:AverageForeignExchangeRate": frame(list(average), 0),
+            "ifrs-full:ClosingForeignExchangeRate": frame(list(closing), len(list(average))),
+        })
+
+
+def test_rates_that_agree_to_their_stated_precision_are_one_rate():
+    # 1.31 stated to 2 decimals and 1.3077 to 4 are the same rate, rounded.
+    converter = CurrencyConverter(_RowsXBRL(average=[
+        {"value": 1.31, "decimals": "2", "start": "2025-01-01", "end": "2025-12-31"},
+        {"value": 1.3077, "decimals": "4", "start": "2025-01-01", "end": "2025-12-31"},
+    ]))
+    assert converter.get_rate(2025, "average") == 1.3077   # the more precise one
+    assert _selection_warnings(converter) == []
+
+
+def test_rates_that_differ_beyond_rounding_are_still_refused():
+    converter = CurrencyConverter(_RowsXBRL(average=[
+        {"value": 1.31, "decimals": "2", "start": "2025-01-01", "end": "2025-12-31"},
+        {"value": 1.3177, "decimals": "4", "start": "2025-01-01", "end": "2025-12-31"},
+    ]))
+    assert converter.get_rate(2025, "average") is None
+    assert any("none was used" in w for w in converter.extraction_warnings)
+
+
+def test_an_interim_closing_rate_does_not_veto_the_year_end_rate():
+    converter = CurrencyConverter(_RowsXBRL(closing=[
+        {"value": 1.27, "instant": "2025-06-30"},   # interim
+        {"value": 1.35, "instant": "2025-12-31"},   # year end
+        {"value": 1.21, "instant": "2025-01-01"},   # IFRS transition date
+    ]))
+    assert converter.get_rate(2025, "closing") == 1.35
+    assert _selection_warnings(converter) == []
+
+
+def test_a_half_year_average_does_not_veto_the_full_year_average():
+    converter = CurrencyConverter(_RowsXBRL(average=[
+        {"value": 1.27, "start": "2025-07-01", "end": "2025-12-31"},
+        {"value": 1.31, "start": "2025-01-01", "end": "2025-12-31"},
+    ]))
+    assert converter.get_rate(2025, "average") == 1.31
+
+
+@pytest.mark.parametrize("value", [0.0, float("nan"), float("inf")])
+def test_zero_and_non_finite_rates_are_unusable_and_reported(value):
+    converter = CurrencyConverter(_RowsXBRL(average=[
+        {"value": value, "start": "2025-01-01", "end": "2025-12-31"},
+    ]))
+    assert converter.get_rate(2025, "average") is None
+    assert converter.to_usd(100, 2025) is None          # was ZeroDivisionError for 0
+    assert ("1 average exchange rate fact(s) had no usable value "
+            "(empty, zero or not finite) and were not used") in converter.extraction_warnings
+
+
+# ---------------------------------------------------------------------------
+# Review follow-up: the year end is the filer's, not the calendar's. By
+# construction: a March year-end INR filer (as Tata Motors and Wipro are) whose
+# table also holds a September interim rate in the same calendar year.
+# ---------------------------------------------------------------------------
+
+class _MarchYearEndXBRL(_RowsXBRL):
+    units = {"home": {"type": "simple", "measure": "iso4217:INR"},
+             "number": {"type": "simple", "measure": "xbrli:pure"}}
+
+    def __init__(self, period_end="2024-03-31", **rows):
+        super().__init__(**rows)
+        self.entity_info = {"document_period_end_date": period_end,
+                            "fiscal_year_end_month": None, "fiscal_year_end_day": None}
+        self.facts.to_dataframe = lambda: pd.DataFrame({"unit_ref": ["home"]})
+
+
+def _period_warnings(converter):
+    return [w for w in converter.extraction_warnings if "period end" in w]
+
+
+def test_a_march_year_end_closing_rate_beats_a_later_interim_rate():
+    converter = CurrencyConverter(_MarchYearEndXBRL(closing=[
+        {"value": 83.4, "instant": "2024-03-31"},   # fiscal year end
+        {"value": 83.8, "instant": "2024-09-30"},   # interim, later in 2024
+    ]))
+    assert converter.get_rate(2024, "closing") == 83.4
+    assert _period_warnings(converter) == []
+
+
+def test_a_march_year_end_full_year_average_beats_a_later_half_year():
+    converter = CurrencyConverter(_MarchYearEndXBRL(average=[
+        {"value": 82.8, "start": "2023-04-01", "end": "2024-03-31"},   # the fiscal year
+        {"value": 83.5, "start": "2024-04-01", "end": "2024-09-30"},   # a half year
+    ]))
+    assert converter.get_rate(2024, "average") == 82.8
+    assert _period_warnings(converter) == []
+
+
+def test_a_rate_not_at_the_period_end_is_used_with_a_warning():
+    converter = CurrencyConverter(_MarchYearEndXBRL(closing=[
+        {"value": 83.8, "instant": "2024-09-30"},
+    ]))
+    assert converter.get_rate(2024, "closing") == 83.8
+    assert ("no closing USD rate for 2024 is dated at the filing's period end "
+            "(--03-31); the one dated 2024-09-30 was used") in converter.extraction_warnings
+
+
+def test_without_a_period_end_the_longest_average_wins_and_the_choice_is_reported():
+    # A filing with no DocumentPeriodEndDate: the full year still beats a later
+    # half year, which the "latest date first" order got wrong.
+    xbrl = _MarchYearEndXBRL(average=[
+        {"value": 82.8, "start": "2023-04-01", "end": "2024-03-31"},
+        {"value": 83.5, "start": "2024-04-01", "end": "2024-09-30"},
+    ])
+    xbrl.entity_info = {}
+    converter = CurrencyConverter(xbrl)
+    assert converter.get_rate(2024, "average") == 82.8
+    assert ("the filing states no period end; of the average USD rates for 2024 "
+            "dated 2024-03-31, 2024-09-30, the one dated 2024-03-31 was used"
+            ) in converter.extraction_warnings
+
+
+# ---------------------------------------------------------------------------
+# Review round 3: an interim filing's period end anchors only its own year.
+# By construction: a December year-end CAD filer's report for 2024-09-30,
+# with the prior year's closing rates at 2023-12-31 and 2023-09-30.
+# ---------------------------------------------------------------------------
+
+class _InterimXBRL(_RowsXBRL):
+    units = {"home": {"type": "simple", "measure": "iso4217:CAD"},
+             "number": {"type": "simple", "measure": "xbrli:pure"}}
+
+    def __init__(self, info, **rows):
+        super().__init__(**rows)
+        self.entity_info = info
+        self.facts.to_dataframe = lambda: pd.DataFrame({"unit_ref": ["home"]})
+
+
+_SEPTEMBER_REPORT = [
+    {"value": 1.3226, "instant": "2023-12-31"},   # 2023 fiscal year end
+    {"value": 1.3520, "instant": "2023-09-30"},   # 2023 comparative interim
+    {"value": 1.3500, "instant": "2024-09-30"},   # the report's own date
+]
+
+
+@pytest.mark.parametrize("info", [
+    {"document_period_end_date": "2024-09-30", "fiscal_year_end_month": 12,
+     "fiscal_year_end_day": 31, "annual_report": False},
+    # No CurrentFiscalYearEndDate: an interim report's own date says nothing
+    # about earlier years, so they fall back with a warning, never to September.
+    {"document_period_end_date": "2024-09-30", "fiscal_year_end_month": None,
+     "fiscal_year_end_day": None, "annual_report": False},
+])
+def test_an_interim_period_end_does_not_anchor_earlier_years(info):
+    converter = CurrencyConverter(_InterimXBRL(info, closing=_SEPTEMBER_REPORT))
+    assert converter.get_rate(2023, "closing") == 1.3226
+    assert converter.get_rate(2024, "closing") == 1.35
+
+
+def test_an_interim_period_end_anchors_its_own_year():
+    info = {"document_period_end_date": "2024-09-30", "fiscal_year_end_month": 12,
+            "fiscal_year_end_day": 31, "annual_report": False}
+    converter = CurrencyConverter(_InterimXBRL(info, closing=[
+        {"value": 1.3500, "instant": "2024-09-30"},
+        {"value": 1.3400, "instant": "2024-06-30"},
+    ]))
+    assert converter.get_rate(2024, "closing") == 1.35
+    assert _period_warnings(converter) == []
