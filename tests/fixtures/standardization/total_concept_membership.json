@@ -1,0 +1,1139 @@
+{
+ "_comment": "GH #1444. Per total standard concept, the gaap_mappings.json keys whose ReverseIndex.lookup() may return it (allowed), measured on main 88c33194. known_wrong: components still mapped to the total in gaap_mappings.json and blocked by the closed-membership guard; deleting the mapping in the data fails the test until the entry is removed here. already_blocked: mapped in the data, dropped by the older is_total/display-text guard.",
+ "totals": {
+  "AllEquityBalance": {
+   "display_name": "Total Equity",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "AssetsNet": "equivalent",
+    "EquityAttributableToOwnersOfParent": "equivalent",
+    "StockholdersEquity": "canonical",
+    "ifrs-full_EquityAttributableToOwnersOfParent": "equivalent"
+   }
+  },
+  "AllEquityBalanceIncludingMinorityInterest": {
+   "display_name": "Total Equity Including Noncontrolling Interest",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "Equity": "equivalent",
+    "LimitedLiabilityCompanyLlcMembersEquityIncludingPortionAttributableToNoncontrollingInterest": "equivalent",
+    "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest": "canonical",
+    "ifrs-full_Equity": "equivalent"
+   }
+  },
+  "Assets": {
+   "display_name": "Total Assets",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "Assets": "canonical",
+    "ifrs-full_Assets": "equivalent",
+    "ifrs:Assets": "equivalent"
+   }
+  },
+  "CashAndCashEquivalents": {
+   "display_name": "Cash and Cash Equivalents",
+   "why_total": "CashFlowStatement \"Cash Flow Totals\" section (closing balance)",
+   "allowed": {
+    "CashAndBankBalancesAtCentralBanks": "unsure: IFRS bank line; the cash total for some banks, a part for others",
+    "CashAndCashEquivalents": "equivalent",
+    "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": "canonical",
+    "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations": "equivalent",
+    "ifrs-full_CashAndBankBalancesAtCentralBanks": "unsure: IFRS bank line; the cash total for some banks, a part for others",
+    "ifrs-full_CashAndCashEquivalents": "equivalent"
+   }
+  },
+  "CommonEquity": {
+   "display_name": "Total Stockholders' Equity",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "MembersEquity": "canonical",
+    "PartnersCapital": "canonical",
+    "PartnersCapitalIncludingPortionAttributableToNoncontrollingInterest": "unsure: a total, but it includes NCI, so AllEquityBalanceIncludingMinorityInterest fits it better",
+    "StockholdersEquityBeforeTreasuryStock": "unsure: a subtotal of equity before treasury stock"
+   }
+  },
+  "ComprehensiveIncomeNet": {
+   "display_name": "Comprehensive Income, Net",
+   "why_total": "ComprehensiveIncome \"Comprehensive Income Totals\" section",
+   "allowed": {
+    "ComprehensiveIncome": "equivalent",
+    "ComprehensiveIncomeAttributableToOwnersOfParent": "equivalent",
+    "ComprehensiveIncomeNetOfTax": "canonical",
+    "ifrs-full_ComprehensiveIncome": "equivalent"
+   }
+  },
+  "CostsSubtotal": {
+   "display_name": "Total Costs and Expenses",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "BenefitsLossesAndExpenses": "equivalent",
+    "CostsAndExpenses": "canonical"
+   }
+  },
+  "CurrentAssetsTotal": {
+   "display_name": "Total Current Assets",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "AssetsCurrent": "canonical",
+    "CurrentAssets": "equivalent",
+    "ifrs-full_CurrentAssets": "equivalent"
+   }
+  },
+  "CurrentLiabilitiesTotal": {
+   "display_name": "Total Current Liabilities",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "CurrentLiabilities": "equivalent",
+    "LiabilitiesCurrent": "canonical",
+    "ifrs-full_CurrentLiabilities": "equivalent"
+   }
+  },
+  "GrossProfit": {
+   "display_name": "Gross Profit",
+   "why_total": "named total: IncomeStatement \"Gross Profit\" section",
+   "allowed": {
+    "GrossProfit": "canonical",
+    "ifrs-full_GrossProfit": "equivalent",
+    "ifrs:GrossProfit": "equivalent"
+   }
+  },
+  "IncomeLossContinuingOperations": {
+   "display_name": "Income from Continuing Operations",
+   "why_total": "named total: income from continuing operations",
+   "allowed": {
+    "IncomeLossFromContinuingOperations": "canonical",
+    "IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest": "equivalent",
+    "ProfitLossFromContinuingOperations": "equivalent",
+    "ifrs-full_ProfitLossFromContinuingOperations": "equivalent"
+   }
+  },
+  "Liabilities": {
+   "display_name": "Total Liabilities",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "Liabilities": "canonical",
+    "ifrs-full_Liabilities": "equivalent",
+    "ifrs:Liabilities": "equivalent"
+   }
+  },
+  "LiabilitiesAndEquity": {
+   "display_name": "Total Liabilities and Equity",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "LiabilitiesAndStockholdersEquity": "canonical",
+    "ifrs-full_LiabilitiesAndEquity": "equivalent"
+   }
+  },
+  "NetCashFromFinancingActivities": {
+   "display_name": "Net Cash from Financing Activities",
+   "why_total": "CashFlowStatement \"Cash Flow Totals\" section",
+   "allowed": {
+    "CashFlowsFromUsedInFinancingActivities": "equivalent",
+    "NetCashProvidedByUsedInFinancingActivities": "canonical",
+    "NetCashProvidedByUsedInFinancingActivitiesContinuingOperations": "equivalent",
+    "ifrs-full_CashFlowsFromUsedInFinancingActivities": "equivalent"
+   }
+  },
+  "NetCashFromInvestingActivities": {
+   "display_name": "Net Cash from Investing Activities",
+   "why_total": "CashFlowStatement \"Cash Flow Totals\" section",
+   "allowed": {
+    "CashFlowsFromUsedInInvestingActivities": "equivalent",
+    "NetCashProvidedByUsedInInvestingActivities": "canonical",
+    "NetCashProvidedByUsedInInvestingActivitiesContinuingOperations": "equivalent",
+    "ifrs-full_CashFlowsFromUsedInInvestingActivities": "equivalent"
+   }
+  },
+  "NetCashFromOperatingActivities": {
+   "display_name": "Net Cash from Operating Activities",
+   "why_total": "CashFlowStatement \"Cash Flow Totals\" section",
+   "allowed": {
+    "CashFlowsFromUsedInOperatingActivities": "equivalent",
+    "NetCashProvidedByUsedInOperatingActivities": "canonical",
+    "NetCashProvidedByUsedInOperatingActivitiesContinuingOperations": "equivalent",
+    "ifrs-full_CashFlowsFromUsedInOperatingActivities": "equivalent"
+   }
+  },
+  "NetChangeInCash": {
+   "display_name": "Net Change in Cash",
+   "why_total": "CashFlowStatement \"Cash Flow Totals\" section",
+   "allowed": {
+    "CashAndCashEquivalentsPeriodIncreaseDecrease": "unsure: deprecated us-gaap net change; FX treatment not stated",
+    "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect": "unsure: the net change before the FX effect: the total minus ForeignExchangeEffectOnCash",
+    "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect": "canonical",
+    "IncreaseDecreaseInCashAndCashEquivalents": "equivalent",
+    "IncreaseDecreaseInCashAndCashEquivalentsBeforeEffectOfExchangeRateChanges": "unsure: IFRS net change before the FX effect: the total minus ForeignExchangeEffectOnCash",
+    "ifrs-full_IncreaseDecreaseInCashAndCashEquivalents": "equivalent"
+   }
+  },
+  "NetIncome": {
+   "display_name": "Net Income",
+   "why_total": "named total: net income attributable to parent",
+   "allowed": {
+    "IncomeLossAttributableToParent": "unsure: income attributable to parent before extraordinary items (deprecated)",
+    "NetIncomeLoss": "canonical",
+    "ProfitLossAttributableToOwnersOfParent": "equivalent",
+    "ifrs-full_ProfitLossAttributableToOwnersOfParent": "equivalent"
+   }
+  },
+  "NetIncomeToCommonShareholders": {
+   "display_name": "Net Income to Common Shareholders",
+   "why_total": "named total: net income available to common",
+   "allowed": {
+    "NetIncomeLossAvailableToCommonStockholdersBasic": "canonical",
+    "NetIncomeLossFromContinuingOperationsAvailableToCommonShareholdersBasic": "unsure: the continuing-operations part only"
+   }
+  },
+  "NonCurrentAssetsTotal": {
+   "display_name": "Total Non-Current Assets",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "AssetsNoncurrent": "canonical",
+    "NoncurrentAssets": "equivalent",
+    "ifrs-full_NoncurrentAssets": "equivalent",
+    "ifrs:NoncurrentAssets": "equivalent"
+   }
+  },
+  "NonCurrentLiabilitiesTotal": {
+   "display_name": "Total Non-Current Liabilities",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "LiabilitiesNoncurrent": "canonical",
+    "NoncurrentLiabilities": "equivalent",
+    "ifrs-full_NoncurrentLiabilities": "equivalent"
+   }
+  },
+  "OperatingIncomeLoss": {
+   "display_name": "Operating Income",
+   "why_total": "named total: IncomeStatement \"Operating Income\" section",
+   "allowed": {
+    "OperatingIncomeLoss": "canonical",
+    "OperatingProfit": "equivalent",
+    "ProfitLossFromOperatingActivities": "equivalent",
+    "ifrs-full_OperatingProfit": "equivalent",
+    "ifrs-full_ProfitLossFromOperatingActivities": "equivalent"
+   }
+  },
+  "PretaxIncomeLoss": {
+   "display_name": "Income Before Tax",
+   "why_total": "named total: IncomeStatement \"Income Before Tax\" section",
+   "allowed": {
+    "IncomeLossFromContinuingOperationsBeforeIncomeTaxes": "equivalent",
+    "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest": "canonical",
+    "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments": "equivalent",
+    "ProfitLossBeforeTax": "equivalent",
+    "ifrs-full_ProfitLossBeforeTax": "equivalent"
+   }
+  },
+  "ProfitLoss": {
+   "display_name": "Profit or Loss",
+   "why_total": "named total: net income including noncontrolling interest",
+   "allowed": {
+    "ProfitLoss": "canonical",
+    "ifrs-full_ProfitLoss": "equivalent",
+    "ifrs:ProfitLoss": "equivalent"
+   }
+  },
+  "Revenue": {
+   "display_name": "Revenue",
+   "why_total": "named total: total revenue (IncomeStatement \"Revenue\" section parent)",
+   "allowed": {
+    "AdmissionsRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "BinderSalesRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "BrokeredNaturalGasMarginRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "CapitalLeasesIncomeStatementDirectFinancingLeaseRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "CargoAndFreightRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "CasinoRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ChemicalsRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ClearingFeesRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "CoalProductsAndServicesRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "CompetitiveEnergyRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ConcessionsRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ConstructionMaterialsRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ConstructionRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ContractsRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ElectricBundledRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ElectricDomesticRegulatedRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ElectricWorldwideUnregulatedRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ElectricalDistributionRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ElectricalGenerationRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ElectricalTransmissionAndDistributionRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ElectricalTransmissionRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ExplorationAndProductionRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "FacilityMembershipAndOperationsRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "FeesAndCommissions": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "FoodAndBeverageRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "FractionationRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "FranchisorRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "GasDomesticRegulatedRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "GasGatheringTransportationMarketingAndProcessingRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "GeneralContractorRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "GoldProductsAndServicesRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "HealthCareOrganizationCapitationRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "HealthCareOrganizationOtherRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "HealthCareOrganizationPatientServiceRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "HealthCareOrganizationPremiumRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "HealthCareOrganizationResidentServiceRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "HomeBuildingRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "InitialFranchiseFees": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "InsuranceServicesRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "LandSales": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "LicensesRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "MaintenanceRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ManagementFeesBaseRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ManagementFeesIncentiveRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "MarineServicesRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "MembershipDuesRevenueOnGoing": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "NaturalGasMidstreamRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "NaturalGasProductionRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "NaturalGasStorageRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "NetInvestmentIncome": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OccupancyRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OilAndCondensateRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OilAndGasSalesRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OperatingLeaseLeaseIncomeLeasePayments": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OperatingLeasesIncomeStatementContingentRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OperatingLeasesIncomeStatementMinimumLeaseRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OperatingLeasesIncomeStatementSubleaseRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OtherAlternativeEnergySalesRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OtherConstructionRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OtherHotelOperatingRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OtherOperatingIncome": "unsure: FASB: other income from the normal revenue-producing operation; #1417 retargeted it to Revenue on purpose",
+    "OtherRealEstateRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "OtherSalesRevenueNet": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ParkingRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "PassengerRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "PercentageRent": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "PremiumsEarnedNet": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "PremiumsEarnedNetOtherInsurance": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "PrincipalTransactionsRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "PropaneRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RealEstateRevenueNet": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RecyclingRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RefiningAndMarketingRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ReimbursementRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ResearchAndDevelopmentArrangementContractToPerformForOthersCompensationEarned": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RetailLandSalesImprovementRevenuePriorSales": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RetailRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "Revenue": "equivalent",
+    "RevenueCoalServices": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueEnvironmentalRemediationServices": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueFromCollaborativeArrangementExcludingRevenueFromContractWithCustomer": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueFromContractWithCustomerExcludingAssessedTax": "canonical",
+    "RevenueFromContractWithCustomerIncludingAssessedTax": "equivalent",
+    "RevenueFromContractsWithCustomers": "equivalent",
+    "RevenueFromEnrollmentAndRegistrationFeesExcludingHospitalityEnterprises": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueFromFranchisorOwnedOutlets": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueFromGrants": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueFromLeasedAndOwnedHotels": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueFromOwnedHotels": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueFromPurchasedOilAndGas": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueFromRelatedParties": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueMineralSales": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueNotFromContractWithCustomer": "unsure: Revenues = contract revenue + this; a part, though some lessors report only it",
+    "RevenueNotFromContractWithCustomerOther": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueOilAndGasServices": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueOtherFinancialServices": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueOtherManufacturedProducts": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueRecognitionMilestoneMethodRevenueRecognized": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RevenueSteamProductsAndServices": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "Revenues": "canonical",
+    "RoyaltyRevenueFromCoal": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SalesOfOilAndGasProspects": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SalesOfRealEstate": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SalesRevenueEnergyServices": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SalesRevenueFromEnergyCommoditiesAndServices": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SalesRevenueGoodsGross": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SalesRevenueGoodsNet": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SalesRevenueNet": "equivalent",
+    "SalesRevenueServicesGross": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SalesRevenueServicesNet": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SecondaryProcessingRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ShippingAndHandlingRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SignageRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SubscriptionRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "SyntheticFuelSalesRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "TimberRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "TimeShareRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "UtilityRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "VehicleTollRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "ifrs-full_Revenue": "equivalent",
+    "ifrs-full_RevenueFromContractsWithCustomers": "equivalent"
+   }
+  },
+  "TotalDeposits": {
+   "display_name": "Total Deposits",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "Deposits": "canonical"
+   }
+  },
+  "TotalInterestIncomeOperating": {
+   "display_name": "Total Interest Income",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "InterestAndDividendIncomeOperating": "canonical",
+    "InterestIncomeOperating": "equivalent"
+   }
+  },
+  "TotalOperatingExpenses": {
+   "display_name": "Total Operating Expenses",
+   "why_total": "display name starts with \"Total\"",
+   "allowed": {
+    "OperatingCostsAndExpenses": "equivalent",
+    "OperatingExpense": "equivalent",
+    "OperatingExpenses": "canonical",
+    "ifrs-full_OperatingExpense": "equivalent"
+   }
+  }
+ },
+ "not_totals": {
+  "ForeignExchangeEffectOnCash": "in \"Cash Flow Totals\" but a component of the net change in cash, not a total"
+ },
+ "known_wrong": [
+  {
+   "tag": "CapitalReserve",
+   "total": "AllEquityBalanceIncludingMinorityInterest",
+   "company_count": 149,
+   "is_total_flag": true,
+   "note": "IFRS capital reserve: one reserve inside equity. open"
+  },
+  {
+   "tag": "DefinedBenefitPlanAccumulatedOtherComprehensiveIncomeBeforeTax",
+   "total": "AllEquityBalanceIncludingMinorityInterest",
+   "company_count": 0,
+   "is_total_flag": true,
+   "note": "pension AOCI amount (a footnote figure), not total equity. open"
+  },
+  {
+   "tag": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsDisposalGroupIncludingDiscontinuedOperations",
+   "total": "CashAndCashEquivalents",
+   "company_count": 197,
+   "is_total_flag": true,
+   "note": "the cash held inside a disposal group, a part of the total cash balance. open"
+  },
+  {
+   "tag": "AociBeforeTaxAttributableToParent",
+   "total": "CommonEquity",
+   "company_count": 3,
+   "is_total_flag": true,
+   "note": "AOCI before tax: one equity component. open"
+  },
+  {
+   "tag": "CommonStockOtherValueOutstanding",
+   "total": "CommonEquity",
+   "company_count": 21,
+   "is_total_flag": true,
+   "note": "common stock value line (FHLBanks report capital stock with it). open"
+  },
+  {
+   "tag": "DebtSecuritiesAvailableForSaleAccumulatedGrossUnrealizedGainLossBeforeTax",
+   "total": "CommonEquity",
+   "company_count": 1,
+   "is_total_flag": true,
+   "note": "AFS unrealized gain/loss, a footnote figure. open"
+  },
+  {
+   "tag": "DefinedBenefitPlanAccumulatedOtherComprehensiveIncomeNetGainsLossesBeforeTax",
+   "total": "CommonEquity",
+   "company_count": 0,
+   "is_total_flag": true,
+   "note": "pension AOCI net gains/losses, a footnote figure. open"
+  },
+  {
+   "tag": "GeneralPartnersCapitalAccount",
+   "total": "CommonEquity",
+   "company_count": 109,
+   "is_total_flag": true,
+   "note": "general partner's share of partners' capital (PartnersCapital is the total). open"
+  },
+  {
+   "tag": "IssuedCapital",
+   "total": "CommonEquity",
+   "company_count": 702,
+   "is_total_flag": true,
+   "note": "IFRS issued (share) capital: one equity component. open"
+  },
+  {
+   "tag": "LimitedPartnersCapitalAccount",
+   "total": "CommonEquity",
+   "company_count": 133,
+   "is_total_flag": true,
+   "note": "limited partners' share of partners' capital (PartnersCapital is the total). open"
+  },
+  {
+   "tag": "ifrs-full_IssuedCapital",
+   "total": "CommonEquity",
+   "company_count": null,
+   "is_total_flag": null,
+   "note": "IFRS issued (share) capital: one equity component. open"
+  },
+  {
+   "tag": "ComprehensiveIncomeAttributableToNoncontrollingInterests",
+   "total": "ComprehensiveIncomeNet",
+   "company_count": 242,
+   "is_total_flag": true,
+   "note": "the NCI share of comprehensive income, a part. open"
+  },
+  {
+   "tag": "CurrentAssetsOtherThanAssetsOrDisposalGroupsClassifiedAsHeldForSaleOrAsHeldForDistributionToOwners",
+   "total": "CurrentAssetsTotal",
+   "company_count": 102,
+   "is_total_flag": true,
+   "note": "IFRS subtotal: CurrentAssets = this + assets held for sale, so both rows would read as the total. open"
+  },
+  {
+   "tag": "CurrentDerivativeFinancialAssets",
+   "total": "CurrentAssetsTotal",
+   "company_count": 141,
+   "is_total_flag": true,
+   "note": "IFRS current derivative assets: a current-asset line. open"
+  },
+  {
+   "tag": "CurrentPrepaymentsAndOtherCurrentAssets",
+   "total": "CurrentAssetsTotal",
+   "company_count": 116,
+   "is_total_flag": true,
+   "note": "IFRS prepayments: a current-asset line. open"
+  },
+  {
+   "tag": "CurrentTaxAssetsCurrent",
+   "total": "CurrentAssetsTotal",
+   "company_count": 228,
+   "is_total_flag": true,
+   "note": "IFRS current tax assets: a current-asset line. open"
+  },
+  {
+   "tag": "CurrentTradeReceivables",
+   "total": "CurrentAssetsTotal",
+   "company_count": 234,
+   "is_total_flag": true,
+   "note": "IFRS trade receivables: a current-asset line. open"
+  },
+  {
+   "tag": "OtherCurrentReceivables",
+   "total": "CurrentAssetsTotal",
+   "company_count": 125,
+   "is_total_flag": true,
+   "note": "IFRS other receivables: a current-asset line. open"
+  },
+  {
+   "tag": "CurrentBorrowingsAndCurrentPortionOfNoncurrentBorrowings",
+   "total": "CurrentLiabilitiesTotal",
+   "company_count": 136,
+   "is_total_flag": true,
+   "note": "IFRS current borrowings: a current-liability line. open"
+  },
+  {
+   "tag": "CurrentDerivativeFinancialLiabilities",
+   "total": "CurrentLiabilitiesTotal",
+   "company_count": 206,
+   "is_total_flag": true,
+   "note": "IFRS current derivative liabilities: a line. open"
+  },
+  {
+   "tag": "CurrentPortionOfLongtermBorrowings",
+   "total": "CurrentLiabilitiesTotal",
+   "company_count": 153,
+   "is_total_flag": true,
+   "note": "IFRS current portion of borrowings: a line. open"
+  },
+  {
+   "tag": "CurrentProvisions",
+   "total": "CurrentLiabilitiesTotal",
+   "company_count": 173,
+   "is_total_flag": true,
+   "note": "IFRS current provisions: a line. open"
+  },
+  {
+   "tag": "CurrentTaxLiabilitiesCurrent",
+   "total": "CurrentLiabilitiesTotal",
+   "company_count": 335,
+   "is_total_flag": true,
+   "note": "IFRS current tax liabilities: a line. open"
+  },
+  {
+   "tag": "LiabilitiesIncludedInDisposalGroupsClassifiedAsHeldForSale",
+   "total": "CurrentLiabilitiesTotal",
+   "company_count": 100,
+   "is_total_flag": true,
+   "note": "IFRS held-for-sale liabilities: a line. open"
+  },
+  {
+   "tag": "OtherCurrentFinancialLiabilities",
+   "total": "CurrentLiabilitiesTotal",
+   "company_count": 103,
+   "is_total_flag": true,
+   "note": "IFRS other current financial liabilities: a line. open"
+  },
+  {
+   "tag": "TradeAndOtherCurrentPayablesToRelatedParties",
+   "total": "CurrentLiabilitiesTotal",
+   "company_count": 116,
+   "is_total_flag": true,
+   "note": "IFRS related-party payables: a line. open"
+  },
+  {
+   "tag": "WarrantLiability",
+   "total": "Liabilities",
+   "company_count": 126,
+   "is_total_flag": true,
+   "note": "warrant liability: one liability line. bead edgartools-7t94s"
+  },
+  {
+   "tag": "IncreaseDecreaseThroughTreasuryShareTransactions",
+   "total": "NetCashFromFinancingActivities",
+   "company_count": 125,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "OtherInflowsOutflowsOfCashClassifiedAsFinancingActivities",
+   "total": "NetCashFromFinancingActivities",
+   "company_count": 124,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "PaymentsForDebtIssueCosts",
+   "total": "NetCashFromFinancingActivities",
+   "company_count": 118,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "PaymentsForShareIssueCosts",
+   "total": "NetCashFromFinancingActivities",
+   "company_count": 190,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "PaymentsOfLeaseLiabilitiesClassifiedAsFinancingActivities",
+   "total": "NetCashFromFinancingActivities",
+   "company_count": 615,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "ProceedsFromExerciseOfOptions",
+   "total": "NetCashFromFinancingActivities",
+   "company_count": 237,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "ProceedsFromExerciseOfWarrants",
+   "total": "NetCashFromFinancingActivities",
+   "company_count": 137,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "ProceedsFromIssueOfBondsNotesAndDebentures",
+   "total": "NetCashFromFinancingActivities",
+   "company_count": 131,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "RepaymentsOfBondsNotesAndDebentures",
+   "total": "NetCashFromFinancingActivities",
+   "company_count": 103,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "ShareIssueRelatedCost",
+   "total": "NetCashFromFinancingActivities",
+   "company_count": 212,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "CashFlowsFromLosingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities",
+   "total": "NetCashFromInvestingActivities",
+   "company_count": 129,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "CashFlowsUsedInObtainingControlOfSubsidiariesOrOtherBusinessesClassifiedAsInvestingActivities",
+   "total": "NetCashFromInvestingActivities",
+   "company_count": 323,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "InterestReceivedClassifiedAsInvestingActivities",
+   "total": "NetCashFromInvestingActivities",
+   "company_count": 191,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "OtherInflowsOutflowsOfCashClassifiedAsInvestingActivities",
+   "total": "NetCashFromInvestingActivities",
+   "company_count": 115,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "PurchaseOfFinancialInstrumentsClassifiedAsInvestingActivities",
+   "total": "NetCashFromInvestingActivities",
+   "company_count": 106,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "PurchaseOfIntangibleAssetsClassifiedAsInvestingActivities",
+   "total": "NetCashFromInvestingActivities",
+   "company_count": 393,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForAmortisationExpense",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 150,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForDecreaseIncreaseInOtherAssets",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 147,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForDecreaseIncreaseInOtherOperatingReceivables",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 111,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForDecreaseIncreaseInTradeAndOtherReceivables",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 227,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForDeferredTaxExpense",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 150,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForDepreciationExpense",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 197,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForFairValueGainsLosses",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 129,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForFinanceCosts",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 213,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForFinanceIncomeCost",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 112,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForGainsLossesOnChangeInFairValueOfDerivatives",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 112,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForIncomeTaxExpense",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 256,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForIncreaseDecreaseInEmployeeBenefitLiabilities",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 123,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForIncreaseDecreaseInOtherLiabilities",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 128,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForIncreaseDecreaseInTradeAndOtherPayables",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 245,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForInterestExpense",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 142,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForInterestIncome",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 109,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForProvisions",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 210,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForReconcileProfitLoss",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 118,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "AdjustmentsForUnrealisedForeignExchangeLossesGains",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 304,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "CashFlowsFromUsedInOperations",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 246,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "CashFlowsFromUsedInOperationsBeforeChangesInWorkingCapital",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 167,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "IncreaseDecreaseInWorkingCapital",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 182,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "InterestReceivedClassifiedAsOperatingActivities",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 243,
+   "is_total_flag": false,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "OtherAdjustmentsForNoncashItems",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 149,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "OtherAdjustmentsToReconcileProfitLoss",
+   "total": "NetCashFromOperatingActivities",
+   "company_count": 110,
+   "is_total_flag": true,
+   "note": "IFRS cash-flow line under the section total (bare IFRS name; GH #1435). open"
+  },
+  {
+   "tag": "ParticipatingSecuritiesDistributedAndUndistributedEarnings",
+   "total": "NetIncomeToCommonShareholders",
+   "company_count": 0,
+   "is_total_flag": false,
+   "note": "earnings allocated to participating securities, a deduction from it. open"
+  },
+  {
+   "tag": "IntangibleAssetsAndGoodwill",
+   "total": "NonCurrentAssetsTotal",
+   "company_count": 206,
+   "is_total_flag": true,
+   "note": "IFRS intangibles and goodwill: a noncurrent-asset line. open"
+  },
+  {
+   "tag": "NoncurrentDerivativeFinancialAssets",
+   "total": "NonCurrentAssetsTotal",
+   "company_count": 103,
+   "is_total_flag": true,
+   "note": "IFRS noncurrent derivative assets: a line. open"
+  },
+  {
+   "tag": "NoncurrentDerivativeFinancialLiabilities",
+   "total": "NonCurrentLiabilitiesTotal",
+   "company_count": 151,
+   "is_total_flag": true,
+   "note": "IFRS noncurrent derivative liabilities: a line. open"
+  },
+  {
+   "tag": "NoncurrentProvisionsForEmployeeBenefits",
+   "total": "NonCurrentLiabilitiesTotal",
+   "company_count": 128,
+   "is_total_flag": true,
+   "note": "IFRS employee-benefit provisions: a line. open"
+  },
+  {
+   "tag": "OtherNoncurrentFinancialLiabilities",
+   "total": "NonCurrentLiabilitiesTotal",
+   "company_count": 112,
+   "is_total_flag": true,
+   "note": "IFRS other noncurrent financial liabilities: a line. open"
+  },
+  {
+   "tag": "RelatedPartyTransactionSellingGeneralAndAdministrativeExpensesFromTransactionsWithRelatedParty",
+   "total": "OperatingIncomeLoss",
+   "company_count": 145,
+   "is_total_flag": true,
+   "note": "an expense line, not operating income. open"
+  },
+  {
+   "tag": "SalesAndMarketingExpense",
+   "total": "OperatingIncomeLoss",
+   "company_count": 190,
+   "is_total_flag": true,
+   "note": "an expense line, not operating income. open"
+  },
+  {
+   "tag": "FinanceIncomeCost",
+   "total": "PretaxIncomeLoss",
+   "company_count": 210,
+   "is_total_flag": true,
+   "note": "IFRS net finance income/cost: a line above pretax income. open"
+  },
+  {
+   "tag": "GainsLossesOnChangeInFairValueOfDerivatives",
+   "total": "PretaxIncomeLoss",
+   "company_count": 108,
+   "is_total_flag": true,
+   "note": "IFRS derivative gains/losses: a line above pretax income. open"
+  },
+  {
+   "tag": "GainsLossesOnExchangeDifferencesOnTranslationRecognisedInProfitOrLoss",
+   "total": "PretaxIncomeLoss",
+   "company_count": 256,
+   "is_total_flag": true,
+   "note": "IFRS FX gains/losses: a line above pretax income. open"
+  },
+  {
+   "tag": "IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+   "total": "ProfitLoss",
+   "company_count": 139,
+   "is_total_flag": false,
+   "note": "IFRS statement-of-equity movement, not profit. open"
+  },
+  {
+   "tag": "IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+   "total": "ProfitLoss",
+   "company_count": 180,
+   "is_total_flag": false,
+   "note": "IFRS statement-of-equity movement, not profit. open"
+  },
+  {
+   "tag": "GainsLossesOnSalesOfAssets",
+   "total": "Revenue",
+   "company_count": 79,
+   "is_total_flag": true,
+   "note": "a gain/loss on asset sales, not revenue. open"
+  },
+  {
+   "tag": "InterestAndFeeIncomeOtherLoans",
+   "total": "Revenue",
+   "company_count": 10,
+   "is_total_flag": true,
+   "note": "interest income on one loan class. open"
+  },
+  {
+   "tag": "PhaseInPlanAmountOfCapitalizedCostsRecovered",
+   "total": "Revenue",
+   "company_count": 0,
+   "is_total_flag": false,
+   "note": "regulatory phase-in cost recovery amount, a disclosure. open"
+  },
+  {
+   "tag": "PromotionalAllowances",
+   "total": "Revenue",
+   "company_count": 0,
+   "is_total_flag": false,
+   "note": "contra-revenue (deducted from revenue). open"
+  },
+  {
+   "tag": "SaleOfTrustAssetsToPayExpenses",
+   "total": "Revenue",
+   "company_count": 1,
+   "is_total_flag": false,
+   "note": "royalty-trust asset sales to pay expenses, not revenue. open"
+  },
+  {
+   "tag": "SalesAllowancesGoods",
+   "total": "Revenue",
+   "company_count": 0,
+   "is_total_flag": false,
+   "note": "contra-revenue. open"
+  },
+  {
+   "tag": "SalesAllowancesPriceProtection",
+   "total": "Revenue",
+   "company_count": 0,
+   "is_total_flag": false,
+   "note": "contra-revenue. open"
+  },
+  {
+   "tag": "SalesAllowancesServices",
+   "total": "Revenue",
+   "company_count": 0,
+   "is_total_flag": false,
+   "note": "contra-revenue. open"
+  },
+  {
+   "tag": "SalesDiscountsGoods",
+   "total": "Revenue",
+   "company_count": 0,
+   "is_total_flag": false,
+   "note": "contra-revenue. open"
+  },
+  {
+   "tag": "SalesDiscountsReturnsAndAllowancesGoods",
+   "total": "Revenue",
+   "company_count": 0,
+   "is_total_flag": false,
+   "note": "contra-revenue. open"
+  },
+  {
+   "tag": "SalesDiscountsServices",
+   "total": "Revenue",
+   "company_count": 0,
+   "is_total_flag": false,
+   "note": "contra-revenue. open"
+  },
+  {
+   "tag": "SalesReturnsAndAllowancesGoods",
+   "total": "Revenue",
+   "company_count": 0,
+   "is_total_flag": false,
+   "note": "contra-revenue. open"
+  },
+  {
+   "tag": "SalesReturnsGoods",
+   "total": "Revenue",
+   "company_count": 0,
+   "is_total_flag": false,
+   "note": "contra-revenue. open"
+  }
+ ],
+ "already_blocked": [
+  {
+   "tag": "CommonStockHeldInTrust",
+   "total": "CommonEquity",
+   "company_count": 14,
+   "note": "component, already dropped by the is_total=false display-text guard"
+  },
+  {
+   "tag": "CommonStockIssuedEmployeeStockTrust",
+   "total": "CommonEquity",
+   "company_count": 9,
+   "note": "component, already dropped by the is_total=false display-text guard"
+  },
+  {
+   "tag": "CommonStockIssuedEmployeeTrustDeferred",
+   "total": "CommonEquity",
+   "company_count": 3,
+   "note": "component, already dropped by the is_total=false display-text guard"
+  },
+  {
+   "tag": "CommonStockSharesHeldInEmployeeTrust",
+   "total": "CommonEquity",
+   "company_count": 7,
+   "note": "component, already dropped by the is_total=false display-text guard"
+  },
+  {
+   "tag": "CommonStocksIncludingAdditionalPaidInCapital",
+   "total": "CommonEquity",
+   "company_count": 83,
+   "note": "component, already dropped by the is_total=false display-text guard"
+  },
+  {
+   "tag": "CommonStocksIncludingAdditionalPaidInCapitalNetOfDiscount",
+   "total": "CommonEquity",
+   "company_count": 3,
+   "note": "component, already dropped by the is_total=false display-text guard"
+  },
+  {
+   "tag": "CompensationAndBenefitsTrust",
+   "total": "CommonEquity",
+   "company_count": 7,
+   "note": "component, already dropped by the is_total=false display-text guard"
+  },
+  {
+   "tag": "DefinedBenefitPlanAccumulatedOtherComprehensiveIncomeNetPriorServiceCostCreditBeforeTax",
+   "total": "CommonEquity",
+   "company_count": 0,
+   "note": "component, already dropped by the is_total=false display-text guard"
+  },
+  {
+   "tag": "DefinedBenefitPlanAccumulatedOtherComprehensiveIncomeNetTransitionAssetsObligationsBeforeTax",
+   "total": "CommonEquity",
+   "company_count": 0,
+   "note": "component, already dropped by the is_total=false display-text guard"
+  },
+  {
+   "tag": "TranslationAdjustmentForNetInvestmentHedgeNetOfTax",
+   "total": "CommonEquity",
+   "company_count": 0,
+   "note": "component, already dropped by the is_total=false display-text guard"
+  },
+  {
+   "tag": "ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
+   "total": "ComprehensiveIncomeNet",
+   "company_count": 1327,
+   "note": "genuine total (incl. NCI), dropped by the is_total=false guard; owner decision"
+  },
+  {
+   "tag": "LiabilitiesAndEquity",
+   "total": "LiabilitiesAndEquity",
+   "company_count": 0,
+   "note": "genuine total (bare IFRS name), dropped by the is_total=false display-text guard; owner decision"
+  },
+  {
+   "tag": "NetIncomeLossAvailableToCommonStockholdersDiluted",
+   "total": "NetIncomeToCommonShareholders",
+   "company_count": 316,
+   "note": "genuine total (diluted twin), dropped by the is_total=false guard; owner decision"
+  },
+  {
+   "tag": "NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest",
+   "total": "ProfitLoss",
+   "company_count": 228,
+   "note": "genuine total (ProfitLoss family), dropped by the is_total=false guard; owner decision"
+  }
+ ]
+}
