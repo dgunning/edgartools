@@ -3,6 +3,7 @@ import gzip
 import inspect
 import logging
 import os
+import posixpath
 import shutil
 import stat
 import tarfile
@@ -1698,6 +1699,9 @@ async def download_bulk_data(
                             member_path = os.path.join(str(download_path), member.name)
                             if not is_within_directory(Path(member_path)):
                                 raise ValueError(f"Attempted path traversal in tar file: {member.name}")
+                            # Python before 3.11.17 and 3.12.15 creates the parent "nested/.." of
+                            # "nested/../x" literally and fails, so extract the normalised name.
+                            member.name = posixpath.normpath(member.name)
 
                             # Extract file and update progress
                             tar.extract(member, str(download_path), filter="tar")

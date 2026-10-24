@@ -1,0 +1,1 @@
+**Bulk tar archives with a `dir/../file` entry extract on every supported Python.** Python before 3.11.17 and 3.12.15 failed with `FileExistsError` on such an entry; the entry name is now normalised before extraction. (GH #1598 follow-up)
