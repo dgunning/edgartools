@@ -96,6 +96,22 @@ def test_net_income_does_not_stand_in_where_the_filer_shows_it_differs():
     assert eps["Q3 2025"] is None
 
 
+def test_untagged_first_quarter_is_six_months_less_the_second():
+    """Tesla's Q1 2026 10-Q does not tag income available to common for the
+    quarter; its Q2 10-Q tags the six months and the discrete Q2. Net income
+    differs, so it cannot stand in, and every rolling window holding Q1 came
+    back empty (TSLA Q1-Q3 2026 TTM EPS NaN). Q1 is six months less Q2."""
+    ef = _preferred_issuer()
+    available = "us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic"
+    facts = [f for f in ef._facts
+             if not (f.concept == available and f.period_start == date(2025, 1, 1) and f.fiscal_period == "Q1")]
+    facts.append(_fact("NetIncomeLossAvailableToCommonStockholdersBasic", 1800.0,
+                       date(2025, 1, 1), date(2025, 6, 30), "Q2", "USD"))
+    eps = _ttm_eps(EntityFacts(cik=1, name="Example Preferred Issuer", facts=facts))["EarningsPerShareBasic"]
+    # Before the fix: None for Q1, Q2 and Q3 2025.
+    assert list(eps.values()) == pytest.approx([36.0] * 4)
+
+
 # Public Storage (PSA), company facts. FY2025 10-K 0001628280-26-007696:
 # NetIncomeLoss 1,784,348,000; net income allocable to common shareholders
 # 1,585,585,000; weighted-average shares basic 175,447,000, diluted 175,902,000;

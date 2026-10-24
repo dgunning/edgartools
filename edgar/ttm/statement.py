@@ -3,7 +3,7 @@
 Provides TTMStatement and TTMStatementBuilder for creating
 trailing twelve month financial statements.
 """
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from datetime import date, timedelta
 from typing import Callable, List, Optional, Tuple
 
@@ -175,11 +175,46 @@ def _numerator_series(facts: List[FinancialFact]) -> dict:
         held = annual.get(fact.period_end)
         if held is None or (fact.filing_date or date.min) > (held.filing_date or date.min):
             annual[fact.period_end] = fact
+    quarters = {q.period_end: q for q in calc._filter_quarterly_facts() if q.numeric_value is not None}
+    _fill_first_quarters(calc, quarters)
     return {
         "facts": facts,
-        "quarters": {q.period_end: q for q in calc._filter_quarterly_facts() if q.numeric_value is not None},
+        "quarters": quarters,
         "annual": annual,
     }
+
+
+def _fill_first_quarters(calc: TTMCalculator, quarters: dict) -> None:
+    """Derive an untagged first quarter as six months less the second quarter.
+
+    The quarterizer derives Q2, Q3 and Q4 but takes Q1 only as tagged. Tesla's
+    Q1 2026 10-Q does not tag income available to common stockholders for the
+    quarter, while its Q2 10-Q tags the six months and the discrete Q2. Net
+    income cannot stand in (the two differ), so without this every window
+    containing Q1 2026 had no EPS.
+    """
+    six_months = {}
+    for fact in calc._filter_by_duration(DurationBucket.YTD_6M):
+        if fact.numeric_value is None or fact.period_start is None or not calc._is_additive_concept(fact):
+            continue
+        key = (fact.period_start, fact.period_end)
+        held = six_months.get(key)
+        if held is None or (fact.filing_date or date.min) > (held.filing_date or date.min):
+            six_months[key] = fact
+    for (start, end), ytd6 in six_months.items():
+        q2 = quarters.get(end)
+        if q2 is None or (q2.calculation_context or "").startswith("derived") or q2.period_start is None or q2.period_start <= start:
+            continue
+        q1_end = q2.period_start - timedelta(days=1)
+        if q1_end in quarters:
+            continue
+        q1 = replace(
+            calc._create_derived_quarter(ytd6, ytd6.numeric_value - q2.numeric_value,
+                                         "derived_q1_ytd6_minus_q2", target_period="Q1", period_start=start),
+            period_end=q1_end,
+        )
+        if calc._classify_duration(q1) == DurationBucket.QUARTER:
+            quarters[q1_end] = q1
 
 
 def _window_numerator(window: List[FinancialFact], series: List[dict]) -> Optional[float]:

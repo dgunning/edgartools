@@ -140,8 +140,16 @@ def test_ttm_console_output_keeps_per_share_precision():
         console.print(statement)
     rendered = capture.get()
 
+    # The rendered value is the dataframe's, to 2 decimals. (It was 20.16 when this
+    # test was written; the GH #1691 and #1692 share-count and numerator fixes moved
+    # it to 20.17, so read it from the statement rather than pinning it.)
+    df = statement.to_dataframe()
+    latest = _period_columns(df)[0]
+    expected = f"{df[df['label'] == 'Earnings Per Share, Basic'].iloc[0][latest]:.2f}"
+    assert 20 < float(expected) < 21, f"GOOGL {latest} basic TTM EPS out of range: {expected}"
+
     eps_line = next(line for line in rendered.splitlines() if "Earnings Per Share, Basic" in line)
-    assert "20.16" in eps_line, f"expected 2-decimal EPS, got: {eps_line.strip()}"
+    assert expected in eps_line, f"expected 2-decimal EPS {expected}, got: {eps_line.strip()}"
     assert "$20 " not in eps_line, f"EPS still whole-dollar rounded: {eps_line.strip()}"
 
     # Monetary lines are unchanged.
