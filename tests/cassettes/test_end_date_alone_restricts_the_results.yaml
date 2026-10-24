@@ -1,0 +1,368 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - efts.sec.gov
+    method: GET
+    uri: https://efts.sec.gov/LATEST/search-index?q=tariff&forms=10-K&dateRange=custom&startdt=2001-01-01&enddt=2003-12-31
+  response:
+    body:
+      string: '{"took":35,"timed_out":false,"_shards":{"total":50,"successful":50,"skipped":0,"failed":0},"hits":{"total":{"value":2117,"relation":"eq"},"max_score":11.22468,"hits":[{"_index":"edgar_file","_id":"0000004904-03-000095:x10b.txt","_score":11.22468,"_source":{"ciks":["0000081027"],"period_ending":"2002-12-31","file_num":["001-12945"],"display_names":["PUBLIC
+        SERVICE CO OF OKLAHOMA  (CIK 0000081027)"],"xsl":null,"sequence":6,"root_forms":["10-K"],"file_date":"2003-03-20","biz_states":["OK"],"sics":["4911"],"form":"10-K","adsh":"0000004904-03-000095","film_num":["03610948"],"biz_locations":["Tulsa,
+        OK"],"file_type":"EX-10","file_description":"(B) TRANSMISSION COORDINATING
+        AGREMENT","inc_states":["OK"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-03-000040:exh102514.txt","_score":11.214724,"_source":{"ciks":["0000023426","0000072741","0000106170","0000315256"],"period_ending":"2002-12-31","file_num":["000-00404","001-05324","000-07624","001-06392"],"display_names":["CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","NORTHEAST UTILITIES
+        SYSTEM  (ES)  (CIK 0000072741)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)"],"xsl":null,"sequence":14,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["CT","MA","NH"],"sics":["4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-03-000040","film_num":["03612236","03612233","03612234","03612235"],"biz_locations":["Berlin,
+        CT","West Springfield, MA","West Springfield, MA","Manchester, NH"],"file_type":"EX-10.25.14","file_description":"EXHIBIT
+        10.25.14","inc_states":["CT","MA","MA","NH"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-02-000051:y58564f.txt","_score":11.213098,"_source":{"ciks":["0000072741"],"period_ending":"2001-12-31","file_num":["001-05324"],"display_names":["NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)"],"xsl":null,"sequence":11,"root_forms":["10-K"],"file_date":"2002-03-22","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000072741-02-000051","film_num":["02582925"],"biz_locations":["West
+        Springfield, MA"],"file_type":"EX-10.23.2","file_description":null,"inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000004904-03-000089:x10b.txt","_score":11.191204,"_source":{"ciks":["0000018734"],"period_ending":"2002-12-31","file_num":["001-12973"],"display_names":["AEP
+        TEXAS CENTRAL CO  (CIK 0000018734)"],"xsl":null,"sequence":6,"root_forms":["10-K"],"file_date":"2003-03-20","biz_states":["OH"],"sics":["4911"],"form":"10-K","adsh":"0000004904-03-000089","film_num":["03610933"],"biz_locations":["Columbus,
+        OH"],"file_type":"EX-10","file_description":"(B) TRANSMISSION COORDINATION
+        AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000004904-03-000096:x10b.txt","_score":11.188892,"_source":{"ciks":["0000092487"],"period_ending":"2002-12-31","file_num":["001-03146"],"display_names":["SOUTHWESTERN
+        ELECTRIC POWER CO  (CIK 0000092487)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2003-03-20","biz_states":["LA"],"sics":["4911"],"form":"10-K","adsh":"0000004904-03-000096","film_num":["03610961"],"biz_locations":["Shreveport,
+        LA"],"file_type":"EX-10","file_description":"(B) TRANSMISSION COOR AGREEMENT","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0000004904-03-000086:x10d.txt","_score":11.1833,"_source":{"ciks":["0000004904"],"period_ending":"2002-12-31","file_num":["001-03525"],"display_names":["AMERICAN
+        ELECTRIC POWER CO INC  (AEP)  (CIK 0000004904)"],"xsl":null,"sequence":7,"root_forms":["10-K"],"file_date":"2003-03-20","biz_states":["OH"],"sics":["4911"],"form":"10-K","adsh":"0000004904-03-000086","film_num":["03610921"],"biz_locations":["Columbus,
+        OH"],"file_type":"EX-10","file_description":"(D) TRANSMISSION COORD AGREEMENT","inc_states":["NY"],"items":[]}},{"_index":"edgar_file","_id":"0000004904-03-000090:x10b.txt","_score":11.139187,"_source":{"ciks":["0000105860"],"period_ending":"2002-12-31","file_num":["000-00340"],"display_names":["AEP
+        TEXAS NORTH CO  (CIK 0000105860)"],"xsl":null,"sequence":6,"root_forms":["10-K"],"file_date":"2003-03-20","biz_states":["OH"],"sics":["4911"],"form":"10-K","adsh":"0000004904-03-000090","film_num":["03610937"],"biz_locations":["Columbus,
+        OH"],"file_type":"EX-10","file_description":"(B) TRANSMISSION COORDINATION
+        AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000950135-03-002055:b45693spexv10wxhy.txt","_score":11.118075,"_source":{"ciks":["0000090144","0000741508","0000071180"],"period_ending":"2002-12-31","file_num":["000-00508","001-08788","002-28348"],"display_names":["SIERRA
+        PACIFIC POWER CO  (CIK 0000090144)","SIERRA PACIFIC RESOURCES /NV/  (CIK 0000741508)","NEVADA
+        POWER CO  (CIK 0000071180)"],"xsl":null,"sequence":11,"root_forms":["10-K"],"file_date":"2003-03-28","biz_states":["NV"],"sics":["4931","4931","4911"],"form":"10-K","adsh":"0000950135-03-002055","film_num":["03625422","03625423","03625424"],"biz_locations":["Reno,
+        NV","Reno, NV","Las Vegas, NV"],"file_type":"EX-10.(H)","file_description":"SERVICE
+        AGREEMENT NO. 101.A FOR LONG-TERM FIRM","inc_states":["NV","NV","NV"],"items":[]}},{"_index":"edgar_file","_id":"0000950135-03-002055:b45693spexv10wxgy.txt","_score":11.113024,"_source":{"ciks":["0000090144","0000741508","0000071180"],"period_ending":"2002-12-31","file_num":["000-00508","001-08788","002-28348"],"display_names":["SIERRA
+        PACIFIC POWER CO  (CIK 0000090144)","SIERRA PACIFIC RESOURCES /NV/  (CIK 0000741508)","NEVADA
+        POWER CO  (CIK 0000071180)"],"xsl":null,"sequence":10,"root_forms":["10-K"],"file_date":"2003-03-28","biz_states":["NV"],"sics":["4931","4931","4911"],"form":"10-K","adsh":"0000950135-03-002055","film_num":["03625422","03625423","03625424"],"biz_locations":["Reno,
+        NV","Reno, NV","Las Vegas, NV"],"file_type":"EX-10.(G)","file_description":"SERVICE
+        AGREEMENT NO. 100 FOR LONG-TERM FIRM POINT","inc_states":["NV","NV","NV"],"items":[]}},{"_index":"edgar_file","_id":"0000950135-03-002055:b45693spexv10wxfy.txt","_score":11.098711,"_source":{"ciks":["0000090144","0000741508","0000071180"],"period_ending":"2002-12-31","file_num":["000-00508","001-08788","002-28348"],"display_names":["SIERRA
+        PACIFIC POWER CO  (CIK 0000090144)","SIERRA PACIFIC RESOURCES /NV/  (CIK 0000741508)","NEVADA
+        POWER CO  (CIK 0000071180)"],"xsl":null,"sequence":9,"root_forms":["10-K"],"file_date":"2003-03-28","biz_states":["NV"],"sics":["4931","4931","4911"],"form":"10-K","adsh":"0000950135-03-002055","film_num":["03625422","03625423","03625424"],"biz_locations":["Reno,
+        NV","Reno, NV","Las Vegas, NV"],"file_type":"EX-10.(F)","file_description":"SERVICE
+        AGREEMENT NO. 97 FOR LONG-TERM FIRM POINT","inc_states":["NV","NV","NV"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-02-000051:y58564k.txt","_score":11.082842,"_source":{"ciks":["0000072741"],"period_ending":"2001-12-31","file_num":["001-05324"],"display_names":["NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)"],"xsl":null,"sequence":16,"root_forms":["10-K"],"file_date":"2002-03-22","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000072741-02-000051","film_num":["02582925"],"biz_locations":["West
+        Springfield, MA"],"file_type":"EX-10.23.7","file_description":null,"inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000950135-03-002055:b45693spexv10wxey.txt","_score":11.079719,"_source":{"ciks":["0000090144","0000741508","0000071180"],"period_ending":"2002-12-31","file_num":["000-00508","001-08788","002-28348"],"display_names":["SIERRA
+        PACIFIC POWER CO  (CIK 0000090144)","SIERRA PACIFIC RESOURCES /NV/  (CIK 0000741508)","NEVADA
+        POWER CO  (CIK 0000071180)"],"xsl":null,"sequence":8,"root_forms":["10-K"],"file_date":"2003-03-28","biz_states":["NV"],"sics":["4931","4931","4911"],"form":"10-K","adsh":"0000950135-03-002055","film_num":["03625422","03625423","03625424"],"biz_locations":["Reno,
+        NV","Reno, NV","Las Vegas, NV"],"file_type":"EX-10.(E)","file_description":"SERVICE
+        AGREEMENT NO. 96 FOR LONG-TERM FIRM POINT","inc_states":["NV","NV","NV"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-03-000040:exh102523.txt","_score":11.078974,"_source":{"ciks":["0000023426","0000072741","0000106170","0000315256"],"period_ending":"2002-12-31","file_num":["000-00404","001-05324","000-07624","001-06392"],"display_names":["CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","NORTHEAST UTILITIES
+        SYSTEM  (ES)  (CIK 0000072741)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)"],"xsl":null,"sequence":23,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["CT","MA","NH"],"sics":["4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-03-000040","film_num":["03612236","03612233","03612234","03612235"],"biz_locations":["Berlin,
+        CT","West Springfield, MA","West Springfield, MA","Manchester, NH"],"file_type":"EX-10.25.23","file_description":"EXHIBIT
+        10.25.23","inc_states":["CT","MA","MA","NH"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-03-015731:d10753exv10w4xdy.txt","_score":11.067977,"_source":{"ciks":["0000731802"],"period_ending":"2003-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":7,"root_forms":["10-K"],"file_date":"2003-11-21","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-03-015731","film_num":["031018150"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.4(D)","file_description":"NO-NOTICE STORAGE AND TRANSPORTATION
+        DELIVERY","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-03-015731:d10753exv10w4xcy.txt","_score":10.981017,"_source":{"ciks":["0000731802"],"period_ending":"2003-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":6,"root_forms":["10-K"],"file_date":"2003-11-21","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-03-015731","film_num":["031018150"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.4(C)","file_description":"FIRM TRANSPORTATION SERVICE
+        AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-02-000051:y58564g.txt","_score":10.979541,"_source":{"ciks":["0000072741"],"period_ending":"2001-12-31","file_num":["001-05324"],"display_names":["NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)"],"xsl":null,"sequence":12,"root_forms":["10-K"],"file_date":"2002-03-22","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000072741-02-000051","film_num":["02582925"],"biz_locations":["West
+        Springfield, MA"],"file_type":"EX-10.23.3","file_description":null,"inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0001062379-03-000209:bogas-ex1020.txt","_score":10.965449,"_source":{"ciks":["0000013390"],"period_ending":"2002-12-31","file_num":["002-23416"],"display_names":["BOSTON
+        GAS CO  (CIK 0000013390)"],"xsl":null,"sequence":4,"root_forms":["10-K"],"file_date":"2003-03-31","biz_states":["MA"],"sics":["4922"],"form":"10-K","adsh":"0001062379-03-000209","film_num":["03631239"],"biz_locations":["Boston,
+        MA"],"file_type":"EX-10","file_description":"EXHIBIT 10.20.1","inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-01-001782:d84476ex10-69.txt","_score":10.953584,"_source":{"ciks":["0000944400"],"period_ending":"2000-12-31","file_num":["000-26140"],"display_names":["AT
+        TRACK COMMUNICATIONS INC  (CIK 0000944400)"],"xsl":null,"sequence":2,"root_forms":["10-K"],"file_date":"2001-02-27","biz_states":["TX"],"sics":["4812"],"form":"10-K","adsh":"0000950134-01-001782","film_num":["1555722"],"biz_locations":["Richardson,
+        TX"],"file_type":"EX-10.69","file_description":"SPECIAL CUSTOMER ARRANGEMENT
+        - MCI WORLDCOM","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0000950135-03-002055:b45693spexv10wxiy.txt","_score":10.947091,"_source":{"ciks":["0000090144","0000741508","0000071180"],"period_ending":"2002-12-31","file_num":["000-00508","001-08788","002-28348"],"display_names":["SIERRA
+        PACIFIC POWER CO  (CIK 0000090144)","SIERRA PACIFIC RESOURCES /NV/  (CIK 0000741508)","NEVADA
+        POWER CO  (CIK 0000071180)"],"xsl":null,"sequence":12,"root_forms":["10-K"],"file_date":"2003-03-28","biz_states":["NV"],"sics":["4931","4931","4911"],"form":"10-K","adsh":"0000950135-03-002055","film_num":["03625422","03625423","03625424"],"biz_locations":["Reno,
+        NV","Reno, NV","Las Vegas, NV"],"file_type":"EX-10.(I)","file_description":"SERVICE
+        AGREEMENT NO. 101.B FOR LONG-TERM FIRM","inc_states":["NV","NV","NV"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-02-014920:d01510exv10w17.txt","_score":10.928563,"_source":{"ciks":["0000731802"],"period_ending":"2002-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":6,"root_forms":["10-K"],"file_date":"2002-11-22","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-02-014920","film_num":["02838223"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.17","file_description":"TRANSPORATION SERVICE AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-03-000040:exh102512.txt","_score":10.916188,"_source":{"ciks":["0000023426","0000072741","0000106170","0000315256"],"period_ending":"2002-12-31","file_num":["000-00404","001-05324","000-07624","001-06392"],"display_names":["CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","NORTHEAST UTILITIES
+        SYSTEM  (ES)  (CIK 0000072741)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)"],"xsl":null,"sequence":12,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["CT","MA","NH"],"sics":["4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-03-000040","film_num":["03612236","03612233","03612234","03612235"],"biz_locations":["Berlin,
+        CT","West Springfield, MA","West Springfield, MA","Manchester, NH"],"file_type":"EX-10.25.12","file_description":"EXHIBIT
+        10.25.12","inc_states":["CT","MA","MA","NH"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-02-000051:y58564n.txt","_score":10.916064,"_source":{"ciks":["0000072741"],"period_ending":"2001-12-31","file_num":["001-05324"],"display_names":["NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)"],"xsl":null,"sequence":19,"root_forms":["10-K"],"file_date":"2002-03-22","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000072741-02-000051","film_num":["02582925"],"biz_locations":["West
+        Springfield, MA"],"file_type":"EX-10.23.10","file_description":null,"inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0001062379-03-000209:bogas-ex1024.txt","_score":10.911785,"_source":{"ciks":["0000013390"],"period_ending":"2002-12-31","file_num":["002-23416"],"display_names":["BOSTON
+        GAS CO  (CIK 0000013390)"],"xsl":null,"sequence":7,"root_forms":["10-K"],"file_date":"2003-03-31","biz_states":["MA"],"sics":["4922"],"form":"10-K","adsh":"0001062379-03-000209","film_num":["03631239"],"biz_locations":["Boston,
+        MA"],"file_type":"EX-10","file_description":"EXHIBIT 10.24.1","inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0001062379-03-000209:bogas-ex1031.txt","_score":10.887624,"_source":{"ciks":["0000013390"],"period_ending":"2002-12-31","file_num":["002-23416"],"display_names":["BOSTON
+        GAS CO  (CIK 0000013390)"],"xsl":null,"sequence":8,"root_forms":["10-K"],"file_date":"2003-03-31","biz_states":["MA"],"sics":["4922"],"form":"10-K","adsh":"0001062379-03-000209","film_num":["03631239"],"biz_locations":["Boston,
+        MA"],"file_type":"EX-10","file_description":"EXHIBIT 10.31.1","inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-01-000075:0005.txt","_score":10.882824,"_source":{"ciks":["0000072741","0000023426","0000106170","0000315256","0000880416"],"period_ending":"2000-12-31","file_num":["001-05324","000-00404","000-07624","001-06392","033-43508"],"display_names":["NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)","CONNECTICUT LIGHT & POWER CO  (CNLHN,
+        CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP, CNPWM, CNPWP, CNTHN, CNTHO,
+        CNTHP)  (CIK 0000023426)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)","NORTH ATLANTIC ENERGY CORP
+        /NH  (CIK 0000880416)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2001-03-28","biz_states":["MA","CT","NH"],"sics":["4911","4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-01-000075","film_num":["1581348","1581349","1581350","1581351","1581352"],"biz_locations":["West
+        Springfield, MA","Berlin, CT","West Springfield, MA","Manchester, NH","Manchester,
+        NH"],"file_type":"EX-10.26","file_description":"EXHIBIT 10.26","inc_states":["MA","CT","MA","NH","NH"],"items":[]}},{"_index":"edgar_file","_id":"0000950133-03-004299:w92507exv10w1.htm","_score":10.879156,"_source":{"ciks":["0000104819","0001103601"],"period_ending":"2003-09-30","file_num":["000-49807","001-16163"],"display_names":["WASHINGTON
+        GAS LIGHT CO  (CIK 0000104819)","WGL HOLDINGS INC  (CIK 0001103601)"],"xsl":null,"sequence":4,"root_forms":["10-K"],"file_date":"2003-12-17","biz_states":["DC"],"sics":["4924","4924"],"form":"10-K","adsh":"0000950133-03-004299","film_num":["031060674","031060675"],"biz_locations":["Washington,
+        DC","Washington, DC"],"file_type":"EX-10.1","file_description":"EXHIBIT 10.1","inc_states":["DC","VA"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-03-015731:d10753exv10w13xay.txt","_score":10.873123,"_source":{"ciks":["0000731802"],"period_ending":"2003-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":10,"root_forms":["10-K"],"file_date":"2003-11-21","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-03-015731","film_num":["031018150"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.13(A)","file_description":"NO NOTICE SERVICE AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000086521-02-000008:sdgemstrcontracti2.htm","_score":10.872122,"_source":{"ciks":["0000086521"],"period_ending":"2001-12-31","file_num":["001-03779"],"display_names":["SAN
+        DIEGO GAS & ELECTRIC CO  (CIK 0000086521)"],"xsl":null,"sequence":4,"root_forms":["10-K"],"file_date":"2002-03-21","biz_states":["CA"],"sics":["4931"],"form":"10-K","adsh":"0000086521-02-000008","film_num":["02581426"],"biz_locations":["San
+        Diego, CA"],"file_type":"EX-10","file_description":"EXHIBIT 10.38 MASTER SERVICES
+        CONTRACT, SCHEDULE J","inc_states":["CA"],"items":[]}},{"_index":"edgar_file","_id":"0001062379-03-000209:bogas-ex1022.txt","_score":10.868995,"_source":{"ciks":["0000013390"],"period_ending":"2002-12-31","file_num":["002-23416"],"display_names":["BOSTON
+        GAS CO  (CIK 0000013390)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2003-03-31","biz_states":["MA"],"sics":["4922"],"form":"10-K","adsh":"0001062379-03-000209","film_num":["03631239"],"biz_locations":["Boston,
+        MA"],"file_type":"EX-10","file_description":"EXHIBIT 10.22.1","inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000086521-02-000008:sdgemstrcontracth2.htm","_score":10.868619,"_source":{"ciks":["0000086521"],"period_ending":"2001-12-31","file_num":["001-03779"],"display_names":["SAN
+        DIEGO GAS & ELECTRIC CO  (CIK 0000086521)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2002-03-21","biz_states":["CA"],"sics":["4931"],"form":"10-K","adsh":"0000086521-02-000008","film_num":["02581426"],"biz_locations":["San
+        Diego, CA"],"file_type":"EX-10","file_description":"EXHIBIT 10.39 MASTER SERVICES
+        CONTRACT, SCHEDULE J","inc_states":["CA"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-03-000040:exh102513.txt","_score":10.867066,"_source":{"ciks":["0000023426","0000072741","0000106170","0000315256"],"period_ending":"2002-12-31","file_num":["000-00404","001-05324","000-07624","001-06392"],"display_names":["CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","NORTHEAST UTILITIES
+        SYSTEM  (ES)  (CIK 0000072741)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)"],"xsl":null,"sequence":13,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["CT","MA","NH"],"sics":["4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-03-000040","film_num":["03612236","03612233","03612234","03612235"],"biz_locations":["Berlin,
+        CT","West Springfield, MA","West Springfield, MA","Manchester, NH"],"file_type":"EX-10.25.13","file_description":"EXHIBIT
+        10.25.13","inc_states":["CT","MA","MA","NH"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-02-000051:y58564o.txt","_score":10.866999,"_source":{"ciks":["0000072741"],"period_ending":"2001-12-31","file_num":["001-05324"],"display_names":["NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)"],"xsl":null,"sequence":20,"root_forms":["10-K"],"file_date":"2002-03-22","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000072741-02-000051","film_num":["02582925"],"biz_locations":["West
+        Springfield, MA"],"file_type":"EX-10.23.11","file_description":null,"inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-03-015731:d10753exv10w13xjy.txt","_score":10.862497,"_source":{"ciks":["0000731802"],"period_ending":"2003-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":19,"root_forms":["10-K"],"file_date":"2003-11-21","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-03-015731","film_num":["031018150"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.13(J)","file_description":"GAS TRANSPORTATION AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000071337-02-000006:nepool.htm","_score":10.860993,"_source":{"ciks":["0000071337"],"period_ending":"2002-03-31","file_num":["002-26651"],"display_names":["NEW
+        ENGLAND POWER CO  (CIK 0000071337)"],"xsl":null,"sequence":4,"root_forms":["10-K"],"file_date":"2002-07-01","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000071337-02-000006","film_num":["02692708"],"biz_locations":["Westborough,
+        MA"],"file_type":"EX-10","file_description":"NEPOOL AGREEMENT","inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-03-015731:d10753exv10w13xly.txt","_score":10.820209,"_source":{"ciks":["0000731802"],"period_ending":"2003-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":21,"root_forms":["10-K"],"file_date":"2003-11-21","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-03-015731","film_num":["031018150"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.13(L)","file_description":"GAS TRANSPORTATION AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-02-000051:y58564h.txt","_score":10.819847,"_source":{"ciks":["0000072741"],"period_ending":"2001-12-31","file_num":["001-05324"],"display_names":["NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)"],"xsl":null,"sequence":13,"root_forms":["10-K"],"file_date":"2002-03-22","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000072741-02-000051","film_num":["02582925"],"biz_locations":["West
+        Springfield, MA"],"file_type":"EX-10.23.4","file_description":null,"inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0001104659-03-004896:j8065_ex10d65.htm","_score":10.813906,"_source":{"ciks":["0000055387","0000060549"],"period_ending":"2002-12-31","file_num":["001-03464","001-02893"],"display_names":["KENTUCKY
+        UTILITIES CO  (CIK 0000055387)","LOUISVILLE GAS & ELECTRIC CO /KY/  (CIK 0000060549)"],"xsl":null,"sequence":11,"root_forms":["10-K"],"file_date":"2003-03-25","biz_states":["KY"],"sics":["4911","4931"],"form":"10-K","adsh":"0001104659-03-004896","film_num":["03615537","03615536"],"biz_locations":["Lexington,
+        KY","Louisville, KY"],"file_type":"EX-10.65","file_description":"EX-10.65","inc_states":["KY","KY"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-03-015731:d10753exv10w13xky.txt","_score":10.785634,"_source":{"ciks":["0000731802"],"period_ending":"2003-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":20,"root_forms":["10-K"],"file_date":"2003-11-21","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-03-015731","film_num":["031018150"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.13(K)","file_description":"GAS TRANSPORTATION AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000950132-01-500079:dex1011.txt","_score":10.754282,"_source":{"ciks":["0000030573"],"period_ending":"2000-12-31","file_num":["001-00956"],"display_names":["DUQUESNE
+        LIGHT CO  (CIK 0000030573)"],"xsl":null,"sequence":3,"root_forms":["10-K"],"file_date":"2001-03-26","biz_states":["PA"],"sics":["4911"],"form":"10-K","adsh":"0000950132-01-500079","film_num":["1578670"],"biz_locations":["Pittsburgh,
+        PA"],"file_type":"EX-10.11","file_description":"AMENDMENT AND RESTATED POLR
+        II AGREEMENT","inc_states":["PA"],"items":[]}},{"_index":"edgar_file","_id":"0000931763-03-000835:dex1013.htm","_score":10.7285795,"_source":{"ciks":["0001054930"],"period_ending":"2002-12-31","file_num":["001-14213"],"display_names":["INTERCEPT
+        INC  (CIK 0001054930)"],"xsl":null,"sequence":4,"root_forms":["10-K"],"file_date":"2003-03-31","biz_states":["GA"],"sics":["6099"],"form":"10-K","adsh":"0000931763-03-000835","film_num":["03631963"],"biz_locations":["Norcross,
+        GA"],"file_type":"EX-10.13","file_description":"WORLDCOM SERVICE AGREEMENT
+        DATED APRIL 21, 2002","inc_states":["GA"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-03-000040:exh102518.txt","_score":10.714584,"_source":{"ciks":["0000023426","0000072741","0000106170","0000315256"],"period_ending":"2002-12-31","file_num":["000-00404","001-05324","000-07624","001-06392"],"display_names":["CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","NORTHEAST UTILITIES
+        SYSTEM  (ES)  (CIK 0000072741)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)"],"xsl":null,"sequence":18,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["CT","MA","NH"],"sics":["4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-03-000040","film_num":["03612236","03612233","03612234","03612235"],"biz_locations":["Berlin,
+        CT","West Springfield, MA","West Springfield, MA","Manchester, NH"],"file_type":"EX-10.25.18","file_description":"EXHIBIT
+        10.25.18","inc_states":["CT","MA","MA","NH"],"items":[]}},{"_index":"edgar_file","_id":"0000071337-02-000006:form10k.htm","_score":10.707891,"_source":{"ciks":["0000071337"],"period_ending":"2002-03-31","file_num":["002-26651"],"display_names":["NEW
+        ENGLAND POWER CO  (CIK 0000071337)"],"xsl":null,"sequence":1,"root_forms":["10-K"],"file_date":"2002-07-01","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000071337-02-000006","film_num":["02692708"],"biz_locations":["Westborough,
+        MA"],"file_type":"10-K","file_description":"FORM 10-K","inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0001062379-03-000209:bogas-ex1023.txt","_score":10.684698,"_source":{"ciks":["0000013390"],"period_ending":"2002-12-31","file_num":["002-23416"],"display_names":["BOSTON
+        GAS CO  (CIK 0000013390)"],"xsl":null,"sequence":6,"root_forms":["10-K"],"file_date":"2003-03-31","biz_states":["MA"],"sics":["4922"],"form":"10-K","adsh":"0001062379-03-000209","film_num":["03631239"],"biz_locations":["Boston,
+        MA"],"file_type":"EX-10","file_description":"EXHIBIT  10.23.1","inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000928385-03-000725:dex104.htm","_score":10.68452,"_source":{"ciks":["0000715957"],"period_ending":"2002-12-31","file_num":["001-08489"],"display_names":["DOMINION
+        RESOURCES INC /VA/  (D)  (CIK 0000715957)"],"xsl":null,"sequence":4,"root_forms":["10-K"],"file_date":"2003-03-20","biz_states":["VA"],"sics":["4911"],"form":"10-K","adsh":"0000928385-03-000725","film_num":["03610912"],"biz_locations":["Richmond,
+        VA"],"file_type":"EX-10.4","file_description":"PJM SOUTH IMPLEMENTATION AGREEMENT","inc_states":["VA"],"items":[]}},{"_index":"edgar_file","_id":"0000928385-03-000726:dex104.htm","_score":10.658632,"_source":{"ciks":["0000103682"],"period_ending":"2002-12-31","file_num":["001-02255"],"display_names":["VIRGINIA
+        ELECTRIC & POWER CO  (CIK 0000103682)"],"xsl":null,"sequence":4,"root_forms":["10-K"],"file_date":"2003-03-20","biz_states":["VA"],"sics":["4911"],"form":"10-K","adsh":"0000928385-03-000726","film_num":["03610917"],"biz_locations":["Richmond,
+        VA"],"file_type":"EX-10.4","file_description":"EXHIBIT 10.4","inc_states":["VA"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-02-000051:y58564i.txt","_score":10.633243,"_source":{"ciks":["0000072741"],"period_ending":"2001-12-31","file_num":["001-05324"],"display_names":["NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)"],"xsl":null,"sequence":14,"root_forms":["10-K"],"file_date":"2002-03-22","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000072741-02-000051","film_num":["02582925"],"biz_locations":["West
+        Springfield, MA"],"file_type":"EX-10.23.5","file_description":null,"inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-03-000040:exh102515.txt","_score":10.593772,"_source":{"ciks":["0000023426","0000072741","0000106170","0000315256"],"period_ending":"2002-12-31","file_num":["000-00404","001-05324","000-07624","001-06392"],"display_names":["CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","NORTHEAST UTILITIES
+        SYSTEM  (ES)  (CIK 0000072741)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)"],"xsl":null,"sequence":15,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["CT","MA","NH"],"sics":["4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-03-000040","film_num":["03612236","03612233","03612234","03612235"],"biz_locations":["Berlin,
+        CT","West Springfield, MA","West Springfield, MA","Manchester, NH"],"file_type":"EX-10.25.15","file_description":"EXHIBIT
+        10.25.15","inc_states":["CT","MA","MA","NH"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-03-000040:exh102522.txt","_score":10.588921,"_source":{"ciks":["0000023426","0000072741","0000106170","0000315256"],"period_ending":"2002-12-31","file_num":["000-00404","001-05324","000-07624","001-06392"],"display_names":["CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","NORTHEAST UTILITIES
+        SYSTEM  (ES)  (CIK 0000072741)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)"],"xsl":null,"sequence":22,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["CT","MA","NH"],"sics":["4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-03-000040","film_num":["03612236","03612233","03612234","03612235"],"biz_locations":["Berlin,
+        CT","West Springfield, MA","West Springfield, MA","Manchester, NH"],"file_type":"EX-10.25.22","file_description":"EXHIBIT
+        10.25.22","inc_states":["CT","MA","MA","NH"],"items":[]}},{"_index":"edgar_file","_id":"0001019687-01-000471:0004.txt","_score":10.577886,"_source":{"ciks":["0001092536"],"period_ending":"2000-12-31","file_num":["000-29255"],"display_names":["FASTNET
+        CORP  (CIK 0001092536)"],"xsl":null,"sequence":"4","root_forms":["10-K"],"file_date":"2001-04-02","biz_states":["PA"],"sics":["7389"],"form":"10-K","adsh":"0001019687-01-000471","film_num":["1592209"],"biz_locations":["Bethlehem,
+        PA"],"file_type":"EX-10.24","file_description":"MCI WORLDCOM ON-NET SERVICE
+        AGREEMENT","inc_states":["PA"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-03-000040:exh102520.txt","_score":10.546978,"_source":{"ciks":["0000023426","0000072741","0000106170","0000315256"],"period_ending":"2002-12-31","file_num":["000-00404","001-05324","000-07624","001-06392"],"display_names":["CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","NORTHEAST UTILITIES
+        SYSTEM  (ES)  (CIK 0000072741)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)"],"xsl":null,"sequence":20,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["CT","MA","NH"],"sics":["4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-03-000040","film_num":["03612236","03612233","03612234","03612235"],"biz_locations":["Berlin,
+        CT","West Springfield, MA","West Springfield, MA","Manchester, NH"],"file_type":"EX-10.25.20","file_description":"EXHIBIT
+        10.25.20","inc_states":["CT","MA","MA","NH"],"items":[]}},{"_index":"edgar_file","_id":"0000950144-03-000618:g80206exv10w49.txt","_score":10.543367,"_source":{"ciks":["0000078460"],"period_ending":"2002-10-31","file_num":["001-06196"],"display_names":["PIEDMONT
+        NATURAL GAS CO INC  (CIK 0000078460)"],"xsl":null,"sequence":6,"root_forms":["10-K"],"file_date":"2003-01-23","biz_states":["NC"],"sics":["4924"],"form":"10-K","adsh":"0000950144-03-000618","film_num":["03522156"],"biz_locations":["Charlotte,
+        NC"],"file_type":"EX-10.49","file_description":"PRECEDENT AGREEMENT/FIRM TRANSPORTATION
+        SERVICE","inc_states":["NC"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-02-014920:d01510exv10w16.txt","_score":10.53255,"_source":{"ciks":["0000731802"],"period_ending":"2002-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2002-11-22","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-02-014920","film_num":["02838223"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.16","file_description":"PRECEDENT AGREEMENT, CORNERSTONE
+        EXPANSION PROJECT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000092195-03-000012:sig10kexhibit-gas_sales.txt","_score":10.522742,"_source":{"ciks":["0000092195"],"period_ending":"2002-12-31","file_num":["001-03553"],"display_names":["SOUTHERN
+        INDIANA GAS & ELECTRIC CO  (CIK 0000092195)"],"xsl":null,"sequence":6,"root_forms":["10-K"],"file_date":"2003-04-09","biz_states":["IN"],"sics":["4931"],"form":"10-K","adsh":"0000092195-03-000012","film_num":["03643561"],"biz_locations":["Evansville,
+        IN"],"file_type":"EX-10.16 GAS SALES","file_description":"GAS SALES & PORT.
+        ADMIN. AGREEMENT","inc_states":["IN"],"items":[]}},{"_index":"edgar_file","_id":"0001039300-01-000003:0001.txt","_score":10.5034,"_source":{"ciks":["0001039300"],"period_ending":"2000-12-31","file_num":["001-13153"],"display_names":["GALILEO
+        INTERNATIONAL INC  (CIK 0001039300)"],"xsl":null,"sequence":1,"root_forms":["10-K"],"file_date":"2001-03-13","biz_states":["IL"],"sics":["7374"],"form":"10-K","adsh":"0001039300-01-000003","film_num":["1567497"],"biz_locations":["Rosemont,
+        IL"],"file_type":"10-K","file_description":"12/31/00 10-K","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0000912057-02-011661:a2074268z10-k.htm","_score":10.487862,"_source":{"ciks":["0001110805"],"period_ending":"2001-12-31","file_num":["001-16417"],"display_names":["VALERO
+        L P  (CIK 0001110805)"],"xsl":null,"sequence":1,"root_forms":["10-K"],"file_date":"2002-03-26","biz_states":["TX"],"sics":["4610"],"form":"10-K","adsh":"0000912057-02-011661","film_num":["02586954"],"biz_locations":["San
+        Antonio, TX"],"file_type":"10-K","file_description":"10-K","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0000912057-02-011661:a2074268zf1_10-k.pdf","_score":10.487862,"_source":{"ciks":["0001110805"],"period_ending":"2001-12-31","file_num":["001-16417"],"display_names":["VALERO
+        L P  (CIK 0001110805)"],"xsl":null,"sequence":3,"root_forms":["10-K"],"file_date":"2002-03-26","biz_states":["TX"],"sics":["4610"],"form":"10-K","adsh":"0000912057-02-011661","film_num":["02586954"],"biz_locations":["San
+        Antonio, TX"],"file_type":"10-K","file_description":"10-K","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-03-000040:exh102517.txt","_score":10.481479,"_source":{"ciks":["0000023426","0000072741","0000106170","0000315256"],"period_ending":"2002-12-31","file_num":["000-00404","001-05324","000-07624","001-06392"],"display_names":["CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","NORTHEAST UTILITIES
+        SYSTEM  (ES)  (CIK 0000072741)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)"],"xsl":null,"sequence":17,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["CT","MA","NH"],"sics":["4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-03-000040","film_num":["03612236","03612233","03612234","03612235"],"biz_locations":["Berlin,
+        CT","West Springfield, MA","West Springfield, MA","Manchester, NH"],"file_type":"EX-10.25.17","file_description":"EXHIBIT
+        10.25.17","inc_states":["CT","MA","MA","NH"],"items":[]}},{"_index":"edgar_file","_id":"0001047469-03-009677:a2105664zex-10_41.htm","_score":10.473201,"_source":{"ciks":["0001168165","0000078100","0001109357","0000022606"],"period_ending":"2002-12-31","file_num":["333-85496","000-16844","001-16169","001-01839"],"display_names":["EXELON
+        GENERATION CO LLC  (CIK 0001168165)","PECO ENERGY CO  (CIK 0000078100)","EXELON
+        CORP  (EXC)  (CIK 0001109357)","COMMONWEALTH EDISON CO  (CIK 0000022606)"],"xsl":null,"sequence":6,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["PA","IL"],"sics":["4911","4931","4931","4911"],"form":"10-K","adsh":"0001047469-03-009677","film_num":["03612860","03612859","03612857","03612861"],"biz_locations":["","Philadelphia,
+        PA","Chicago, IL","Chicago, IL"],"file_type":"EX-10.41","file_description":"EX-10.41","inc_states":["","PA","PA","IL"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-03-000040:exh102516.txt","_score":10.437919,"_source":{"ciks":["0000023426","0000072741","0000106170","0000315256"],"period_ending":"2002-12-31","file_num":["000-00404","001-05324","000-07624","001-06392"],"display_names":["CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","NORTHEAST UTILITIES
+        SYSTEM  (ES)  (CIK 0000072741)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)"],"xsl":null,"sequence":16,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["CT","MA","NH"],"sics":["4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-03-000040","film_num":["03612236","03612233","03612234","03612235"],"biz_locations":["Berlin,
+        CT","West Springfield, MA","West Springfield, MA","Manchester, NH"],"file_type":"EX-10.25.16","file_description":"EXHIBIT
+        10.25.16","inc_states":["CT","MA","MA","NH"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-02-001439:d94197a1ex10-45.txt","_score":10.428994,"_source":{"ciks":["0000826773"],"period_ending":"2001-06-30","file_num":["000-28579"],"display_names":["NOVO
+        NETWORKS INC  (CIK 0000826773)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2002-02-19","biz_states":["TX"],"sics":["4812"],"form":"10-K/A","adsh":"0000950134-02-001439","film_num":["02552445"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.45","file_description":"QWEST COMMUNICATIONS CORP.
+        CARRIER SERVICE AGRMT.","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0000893220-02-001515:w66595exv10w29.txt","_score":10.424678,"_source":{"ciks":["0000100548"],"period_ending":"2002-09-30","file_num":["001-01398"],"display_names":["UGI
+        UTILITIES INC  (CIK 0000100548)"],"xsl":null,"sequence":8,"root_forms":["10-K"],"file_date":"2002-12-23","biz_states":["PA"],"sics":["4932"],"form":"10-K","adsh":"0000893220-02-001515","film_num":["02867570"],"biz_locations":["Valley
+        Forge, PA"],"file_type":"EX-10.29","file_description":"FIRM TRANSPORTATION
+        SERVICE AGREEMENT","inc_states":["PA"],"items":[]}},{"_index":"edgar_file","_id":"0000893220-02-001515:w66595exv10w27.txt","_score":10.411608,"_source":{"ciks":["0000100548"],"period_ending":"2002-09-30","file_num":["001-01398"],"display_names":["UGI
+        UTILITIES INC  (CIK 0000100548)"],"xsl":null,"sequence":6,"root_forms":["10-K"],"file_date":"2002-12-23","biz_states":["PA"],"sics":["4932"],"form":"10-K","adsh":"0000893220-02-001515","film_num":["02867570"],"biz_locations":["Valley
+        Forge, PA"],"file_type":"EX-10.27","file_description":"NO-NOTICE TRANSPORTATION
+        AGREEMENT","inc_states":["PA"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-03-015731:d10753exv10w13xfy.txt","_score":10.403681,"_source":{"ciks":["0000731802"],"period_ending":"2003-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":15,"root_forms":["10-K"],"file_date":"2003-11-21","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-03-015731","film_num":["031018150"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.13(F)","file_description":"GAS TRANSPORTATION AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-03-015731:d10753exv10w13xey.txt","_score":10.402498,"_source":{"ciks":["0000731802"],"period_ending":"2003-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":14,"root_forms":["10-K"],"file_date":"2003-11-21","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-03-015731","film_num":["031018150"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.13(E)","file_description":"GAS TRANSPORTATION AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-03-015731:d10753exv10w13xdy.txt","_score":10.40082,"_source":{"ciks":["0000731802"],"period_ending":"2003-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":13,"root_forms":["10-K"],"file_date":"2003-11-21","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-03-015731","film_num":["031018150"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.13(D)","file_description":"GAS TRANSPORTATION AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0001047469-03-010583:a2106299z10-k.htm","_score":10.397384,"_source":{"ciks":["0001168397"],"period_ending":"2002-12-31","file_num":["001-31345"],"display_names":["PACIFIC
+        ENERGY PARTNERS LP  (CIK 0001168397)"],"xsl":null,"sequence":1,"root_forms":["10-K"],"file_date":"2003-03-27","biz_states":[],"sics":["1311"],"form":"10-K","adsh":"0001047469-03-010583","film_num":["03621921"],"biz_locations":[""],"file_type":"10-K","file_description":"10-K","inc_states":[""],"items":[]}},{"_index":"edgar_file","_id":"0000071337-01-500008:nep2001.txt","_score":10.39307,"_source":{"ciks":["0000071337"],"period_ending":"2001-03-31","file_num":["002-26651"],"display_names":["NEW
+        ENGLAND POWER CO  (CIK 0000071337)"],"xsl":null,"sequence":1,"root_forms":["10-K"],"file_date":"2001-06-28","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000071337-01-500008","film_num":["1670557"],"biz_locations":["Westborough,
+        MA"],"file_type":"10-K","file_description":null,"inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000909281-01-500007:nbpl10-ka.txt","_score":10.365606,"_source":{"ciks":["0001095355"],"period_ending":"2000-12-31","file_num":["333-88577"],"display_names":["NORTHERN
+        BORDER PIPELINE CO  (CIK 0001095355)"],"xsl":null,"sequence":1,"root_forms":["10-K"],"file_date":"2001-03-29","biz_states":["NE"],"sics":["4922"],"form":"10-K","adsh":"0000909281-01-500007","film_num":["1583838"],"biz_locations":["Omaha,
+        NE"],"file_type":"10-K","file_description":"FORM 10-K","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000092195-03-000014:igc_10kportfolioagree.txt","_score":10.350531,"_source":{"ciks":["0000050183"],"period_ending":"2002-12-31","file_num":["001-06494"],"display_names":["INDIANA
+        GAS CO INC  (CIK 0000050183)"],"xsl":null,"sequence":3,"root_forms":["10-K"],"file_date":"2003-04-09","biz_states":["IN"],"sics":["4924"],"form":"10-K","adsh":"0000092195-03-000014","film_num":["03643704"],"biz_locations":["Evansville,
+        IN"],"file_type":"EX-10.12 GAS SALES","file_description":"INDIANA GAS SALES
+        & PORTFOLIO AGREEM.","inc_states":["IN"],"items":[]}},{"_index":"edgar_file","_id":"0000912057-02-012987:a2074499zex-10_833.txt","_score":10.325467,"_source":{"ciks":["0000899322","0000899281"],"period_ending":"2001-12-31","file_num":["033-59960-01","033-59960"],"display_names":["SITHE
+        INDEPENDENCE POWER PARTNERS LP  (CIK 0000899322)","SITHE INDEPENDENCE FUNDING
+        CORP  (CIK 0000899281)"],"xsl":null,"sequence":7,"root_forms":["10-K"],"file_date":"2002-04-01","biz_states":["NY"],"sics":["4931","4931"],"form":"10-K","adsh":"0000912057-02-012987","film_num":["02597226","02597225"],"biz_locations":["New
+        York, NY","New York, NY"],"file_type":"EX-10.8(33)","file_description":"EXHIBIT
+        10.8.33","inc_states":["DE","DE"],"items":[]}},{"_index":"edgar_file","_id":"0000893220-02-001515:w66595exv10w26.txt","_score":10.308352,"_source":{"ciks":["0000100548"],"period_ending":"2002-09-30","file_num":["001-01398"],"display_names":["UGI
+        UTILITIES INC  (CIK 0000100548)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2002-12-23","biz_states":["PA"],"sics":["4932"],"form":"10-K","adsh":"0000893220-02-001515","film_num":["02867570"],"biz_locations":["Valley
+        Forge, PA"],"file_type":"EX-10.26","file_description":"NO-NOTICE TRANSPORTATION
+        SERVICE AGREEMENT","inc_states":["PA"],"items":[]}},{"_index":"edgar_file","_id":"0001019687-01-000471:0005.txt","_score":10.292025,"_source":{"ciks":["0001092536"],"period_ending":"2000-12-31","file_num":["000-29255"],"display_names":["FASTNET
+        CORP  (CIK 0001092536)"],"xsl":null,"sequence":"5","root_forms":["10-K"],"file_date":"2001-04-02","biz_states":["PA"],"sics":["7389"],"form":"10-K","adsh":"0001019687-01-000471","film_num":["1592209"],"biz_locations":["Bethlehem,
+        PA"],"file_type":"EX-10.25","file_description":"AMERITECH - CONFIRMATION OF
+        SERVICE ORDER","inc_states":["PA"],"items":[]}},{"_index":"edgar_file","_id":"0000912057-02-012987:a2074499zex-10_832.txt","_score":10.28867,"_source":{"ciks":["0000899322","0000899281"],"period_ending":"2001-12-31","file_num":["033-59960-01","033-59960"],"display_names":["SITHE
+        INDEPENDENCE POWER PARTNERS LP  (CIK 0000899322)","SITHE INDEPENDENCE FUNDING
+        CORP  (CIK 0000899281)"],"xsl":null,"sequence":6,"root_forms":["10-K"],"file_date":"2002-04-01","biz_states":["NY"],"sics":["4931","4931"],"form":"10-K","adsh":"0000912057-02-012987","film_num":["02597226","02597225"],"biz_locations":["New
+        York, NY","New York, NY"],"file_type":"EX-10.8(32)","file_description":"EXHIBIT
+        10.8.32","inc_states":["DE","DE"],"items":[]}},{"_index":"edgar_file","_id":"0000950135-03-002055:b45693spexv10wxdy.txt","_score":10.262419,"_source":{"ciks":["0000090144","0000741508","0000071180"],"period_ending":"2002-12-31","file_num":["000-00508","001-08788","002-28348"],"display_names":["SIERRA
+        PACIFIC POWER CO  (CIK 0000090144)","SIERRA PACIFIC RESOURCES /NV/  (CIK 0000741508)","NEVADA
+        POWER CO  (CIK 0000071180)"],"xsl":null,"sequence":7,"root_forms":["10-K"],"file_date":"2003-03-28","biz_states":["NV"],"sics":["4931","4931","4911"],"form":"10-K","adsh":"0000950135-03-002055","film_num":["03625422","03625423","03625424"],"biz_locations":["Reno,
+        NV","Reno, NV","Las Vegas, NV"],"file_type":"EX-10.(D)","file_description":"SETTLEMENT
+        AGREEMENT, DATED APRIL 16, 2002","inc_states":["NV","NV","NV"],"items":[]}},{"_index":"edgar_file","_id":"0000950132-02-000066:dex1014.txt","_score":10.248498,"_source":{"ciks":["0000030573"],"period_ending":"2001-12-31","file_num":["001-00956"],"display_names":["DUQUESNE
+        LIGHT CO  (CIK 0000030573)"],"xsl":null,"sequence":8,"root_forms":["10-K"],"file_date":"2002-03-28","biz_states":["PA"],"sics":["4911"],"form":"10-K","adsh":"0000950132-02-000066","film_num":["02590776"],"biz_locations":["Pittsburgh,
+        PA"],"file_type":"EX-10.14","file_description":"CAPACITY AGREEMENT (ORION)","inc_states":["PA"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-02-000051:y58564j.txt","_score":10.246199,"_source":{"ciks":["0000072741"],"period_ending":"2001-12-31","file_num":["001-05324"],"display_names":["NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)"],"xsl":null,"sequence":15,"root_forms":["10-K"],"file_date":"2002-03-22","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000072741-02-000051","film_num":["02582925"],"biz_locations":["West
+        Springfield, MA"],"file_type":"EX-10.23.6","file_description":null,"inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-02-000051:y58564l.txt","_score":10.242617,"_source":{"ciks":["0000072741"],"period_ending":"2001-12-31","file_num":["001-05324"],"display_names":["NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)"],"xsl":null,"sequence":17,"root_forms":["10-K"],"file_date":"2002-03-22","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000072741-02-000051","film_num":["02582925"],"biz_locations":["West
+        Springfield, MA"],"file_type":"EX-10.23.8","file_description":null,"inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000893220-02-001515:w66595exv10w25.txt","_score":10.2258005,"_source":{"ciks":["0000100548"],"period_ending":"2002-09-30","file_num":["001-01398"],"display_names":["UGI
+        UTILITIES INC  (CIK 0000100548)"],"xsl":null,"sequence":4,"root_forms":["10-K"],"file_date":"2002-12-23","biz_states":["PA"],"sics":["4932"],"form":"10-K","adsh":"0000893220-02-001515","film_num":["02867570"],"biz_locations":["Valley
+        Forge, PA"],"file_type":"EX-10.25","file_description":"STORAGE TRANSPORTATION
+        AGREEMENT","inc_states":["PA"],"items":[]}},{"_index":"edgar_file","_id":"0000930413-01-000577:0009.txt","_score":10.217973,"_source":{"ciks":["0001061393"],"period_ending":"2000-12-31","file_num":["333-52797"],"display_names":["CH
+        ENERGY GROUP INC  (CIK 0001061393)"],"xsl":null,"sequence":9,"root_forms":["10-K"],"file_date":"2001-03-09","biz_states":["NY"],"sics":["4931"],"form":"10-K","adsh":"0000930413-01-000577","film_num":["1564612"],"biz_locations":["Poughkeepsie,
+        NY"],"file_type":"EX-10.(I)80","file_description":"POWER PURCHASE AGREEMENT","inc_states":["NY"],"items":[]}},{"_index":"edgar_file","_id":"0000950134-03-015731:d10753exv10w4xay.txt","_score":10.205704,"_source":{"ciks":["0000731802"],"period_ending":"2003-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2003-11-21","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-03-015731","film_num":["031018150"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.4(A)","file_description":"FIRM GAS TRANSPORTATION
+        SERVICE AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000950131-01-500504:dex1053.txt","_score":10.205356,"_source":{"ciks":["0001071598"],"period_ending":"2000-12-31","file_num":["000-27743"],"display_names":["PAC-WEST
+        TELECOMM INC  (CIK 0001071598)"],"xsl":null,"sequence":"6","root_forms":["10-K"],"file_date":"2001-04-02","biz_states":["CA"],"sics":["4832"],"form":"10-K","adsh":"0000950131-01-500504","film_num":["1592037"],"biz_locations":["Stockton,
+        CA"],"file_type":"EX-10.53","file_description":"INTERCONNECTION AGREEMENT","inc_states":[],"items":[]}},{"_index":"edgar_file","_id":"0000950134-03-015731:d10753exv10w13xgy.txt","_score":10.202253,"_source":{"ciks":["0000731802"],"period_ending":"2003-09-30","file_num":["001-10042"],"display_names":["ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)"],"xsl":null,"sequence":16,"root_forms":["10-K"],"file_date":"2003-11-21","biz_states":["TX"],"sics":["4924"],"form":"10-K","adsh":"0000950134-03-015731","film_num":["031018150"],"biz_locations":["Dallas,
+        TX"],"file_type":"EX-10.13(G)","file_description":"FIRM NO-NOTICE TRANSPORTATION
+        AGREEMENT","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000912057-02-012987:a2074499zex-10_836.txt","_score":10.141789,"_source":{"ciks":["0000899322","0000899281"],"period_ending":"2001-12-31","file_num":["033-59960-01","033-59960"],"display_names":["SITHE
+        INDEPENDENCE POWER PARTNERS LP  (CIK 0000899322)","SITHE INDEPENDENCE FUNDING
+        CORP  (CIK 0000899281)"],"xsl":null,"sequence":10,"root_forms":["10-K"],"file_date":"2002-04-01","biz_states":["NY"],"sics":["4931","4931"],"form":"10-K","adsh":"0000912057-02-012987","film_num":["02597226","02597225"],"biz_locations":["New
+        York, NY","New York, NY"],"file_type":"EX-10.8(36)","file_description":"EXHIBIT
+        10.8.36","inc_states":["DE","DE"],"items":[]}},{"_index":"edgar_file","_id":"0000912057-02-012987:a2074499zex-10_837.txt","_score":10.133264,"_source":{"ciks":["0000899322","0000899281"],"period_ending":"2001-12-31","file_num":["033-59960-01","033-59960"],"display_names":["SITHE
+        INDEPENDENCE POWER PARTNERS LP  (CIK 0000899322)","SITHE INDEPENDENCE FUNDING
+        CORP  (CIK 0000899281)"],"xsl":null,"sequence":11,"root_forms":["10-K"],"file_date":"2002-04-01","biz_states":["NY"],"sics":["4931","4931"],"form":"10-K","adsh":"0000912057-02-012987","film_num":["02597226","02597225"],"biz_locations":["New
+        York, NY","New York, NY"],"file_type":"EX-10.8(37)","file_description":"EXHIBIT
+        10.8.37","inc_states":["DE","DE"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-02-000051:y58564m.txt","_score":10.122777,"_source":{"ciks":["0000072741"],"period_ending":"2001-12-31","file_num":["001-05324"],"display_names":["NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)"],"xsl":null,"sequence":18,"root_forms":["10-K"],"file_date":"2002-03-22","biz_states":["MA"],"sics":["4911"],"form":"10-K","adsh":"0000072741-02-000051","film_num":["02582925"],"biz_locations":["West
+        Springfield, MA"],"file_type":"EX-10.23.9","file_description":null,"inc_states":["MA"],"items":[]}},{"_index":"edgar_file","_id":"0000912057-01-008684:a2042173z10-k.txt","_score":10.08846,"_source":{"ciks":["0001075607"],"period_ending":"2000-12-31","file_num":["000-26091"],"display_names":["TC
+        PIPELINES LP  (CIK 0001075607)"],"xsl":null,"sequence":1,"root_forms":["10-K"],"file_date":"2001-03-29","biz_states":["MA"],"sics":["4922"],"form":"10-K","adsh":"0000912057-01-008684","film_num":["1584327"],"biz_locations":["Westborough,
+        MA"],"file_type":"10-K","file_description":"FORM 10-K","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0001021408-03-005333:d10k.htm","_score":10.0397625,"_source":{"ciks":["0000101063"],"period_ending":"2002-12-31","file_num":["001-01550"],"display_names":["CHIQUITA
+        BRANDS INTERNATIONAL INC  (CIK 0000101063)"],"xsl":null,"sequence":1,"root_forms":["10-K"],"file_date":"2003-03-31","biz_states":["OH"],"sics":["0100"],"form":"10-K","adsh":"0001021408-03-005333","film_num":["03627301"],"biz_locations":["Cincinnati,
+        OH"],"file_type":"10-K","file_description":"FORM 10-K","inc_states":["NJ"],"items":[]}},{"_index":"edgar_file","_id":"0000950150-02-000189:a79673ex10-25.txt","_score":10.039085,"_source":{"ciks":["0001056903"],"period_ending":"2001-12-31","file_num":["001-14431"],"display_names":["AMERICAN
+        STATES WATER CO  (AWR)  (CIK 0001056903)"],"xsl":null,"sequence":3,"root_forms":["10-K"],"file_date":"2002-03-05","biz_states":["CA"],"sics":["4941"],"form":"10-K","adsh":"0000950150-02-000189","film_num":["02567411"],"biz_locations":["San
+        Dimas, CA"],"file_type":"EX-10.25","file_description":"EXHIBIT 10.25","inc_states":["CA"],"items":[]}},{"_index":"edgar_file","_id":"0000909281-01-500006:nbp10-ka.txt","_score":10.038016,"_source":{"ciks":["0000909281"],"period_ending":"2000-12-31","file_num":["001-12202"],"display_names":["NORTHERN
+        BORDER PARTNERS LP  (CIK 0000909281)"],"xsl":null,"sequence":1,"root_forms":["10-K"],"file_date":"2001-03-29","biz_states":["TX"],"sics":["4922"],"form":"10-K","adsh":"0000909281-01-500006","film_num":["1583839"],"biz_locations":["Houston,
+        TX"],"file_type":"10-K","file_description":"FORM 10-K","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0001047469-03-007124:a2104540zex-10_1.htm","_score":10.032947,"_source":{"ciks":["0000075488"],"period_ending":"2002-12-31","file_num":["001-02348"],"display_names":["PACIFIC
+        GAS & ELECTRIC CO  (CIK 0000075488)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2003-02-27","biz_states":["CA"],"sics":["4931"],"form":"10-K","adsh":"0001047469-03-007124","film_num":["03583964"],"biz_locations":["San
+        Francisco, CA"],"file_type":"EX-10.1","file_description":"EXHIBIT 10.1","inc_states":["CA"],"items":[]}},{"_index":"edgar_file","_id":"0000072741-03-000040:exh102519.txt","_score":10.02404,"_source":{"ciks":["0000023426","0000072741","0000106170","0000315256"],"period_ending":"2002-12-31","file_num":["000-00404","001-05324","000-07624","001-06392"],"display_names":["CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","NORTHEAST UTILITIES
+        SYSTEM  (ES)  (CIK 0000072741)","WESTERN MASSACHUSETTS ELECTRIC CO  (CIK 0000106170)","PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)"],"xsl":null,"sequence":19,"root_forms":["10-K"],"file_date":"2003-03-21","biz_states":["CT","MA","NH"],"sics":["4911","4911","4911","4911"],"form":"10-K","adsh":"0000072741-03-000040","film_num":["03612236","03612233","03612234","03612235"],"biz_locations":["Berlin,
+        CT","West Springfield, MA","West Springfield, MA","Manchester, NH"],"file_type":"EX-10.25.19","file_description":"EXHIBIT
+        10.25.19","inc_states":["CT","MA","MA","NH"],"items":[]}},{"_index":"edgar_file","_id":"0000912057-02-011661:a2074268zex-10_6.txt","_score":9.968884,"_source":{"ciks":["0001110805"],"period_ending":"2001-12-31","file_num":["001-16417"],"display_names":["VALERO
+        L P  (CIK 0001110805)"],"xsl":null,"sequence":14,"root_forms":["10-K"],"file_date":"2002-03-26","biz_states":["TX"],"sics":["4610"],"form":"10-K","adsh":"0000912057-02-011661","film_num":["02586954"],"biz_locations":["San
+        Antonio, TX"],"file_type":"EX-10.6","file_description":"EXHIBIT 10.6","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0001047469-03-007123:a2103978zex-10_1.htm","_score":9.956447,"_source":{"ciks":["0001004980"],"period_ending":"2002-12-31","file_num":["001-12609"],"display_names":["PG&E
+        CORP  (PCG, PCG-PA, PCG-PB, PCG-PC, PCG-PD, PCG-PE, PCG-PG, PCG-PH, PCG-PI)  (CIK
+        0001004980)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2003-02-27","biz_states":["CA"],"sics":["4931"],"form":"10-K","adsh":"0001047469-03-007123","film_num":["03583952"],"biz_locations":["San
+        Francisco, CA"],"file_type":"EX-10.1","file_description":"EXHIBIT 10.1","inc_states":["CA"],"items":[]}},{"_index":"edgar_file","_id":"0000054502-03-000002:kmiex991.htm","_score":9.926435,"_source":{"ciks":["0000054502"],"period_ending":"2002-12-31","file_num":["001-06446"],"display_names":["KINDER
+        MORGAN INC  (CIK 0000054502)"],"xsl":null,"sequence":9,"root_forms":["10-K"],"file_date":"2003-02-26","biz_states":["TX"],"sics":["4923"],"form":"10-K","adsh":"0000054502-03-000002","film_num":["03580367"],"biz_locations":["Houston,
+        TX"],"file_type":"EX-99.1","file_description":"KMP 2002 FINANCIAL STATEMENTS
+        AND NOTES","inc_states":["KS"],"items":[]}},{"_index":"edgar_file","_id":"0000928385-01-000970:0011.txt","_score":9.900823,"_source":{"ciks":["0001041954"],"period_ending":"2000-12-31","file_num":["000-23253"],"display_names":["ITC
+        DELTACOM INC  (CIK 0001041954)"],"xsl":null,"sequence":11,"root_forms":["10-K"],"file_date":"2001-04-02","biz_states":["GA"],"sics":["4813"],"form":"10-K","adsh":"0000928385-01-000970","film_num":["1590479"],"biz_locations":["West
+        Point, GA"],"file_type":"EX-10.49.2","file_description":"1ST AMEND TO INTERCONNECTION
+        AGREEMENT","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0000950129-03-001627:h03424e10vk.txt","_score":9.883915,"_source":{"ciks":["0001095355"],"period_ending":"2002-12-31","file_num":["333-88577"],"display_names":["NORTHERN
+        BORDER PIPELINE CO  (CIK 0001095355)"],"xsl":null,"sequence":1,"root_forms":["10-K"],"file_date":"2003-03-28","biz_states":["NE"],"sics":["4922"],"form":"10-K","adsh":"0000950129-03-001627","film_num":["03622953"],"biz_locations":["Omaha,
+        NE"],"file_type":"10-K","file_description":"NORTHERN BORDER PIPELINE CO.-
+        DECEMBER 31, 2002","inc_states":["TX"],"items":[]}},{"_index":"edgar_file","_id":"0000950129-03-001288:h03809e10vk.htm","_score":9.858575,"_source":{"ciks":["0001110805"],"period_ending":"2002-12-31","file_num":["001-16417"],"display_names":["VALERO
+        L P  (CIK 0001110805)"],"xsl":null,"sequence":1,"root_forms":["10-K"],"file_date":"2003-03-10","biz_states":["TX"],"sics":["4610"],"form":"10-K","adsh":"0000950129-03-001288","film_num":["03597078"],"biz_locations":["San
+        Antonio, TX"],"file_type":"10-K","file_description":"VALERO L.P.- YEAR ENDED
+        DECEMBER 31, 2002","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0000948545-02-000012:doc5.txt","_score":9.813407,"_source":{"ciks":["0000948545"],"period_ending":"2001-12-31","file_num":["001-31278"],"display_names":["TALK
+        AMERICA  (CIK 0000948545)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2002-04-01","biz_states":["VA"],"sics":["4812"],"form":"10-K","adsh":"0000948545-02-000012","film_num":["02596028"],"biz_locations":["Reston,
+        VA"],"file_type":"EX-10.62","file_description":null,"inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0001047469-03-024446:a2114486zex-10_67.txt","_score":9.798648,"_source":{"ciks":["0001048911"],"period_ending":"2003-05-31","file_num":["001-15829"],"display_names":["FEDEX
+        CORP  (FDX)  (CIK 0001048911)"],"xsl":null,"sequence":5,"root_forms":["10-K"],"file_date":"2003-07-17","biz_states":["TN"],"sics":["4513"],"form":"10-K","adsh":"0001047469-03-024446","film_num":["03791726"],"biz_locations":["Memphis,
+        TN"],"file_type":"EX-10.67","file_description":"EXHIBIT 10.67","inc_states":["DE"],"items":[]}},{"_index":"edgar_file","_id":"0000927016-01-500121:dex107.txt","_score":9.771733,"_source":{"ciks":["0000013390"],"period_ending":"2000-12-31","file_num":["002-23416"],"display_names":["BOSTON
+        GAS CO  (CIK 0000013390)"],"xsl":null,"sequence":3,"root_forms":["10-K"],"file_date":"2001-04-02","biz_states":["MA"],"sics":["4922"],"form":"10-K","adsh":"0000927016-01-500121","film_num":["1589757"],"biz_locations":["Boston,
+        MA"],"file_type":"EX-10.7","file_description":"FIRM GAS TRANSPORTATION AGREEMENT","inc_states":["MA"],"items":[]}}]},"aggregations":{"entity_filter":{"doc_count_error_upper_bound":6,"sum_other_doc_count":2099,"buckets":[{"key":"NORTHEAST
+        UTILITIES SYSTEM  (ES)  (CIK 0000072741)","doc_count":38},{"key":"CONNECTICUT
+        LIGHT & POWER CO  (CNLHN, CNLHO, CNLHP, CNLPL, CNLPM, CNLTL, CNLTN, CNLTP,
+        CNPWM, CNPWP, CNTHN, CNTHO, CNTHP)  (CIK 0000023426)","doc_count":24},{"key":"PUBLIC
+        SERVICE CO OF NEW HAMPSHIRE  (CIK 0000315256)","doc_count":23},{"key":"ATMOS
+        ENERGY CORP  (ATO)  (CIK 0000731802)","doc_count":22},{"key":"WESTERN MASSACHUSETTS
+        ELECTRIC CO  (CIK 0000106170)","doc_count":22},{"key":"PACIFIC GAS & ELECTRIC
+        CO  (CIK 0000075488)","doc_count":15},{"key":"PG&E CORP  (PCG, PCG-PA, PCG-PB,
+        PCG-PC, PCG-PD, PCG-PE, PCG-PG, PCG-PH, PCG-PI)  (CIK 0001004980)","doc_count":15},{"key":"FIRSTENERGY
+        CORP  (FE)  (CIK 0001031296)","doc_count":12},{"key":"CLEVELAND ELECTRIC ILLUMINATING
+        CO  (CIK 0000020947)","doc_count":9},{"key":"EDISON MISSION ENERGY  (CIK 0000930835)","doc_count":9},{"key":"OHIO
+        EDISON CO  (CIK 0000073960)","doc_count":9},{"key":"UGI UTILITIES INC  (CIK
+        0000100548)","doc_count":9},{"key":"WAL MART STORES INC  (WMT)  (CIK 0000104169)","doc_count":9},{"key":"AMERICAN
+        ELECTRIC POWER CO INC  (AEP)  (CIK 0000004904)","doc_count":8},{"key":"BOSTON
+        GAS CO  (CIK 0000013390)","doc_count":8},{"key":"CH ENERGY GROUP INC  (CIK
+        0001061393)","doc_count":8},{"key":"CLECO CORP  (CIK 0001089819)","doc_count":8},{"key":"ITC
+        DELTACOM INC  (CIK 0001041954)","doc_count":8},{"key":"NEVADA POWER CO  (CIK
+        0000071180)","doc_count":8},{"key":"SIERRA PACIFIC POWER CO  (CIK 0000090144)","doc_count":8},{"key":"SIERRA
+        PACIFIC RESOURCES /NV/  (CIK 0000741508)","doc_count":8},{"key":"CLECO POWER
+        LLC  (CIK 0000018672)","doc_count":7},{"key":"JERSEY CENTRAL POWER & LIGHT
+        CO  (CIK 0000053456)","doc_count":7},{"key":"METROPOLITAN EDISON CO  (CIK
+        0000065350)","doc_count":7},{"key":"NOVO NETWORKS INC  (CIK 0000826773)","doc_count":7},{"key":"PENNSYLVANIA
+        ELECTRIC CO  (CIK 0000077227)","doc_count":7},{"key":"TOLEDO EDISON CO  (CIK
+        0000352049)","doc_count":7},{"key":"UTSTARCOM INC  (UTSI)  (CIK 0001030471)","doc_count":7},{"key":"AMEREN
+        CORP  (AEE)  (CIK 0001002910)","doc_count":6},{"key":"AMERICAN STATES WATER
+        CO  (AWR)  (CIK 0001056903)","doc_count":6}]},"sic_filter":{"doc_count_error_upper_bound":0,"sum_other_doc_count":740,"buckets":[{"key":"4911","doc_count":343},{"key":"4931","doc_count":176},{"key":"4813","doc_count":133},{"key":"4924","doc_count":81},{"key":"4812","doc_count":64},{"key":"1311","doc_count":60},{"key":"4922","doc_count":54},{"key":"3674","doc_count":41},{"key":"7372","doc_count":40},{"key":"4923","doc_count":34},{"key":"4610","doc_count":28},{"key":"4991","doc_count":28},{"key":"4932","doc_count":26},{"key":"3845","doc_count":25},{"key":"2330","doc_count":24},{"key":"3312","doc_count":21},{"key":"5331","doc_count":21},{"key":"3825","doc_count":20},{"key":"3140","doc_count":19},{"key":"3661","doc_count":18},{"key":"3663","doc_count":18},{"key":"7389","doc_count":18},{"key":"4941","doc_count":17},{"key":"2911","doc_count":16},{"key":"3559","doc_count":16},{"key":"3841","doc_count":16},{"key":"4213","doc_count":16},{"key":"7373","doc_count":16},{"key":"3651","doc_count":14},{"key":"7370","doc_count":14}]},"biz_states_filter":{"doc_count_error_upper_bound":0,"sum_other_doc_count":202,"buckets":[{"key":"CA","doc_count":319},{"key":"TX","doc_count":280},{"key":"NY","doc_count":150},{"key":"MA","doc_count":129},{"key":"PA","doc_count":98},{"key":"NJ","doc_count":84},{"key":"GA","doc_count":79},{"key":"OH","doc_count":78},{"key":"CT","doc_count":69},{"key":"FL","doc_count":68},{"key":"VA","doc_count":66},{"key":"CO","doc_count":60},{"key":"MN","doc_count":53},{"key":"IL","doc_count":48},{"key":"WA","doc_count":43},{"key":"OR","doc_count":38},{"key":"NC","doc_count":36},{"key":"NH","doc_count":36},{"key":"OK","doc_count":32},{"key":"MO","doc_count":28},{"key":"IN","doc_count":25},{"key":"MD","doc_count":25},{"key":"AZ","doc_count":22},{"key":"MI","doc_count":21},{"key":"WI","doc_count":21},{"key":"LA","doc_count":20},{"key":"AR","doc_count":17},{"key":"DC","doc_count":17},{"key":"SC","doc_count":16},{"key":"UT","doc_count":15}]},"form_filter":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"key":"10-K","doc_count":2117}]}},"query":{"_source":{"exclude":["doc_text"]},"query":{"bool":{"must":[{"match_phrase":{"doc_text":"tariff"}}],"must_not":[],"should":[],"filter":[{"terms":{"root_forms":["10-K"]}},{"range":{"file_date":{"gte":"2001-01-01","lte":"2003-12-31"}}}]}},"from":0,"size":100,"aggregations":{"form_filter":{"terms":{"field":"root_forms","size":30}},"entity_filter":{"terms":{"field":"display_names.raw","size":30}},"sic_filter":{"terms":{"field":"sics","size":30}},"biz_states_filter":{"terms":{"field":"biz_states","size":30}}}}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      connection:
+      - keep-alive
+      content-length:
+      - '67810'
+      content-type:
+      - application/json
+      date:
+      - Sat, 24 Oct 2026 18:02:03 GMT
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-apigw-id:
+      - FwrYXHK5oAMEOFg=
+      x-amz-cf-id:
+      - jO7RImij4P-88LWFC3XEzs_j1E_TbsSZ0lJanMOkZTzWXMDCQPQfrg==
+      x-amz-cf-pop:
+      - ORD58-P1
+      x-amzn-requestid:
+      - 79204092-47ba-4d38-8aa4-54e7b376f5a4
+      x-amzn-trace-id:
+      - Root=1-6adcf29b-334598aa2016574b2fb978e9;Parent=10f8a217818c31f0;Sampled=0;Lineage=1:fc027ad0:0
+    status:
+      code: 200
+      message: OK
+version: 1
