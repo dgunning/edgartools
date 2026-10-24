@@ -5,15 +5,17 @@ This module handles parsing of XBRL instance documents including facts, contexts
 units, footnotes, and entity information extraction.
 """
 
+import math
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from lxml import etree as ET
-from edgar.xmltools import xml_parser
 
 from edgar.core import log
 from edgar.xbrl.core import (
+    INFINITE_PRECISION,
     NAMESPACES,
     classify_duration,
     duration_days,
@@ -22,6 +24,7 @@ from edgar.xbrl.core import (
     is_quarterly_document_type,
 )
 from edgar.xbrl.models import Context, Fact, XBRLProcessingError
+from edgar.xmltools import xml_parser
 
 from .base import BaseParser
 
@@ -42,6 +45,7 @@ _BLOCK_ELEMENTS = frozenset({
 _CELL_ELEMENTS = frozenset({'td', 'th'})
 
 XBRLI_NS = "{http://www.xbrl.org/2003/instance}"
+XSI_NS = "{http://www.w3.org/2001/XMLSchema-instance}"
 
 # The structural children of an instance root -- everything that is not a fact.
 #
@@ -66,6 +70,69 @@ _STRUCTURAL_ELEMENTS = frozenset({
 # Axes whose member names another legal entity: a DEI fact on one of them is a
 # co-registrant's, not the filer's (GH #1420, #1710).
 _ENTITY_AXES = ('dei:LegalEntityAxis', 'srt:ConsolidatedEntitiesAxis')
+
+# xsi:nil is a boolean: true/false or 1/0.
+_NIL_TRUE = frozenset({'true', '1'})
+
+
+def _is_nil(element: ET.Element) -> bool:
+    """Whether an element is marked ``xsi:nil``."""
+    nil = element.get(f"{XSI_NS}nil")
+    return isinstance(nil, str) and nil.strip().lower() in _NIL_TRUE
+
+
+def _xbrli_child(element: ET.Element, local_name: str) -> Optional[ET.Element]:
+    """The direct child in the XBRL instance namespace, if any."""
+    tag = f"{XBRLI_NS}{local_name}"
+    for child in element:
+        if child.tag == tag:
+            return child
+    return None
+
+
+def _format_fraction_value(numeric: float) -> str:
+    """Lexical form of a fraction's quotient. Whole numbers drop the trailing ``.0``."""
+    if numeric.is_integer():
+        return str(int(numeric))
+    return str(numeric)
+
+
+def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float]]]:
+    """Read an ``xbrli:fractionItemType`` fact, or None when the element is not one.
+
+    A fraction item has no text of its own. Its value is the numerator divided
+    by the denominator (XBRL 2.1 §5.1.1.3.2), and its precision is INF (§4.6.6).
+    Joining the children's text reads 1/3 as 13, because blank text between the
+    two elements is removed before ``itertext()`` runs (GH #1766).
+
+    A quotient that cannot be computed (a zero denominator, a non-decimal, or a
+    value that does not fit in a float) leaves the numeric value unset, the
+    same way ``float()`` leaves it unset for any other text that is not a
+    number, and keeps the two parts separated by ``/`` so the digits are not
+    concatenated into a different number. A nil fact, or a nil numerator or
+    denominator, is an absent value: empty text and no numeric value.
+    """
+    numerator = _xbrli_child(element, 'numerator')
+    denominator = _xbrli_child(element, 'denominator')
+    if numerator is None or denominator is None:
+        return None
+    if _is_nil(element) or _is_nil(numerator) or _is_nil(denominator):
+        return '', None
+    num_text = (numerator.text or '').strip()
+    den_text = (denominator.text or '').strip()
+    if not num_text or not den_text:
+        return '', None
+    try:
+        numerator_value = Decimal(num_text)
+        denominator_value = Decimal(den_text)
+        numeric = float(numerator_value / denominator_value)
+    except (InvalidOperation, ZeroDivisionError, ValueError, TypeError):
+        return f'{num_text}/{den_text}', None
+    # A quotient that does not fit in a float must not become 0 or inf: that
+    # is a different number, the same failure as joining the digits.
+    if not math.isfinite(numeric) or (numeric == 0.0 and numerator_value != 0):
+        return f'{num_text}/{den_text}', None
+    return _format_fraction_value(numeric), numeric
 
 
 class InstanceParser(BaseParser):
@@ -548,40 +615,53 @@ class InstanceParser(BaseParser):
                 # Get unit reference
                 unit_ref = element.get('unitRef')
 
-                # Get value - optimize string handling
-                value = element.text
-                if not value or not value.strip():
-                    # Collect all nested text (handles HTML content in TextBlock elements)
-                    all_text = "".join(element.itertext()).strip()
-                    if all_text:
-                        value = all_text
-
-                # Optimize string handling - inline conditional
-                value = value.strip() if value else ""
-
                 # Get decimals attribute - direct access
                 decimals = element.get('decimals')
 
-                # Optimize numeric conversion with faster try/except.
-                #
-                # A unitRef is what makes a fact numeric. XBRL requires one on
-                # every numeric item and forbids one on non-numeric items, so
-                # its presence is an exact test here, where the element catalog
-                # (and with it the declared type) is not reachable.
-                #
-                # Without the check, float() succeeded on anything that merely
-                # looked like a number, so unitless metadata carried a
-                # numeric_value: dei:DocumentFiscalYearFocus is a gYear, and a
-                # query for facts valued near 2023 returned the fiscal-year
-                # focus alongside real monetary facts. numeric_value is the
-                # field consumers read as "this is a numeric fact", so every
-                # one of them inherited the misclassification (gh #1220).
-                numeric_value = None
-                if value and unit_ref:
-                    try:
-                        numeric_value = float(value)
-                    except (ValueError, TypeError):
-                        pass
+                # A fraction item's value is numerator / denominator and its
+                # precision is INF (XBRL 2.1 §5.1.1.3.2, §4.6.6). It has no
+                # text node of its own, so the itertext() fallback would
+                # concatenate the two children (GH #1766: 1/3 was read as 13).
+                # The children's tags are the type signal the element catalog
+                # would have given, so this does not depend on unitRef the way
+                # a plain numeric fact does.
+                fraction = _fraction_item(element)
+                if fraction is not None:
+                    value, numeric_value = fraction
+                    if numeric_value is not None:
+                        decimals = INFINITE_PRECISION
+                else:
+                    # Get value - optimize string handling
+                    value = element.text
+                    if not value or not value.strip():
+                        # Collect all nested text (handles HTML content in TextBlock elements)
+                        all_text = "".join(element.itertext()).strip()
+                        if all_text:
+                            value = all_text
+
+                    # Optimize string handling - inline conditional
+                    value = value.strip() if value else ""
+
+                    # Optimize numeric conversion with faster try/except.
+                    #
+                    # A unitRef is what makes a fact numeric. XBRL requires one on
+                    # every numeric item and forbids one on non-numeric items, so
+                    # its presence is an exact test here, where the element catalog
+                    # (and with it the declared type) is not reachable.
+                    #
+                    # Without the check, float() succeeded on anything that merely
+                    # looked like a number, so unitless metadata carried a
+                    # numeric_value: dei:DocumentFiscalYearFocus is a gYear, and a
+                    # query for facts valued near 2023 returned the fiscal-year
+                    # focus alongside real monetary facts. numeric_value is the
+                    # field consumers read as "this is a numeric fact", so every
+                    # one of them inherited the misclassification (gh #1220).
+                    numeric_value = None
+                    if value and unit_ref:
+                        try:
+                            numeric_value = float(value)
+                        except (ValueError, TypeError):
+                            pass
 
                 # Create base key for duplicate detection
                 base_key = self._create_normalized_fact_key(element_id, context_ref)
