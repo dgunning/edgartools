@@ -31,7 +31,17 @@ from collections import Counter
 
 import pytest
 
-import edgar
+from tests._offline_filings import offline_filing
+
+# AAPL's FY2025 10-K is also read by test_issue_rv86_incorporated_mda.py, so both
+# replay one cassette named after the filing. TSM's 20-F stays on the network: its
+# full submission is 45 MB.
+CASSETTES = {"test_section_tables_no_duplication_aapl_10k": "filing_0000320193-25-000079"}
+
+
+@pytest.fixture
+def vcr_cassette_name(request):
+    return CASSETTES.get(request.node.name, request.node.name)
 
 
 def _html_of(table_node):
@@ -43,10 +53,10 @@ def _hash_counts(tables):
     return Counter(hashlib.sha1(_html_of(t).encode("utf-8")).hexdigest() for t in tables)
 
 
-@pytest.mark.network
+@pytest.mark.vcr
 def test_section_tables_no_duplication_aapl_10k():
     """part_ii_item_8 of AAPL's 10-K must return each table exactly once."""
-    typed = edgar.find("0000320193-25-000079").obj()
+    typed = offline_filing("0000320193-25-000079").obj()
     section = typed.sections["part_ii_item_8"]
 
     tables = section.tables()
@@ -66,10 +76,10 @@ def test_section_tables_no_duplication_aapl_10k():
     assert len(section.text()) == 62189  # was 62223 before the trailing "Apple Inc. | 2024 Form 10-K | 50" footer left the slice (llmp.12 step 6)
 
 
-@pytest.mark.network
+@pytest.mark.vcr
 def test_section_tables_no_duplication_aapl_10q():
     """A second form (10-Q) must also be fully dup-free after the fix."""
-    typed = edgar.find("0000320193-25-000073").obj()
+    typed = offline_filing("0000320193-25-000073").obj()
     section = typed.sections["part_i_item_1"]
 
     tables = section.tables()
@@ -91,7 +101,7 @@ def test_section_tables_nested_explosion_gone_tsm_20f():
     overlap bug (worst ~x4), so we assert the nested-serialization explosion
     is gone rather than full dup-freedom.
     """
-    typed = edgar.find("0001628280-26-025362").obj()
+    typed = offline_filing("0001628280-26-025362").obj()
     section = typed.sections["part_iii_item_19"]
 
     tables = section.tables()
