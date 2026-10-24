@@ -42,6 +42,7 @@ import pytest
 
 from edgar.xbrl import XBRL
 from edgar.xbrl.statements import _period_kinds
+from tests._offline_filings import offline_filing
 
 AAPL_2022 = Path("tests/fixtures/xbrl/aapl/10k_2022")
 
@@ -182,15 +183,13 @@ def test_period_kinds(values, expected):
     assert _period_kinds({"values": values}) == expected
 
 
-@pytest.mark.network
+@pytest.mark.vcr
 def test_the_reported_oracle_row():
     """
     The report's own repro: ORCL Q1 FY2024. The Cerner row for equity
     consideration transferred carried $18.6B, which is us-gaap:Goodwill.
     """
-    from edgar import get_by_accession_number
-
-    xbrl = get_by_accession_number("0000950170-23-047713").xbrl()
+    xbrl = offline_filing("0000950170-23-047713").xbrl()
     role = (
         "http://www.oracle.com/20230831/taxonomy/role/"
         "Role_DisclosureACQUISITIONSNarrativeDetails"
