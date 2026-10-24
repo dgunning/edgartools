@@ -304,38 +304,44 @@ def test_terminating_quotient_of_one_over_two_to_the_hundred_is_exact():
 
 
 def test_terminating_quotient_past_the_default_int_str_limit_is_exact():
-    """1/2**6200. 5**6200 has 4334 digits, past the default 4300-digit int-to-str limit.
+    """1/2**6200. 5**6200 has 4334 digits, past the 4300-digit int-to-str limit.
 
-    Under that default, ``str(5**6200)`` raises ``ValueError``. The quotient is
-    still the exact expansion, not slash text with an unset value.
+    The limit is set here, then restored, so ``str(5**6200)`` still raises
+    when ``PYTHONINTMAXSTRDIGITS=0`` has turned the limit off. The quotient is
+    the exact expansion, not slash text with an unset value.
     """
     power = 6200
-    assert sys.get_int_max_str_digits() == sys.int_info.default_max_str_digits
-    with pytest.raises(ValueError):
-        str(5 ** power)
-    significand = format(
-        decimal.Context(
-            prec=power,
-            rounding=decimal.ROUND_HALF_EVEN,
-            Emin=decimal.MIN_EMIN,
-            Emax=decimal.MAX_EMAX,
-            traps=[],
-        ).power(decimal.Decimal(5), decimal.Decimal(power)),
-        "f",
-    )
-    assert len(significand) == 4334
-    assert len(significand) > sys.int_info.default_max_str_digits
-    expected = "0." + "0" * (power - len(significand)) + significand
-    facts = _with_facts(f"""
+    previous = sys.get_int_max_str_digits()
+    sys.set_int_max_str_digits(4300)
+    try:
+        assert sys.get_int_max_str_digits() == 4300
+        with pytest.raises(ValueError):
+            str(5 ** power)
+        significand = format(
+            decimal.Context(
+                prec=power,
+                rounding=decimal.ROUND_HALF_EVEN,
+                Emin=decimal.MIN_EMIN,
+                Emax=decimal.MAX_EMAX,
+                traps=[],
+            ).power(decimal.Decimal(5), decimal.Decimal(power)),
+            "f",
+        )
+        assert len(significand) == 4334
+        assert len(significand) > 4300
+        expected = "0." + "0" * (power - len(significand)) + significand
+        facts = _with_facts(f"""
   <my:widePower contextRef="C1" unitRef="pure">
     <xbrli:numerator>1</xbrli:numerator>
     <xbrli:denominator>{2 ** power}</xbrli:denominator>
   </my:widePower>
 """)
-    fact = facts["my_widePower|C1"]
-    assert fact.value == expected
-    assert fact.numeric_value is None
-    assert fact.decimals == "INF"
+        fact = facts["my_widePower|C1"]
+        assert fact.value == expected
+        assert fact.numeric_value is None
+        assert fact.decimals == "INF"
+    finally:
+        sys.set_int_max_str_digits(previous)
 
 
 def test_fraction_operand_includes_text_around_a_comment_or_processing_instruction():

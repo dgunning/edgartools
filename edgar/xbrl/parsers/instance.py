@@ -219,8 +219,9 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], 
 
     The third item is True when the quotient is a finite decimal. The caller
     then sets ``decimals`` to INF even if the float conversion cannot represent
-    that decimal. ``numeric_value`` is the float, and is left unset when the
-    float would round, overflow, or underflow to zero. A non-finite quotient
+    that decimal. ``numeric_value`` is the float of the quotient. It is left
+    unset only when that float overflows, or a nonzero quotient underflows to
+    zero; the exact text stays in ``value``. A non-finite quotient
     (a zero denominator, or a non-decimal) leaves the numeric value unset and
     keeps the two parts separated by ``/``. A nil fact, or a nil numerator or
     denominator, is an absent value.
