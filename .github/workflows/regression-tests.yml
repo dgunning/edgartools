@@ -146,9 +146,15 @@ jobs:
         python -m pip install -e ".[ai]"
         python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock pytest-vcr "vcrpy>=8.3.0,<9" freezegun==1.5.1 filelock tqdm responses
 
+    # `not fast`: the fast regression tests (45,660 of 46,447 on 2026-10-24)
+    # already gate every pull request and push in test-fast, in parallel, in
+    # python-hatch-workflow.yml. Re-running them here, serially, took 26 of
+    # this job's 43 test minutes and checked nothing new (edgartools-07lk.26).
+    # What is left is what only this lane runs: the network-marked regression
+    # tests and the few marked neither fast nor network.
     - name: Run regression tests
       run: |
-        pytest --cov --cov-report=xml -m regression --enable-cache
+        pytest --cov --cov-report=xml -m 'regression and not fast' --enable-cache
 
     # `always()`: a run that failed still warmed the cache, and the next one
     # should not pay for those downloads again.
