@@ -1,10 +1,13 @@
+import errno
 import gzip
 import inspect
 import logging
 import os
 import shutil
+import stat
 import tarfile
 import tempfile
+import time
 import uuid
 import zipfile
 from contextlib import contextmanager
@@ -25,13 +28,14 @@ from tqdm import tqdm
 logging.getLogger("stamina").setLevel(logging.ERROR)
 
 from edgar.core import text_extensions
-from edgar.settings import get_edgar_data_directory
 from edgar.exceptions import (
     IdentityNotSetError,
     TooManyRequestsError,
     TransportError,
+    ValidationError,
 )
 from edgar.httpclient import async_http_client, http_client, uncached_http_client
+from edgar.settings import get_edgar_data_directory
 
 """
 This module provides functions to handle HTTP requests with retry logic, throttling, and identity management.
@@ -1488,6 +1492,106 @@ def download_text_between_tags(url: str, tag: str):
 logger = logging.getLogger(__name__)
 
 
+_BULK_STAGE_MARKER = ".edgartools-stage"
+_BULK_STAGE_OWNER = b"edgartools-bulk-stage-v1\n"
+
+
+@contextmanager
+def _bulk_file_lock(path: Path, blocking: bool = True):
+    """Keep a stable lock inode; never unlink a coordinator used by other calls."""
+    with path.open("a+b") as handle:
+        if handle.tell() == 0:
+            handle.write(b"\0")
+            handle.flush()
+        handle.seek(0)
+        try:
+            if os.name == "nt":
+                import msvcrt
+                # LK_LOCK stops after ten attempts. Match flock's blocking
+                # semantics by retrying contention, while propagating other errors.
+                while True:
+                    try:
+                        msvcrt.locking(handle.fileno(), msvcrt.LK_NBLCK, 1)
+                        break
+                    except OSError as error:
+                        if not blocking or error.errno != errno.EACCES:
+                            raise
+                        time.sleep(0.1)
+            else:
+                import fcntl
+                fcntl.flock(handle, fcntl.LOCK_EX | (0 if blocking else fcntl.LOCK_NB))
+        except OSError as error:
+            if blocking or error.errno not in (errno.EACCES, errno.EAGAIN):
+                raise
+            yield False
+            return
+        try:
+            yield True
+        finally:
+            handle.seek(0)
+            if os.name == "nt":
+                msvcrt.locking(handle.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                fcntl.flock(handle, fcntl.LOCK_UN)
+
+
+def _bulk_is_link(path: Path) -> bool:
+    info = path.lstat()
+    return stat.S_ISLNK(info.st_mode) or bool(
+        getattr(info, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+    )
+
+
+def _sweep_bulk_staging(directory: Path, local_dir: str):
+    """Called under the coordinator; preserve active, unknown and recovery trees."""
+    for candidate in directory.glob(f".{local_dir}-*"):
+        marker = candidate / _BULK_STAGE_MARKER
+        try:
+            if _bulk_is_link(candidate) or not candidate.is_dir() or _bulk_is_link(marker):
+                continue
+            if marker.read_bytes() != _BULK_STAGE_OWNER or (candidate / "previous").exists():
+                continue
+            with _bulk_file_lock(marker, blocking=False) as acquired:
+                if not acquired:
+                    continue
+            # Windows cannot remove the open lease file. The coordinator prevents
+            # another call claiming this abandoned tree between unlock and removal.
+            shutil.rmtree(candidate)
+        except OSError:
+            continue
+
+
+@contextmanager
+def _bulk_staging(directory: Path, local_dir: str):
+    coordinator = directory / f".{local_dir}.lock"
+    with _bulk_file_lock(coordinator):
+        _sweep_bulk_staging(directory, local_dir)
+        staging = Path(tempfile.mkdtemp(prefix=f".{local_dir}-", dir=directory))
+        try:
+            marker = staging / _BULK_STAGE_MARKER
+            marker.write_bytes(_BULK_STAGE_OWNER)
+            lease = _bulk_file_lock(marker)
+            lease.__enter__()
+        except BaseException:
+            try:
+                shutil.rmtree(staging)
+            except OSError as error:
+                logger.warning("Failed to remove uninitialised bulk staging %s: %s", staging, error)
+            raise
+    try:
+        yield staging
+    finally:
+        with _bulk_file_lock(coordinator):
+            lease.__exit__(None, None, None)
+            if (staging / "previous").exists():
+                logger.error("Bulk cache recovery retained at %s", staging / "previous")
+            else:
+                try:
+                    shutil.rmtree(staging)
+                except OSError as error:
+                    logger.warning("Failed to remove bulk staging %s: %s", staging, error)
+
+
 @retry(
     on=should_retry,
     attempts=BULK_RETRY_ATTEMPTS,
@@ -1502,15 +1606,22 @@ async def download_bulk_data(
         data_directory: Optional[Path] = None,
         client: Optional[AsyncClient] = None,
         disable_progress: bool = False,
+        preserve_existing_filings: bool = False,
 ) -> Path:
     """
     Download and extract bulk data from zip or tar.gz archives
+
+    A refresh replaces the whole ``data_directory/<archive name>`` directory. It never
+    leaves a mix of old and new files, but the swap is two renames, so a reader that
+    looks between them briefly finds no directory.
 
     Args:
         client: The httpx2.AsyncClient instance
         url: URL to download from (e.g. "https://www.sec.gov/Archives/edgar/daily-index/xbrl/companyfacts.zip")
         data_directory: Base directory for downloads
         disable_progress: If True, suppress progress bars. Defaults to False.
+        preserve_existing_filings: Keep existing .nc and .nc.gz files absent from
+            the archive, for incremental filtered filing downloads.
 
     Returns:
         Path to the directory containing the extracted data
@@ -1533,16 +1644,19 @@ async def download_bulk_data(
         raise ValueError("Invalid URL - cannot extract filename")
 
     local_dir = filename.split(".")[0]
-    download_path = data_directory / local_dir
-    download_filename = download_path / filename
+    destination_path = data_directory / local_dir
+    data_directory.mkdir(parents=True, exist_ok=True)
+    # Stage beside the cache so the final swap is a same-filesystem rename.
+    staging = _bulk_staging(data_directory, local_dir)
+    staging_path = staging.__enter__()
+    download_filename = staging_path / filename
+    download_path = staging_path / local_dir
 
     try:
-        # Create the directory with parents=True and exist_ok=True to avoid race conditions
-        download_path.mkdir(parents=True, exist_ok=True)
-
+        download_path.mkdir()
         # Download the file
         try:
-            await stream_file(url, client=client, path=download_path, disable_progress=disable_progress)
+            await stream_file(url, client=client, path=staging_path, disable_progress=disable_progress)
         except Exception as e:
             raise IOError(f"Failed to download file: {e}") from e
 
@@ -1561,29 +1675,32 @@ async def download_bulk_data(
                             pbar.update(info.file_size)
 
             elif any(filename.endswith(ext) for ext in (".tar.gz", ".tgz")):
+                if not hasattr(tarfile, "tar_filter"):
+                    raise RuntimeError("Extracting bulk tar archives safely requires Python 3.11.4 or later")
                 with tarfile.open(download_filename, "r:gz") as tar:
                     # Security check for tar files to prevent path traversal
-                    def is_within_directory(directory: Path, target: Path) -> bool:
+                    root = download_path.resolve()
+
+                    def is_within_directory(target: Path) -> bool:
                         try:
-                            return os.path.commonpath([directory, target]) == str(directory)
+                            return os.path.commonpath([root, target.resolve()]) == str(root)
                         except ValueError:
                             return False
 
                     members = tar.getmembers()
+                    if any(not (member.isfile() or member.isdir()) for member in members):
+                        raise ValidationError("Bulk archives must contain regular files and directories")
                     total_size = sum(member.size for member in members)
 
                     with tqdm(total=total_size, unit="B", unit_scale=True, desc="Extracting", disable=disable_progress) as pbar:
                         for member in members:
                             # Check for path traversal
                             member_path = os.path.join(str(download_path), member.name)
-                            if not is_within_directory(Path(str(download_path)), Path(member_path)):
+                            if not is_within_directory(Path(member_path)):
                                 raise ValueError(f"Attempted path traversal in tar file: {member.name}")
 
                             # Extract file and update progress
-                            try:
-                                tar.extract(member, str(download_path), filter="tar")
-                            except TypeError:
-                                tar.extract(member, str(download_path))
+                            tar.extract(member, str(download_path), filter="tar")
                             pbar.update(member.size)
             else:
                 raise ValueError(f"Unsupported file format: {filename}")
@@ -1599,16 +1716,47 @@ async def download_bulk_data(
             except Exception as e:
                 logger.warning("Failed to delete archive file %s: %s", download_filename, e)
 
-        return download_path
+        # Tar links and special files are refused before extraction above. ZipFile.extract
+        # cannot create links, so this check is a backstop for what reached the disk.
+        if any(member.is_symlink() for member in download_path.rglob("*")):
+            raise ValidationError("Bulk archives must contain regular files and directories")
 
-    except Exception:
-        # Clean up the download directory in case of any errors
+        # Swap whole directories so the cache never holds a mix of old and new files:
+        # move the old tree into staging, move the new tree into place, and restore the
+        # old tree if that fails. Staging cleanup then deletes the old tree. Between the
+        # two renames the directory is briefly absent (see the docstring).
+        previous_path = staging_path / "previous"
+        with _bulk_file_lock(data_directory / f".{local_dir}.lock"):
+            if preserve_existing_filings and destination_path.exists():
+                if _bulk_is_link(destination_path):
+                    raise ValidationError("Existing filing directory must not be a link")
+                for existing in destination_path.iterdir():
+                    if existing.name.endswith((".nc", ".nc.gz")):
+                        if _bulk_is_link(existing) or not existing.is_file():
+                            raise ValidationError("Existing filings must be regular files")
+                        preserved = download_path / existing.name
+                        if not preserved.exists():
+                            shutil.copy2(existing, preserved)
+            if destination_path.exists():
+                os.replace(destination_path, previous_path)
+            try:
+                os.replace(download_path, destination_path)
+            except BaseException:
+                if previous_path.exists():
+                    try:
+                        os.replace(previous_path, destination_path)
+                    except OSError:
+                        logger.exception("Failed to restore bulk cache; recover from %s", previous_path)
+                raise
+            if previous_path.exists():
+                shutil.rmtree(previous_path)
+        return destination_path
+
+    finally:
         try:
-            if download_path.exists():
-                shutil.rmtree(download_path)
+            staging.__exit__(None, None, None)
         except Exception as cleanup_error:
             logger.error("Failed to clean up after error: %s", cleanup_error)
-        raise
 
 
 def download_datafile(data_url: str, local_directory: Optional[Path] = None) -> Path:

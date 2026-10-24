@@ -591,7 +591,7 @@ def _download_feed_files_for_filings(filings: 'Filings',
                 existing_files = {str(f) for f in bulk_file_directory.glob('*.nc')}
 
             path = _run_coroutine(download_bulk_data(client=None, url=url, data_directory=data_directory,
-                                                     disable_progress=disable_progress))
+                                                     disable_progress=disable_progress, preserve_existing_filings=True))
             log.info('Downloaded feed file to %s', path)
             if not path.exists():
                 continue
