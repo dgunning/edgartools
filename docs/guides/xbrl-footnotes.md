@@ -247,10 +247,10 @@ The parser correctly handles all standard XBRL namespaces:
 
 ## Performance Considerations
 
-- Footnote extraction adds minimal overhead to XBRL parsing
-- Footnotes are parsed lazily during instance document processing
-- Both fact-to-footnote and footnote-to-fact lookups are O(1) operations
-- Large documents with many footnotes are handled efficiently
+- Footnotes are extracted eagerly during instance parsing, after the facts have been collected and merged.
+- When the first relationship reaches fact attachment, the parser builds a temporary lookup from fact IDs to the first matching fact in the final facts dictionary. All relationships in that extraction share the lookup. It is released after extraction and is never built if no relationship reaches attachment.
+- For F stored facts, R relationships reaching attachment, and U distinct fact IDs, selecting facts for attachment takes expected O(F + R) work and O(U) temporary references. This describes fact selection, not all footnote processing: checking each fact's list for duplicate notes and assigning suffixes to colliding resource labels have additional costs.
+- `XBRL.get_footnotes_for_fact(fact_id)` searches the current facts dictionary on every call, so it reflects changes to the stored facts. Its worst-case work is O(F + K), where K is the number of footnote keys on the matching fact. The temporary attachment lookup is not retained for this public getter.
 
 ## Error Handling
 
