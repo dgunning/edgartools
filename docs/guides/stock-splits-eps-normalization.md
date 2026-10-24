@@ -196,9 +196,11 @@ print(f"Periods: {ttm_revenue.periods}")
 For any XBRL concept:
 
 ```python
-# Per-share metrics are automatically split-adjusted
-ttm_eps = nvidia.get_ttm("EarningsPerShareBasic")
-print(f"TTM EPS: ${ttm_eps.value:.2f}")
+# Per-share metrics are automatically split-adjusted. Quarterly EPS does not
+# add up to annual EPS, so get_ttm returns the filed fiscal-year EPS, and raises
+# ValidationError for a window that is not a fiscal year.
+ttm_eps = nvidia.get_ttm("EarningsPerShareBasic", as_of="2025-01-26")
+print(f"FY EPS: ${ttm_eps.value:.2f}")
 
 # Share counts are automatically adjusted too
 ttm_shares = nvidia.get_ttm("WeightedAverageNumberOfSharesOutstandingBasic")

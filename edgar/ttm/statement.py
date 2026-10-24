@@ -3,8 +3,8 @@
 Provides TTMStatement and TTMStatementBuilder for creating
 trailing twelve month financial statements.
 """
-from dataclasses import dataclass
-from datetime import date
+from dataclasses import dataclass, replace
+from datetime import date, timedelta
 from typing import Callable, List, Optional, Tuple
 
 import pandas as pd
@@ -18,7 +18,12 @@ from edgar.entity.unit_handling import (
     is_per_share_label,
     is_share_count_label,
 )
-from edgar.ttm.calculator import DurationBucket, TTMCalculator
+from edgar.ttm.calculator import (
+    EPS_NUMERATOR_CONCEPTS,
+    DurationBucket,
+    TTMCalculator,
+    numerator_agrees_within,
+)
 
 
 def _is_per_share_item(item: dict) -> bool:
@@ -29,6 +34,213 @@ def _is_per_share_item(item: dict) -> bool:
 def _is_share_count_item(item: dict) -> bool:
     """True when a statement line item holds a number of shares."""
     return is_share_count_label(item.get('concept', ''), item.get('label', ''))
+
+
+def _period_days(start: date, end: date) -> int:
+    """Length of a duration period in days, both ends included."""
+    return (end - start).days + 1
+
+
+def _quarter_share_count(quarter: FinancialFact, quarter_counts: dict, annual_counts: dict,
+                         cumulative_counts: Optional[dict] = None) -> Optional[float]:
+    """Weighted-average share count for one quarter of a TTM window.
+
+    A filed three-month count is used as is. A fiscal-year count is never put in
+    a quarter's place: when the quarter closes a fiscal year and has no
+    three-month count (10-Ks rarely tag one), its count is solved from the
+    fiscal-year count and the year's other three quarters, weighting each period
+    by its days, which is how the year's weighted average is built (ASC
+    260-10-45-10). Failing that, it is solved the same way from the filer's
+    cumulative counts: the period through the quarter's end less the period
+    through the day before it starts (Q4 = FY - 9M, Q3 = 9M - 6M). Returns None
+    when neither is possible (GH #1691).
+    """
+    filed = quarter_counts.get(quarter.period_end)
+    if filed is not None:
+        return filed.numeric_value
+    if quarter.period_start is None:
+        return None
+
+    year = annual_counts.get(quarter.period_end)
+    if year is not None and year.period_start is not None:
+        others = [f for end, f in quarter_counts.items()
+                  if year.period_start < end < quarter.period_start and f.period_start
+                  and f.period_start >= year.period_start]
+        year_days = _period_days(year.period_start, year.period_end)
+        quarter_days = _period_days(quarter.period_start, quarter.period_end)
+        other_days = sum(_period_days(f.period_start, f.period_end) for f in others)
+        if len(others) == 3 and abs(other_days + quarter_days - year_days) <= 3:
+            solved = (year.numeric_value * year_days
+                      - sum(f.numeric_value * _period_days(f.period_start, f.period_end) for f in others)) / quarter_days
+            if solved > 0:
+                return solved
+
+    return _solve_from_cumulative(quarter, cumulative_counts or {})
+
+
+def _solve_from_cumulative(quarter: FinancialFact, cumulative_counts: dict) -> Optional[float]:
+    """A quarter's count from two cumulative counts sharing a start (GH #1691).
+
+    ``cumulative_counts`` maps (period_start, period_end) to a share fact. The
+    weighted average through the quarter's end, times its days, less the one
+    through the day before the quarter starts, is the quarter's share-days.
+    """
+    prior_end = quarter.period_start - timedelta(days=1)
+    quarter_days = _period_days(quarter.period_start, quarter.period_end)
+    for (start, end), through in cumulative_counts.items():
+        if end != quarter.period_end or start >= quarter.period_start:
+            continue
+        before = cumulative_counts.get((start, prior_end))
+        if before is None:
+            continue
+        solved = (through.numeric_value * _period_days(start, end)
+                  - before.numeric_value * _period_days(start, prior_end)) / quarter_days
+        if solved > 0:
+            return solved
+    return None
+
+
+def _matching_year(window: List[FinancialFact], annual: dict) -> Optional[FinancialFact]:
+    """The fiscal-year fact that spans exactly this four-quarter window, if any."""
+    start, end = window[0].period_start, window[-1].period_end
+    year = annual.get(end)
+    if year is not None and year.period_start and start and abs((year.period_start - start).days) <= 7:
+        return year
+    return None
+
+
+def _share_count_maps(shares_facts: List[FinancialFact]) -> Tuple[dict, dict, dict]:
+    """Share counts, latest filing first: three-month and fiscal-year counts by
+    period_end, and every cumulative count (quarter, six and nine months, year)
+    by (period_start, period_end)."""
+    calc = TTMCalculator(shares_facts)
+    maps = []
+    for bucket in (DurationBucket.QUARTER, DurationBucket.ANNUAL):
+        by_end = {}
+        for fact in calc._filter_by_duration(bucket):
+            if fact.numeric_value is None:
+                continue
+            held = by_end.get(fact.period_end)
+            if held is None or (fact.filing_date and held.filing_date and fact.filing_date > held.filing_date):
+                by_end[fact.period_end] = fact
+        maps.append(by_end)
+    cumulative = {}
+    for bucket in (DurationBucket.QUARTER, DurationBucket.YTD_6M, DurationBucket.YTD_9M, DurationBucket.ANNUAL):
+        for fact in calc._filter_by_duration(bucket):
+            if fact.numeric_value is None or fact.period_start is None:
+                continue
+            key = (fact.period_start, fact.period_end)
+            held = cumulative.get(key)
+            if held is None or (fact.filing_date and held.filing_date and fact.filing_date > held.filing_date):
+                cumulative[key] = fact
+    return maps[0], maps[1], cumulative
+
+
+def _window_share_count(window: List[FinancialFact], quarter_counts: dict, annual_counts: dict,
+                        cumulative_counts: Optional[dict] = None) -> Optional[float]:
+    """Weighted-average share count over a four-quarter TTM window (GH #1691).
+
+    A window that is a fiscal year uses that year's filed count, so its EPS is
+    the filed annual EPS. Any other window weights its quarters' counts by their
+    days. ``quarter_counts`` and ``annual_counts`` map period_end to a three-month
+    and a fiscal-year share fact; ``cumulative_counts`` (see _share_count_maps)
+    lets a quarter with no count of its own be solved. Returns None when a
+    quarter has no count.
+    """
+    year = _matching_year(window, annual_counts)
+    if year is not None:
+        return year.numeric_value
+
+    weighted = 0.0
+    total_days = 0
+    for quarter in window:
+        if quarter.period_start is None:
+            return None
+        count = _quarter_share_count(quarter, quarter_counts, annual_counts, cumulative_counts)
+        if count is None:
+            return None
+        days = _period_days(quarter.period_start, quarter.period_end)
+        weighted += count * days
+        total_days += days
+    return weighted / total_days if total_days else None
+
+
+def _numerator_series(facts: List[FinancialFact]) -> dict:
+    """One EPS numerator concept's facts, indexed for TTM windows."""
+    calc = TTMCalculator(facts)
+    annual = {}
+    for fact in calc._filter_by_duration(DurationBucket.ANNUAL):
+        if fact.numeric_value is None:
+            continue
+        held = annual.get(fact.period_end)
+        if held is None or (fact.filing_date or date.min) > (held.filing_date or date.min):
+            annual[fact.period_end] = fact
+    quarters = {q.period_end: q for q in calc._filter_quarterly_facts() if q.numeric_value is not None}
+    _fill_first_quarters(calc, quarters)
+    return {
+        "facts": facts,
+        "quarters": quarters,
+        "annual": annual,
+    }
+
+
+def _fill_first_quarters(calc: TTMCalculator, quarters: dict) -> None:
+    """Derive an untagged first quarter as six months less the second quarter.
+
+    The quarterizer derives Q2, Q3 and Q4 but takes Q1 only as tagged. Tesla's
+    Q1 2026 10-Q does not tag income available to common stockholders for the
+    quarter, while its Q2 10-Q tags the six months and the discrete Q2. Net
+    income cannot stand in (the two differ), so without this every window
+    containing Q1 2026 had no EPS.
+    """
+    six_months = {}
+    for fact in calc._filter_by_duration(DurationBucket.YTD_6M):
+        if fact.numeric_value is None or fact.period_start is None or not calc._is_additive_concept(fact):
+            continue
+        key = (fact.period_start, fact.period_end)
+        held = six_months.get(key)
+        if held is None or (fact.filing_date or date.min) > (held.filing_date or date.min):
+            six_months[key] = fact
+    for (start, end), ytd6 in six_months.items():
+        q2 = quarters.get(end)
+        if q2 is None or (q2.calculation_context or "").startswith("derived") or q2.period_start is None or q2.period_start <= start:
+            continue
+        q1_end = q2.period_start - timedelta(days=1)
+        if q1_end in quarters:
+            continue
+        q1 = replace(
+            calc._create_derived_quarter(ytd6, ytd6.numeric_value - q2.numeric_value,
+                                         "derived_q1_ytd6_minus_q2", target_period="Q1", period_start=start),
+            period_end=q1_end,
+        )
+        if calc._classify_duration(q1) == DurationBucket.QUARTER:
+            quarters[q1_end] = q1
+
+
+def _window_numerator(window: List[FinancialFact], series: List[dict]) -> Optional[float]:
+    """TTM EPS numerator for one window, from the best numerator concept (GH #1692).
+
+    ``series`` is ordered best first (income available to common stockholders
+    before net income). A window that is a fiscal year uses the year's filed
+    value, otherwise the four quarters are summed; all from ONE concept. A
+    lesser concept stands in only where the filer's facts do not show it
+    differing from the better one in this window; otherwise there is no EPS.
+    """
+    start, end = window[0].period_start, window[-1].period_end
+    for rank, candidate in enumerate(series):
+        year = _matching_year(window, candidate["annual"])
+        if year is not None:
+            value = year.numeric_value
+        elif all(q.period_end in candidate["quarters"] for q in window):
+            value = sum(candidate["quarters"][q.period_end].numeric_value for q in window)
+        else:
+            continue
+        span_start = start or end
+        if all(numerator_agrees_within(better["facts"], candidate["facts"], span_start, end)
+               for better in series[:rank]):
+            return value
+        return None
+    return None
 
 
 @dataclass
@@ -287,29 +499,31 @@ class TTMStatementBuilder:
             return int(fy) if pd.notna(fy) else int(row["as_of_date"].year)
 
         def _trend_for_eps(eps_concept: str, max_periods: int) -> Optional[pd.DataFrame]:
-            net_income_concepts = [
-                "NetIncomeLoss",
-                "NetIncomeLossAvailableToCommonStockholdersBasic",
-            ]
             shares_basic_concepts = [
                 "WeightedAverageNumberOfSharesOutstandingBasic",
-                "WeightedAverageNumberOfSharesOutstandingBasicAndDiluted",
+                "WeightedAverageNumberOfShareOutstandingBasicAndDiluted",
             ]
             shares_diluted_concepts = [
                 "WeightedAverageNumberOfDilutedSharesOutstanding",
                 "WeightedAverageNumberOfSharesOutstandingDiluted",
+                "WeightedAverageNumberOfShareOutstandingBasicAndDiluted",
             ]
 
-            net_income_facts = None
-            for concept in net_income_concepts:
-                net_income_facts = _get_concept_facts(concept)
-                if net_income_facts:
-                    break
-
-            if not net_income_facts:
-                return None
-
             is_diluted = "diluted" in eps_concept.lower()
+            # Basic EPS divides income available to common stockholders, not net
+            # income; the diluted numerator starts from it (GH #1692).
+            numerators = []
+            for concept in EPS_NUMERATOR_CONCEPTS["diluted" if is_diluted else "basic"]:
+                concept_facts = _get_concept_facts(concept)
+                if concept_facts:
+                    numerators.append((concept, concept_facts))
+            if not numerators:
+                return None
+            # Windows are laid out on net income's quarters (the widest series);
+            # each window's numerator is then chosen by _window_numerator.
+            net_income_facts = dict(numerators).get("NetIncomeLoss") or numerators[0][1]
+            numerator_series = [_numerator_series(f) for _, f in numerators]
+
             shares_facts = None
             share_candidates = shares_diluted_concepts if is_diluted else shares_basic_concepts
             for concept in share_candidates:
@@ -341,57 +555,47 @@ class TTMStatementBuilder:
             # detect_fiscal_year_end takes a list of facts, not an EntityFacts.
             fiscal_year_end_month = detect_fiscal_year_end(net_income_facts)
 
-            shares_calc = TTMCalculator(shares_facts)
-            share_quarters = shares_calc._filter_by_duration(DurationBucket.QUARTER)
-            if not share_quarters:
+            shares_by_end, shares_by_end_annual, shares_cumulative = _share_count_maps(shares_facts)
+            if not shares_by_end:
                 return None
 
-            shares_by_end = {}
-            for fact in share_quarters:
-                key = fact.period_end
-                if key not in shares_by_end or (
-                    fact.filing_date and shares_by_end[key].filing_date and fact.filing_date > shares_by_end[key].filing_date
-                ):
-                    shares_by_end[key] = fact
-
-            share_annual = shares_calc._filter_by_duration(DurationBucket.ANNUAL)
-            shares_by_end_annual = {}
-            shares_by_year_annual = {}
-            for fact in share_annual:
-                key = fact.period_end
-                if key not in shares_by_end_annual or (
-                    fact.filing_date and shares_by_end_annual[key].filing_date and fact.filing_date > shares_by_end_annual[key].filing_date
-                ):
-                    shares_by_end_annual[key] = fact
-                if fact.fiscal_year:
-                    existing = shares_by_year_annual.get(fact.fiscal_year)
-                    if not existing or (
-                        fact.filing_date and existing.filing_date and fact.filing_date > existing.filing_date
-                    ):
-                        shares_by_year_annual[fact.fiscal_year] = fact
+            # Diluted EPS for a loss: potential shares are antidilutive, so the
+            # diluted count is the basic count (ASC 260-10-45-17, -20). Quarterly
+            # diluted counts include them for profitable quarters, so a window
+            # mixing profit and loss quarters must not average them in (GH #1782).
+            # The control number is income from continuing operations where it
+            # is tagged (ASC 260-10-45-18), else the EPS numerator.
+            basic_maps = None
+            control_series = None
+            if is_diluted:
+                for concept in shares_basic_concepts:
+                    basic_facts = _get_concept_facts(concept)
+                    if basic_facts:
+                        basic_maps = _share_count_maps(basic_facts)
+                        break
+                continuing = _get_concept_facts("IncomeLossFromContinuingOperations")
+                control_series = [_numerator_series(continuing)] if continuing else None
 
             rows = []
             for i in range(3, len(ni_quarters)):
                 window = ni_quarters[i - 3:i + 1]
-                window_ends = [q.period_end for q in window]
-                window_shares = []
-                for quarter in window:
-                    end = quarter.period_end
-                    share_fact = shares_by_end.get(end) or shares_by_end_annual.get(end)
-                    if not share_fact and quarter.fiscal_period == "Q4":
-                        share_fact = shares_by_year_annual.get(quarter.fiscal_year)
-                    if not share_fact or share_fact.numeric_value is None:
-                        window_shares = []
-                        break
-                    window_shares.append(share_fact.numeric_value)
-
-                if not window_shares:
+                # A fiscal-year count never fills a quarter's slot (GH #1691)
+                avg_shares = _window_share_count(window, shares_by_end, shares_by_end_annual, shares_cumulative)
+                if not avg_shares:
                     continue
 
-                ttm_income = sum(q.numeric_value for q in window if q.numeric_value is not None)
-                avg_shares = sum(window_shares) / len(window_shares)
-                if avg_shares == 0:
+                ttm_income = _window_numerator(window, numerator_series)
+                if ttm_income is None:
                     continue
+
+                # A fiscal-year window's filed diluted count already applies the
+                # year's antidilution test; a rolling window needs its own.
+                if basic_maps and _matching_year(window, shares_by_end_annual) is None:
+                    control = _window_numerator(window, control_series) if control_series else None
+                    if (ttm_income if control is None else control) < 0:
+                        basic_shares = _window_share_count(window, *basic_maps)
+                        if basic_shares:
+                            avg_shares = min(avg_shares, basic_shares)
 
                 as_of_fact = window[-1]
                 label_fy = calculate_fiscal_year_for_label(
@@ -403,6 +607,7 @@ class TTMStatementBuilder:
                     "fiscal_year": label_fy,
                     "fiscal_period": as_of_fact.fiscal_period,
                     "as_of_date": as_of_fact.period_end,
+                    "has_gaps": ni_calc._check_for_gaps(window),
                 })
 
             if not rows:
@@ -506,7 +711,14 @@ class TTMStatementBuilder:
                             concept, period_label, row["as_of_date"],
                         )
                         continue
-                    period_values[period_label] = row["ttm_value"]
+                    # A window whose quarters are not consecutive does not
+                    # cover twelve months (a skipped quarter makes it ~15), so
+                    # its sum is not a TTM value: leave the cell empty rather
+                    # than print it under a TTM column (GH #1694).
+                    # A per-share earnings line has no value outside a fiscal-year
+                    # window (NaN in the trend frame) (GH #1695).
+                    value = row["ttm_value"]
+                    period_values[period_label] = None if row.get("has_gaps") or pd.isna(value) else value
 
                 if base_period_labels:
                     values = {p: period_values.get(p) for p in base_period_labels}

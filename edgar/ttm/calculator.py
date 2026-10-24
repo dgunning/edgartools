@@ -12,8 +12,9 @@ Example:
     TTM Revenue: $391.0B
 
 """
+import re
 from dataclasses import dataclass
-from datetime import date
+from datetime import date, timedelta
 from typing import Callable, List, Optional, Tuple
 
 import pandas as pd
@@ -42,6 +43,18 @@ YTD_9M_MAX_DAYS = 329  # Non-overlapping with Annual
 ANNUAL_MIN_DAYS = 330
 ANNUAL_MAX_DAYS = 420
 
+# Per-share earnings concept names other than EarningsPerShare* (GH #1695).
+_PER_SHARE_EARNINGS_SUFFIX = re.compile(
+    r'per(basic|diluted|basicanddiluted)?share|peroutstandinglimitedpartnershipunit')
+
+# Consecutive quarters: days between quarter ends, and the span of a four-quarter
+# window. 52/53-week filers have 12/12/12/16 or 13/13/13/14-week quarters, and a
+# 53-week year is 371 days (GH #1694).
+QUARTER_END_GAP_MIN_DAYS = 70
+QUARTER_END_GAP_MAX_DAYS = 119
+WINDOW_SPAN_MIN_DAYS = 350
+WINDOW_SPAN_MAX_DAYS = 371
+
 # Calculation limits
 MAX_TTM_PERIODS = 100  # Maximum periods for TTM trend calculation
 MIN_QUARTERS_FOR_TTM = 4  # Minimum quarters needed for a single TTM value
@@ -57,6 +70,75 @@ STALE_THRESHOLD_DAYS = 185
 # Split detection
 MAX_SPLIT_LAG_DAYS = 280  # Maximum days between period_end and filing_date for valid split
 MAX_SPLIT_DURATION_DAYS = 31  # Maximum duration for a valid split fact (instant or short)
+
+# Monetary duration concepts whose quarters are not defined to add up to the
+# year, so a quarter cannot be derived by subtraction (Q4 = FY - 9M, Q2 = 6M - Q1)
+# (GH #1693). Keyed by local name. Their unit (USD) says nothing about this; the
+# concept definition does:
+# - Two-class EPS allocations are made separately for each period (ASC 260-10-45-60B).
+# - Revenue recognized out of a contract liability counts the balance at the start
+#   of the period (ASC 606-10-50-8(b)): Snowflake's three FY2025 quarters sum to
+#   1,994.7M against a nine-month figure of 1,600M.
+# - The rest are measured for another period than the reporting interval.
+# This is a reviewed list, not a classification of the taxonomy; concepts not on
+# it keep the unit-based rule in `_is_additive_concept`.
+# NetIncomeLossAvailableToCommonStockholdersBasic is deliberately NOT listed: it is
+# net income less preferred dividends, which add up, unless participating
+# securities share undistributed earnings. It is the basic EPS numerator, and its
+# derived Q4 is what a derived Q4 EPS divides (GH #1692).
+NON_ADDITIVE_DURATION_CONCEPTS = frozenset({
+    "UndistributedEarningsLossAllocatedToParticipatingSecuritiesBasic",
+    "DistributedEarnings",
+    "ContractWithCustomerLiabilityRevenueRecognized",
+    "DeferredIncomeRevenueRecognized",
+    "BusinessAcquisitionsPurchasePriceAllocationYearOfAcquisitionNetEffectOnIncome",
+    "ManagingMemberOrGeneralPartnerSubsequentDistributionAmount",
+    "PreviouslyEstimatedDevelopmentCostsIncurred",
+})
+
+# Numerators for derived EPS, best first (GH #1692). Basic EPS divides income
+# available to common stockholders (ASC 260-10-45-10, -11); the diluted
+# numerator starts from it (ASC 260-10-45-16). NetIncomeLoss is only a stand-in.
+EPS_NUMERATOR_CONCEPTS = {
+    "basic": (
+        "NetIncomeLossAvailableToCommonStockholdersBasic",
+        "NetIncomeLoss",
+    ),
+    "diluted": (
+        "NetIncomeLossAvailableToCommonStockholdersDiluted",
+        "NetIncomeLossAvailableToCommonStockholdersBasic",
+        "NetIncomeLoss",
+    ),
+}
+
+
+def numerator_agrees_within(preferred: List[FinancialFact], substitute: List[FinancialFact],
+                            start: date, end: date) -> bool:
+    """May ``substitute`` stand in for the ``preferred`` EPS numerator over [start, end]?
+
+    Yes unless the filer's own facts say they differ: some period overlapping the
+    span is tagged with both concepts and the latest-filed values disagree (a
+    preferred dividend, say, separates income available to common from net
+    income). Periods tagged with only one of them are no evidence either way.
+    """
+    def latest_by_period(facts):
+        best = {}
+        for f in facts:
+            if f.period_type != 'duration' or f.period_start is None or f.period_end is None:
+                continue
+            if f.numeric_value is None or f.period_end < start or f.period_start > end:
+                continue
+            key = (f.period_start, f.period_end)
+            if key not in best or (f.filing_date or date.min) > (best[key].filing_date or date.min):
+                best[key] = f
+        return best
+
+    substitutes = latest_by_period(substitute)
+    for key, fact in latest_by_period(preferred).items():
+        other = substitutes.get(key)
+        if other is not None and abs(fact.numeric_value - other.numeric_value) > max(1.0, 1e-6 * abs(other.numeric_value)):
+            return False
+    return True
 
 
 class DurationBucket:
@@ -76,7 +158,7 @@ class TTMMetric:
     Attributes:
         concept: XBRL concept identifier (e.g., 'us-gaap:Revenue')
         label: Human-readable label (e.g., 'Revenue')
-        value: TTM value (sum of 4 quarters)
+        value: TTM value (sum of 4 quarters; the average for share counts and rates)
         unit: Unit of measurement (e.g., 'USD', 'shares')
         as_of_date: Date of most recent quarter in TTM window
         periods: List of fiscal periods included [(2023, 'Q3'), (2023, 'Q4'), ...]
@@ -140,7 +222,8 @@ class TTMCalculator:
         """Calculate TTM value as of a specific date.
 
         Selects the 4 most recent consecutive quarters ending on or before
-        the as_of date and sums their values. Quarters are obtained via
+        the as_of date and sums their values (share counts and rates are
+        averaged instead, see `_aggregate_window`). Quarters are obtained via
         quarterization, which derives Q2, Q3, and Q4 from YTD and annual facts
         when discrete quarterly filings are not available.
 
@@ -160,6 +243,11 @@ class TTMCalculator:
 
         """
 
+        # Per-share earnings: quarters do not add up to a year, so the value is
+        # a filed fiscal-year amount or there is none (GH #1695).
+        if self.facts and self._is_per_share_earnings_concept(self.facts[0]):
+            return self._per_share_earnings_ttm(as_of)
+
         # 1. Get quarterized facts (includes derived Q2, Q3, Q4 from YTD/annual)
         quarterly = self._filter_quarterly_facts()
 
@@ -177,8 +265,9 @@ class TTMCalculator:
         # 4. Check for gaps in quarterly data
         has_gaps = self._check_for_gaps(ttm_quarters)
 
-        # 5. Sum quarterly values to get TTM
-        ttm_value = sum(q.numeric_value for q in ttm_quarters)
+        # 5. Aggregate the window: flows are summed, levels (share counts, rates)
+        #    are averaged -- the same rule calculate_ttm_trend applies (GH #1698)
+        ttm_value = self._aggregate_window(ttm_quarters)
 
         # 6. Check if any quarters were derived (vs. reported)
         has_calculated_q4 = any(
@@ -201,19 +290,97 @@ class TTMCalculator:
             is_stale=is_stale, window_end=window_end, reference_date=reference_date
         )
 
-        # 9. Build and return result
+        # 9. Build and return result. Label each quarter's fiscal year from its
+        #    period_end and the fiscal year-end month, as calculate_ttm_trend does
+        #    (GH #793): a quarter re-filed as a comparative carries the LATER
+        #    filing's fiscal_year, so AAPL's quarter ending 2022-12-31 read as
+        #    (2024, 'Q1') (GH #1699).
+        from edgar.entity.enhanced_statement import (
+            calculate_fiscal_year_for_label,
+            detect_fiscal_year_end,
+        )
+        fiscal_year_end_month = detect_fiscal_year_end(self.facts)
         return TTMMetric(
             concept=ttm_quarters[0].concept,
             label=ttm_quarters[0].label,
             value=ttm_value,
             unit=ttm_quarters[0].unit,
             as_of_date=window_end,  # Most recent quarter
-            periods=[(q.fiscal_year, q.fiscal_period) for q in ttm_quarters],
+            periods=[(calculate_fiscal_year_for_label(q.period_end, fiscal_year_end_month), q.fiscal_period)
+                     for q in ttm_quarters],
             period_facts=ttm_quarters,
             has_gaps=has_gaps,
             has_calculated_q4=has_calculated_q4,
             is_stale=is_stale,
             warning=warning
+        )
+
+    def _per_share_earnings_ttm(self, as_of: Optional[date]) -> TTMMetric:
+        """TTM of a per-share earnings concept: the filed fiscal-year amount (GH #1695).
+
+        Quarterly EPS need not add up to annual EPS (ASC 260-10-55-50), so the
+        twelve-month value exists only for a fiscal year. It is the latest
+        fiscal year ending on or before ``as_of`` (today if None), provided no
+        quarter has ended since (within a week). Otherwise the window is a
+        rolling one, which has no filed amount, and this raises.
+        """
+        from edgar.entity.enhanced_statement import (
+            calculate_fiscal_year_for_label,
+            detect_fiscal_year_end,
+        )
+        from edgar.exceptions import ValidationError
+
+        reference = as_of if as_of is not None else date.today()
+        concept = self.facts[0].concept
+        quarterly = [q for q in self._filter_quarterly_facts() if q.period_end <= reference]
+        years = [f for f in self._filter_by_duration(DurationBucket.ANNUAL)
+                 if f.period_end <= reference and f.period_start and f.numeric_value is not None]
+        if not years:
+            raise ValidationError(
+                f"{concept} is a per-share earnings amount: quarterly amounts do not add up to "
+                f"a twelve-month amount (ASC 260-10-55-50), and no fiscal-year amount was filed "
+                f"on or before {reference}.",
+                parameter="as_of", invalid_value=as_of)
+        year_end = max(f.period_end for f in years)
+        latest_quarter = max((q.period_end for q in quarterly), default=None)
+        if latest_quarter is not None and latest_quarter > year_end + timedelta(days=7):
+            raise ValidationError(
+                f"{concept} is a per-share earnings amount: quarterly amounts do not add up to "
+                f"a twelve-month amount (ASC 260-10-55-50). The twelve months ending "
+                f"{latest_quarter} are not a fiscal year, so no amount was filed for them.",
+                parameter="as_of", invalid_value=as_of,
+                suggestions=[f"Pass as_of={year_end.isoformat()} for the filed fiscal-year amount"])
+
+        fy = max((f for f in years if f.period_end == year_end),
+                 key=lambda f: (self._form_tier(f.form_type or ''), f.filing_date or date.min))
+        in_year = sorted((q for q in quarterly
+                          if q.period_start and q.period_start >= fy.period_start - timedelta(days=7)
+                          and q.period_end <= year_end + timedelta(days=7)),
+                         key=lambda q: q.period_end)
+        fiscal_year_end_month = detect_fiscal_year_end(self.facts)
+        if len(in_year) == 4 and not self._check_for_gaps(in_year):
+            period_facts = in_year
+            periods = [(calculate_fiscal_year_for_label(q.period_end, fiscal_year_end_month), q.fiscal_period)
+                       for q in in_year]
+        else:
+            period_facts = [fy]
+            periods = [(calculate_fiscal_year_for_label(year_end, fiscal_year_end_month), 'FY')]
+
+        is_stale = (reference - year_end).days > STALE_THRESHOLD_DAYS
+        warning = self._generate_warning(quarterly, period_facts, False, is_stale=is_stale,
+                                         window_end=year_end, reference_date=reference)
+        return TTMMetric(
+            concept=concept,
+            label=fy.label,
+            value=fy.numeric_value,
+            unit=fy.unit,
+            as_of_date=year_end,
+            periods=periods,
+            period_facts=period_facts,
+            has_gaps=False,
+            has_calculated_q4=False,
+            is_stale=is_stale,
+            warning=warning,
         )
 
     def quarterize(self) -> List[FinancialFact]:
@@ -226,6 +393,12 @@ class TTMCalculator:
 
         Derived facts have ``calculation_context`` set to the derivation method
         (e.g., 'derived_q4_fy_minus_ytd9').
+
+        Each quarter is the LATEST-filed fact for its period (a reported quarter,
+        or one derived from the latest-filed annual or year-to-date fact). Its
+        ``accession``, ``filing_date`` and ``fiscal_year`` are that filing's, so a
+        quarter repeated as a comparative carries the later filing's metadata, not
+        the filing that first reported it (GH #1699).
 
         Returns:
             Quarterly facts sorted by period_end descending.
@@ -250,6 +423,9 @@ class TTMCalculator:
             - fiscal_period: e.g., 'Q2'
             - yoy_growth: % change vs 4 quarters ago (None if insufficient data)
             - periods_included: List of quarters in this TTM window
+            - has_gaps: True if the window's quarters are not consecutive, so
+              ttm_value is not a twelve-month figure (same test as
+              `calculate_ttm`'s `has_gaps`, GH #1694)
 
         Raises:
             ValueError: If periods < 1 or > 100, or insufficient data
@@ -299,29 +475,20 @@ class TTMCalculator:
         total_available = len(sorted_facts) - 3  # Number of possible TTM windows
         num_to_calculate = min(periods, total_available)
 
-        # A share count or a rate is a level that persists, not a flow that
-        # accumulates, so the trailing-twelve-month figure is the window's average
-        # rather than its total (bead edgartools-djwu).
-        averaged = self._is_window_average_concept(sorted_facts[0]) if sorted_facts else False
-
-        def aggregate(window):
-            total = sum(q.numeric_value for q in window)
-            return total / len(window) if averaged and window else total
-
         # Calculate from most recent backwards
         for offset in range(num_to_calculate):
             i = len(sorted_facts) - 1 - offset
             # TTM window: quarters [i-3, i-2, i-1, i] (4 quarters)
             ttm_window = sorted_facts[i-3:i+1]
-            ttm_value = aggregate(ttm_window)
+            ttm_value = self._aggregate_window(ttm_window)
 
             # Calculate YoY growth (compare to TTM from 4 quarters ago)
             yoy_growth = None
-            if i >= 7:  # Need 8 total quarters for YoY comparison
+            if i >= 7 and ttm_value is not None:  # Need 8 total quarters for YoY comparison
                 prior_ttm_window = sorted_facts[i-7:i-3]
-                prior_ttm = aggregate(prior_ttm_window)
+                prior_ttm = self._aggregate_window(prior_ttm_window)
                 # Only calculate YoY for positive prior values (negative = losses)
-                if prior_ttm > 0:
+                if prior_ttm is not None and prior_ttm > 0:
                     yoy_growth = (ttm_value - prior_ttm) / prior_ttm
 
             # Build result row. Derive the label fiscal_year from period_end + FYE
@@ -341,7 +508,8 @@ class TTMCalculator:
                     (calculate_fiscal_year_for_label(q.period_end, fiscal_year_end_month),
                      q.fiscal_period)
                     for q in ttm_window
-                ]
+                ],
+                'has_gaps': self._check_for_gaps(ttm_window),
             })
 
         # 5. Convert to DataFrame (already in most-recent-first order)
@@ -465,6 +633,62 @@ class TTMCalculator:
 
         return filtered
 
+    def _aggregate_window(self, window: List[FinancialFact]) -> Optional[float]:
+        """Combine a TTM window's quarters into one trailing-twelve-month value.
+
+        A share count or a rate is a level that persists, not a flow that
+        accumulates, so its trailing-twelve-month figure is the window's average
+        rather than its total (bead edgartools-djwu). Both `calculate_ttm` and
+        `calculate_ttm_trend` aggregate through here so they cannot disagree
+        (GH #1698).
+
+        A per-share earnings amount (continuing or discontinued operations per
+        share) is a ratio for its own period, so quarters do not add up to the
+        year (ASC 260-10-55-50). Its value is the filed fiscal-year amount when
+        the window is a fiscal year, otherwise None (GH #1695).
+        """
+        if window and self._is_per_share_earnings_concept(window[0]):
+            return self._filed_fiscal_year_value(window)
+        total = sum(q.numeric_value for q in window)
+        if window and self._is_window_average_concept(window[0]):
+            return total / len(window)
+        return total
+
+    def _is_per_share_earnings_concept(self, fact: FinancialFact) -> bool:
+        """Is this a per-share (or per-unit) earnings amount (GH #1695)?
+
+        EarningsPerShare*, IncomeLossFromContinuingOperationsPerBasicShare,
+        the discontinued-operations and *PerBasicAndDilutedShare concepts, and
+        NetIncomeLossPerOutstandingLimitedPartnershipUnit* are ratios for their
+        own period. Dividends or distributions per share are flows and keep
+        summing. (The TTM statement computes its EPS rows from income and
+        shares, not through here.)
+        """
+        name = fact.concept.split(':')[-1].lower()
+        if 'dividend' in name or 'distribut' in name:
+            return False
+        if not ('earningspershare' in name
+                or ('incomeloss' in name and _PER_SHARE_EARNINGS_SUFFIX.search(name))):
+            return False
+        if not fact.unit:
+            return False
+        from edgar.entity.unit_handling import UnitNormalizer
+        unit = str(fact.unit).lower()
+        return (UnitNormalizer.normalize_unit(str(fact.unit)) in UnitNormalizer.PER_SHARE_MAPPINGS
+                or '/share' in unit or 'per share' in unit or '/unit' in unit or 'per unit' in unit)
+
+    def _filed_fiscal_year_value(self, window: List[FinancialFact]) -> Optional[float]:
+        """The latest-filed fiscal-year amount that spans exactly this window, if any."""
+        start, end = window[0].period_start, window[-1].period_end
+        if start is None or end is None:
+            return None
+        years = [f for f in self._filter_by_duration(DurationBucket.ANNUAL)
+                 if f.period_end == end and f.period_start and f.numeric_value is not None
+                 and abs((f.period_start - start).days) <= 7]
+        if not years:
+            return None
+        return max(years, key=lambda f: (self._form_tier(f.form_type or ''), f.filing_date or date.min)).numeric_value
+
     def _is_window_average_concept(self, fact: FinancialFact) -> bool:
         """Should this concept's TTM value be the window's average rather than its sum?
 
@@ -512,6 +736,8 @@ class TTMCalculator:
 
         Returns False for:
         - Instant facts (Assets, Equity) - point-in-time, not flows
+        - Concepts in NON_ADDITIVE_DURATION_CONCEPTS - monetary, but their
+          quarters do not add up to the year by definition (GH #1693)
         - Share counts (UnitType.SHARES) - not additive
         - Ratios/Rates (UnitType.RATIO) - averages, not sums
         - Per-share metrics (EPS) - derived from Income/Shares, shares change
@@ -526,7 +752,12 @@ class TTMCalculator:
             log.debug(f"Skipping derivation for {fact.concept}: instant period type")
             return False
 
-        # 2. Unit Type Check
+        # 2. Concept definition: some monetary flows do not add up over time
+        if fact.concept.split(':')[-1] in NON_ADDITIVE_DURATION_CONCEPTS:
+            log.debug(f"Skipping derivation for {fact.concept}: quarters do not add up to the year")
+            return False
+
+        # 3. Unit Type Check
         if not fact.unit:
             return True  # Assume additive if no unit (rare)
 
@@ -1083,7 +1314,7 @@ class TTMCalculator:
 
         """
         candidates = [q for q in quarters if q.period_end < before]
-        return max(candidates, key=lambda q: q.period_end) if candidates else None
+        return max(candidates, key=self._operand_rank) if candidates else None
 
     def _find_prior_ytd6(
         self,
@@ -1105,7 +1336,7 @@ class TTMCalculator:
 
         """
         candidates = [y for y in ytd_6m if y.period_end < before]
-        return max(candidates, key=lambda y: y.period_end) if candidates else None
+        return max(candidates, key=self._operand_rank) if candidates else None
 
     def _find_matching_ytd9(
         self,
@@ -1142,11 +1373,23 @@ class TTMCalculator:
             if y.period_start == period_start and y.period_end < before
         ]
         if candidates:
-            return max(candidates, key=lambda y: y.period_end)
+            return max(candidates, key=self._operand_rank)
 
         # Fallback: latest YTD_9M before the date
         candidates = [y for y in ytd_9m if y.period_end < before]
-        return max(candidates, key=lambda y: y.period_end) if candidates else None
+        return max(candidates, key=self._operand_rank) if candidates else None
+
+    def _operand_rank(self, fact: FinancialFact) -> tuple:
+        """Order derivation operands: latest period, then best source, then latest filing.
+
+        Two facts for the same period are the original and a recast (a later
+        filing restating it, for example after a disposal). Taking whichever was
+        listed first made a derived quarter depend on input order (GH #1675).
+        The latest filing is the one the annual fact it is paired with is most
+        likely restated to as well, and it matches `_deduplicate_by_period_end`,
+        which keeps the latest-filed annual fact's derived quarter.
+        """
+        return (fact.period_end, self._form_tier(fact.form_type or ''), fact.filing_date or date.min)
 
     def _create_derived_quarter(
         self,
@@ -1299,12 +1542,17 @@ class TTMCalculator:
             return False
 
         for i in range(len(quarters) - 1):
-            # Calculate gap between consecutive quarters
+            # Quarter ends ~91 days apart. A 52/53-week filer's long quarter is
+            # 16 or 17 weeks (Costco's Q4: 112 days), so up to 119 (GH #1694).
             gap = (quarters[i+1].period_end - quarters[i].period_end).days
+            if not (QUARTER_END_GAP_MIN_DAYS <= gap <= QUARTER_END_GAP_MAX_DAYS):
+                return True
 
-            # Expect ~90 days between consecutive quarters
-            # Allow 70-110 day range for calendar variations
-            if not (70 <= gap <= 110):
+        # Four consecutive quarters span a year: 52 or 53 weeks, or a calendar year.
+        first_start = quarters[0].period_start
+        if len(quarters) == 4 and first_start is not None:
+            span = (quarters[-1].period_end - first_start).days + 1
+            if not (WINDOW_SPAN_MIN_DAYS <= span <= WINDOW_SPAN_MAX_DAYS):
                 return True
 
         return False

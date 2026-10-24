@@ -1404,12 +1404,23 @@ def calculate_fiscal_year_for_label(period_end: date, fiscal_year_end_month: int
         >>> # Period ending Jan 1, 2023 for a Dec FYE company → FY2022
         >>> calculate_fiscal_year_for_label(date(2023, 1, 1), 12)
         2022
+
+        >>> # Costco (August FYE) year ending September 3, 2023 → FY2023
+        >>> calculate_fiscal_year_for_label(date(2023, 9, 3), 8)
+        2023
     """
     # Early January (Jan 1-7): Use prior year (52/53-week calendar convention)
     # Companies with 52/53-week calendars can have fiscal year end dates
     # fall in the first week of January (e.g., Jan 1 belongs to prior FY)
     if period_end.month == 1 and period_end.day <= 7:
         return period_end.year - 1
+
+    # The same drift for any fiscal year-end month: a 52/53-week year closes on
+    # the weekday nearest the month end, which can be a few days into the next
+    # month (Costco, August FYE: 2023-09-03; Home Depot, January FYE:
+    # 2026-02-01). That period closes the fiscal year, it does not open the next.
+    if period_end.month == fiscal_year_end_month % 12 + 1 and period_end.day <= 7:
+        return period_end.year
 
     # Fiscal year convention: if the period ends after the FYE month,
     # it belongs to the next fiscal year (which ends in FYE month of the following year)
