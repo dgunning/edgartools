@@ -68,6 +68,8 @@ def test_no_dates_sends_no_range(sent_params):
     assert not {"dateRange", "startdt", "enddt"} & set(params)
 
 
+# Stays network: the request carries enddt=tomorrow, so no recording would match it
+# on a later day, and the hit count it bounds grows with every new filing.
 @pytest.mark.network
 def test_start_date_alone_restricts_the_results():
     results = efts.search_filings("tariff", forms="10-K", start_date="2025-01-01")
@@ -78,7 +80,9 @@ def test_start_date_alone_restricts_the_results():
     assert results.total < 10_000
 
 
-@pytest.mark.network
+# Replayed: both bounds are fixed (startdt=2001-01-01, enddt=2003-12-31), so the
+# recorded request is the one the library sends. Recorded 2026-10-24.
+@pytest.mark.vcr
 def test_end_date_alone_restricts_the_results():
     results = efts.search_filings("tariff", forms="10-K", end_date="2003-12-31")
     late = [(r.company, r.filed) for r in results if str(r.filed) > "2003-12-31"]

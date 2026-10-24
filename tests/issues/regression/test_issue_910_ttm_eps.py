@@ -36,6 +36,17 @@ VALUE_COLUMNS_EXCLUDED = {
 }
 
 
+@pytest.fixture
+def vcr_cassette_name(request):
+    """One cassette per company: its submissions and company facts, recorded 2026-10-24.
+
+    The unparametrized tests all read GOOGL.
+    """
+    callspec = getattr(request.node, "callspec", None)
+    ticker = callspec.params["ticker"] if callspec else "GOOGL"
+    return f"test_issue_910_{ticker.lower()}_company_facts"
+
+
 def _period_columns(df: pd.DataFrame) -> list:
     return [c for c in df.columns if c not in VALUE_COLUMNS_EXCLUDED]
 
@@ -63,7 +74,7 @@ def test_per_share_detection_excludes_monetary_and_share_count_concepts():
     assert not _is_per_share_item({"concept": "InterestExpenseDeposits", "label": "Interest Expense, Deposits"})
 
 
-@pytest.mark.network
+@pytest.mark.vcr
 @pytest.mark.regression
 @pytest.mark.parametrize("ticker", ["GOOGL", "TSLA"])
 def test_ttm_eps_is_stable_across_period_counts(ticker):
@@ -91,7 +102,7 @@ def test_ttm_eps_is_stable_across_period_counts(ticker):
             )
 
 
-@pytest.mark.network
+@pytest.mark.vcr
 @pytest.mark.regression
 @pytest.mark.parametrize("ticker", ["GOOGL", "TSLA", "AAPL", "NVDA"])
 def test_ttm_eps_has_no_missing_periods(ticker):
@@ -105,7 +116,7 @@ def test_ttm_eps_has_no_missing_periods(ticker):
         assert not missing, f"{ticker}: {label} missing TTM values for {missing}"
 
 
-@pytest.mark.network
+@pytest.mark.vcr
 @pytest.mark.regression
 def test_ttm_eps_at_fiscal_year_end_matches_reported_annual_eps():
     """Ground truth: a TTM window ending on the fiscal year end covers exactly
@@ -127,7 +138,7 @@ def test_ttm_eps_at_fiscal_year_end_matches_reported_annual_eps():
     assert basic["Q2 2026"] == pytest.approx(20.14, rel=0.01)
 
 
-@pytest.mark.network
+@pytest.mark.vcr
 @pytest.mark.regression
 def test_ttm_console_output_keeps_per_share_precision():
     """EPS rendered as '$20' while the dataframe held 20.16. Per-share amounts
