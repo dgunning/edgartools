@@ -2151,6 +2151,7 @@ class EnhancedStatementBuilder:
             )
         else:
             # Process root nodes normally for other statements
+            tree_concepts = self._reachable_concepts(virtual_tree)
             for root_concept in virtual_tree.get('roots', []):
                 item = self._build_canonical_item(
                     root_concept,
@@ -2158,10 +2159,12 @@ class EnhancedStatementBuilder:
                     period_maps,
                     periods,
                     depth=0,
-                    statement_type=virtual_tree_key
+                    statement_type=virtual_tree_key,
+                    tree_concepts=tree_concepts
                 )
                 if item:
                     items.append(item)
+            self._merge_split_series(items, periods)
 
         # Collect both labels and concepts already present in the tree so the
         # orphan dedup at line ~2456 catches matches by either. Tracking only
@@ -2588,43 +2591,75 @@ class EnhancedStatementBuilder:
 
         return revenue_item
 
+    def _merge_split_series(self, items: List[MultiPeriodItem], periods: List[str]) -> None:
+        """Join rows of one normalized concept whose periods do not overlap.
+
+        A filer that moves from PaymentsOfDividendsCommonStock to
+        PaymentsOfDividends fills each tree node for some years only, so one
+        dividends series showed as two half rows. The first row in tree order
+        takes the other's periods and the other, when it has no children, is
+        dropped (GH #1674).
+        """
+        groups: Dict[str, List[Tuple[List[MultiPeriodItem], MultiPeriodItem]]] = {}
+
+        def walk(siblings):
+            for it in siblings:
+                if not it.is_abstract and it.concept:
+                    groups.setdefault(self._normalize_concept(it.concept), []).append((siblings, it))
+                walk(it.children)
+        walk(items)
+
+        for members in groups.values():
+            if len(members) < 2:
+                continue
+            _, keeper = members[0]
+            for siblings, other in members[1:]:
+                if other.children:
+                    continue
+                filled = {p for p in periods if keeper.values.get(p) is not None}
+                theirs = {p for p in periods if other.values.get(p) is not None}
+                if not theirs or not filled or filled & theirs:
+                    continue
+                for p in theirs:
+                    keeper.values[p] = other.values[p]
+                siblings.remove(other)
+
+    @staticmethod
+    def _reachable_concepts(virtual_tree: Dict[str, Any]) -> Set[str]:
+        """The concepts reached from the tree's roots, i.e. those built as rows."""
+        nodes = virtual_tree.get('nodes', {})
+        reached: Set[str] = set()
+        stack = list(virtual_tree.get('roots', []))
+        while stack:
+            concept = stack.pop()
+            if concept in reached:
+                continue
+            reached.add(concept)
+            stack.extend(nodes.get(concept, {}).get('children', []))
+        return reached
+
     def _build_canonical_item(self,
                              concept: str,
                              nodes: Dict[str, Any],
                              period_maps: Dict[str, Dict[str, FinancialFact]],
                              periods: List[str],
                              depth: int = 0,
-                             statement_type: Optional[str] = None) -> Optional[MultiPeriodItem]:
-        """Build a single canonical item with multi-period values."""
+                             statement_type: Optional[str] = None,
+                             tree_concepts: Optional[Set[str]] = None) -> Optional[MultiPeriodItem]:
+        """Build a single canonical item with multi-period values.
+
+        tree_concepts: concepts the tree renders as their own rows. A node whose
+        concept has no fact borrows the fact of a concept normalized to the same
+        name, unless that concept has its own row: JPM's dividends showed twice,
+        once on the PaymentsOfDividendsCommonStock row through the shared
+        DividendsPaid normalization and once on its own PaymentsOfDividends
+        row (GH #1674).
+        """
         node = nodes.get(concept, {})
+        tree_concepts = tree_concepts or set()
 
-        # Get values for each period
-        # Check both original concept and normalized version
-        values = {}
-        has_any_value = False
-        for period in periods:
-            # Try original concept first
-            fact = period_maps[period].get(concept)
-            # If not found, try normalized version
-            if not fact:
-                normalized = self._normalize_concept(concept)
-                fact = period_maps[period].get(normalized)
-
-            if fact:
-                values[period] = fact.numeric_value
-                has_any_value = True
-            else:
-                values[period] = None
-
-        # Get label from first fact or node
-        label = None
-        for period in periods:
-            fact = period_maps[period].get(concept)
-            if fact:
-                label = fact.label
-                break
-        if not label:
-            label = node.get('label', concept)
+        values, has_any_value = self._canonical_values(concept, period_maps, periods, tree_concepts)
+        label = self._canonical_label(concept, node, period_maps, periods)
 
         # Process children first to see if any have values
         children_items = []
@@ -2635,7 +2670,8 @@ class EnhancedStatementBuilder:
                 period_maps,
                 periods,
                 depth + 1,
-                statement_type=statement_type
+                statement_type=statement_type,
+                tree_concepts=tree_concepts
             )
             if child_item:
                 children_items.append(child_item)
@@ -2672,6 +2708,52 @@ class EnhancedStatementBuilder:
         )
 
         return item
+
+    def _canonical_values(self,
+                          concept: str,
+                          period_maps: Dict[str, Dict[str, FinancialFact]],
+                          periods: List[str],
+                          tree_concepts: Set[str]) -> Tuple[Dict[str, Any], bool]:
+        """A canonical item's value per period, and whether any period has one."""
+        # Get values for each period
+        # Check both original concept and normalized version
+        values = {}
+        has_any_value = False
+        for period in periods:
+            # Try original concept first
+            fact = period_maps[period].get(concept)
+            # If not found, try normalized version
+            if not fact:
+                normalized = self._normalize_concept(concept)
+                fact = period_maps[period].get(normalized)
+                if fact is not None:
+                    raw = fact.concept.split(':', 1)[-1]
+                    if raw != concept and raw in tree_concepts:
+                        fact = None
+
+            if fact:
+                values[period] = fact.numeric_value
+                has_any_value = True
+            else:
+                values[period] = None
+        return values, has_any_value
+
+    @staticmethod
+    def _canonical_label(concept: str,
+                         node: Dict[str, Any],
+                         period_maps: Dict[str, Dict[str, FinancialFact]],
+                         periods: List[str]) -> str:
+        """A canonical item's label: the first fact's, else the node's."""
+        # Get label from first fact or node
+        label = None
+        for period in periods:
+            fact = period_maps[period].get(concept)
+            if fact:
+                label = fact.label
+                break
+        if not label:
+            label = node.get('label', concept)
+        return label
 
     def _add_orphan_facts(self,
                          period_maps: Dict[str, Dict[str, FinancialFact]],
