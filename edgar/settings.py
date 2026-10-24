@@ -38,6 +38,8 @@ __all__ = [
     'get_identity',
     'identity_prompt',
     'limits',
+    'selective_attachment_download',
+    'selective_attachment_download_min_bytes',
     'set_identity',
 ]
 
@@ -65,6 +67,24 @@ class EdgarSettings:
 
 
 edgar_identity = 'EDGAR_IDENTITY'
+
+# A submission whose complete .txt is larger than this is "large": reading its XBRL
+# fetches only the XBRL files instead of the whole submission (edgartools-vk270.1).
+# Below it, one request for the .txt is faster than the ~8 requests for the parts.
+selective_attachment_download_min_bytes: int = 20_000_000
+
+_SELECTIVE_DOWNLOAD_ENV = 'EDGAR_SELECTIVE_ATTACHMENT_DOWNLOAD'
+_FALSE_VALUES = ('false', '0', 'no', 'off', 'n', 'f')
+
+
+def selective_attachment_download() -> bool:
+    """Whether a large filing downloads only the files a call needs.
+
+    On by default. Set ``EDGAR_SELECTIVE_ATTACHMENT_DOWNLOAD=false`` to
+    always download the complete submission .txt, as 5.x did. Read on every
+    call, so changing the variable takes effect without a re-import.
+    """
+    return os.environ.get(_SELECTIVE_DOWNLOAD_ENV, '').strip().lower() not in _FALSE_VALUES
 
 # Local storage directory - use centralized path configuration
 from edgar.paths import get_data_directory as _get_data_directory  # noqa: E402
