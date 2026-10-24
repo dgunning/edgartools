@@ -1,0 +1,278 @@
+{
+ "_comment": "Closed membership of each total standard concept (GH #1444): ReverseIndex.lookup() returns a concept listed here only for the gaap_mappings.json keys listed under it. Pinned by tests/issues/regression/test_issue_1444_total_membership.py.",
+ "totals": {
+  "AllEquityBalance": [
+   "AssetsNet",
+   "EquityAttributableToOwnersOfParent",
+   "StockholdersEquity",
+   "ifrs-full_EquityAttributableToOwnersOfParent"
+  ],
+  "AllEquityBalanceIncludingMinorityInterest": [
+   "Equity",
+   "LimitedLiabilityCompanyLlcMembersEquityIncludingPortionAttributableToNoncontrollingInterest",
+   "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+   "ifrs-full_Equity"
+  ],
+  "Assets": [
+   "Assets",
+   "ifrs-full_Assets",
+   "ifrs:Assets"
+  ],
+  "CashAndCashEquivalents": [
+   "CashAndBankBalancesAtCentralBanks",
+   "CashAndCashEquivalents",
+   "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+   "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations",
+   "ifrs-full_CashAndBankBalancesAtCentralBanks",
+   "ifrs-full_CashAndCashEquivalents"
+  ],
+  "CommonEquity": [
+   "MembersEquity",
+   "PartnersCapital",
+   "PartnersCapitalIncludingPortionAttributableToNoncontrollingInterest",
+   "StockholdersEquityBeforeTreasuryStock"
+  ],
+  "ComprehensiveIncomeNet": [
+   "ComprehensiveIncome",
+   "ComprehensiveIncomeAttributableToOwnersOfParent",
+   "ComprehensiveIncomeNetOfTax",
+   "ifrs-full_ComprehensiveIncome"
+  ],
+  "CostsSubtotal": [
+   "BenefitsLossesAndExpenses",
+   "CostsAndExpenses"
+  ],
+  "CurrentAssetsTotal": [
+   "AssetsCurrent",
+   "CurrentAssets",
+   "ifrs-full_CurrentAssets"
+  ],
+  "CurrentLiabilitiesTotal": [
+   "CurrentLiabilities",
+   "LiabilitiesCurrent",
+   "ifrs-full_CurrentLiabilities"
+  ],
+  "GrossProfit": [
+   "GrossProfit",
+   "ifrs-full_GrossProfit",
+   "ifrs:GrossProfit"
+  ],
+  "IncomeLossContinuingOperations": [
+   "IncomeLossFromContinuingOperations",
+   "IncomeLossFromContinuingOperationsIncludingPortionAttributableToNoncontrollingInterest",
+   "ProfitLossFromContinuingOperations",
+   "ifrs-full_ProfitLossFromContinuingOperations"
+  ],
+  "Liabilities": [
+   "Liabilities",
+   "ifrs-full_Liabilities",
+   "ifrs:Liabilities"
+  ],
+  "LiabilitiesAndEquity": [
+   "LiabilitiesAndStockholdersEquity",
+   "ifrs-full_LiabilitiesAndEquity"
+  ],
+  "NetCashFromFinancingActivities": [
+   "CashFlowsFromUsedInFinancingActivities",
+   "NetCashProvidedByUsedInFinancingActivities",
+   "NetCashProvidedByUsedInFinancingActivitiesContinuingOperations",
+   "ifrs-full_CashFlowsFromUsedInFinancingActivities"
+  ],
+  "NetCashFromInvestingActivities": [
+   "CashFlowsFromUsedInInvestingActivities",
+   "NetCashProvidedByUsedInInvestingActivities",
+   "NetCashProvidedByUsedInInvestingActivitiesContinuingOperations",
+   "ifrs-full_CashFlowsFromUsedInInvestingActivities"
+  ],
+  "NetCashFromOperatingActivities": [
+   "CashFlowsFromUsedInOperatingActivities",
+   "NetCashProvidedByUsedInOperatingActivities",
+   "NetCashProvidedByUsedInOperatingActivitiesContinuingOperations",
+   "ifrs-full_CashFlowsFromUsedInOperatingActivities"
+  ],
+  "NetChangeInCash": [
+   "CashAndCashEquivalentsPeriodIncreaseDecrease",
+   "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+   "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+   "IncreaseDecreaseInCashAndCashEquivalents",
+   "IncreaseDecreaseInCashAndCashEquivalentsBeforeEffectOfExchangeRateChanges",
+   "ifrs-full_IncreaseDecreaseInCashAndCashEquivalents"
+  ],
+  "NetIncome": [
+   "IncomeLossAttributableToParent",
+   "NetIncomeLoss",
+   "ProfitLossAttributableToOwnersOfParent",
+   "ifrs-full_ProfitLossAttributableToOwnersOfParent"
+  ],
+  "NetIncomeToCommonShareholders": [
+   "NetIncomeLossAvailableToCommonStockholdersBasic",
+   "NetIncomeLossFromContinuingOperationsAvailableToCommonShareholdersBasic"
+  ],
+  "NonCurrentAssetsTotal": [
+   "AssetsNoncurrent",
+   "NoncurrentAssets",
+   "ifrs-full_NoncurrentAssets",
+   "ifrs:NoncurrentAssets"
+  ],
+  "NonCurrentLiabilitiesTotal": [
+   "LiabilitiesNoncurrent",
+   "NoncurrentLiabilities",
+   "ifrs-full_NoncurrentLiabilities"
+  ],
+  "OperatingIncomeLoss": [
+   "OperatingIncomeLoss",
+   "OperatingProfit",
+   "ProfitLossFromOperatingActivities",
+   "ifrs-full_OperatingProfit",
+   "ifrs-full_ProfitLossFromOperatingActivities"
+  ],
+  "PretaxIncomeLoss": [
+   "IncomeLossFromContinuingOperationsBeforeIncomeTaxes",
+   "IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+   "IncomeLossFromContinuingOperationsBeforeIncomeTaxesMinorityInterestAndIncomeLossFromEquityMethodInvestments",
+   "ProfitLossBeforeTax",
+   "ifrs-full_ProfitLossBeforeTax"
+  ],
+  "ProfitLoss": [
+   "ProfitLoss",
+   "ifrs-full_ProfitLoss",
+   "ifrs:ProfitLoss"
+  ],
+  "Revenue": [
+   "AdmissionsRevenue",
+   "BinderSalesRevenue",
+   "BrokeredNaturalGasMarginRevenue",
+   "CapitalLeasesIncomeStatementDirectFinancingLeaseRevenue",
+   "CargoAndFreightRevenue",
+   "CasinoRevenue",
+   "ChemicalsRevenue",
+   "ClearingFeesRevenue",
+   "CoalProductsAndServicesRevenue",
+   "CompetitiveEnergyRevenue",
+   "ConcessionsRevenue",
+   "ConstructionMaterialsRevenue",
+   "ConstructionRevenue",
+   "ContractsRevenue",
+   "ElectricBundledRevenue",
+   "ElectricDomesticRegulatedRevenue",
+   "ElectricWorldwideUnregulatedRevenue",
+   "ElectricalDistributionRevenue",
+   "ElectricalGenerationRevenue",
+   "ElectricalTransmissionAndDistributionRevenue",
+   "ElectricalTransmissionRevenue",
+   "ExplorationAndProductionRevenue",
+   "FacilityMembershipAndOperationsRevenue",
+   "FeesAndCommissions",
+   "FoodAndBeverageRevenue",
+   "FractionationRevenue",
+   "FranchisorRevenue",
+   "GasDomesticRegulatedRevenue",
+   "GasGatheringTransportationMarketingAndProcessingRevenue",
+   "GeneralContractorRevenue",
+   "GoldProductsAndServicesRevenue",
+   "HealthCareOrganizationCapitationRevenue",
+   "HealthCareOrganizationOtherRevenue",
+   "HealthCareOrganizationPatientServiceRevenue",
+   "HealthCareOrganizationPremiumRevenue",
+   "HealthCareOrganizationResidentServiceRevenue",
+   "HomeBuildingRevenue",
+   "InitialFranchiseFees",
+   "InsuranceServicesRevenue",
+   "LandSales",
+   "LicensesRevenue",
+   "MaintenanceRevenue",
+   "ManagementFeesBaseRevenue",
+   "ManagementFeesIncentiveRevenue",
+   "MarineServicesRevenue",
+   "MembershipDuesRevenueOnGoing",
+   "NaturalGasMidstreamRevenue",
+   "NaturalGasProductionRevenue",
+   "NaturalGasStorageRevenue",
+   "NetInvestmentIncome",
+   "OccupancyRevenue",
+   "OilAndCondensateRevenue",
+   "OilAndGasSalesRevenue",
+   "OperatingLeaseLeaseIncomeLeasePayments",
+   "OperatingLeasesIncomeStatementContingentRevenue",
+   "OperatingLeasesIncomeStatementMinimumLeaseRevenue",
+   "OperatingLeasesIncomeStatementSubleaseRevenue",
+   "OtherAlternativeEnergySalesRevenue",
+   "OtherConstructionRevenue",
+   "OtherHotelOperatingRevenue",
+   "OtherOperatingIncome",
+   "OtherRealEstateRevenue",
+   "OtherSalesRevenueNet",
+   "ParkingRevenue",
+   "PassengerRevenue",
+   "PercentageRent",
+   "PremiumsEarnedNet",
+   "PremiumsEarnedNetOtherInsurance",
+   "PrincipalTransactionsRevenue",
+   "PropaneRevenue",
+   "RealEstateRevenueNet",
+   "RecyclingRevenue",
+   "RefiningAndMarketingRevenue",
+   "ReimbursementRevenue",
+   "ResearchAndDevelopmentArrangementContractToPerformForOthersCompensationEarned",
+   "RetailLandSalesImprovementRevenuePriorSales",
+   "RetailRevenue",
+   "Revenue",
+   "RevenueCoalServices",
+   "RevenueEnvironmentalRemediationServices",
+   "RevenueFromCollaborativeArrangementExcludingRevenueFromContractWithCustomer",
+   "RevenueFromContractWithCustomerExcludingAssessedTax",
+   "RevenueFromContractWithCustomerIncludingAssessedTax",
+   "RevenueFromContractsWithCustomers",
+   "RevenueFromEnrollmentAndRegistrationFeesExcludingHospitalityEnterprises",
+   "RevenueFromFranchisorOwnedOutlets",
+   "RevenueFromGrants",
+   "RevenueFromLeasedAndOwnedHotels",
+   "RevenueFromOwnedHotels",
+   "RevenueFromPurchasedOilAndGas",
+   "RevenueFromRelatedParties",
+   "RevenueMineralSales",
+   "RevenueNotFromContractWithCustomer",
+   "RevenueNotFromContractWithCustomerOther",
+   "RevenueOilAndGasServices",
+   "RevenueOtherFinancialServices",
+   "RevenueOtherManufacturedProducts",
+   "RevenueRecognitionMilestoneMethodRevenueRecognized",
+   "RevenueSteamProductsAndServices",
+   "Revenues",
+   "RoyaltyRevenueFromCoal",
+   "SalesOfOilAndGasProspects",
+   "SalesOfRealEstate",
+   "SalesRevenueEnergyServices",
+   "SalesRevenueFromEnergyCommoditiesAndServices",
+   "SalesRevenueGoodsGross",
+   "SalesRevenueGoodsNet",
+   "SalesRevenueNet",
+   "SalesRevenueServicesGross",
+   "SalesRevenueServicesNet",
+   "SecondaryProcessingRevenue",
+   "ShippingAndHandlingRevenue",
+   "SignageRevenue",
+   "SubscriptionRevenue",
+   "SyntheticFuelSalesRevenue",
+   "TimberRevenue",
+   "TimeShareRevenue",
+   "UtilityRevenue",
+   "VehicleTollRevenue",
+   "ifrs-full_Revenue",
+   "ifrs-full_RevenueFromContractsWithCustomers"
+  ],
+  "TotalDeposits": [
+   "Deposits"
+  ],
+  "TotalInterestIncomeOperating": [
+   "InterestAndDividendIncomeOperating",
+   "InterestIncomeOperating"
+  ],
+  "TotalOperatingExpenses": [
+   "OperatingCostsAndExpenses",
+   "OperatingExpense",
+   "OperatingExpenses",
+   "ifrs-full_OperatingExpense"
+  ]
+ }
+}
