@@ -315,4 +315,4 @@ footnotes = parser.footnotes  # Ready to use!
 
 ---
 
-*This feature was implemented to support the XBRL 2.1 specification for footnotes and is compatible with all standard SEC XBRL filings.*
+*This feature supports embedded XBRL footnote resources and fact associations in instance documents. The APIs above expose the text, relationships, and metadata retained by the parser.*
