@@ -18,7 +18,9 @@ sign, and an optional fraction. ``Decimal`` also accepts an exponent
 (``1E-300000``), an underscore (``1_0``), and non-ASCII digits. Those stay
 in slash form with ``numeric_value`` unset. The exponent is rejected before
 any arithmetic, because ``1/1E-300000`` would otherwise scale a coefficient
-by ``10 ** 300000``.
+by ``10 ** 300000``. A plain decimal longer than 10000 characters keeps
+the slash form too. ``2**6200`` is 1867 digits and still divides;
+``0.`` followed by 300,000 zeros and a ``1`` does not.
 
 Real filing: Apple Inc. FY2023 Form 10-K, accession 0000320193-23-000106,
 instance ``aapl-20230930_htm.xml``. SEC full-text search for
@@ -418,6 +420,29 @@ def test_operands_outside_the_xsd_decimal_lexical_space_keep_the_slash_form():
     assert arabic.value == f"{arabic_one}/1"
     assert arabic.numeric_value is None
     assert arabic.decimals is None
+
+
+def test_long_plain_decimal_operand_keeps_the_slash_form():
+    """``0.`` and 300,000 zeros then ``1`` is legal xsd:decimal, and too long.
+
+    The scale is the text length. Dividing it used to take about 29 seconds
+    and produce a 300,002-digit integer. The operand cap rejects it before
+    any arithmetic, so the fact stays in slash form.
+    """
+    den = "0." + "0" * 300_000 + "1"
+    started = time.perf_counter()
+    facts = _with_facts(f"""
+  <my:longDecimal contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1</xbrli:numerator>
+    <xbrli:denominator>{den}</xbrli:denominator>
+  </my:longDecimal>
+""")
+    elapsed = time.perf_counter() - started
+    assert elapsed < 1
+    fact = facts["my_longDecimal|C1"]
+    assert fact.value == f"1/{den}"
+    assert fact.numeric_value is None
+    assert fact.decimals is None
 
 
 # Apple Inc. FY2023 Form 10-K. Ordinary-fact control: this instance has no

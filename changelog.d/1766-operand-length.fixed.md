@@ -1,0 +1,1 @@
+**A long plain-decimal XBRL fraction could stall parsing.** `0.` followed by 300,000 zeros and a `1` is legal xsd:decimal; dividing it took 29.4 seconds and stored a 300,002-digit integer. Operands longer than 10,000 characters now stay in slash form with no numeric value. (GH #1766)

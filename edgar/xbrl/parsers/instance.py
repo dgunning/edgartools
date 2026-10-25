@@ -8,7 +8,7 @@ units, footnotes, and entity information extraction.
 import math
 import re
 from datetime import datetime
-from decimal import MAX_EMAX, MIN_EMIN, ROUND_HALF_EVEN, Decimal, InvalidOperation, localcontext
+from decimal import MAX_EMAX, MIN_EMIN, ROUND_HALF_EVEN, Decimal, Inexact, InvalidOperation, localcontext
 from decimal import Context as DecimalContext
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
@@ -133,88 +133,17 @@ def _decimal_context(prec: int) -> DecimalContext:
     )
 
 
-def _coefficient(value: Decimal) -> tuple[int, int]:
-    """Integer coefficient and base-10 exponent of a finite ``Decimal``."""
-    sign, digits, exponent = value.as_tuple()
-    coefficient = 0
-    for digit in digits:
-        coefficient = coefficient * 10 + digit
-    if sign:
-        coefficient = -coefficient
-    return coefficient, exponent
-
-
-def _decimal_digit_count(number: int) -> int:
-    """Decimal digits of a non-negative int, without converting it to a string.
-
-    ``str`` of an int longer than the default 4300 digits raises ``ValueError``.
-    ``1/2**6200`` has a 4334-digit significand, so that conversion cannot be
-    the way the count is computed.
-    """
-    if number == 0:
-        return 1
-    # floor(log10(number)) + 1, from log2, then corrected against a power of
-    # ten. The log uses this context so the caller's precision cannot move it.
-    log_ctx = _decimal_context(50)
-    log10_2 = log_ctx.divide(log_ctx.ln(Decimal(2)), log_ctx.ln(Decimal(10)))
-    scaled = log_ctx.multiply(Decimal(number.bit_length() - 1), log10_2)
-    estimate = int(scaled) + 1
-    while 10 ** estimate <= number:
-        estimate += 1
-    while estimate > 1 and 10 ** (estimate - 1) > number:
-        estimate -= 1
-    return estimate
-
-
-def _exact_terminating_digits(numerator: Decimal, denominator: Decimal) -> Optional[int]:
-    """Significant digits of an exact quotient, or None when it does not terminate.
-
-    A reduced fraction terminates exactly when the denominator is ``2^a * 5^b``.
-    The digit count is the length of that significand after factors of ten are
-    folded into the exponent.
-    """
-    numerator_coeff, numerator_exp = _coefficient(numerator)
-    denominator_coeff, denominator_exp = _coefficient(denominator)
-    numerator_coeff = abs(numerator_coeff)
-    denominator_coeff = abs(denominator_coeff)
-    if denominator_coeff == 0:
-        return None
-    common = math.gcd(numerator_coeff, denominator_coeff)
-    numerator_coeff //= common
-    denominator_coeff //= common
-    shift = numerator_exp - denominator_exp
-    if shift > 0:
-        numerator_coeff *= 10 ** shift
-    elif shift < 0:
-        denominator_coeff *= 10 ** (-shift)
-    common = math.gcd(numerator_coeff, denominator_coeff)
-    numerator_coeff //= common
-    denominator_coeff //= common
-    twos = 0
-    while denominator_coeff % 2 == 0:
-        denominator_coeff //= 2
-        twos += 1
-    fives = 0
-    while denominator_coeff % 5 == 0:
-        denominator_coeff //= 5
-        fives += 1
-    if denominator_coeff != 1:
-        return None
-    coefficient = numerator_coeff
-    coefficient *= 1 << max(fives - twos, 0)
-    coefficient *= 5 ** max(twos - fives, 0)
-    if coefficient == 0:
-        return 1
-    while coefficient % 10 == 0:
-        coefficient //= 10
-    return _decimal_digit_count(coefficient)
-
-
 # XML Schema Part 2, the decimal lexical space. ASCII digits only, so a
 # non-ASCII digit such as Arabic-Indic one is rejected. ``Decimal`` accepts
 # those, and it also accepts an exponent and underscores. This production
 # does not.
-_XSD_DECIMAL_RE = re.compile(r'[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)')
+_XSD_DECIMAL_RE = re.compile(r'[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)')
+
+# Real filings use a few dozen digits. The exactness regressions go further
+# (``2**6200`` is 1867 digits, ``10**400`` is 401) and still have to divide.
+# Past this, a plain decimal such as ``0.`` and 300_000 zeros then ``1`` is
+# legal xsd:decimal whose scale is the length of the text.
+_MAX_FRACTION_OPERAND_CHARS = 10000
 
 
 def _is_xsd_decimal(text: str) -> bool:
@@ -245,17 +174,19 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], 
     (a zero denominator, or a non-decimal) leaves the numeric value unset and
     keeps the two parts separated by ``/``. A non-decimal includes anything
     outside the xsd:decimal lexical space. ``Decimal`` would accept an
-    exponent, an underscore, or a non-ASCII digit, and a negative exponent
-    then scales a coefficient by ``10`` to that power. Surrounding whitespace
-    is stripped first, so ``  2 `` / `` 4 `` is still one half. A nil fact,
-    or a nil numerator or denominator, is an absent value.
+    exponent, an underscore, or a non-ASCII digit. Surrounding whitespace
+    is stripped first, so ``  2 `` / `` 4 `` is still one half. An operand
+    longer than 10000 characters keeps the slash form too. A nil fact, or a
+    nil numerator or denominator, is an absent value.
 
-    A terminating quotient (denominator ``2^a * 5^b`` in lowest terms) is
-    stored in full. ``1/2**100`` needs 70 significant digits; 50 would drop
-    the tail and still be marked INF. A non-terminating quotient is rounded
-    half-even to at least 50 significant digits, or to the operands' own
-    digit count when that is larger. ``1/3`` is therefore fifty 3s, not an
-    infinite expansion and not the ROUND_UP spelling that ends in 4.
+    A terminating quotient is stored in full. One division at
+    ``sig(n) + 4*sig(d) + 1`` digits is enough, because
+    ``log2(d) < 3.33 * digits(d)``. ``1/2**100`` needs 70 significant digits;
+    50 would drop the tail and still be marked INF. If that division sets
+    ``Inexact``, the quotient recurs and is rounded half-even to at least 50
+    significant digits, or to the operands' own digit count when that is
+    larger. ``1/3`` is therefore fifty 3s, not an infinite expansion and not
+    the ROUND_UP spelling that ends in 4.
     """
     numerator = _xbrli_child(element, 'numerator')
     denominator = _xbrli_child(element, 'denominator')
@@ -270,10 +201,15 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], 
     if not num_text or not den_text:
         return '', None, False
     slash = f'{num_text}/{den_text}'
-    # Before any Decimal arithmetic. ``Decimal`` accepts ``1E-300000``,
-    # ``1_0`` and non-ASCII digits, and a negative exponent then makes
-    # ``_exact_terminating_digits`` build ``10 ** n`` for that exponent.
+    # Before any Decimal arithmetic. ``Decimal`` accepts an exponent,
+    # underscores and non-ASCII digits, none of which are xsd:decimal.
+    # A long plain decimal is legal and its scale is the text length.
     if not _is_xsd_decimal(num_text) or not _is_xsd_decimal(den_text):
+        return slash, None, False
+    if (
+        len(num_text) > _MAX_FRACTION_OPERAND_CHARS
+        or len(den_text) > _MAX_FRACTION_OPERAND_CHARS
+    ):
         return slash, None, False
     try:
         # String construction is exact, so prec here does not round the
@@ -289,13 +225,16 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], 
             )
         if invalid:
             return slash, None, False
-        exact = _exact_terminating_digits(numerator_value, denominator_value)
-        if exact is None:
-            # Terminating quotients are exact; recurring ones are rounded half-even to 50 significant digits. decimals stays INF.
-            prec = max(50, _significant_digits(num_text) + _significant_digits(den_text))
-        else:
-            prec = exact
-        quotient = _decimal_context(prec).divide(numerator_value, denominator_value)
+        # Terminating n/d fits in sig(n) + 4*sig(d) + 1 digits. Inexact means
+        # it recurs, so round half-even to the 50-digit rule. decimals stays INF.
+        sig_n = _significant_digits(num_text)
+        sig_d = _significant_digits(den_text)
+        ctx = _decimal_context(max(50, sig_n + 4 * sig_d + 1))
+        quotient = ctx.divide(numerator_value, denominator_value)
+        if ctx.flags[Inexact]:
+            quotient = _decimal_context(max(50, sig_n + sig_d)).divide(
+                numerator_value, denominator_value
+            )
     except (InvalidOperation, ZeroDivisionError, ValueError, TypeError):
         return slash, None, False
     if not quotient.is_finite():
