@@ -154,7 +154,13 @@ jobs:
     # tests and the few marked neither fast nor network.
     - name: Run regression tests
       run: |
-        pytest --cov --cov-report=xml -m 'regression and not fast' --enable-cache
+        # No coverage on pull requests: the Codecov upload below skips them, so
+        # it would be computed and thrown away (edgartools-07lk.26 step B).
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          pytest -m 'regression and not fast' --enable-cache
+        else
+          pytest --cov --cov-report=xml -m 'regression and not fast' --enable-cache
+        fi
 
     # `always()`: a run that failed still warmed the cache, and the next one
     # should not pay for those downloads again.
