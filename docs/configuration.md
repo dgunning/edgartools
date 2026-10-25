@@ -63,6 +63,27 @@ export EDGAR_RATE_LIMIT_PER_SEC="5"
 export EDGAR_HTTP_TIMEOUT="25"
 ```
 
+#### EDGAR_SELECTIVE_ATTACHMENT_DOWNLOAD
+Controls whether `filing.xbrl()` (and so `get_financials()`) downloads only the XBRL
+files of a large filing. On by default.
+
+A filing's complete submission holds every exhibit, image and PDF. When a 10-K, 10-Q,
+20-F or 40-F (or an amendment) lists a submission larger than 20 MB on its index page,
+edgartools fetches that index page, the XBRL files and `FilingSummary.xml` instead of
+the whole submission. VALE's FY2025 20-F drops from 101.4 MB to 0.76 MB over the wire,
+and the statements are identical. Smaller filings and other forms keep the single
+download they always had.
+
+```bash
+# Always download the complete submission, as 5.x did
+export EDGAR_SELECTIVE_ATTACHMENT_DOWNLOAD="false"
+```
+
+One trade-off: if you call `filing.xbrl()` and then `filing.html()` or `filing.text()`
+on the same large filing, the second call still downloads the full submission. Turn
+the setting off if you always read both. Filings read from local storage
+(`EDGAR_USE_LOCAL_DATA`) are unaffected.
+
 ### Local Data Storage
 
 #### EDGAR_USE_LOCAL_DATA

@@ -255,6 +255,110 @@ def _follows_disclosure_family(role_def: str, family_key: Tuple[str, ...],
     return stem_key is not None and stem_declares_disclosure[stem_key]
 
 
+_XBRL_DOCUMENT_KINDS = ('schema', 'label', 'presentation', 'calculation', 'definition', 'instance')
+# Forms whose submissions are checked for size before reading their XBRL. The check
+# costs one index-page request, so it is limited to the annual and quarterly reports
+# that get_financials() reads and that carry the large submissions; every other form
+# keeps its single request for the .txt.
+_SELECTIVE_DOWNLOAD_FORMS = frozenset({'10-K', '10-KT', '10-Q', '10-QT', '20-F', '40-F'})
+_HOMEPAGE_SIC = re.compile(r'SIC:\s*(\d+)')
+
+
+class _SelectiveXBRLSources:
+    """The XBRL files of a large filing, fetched one by one instead of in the submission .txt."""
+
+    def __init__(self, attachments: 'XBRLAttachments', period_of_report: str,
+                 sic: Optional[str], filing_summary):
+        self.attachments = attachments
+        self.period_of_report = period_of_report
+        self.sic = sic
+        self.filing_summary = filing_summary
+
+
+def _submission_size(homepage, accession_no: str) -> Optional[int]:
+    """Bytes in the complete submission .txt, as the filing index page lists it."""
+    for attachment in homepage.attachments:
+        if attachment.document == f"{accession_no}.txt":
+            try:
+                return int(attachment.size)
+            except (TypeError, ValueError):
+                return None
+    return None
+
+
+def _selective_xbrl_sources(filing) -> Optional[_SelectiveXBRLSources]:
+    """The XBRL files of a large filing fetched individually, or None to read the whole submission.
+
+    A large submission is mostly exhibits, images and PDFs: VALE's FY2025 20-F is
+    169.5 MB, and its XBRL files are 0.76 MB of what goes over the wire. This
+    fetches the filing index page, then only the XBRL files and FilingSummary.xml,
+    and takes the period of report and SIC from the index page (edgartools-vk270.1).
+
+    None keeps today's path: the setting is off, the form is not an annual or
+    quarterly report, the submission is already loaded
+    or comes from local storage or datamule, it is at or below
+    ``selective_attachment_download_min_bytes``, or anything here fails. That path reads the
+    whole submission and reports any real error itself.
+    """
+    from edgar.settings import selective_attachment_download, selective_attachment_download_min_bytes
+    from edgar.storage import is_using_local_storage
+    from edgar.storage.datamule import is_using_datamule_storage
+
+    if not selective_attachment_download():
+        return None
+    form = (getattr(filing, 'form', None) or '').upper().removesuffix('/A')
+    if form not in _SELECTIVE_DOWNLOAD_FORMS:
+        return None
+    if getattr(filing, '_sgml', None) is not None:
+        return None
+    if is_using_local_storage() or is_using_datamule_storage():
+        return None
+    try:
+        homepage = filing.homepage
+        size = _submission_size(homepage, filing.accession_no)
+        if size is None or size <= selective_attachment_download_min_bytes:
+            return None
+        period_of_report = homepage.period_of_report
+        if not period_of_report:
+            return None
+        attachments = XBRLAttachments(homepage.attachments)
+        if not attachments.has_instance_document:
+            return None
+        attachments.prefetch()
+        sic = None
+        filers = homepage.get_filers()
+        if filers:
+            match = _HOMEPAGE_SIC.search(filers[0].identification or '')
+            sic = match.group(1) if match else None
+        filing_summary = _download_filing_summary(homepage.url)
+    except Exception as e:
+        log.debug("Reading the whole submission for %s; selective XBRL download unavailable: %s",
+                  getattr(filing, 'accession_no', '<unknown filing>'), e)
+        return None
+    return _SelectiveXBRLSources(attachments, period_of_report, sic, filing_summary)
+
+
+def _download_filing_summary(homepage_url: str):
+    """FilingSummary.xml from the filing folder, or None when it is missing or unreadable.
+
+    Its categories are optional: from_filing skips them on any failure.
+    """
+    from edgar.httprequests import download_file
+    from edgar.sgml.filing_summary import FilingSummary
+    try:
+        content = download_file(f"{homepage_url.rsplit('/', 1)[0]}/FilingSummary.xml")
+        if isinstance(content, bytes):
+            content = content.decode('utf-8', errors='replace')
+        if not content:
+            return None
+        filing_summary = FilingSummary.parse(content)
+        filing_summary.reports._filing_summary = filing_summary
+        return filing_summary
+    except Exception as e:
+        log.debug("No FilingSummary.xml at %s: %s", homepage_url, e)
+        return None
+
+
 def _capture_sgml_period_of_report(xbrl: "XBRL", filing) -> None:
     """Record the filing header's period_of_report on `xbrl`, or say why not.
 
@@ -379,6 +483,10 @@ class XBRLAttachments:
 
     def __init__(self, attachments: Attachments):
         self._documents = dict()
+        # The instance is read here to recognise it; keep that text so parsing
+        # does not read it again. An attachment without an in-memory SGML copy
+        # downloads on every .content access (edgartools-vk270.1).
+        self._contents = dict()
         if attachments.data_files:
             for attachment in attachments.data_files:
                 if attachment.document_type in ["XML", 'EX-101.INS'] and attachment.extension.endswith(
@@ -386,6 +494,7 @@ class XBRLAttachments:
                     content = attachment.content
                     if content and '<xbrl' in content[:2000]:
                         self._documents['instance'] = attachment
+                        self._contents['instance'] = content
                 elif attachment.document_type == 'EX-101.SCH':
                     self._documents['schema'] = attachment
                 elif attachment.document_type == 'EX-101.DEF':
@@ -411,6 +520,19 @@ class XBRLAttachments:
 
     def get(self, doc_type: str):
         return self._documents.get(doc_type)
+
+    def content(self, doc_type: str):
+        """The text of one XBRL document, or None when the filing has none of that type."""
+        if doc_type in self._contents:
+            return self._contents[doc_type]
+        attachment = self._documents.get(doc_type)
+        return attachment.content if attachment is not None else None
+
+    def prefetch(self) -> None:
+        """Read every XBRL document now, so a failed download surfaces before parsing starts."""
+        for doc_type in self._documents:
+            if doc_type not in self._contents:
+                self._contents[doc_type] = self._documents[doc_type].content
 
     def __rich__(self):
         table = Table(Column("Type"),
@@ -1030,7 +1152,10 @@ class XBRL:
 
         xbrl = cls()
 
-        xbrl_attachments = XBRLAttachments(filing.attachments)
+        # A large submission is mostly exhibits and PDFs; fetch just its XBRL files
+        # when that is possible, else read the whole submission (edgartools-vk270.1).
+        selective = _selective_xbrl_sources(filing)
+        xbrl_attachments = selective.attachments if selective else XBRLAttachments(filing.attachments)
 
         if xbrl_attachments.empty:
             # Silent on purpose. `filing.xbrl()` answering None for a filing
@@ -1043,22 +1168,22 @@ class XBRL:
             return None
 
         if xbrl_attachments.get('schema'):
-            xbrl.parser.parse_schema_content(xbrl_attachments.get('schema').content)
+            xbrl.parser.parse_schema_content(xbrl_attachments.content('schema'))
 
         if xbrl_attachments.get('label'):
-            xbrl.parser.parse_labels_content(xbrl_attachments.get('label').content)
+            xbrl.parser.parse_labels_content(xbrl_attachments.content('label'))
 
         if xbrl_attachments.get('presentation'):
-            xbrl.parser.parse_presentation_content(xbrl_attachments.get('presentation').content)
+            xbrl.parser.parse_presentation_content(xbrl_attachments.content('presentation'))
 
         if xbrl_attachments.get('calculation'):
-            xbrl.parser.parse_calculation_content(xbrl_attachments.get('calculation').content)
+            xbrl.parser.parse_calculation_content(xbrl_attachments.content('calculation'))
 
         if xbrl_attachments.get('definition'):
-            xbrl.parser.parse_definition_content(xbrl_attachments.get('definition').content)
+            xbrl.parser.parse_definition_content(xbrl_attachments.content('definition'))
 
         if xbrl_attachments.get('instance'):
-            xbrl.parser.parse_instance_content(xbrl_attachments.get('instance').content)
+            xbrl.parser.parse_instance_content(xbrl_attachments.content('instance'))
         elif not xbrl_attachments.empty:
             # Filing bundle is in local storage AND has linkbases, but the XBRL
             # instance document itself is missing. This is typical for iXBRL filings
@@ -1090,12 +1215,20 @@ class XBRL:
                     f"the filing — entity info and facts will be empty."
                 )
 
-        # Capture SGML period_of_report for date discrepancy detection.
-        _capture_sgml_period_of_report(xbrl, filing)
+        # Capture SGML period_of_report for date discrepancy detection. The
+        # selective path takes it from the index page: filing.period_of_report
+        # would load the whole submission.
+        if selective:
+            xbrl._sgml_period_of_report = selective.period_of_report
+        else:
+            _capture_sgml_period_of_report(xbrl, filing)
 
         # Try to set industry from filing header SIC for industry-specific standardization
         try:
-            if hasattr(filing, '_sgml') and filing._sgml is not None:
+            if selective:
+                if selective.sic:
+                    xbrl.standardization.set_industry_from_sic(selective.sic)
+            elif hasattr(filing, '_sgml') and filing._sgml is not None:
                 # Only use SIC if header is already loaded (no extra network call)
                 header = filing._sgml.header
                 if header and header.filers:
@@ -1110,27 +1243,30 @@ class XBRL:
                 e,
             )
 
-        # Load authoritative categories from FilingSummary.xml
-        # SGML is already loaded from filing.attachments above, so this is zero-cost
+        # Load authoritative categories from FilingSummary.xml. On today's path the
+        # SGML is already loaded from filing.attachments above, so this is zero-cost;
+        # the selective path fetched FilingSummary.xml on its own.
         try:
-            sgml = filing.sgml()
-            if sgml:
-                filing_summary = sgml.filing_summary
-                if filing_summary:
-                    _MENU_CATEGORY_TO_CLASSIFICATION = {
-                        'Notes': 'note',
-                        'Tables': 'note',
-                        'Policies': 'note',
-                        'Details': 'disclosure',
-                        'Cover': 'document',
-                    }
-                    for report in filing_summary.reports:
-                        if report.role and report.menu_category:
-                            classification = _MENU_CATEGORY_TO_CLASSIFICATION.get(report.menu_category)
-                            if classification:
-                                xbrl._filing_summary_categories[report.role] = classification
-                            xbrl._filing_summary_menu_categories[report.role] = report.menu_category
-                    xbrl._filing_summary = filing_summary
+            if selective:
+                filing_summary = selective.filing_summary
+            else:
+                sgml = filing.sgml()
+                filing_summary = sgml.filing_summary if sgml else None
+            if filing_summary:
+                _MENU_CATEGORY_TO_CLASSIFICATION = {
+                    'Notes': 'note',
+                    'Tables': 'note',
+                    'Policies': 'note',
+                    'Details': 'disclosure',
+                    'Cover': 'document',
+                }
+                for report in filing_summary.reports:
+                    if report.role and report.menu_category:
+                        classification = _MENU_CATEGORY_TO_CLASSIFICATION.get(report.menu_category)
+                        if classification:
+                            xbrl._filing_summary_categories[report.role] = classification
+                        xbrl._filing_summary_menu_categories[report.role] = report.menu_category
+                xbrl._filing_summary = filing_summary
         except Exception:
             pass
 
