@@ -1,0 +1,1 @@
+**Stitched fact DataFrames respect changed period filters.** After converting a GBDC-backed two-period query, raising `across_periods()` to three could return two cached rows although execution returned none. The stitched cache key now includes minimum-period and completeness settings.

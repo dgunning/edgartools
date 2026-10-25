@@ -655,18 +655,22 @@ class StitchedFactQuery(FactQuery):
         return df
 
     def _df_cache_key(self, columns: tuple) -> tuple:
-        """The base key plus the stitching configuration.
+        """The base key plus stitched population and period-filter options.
 
         execute() here passes max_periods, standard and statement_types to
         get_facts(), so two queries identical in filters but differing in these
         return different populations. They are constructor kwargs rather than
         fluent setters, so they cannot change mid-object today — they are in the
         key so that stops being something the cache silently depends on.
+        Period filters can change the population after a frame has been cached.
         """
         return super()._df_cache_key(columns) + (
             self._max_periods,
             self._standard,
             tuple(self._statement_types) if isinstance(self._statement_types, list) else self._statement_types,
+            self._cross_period_only,
+            getattr(self, '_min_periods', 2) if self._cross_period_only else None,
+            self._require_all_periods,
         )
 
     def to_dataframe(self, *columns) -> pd.DataFrame:
