@@ -206,7 +206,16 @@ jobs:
         # fast or network by measurement, and the 934 offline ones gate here.
         # The network half still runs only in the Regression Tests workflow —
         # PRs must not hammer the SEC endpoint.
-        pytest -n auto --cov --cov-report=xml -m 'fast'
+        #
+        # Coverage only where it is read. A pull request never uploads it (the
+        # upload below and the Combine Coverage job with its 65% floor run on
+        # push), and --cov with branch coverage doubles this step: 273 s vs 577 s
+        # locally at 4 workers (edgartools-07lk.26 step B).
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          pytest -n auto -m 'fast'
+        else
+          pytest -n auto --cov --cov-report=xml -m 'fast'
+        fi
 
     - name: Upload coverage data
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
