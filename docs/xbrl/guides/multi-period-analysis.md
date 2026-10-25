@@ -684,6 +684,11 @@ against the periods remaining after the ordinary filters and any `across_periods
 filter, before sorting and limiting; it does not require every period present in
 every underlying filing.
 
+`sort_by()` orders only the current query's result list; it does not reorder the
+stitched owner's cached rows. Other queries, including unsorted `limit()` queries,
+keep the owner's original order. Sorting preserves the existing row dictionaries;
+it does not return independent copies of each row.
+
 ### Trend Analysis
 
 ```python

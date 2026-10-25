@@ -574,8 +574,8 @@ class StitchedFactQuery(FactQuery):
         # Apply sorting if specified
         sort_by = self._sort_by
         if results and sort_by and sort_by in results[0]:
-            results.sort(key=lambda f: f.get(sort_by, ''),
-                         reverse=not self._sort_ascending)
+            results = sorted(results, key=lambda f: f.get(sort_by, ''),
+                             reverse=not self._sort_ascending)
 
         # Apply limit if specified
         if self._limit is not None:
