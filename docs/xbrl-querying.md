@@ -102,6 +102,35 @@ range_query = xb.query().by_value(lambda x: 100_000 <= x <= 1_000_000)
 ```
 
 
+### By Period Keys
+
+`by_period_keys()` captures the supplied keys when you call it. Appending,
+removing or clearing items in your list later does not change that query's
+selection, even if you have not executed the query yet. This applies to both
+ordinary and stitched XBRL fact queries.
+
+```python
+period_keys = ["duration_2024-10-01_2025-03-31"]
+query = xb.query().by_period_keys(period_keys)
+
+period_keys.append("duration_2023-10-01_2024-03-31")
+original_selection = query.to_dataframe()  # Still selects the first period
+updated_selection = xb.query().by_period_keys(period_keys).to_dataframe()
+```
+
+Create a new query to use the edited selection. Calling `by_period_keys()`
+again on the same query adds an AND constraint: a fact must satisfy both
+selections. An empty list selects no facts, and duplicate keys do not duplicate
+results or change their order. This capture rule applies to the built-in
+period-list filter; custom predicates retain their own callable behavior.
+
+Earlier implementations retained the caller's list without specifying when
+the selection was captured. Editing the list could change `execute()` while
+a cached DataFrame kept the previous selection. If your code used list edits
+to update an existing query, create a new query as shown above. Clearing an
+ordinary query's owner refreshes its source data while preserving the period
+keys captured by that query.
+
 ### By Statement Type
 
 ```python
@@ -163,6 +192,38 @@ full_df = query.to_dataframe()
 # Column information
 print("Available columns:", df.columns.tolist())
 ```
+
+### Refreshing cached query results
+
+Ordinary and stitched queries share a cache lifecycle. Each cached conversion
+belongs to the query's current configuration and requested columns; stitched
+queries also include their period-filter settings. Returning to an earlier
+configuration may reuse its cached DataFrame.
+
+An ordinary `FactsView` caches enriched rows and its full DataFrame. It also owns
+a cache generation, advanced by an explicit `clear_cache()` call. Call that method
+on the query's own view when you need it to read updated data. Existing queries
+bound to that view discard all prior-generation frames, including other column
+projections, on the next `to_dataframe()` or `to_pandas()` call:
+
+```python
+view = xbrl.facts
+query = view.query().by_concept("us-gaap:InterestPaidNet", exact=True)
+earlier = query.to_dataframe()
+
+# After updating the underlying data, explicitly clear this view.
+view.clear_cache()
+current = query.to_dataframe()
+```
+
+Clearing does not rewrite `earlier` or clear a separately constructed view, and
+does not automatically refresh all XBRL statements or metadata. Stitched views
+provide no cache generation: they retain configuration-only caching, with no
+automatic source-refresh contract.
+
+Sorting changes only the query's result list, never the owner's list, and does
+not copy the row dictionaries. Cached conversions can return the same DataFrame
+object; use `.copy()` before editing it if you need an independent frame.
 
 ### Fact Structure
 

@@ -417,13 +417,18 @@ class FactQuery:
         """
         Filter facts by a list of period keys.
 
+        The keys are captured when this method is called. Later edits to the
+        caller's list do not change this filter. To use an edited selection,
+        start a new query; another call on this query adds an AND constraint.
+
         Args:
             period_keys: List of period keys to filter by
 
         Returns:
             Self for method chaining
         """
-        self._filters.append(lambda f: 'period_key' in f and f['period_key'] in period_keys)
+        selected_period_keys = tuple(period_keys)
+        self._filters.append(lambda f: 'period_key' in f and f['period_key'] in selected_period_keys)
         return self
 
     def by_instant_date(self, date_str: str, exact: bool = True) -> FactQuery:
@@ -1115,6 +1120,24 @@ class FactQuery:
             getattr(self, '_requested_dimension', None),
         )
 
+    def _dataframe_cache(self) -> Dict[tuple, pd.DataFrame]:
+        """Acquire frames for the owner's current cache generation.
+
+        Owners without a generation retain configuration-only caching. Initialize
+        lazily because StitchedFactQuery does not call the base initializer.
+        """
+        generation = getattr(self._facts_view, '_cache_generation', None)
+        cache = getattr(self, '_df_cache', None)
+        if cache is None or (
+            generation is not None
+            and getattr(self, '_df_cache_generation', None) != generation
+        ):
+            cache = {}
+            self._df_cache = cache
+        if generation is not None:
+            self._df_cache_generation = generation
+        return cache
+
     def _projection_source_columns(self, columns: tuple, results: List[Dict[str, Any]]):
         """The source keys a projected `to_dataframe(*columns)` actually needs.
 
@@ -1206,7 +1229,7 @@ class FactQuery:
         See engineering/decisions/facts-dataframe-schema.md.
         """
         cache_key = self._df_cache_key(columns)
-        cache = getattr(self, '_df_cache', {})
+        cache = self._dataframe_cache()
         if cache_key in cache:
             return cache[cache_key]
         results = self.execute()
@@ -1345,6 +1368,7 @@ class FactsView:
         self.xbrl = xbrl
         self._facts_cache = None
         self._facts_df_cache = None
+        self._cache_generation = 0
 
     def __len__(self):
         return len(self.get_facts())
@@ -2295,9 +2319,10 @@ class FactsView:
         return None
 
     def clear_cache(self) -> None:
-        """Clear cached data."""
+        """Clear this view's cached data and invalidate its queries' cached frames."""
         self._facts_cache = None
         self._facts_df_cache = None
+        self._cache_generation += 1
 
     def __str__(self):
         return f"Facts for {self.xbrl}"

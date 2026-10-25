@@ -676,6 +676,19 @@ df = query.to_dataframe()
 consistent_facts = query.across_periods(min_periods=5).execute()
 ```
 
+`across_periods()` and `complete_periods_only()` configure the same query object.
+After changing either setting, its next `to_dataframe()` or `to_pandas()` conversion
+uses the current period filters, even if the query was converted before. A DataFrame
+already returned to the caller is not changed in place. Completeness is evaluated
+against the periods remaining after the ordinary filters and any `across_periods()`
+filter, before sorting and limiting; it does not require every period present in
+every underlying filing.
+
+`sort_by()` orders only the current query's result list; it does not reorder the
+stitched owner's cached rows. Other queries, including unsorted `limit()` queries,
+keep the owner's original order. Sorting preserves the existing row dictionaries;
+it does not return independent copies of each row.
+
 ### Trend Analysis
 
 ```python
