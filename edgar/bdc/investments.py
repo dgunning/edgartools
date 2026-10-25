@@ -2286,11 +2286,18 @@ def _exclude_restated_rows(rows: list[PortfolioInvestment]):
         parts = [o for o in kept if o is not inv and o.identifier.startswith(ident)
                  and len(o.identifier) > len(ident) and not o.identifier[len(ident)].isalnum()]
         if parts and abs(sum(map(fv, parts)) - fv(inv)) <= tolerance(len(parts)):
-            # A row with its own cost is a holding, not a header over one row:
-            # ARCC's "Proofpoint, Inc. | Second lien senior secured loan" (cost
-            # 52.6M) and "... loan 1" (cost 51.6M) are both worth 50.5M (GH #1505)
+            # A row with its own cost over one row is a holding unless the row
+            # repeats that cost under a longer label. ARCC's "Proofpoint, Inc. |
+            # Second lien senior secured loan" (cost 52.6M) and "... loan 1"
+            # (cost 51.6M) are both worth 50.5M (GH #1505); ARCC's "... loan" and
+            # "... loan 1" pairs that share a cost differ only by a counter. PFX's
+            # company subtotals repeat their holding's cost (GH #1583).
             if inv.cost is not None and len(parts) == 1:
-                continue
+                part = parts[0]
+                restated = (part.cost is not None and abs(part.cost - inv.cost) <= tolerance(1)
+                            and not re.fullmatch(r' \w+', part.identifier[len(ident):]))
+                if not restated:
+                    continue
             drop(inv, f"total of {len(parts)} row(s) that extend it")
 
     # One identifier spelled two ways
