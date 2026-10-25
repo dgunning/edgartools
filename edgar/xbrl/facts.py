@@ -417,13 +417,18 @@ class FactQuery:
         """
         Filter facts by a list of period keys.
 
+        The keys are captured when this method is called. Later edits to the
+        caller's list do not change this filter. To use an edited selection,
+        start a new query; another call on this query adds an AND constraint.
+
         Args:
             period_keys: List of period keys to filter by
 
         Returns:
             Self for method chaining
         """
-        self._filters.append(lambda f: 'period_key' in f and f['period_key'] in period_keys)
+        selected_period_keys = tuple(period_keys)
+        self._filters.append(lambda f: 'period_key' in f and f['period_key'] in selected_period_keys)
         return self
 
     def by_instant_date(self, date_str: str, exact: bool = True) -> FactQuery:

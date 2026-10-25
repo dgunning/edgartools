@@ -274,3 +274,42 @@ def test_period_filter_cache_and_sibling_sort_preserve_source_order(source_obser
     restored = query.to_dataframe(*columns)
     assert _rows(restored, columns) == expected[:2]
     assert restored is warm
+
+
+def test_captured_period_keys_compose_with_period_filter_transitions(source_observations):
+    owner = SourceStatements(source_observations)
+    keys = ["duration_2024-10-01_2025-03-31", "duration_2023-10-01_2024-03-31"]
+    query = _query(owner).by_period_keys(keys).across_periods(1)
+    expected = _rows(source_observations)
+    assert _rows(query.to_dataframe(*FIELDS)) == expected
+    keys.remove("duration_2023-10-01_2024-03-31")
+
+    for minimum, selected in ((2, expected[:2]), (3, []), (1, expected)):
+        query.across_periods(minimum)
+        assert _rows(query.execute()) == selected
+        assert _rows(query.to_pandas(*FIELDS)) == selected
+
+    query.complete_periods_only()
+    assert _rows(query.execute()) == _rows(query.to_dataframe(*FIELDS)) == expected[:2]
+    fresh = _query(owner).by_period_keys(keys).complete_periods_only()
+    assert _rows(fresh.execute()) == _rows(fresh.to_dataframe(*FIELDS)) == [expected[0], expected[2]]
+
+
+def test_sibling_sort_preserves_captured_period_selection_and_limit_order(source_observations):
+    owner = SourceStatements(source_observations)
+    keys = ["duration_2024-10-01_2025-03-31", "duration_2023-10-01_2024-03-31"]
+    query = _query(owner).by_period_keys(keys).limit(2)
+    expected = _rows(source_observations)
+    assert _rows(query.to_dataframe(*FIELDS)) == expected[:2]
+    keys.clear()
+
+    # This sibling reaches the owner's list without a filtering copy first.
+    sibling = _query(owner).sort_by("numeric_value").execute()
+    assert _rows(sibling) == [expected[2], expected[1], expected[0]]
+    assert _rows(query.execute()) == expected[:2]
+    query.limit(3)
+    assert _rows(query.execute()) == _rows(query.to_dataframe(*FIELDS)) == expected
+    query.limit(2)
+    assert _rows(query.execute()) == _rows(query.to_dataframe(*FIELDS)) == expected[:2]
+    fresh = _query(owner).by_period_keys(keys)
+    assert _rows(fresh.execute()) == _rows(fresh.to_dataframe(*FIELDS)) == []
