@@ -1,5 +1,7 @@
 """A period selection captures its caller's list when the filter is added.
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1814
+
 Source: Golub Capital BDC's March 31, 2025 10-Q, accession
 0001476765-25-000040, retained in tests/fixtures/xbrl/gbdc.
 The ordinary owner parses a disclosed minimal wrapper of original nodes; the

@@ -1,7 +1,9 @@
 """Explicit FactsView clears invalidate DataFrames on queries bound to that view.
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1811
+
 The real GBDC acceptance case remains in
-tests/issues/reproductions/xbrl-parsing/test_factquery_cache_invalidation.py.
+tests/issues/regression/test_issue_1811.py.
 These small synthetic facts isolate cache ownership and configuration behavior.
 """
 

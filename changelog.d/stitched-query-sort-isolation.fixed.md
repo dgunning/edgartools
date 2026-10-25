@@ -1,1 +1,0 @@
-**`StitchedFactQuery.sort_by()` changed sibling queries' row order.** In a controlled input from GBDC's March 2025 10-Q (`0001476765-25-000040`), sorting one query made an unrelated `limit(1)` select $71,205,000 instead of $133,282,000 of interest paid. Sorting now returns a separate list and preserves the owner's order.

@@ -1,5 +1,7 @@
 """Reproduce a retained FactQuery DataFrame surviving FactsView.clear_cache().
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1811
+
 Source: Golub Capital BDC's March 31, 2025 10-Q, accession
 0001476765-25-000040, checked in as gbdc-20250331_htm.xml.
 

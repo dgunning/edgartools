@@ -1,5 +1,7 @@
 """Expected-correct reproductions of sibling stitched queries changing row order.
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1813
+
 Source: Golub Capital BDC, Inc., March 31, 2025 10-Q,
 accession 0001476765-25-000040, tests/fixtures/xbrl/gbdc/gbdc-20250331_htm.xml.
 The selected InterestPaidNet observations keep their original values, contexts,
@@ -38,7 +40,7 @@ FIELDS = ("concept", "label", "period_start", "period_end", "numeric_value")
 @pytest.fixture(scope="module")
 def source_observations():
     """Read the selected source fields once, stopping after the second fact."""
-    fixture = Path(__file__).resolve().parents[3] / "fixtures/xbrl/gbdc/gbdc-20250331_htm.xml"
+    fixture = Path(__file__).resolve().parents[2] / "fixtures/xbrl/gbdc/gbdc-20250331_htm.xml"
     wanted = {"c-1", "c-26", "usd", "f-501", "f-502"}
     selected = {}
     measure_namespaces = {}

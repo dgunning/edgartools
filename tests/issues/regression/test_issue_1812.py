@@ -1,5 +1,7 @@
 """Expected-correct reproductions of stale stitched period-filter DataFrames.
 
+GitHub Issue: https://github.com/dgunning/edgartools/issues/1812
+
 Source: Golub Capital BDC, Inc., March 31, 2025 10-Q,
 accession 0001476765-25-000040, tests/fixtures/xbrl/gbdc/gbdc-20250331_htm.xml.
 The three selected observations retain their source values, contexts and units.
@@ -38,7 +40,7 @@ LABELS = {"InterestPaidNet": "Interest paid, net", "StockIssued1": "Stock issued
 @pytest.fixture(scope="module")
 def source_observations():
     """Read the selected source fields once, stopping after the third fact."""
-    fixture = Path(__file__).resolve().parents[3] / "fixtures/xbrl/gbdc/gbdc-20250331_htm.xml"
+    fixture = Path(__file__).resolve().parents[2] / "fixtures/xbrl/gbdc/gbdc-20250331_htm.xml"
     wanted = {"c-1", "c-26", "usd", "f-501", "f-502", "f-505"}
     selected = {}
     measure_namespaces = {}
