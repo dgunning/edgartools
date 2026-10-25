@@ -164,6 +164,29 @@ full_df = query.to_dataframe()
 print("Available columns:", df.columns.tolist())
 ```
 
+### Refreshing cached query results
+
+An ordinary `FactsView` caches enriched rows and its full DataFrame; each query
+also caches its conversions. Call `clear_cache()` on the query's own view when
+you need it to read updated data. Existing queries bound to that view discard
+their old cached frames on the next `to_dataframe()` or `to_pandas()` call:
+
+```python
+view = xbrl.facts
+query = view.query().by_concept("us-gaap:InterestPaidNet", exact=True)
+earlier = query.to_dataframe()
+
+# After updating the underlying data, explicitly clear this view.
+view.clear_cache()
+current = query.to_dataframe()
+```
+
+Clearing does not rewrite `earlier` or clear a separately constructed view. A
+conversion with unchanged data and configuration can return the same cached
+DataFrame object; use `.copy()` before editing it if you need an independent
+frame. This explicit clear does not automatically refresh all XBRL statements
+or metadata, and does not add a source-refresh contract to stitched views.
+
 ### Fact Structure
 
 Each fact contains the following key information:

@@ -1,0 +1,1 @@
+**`FactsView.clear_cache()` left retained query DataFrames stale.** In staged loading of GBDC's March 2025 10-Q (`0001476765-25-000040`), a cached query omitted the $71,205,000 comparative interest-paid observation after a clear. Existing queries now discard obsolete frames when their own view is cleared.

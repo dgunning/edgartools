@@ -680,7 +680,7 @@ class StitchedFactQuery(FactQuery):
             pandas DataFrame with query results
         """
         cache_key = self._df_cache_key(columns)
-        cache = getattr(self, '_df_cache', {})
+        cache = self._dataframe_cache()
         if cache_key in cache:
             return cache[cache_key]
         results = self.execute()
