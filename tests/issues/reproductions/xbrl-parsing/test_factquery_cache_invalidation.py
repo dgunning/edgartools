@@ -102,12 +102,12 @@ def _staged_documents():
         for node in (locator, note, arc):
             staged_link.append(deepcopy(node))
         documents.append(etree.tostring(staged, encoding="unicode"))
-        print(
+        print(  # noqa: T201 - reproduction diagnostics
             f"Source: {fact_id} {_CONCEPT}; context={context_id}; value={amount}; "
             f"unit=usd/iso4217:USD; decimals=-3; {start} to {end}; note=fn-1"
         )
 
-    print(f"Source note: role={_NOTE_ROLE}; lang=en-US; text={_NOTE_TEXT}")
+    print(f"Source note: role={_NOTE_ROLE}; lang=en-US; text={_NOTE_TEXT}")  # noqa: T201
     return documents
 
 
@@ -116,7 +116,7 @@ def _rows(records):
 
 
 def test_retained_query_dataframe_refreshes_after_facts_view_clear_cache():
-    print(f"Imported FactQuery module: {facts_module.__file__}")
+    print(f"Imported FactQuery module: {facts_module.__file__}")  # noqa: T201
     first_document, second_document = _staged_documents()
     expected = [
         (fact_id, _CONCEPT, context_id, "usd", amount)
@@ -162,10 +162,10 @@ def test_retained_query_dataframe_refreshes_after_facts_view_clear_cache():
     assert view_rows == expected
     assert executed_rows == expected
     assert fresh_rows == expected
-    print(f"Live facts: {len(raw_facts)}; live footnotes: {live_notes}")
-    print(f"Warm retained DataFrame: {warm_rows}")
-    print(f"After clear_cache: view={view_rows}; retained execute={executed_rows}")
-    print(f"After clear_cache: fresh DataFrame={fresh_rows}; retained DataFrame={retained_rows}")
+    print(f"Live facts: {len(raw_facts)}; live footnotes: {live_notes}")  # noqa: T201
+    print(f"Warm retained DataFrame: {warm_rows}")  # noqa: T201
+    print(f"After clear_cache: view={view_rows}; retained execute={executed_rows}")  # noqa: T201
+    print(f"After clear_cache: fresh DataFrame={fresh_rows}; retained DataFrame={retained_rows}")  # noqa: T201
 
     assert retained_rows == expected, (
         "FactsView.clear_cache() must refresh DataFrames on retained queries; "

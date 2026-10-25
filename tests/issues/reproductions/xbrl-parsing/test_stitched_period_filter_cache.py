@@ -242,3 +242,35 @@ def test_period_filters_compose_with_projection_sort_and_limit(source_observatio
 
     query.sort_by("numeric_value").limit(1)
     assert _rows(query.to_pandas(*columns), columns) == _rows(source_observations[1:2], columns)
+
+
+def test_period_filter_cache_and_sibling_sort_preserve_source_order(source_observations):
+    """Changing the retained population must not expose a sibling's ordering."""
+    owner = SourceStatements(source_observations)
+    query = _query(owner).across_periods(2)
+    columns = ("concept", "label", "period_start", "period_end", "numeric_value")
+    expected = [
+        ("us-gaap:InterestPaidNet", "Interest paid, net", "2024-10-01", "2025-03-31", 133282000),
+        ("us-gaap:InterestPaidNet", "Interest paid, net", "2023-10-01", "2024-03-31", 71205000),
+        ("us-gaap:StockIssued1", "Stock issued", "2024-10-01", "2025-03-31", 33704000),
+    ]
+    warm = query.to_dataframe(*columns)
+    assert _rows(query.execute(), columns) == _rows(warm, columns) == expected[:2]
+
+    # No filters or transformations: this sibling reaches the owner's cached
+    # list directly, so an in-place sort would reorder later populations.
+    sibling = _query(owner).sort_by("numeric_value").execute()
+    assert _rows(sibling, columns) == [expected[2], expected[1], expected[0]]
+
+    # Keep the projection and every other retained-query setting unchanged.
+    query.across_periods(1)
+    assert _rows(query.execute(), columns) == expected
+    widened = query.to_dataframe(*columns)
+    assert list(widened.columns) == list(columns)
+    assert _rows(widened, columns) == expected
+
+    query.across_periods(2)
+    assert _rows(query.execute(), columns) == expected[:2]
+    restored = query.to_dataframe(*columns)
+    assert _rows(restored, columns) == expected[:2]
+    assert restored is warm

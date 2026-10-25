@@ -166,10 +166,16 @@ print("Available columns:", df.columns.tolist())
 
 ### Refreshing cached query results
 
-An ordinary `FactsView` caches enriched rows and its full DataFrame; each query
-also caches its conversions. Call `clear_cache()` on the query's own view when
-you need it to read updated data. Existing queries bound to that view discard
-their old cached frames on the next `to_dataframe()` or `to_pandas()` call:
+Ordinary and stitched queries share a cache lifecycle. Each cached conversion
+belongs to the query's current configuration and requested columns; stitched
+queries also include their period-filter settings. Returning to an earlier
+configuration may reuse its cached DataFrame.
+
+An ordinary `FactsView` caches enriched rows and its full DataFrame. It also owns
+a cache generation, advanced by an explicit `clear_cache()` call. Call that method
+on the query's own view when you need it to read updated data. Existing queries
+bound to that view discard all prior-generation frames, including other column
+projections, on the next `to_dataframe()` or `to_pandas()` call:
 
 ```python
 view = xbrl.facts
@@ -181,11 +187,14 @@ view.clear_cache()
 current = query.to_dataframe()
 ```
 
-Clearing does not rewrite `earlier` or clear a separately constructed view. A
-conversion with unchanged data and configuration can return the same cached
-DataFrame object; use `.copy()` before editing it if you need an independent
-frame. This explicit clear does not automatically refresh all XBRL statements
-or metadata, and does not add a source-refresh contract to stitched views.
+Clearing does not rewrite `earlier` or clear a separately constructed view, and
+does not automatically refresh all XBRL statements or metadata. Stitched views
+provide no cache generation: they retain configuration-only caching, with no
+automatic source-refresh contract.
+
+Sorting changes only the query's result list, never the owner's list, and does
+not copy the row dictionaries. Cached conversions can return the same DataFrame
+object; use `.copy()` before editing it if you need an independent frame.
 
 ### Fact Structure
 
