@@ -657,6 +657,7 @@ class InstanceParser(BaseParser):
 
             # Track undefined footnotes for deduplication
             undefined_footnotes = set()
+            first_fact_by_id: Optional[Dict[Optional[str], Fact]] = None
 
             for footnote_link in root.findall(f'.//{LINKBASE_NS}footnoteLink'):
                 # label -> the key this link's resource was stored under
@@ -707,7 +708,12 @@ class InstanceParser(BaseParser):
                         continue
 
                     self.footnotes[footnote_key].related_fact_ids.append(fact_id)
-                    self._attach_footnote_to_fact(fact_id, footnote_key)
+                    if first_fact_by_id is None:
+                        first_fact_by_id = {}
+                        for fact in self.facts.values():
+                            # Preserve the first match in final, merged fact order.
+                            first_fact_by_id.setdefault(fact.fact_id, fact)
+                    self._attach_footnote_to_fact(fact_id, footnote_key, first_fact_by_id)
 
             # Summary message for undefined footnotes (non-critical)
             if undefined_footnotes:
@@ -736,13 +742,12 @@ class InstanceParser(BaseParser):
             suffix += 1
         return f"{label}#{suffix}"
 
-    def _attach_footnote_to_fact(self, fact_id: str, footnote_key: str) -> None:
+    def _attach_footnote_to_fact(self, fact_id: str, footnote_key: str,
+                               first_fact_by_id: Dict[Optional[str], Fact]) -> None:
         """Record the footnote on the fact it annotates."""
-        for fact in self.facts.values():
-            if fact.fact_id == fact_id:
-                if footnote_key not in fact.footnotes:
-                    fact.footnotes.append(footnote_key)
-                return
+        fact = first_fact_by_id.get(fact_id)
+        if fact is not None and footnote_key not in fact.footnotes:
+            fact.footnotes.append(footnote_key)
 
     def _footnote_text(self, footnote_elem) -> str:
         """
