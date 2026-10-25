@@ -34,6 +34,7 @@ filed value ``352583000000``. The prior year, context ``c-23`` (instant
 import decimal
 import sys
 import time
+from unittest.mock import patch
 
 import pytest
 
@@ -422,16 +423,94 @@ def test_operands_outside_the_xsd_decimal_lexical_space_keep_the_slash_form():
     assert arabic.decimals is None
 
 
+def test_recurring_fraction_uses_the_inexact_fallback_precision():
+    """A recurring quotient is re-divided at sig(n)+sig(d), not the first pass.
+
+    ``10**60 / 3`` does not terminate. The numerator ``1`` and sixty zeros
+    has 61 significant digits and the denominator has 1, so the sum is 62,
+    past 50. The first division asks for ``61 + 4*1 + 1`` = 66 digits and
+    sets ``Inexact``. The fallback keeps 62. Half-even, the next digit is
+    3, so the stored text is sixty 3s, a point, and two 3s. Leaving the
+    first pass in place would keep six 3s after the point.
+    """
+    numerator = "1" + "0" * 60
+    expected = "3" * 60 + ".33"
+    first_pass = "3" * 60 + ".333333"
+    facts = _with_facts(f"""
+  <my:sixtyOverThree contextRef="C1" unitRef="pure">
+    <xbrli:numerator>{numerator}</xbrli:numerator>
+    <xbrli:denominator>3</xbrli:denominator>
+  </my:sixtyOverThree>
+""")
+    fact = facts["my_sixtyOverThree|C1"]
+    assert len(numerator) == 61
+    assert len(expected.replace(".", "")) == 62
+    assert fact.value == expected
+    assert fact.value != first_pass
+    assert fact.decimals == "INF"
+    assert fact.numeric_value == float(decimal.Decimal(expected))
+
+
+def test_operand_length_cap_boundary_on_numerator_and_denominator():
+    """10000 characters still divide. 10001 keeps the slash form.
+
+    Both limits are checked on the numerator and on the denominator. These
+    powers of ten are past the float range, so a divided fact has decimals
+    INF and numeric_value None. The slash form has decimals None.
+    """
+    at_cap = "1" + "0" * 9999
+    over = "1" + "0" * 10000
+    assert len(at_cap) == 10000
+    assert len(over) == 10001
+    # 1/10**9999 is the digit 1, 9999 places right of the decimal point.
+    under = "0." + "0" * 9998 + "1"
+    facts = _with_facts(f"""
+  <my:numAtCap contextRef="C1" unitRef="pure">
+    <xbrli:numerator>{at_cap}</xbrli:numerator>
+    <xbrli:denominator>1</xbrli:denominator>
+  </my:numAtCap>
+  <my:denAtCap contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1</xbrli:numerator>
+    <xbrli:denominator>{at_cap}</xbrli:denominator>
+  </my:denAtCap>
+  <my:numOver contextRef="C1" unitRef="pure">
+    <xbrli:numerator>{over}</xbrli:numerator>
+    <xbrli:denominator>1</xbrli:denominator>
+  </my:numOver>
+  <my:denOver contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1</xbrli:numerator>
+    <xbrli:denominator>{over}</xbrli:denominator>
+  </my:denOver>
+""")
+    num_at = facts["my_numAtCap|C1"]
+    assert num_at.value == at_cap
+    assert num_at.decimals == "INF"
+    assert num_at.numeric_value is None
+    den_at = facts["my_denAtCap|C1"]
+    assert den_at.value == under
+    assert den_at.decimals == "INF"
+    assert den_at.numeric_value is None
+    num_over = facts["my_numOver|C1"]
+    assert num_over.value == f"{over}/1"
+    assert num_over.numeric_value is None
+    assert num_over.decimals is None
+    den_over = facts["my_denOver|C1"]
+    assert den_over.value == f"1/{over}"
+    assert den_over.numeric_value is None
+    assert den_over.decimals is None
+
+
 def test_long_plain_decimal_operand_keeps_the_slash_form():
     """``0.`` and 300,000 zeros then ``1`` is legal xsd:decimal, and too long.
 
     The scale is the text length. Dividing it used to take about 29 seconds
-    and produce a 300,002-digit integer. The operand cap rejects it before
-    any arithmetic, so the fact stays in slash form.
+    and produce a 300,002-digit integer. The cap rejects it before
+    ``Decimal`` is constructed. The clock stays as a loose backstop.
     """
     den = "0." + "0" * 300_000 + "1"
     started = time.perf_counter()
-    facts = _with_facts(f"""
+    with patch("edgar.xbrl.parsers.instance.Decimal", wraps=decimal.Decimal) as decimal_spy:
+        facts = _with_facts(f"""
   <my:longDecimal contextRef="C1" unitRef="pure">
     <xbrli:numerator>1</xbrli:numerator>
     <xbrli:denominator>{den}</xbrli:denominator>
@@ -439,6 +518,14 @@ def test_long_plain_decimal_operand_keeps_the_slash_form():
 """)
     elapsed = time.perf_counter() - started
     assert elapsed < 1
+    constructed = []
+    for call in decimal_spy.call_args_list:
+        if call.args:
+            constructed.append(call.args[0])
+        elif "value" in call.kwargs:
+            constructed.append(call.kwargs["value"])
+    assert den not in constructed
+    assert all(isinstance(text, str) and len(text) <= 10000 for text in constructed)
     fact = facts["my_longDecimal|C1"]
     assert fact.value == f"1/{den}"
     assert fact.numeric_value is None
