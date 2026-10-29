@@ -22,6 +22,14 @@ by ``10 ** 300000``. A plain decimal longer than 10000 characters keeps
 the slash form too. ``2**6200`` is 1867 digits and still divides;
 ``0.`` followed by 300,000 zeros and a ``1`` does not.
 
+An exact quotient inside that cap can still fall outside the float range.
+``1`` over ``1`` followed by 9,999 zeros is the digit 1 in the 9,999th
+decimal place, and ``float()`` of that text is ``0.0``. A 9,999-digit
+numerator over 1 is exact too, and ``float()`` of it is infinite (or
+raises ``OverflowError`` where the conversion refuses). In both cases
+``value`` keeps the decimal and ``numeric_value`` stays unset: the two
+fields disagree on purpose, and ``decimals`` stays ``INF``.
+
 Real filing: Apple Inc. FY2023 Form 10-K, accession 0000320193-23-000106,
 instance ``aapl-20230930_htm.xml``. SEC full-text search for
 ``fractionItemType`` and for ``xbrli:numerator`` returned no hits, and this
@@ -221,6 +229,63 @@ def test_fraction_outside_float_range_keeps_the_exact_decimal():
     assert overflow.value == huge
     assert overflow.numeric_value is None
     assert overflow.decimals == "INF"
+
+
+def test_exact_underflow_to_zero_keeps_the_decimal_and_unsets_the_float():
+    """``1`` over ``1`` and 9,999 zeros is exact, and ``float()`` of it is ``0.0``.
+
+    The denominator is 10,000 characters, so it passes the operand cap and
+    the xsd:decimal gate, and the quotient terminates. The stored text is
+    the digit 1 in the 9,999th decimal place. ``numeric_value`` is left
+    unset on purpose: writing ``0.0`` there would make a nonzero fraction
+    look like zero. ``decimals`` stays ``INF`` because the quotient did
+    evaluate. The 400-digit case above is the same branch at a smaller
+    magnitude; this is the largest power of ten that still passes the cap.
+    """
+    denominator = "1" + "0" * 9999
+    assert len(denominator) == 10_000
+    expected = "0." + "0" * 9998 + "1"
+    facts = _with_facts(f"""
+  <my:tinyExact contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1</xbrli:numerator>
+    <xbrli:denominator>{denominator}</xbrli:denominator>
+  </my:tinyExact>
+""")
+    fact = facts["my_tinyExact|C1"]
+    assert fact.value == expected
+    assert decimal.Decimal(fact.value) == decimal.Decimal("1E-9999")
+    assert fact.numeric_value is None
+    assert fact.decimals == "INF"
+    # float() of the stored text is zero. value and numeric_value disagree.
+    assert float(fact.value) == 0.0
+
+
+def test_exact_overflow_past_float_keeps_the_decimal_and_unsets_the_float():
+    """A 9,999-digit numerator over 1 is exact and does not fit in a float.
+
+    The numerator is 9,999 nines, inside the 10,000-character cap.
+    ``float()`` of that integer is infinite, or it raises ``OverflowError``
+    where the conversion refuses a value this large. Parsing does not
+    raise. ``value`` is those nines and ``numeric_value`` is unset, the
+    same contract as an underflow to zero. ``decimals`` stays ``INF``.
+    """
+    numerator = "9" * 9999
+    assert len(numerator) == 9999
+    facts = _with_facts(f"""
+  <my:hugeExact contextRef="C1" unitRef="pure">
+    <xbrli:numerator>{numerator}</xbrli:numerator>
+    <xbrli:denominator>1</xbrli:denominator>
+  </my:hugeExact>
+""")
+    fact = facts["my_hugeExact|C1"]
+    assert fact.value == numerator
+    assert fact.numeric_value is None
+    assert fact.decimals == "INF"
+    try:
+        converted = float(numerator)
+    except OverflowError:
+        converted = float("inf")
+    assert converted == float("inf")
 
 
 def test_fraction_value_is_exact_past_the_float_mantissa():
