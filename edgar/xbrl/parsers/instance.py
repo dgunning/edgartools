@@ -5,15 +5,19 @@ This module handles parsing of XBRL instance documents including facts, contexts
 units, footnotes, and entity information extraction.
 """
 
+import math
+import re
 from datetime import datetime
+from decimal import MAX_EMAX, MIN_EMIN, ROUND_HALF_EVEN, Decimal, Inexact, InvalidOperation, localcontext
+from decimal import Context as DecimalContext
 from pathlib import Path
-from typing import Any, Dict, List, Union, Optional
+from typing import Any, Dict, List, Optional, Union
 
 from lxml import etree as ET
-from edgar.xmltools import xml_parser
 
 from edgar.core import log
 from edgar.xbrl.core import (
+    INFINITE_PRECISION,
     NAMESPACES,
     classify_duration,
     duration_days,
@@ -22,6 +26,7 @@ from edgar.xbrl.core import (
     is_quarterly_document_type,
 )
 from edgar.xbrl.models import Context, Fact, XBRLProcessingError
+from edgar.xmltools import xml_parser
 
 from .base import BaseParser
 
@@ -42,6 +47,7 @@ _BLOCK_ELEMENTS = frozenset({
 _CELL_ELEMENTS = frozenset({'td', 'th'})
 
 XBRLI_NS = "{http://www.xbrl.org/2003/instance}"
+XSI_NS = "{http://www.w3.org/2001/XMLSchema-instance}"
 
 # The structural children of an instance root -- everything that is not a fact.
 #
@@ -66,6 +72,210 @@ _STRUCTURAL_ELEMENTS = frozenset({
 # Axes whose member names another legal entity: a DEI fact on one of them is a
 # co-registrant's, not the filer's (GH #1420, #1710).
 _ENTITY_AXES = ('dei:LegalEntityAxis', 'srt:ConsolidatedEntitiesAxis')
+
+# xsi:nil is a boolean: true/false or 1/0.
+_NIL_TRUE = frozenset({'true', '1'})
+
+
+def _is_nil(element: ET.Element) -> bool:
+    """Whether an element is marked ``xsi:nil``."""
+    nil = element.get(f"{XSI_NS}nil")
+    return isinstance(nil, str) and nil.strip().lower() in _NIL_TRUE
+
+
+def _xbrli_child(element: ET.Element, local_name: str) -> Optional[ET.Element]:
+    """The direct child in the XBRL instance namespace, if any."""
+    tag = f"{XBRLI_NS}{local_name}"
+    for child in element:
+        if child.tag == tag:
+            return child
+    return None
+
+
+def _significant_digits(text: str) -> int:
+    """Significant digits in a decimal lexical form, at least one.
+
+    Used only to size the division context. A non-decimal still returns a
+    count; the division then fails and the caller keeps the slash form.
+    """
+    body = text.strip().lstrip('+-')
+    exponent = body.lower().find('e')
+    if exponent != -1:
+        body = body[:exponent]
+    body = body.replace('.', '', 1).lstrip('0')
+    return max(len(body), 1)
+
+
+def _format_decimal(value: Decimal) -> str:
+    """Fixed-point form of an exact quotient, without a trailing ``.0``."""
+    text = format(value, 'f')
+    if '.' in text:
+        text = text.rstrip('0').rstrip('.')
+    if text in ('', '-'):
+        return '0'
+    return text
+
+
+def _decimal_context(prec: int) -> DecimalContext:
+    """Division context that does not inherit the caller's settings.
+
+    ``localcontext()`` with no argument copies the caller's rounding and
+    exponent limits. ``ROUND_UP`` would change the last digit of 1/3,
+    ``Emax=2`` overflows 1000/1, and ``Emin=-9`` underflows 10^-100 to zero.
+    """
+    return DecimalContext(
+        prec=prec,
+        rounding=ROUND_HALF_EVEN,
+        Emin=MIN_EMIN,
+        Emax=MAX_EMAX,
+        traps=[],
+        clamp=0,
+    )
+
+
+# XML Schema Part 2, the decimal lexical space. ASCII digits only, so a
+# non-ASCII digit such as Arabic-Indic one is rejected. ``Decimal`` accepts
+# those, and it also accepts an exponent and underscores. This production
+# does not.
+_XSD_DECIMAL_RE = re.compile(r'[+-]?(?:[0-9]+(?:\.[0-9]*)?|\.[0-9]+)')
+
+# Real filings use a few dozen digits. The exactness regressions go further
+# (``2**6200`` is 1867 digits, ``10**400`` is 401) and still have to divide.
+# Past this, a plain decimal such as ``0.`` and 300_000 zeros then ``1`` is
+# legal xsd:decimal whose scale is the length of the text.
+_MAX_FRACTION_OPERAND_CHARS = 10000
+
+
+def _is_xsd_decimal(text: str) -> bool:
+    """Whether ``text`` is an xsd:decimal lexical form.
+
+    Surrounding whitespace is ignored. ``_fraction_item`` strips the operand
+    before this check and before the slash form is stored, which is the same
+    treatment ``  2 `` / `` 4 `` already gets, and the same one the decimal
+    type's collapse facet gives a leading or trailing space. A space that
+    survives that strip, such as one between digits, is not a decimal.
+    """
+    return _XSD_DECIMAL_RE.fullmatch(text.strip()) is not None
+
+
+def _fraction_quotient(num_text: str, den_text: str) -> Optional[Decimal]:
+    """Divide two xsd:decimal operands, or None when the quotient is not finite.
+
+    One division at ``sig(n) + 4*sig(d) + 1`` digits stores a terminating
+    quotient in full, because ``log2(d) < 3.33 * digits(d)``. ``1/2**100``
+    needs 70 significant digits; 50 would drop the tail and still be marked
+    INF. ``Inexact`` means the quotient recurs, so a second division rounds
+    it half-even to at least 50 significant digits, or to the operands' own
+    digit count when that is larger. ``1/3`` is therefore fifty 3s.
+    """
+    try:
+        # String construction is exact, so prec here does not round the
+        # operands. The explicit context only shuts out the caller's traps
+        # and exponent limits.
+        with localcontext(_decimal_context(1)):
+            numerator_value = Decimal(num_text)
+            denominator_value = Decimal(den_text)
+            invalid = (
+                not numerator_value.is_finite()
+                or not denominator_value.is_finite()
+                or denominator_value.is_zero()
+            )
+        if invalid:
+            return None
+        # Terminating n/d fits in sig(n) + 4*sig(d) + 1 digits. Inexact means
+        # it recurs, so round half-even to the 50-digit rule. decimals stays INF.
+        sig_n = _significant_digits(num_text)
+        sig_d = _significant_digits(den_text)
+        ctx = _decimal_context(max(50, sig_n + 4 * sig_d + 1))
+        quotient = ctx.divide(numerator_value, denominator_value)
+        if ctx.flags[Inexact]:
+            quotient = _decimal_context(max(50, sig_n + sig_d)).divide(
+                numerator_value, denominator_value
+            )
+    except (InvalidOperation, ZeroDivisionError, ValueError, TypeError):
+        return None
+    if not quotient.is_finite():
+        return None
+    return quotient
+
+
+def _fraction_numeric_value(quotient: Decimal) -> Optional[float]:
+    """Float of a finite quotient, or None when that float is out of range.
+
+    Overflow to a non-finite float, and underflow of a nonzero quotient to
+    ``0.0`` (including signed zero), leave the numeric value unset. A
+    subnormal is finite and nonzero, so it is kept: ``1/10**320`` is the
+    subnormal ``1e-320``, the same kind of rounded float a value past the
+    mantissa already gets. ``1/10**400`` underflows to ``0.0`` and is unset.
+    """
+    numeric = float(quotient)
+    if not math.isfinite(numeric) or (numeric == 0.0 and quotient != 0):
+        return None
+    return numeric
+
+
+def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], bool]]:
+    """Read an ``xbrli:fractionItemType`` fact, or None when the element is not one.
+
+    A fraction item has no text of its own. Its value is the numerator divided
+    by the denominator (XBRL 2.1 §5.1.1.3.2), and its precision is INF (§4.6.6).
+    Joining the children's text reads 1/3 as 13, because blank text between the
+    two elements is removed before ``itertext()`` runs (GH #1766).
+
+    The third item is True when the quotient is a finite decimal. The caller
+    then sets ``decimals`` to INF even if the float conversion cannot represent
+    that decimal. ``numeric_value`` is the float of the quotient. It is left
+    unset only when that float overflows, or a nonzero quotient underflows to
+    zero, including signed zero; the exact text stays in ``value``. A
+    subnormal is finite and nonzero, so it is kept: ``1/10**320`` is the
+    subnormal ``1e-320``, while ``1/10**400`` underflows to ``0.0`` and stays
+    unset. A non-finite quotient (a zero denominator, or a non-decimal)
+    leaves the numeric value unset and keeps the two parts separated by
+    ``/``. A non-decimal includes anything
+    outside the xsd:decimal lexical space. ``Decimal`` would accept an
+    exponent, an underscore, or a non-ASCII digit. Surrounding whitespace
+    is stripped first, so ``  2 `` / `` 4 `` is still one half. An operand
+    longer than 10000 characters keeps the slash form too. A nil fact, or a
+    nil numerator or denominator, is an absent value.
+
+    A terminating quotient is stored in full. One division at
+    ``sig(n) + 4*sig(d) + 1`` digits is enough, because
+    ``log2(d) < 3.33 * digits(d)``. ``1/2**100`` needs 70 significant digits;
+    50 would drop the tail and still be marked INF. If that division sets
+    ``Inexact``, the quotient recurs and is rounded half-even to at least 50
+    significant digits, or to the operands' own digit count when that is
+    larger. ``1/3`` is therefore fifty 3s, not an infinite expansion and not
+    the ROUND_UP spelling that ends in 4.
+    """
+    numerator = _xbrli_child(element, 'numerator')
+    denominator = _xbrli_child(element, 'denominator')
+    if numerator is None or denominator is None:
+        return None
+    if _is_nil(element) or _is_nil(numerator) or _is_nil(denominator):
+        return '', None, False
+    # ``.text`` stops at a comment or processing instruction, so 1<!--c-->2
+    # would be read as 1. The operand is the element's whole character content.
+    num_text = ''.join(numerator.itertext()).strip()
+    den_text = ''.join(denominator.itertext()).strip()
+    if not num_text or not den_text:
+        return '', None, False
+    slash = f'{num_text}/{den_text}'
+    # Before any Decimal arithmetic. ``Decimal`` accepts an exponent,
+    # underscores and non-ASCII digits, none of which are xsd:decimal.
+    # A long plain decimal is legal and its scale is the text length.
+    if not _is_xsd_decimal(num_text) or not _is_xsd_decimal(den_text):
+        return slash, None, False
+    if (
+        len(num_text) > _MAX_FRACTION_OPERAND_CHARS
+        or len(den_text) > _MAX_FRACTION_OPERAND_CHARS
+    ):
+        return slash, None, False
+    quotient = _fraction_quotient(num_text, den_text)
+    if quotient is None:
+        return slash, None, False
+    # decimals stays INF. numeric_value is unset only when the float is out
+    # of range: non-finite, or a nonzero quotient that underflows to 0.0.
+    return _format_decimal(quotient), _fraction_numeric_value(quotient), True
 
 
 class InstanceParser(BaseParser):
@@ -548,40 +758,56 @@ class InstanceParser(BaseParser):
                 # Get unit reference
                 unit_ref = element.get('unitRef')
 
-                # Get value - optimize string handling
-                value = element.text
-                if not value or not value.strip():
-                    # Collect all nested text (handles HTML content in TextBlock elements)
-                    all_text = "".join(element.itertext()).strip()
-                    if all_text:
-                        value = all_text
-
-                # Optimize string handling - inline conditional
-                value = value.strip() if value else ""
-
                 # Get decimals attribute - direct access
                 decimals = element.get('decimals')
 
-                # Optimize numeric conversion with faster try/except.
-                #
-                # A unitRef is what makes a fact numeric. XBRL requires one on
-                # every numeric item and forbids one on non-numeric items, so
-                # its presence is an exact test here, where the element catalog
-                # (and with it the declared type) is not reachable.
-                #
-                # Without the check, float() succeeded on anything that merely
-                # looked like a number, so unitless metadata carried a
-                # numeric_value: dei:DocumentFiscalYearFocus is a gYear, and a
-                # query for facts valued near 2023 returned the fiscal-year
-                # focus alongside real monetary facts. numeric_value is the
-                # field consumers read as "this is a numeric fact", so every
-                # one of them inherited the misclassification (gh #1220).
-                numeric_value = None
-                if value and unit_ref:
-                    try:
-                        numeric_value = float(value)
-                    except (ValueError, TypeError):
-                        pass
+                # A fraction item's value is numerator / denominator and its
+                # precision is INF (XBRL 2.1 §5.1.1.3.2, §4.6.6). It has no
+                # text node of its own, so the itertext() fallback would
+                # concatenate the two children (GH #1766: 1/3 was read as 13).
+                # The children's tags are the type signal the element catalog
+                # would have given, so this does not depend on unitRef the way
+                # a plain numeric fact does.
+                fraction = _fraction_item(element)
+                if fraction is not None:
+                    value, numeric_value, evaluated = fraction
+                    # INF is the fraction's precision (§4.6.6), including when
+                    # the quotient does not fit in a float. A nil or non-finite
+                    # fraction did not evaluate, so its decimals stay as filed.
+                    if evaluated:
+                        decimals = INFINITE_PRECISION
+                else:
+                    # Get value - optimize string handling
+                    value = element.text
+                    if not value or not value.strip():
+                        # Collect all nested text (handles HTML content in TextBlock elements)
+                        all_text = "".join(element.itertext()).strip()
+                        if all_text:
+                            value = all_text
+
+                    # Optimize string handling - inline conditional
+                    value = value.strip() if value else ""
+
+                    # Optimize numeric conversion with faster try/except.
+                    #
+                    # A unitRef is what makes a fact numeric. XBRL requires one on
+                    # every numeric item and forbids one on non-numeric items, so
+                    # its presence is an exact test here, where the element catalog
+                    # (and with it the declared type) is not reachable.
+                    #
+                    # Without the check, float() succeeded on anything that merely
+                    # looked like a number, so unitless metadata carried a
+                    # numeric_value: dei:DocumentFiscalYearFocus is a gYear, and a
+                    # query for facts valued near 2023 returned the fiscal-year
+                    # focus alongside real monetary facts. numeric_value is the
+                    # field consumers read as "this is a numeric fact", so every
+                    # one of them inherited the misclassification (gh #1220).
+                    numeric_value = None
+                    if value and unit_ref:
+                        try:
+                            numeric_value = float(value)
+                        except (ValueError, TypeError):
+                            pass
 
                 # Create base key for duplicate detection
                 base_key = self._create_normalized_fact_key(element_id, context_ref)
