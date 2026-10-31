@@ -158,6 +158,62 @@ def _is_xsd_decimal(text: str) -> bool:
     return _XSD_DECIMAL_RE.fullmatch(text.strip()) is not None
 
 
+def _fraction_quotient(num_text: str, den_text: str) -> Optional[Decimal]:
+    """Divide two xsd:decimal operands, or None when the quotient is not finite.
+
+    One division at ``sig(n) + 4*sig(d) + 1`` digits stores a terminating
+    quotient in full, because ``log2(d) < 3.33 * digits(d)``. ``1/2**100``
+    needs 70 significant digits; 50 would drop the tail and still be marked
+    INF. ``Inexact`` means the quotient recurs, so a second division rounds
+    it half-even to at least 50 significant digits, or to the operands' own
+    digit count when that is larger. ``1/3`` is therefore fifty 3s.
+    """
+    try:
+        # String construction is exact, so prec here does not round the
+        # operands. The explicit context only shuts out the caller's traps
+        # and exponent limits.
+        with localcontext(_decimal_context(1)):
+            numerator_value = Decimal(num_text)
+            denominator_value = Decimal(den_text)
+            invalid = (
+                not numerator_value.is_finite()
+                or not denominator_value.is_finite()
+                or denominator_value.is_zero()
+            )
+        if invalid:
+            return None
+        # Terminating n/d fits in sig(n) + 4*sig(d) + 1 digits. Inexact means
+        # it recurs, so round half-even to the 50-digit rule. decimals stays INF.
+        sig_n = _significant_digits(num_text)
+        sig_d = _significant_digits(den_text)
+        ctx = _decimal_context(max(50, sig_n + 4 * sig_d + 1))
+        quotient = ctx.divide(numerator_value, denominator_value)
+        if ctx.flags[Inexact]:
+            quotient = _decimal_context(max(50, sig_n + sig_d)).divide(
+                numerator_value, denominator_value
+            )
+    except (InvalidOperation, ZeroDivisionError, ValueError, TypeError):
+        return None
+    if not quotient.is_finite():
+        return None
+    return quotient
+
+
+def _fraction_numeric_value(quotient: Decimal) -> Optional[float]:
+    """Float of a finite quotient, or None when that float is out of range.
+
+    Overflow to a non-finite float, and underflow of a nonzero quotient to
+    ``0.0`` (including signed zero), leave the numeric value unset. A
+    subnormal is finite and nonzero, so it is kept: ``1/10**320`` is the
+    subnormal ``1e-320``, the same kind of rounded float a value past the
+    mantissa already gets. ``1/10**400`` underflows to ``0.0`` and is unset.
+    """
+    numeric = float(quotient)
+    if not math.isfinite(numeric) or (numeric == 0.0 and quotient != 0):
+        return None
+    return numeric
+
+
 def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], bool]]:
     """Read an ``xbrli:fractionItemType`` fact, or None when the element is not one.
 
@@ -170,9 +226,12 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], 
     then sets ``decimals`` to INF even if the float conversion cannot represent
     that decimal. ``numeric_value`` is the float of the quotient. It is left
     unset only when that float overflows, or a nonzero quotient underflows to
-    zero; the exact text stays in ``value``. A non-finite quotient
-    (a zero denominator, or a non-decimal) leaves the numeric value unset and
-    keeps the two parts separated by ``/``. A non-decimal includes anything
+    zero, including signed zero; the exact text stays in ``value``. A
+    subnormal is finite and nonzero, so it is kept: ``1/10**320`` is the
+    subnormal ``1e-320``, while ``1/10**400`` underflows to ``0.0`` and stays
+    unset. A non-finite quotient (a zero denominator, or a non-decimal)
+    leaves the numeric value unset and keeps the two parts separated by
+    ``/``. A non-decimal includes anything
     outside the xsd:decimal lexical space. ``Decimal`` would accept an
     exponent, an underscore, or a non-ASCII digit. Surrounding whitespace
     is stripped first, so ``  2 `` / `` 4 `` is still one half. An operand
@@ -211,39 +270,12 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], 
         or len(den_text) > _MAX_FRACTION_OPERAND_CHARS
     ):
         return slash, None, False
-    try:
-        # String construction is exact, so prec here does not round the
-        # operands. The explicit context only shuts out the caller's traps
-        # and exponent limits.
-        with localcontext(_decimal_context(1)):
-            numerator_value = Decimal(num_text)
-            denominator_value = Decimal(den_text)
-            invalid = (
-                not numerator_value.is_finite()
-                or not denominator_value.is_finite()
-                or denominator_value.is_zero()
-            )
-        if invalid:
-            return slash, None, False
-        # Terminating n/d fits in sig(n) + 4*sig(d) + 1 digits. Inexact means
-        # it recurs, so round half-even to the 50-digit rule. decimals stays INF.
-        sig_n = _significant_digits(num_text)
-        sig_d = _significant_digits(den_text)
-        ctx = _decimal_context(max(50, sig_n + 4 * sig_d + 1))
-        quotient = ctx.divide(numerator_value, denominator_value)
-        if ctx.flags[Inexact]:
-            quotient = _decimal_context(max(50, sig_n + sig_d)).divide(
-                numerator_value, denominator_value
-            )
-    except (InvalidOperation, ZeroDivisionError, ValueError, TypeError):
+    quotient = _fraction_quotient(num_text, den_text)
+    if quotient is None:
         return slash, None, False
-    if not quotient.is_finite():
-        return slash, None, False
-    value = _format_decimal(quotient)
-    numeric = float(quotient)
-    if not math.isfinite(numeric) or (numeric == 0.0 and quotient != 0):
-        return value, None, True
-    return value, numeric, True
+    # decimals stays INF. numeric_value is unset only when the float is out
+    # of range: non-finite, or a nonzero quotient that underflows to 0.0.
+    return _format_decimal(quotient), _fraction_numeric_value(quotient), True
 
 
 class InstanceParser(BaseParser):

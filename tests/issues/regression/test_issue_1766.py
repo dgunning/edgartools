@@ -30,6 +30,13 @@ raises ``OverflowError`` where the conversion refuses). In both cases
 ``value`` keeps the decimal and ``numeric_value`` stays unset: the two
 fields disagree on purpose, and ``decimals`` stays ``INF``.
 
+``1/10**320`` is inside the subnormal range. ``float()`` of it is the
+subnormal ``1e-320`` (hex ``0x0.00000000007e8p-1022``), finite and nonzero,
+so ``numeric_value`` keeps that float. ``1/10**400`` underflows to ``0.0``,
+and ``-1/10**400`` underflows to signed zero; both leave ``numeric_value``
+unset. A subnormal is the same kind of rounded float a value past the
+mantissa already gets, so the out-of-range rule does not cover it.
+
 Real filing: Apple Inc. FY2023 Form 10-K, accession 0000320193-23-000106,
 instance ``aapl-20230930_htm.xml``. SEC full-text search for
 ``fractionItemType`` and for ``xbrli:numerator`` returned no hits, and this
@@ -229,6 +236,69 @@ def test_fraction_outside_float_range_keeps_the_exact_decimal():
     assert overflow.value == huge
     assert overflow.numeric_value is None
     assert overflow.decimals == "INF"
+
+
+def test_subnormal_quotient_keeps_its_float_and_underflow_to_zero_does_not():
+    """``1/10**320`` is a subnormal and is kept. ``1/10**400`` underflows and is unset.
+
+    Measured on CPython 3.12: ``float(Decimal(1) / Decimal(10)**320)`` is the
+    subnormal ``1e-320`` (``0x0.00000000007e8p-1022``), below
+    ``sys.float_info.min`` and not equal to the exact decimal. That float is
+    ``numeric_value``. ``1/10**400`` and ``-1/10**400`` become ``0.0`` and
+    ``-0.0``; a nonzero quotient must not be reported as zero, so
+    ``numeric_value`` stays unset while ``value`` keeps the exact decimal
+    and ``decimals`` stays ``INF``. The negative subnormal ``-1/10**320``
+    is kept, the same way.
+    """
+    den_320 = "1" + "0" * 320
+    den_400 = "1" + "0" * 400
+    facts = _with_facts(f"""
+  <my:sub320 contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1</xbrli:numerator>
+    <xbrli:denominator>{den_320}</xbrli:denominator>
+  </my:sub320>
+  <my:under400 contextRef="C1" unitRef="pure">
+    <xbrli:numerator>1</xbrli:numerator>
+    <xbrli:denominator>{den_400}</xbrli:denominator>
+  </my:under400>
+  <my:negSub320 contextRef="C1" unitRef="pure">
+    <xbrli:numerator>-1</xbrli:numerator>
+    <xbrli:denominator>{den_320}</xbrli:denominator>
+  </my:negSub320>
+  <my:negUnder400 contextRef="C1" unitRef="pure">
+    <xbrli:numerator>-1</xbrli:numerator>
+    <xbrli:denominator>{den_400}</xbrli:denominator>
+  </my:negUnder400>
+""")
+    sub = facts["my_sub320|C1"]
+    assert sub.value == "0." + "0" * 319 + "1"
+    assert decimal.Decimal(sub.value) == decimal.Decimal("1E-320")
+    assert sub.numeric_value == 1e-320
+    assert sub.numeric_value.hex() == "0x0.00000000007e8p-1022"
+    assert 0.0 < sub.numeric_value < sys.float_info.min
+    assert decimal.Decimal(sub.numeric_value) != decimal.Decimal(sub.value)
+    assert sub.decimals == "INF"
+
+    under = facts["my_under400|C1"]
+    assert under.value == "0." + "0" * 399 + "1"
+    assert decimal.Decimal(under.value) == decimal.Decimal("1E-400")
+    assert float(under.value) == 0.0
+    assert under.numeric_value is None
+    assert under.decimals == "INF"
+
+    neg_sub = facts["my_negSub320|C1"]
+    assert neg_sub.value == "-0." + "0" * 319 + "1"
+    assert neg_sub.numeric_value == -1e-320
+    assert neg_sub.numeric_value.hex() == "-0x0.00000000007e8p-1022"
+    assert -sys.float_info.min < neg_sub.numeric_value < 0.0
+    assert neg_sub.decimals == "INF"
+
+    neg_under = facts["my_negUnder400|C1"]
+    assert neg_under.value == "-0." + "0" * 399 + "1"
+    assert decimal.Decimal(neg_under.value) == decimal.Decimal("-1E-400")
+    assert str(float(neg_under.value)) == "-0.0"
+    assert neg_under.numeric_value is None
+    assert neg_under.decimals == "INF"
 
 
 def test_exact_underflow_to_zero_keeps_the_decimal_and_unsets_the_float():
