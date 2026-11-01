@@ -16678,22 +16678,6 @@
     "first_year": 2021,
     "last_year": 2025
   },
-  "FinanceLeaseRightOfUseAssetBeforeAccumulatedAmortization": {
-    "standard_tags": [
-      "PlantPropertyEquipmentNet"
-    ],
-    "display_name": "Property, Plant and Equipment",
-    "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 18,
-    "occurrence_rate": 0.002,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
   "FinancialInstrumentsOwnedPrincipalInvestmentsAtFairValue": {
     "standard_tags": [
       "LongtermInvestments"
@@ -35506,13 +35490,13 @@
   },
   "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "AccumulatedDepreciation"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Accumulated Depreciation",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": true,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 118,
     "occurrence_rate": 0.013,
     "temporal_consistency": 0.417,
@@ -35538,13 +35522,13 @@
   },
   "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "GrossPropertyPlantEquipment"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Property, Plant & Equipment, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": true,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 62,
     "occurrence_rate": 0.007,
     "temporal_consistency": 0.417,
@@ -35570,13 +35554,13 @@
   },
   "PropertyPlantAndEquipmentExcludingLessorAssetUnderOperatingLeaseAccumulatedDepreciation": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "AccumulatedDepreciation"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Accumulated Depreciation",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 2,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -35602,13 +35586,13 @@
   },
   "PropertyPlantAndEquipmentExcludingLessorAssetUnderOperatingLeaseBeforeAccumulatedDepreciation": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "GrossPropertyPlantEquipment"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Property, Plant & Equipment, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": true,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -35680,22 +35664,6 @@
     "first_year": 2020,
     "last_year": 2025
   },
-  "PropertyPlantAndEquipmentOtherAccumulatedDepreciation": {
-    "standard_tags": [
-      "PlantPropertyEquipmentNet"
-    ],
-    "display_name": "Property, Plant and Equipment",
-    "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 9,
-    "occurrence_rate": 0.001,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
   "PropertyPlantAndEquipmentOtherNet": {
     "standard_tags": [
       "PlantPropertyEquipmentNet"
@@ -35714,13 +35682,13 @@
   },
   "PropertyPlantAndEquipmentOwnedAccumulatedDepreciation": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "AccumulatedDepreciation"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Accumulated Depreciation",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 10,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
