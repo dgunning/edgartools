@@ -51,10 +51,10 @@ dependencies = [
   "humanize>=4.0.0",
   "stamina>=24.2.0",
   "orjson>=3.11.6",
-  "textdistance>=4.5.0",
   "rank_bm25>=0.2.1",
   "rapidfuzz>=3.5.0",
-  "unidecode>=1.2.0",
+  # anyascii (ISC) replaced unidecode (GPL) for transliterating names in search.
+  "anyascii>=0.3.3",
   "pydantic>=2.4.0",
   "tqdm>=4.66.3",
   "jinja2>=3.1.6",

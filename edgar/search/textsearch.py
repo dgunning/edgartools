@@ -33,10 +33,10 @@ class SimilaritySearchIndex:
                 query: str,
                 threshold=0.6,
                 topn=20):
-        import textdistance
+        from rapidfuzz.distance import Jaro
         query = query.lower()
         df = (self
-              .data.assign(match=self.data[self._search_column].apply(textdistance.jaro, s2=query).round(2))
+              .data.assign(match=self.data[self._search_column].apply(Jaro.similarity, s2=query).round(2))
               )
         df = df[df.match > threshold]
         df['matches_start'] = df[self._search_column].str.startswith(query[0])
