@@ -137,7 +137,7 @@ def test_each_total_resolves_from_exactly_its_allowed_members(index):
         problems += [f"{total}: NEW member {key}" for key in sorted(actual - allowed)]
         problems += [f"{total}: member {key} no longer resolves to it (update the fixture)" for key in sorted(allowed - actual)]
     assert not problems, "\n".join(problems)
-    assert sum(len(spec["allowed"]) for spec in TOTALS.values()) == 217
+    assert sum(len(spec["allowed"]) for spec in TOTALS.values()) == 218  # +RegulatedAndUnregulatedOperatingRevenue (GH #1844)
 
 
 def test_mapped_members_are_allowed_known_wrong_or_already_blocked():

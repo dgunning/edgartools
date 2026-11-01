@@ -311,6 +311,7 @@
     "RealEstateRevenueNet": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
     "RecyclingRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
     "RefiningAndMarketingRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
+    "RegulatedAndUnregulatedOperatingRevenue": "canonical",
     "ReimbursementRevenue": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
     "ResearchAndDevelopmentArrangementContractToPerformForOthersCompensationEarned": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",
     "RetailLandSalesImprovementRevenuePriorSales": "unsure: a revenue stream; a calculation child of Revenues, but a single-stream filer reports it as its top line",

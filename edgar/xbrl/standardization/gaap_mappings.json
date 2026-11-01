@@ -14878,70 +14878,6 @@
     "first_year": 2012,
     "last_year": 2025
   },
-  "EffectiveIncomeTaxRateReconciliationFdiiAmount": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "EffectiveIncomeTaxRateReconciliationGiltiAmount": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "EffectiveIncomeTaxRateReconciliationTaxCutsAndJobsActOf2017Amount": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "EffectiveIncomeTaxRateReconciliationTaxCutsAndJobsActOf2017TransitionTaxOnAccumulatedForeignEarningsAmount": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2021,
-    "last_year": 2021
-  },
   "ElectricBundledRevenue": {
     "standard_tags": [
       "Revenue"
@@ -16673,22 +16609,6 @@
     "confidence": 0.5,
     "company_count": 236,
     "occurrence_rate": 0.026,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
-  "FinanceLeaseRightOfUseAssetBeforeAccumulatedAmortization": {
-    "standard_tags": [
-      "PlantPropertyEquipmentNet"
-    ],
-    "display_name": "Property, Plant and Equipment",
-    "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 18,
-    "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
@@ -20074,710 +19994,6 @@
     "first_year": 2021,
     "last_year": 2025
   },
-  "IncomeTaxReconciliationChangeInDeferredTaxAssetsValuationAllowance": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationChangeInEnactedTaxRate": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDeductions": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDeductionsDividends": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDeductionsExtraterritorialIncomeExclusion": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDeductionsOther": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDeductionsQualifiedProductionActivities": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDispositionOfAssets": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.25,
-    "years_present": 3,
-    "first_year": 2020,
-    "last_year": 2022
-  },
-  "IncomeTaxReconciliationDispositionOfBusiness": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationEquityInEarningsLossesOfUnconsolidatedSubsidiary": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.167,
-    "years_present": 2,
-    "first_year": 2020,
-    "last_year": 2021
-  },
-  "IncomeTaxReconciliationForeignIncomeTaxRateDifferential": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationIncomeTaxExpenseBenefitAtFederalStatutoryIncomeTaxRate": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationMinorityInterestIncomeExpense": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpense": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseAmortization": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseDepletion": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseImpairmentLosses": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseMealsAndEntertainment": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseOther": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseResearchAndDevelopment": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseRestructuringCharges": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseShareBasedCompensationCost": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2024,
-    "last_year": 2024
-  },
-  "IncomeTaxReconciliationOtherAdjustments": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationOtherReconcilingItems": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.167,
-    "years_present": 2,
-    "first_year": 2023,
-    "last_year": 2024
-  },
-  "IncomeTaxReconciliationPriorYearIncomeTaxes": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationRepatriationOfForeignEarnings": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationRepatriationOfForeignEarningsJobsCreationActOf2004": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationStateAndLocalIncomeTaxes": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxContingencies": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2021,
-    "last_year": 2021
-  },
-  "IncomeTaxReconciliationTaxContingenciesDomestic": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxContingenciesForeign": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxContingenciesOther": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxContingenciesStateAndLocal": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxCredits": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxCreditsForeign": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxCreditsInvestment": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxCreditsOther": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2023,
-    "last_year": 2023
-  },
-  "IncomeTaxReconciliationTaxCreditsResearch": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 2,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.25,
-    "years_present": 3,
-    "first_year": 2021,
-    "last_year": 2024
-  },
-  "IncomeTaxReconciliationTaxExemptIncome": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxHolidays": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxSettlements": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2022,
-    "last_year": 2022
-  },
-  "IncomeTaxReconciliationTaxSettlementsDomestic": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxSettlementsForeign": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxSettlementsStateAndLocal": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
   "IncomeTaxesReceivable": {
     "standard_tags": [
       "IncomeTaxReceivable"
@@ -22620,13 +21836,13 @@
   },
   "InterestExpenseOnLeaseLiabilities": {
     "standard_tags": [
-      "OperatingLeaseExpense"
+      "InterestExpense"
     ],
-    "display_name": "Operating Lease Expense",
+    "display_name": "Interest Expense",
     "statement": "IncomeStatement",
-    "section": "Operating Expenses",
+    "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 39,
     "occurrence_rate": 0.004,
     "temporal_consistency": 0.417,
@@ -35506,13 +34722,13 @@
   },
   "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "AccumulatedDepreciation"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Accumulated Depreciation",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": true,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 118,
     "occurrence_rate": 0.013,
     "temporal_consistency": 0.417,
@@ -35538,13 +34754,13 @@
   },
   "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "GrossPropertyPlantEquipment"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Property, Plant & Equipment, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": true,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 62,
     "occurrence_rate": 0.007,
     "temporal_consistency": 0.417,
@@ -35570,13 +34786,13 @@
   },
   "PropertyPlantAndEquipmentExcludingLessorAssetUnderOperatingLeaseAccumulatedDepreciation": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "AccumulatedDepreciation"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Accumulated Depreciation",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 2,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -35602,13 +34818,13 @@
   },
   "PropertyPlantAndEquipmentExcludingLessorAssetUnderOperatingLeaseBeforeAccumulatedDepreciation": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "GrossPropertyPlantEquipment"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Property, Plant & Equipment, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": true,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -35680,22 +34896,6 @@
     "first_year": 2020,
     "last_year": 2025
   },
-  "PropertyPlantAndEquipmentOtherAccumulatedDepreciation": {
-    "standard_tags": [
-      "PlantPropertyEquipmentNet"
-    ],
-    "display_name": "Property, Plant and Equipment",
-    "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 9,
-    "occurrence_rate": 0.001,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
   "PropertyPlantAndEquipmentOtherNet": {
     "standard_tags": [
       "PlantPropertyEquipmentNet"
@@ -35714,13 +34914,13 @@
   },
   "PropertyPlantAndEquipmentOwnedAccumulatedDepreciation": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "AccumulatedDepreciation"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Accumulated Depreciation",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 10,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
@@ -36660,13 +35860,13 @@
   },
   "RegulatedAndUnregulatedOperatingRevenue": {
     "standard_tags": [
-      "ElectricUtilityRevenue"
+      "Revenue"
     ],
-    "display_name": "Electric Utility Revenue",
+    "display_name": "Revenue",
     "statement": "IncomeStatement",
     "section": "Revenue",
     "is_total": true,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 18,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
@@ -42646,7 +41846,7 @@
   },
   "ifrs-full_InterestExpenseOnLeaseLiabilities": {
     "standard_tags": [
-      "OperatingLeaseExpense"
+      "InterestExpense"
     ]
   },
   "ifrs-full_Inventories": {
