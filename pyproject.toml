@@ -188,11 +188,11 @@ dependencies = [
   "pytest-asyncio",
   "pytest-retry",
   "pytest-vcr",
-  # 8.3.0 is the first vcrpy that can intercept httpx2. Its httpx stub crashes
-  # (`'NoneType' object has no attribute 'encode'`) on a cassette with a null
-  # reason phrase, which 79 of ours have; tests/_vcr_compat.py carries the fix
-  # until kevin1024/vcrpy#1029 is released.
-  "vcrpy>=8.3.0,<9",
+  # 8.3.0 is the first vcrpy that can intercept httpx2, and 8.4.0 the first that
+  # replays a cassette with a null reason phrase (kevin1024/vcrpy#1029), which
+  # 79 of ours have. 8.3.0 crashes on them with `'NoneType' object has no
+  # attribute 'encode'`; tests/meta/test_vcr_null_reason_phrase.py checks it.
+  "vcrpy>=8.4.0,<9",
   "filelock",
   "pyinstrument",
   "pyright",
@@ -323,9 +323,8 @@ dependencies = [
   "pytest-retry",
   "pytest-mock",
   "pytest-vcr",
-  # Same floor as the default env; tests/_vcr_compat.py carries the
-  # null-reason-phrase fix this version needs.
-  "vcrpy>=8.3.0,<9",
+  # Same floor as the default env: 8.4.0 replays null reason phrases.
+  "vcrpy>=8.4.0,<9",
   "filelock",
   "tqdm",
   "responses",
