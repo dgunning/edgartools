@@ -22,6 +22,10 @@ _CURRENCY_PREFIX_RE = re.compile(r'^[A-Z]{0,3}\$')
 # Numeric placeholder symbols
 _NUMERIC_PLACEHOLDERS = frozenset(['—', '–', '-', '--', 'N/A', 'n/a', 'NM', 'nm'])
 
+# Placeholders that mean "no value reported" rather than zero. They stay numeric-like
+# for table geometry and classification, but export as NaN instead of 0.0 (GH #1849).
+_MISSING_PLACEHOLDERS = frozenset(['N/A', 'n/a', 'NM', 'nm'])
+
 
 def _drop_empty_spacer_columns(df: pd.DataFrame, label_key) -> pd.DataFrame:
     """Drop the empty columns left behind by a row-label header that spans several.
@@ -119,6 +123,8 @@ class Cell:
         if not self.is_numeric:
             return None
         text = self.text().strip()
+        if text in _MISSING_PLACEHOLDERS:
+            return float('nan')
         if text in _NUMERIC_PLACEHOLDERS:
             return 0.0
         try:
