@@ -2782,9 +2782,9 @@ class PortfolioInvestments:
             {
                 'company_name': inv.company_name,
                 'investment_type': inv.investment_type,
-                'fair_value': float(inv.fair_value) if inv.fair_value else None,
-                'cost': float(inv.cost) if inv.cost else None,
-                'principal_amount': float(inv.principal_amount) if inv.principal_amount else None,
+                'fair_value': float(inv.fair_value) if inv.fair_value is not None else None,
+                'cost': float(inv.cost) if inv.cost is not None else None,
+                'principal_amount': float(inv.principal_amount) if inv.principal_amount is not None else None,
                 'shares': inv.shares,
                 'interest_rate': inv.interest_rate,
                 'pik_rate': inv.pik_rate,
