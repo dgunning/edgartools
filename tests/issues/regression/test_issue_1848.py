@@ -112,9 +112,10 @@ def test_rendering_shows_put_call_only_when_present(reports):
 
 
 def test_rendering_has_no_put_call_column_without_options():
+    from rich.console import Console
+
     from edgar.thirteenf.models import HoldingsComparison
     from edgar.thirteenf.rendering import render_holdings_comparison
-    from rich.console import Console
     df = pd.DataFrame([{
         "Cusip": "00211V106", "Ticker": None, "Issuer": "ATA CREATIVITY", "PutCall": "",
         "Shares": 400, "PrevShares": 400, "Value": 308, "PrevValue": 327, "ShareChange": 0,
@@ -128,6 +129,7 @@ def test_rendering_has_no_put_call_column_without_options():
 async def test_mcp_comparison_names_the_option_rows():
     """The MCP comparison payload says which of a CUSIP's rows is the Put or Call."""
     from unittest.mock import MagicMock, patch
+
     from edgar.ai.mcp.tools.ownership import edgar_ownership
 
     df = pd.DataFrame([
