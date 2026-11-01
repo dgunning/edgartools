@@ -22620,13 +22620,13 @@
   },
   "InterestExpenseOnLeaseLiabilities": {
     "standard_tags": [
-      "OperatingLeaseExpense"
+      "InterestExpense"
     ],
-    "display_name": "Operating Lease Expense",
+    "display_name": "Interest Expense",
     "statement": "IncomeStatement",
-    "section": "Operating Expenses",
+    "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 39,
     "occurrence_rate": 0.004,
     "temporal_consistency": 0.417,
@@ -42646,7 +42646,7 @@
   },
   "ifrs-full_InterestExpenseOnLeaseLiabilities": {
     "standard_tags": [
-      "OperatingLeaseExpense"
+      "InterestExpense"
     ]
   },
   "ifrs-full_Inventories": {
