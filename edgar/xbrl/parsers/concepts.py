@@ -224,8 +224,8 @@ US_GAAP_BALANCE_TYPES = {
     # ============================================================================
 
     'us-gaap:CommonStockValue': 'credit',
-    'us-gaap:CommonStockSharesIssued': 'credit',
-    'us-gaap:CommonStockSharesOutstanding': 'credit',
+    # Share counts (CommonStockSharesIssued, CommonStockSharesOutstanding) are
+    # sharesItemType, which the taxonomy gives no balance (GH #1728).
     'us-gaap:PreferredStockValue': 'credit',
     'us-gaap:AdditionalPaidInCapital': 'credit',
     'us-gaap:AdditionalPaidInCapitalCommonStock': 'credit',
@@ -264,6 +264,7 @@ US_GAAP_BALANCE_TYPES = {
     # Cost of Revenue
     'us-gaap:CostOfRevenue': 'debit',
     'us-gaap:CostOfGoodsAndServicesSold': 'debit',
+    'us-gaap:CostsAndExpenses': 'debit',
     'us-gaap:CostOfGoodsSold': 'debit',
     'us-gaap:CostOfServices': 'debit',
 
@@ -306,7 +307,8 @@ US_GAAP_BALANCE_TYPES = {
     # ============================================================================
 
     # Operating Activities
-    'us-gaap:NetCashProvidedByUsedInOperatingActivities': 'debit',
+    # NetCashProvidedByUsedInOperatingActivities has no balance in the taxonomy
+    # (it can be an inflow or an outflow), so it has no entry (GH #1728).
     'us-gaap:DepreciationAndAmortization': 'debit',
     'us-gaap:ShareBasedCompensationArrangementByShareBasedPaymentAwardExpenseRecognized': 'debit',
     'us-gaap:DeferredIncomeTaxExpenseBenefit': 'debit',
