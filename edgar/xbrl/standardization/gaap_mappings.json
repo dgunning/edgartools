@@ -36660,13 +36660,13 @@
   },
   "RegulatedAndUnregulatedOperatingRevenue": {
     "standard_tags": [
-      "ElectricUtilityRevenue"
+      "Revenue"
     ],
-    "display_name": "Electric Utility Revenue",
+    "display_name": "Revenue",
     "statement": "IncomeStatement",
     "section": "Revenue",
     "is_total": true,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 18,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
