@@ -26,6 +26,9 @@ __all__ = ['parse_multiline_format', 'extract_entry_total', 'reconcile_entry_tot
 # Minimum number of columns expected in a holdings table marker line
 _MIN_HOLDINGS_COLUMNS = 6
 
+# A voting-column number: digits with thousands separators, optional decimals; no trailing comma
+_VOTING_NUMBER_RE = re.compile(r'^\d{1,3}(,\d{3})*(\.\d+)?$|^\d+(\.\d+)?$')
+
 # Regex for a valid cleaned CUSIP: exactly 9 alphanumeric chars with at least one digit
 _CUSIP_RE = re.compile(r'^[A-Za-z0-9]{9}$')
 
@@ -179,6 +182,41 @@ def _is_header_or_skip_line(line):
     return False
 
 
+def _trailing_voting_with_dashes(data_parts, shares):
+    """Voting columns of a row whose empty cells are dashes, or None to use the numeric scan.
+
+    A legacy table writes an empty voting cell as '-' (GH #1846). The numeric scan in
+    ``_parse_after_cusip`` stops at a bare '-', so ``4  1,952,142  -  -`` lost its Sole quantity and
+    ``11  -  -  148,311`` filed its None quantity under Sole. Manager numbers (``2``, ``11``) look like
+    voting quantities, so the alignment is not guessed from the tokens alone: the trailing 3, then 2,
+    then 1 tokens (plain numbers or dashes, never ``4,``) are taken as the voting cells, in Sole,
+    Shared, None order with '-' as 0, and the first alignment whose quantities add up to the row's
+    shares wins. Voting authority covers the position, so a sum that matches is the strongest
+    evidence of the alignment. Returns None, leaving the scan in charge, when no trailing group
+    contains a dash or none adds up to the shares.
+    """
+    if not shares:
+        return None
+    for count in (3, 2, 1):
+        if len(data_parts) < 2 + count:
+            continue
+        cells = data_parts[-count:]
+        if '-' not in cells:
+            continue
+        values = []
+        for cell in cells:
+            if cell == '-':
+                values.append(0)
+            elif _VOTING_NUMBER_RE.match(cell):
+                values.append(float(cell.replace(',', '')))
+            else:
+                break
+        else:
+            if sum(values) == shares:
+                return values
+    return None
+
+
 def _parse_after_cusip(data_parts):
     """
     Parse the numeric fields after the CUSIP column.
@@ -200,19 +238,21 @@ def _parse_after_cusip(data_parts):
         shares = int(float(shares_str)) if shares_str and shares_str != '-' else 0
 
         # Parse voting columns from the end (look for numeric values)
-        voting_values = []
-        for i in range(len(data_parts) - 1, 1, -1):
-            part = data_parts[i].replace(',', '').replace('.', '')
-            if part.replace('-', '').isdigit():
-                val_str = data_parts[i].replace(',', '')
-                try:
-                    voting_values.insert(0, float(val_str) if val_str != '-' else 0)
-                    if len(voting_values) == 3:
+        voting_values = _trailing_voting_with_dashes(data_parts, shares)
+        if voting_values is None:
+            voting_values = []
+            for i in range(len(data_parts) - 1, 1, -1):
+                part = data_parts[i].replace(',', '').replace('.', '')
+                if part.replace('-', '').isdigit():
+                    val_str = data_parts[i].replace(',', '')
+                    try:
+                        voting_values.insert(0, float(val_str) if val_str != '-' else 0)
+                        if len(voting_values) == 3:
+                            break
+                    except ValueError:
                         break
-                except ValueError:
+                else:
                     break
-            else:
-                break
 
         sole_voting = int(voting_values[0]) if len(voting_values) >= 1 else 0
         shared_voting = int(voting_values[1]) if len(voting_values) >= 2 else 0
