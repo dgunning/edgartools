@@ -639,8 +639,10 @@ class Company(Entity):
 
         The HTML result is a Financials with ``xb=None``. Its income_statement()
         is a FinancialTable with to_dataframe(), currency, source_url and notes;
-        its income getters return actual currency amounts. Balance sheet and
-        cash flow are unavailable. XBRL-only operations are not supported.
+        its DataFrame has Statement metadata columns (unavailable XBRL metadata
+        is null), optional per-row units and conservative standard_concept
+        mappings. Income getters return actual currency amounts. Balance sheet
+        and cash flow are unavailable; requested XBRL-only operations raise.
 
         Args:
             max_6k_filings: Positive bound on recent 6-Ks examined (default 10).
