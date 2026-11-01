@@ -155,6 +155,22 @@ class HoldingsView:
         return self.data.iloc[index]
 
 
+def _position_frame(holdings, columns):
+    """Select ``columns`` from a holdings frame plus a plain-string ``PutCall`` key.
+
+    A 13F position is identified by ``(Cusip, PutCall)``: common stock, Put and Call rows on one
+    CUSIP are separate positions (GH #824, GH #1848). Equity rows carry ``''``; a missing column,
+    NaN or None is normalised to ``''`` so both sides of a merge compare equal.
+    """
+    frame = holdings[[c for c in columns if c != 'PutCall']].copy()
+    if 'PutCall' in holdings.columns:
+        put_call = holdings['PutCall'].astype(object)
+        frame['PutCall'] = put_call.where(put_call.notna(), '').astype(str)
+    else:
+        frame['PutCall'] = ''
+    return frame
+
+
 class HoldingsComparison:
     """Comparison of 13F holdings between two consecutive quarters."""
 
@@ -1135,11 +1151,13 @@ class ThirteenF:
         if previous is None or len(previous) == 0:
             return None
 
-        cur = current[['Cusip', 'Ticker', 'Issuer', 'SharesPrnAmount', 'Value']].rename(
+        # Match like with like: the position key is (Cusip, PutCall), the same identity
+        # `holdings` aggregates by (GH #1848).
+        cur = _position_frame(current, ['Cusip', 'Ticker', 'Issuer', 'PutCall', 'SharesPrnAmount', 'Value']).rename(
             columns={'SharesPrnAmount': 'Shares'}
         )
 
-        prev = previous[['Cusip', 'Ticker', 'Issuer', 'SharesPrnAmount', 'Value']].rename(
+        prev = _position_frame(previous, ['Cusip', 'Ticker', 'Issuer', 'PutCall', 'SharesPrnAmount', 'Value']).rename(
             columns={
                 'Ticker': 'Ticker_prev',
                 'Issuer': 'Issuer_prev',
@@ -1148,7 +1166,7 @@ class ThirteenF:
             }
         )
 
-        merged = cur.merge(prev, on='Cusip', how='outer')
+        merged = cur.merge(prev, on=['Cusip', 'PutCall'], how='outer')
 
         # Coalesce Ticker / Issuer
         merged['Ticker'] = merged['Ticker'].fillna(merged['Ticker_prev'])
@@ -1240,23 +1258,23 @@ class ThirteenF:
             if h is None or len(h) == 0:
                 continue
             col_name = report.report_period
-            subset = h[['Cusip', 'Ticker', 'Issuer', 'SharesPrnAmount']].copy()
+            subset = _position_frame(h, ['Cusip', 'Ticker', 'Issuer', 'PutCall', 'SharesPrnAmount'])
             subset.rename(columns={'SharesPrnAmount': col_name}, inplace=True)
 
             if merged is None:
                 merged = subset
             else:
-                # Merge on Cusip; coalesce Ticker/Issuer from newer data
+                # Merge on the position key (Cusip, PutCall); coalesce Ticker/Issuer from newer data
                 merged = merged.merge(
-                    subset[['Cusip', col_name]],
-                    on='Cusip',
+                    subset[['Cusip', 'PutCall', col_name]],
+                    on=['Cusip', 'PutCall'],
                     how='outer',
                 )
                 # Update Ticker/Issuer from this (newer) report where missing
                 # Use merge instead of map (2-3x faster than apply)
-                new_ids = subset[['Cusip', 'Ticker', 'Issuer']].drop_duplicates('Cusip')
+                new_ids = subset[['Cusip', 'PutCall', 'Ticker', 'Issuer']].drop_duplicates(['Cusip', 'PutCall'])
                 new_ids = new_ids.rename(columns={'Ticker': 'Ticker_new', 'Issuer': 'Issuer_new'})
-                merged = merged.merge(new_ids, on='Cusip', how='left')
+                merged = merged.merge(new_ids, on=['Cusip', 'PutCall'], how='left')
                 merged['Ticker'] = merged['Ticker'].fillna(merged['Ticker_new'])
                 merged['Issuer'] = merged['Issuer'].fillna(merged['Issuer_new'])
                 merged.drop(columns=['Ticker_new', 'Issuer_new'], inplace=True)

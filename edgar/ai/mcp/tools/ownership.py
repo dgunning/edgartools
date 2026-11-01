@@ -313,6 +313,10 @@ async def _get_portfolio_diff(identifier: str, limit: int) -> Any:
                 "cusip": _cell_text(row.get("Cusip")) or "",
                 "status": _cell_text(row.get("Status")) or "",
             }
+            # Option rows share a CUSIP with the equity row; say which one this is (GH #1848)
+            put_call = _cell_text(row.get("PutCall"))
+            if put_call:
+                entry["put_call"] = put_call
 
             # Current values
             shares = _cell_number(row.get("Shares"), as_int=True)
