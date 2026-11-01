@@ -803,7 +803,8 @@ class TestREITSubtype:
         # Equity REITs
         ("PLD", "equity"),     # Prologis (industrial)
         ("AMT", "equity"),     # American Tower (cell towers)
-        ("EQR", "equity"),     # Equity Residential (apartments)
+        (906107, "equity"),    # Vivmark Residential (apartments): Equity Residential until
+                               # 2026-08-12, when SEC retired the EQR ticker for VMRK; the CIK survives renames
         ("O", "equity"),       # Realty Income (net lease)
         ("SPG", "equity"),     # Simon Property Group (malls)
         ("WPC", "equity"),     # W. P. Carey (net lease) — GH #854 regression:

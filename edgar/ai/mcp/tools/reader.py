@@ -77,6 +77,10 @@ SECTION_MAP_6K = {
 # Form types that have dedicated extractors (keyed by base form, without /A suffix)
 FORM_EXTRACTORS = {"10-K", "10-Q", "8-K", "DEF 14A", "SC 13D", "SC 13G", "SC 13D/A", "SC 13G/A", "13F-HR"}
 
+# Schedule 13D/G form names: "SC 13D" until December 2024, "SCHEDULE 13D" since
+SCHEDULE_13D_FORMS = ("SC 13D", "SCHEDULE 13D")
+SCHEDULE_13G_FORMS = ("SC 13G", "SCHEDULE 13G")
+
 # Rows of a 13F-HR ``holdings`` section returned when the caller sets no ``limit``.
 DEFAULT_HOLDINGS_LIMIT = 30
 
@@ -95,7 +99,8 @@ Available sections by form type:
 - 20-F: business, risk_factors, mda, financials, directors, shareholders, controls
 - 8-K: items, press_release, earnings
 - DEF 14A: compensation, pay_performance, governance
-- SC 13D/13G: ownership, purpose
+- SC 13D / SCHEDULE 13D: ownership, purpose
+- SC 13G / SCHEDULE 13G: ownership
 - 13F-HR: holdings, summary
 
 Examples:
@@ -335,8 +340,10 @@ def _get_section_list(form_type: str) -> list[str]:
         return ["items", "press_release", "earnings"]
     elif base == "DEF 14A":
         return ["compensation", "pay_performance", "governance"]
-    elif base in ("SC 13D", "SC 13G"):
+    elif base in SCHEDULE_13D_FORMS:
         return ["ownership", "purpose"]
+    elif base in SCHEDULE_13G_FORMS:
+        return ["ownership"]
     elif base == "13F-HR":
         return ["holdings", "summary"]
     else:
@@ -361,7 +368,7 @@ def _extract_section(obj, form_type: str, section: str, limit: int = DEFAULT_HOL
         return _extract_8k_section(obj, section)
     elif base == "DEF 14A":
         return _extract_proxy_section(obj, section)
-    elif base in ("SC 13D", "SC 13G"):
+    elif base in SCHEDULE_13D_FORMS or base in SCHEDULE_13G_FORMS:
         return _extract_schedule13_section(obj, section)
     elif base == "13F-HR":
         return _extract_13f_section(obj, section, limit=limit)
@@ -577,16 +584,9 @@ def _extract_schedule13_section(obj, section: str) -> Optional[str]:
         return None
 
     elif section == "purpose":
-        # Try to get the purpose of transaction text
-        try:
-            # Schedule 13D Item 4 is "Purpose of Transaction"
-            if hasattr(obj, 'purpose_of_transaction'):
-                return str(obj.purpose_of_transaction)
-            # Fallback: try generic string representation
-            return str(obj)
-        except Exception as e:
-            logger.debug(f"Could not extract 13D/G purpose: {e}")
-        return None
+        # Schedule 13D Item 4 is "Purpose of Transaction"; Schedule 13G has no such item
+        items = getattr(obj, 'items', None)
+        return getattr(items, 'item4_purpose_of_transaction', None)
 
     return None
 
