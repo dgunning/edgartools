@@ -805,6 +805,10 @@ class FactQuery:
             aggfunc='first'
         )
         pivot.index.name = 'label'
+        # The unit of each row, where it has one, so the statement can tell a pure
+        # ratio (0.156 = 15.6%) from a dollar amount labelled 'margin' (GH #1850).
+        row_units = df.groupby('row_key')['unit'].agg(lambda u: u.iloc[0] if (u == u.iloc[0]).all() else None)
+        pivot.attrs['units'] = {k: v for k, v in row_units.items() if v}
 
         # Sort columns by period (newest first)
         # Create a mapping of column names to sort keys
