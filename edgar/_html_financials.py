@@ -281,6 +281,49 @@ class _HTMLFinancials(Financials):
         return self._income.__rich__()
 
 
+def _quarter_column_positions(table, filing_year):
+    """Keep unique quarterly amount columns, newest comparison first."""
+    columns = [(key, i) for i, col in enumerate(table.dataframe.columns)
+               if (key := _quarter(str(col), filing_year)) is not None]
+    if not columns or len({key for key, _ in columns}) != len(columns):
+        return []
+    return [i for _, i in sorted(columns, reverse=True)]
+
+
+def _has_income_totals(table):
+    labels = {str(label).strip().lower() for label in table.dataframe.index}
+    if not labels.intersection(_REVENUE) or not labels.intersection(_NET_INCOME):
+        return False
+    # A grouped/NCI table needs explicit parent attribution; do not return
+    # consolidated income as the owners' income via a loose label match.
+    has_nci = any('noncontrolling' in label or 'non-controlling' in label for label in labels)
+    return not has_nci or bool(labels.intersection(_NET_INCOME[:2]))
+
+
+def _declared_table_units(context):
+    """Use the nearest explicit declaration, even if it is unsupported."""
+    for text in reversed(context):
+        match = re.search(r'(?:\(?\s*units?\s*:\s*|\(\s*(?:amounts?\s+)?in\s+)[^)\n]+', text, re.I)
+        if match:
+            declaration = match[0]
+            currency = _currency(declaration)
+            return (declaration, currency, Scale.detect(declaration)) if currency else None
+    return None
+
+
+def _clean_eps_rows(frame, row_types):
+    for row, label in enumerate(frame.index):
+        if not re.search(r'\beps\b|per share|per adr|per ads', str(label), re.I):
+            continue
+        row_types[row] = RowType.PER_SHARE
+        # The existing parser preserves literal letter footnotes (29.43b).
+        # Retain the footnote text below, remove only a numeric suffix.
+        for col in range(len(frame.columns)):
+            match = re.fullmatch(r'(-?\d+(?:\.\d+)?)[a-z]', str(frame.iloc[row, col]), re.I)
+            if match:
+                frame.iloc[row, col] = float(match[1])
+
+
 def _extract_6k_income_statement(filing) -> Optional[Financials]:
     """Return only an explicitly quarterly, currency-qualified income table.
 
@@ -297,43 +340,23 @@ def _extract_6k_income_statement(filing) -> Optional[Financials]:
         table = release.income_statement
         if table is None:
             continue
-        columns = [(key, i) for i, col in enumerate(table.dataframe.columns)
-                   if (key := _quarter(str(col), filing_year)) is not None]
-        if not columns or len({key for key, _ in columns}) != len(columns):
+        positions = _quarter_column_positions(table, filing_year)
+        if not positions or not _has_income_totals(table):
             continue
-        labels = {str(label).strip().lower() for label in table.dataframe.index}
-        if not labels.intersection(_REVENUE) or not labels.intersection(_NET_INCOME):
-            continue
-        # A grouped/NCI table needs explicit parent attribution; do not return
-        # consolidated income as the owners' income via a loose label match.
-        if any('noncontrolling' in label or 'non-controlling' in label for label in labels):
-            if not labels.intersection(_NET_INCOME[:2]):
-                continue
         context, notes = _table_context(release, table)
-        declarations = [m[0] for text in reversed(context)
-                        if (m := re.search(r'(?:\(?\s*units?\s*:\s*|\(\s*(?:amounts?\s+)?in\s+)[^)\n]+', text, re.I))]
-        if not declarations or (currency := _currency(declarations[0])) is None:
+        units = _declared_table_units(context)
+        if units is None:
             continue
-        scale = Scale.detect(declarations[0])
-        positions = [i for _, i in sorted(columns, reverse=True)]
+        declaration, currency, scale = units
         frame = table.dataframe.iloc[:, positions].copy()
         row_types = list(table.row_types)
-        for row, label in enumerate(frame.index):
-            if re.search(r'\beps\b|per share|per adr|per ads', str(label), re.I):
-                row_types[row] = RowType.PER_SHARE
-                # The existing parser preserves literal letter footnotes (29.43b).
-                # Retain the footnote text below, remove only a numeric suffix.
-                for col in range(len(frame.columns)):
-                    raw = str(frame.iloc[row, col])
-                    match = re.fullmatch(r'(-?\d+(?:\.\d+)?)[a-z]', raw, re.I)
-                    if match:
-                        frame.iloc[row, col] = float(match[1])
+        _clean_eps_rows(frame, row_types)
         source_url = attachment.url
         statement = _HTMLIncomeStatement(
             dataframe=frame, scale=scale, title=table.title,
             statement_type=table.statement_type, periods=list(frame.columns),
             raw_index=table.raw_index, row_types=row_types, currency=currency,
-            source_url=source_url, notes=tuple([declarations[0], *notes]),
+            source_url=source_url, notes=tuple([declaration, *notes]),
         )
         result = _HTMLFinancials(filing, statement)
         if result.get_revenue() is not None and result.get_net_income() is not None:
