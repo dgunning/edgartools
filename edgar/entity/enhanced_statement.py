@@ -129,8 +129,48 @@ _EPS_CONCEPTS = [
 _PROFIT_CONCEPTS = [
     'GrossProfit',
     'OperatingIncomeLoss',
+    'ProfitLoss',
     'NetIncomeLoss',
 ]
+
+# Periods a 10-K or 10-Q reports in; DEF 14A pay-versus-performance facts carry none.
+_REPORTED_FISCAL_PERIODS = {'FY', 'Q1', 'Q2', 'Q3', 'Q4'}
+
+
+def _local_name(concept: str) -> str:
+    return concept.split(':')[-1]
+
+
+def _with_profit_loss_fallback(stmt_facts: List['FinancialFact'],
+                               facts: List['FinancialFact']) -> List['FinancialFact']:
+    """Add ProfitLoss to an income statement for periods it has no net income for.
+
+    Some filers (Mastercard among them) tag the income statement's net income line
+    as us-gaap:ProfitLoss, net income including the noncontrolling interest, and
+    never as NetIncomeLoss. The learned mappings place ProfitLoss on the cash flow
+    statement, which does not feed the income statement, so those facts were
+    dropped and the only net income row left was the noncontrolling interest's
+    (GH #1823). ProfitLoss is added only for a period the statement already has
+    and that has no reported NetIncomeLoss, so a filer that tags both keeps one
+    net income row per period.
+    """
+    def period(fact):
+        return fact.period_start, fact.period_end
+
+    statement_periods = {period(f) for f in stmt_facts}
+    with_net_income = {
+        period(f) for f in stmt_facts
+        if _local_name(f.concept) == 'NetIncomeLoss' and f.fiscal_period in _REPORTED_FISCAL_PERIODS
+    }
+    included = {id(f) for f in stmt_facts}
+    fallback = [
+        f for f in facts
+        if _local_name(f.concept) == 'ProfitLoss'
+        and id(f) not in included
+        and period(f) in statement_periods
+        and period(f) not in with_net_income
+    ]
+    return stmt_facts + fallback if fallback else stmt_facts
 
 
 def _fact_belongs_to_statement(fact: 'FinancialFact', target_stmt_type: str) -> bool:
@@ -1690,6 +1730,8 @@ class EnhancedStatementBuilder:
         """
         # Filter facts by statement type (including multi-statement concepts from feeder statements)
         stmt_facts = [f for f in facts if _fact_belongs_to_statement(f, statement_type)]
+        if statement_type == 'IncomeStatement':
+            stmt_facts = _with_profit_loss_fallback(stmt_facts, facts)
 
         # Use the same logic as FactQuery.latest_periods for consistency
         # Group facts by unique periods and calculate period info
@@ -2303,7 +2345,11 @@ class EnhancedStatementBuilder:
 
                     # Add profit concepts
                     for concept in _PROFIT_CONCEPTS:
-                        if concept in nodes:
+                        # ProfitLoss has no income statement node (the learned tree
+                        # places it on the cash flow statement), but when it is
+                        # the filer's net income it belongs here, not among the
+                        # orphans at the end (GH #1823).
+                        if concept in nodes or concept == 'ProfitLoss':
                             has_values = any(concept in period_maps[p] for p in periods)
                             if has_values:
                                 profit_item = self._build_canonical_item(
@@ -3209,7 +3255,8 @@ class EnhancedStatementBuilder:
             'IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest',
             # Tax
             'IncomeTaxExpenseBenefit',
-            # Non-controlling interest
+            # Net income including the noncontrolling interest, then the interest
+            'ProfitLoss',
             'NetIncomeLossAttributableToNoncontrollingInterest',
             # Net Income
             'NetIncomeLoss', 'NetIncomeLossAvailableToCommonStockholdersBasic',
