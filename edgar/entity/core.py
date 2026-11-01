@@ -31,7 +31,7 @@ from edgar.company_reports import TenK, TenQ
 from edgar.display.styles import get_style, SYMBOLS
 from edgar.entity.data import Address, CompanyData, EntityData
 from edgar.entity.entity_facts import EntityFacts, get_company_facts
-from edgar.exceptions import CompanyFactsNotFoundError, CompanyNotFoundError
+from edgar.exceptions import CompanyFactsNotFoundError, CompanyNotFoundError, ValidationError
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.display.formatting import cik_text, datefmt, reverse_name
@@ -628,19 +628,28 @@ class Company(Entity):
                 return Financials.extract(filing)
         return None
 
-    def get_quarterly_financials(self) -> Optional[Financials]:
+    def get_quarterly_financials(self, *, max_6k_filings: int = 10) -> Optional[Financials]:
         """
         Get financial statements from this company's latest quarterly report.
 
-        Checks 10-Q first, then falls back to 6-K (foreign private issuers).
-        Returns a Financials object with the same interface as get_financials(),
-        but with quarterly data instead of annual.
+        Checks 10-Q first, then at most ``max_6k_filings`` recent unamended
+        6-Ks (foreign private issuers). For each 6-K, XBRL takes precedence.
+        An untagged HTML earnings exhibit can supply a table-backed income
+        statement with explicit quarterly columns and currency units.
+
+        The HTML result is a Financials with ``xb=None``. Its income_statement()
+        is a FinancialTable with to_dataframe(), currency, source_url and notes;
+        its income getters return actual currency amounts. Balance sheet and
+        cash flow are unavailable. XBRL-only operations are not supported.
+
+        Args:
+            max_6k_filings: Positive bound on recent 6-Ks examined (default 10).
+                Does not load older submissions beyond the current filings list.
 
         Returns:
             Financials object, or None when there are no statements to read:
-            this company has filed no 10-Q or 6-K, or the latest one carries no
-            XBRL (most 6-Ks don't). It is never how a failure is reported; a
-            transport or parsing failure raises.
+            no 10-Q exists and no supported 6-K is found within the search bound.
+            Transport failures raise; unsupported HTML formats remain unavailable.
 
         Example::
 
@@ -648,13 +657,23 @@ class Company(Entity):
             quarterly.income_statement()
             quarterly.balance_sheet()
         """
+        if isinstance(max_6k_filings, bool) or not isinstance(max_6k_filings, int) or max_6k_filings < 1:
+            raise ValidationError('max_6k_filings must be a positive integer',
+                                  parameter='max_6k_filings', invalid_value=max_6k_filings)
         tenq_filing = self.latest_tenq
         if tenq_filing is not None:
             return tenq_filing.financials
         # Fall back to 6-K (foreign private issuers)
-        filing = self.get_filings(form='6-K', amendments=False, trigger_full_load=False).latest()
-        if filing is not None:
-            return Financials.extract(filing)
+        from edgar._html_financials import _extract_6k_income_statement
+
+        filings = self.get_filings(form='6-K', amendments=False, trigger_full_load=False)
+        for filing in filings.head(max_6k_filings):
+            financials = Financials.extract(filing)
+            if financials is not None:
+                return financials
+            financials = _extract_6k_income_statement(filing)
+            if financials is not None:
+                return financials
         return None
 
     @property

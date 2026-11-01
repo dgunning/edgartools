@@ -118,6 +118,52 @@ income = quarterly.income_statement()
 | Annual (10-K) | `company.get_financials()` |
 | Quarterly (10-Q) | `company.get_quarterly_financials()` |
 
+### Foreign issuers and untagged 6-K earnings
+
+When no 10-Q exists, the method examines up to 10 recent unamended 6-Ks,
+newest first. Each filing's XBRL takes precedence. If XBRL is absent, an
+EX-99 HTML earnings exhibit can provide a **table-backed income statement**.
+A monthly notice without an income statement is skipped. Increase the explicit
+bound with `company.get_quarterly_financials(max_6k_filings=20)` if necessary;
+this does not fetch older submission-history files.
+
+```python
+from edgar import Company
+
+quarterly = Company("TSM").get_quarterly_financials()
+if quarterly is not None:
+    income = quarterly.income_statement()
+    print(income.to_dataframe())
+    print(quarterly.get_net_income())
+    if quarterly.xb is None:
+        print(income.currency, income.scale)
+        print(income.source_url)
+        print(income.notes)
+```
+
+For TSM's October 15, 2026 release (`0001046179-26-000726`), the reported net
+income is TWD 763,064 million. `get_net_income()` and `to_dataframe()` return
+**763,064,000,000 TWD**, while `income.dataframe` retains the reported millions.
+EPS remains unscaled: the release's `EPS (NT$)` row is **29.43**, not millions
+of dollars. The row is reported EPS; this adapter does not infer a basic/diluted
+classification or an ADR conversion.
+
+HTML results have `xb=None`. The income statement is a `FinancialTable`, not
+an XBRL `Statement`: it supports `.dataframe`, `.to_dataframe()` and the
+earnings-table display methods, but not XBRL rendering, facts or dimensional
+views. `get_revenue()`, `get_gross_profit()`, `get_operating_income()` and
+`get_net_income()` support recognized income rows. Other statements and
+unavailable metrics return `None`; they are not reconstructed. `period_offset`
+walks the actual quarterly **comparison columns** in date order, which need
+not be consecutive quarters.
+
+Currency and scale must be explicit near the table; annual/YTD, unknown-period,
+change-percent and ambiguous duplicate-period columns are not treated as
+quarterly amounts. Source URLs and nearby footnotes travel with the table,
+including TSM's note that the current figures had not been approved by its
+Board of Directors. Unsupported formats still return `None`; this limited
+fallback does not promise coverage of every foreign issuer's HTML or PDF.
+
 ---
 
 
