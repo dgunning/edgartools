@@ -48,7 +48,6 @@ filed value ``352583000000``. The prior year, context ``c-23`` (instant
 """
 import decimal
 import sys
-import time
 from unittest.mock import patch
 
 import pytest
@@ -513,14 +512,16 @@ def test_fraction_operand_includes_text_around_a_comment_or_processing_instructi
 def test_operands_outside_the_xsd_decimal_lexical_space_keep_the_slash_form():
     """An exponent, an underscore, or a non-ASCII digit is not an xsd:decimal.
 
-    ``Decimal`` accepts all three. ``1`` over ``1E-300000`` then builds a
-    coefficient of ``10 ** 300000`` inside the terminating-digit count, which
-    takes on the order of a minute. The lexical check rejects it first.
+    ``Decimal`` accepts all three. ``1`` over ``1E-300000`` would scale a
+    coefficient by ``10 ** 300000``. The lexical check rejects each operand
+    before ``Decimal`` is constructed. The spy records every constructor
+    argument from this parse, and those operands are absent from it.
     """
     # Arabic-Indic digit one. Decimal accepts it and reads it as 1.
     arabic_one = "\u0661"
-    started = time.perf_counter()
-    facts = _with_facts(f"""
+    rejected = ("1E-300000", "1E+2", "1_0", arabic_one)
+    with patch("edgar.xbrl.parsers.instance.Decimal", wraps=decimal.Decimal) as decimal_spy:
+        facts = _with_facts(f"""
   <my:hugeExponent contextRef="C1" unitRef="pure">
     <xbrli:numerator>1</xbrli:numerator>
     <xbrli:denominator>1E-300000</xbrli:denominator>
@@ -538,8 +539,12 @@ def test_operands_outside_the_xsd_decimal_lexical_space_keep_the_slash_form():
     <xbrli:denominator>1</xbrli:denominator>
   </my:arabicDigit>
 """)
-    elapsed = time.perf_counter() - started
-    assert elapsed < 1
+    constructed = _decimal_constructor_values(decimal_spy)
+    # 1/3 is in the fixture, so a live spy sees its denominator. An empty
+    # call list would otherwise make the negative checks pass.
+    assert "3" in constructed
+    for operand in rejected:
+        assert operand not in constructed
     huge = facts["my_hugeExponent|C1"]
     assert huge.value == "1/1E-300000"
     assert huge.numeric_value is None
@@ -640,10 +645,10 @@ def test_long_plain_decimal_operand_keeps_the_slash_form():
 
     The scale is the text length. Dividing it used to take about 29 seconds
     and produce a 300,002-digit integer. The cap rejects it before
-    ``Decimal`` is constructed. The clock stays as a loose backstop.
+    ``Decimal`` is constructed. The spy records every constructor argument
+    and the long denominator is absent from it.
     """
     den = "0." + "0" * 300_000 + "1"
-    started = time.perf_counter()
     with patch("edgar.xbrl.parsers.instance.Decimal", wraps=decimal.Decimal) as decimal_spy:
         facts = _with_facts(f"""
   <my:longDecimal contextRef="C1" unitRef="pure">
@@ -651,14 +656,9 @@ def test_long_plain_decimal_operand_keeps_the_slash_form():
     <xbrli:denominator>{den}</xbrli:denominator>
   </my:longDecimal>
 """)
-    elapsed = time.perf_counter() - started
-    assert elapsed < 1
-    constructed = []
-    for call in decimal_spy.call_args_list:
-        if call.args:
-            constructed.append(call.args[0])
-        elif "value" in call.kwargs:
-            constructed.append(call.kwargs["value"])
+    constructed = _decimal_constructor_values(decimal_spy)
+    # 1/3 is in the fixture, so a live spy sees its denominator.
+    assert "3" in constructed
     assert den not in constructed
     assert all(isinstance(text, str) and len(text) <= 10000 for text in constructed)
     fact = facts["my_longDecimal|C1"]
@@ -696,6 +696,17 @@ def test_apple_fy2023_10k_ordinary_assets_are_unchanged():
     prior = facts["us-gaap_Assets|c-23"]
     assert prior.value == "352755000000"
     assert prior.numeric_value == 352755000000.0
+
+
+def _decimal_constructor_values(decimal_spy):
+    """Texts passed to ``Decimal`` while the spy was active."""
+    constructed = []
+    for call in decimal_spy.call_args_list:
+        if call.args:
+            constructed.append(call.args[0])
+        elif "value" in call.kwargs:
+            constructed.append(call.kwargs["value"])
+    return constructed
 
 
 def _with_facts(extra: str):
