@@ -7,6 +7,7 @@ Get ownership data: insider transactions, institutional holders, or fund portfol
 from __future__ import annotations
 
 import logging
+from datetime import date, timedelta
 from typing import Any
 
 from edgar.ai.mcp.tools.base import (
@@ -23,7 +24,7 @@ from edgar.ai.mcp.tools.base import (
 logger = logging.getLogger(__name__)
 
 # Upper bound on `limit`, matching edgar_monitor and edgar_screen. The insider
-# path parses up to 2 * limit Form 4 filings, so an unbounded limit would let
+# path parses up to `limit` Form 4 filings, so an unbounded limit would let
 # one call fetch every Form 4 a company has ever filed.
 _MAX_LIMIT = 100
 
@@ -48,8 +49,9 @@ Examples:
         },
         "days": {
             "type": "integer",
-            "description": "Lookback period for insider transactions (default 90)",
-            "default": 90
+            "description": "Only Form 4s filed in the last N days (default 90)",
+            "default": 90,
+            "minimum": 1
         },
         "limit": {
             "type": "integer",
@@ -104,75 +106,24 @@ async def edgar_ownership(
 
 
 async def _get_insider_transactions(identifier: str, days: int, limit: int) -> Any:
-    """Get insider trading activity from Form 4 filings."""
+    """Get insider trading activity from Form 4 filings filed in the last `days` days."""
     try:
         company = resolve_company(identifier)
+        days = max(int(days), 1)
+        since = date.today() - timedelta(days=days)
 
-        # Get Form 4 filings
-        form4_filings = company.get_filings(form="4").head(limit * 2)  # Get extra in case some fail
+        form4_filings = company.get_filings(
+            form="4", filing_date=f"{since.isoformat()}:"
+        ).head(limit)
 
-        transactions = []
-        for filing in form4_filings:
-            try:
-                txn = {
-                    "filing_date": str(filing.filing_date),
-                    "accession_number": filing.accession_number,
-                }
-
-                # Try to extract details from the Form 4 object
-                try:
-                    obj = filing.obj()
-
-                    # Get reporting owner info
-                    if hasattr(obj, 'reporting_owner'):
-                        owner = obj.reporting_owner
-                        if hasattr(owner, 'name'):
-                            txn["insider_name"] = owner.name
-                        else:
-                            txn["insider_name"] = str(owner)
-
-                    # Get relationship
-                    if hasattr(obj, 'is_officer'):
-                        txn["is_officer"] = obj.is_officer
-                    if hasattr(obj, 'is_director'):
-                        txn["is_director"] = obj.is_director
-                    if hasattr(obj, 'officer_title'):
-                        txn["title"] = obj.officer_title
-
-                    # Get transactions
-                    if hasattr(obj, 'transactions'):
-                        txn_list = []
-                        for t in obj.transactions[:5]:  # Limit transactions per filing
-                            txn_detail = {}
-                            if hasattr(t, 'transaction_type'):
-                                txn_detail["type"] = t.transaction_type
-                            if hasattr(t, 'shares'):
-                                txn_detail["shares"] = t.shares
-                            if hasattr(t, 'price'):
-                                txn_detail["price"] = float(t.price) if t.price else None
-                            if hasattr(t, 'acquired_disposed'):
-                                txn_detail["action"] = t.acquired_disposed
-                            if txn_detail:
-                                txn_list.append(txn_detail)
-                        if txn_list:
-                            txn["transactions"] = txn_list
-
-                except Exception as e:
-                    logger.debug(f"Could not parse Form 4 details: {e}")
-
-                transactions.append(txn)
-
-                if len(transactions) >= limit:
-                    break
-
-            except Exception as e:
-                logger.debug(f"Could not process Form 4 filing: {e}")
-                continue
+        transactions = [_insider_entry(filing) for filing in form4_filings]
 
         result = {
             "company": company.name,
             "cik": str(company.cik),
             "analysis": "insider_transactions",
+            "days": days,
+            "since": since.isoformat(),
             "transaction_count": len(transactions),
             "transactions": transactions,
         }
@@ -186,6 +137,43 @@ async def _get_insider_transactions(identifier: str, days: int, limit: int) -> A
 
     except Exception as e:
         return error(str(e), suggestions=get_error_suggestions(e))
+
+
+def _insider_entry(filing) -> dict[str, Any]:
+    """Summarise one Form 4: who filed it, their role, and up to five transactions."""
+    entry: dict[str, Any] = {
+        "filing_date": str(filing.filing_date),
+        "accession_number": filing.accession_number,
+    }
+    try:
+        form4 = filing.obj()
+        summary = form4.get_ownership_summary()
+    except Exception as e:
+        logger.debug(f"Could not parse Form 4 {filing.accession_number}: {e}")
+        entry["error"] = f"Could not parse Form 4: {e}"
+        return entry
+
+    owners = form4.reporting_owners.owners
+    entry["insider_name"] = form4.insider_name
+    entry["title"] = form4.position
+    entry["is_officer"] = any(o.is_officer for o in owners)
+    entry["is_director"] = any(o.is_director for o in owners)
+    entry["is_ten_pct_owner"] = any(o.is_ten_pct_owner for o in owners)
+
+    entry["transactions"] = [
+        {
+            "type": t.transaction_type,
+            "code": t.code,
+            "description": t.code_description,
+            "security": t.security_title,
+            "shares": t.shares_numeric,
+            "price": t.price_numeric,
+            "value": t.value_numeric,
+            "is_derivative": t.is_derivative,
+        }
+        for t in summary.transactions[:5]  # Limit transactions per filing
+    ]
+    return entry
 
 
 async def _get_fund_holdings(identifier: str, limit: int) -> Any:

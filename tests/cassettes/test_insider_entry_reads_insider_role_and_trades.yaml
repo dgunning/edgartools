@@ -1,0 +1,308 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1045810/000158867026000014/0001588670-26-000014.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0001588670-26-000014.txt : 20260918\n<SEC-HEADER>0001588670-26-000014.hdr.sgml
+        : 20260918\n<ACCEPTANCE-DATETIME>20260918171242\nACCESSION NUMBER:\t\t0001588670-26-000014\nCONFORMED
+        SUBMISSION TYPE:\t4\nPUBLIC DOCUMENT COUNT:\t\t1\nCONFORMED PERIOD OF REPORT:\t20260916\nFILED
+        AS OF DATE:\t\t20260918\nDATE AS OF CHANGE:\t\t20260918\n\nREPORTING-OWNER:\t\n\n\tOWNER
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tKress Colette\n\t\tCENTRAL INDEX
+        KEY:\t\t\t0001588670\n\t\tORGANIZATION NAME:           \t\n\n\tFILING VALUES:\n\t\tFORM
+        TYPE:\t\t4\n\t\tSEC ACT:\t\t1934 Act\n\t\tSEC FILE NUMBER:\t000-23985\n\t\tFILM
+        NUMBER:\t\t261391729\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\tC/O NVIDIA CORPORATION\n\t\tSTREET
+        2:\t\t2788 SAN TOMAS EXPRESSWAY\n\t\tCITY:\t\t\tSANTA CLARA\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95051\n\nISSUER:\t\t\n\n\tCOMPANY
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tNVIDIA CORP\n\t\tCENTRAL INDEX KEY:\t\t\t0001045810\n\t\tSTANDARD
+        INDUSTRIAL CLASSIFICATION:\tSEMICONDUCTORS & RELATED DEVICES [3674]\n\t\tORGANIZATION
+        NAME:           \t04 Manufacturing\n\t\tEIN:\t\t\t\t943177549\n\t\tSTATE OF
+        INCORPORATION:\t\t\tDE\n\t\tFISCAL YEAR END:\t\t\t0131\n\n\tBUSINESS ADDRESS:\t\n\t\tSTREET
+        1:\t\t2788 SAN TOMAS EXPRESSWAY\n\t\tCITY:\t\t\tSANTA CLARA\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95051\n\t\tBUSINESS
+        PHONE:\t\t408-486-2000\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\t2788 SAN TOMAS
+        EXPRESSWAY\n\t\tCITY:\t\t\tSANTA CLARA\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95051\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tNVIDIA CORP/DE\n\t\tDATE OF NAME CHANGE:\t20020612\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tNVIDIA CORP/CA\n\t\tDATE OF NAME CHANGE:\t19980303\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>4\n<SEQUENCE>1\n<FILENAME>wk-form4_1789765959.xml\n<DESCRIPTION>FORM
+        4\n<TEXT>\n<XML>\n<?xml version=\"1.0\"?>\n<ownershipDocument>\n\n    <schemaVersion>X0609</schemaVersion>\n\n
+        \   <documentType>4</documentType>\n\n    <periodOfReport>2026-09-16</periodOfReport>\n\n
+        \   <notSubjectToSection16>0</notSubjectToSection16>\n\n    <issuer>\n        <issuerCik>0001045810</issuerCik>\n
+        \       <issuerName>NVIDIA CORP</issuerName>\n        <issuerTradingSymbol>NVDA</issuerTradingSymbol>\n
+        \       <issuerForeignTradingSymbol></issuerForeignTradingSymbol>\n    </issuer>\n\n
+        \   <reportingOwner>\n        <reportingOwnerId>\n            <rptOwnerCik>0001588670</rptOwnerCik>\n
+        \           <rptOwnerName>Kress Colette</rptOwnerName>\n        </reportingOwnerId>\n
+        \       <reportingOwnerAddress>\n            <rptOwnerNonUSAddressFlag>false</rptOwnerNonUSAddressFlag>\n
+        \           <rptOwnerStreet1>C/O NVIDIA CORPORATION</rptOwnerStreet1>\n            <rptOwnerStreet2>2788
+        SAN TOMAS EXPRESSWAY</rptOwnerStreet2>\n            <rptOwnerCity>SANTA CLARA</rptOwnerCity>\n
+        \           <rptOwnerState>CA</rptOwnerState>\n            <rptOwnerZipCode>95051</rptOwnerZipCode>\n
+        \           <rptOwnerStateDescription></rptOwnerStateDescription>\n        </reportingOwnerAddress>\n
+        \       <reportingOwnerRelationship>\n            <isDirector>0</isDirector>\n
+        \           <isOfficer>1</isOfficer>\n            <isTenPercentOwner>0</isTenPercentOwner>\n
+        \           <isOther>0</isOther>\n            <officerTitle>EVP &amp; Chief
+        Financial Officer</officerTitle>\n            <otherText></otherText>\n        </reportingOwnerRelationship>\n
+        \   </reportingOwner>\n\n    <aff10b5One>1</aff10b5One>\n\n    <nonDerivativeTable>\n
+        \       <nonDerivativeTransaction>\n            <securityTitle>\n                <value>Common</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-09-16</value>\n
+        \           </transactionDate>\n            <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>F</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \           </transactionCoding>\n            <transactionAmounts>\n                <transactionShares>\n
+        \                   <value>40747</value>\n                    <footnoteId
+        id=\"F1\"/>\n                </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>212.17</value>\n                </transactionPricePerShare>\n
+        \               <transactionAcquiredDisposedCode>\n                    <value>D</value>\n
+        \               </transactionAcquiredDisposedCode>\n            </transactionAmounts>\n
+        \           <postTransactionAmounts>\n                <sharesOwnedFollowingTransaction>\n
+        \                   <value>800021</value>\n                    <footnoteId
+        id=\"F2\"/>\n                </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common</value>\n            </securityTitle>\n
+        \           <transactionDate>\n                <value>2026-09-17</value>\n
+        \           </transactionDate>\n            <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F3\"/>\n            </transactionCoding>\n
+        \           <transactionAmounts>\n                <transactionShares>\n                    <value>4681</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>218.0144</value>\n                    <footnoteId
+        id=\"F4\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>795340</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common</value>\n            </securityTitle>\n
+        \           <transactionDate>\n                <value>2026-09-17</value>\n
+        \           </transactionDate>\n            <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F3\"/>\n            </transactionCoding>\n
+        \           <transactionAmounts>\n                <transactionShares>\n                    <value>20369</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>219.0172</value>\n                    <footnoteId
+        id=\"F5\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>774971</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common</value>\n            </securityTitle>\n
+        \           <transactionDate>\n                <value>2026-09-17</value>\n
+        \           </transactionDate>\n            <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F3\"/>\n            </transactionCoding>\n
+        \           <transactionAmounts>\n                <transactionShares>\n                    <value>9868</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>219.5932</value>\n                    <footnoteId
+        id=\"F6\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>765103</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeHolding>\n
+        \           <securityTitle>\n                <value>Common</value>\n            </securityTitle>\n
+        \           <postTransactionAmounts>\n                <sharesOwnedFollowingTransaction>\n
+        \                   <value>83060</value>\n                </sharesOwnedFollowingTransaction>\n
+        \           </postTransactionAmounts>\n            <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>I</value>\n                </directOrIndirectOwnership>\n
+        \               <natureOfOwnership>\n                    <value>By Trust</value>\n
+        \               </natureOfOwnership>\n            </ownershipNature>\n        </nonDerivativeHolding>\n
+        \       <nonDerivativeHolding>\n            <securityTitle>\n                <value>Common</value>\n
+        \           </securityTitle>\n            <postTransactionAmounts>\n                <sharesOwnedFollowingTransaction>\n
+        \                   <value>712934</value>\n                </sharesOwnedFollowingTransaction>\n
+        \           </postTransactionAmounts>\n            <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>I</value>\n                </directOrIndirectOwnership>\n
+        \               <natureOfOwnership>\n                    <value>By Limited
+        Liability Company</value>\n                </natureOfOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeHolding>\n        <nonDerivativeHolding>\n            <securityTitle>\n
+        \               <value>Common</value>\n            </securityTitle>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>4000</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>I</value>\n                </directOrIndirectOwnership>\n
+        \               <natureOfOwnership>\n                    <value>By immediate
+        family member 1</value>\n                </natureOfOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeHolding>\n        <nonDerivativeHolding>\n            <securityTitle>\n
+        \               <value>Common</value>\n            </securityTitle>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>4000</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>I</value>\n                </directOrIndirectOwnership>\n
+        \               <natureOfOwnership>\n                    <value>By immediate
+        family member 2</value>\n                </natureOfOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeHolding>\n        <nonDerivativeHolding>\n            <securityTitle>\n
+        \               <value>Common</value>\n            </securityTitle>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>451498</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>I</value>\n                </directOrIndirectOwnership>\n
+        \               <natureOfOwnership>\n                    <value>Grantor Retained
+        Annuity Trust 1</value>\n                </natureOfOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeHolding>\n        <nonDerivativeHolding>\n            <securityTitle>\n
+        \               <value>Common</value>\n            </securityTitle>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>451498</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>I</value>\n                </directOrIndirectOwnership>\n
+        \               <natureOfOwnership>\n                    <value>Grantor Retained
+        Annuity Trust 2</value>\n                </natureOfOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeHolding>\n        <nonDerivativeHolding>\n            <securityTitle>\n
+        \               <value>Common</value>\n            </securityTitle>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>2032048</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>I</value>\n                </directOrIndirectOwnership>\n
+        \               <natureOfOwnership>\n                    <value>Grantor Retained
+        Annuity Trust 3</value>\n                </natureOfOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeHolding>\n        <nonDerivativeHolding>\n            <securityTitle>\n
+        \               <value>Common</value>\n            </securityTitle>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>271592</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>I</value>\n                </directOrIndirectOwnership>\n
+        \               <natureOfOwnership>\n                    <value>Grantor Retained
+        Annuity Trust 4</value>\n                </natureOfOwnership>\n            </ownershipNature>\n
+        \       </nonDerivativeHolding>\n    </nonDerivativeTable>\n\n    <derivativeTable></derivativeTable>\n\n
+        \   <footnotes>\n        <footnote id=\"F1\">Represents shares withheld by
+        the Issuer to satisfy taxes due by the Reporting Person in connection with
+        the vesting of restricted stock units previously reported on a Form 4.</footnote>\n
+        \       <footnote id=\"F2\">Includes 36,303 shares issued upon the vesting
+        of restricted stock units previously reported on a Form 4 and 127 shares purchased
+        pursuant to the Issuer's Employee Stock Purchase Plan on August 31, 2026.</footnote>\n
+        \       <footnote id=\"F3\">The reported transaction was effected pursuant
+        to a Rule 10b5-1 trading plan adopted by the Reporting Person on June 16,
+        2026.</footnote>\n        <footnote id=\"F4\">Represents weighted average
+        sales price. The shares were sold at prices ranging from $217.42 to $218.40.
+        The Reporting Person will provide upon request, to the Securities and Exchange
+        Commission (the &quot;SEC&quot;), the Issuer or security holder of the Issuer,
+        full information regarding the number of shares sold at each separate price.</footnote>\n
+        \       <footnote id=\"F5\">Represents weighted average sales price. The shares
+        were sold at prices ranging from $218.42 to $219.415. The Reporting Person
+        will provide upon request, to the SEC, the Issuer or security holder of the
+        Issuer, full information regarding the number of shares sold at each separate
+        price.</footnote>\n        <footnote id=\"F6\">Represents weighted average
+        sales price. The shares were sold at prices ranging from $219.42 to $219.865.
+        The Reporting Person will provide upon request, to the SEC, the Issuer or
+        security holder of the Issuer, full information regarding the number of shares
+        sold at each separate price.</footnote>\n    </footnotes>\n\n    <remarks></remarks>\n\n
+        \   <ownerSignature>\n        <signatureName>/s/ Tina Ashcraft, Attorney-in-Fact
+        for Colette Kress</signatureName>\n        <signatureDate>2026-09-18</signatureDate>\n
+        \   </ownerSignature>\n</ownershipDocument>\n</XML>\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      cache-control:
+      - no-cache, no-store, no-transform, proxy-revalidate
+      connection:
+      - keep-alive
+      content-length:
+      - '16522'
+      content-security-policy:
+      - frame-ancestors 'self'
+      content-type:
+      - text/plain
+      date:
+      - Sun, 25 Oct 2026 12:18:37 GMT
+      etag:
+      - '"c758e6fc3feae267b34e678f86bf604c-gzip"'
+      last-modified:
+      - Fri, 18 Sep 2026 21:13:04 GMT
+      permissions-policy:
+      - geolocation=(), microphone=(), camera=()
+      pragma:
+      - no-cache
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - NwdtiYzhq3DqQBsfrAGtsJvUV8zFHXF8bnQOpc7+iZ0i7BPMJDeTMoybOYiQDIB3z7imS+YIbBJUyyZufBUF/uZGPImIFEns
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - JEANQRAR1HZ19QZE
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - O3mD.CFqaUNrpFtS.FpIUgePwXJVk82c
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate, zstd
+      connection:
+      - keep-alive
+      host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK0001588670.json
+  response:
+    body:
+      string: '{"cik":"0001588670","entityType":"other","sic":"","sicDescription":"","ownerOrg":"","insiderTransactionForOwnerExists":1,"insiderTransactionForIssuerExists":0,"name":"Kress
+        Colette","tickers":[],"exchanges":[],"ein":null,"lei":null,"description":"","website":"","investorWebsite":"","category":"","fiscalYearEnd":null,"stateOfIncorporation":"","stateOfIncorporationDescription":"","addresses":{"mailing":{"street1":"C/O
+        NVIDIA CORPORATION","street2":"2788 SAN TOMAS EXPRESSWAY","city":"SANTA CLARA","stateOrCountry":"CA","zipCode":"95051","stateOrCountryDescription":"CA","isForeignLocation":0,"foreignStateTerritory":null,"country":null,"countryCode":null},"business":{"street1":null,"street2":null,"city":null,"stateOrCountry":null,"zipCode":null,"stateOrCountryDescription":null,"isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null}},"phone":null,"flags":"","formerNames":[],"filings":{"recent":{"accessionNumber":["0001588670-26-000014","0001958244-26-000615","0001588670-26-000012","0001588670-26-000010","0001958244-26-000168","0001588670-26-000008","0001588670-26-000006","0001588670-26-000004","0001588670-26-000002","0001588670-25-000017","0001588670-25-000015","0001958244-25-004541","0001588670-25-000013","0001588670-25-000011","0001588670-25-000009","0001958244-25-004347","0001958244-25-004346","0001588670-25-000006","0001588670-25-000003","0001045810-25-000140","0001958244-25-003698","0001045810-25-000069","0001958244-25-001868","0001045810-25-000050","0001045810-25-000033","0001045810-25-000027","0001045810-24-000335","0001958244-24-005852","0001045810-24-000283","0001958244-24-004564","0001045810-24-000176","0001045810-24-000169","0001958244-24-002813","0001045810-24-000077","0001045810-24-000062","0001045810-24-000053","0001045810-23-000258","0001045810-23-000209","0001045810-23-000180","0001950047-23-003455","0001045810-23-000131","0001963746-23-000008","0001045810-23-000103","0001045810-23-000063","0001045810-23-000051","0001045810-23-000050","0001045810-23-000048","0001045810-23-000032","0001045810-23-000006","0001045810-22-000186","0001588670-22-000002","0001045810-22-000121","0001045810-22-000045","0001045810-22-000029","0001045810-22-000016","0001045810-21-000185","0001045810-21-000152","0001045810-21-000107","0001045810-21-000040","0001045810-21-000028","0001045810-20-000201","0001045810-20-000197","0001045810-20-000159","0001045810-20-000107","0001045810-20-000043","0001045810-20-000037","0001045810-20-000029","0001045810-20-000028","0001045810-20-000020","0001045810-20-000002","0001045810-20-000001","0001045810-19-000186","0001045810-19-000178","0001045810-19-000162","0001045810-19-000130","0001045810-19-000123","0001045810-19-000053","0001045810-19-000039","0001045810-19-000019","0001045810-18-000168","0001045810-18-000163","0001045810-18-000131","0001045810-18-000125","0001045810-18-000104","0001045810-18-000039","0001045810-18-000021","0001045810-17-000186","0001045810-17-000156","0001045810-17-000148","0001045810-17-000136","0001045810-17-000057","0001045810-17-000052","0001045810-17-000033","0001045810-16-000335","0001045810-16-000330","0001045810-16-000320","0001045810-16-000304","0001045810-16-000224","0001045810-16-000213","0001045810-15-000159","0001045810-15-000154","0001045810-15-000080","0001045810-15-000053","0001045810-14-000172","0001045810-14-000042","0001045810-13-000097","0001045810-13-000095"],"filingDate":["2026-09-18","2026-09-17","2026-06-23","2026-03-20","2026-03-20","2026-03-11","2026-03-04","2026-02-06","2026-01-15","2025-12-19","2025-12-12","2025-12-12","2025-11-05","2025-10-23","2025-09-19","2025-09-19","2025-09-19","2025-08-06","2025-07-17","2025-06-23","2025-06-20","2025-03-21","2025-03-21","2025-03-12","2025-03-05","2025-03-04","2024-12-13","2024-12-13","2024-09-20","2024-09-20","2024-06-26","2024-06-21","2024-06-21","2024-03-22","2024-03-12","2024-03-08","2023-12-15","2023-09-22","2023-08-30","2023-08-28","2023-06-23","2023-06-02","2023-06-01","2023-03-17","2023-03-14","2023-03-14","2023-03-14","2023-03-06","2023-01-27","2022-12-16","2022-09-23","2022-06-17","2022-03-18","2022-03-14","2022-03-03","2021-12-10","2021-09-17","2021-06-21","2021-03-18","2021-03-04","2020-12-11","2020-12-07","2020-09-18","2020-06-19","2020-03-20","2020-03-11","2020-03-03","2020-02-25","2020-02-20","2020-01-22","2020-01-07","2019-12-27","2019-12-12","2019-09-20","2019-07-01","2019-06-20","2019-03-22","2019-03-12","2019-02-20","2018-12-17","2018-12-14","2018-09-21","2018-09-13","2018-06-22","2018-03-23","2018-03-12","2017-12-15","2017-10-11","2017-09-22","2017-09-13","2017-03-21","2017-03-17","2017-03-10","2016-10-05","2016-09-23","2016-09-19","2016-08-29","2016-04-04","2016-03-18","2015-10-02","2015-09-18","2015-04-27","2015-03-20","2014-09-19","2014-03-21","2013-10-09","2013-10-09"],"reportDate":["2026-09-16","","2026-06-17","2026-03-18","","2026-03-09","2026-03-02","2026-02-04","2026-01-13","2025-12-17","2025-12-10","","2025-11-03","2025-10-21","2025-09-17","","","2025-08-04","2025-07-15","2025-06-18","","2025-03-19","","2025-03-10","2025-03-03","2025-02-28","2024-12-11","","2024-09-18","","2024-06-24","2024-06-19","","2024-03-20","2024-03-08","2024-03-06","2023-12-13","2023-09-20","2023-08-28","","2023-06-21","","2023-05-30","2023-03-15","2022-12-14","2023-01-26","2023-03-10","2023-03-02","2023-01-26","2022-12-14","2022-09-21","2022-06-15","2022-03-16","2022-03-10","2022-03-03","2021-12-08","2021-09-15","2021-06-16","2021-03-16","2021-03-02","2020-12-09","2020-12-03","2020-09-16","2020-06-17","2020-03-18","2020-03-09","2020-03-02","2020-02-24","2020-02-18","2020-01-21","2020-01-06","2019-12-23","2019-12-11","2019-09-18","2019-06-28","2019-06-19","2019-03-20","2019-03-08","2019-02-15","2018-12-14","2018-12-12","2018-09-19","2018-09-11","2018-06-20","2018-03-21","2018-03-08","2017-12-13","2017-10-09","2017-09-20","2017-09-12","2017-03-17","2017-03-15","2017-03-08","2016-10-04","2016-09-21","2016-09-15","2016-08-29","2016-03-31","2016-03-16","2015-10-01","2015-09-16","2015-04-24","2015-03-18","2014-09-17","2014-03-19","2013-10-08","2013-09-30"],"acceptanceDateTime":["2026-09-18T21:12:42.000Z","2026-09-17T21:29:01.000Z","2026-06-23T10:02:20.000Z","2026-03-21T00:07:15.000Z","2026-03-20T21:24:34.000Z","2026-03-11T22:12:42.000Z","2026-03-04T22:31:54.000Z","2026-02-06T22:06:41.000Z","2026-01-15T22:03:45.000Z","2025-12-19T22:07:43.000Z","2025-12-13T02:04:51.000Z","2025-12-12T23:36:24.000Z","2025-11-06T00:06:18.000Z","2025-10-23T23:35:22.000Z","2025-09-20T01:05:27.000Z","2025-09-19T23:19:20.000Z","2025-09-19T21:26:22.000Z","2025-08-06T23:19:31.000Z","2025-07-18T00:46:11.000Z","2025-06-23T22:40:05.000Z","2025-06-20T21:59:51.000Z","2025-03-22T00:42:35.000Z","2025-03-21T21:00:50.000Z","2025-03-12T22:55:55.000Z","2025-03-06T01:35:53.000Z","2025-03-04T21:54:48.000Z","2024-12-14T00:52:48.000Z","2024-12-13T22:00:05.000Z","2024-09-21T01:10:31.000Z","2024-09-20T20:34:26.000Z","2024-06-26T20:09:15.000Z","2024-06-22T00:05:10.000Z","2024-06-21T20:08:36.000Z","2024-03-22T20:26:23.000Z","2024-03-12T20:33:42.000Z","2024-03-08T21:07:58.000Z","2023-12-16T00:36:21.000Z","2023-09-22T23:33:55.000Z","2023-08-30T21:08:53.000Z","2023-08-28T20:08:13.000Z","2023-06-24T00:22:23.000Z","2023-06-02T21:04:15.000Z","2023-06-01T20:36:46.000Z","2023-03-18T00:02:42.000Z","2023-03-14T20:19:09.000Z","2023-03-14T20:18:50.000Z","2023-03-14T20:17:58.000Z","2023-03-07T00:43:46.000Z","2023-01-28T00:15:00.000Z","2022-12-16T21:23:39.000Z","2022-09-23T21:20:27.000Z","2022-06-17T20:34:24.000Z","2022-03-18T22:37:47.000Z","2022-03-14T20:08:48.000Z","2022-03-03T23:37:54.000Z","2021-12-10T23:16:23.000Z","2021-09-17T20:01:31.000Z","2021-06-21T20:04:02.000Z","2021-03-19T00:04:39.000Z","2021-03-05T01:21:21.000Z","2020-12-11T22:25:17.000Z","2020-12-07T22:50:24.000Z","2020-09-18T21:07:20.000Z","2020-06-20T00:48:24.000Z","2020-03-20T20:08:07.000Z","2020-03-12T00:37:41.000Z","2020-03-03T22:07:05.000Z","2020-02-25T21:05:27.000Z","2020-02-20T22:58:20.000Z","2020-01-22T21:20:56.000Z","2020-01-07T21:37:07.000Z","2019-12-27T21:02:40.000Z","2019-12-12T21:08:29.000Z","2019-09-20T21:28:55.000Z","2019-07-01T22:37:45.000Z","2019-06-20T23:12:54.000Z","2019-03-22T23:06:08.000Z","2019-03-12T22:40:39.000Z","2019-02-20T23:58:31.000Z","2018-12-18T00:09:55.000Z","2018-12-14T22:40:15.000Z","2018-09-21T21:04:39.000Z","2018-09-13T20:47:48.000Z","2018-06-22T21:45:15.000Z","2018-03-23T20:43:41.000Z","2018-03-12T22:08:03.000Z","2017-12-15T22:45:32.000Z","2017-10-11T22:25:01.000Z","2017-09-22T22:37:51.000Z","2017-09-13T23:53:34.000Z","2017-03-21T20:14:58.000Z","2017-03-17T20:19:00.000Z","2017-03-11T00:41:19.000Z","2016-10-05T20:10:57.000Z","2016-09-23T21:06:08.000Z","2016-09-19T20:23:11.000Z","2016-08-29T21:31:24.000Z","2016-04-05T01:07:18.000Z","2016-03-19T00:00:27.000Z","2015-10-02T21:20:56.000Z","2015-09-18T20:16:31.000Z","2015-04-27T23:18:46.000Z","2015-03-21T00:10:39.000Z","2014-09-19T21:53:32.000Z","2014-03-22T00:02:23.000Z","2013-10-09T22:34:37.000Z","2013-10-09T22:33:08.000Z"],"act":["34","","34","34","","34","34","34","34","34","34","","34","34","34","","","34","34","34","","34","","34","34","34","34","","34","","34","34","","34","34","34","34","34","34","","34","","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34"],"form":["4","144","4","4","144","4","4","4","4","4","4","144","4","4","4","144/A","144","4","4","4","144","4","144","4","4","4","4","144","4","144","4","4","144","4","4","4","4","4","4","144","4","144","4","4","4/A","4/A","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","3"],"fileNumber":["000-23985","","000-23985","000-23985","","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","","000-23985","000-23985","000-23985","","","000-23985","000-23985","000-23985","","000-23985","","000-23985","000-23985","000-23985","000-23985","","000-23985","","000-23985","000-23985","","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","","000-23985","","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985","000-23985"],"filmNumber":["261391729","","261108835","26779625","","26744805","26722955","26608683","26536918","251588458","251569801","","251455541","251414038","251328251","","","251191124","251132486","251066247","","25762038","","25733261","25713293","25705759","241549756","","241314472","","241073510","241061781","","24775613","24742658","24734364","231491934","231272791","231226057","","231039231","","23985260","23744618","23731259","23731253","23731230","23710643","23564830","221468251","221263042","221024402","22753805","22736627","22711088","211486514","211260355","211030463","21756133","21716114","201384475","201373705","201184625","20977020","20732067","20706957","20683574","20650604","20636693","20539137","20513679","191313793","191281949","191105499","19934669","19909628","19701062","19676386","19620045","181239151","181236508","181082104","181069296","18915459","18710637","18684696","171259989","171133466","171098397","171084287","17704355","17698232","17683515","161922536","161900444","161891996","161858821","161552855","161517299","151141394","151115607","15796311","15717498","141112773","14711636","131144236","131144233"],"items":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],"core_type":["4","144","4","4","144","4","4","4","4","4","4","144","4","4","4","144/A","144","4","4","4","144","4","144","4","4","4","4","144","4","144","4","4","144","4","4","4","4","4","4","144","4","144","4","4","4/A","4/A","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","3"],"size":[16522,8926,10909,43986,16259,10827,12956,47014,32321,10588,55987,25073,30917,21114,23013,26299,26404,35818,21115,27818,14852,14891,6401,9427,11373,9393,21502,7805,13246,9347,32442,18943,7028,7537,7562,9691,7454,7636,28361,5588,7454,5184,28353,7428,7712,7362,18116,7482,7648,7998,7612,7430,7428,7454,10385,6502,7037,6460,8312,6821,6460,6968,5106,5105,5103,5130,16522,18489,5314,8285,12173,8654,5106,8903,5127,5105,6957,9543,5185,5128,5106,8403,5317,6954,5107,9546,6952,5130,5108,5317,5129,5114,9380,5127,5107,5057,5127,6520,11208,5127,6883,5129,12960,6883,7250,5055,6764],"isXBRL":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"isInlineXBRL":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"isXBRLNumeric":[0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"primaryDocument":["xslF345X06/wk-form4_1789765959.xml","xsl144X01/primary_doc.xml","xslF345X06/wk-form4_1782208938.xml","xslF345X06/wk-form4_1774051632.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1773267159.xml","xslF345X05/wk-form4_1772663512.xml","xslF345X05/wk-form4_1770415598.xml","xslF345X05/wk-form4_1768514622.xml","xslF345X05/wk-form4_1766182060.xml","xslF345X05/wk-form4_1765591487.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1762387575.xml","xslF345X05/wk-form4_1761262519.xml","xslF345X05/wk-form4_1758330323.xml","xsl144X01/primary_doc.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1754522367.xml","xslF345X05/wk-form4_1752799565.xml","xslF345X05/wk-form4_1750718394.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1742604148.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1741820149.xml","xslF345X05/wk-form4_1741224946.xml","xslF345X05/wk-form4_1741125282.xml","xslF345X05/wk-form4_1734137561.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1726881026.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1719432548.xml","xslF345X05/wk-form4_1719014702.xml","xsl144X01/primary_doc.xml","xslF345X05/wk-form4_1711139173.xml","xslF345X05/wk-form4_1710275594.xml","xslF345X05/wk-form4_1709932066.xml","xslF345X05/wk-form4_1702686970.xml","xslF345X05/wk-form4_1695425626.xml","xslF345X05/wk-form4_1693429721.xml","xsl144X01/primary_doc.xml","xslF345X04/wk-form4_1687566133.xml","xsl144X01/primary_doc.xml","xslF345X04/wk-form4_1685651792.xml","xslF345X03/wf-form4_167909774406116.xml","xslF345X03/wf-form4a_167882513564677.xml","xslF345X03/wf-form4a_167882511093689.xml","xslF345X03/wf-form4_167882506077586.xml","xslF345X03/wf-form4_167814981661531.xml","xslF345X03/wf-form4_167486488448198.xml","xslF345X03/wf-form4_167122578725281.xml","xslF345X03/wf-form4_166396801160147.xml","xslF345X03/wf-form4_165549804262737.xml","xslF345X03/wf-form4_164764305374407.xml","xslF345X03/wf-form4_164728840754888.xml","xslF345X03/wf-form4_164635062272982.xml","xslF345X03/wf-form4_163917817115255.xml","xslF345X03/wf-form4_163190886084588.xml","xslF345X03/wf-form4_162430582828563.xml","xslF345X03/wf-form4_161611226271705.xml","xslF345X03/wf-form4_161490726119716.xml","xslF345X03/wf-form4_160772550509399.xml","xslF345X03/wf-form4_160738140554608.xml","xslF345X03/wf-form4_160046322804476.xml","xslF345X03/wf-form4_159261408715540.xml","xslF345X03/wf-form4_158473486888006.xml","xslF345X03/wf-form4_158397344407538.xml","xslF345X03/wf-form4_158327320750784.xml","xslF345X03/wf-form4_158266470922609.xml","xslF345X03/wf-form4_158223948368978.xml","xslF345X03/wf-form4_157972803834536.xml","xslF345X03/wf-form4_157843301031650.xml","xslF345X03/wf-form4_157748054304313.xml","xslF345X03/wf-form4_157618489100359.xml","xslF345X03/wf-form4_156901491940070.xml","xslF345X03/wf-form4_156202064989627.xml","xslF345X03/wf-form4_156107235987839.xml","xslF345X03/wf-form4_155329595341755.xml","xslF345X03/wf-form4_155243027880652.xml","xslF345X03/wf-form4_155070709666952.xml","xslF345X03/wf-form4_154509177771818.xml","xslF345X03/wf-form4_154482719886977.xml","xslF345X03/wf-form4_153756385798266.xml","xslF345X03/wf-form4_153687165103413.xml","xslF345X03/wf-form4_152970389958302.xml","xslF345X03/wf-form4_152183778956056.xml","xslF345X03/wf-form4_152089246894785.xml","xslF345X03/wf-form4_151337791829779.xml","xslF345X03/wf-form4_150776068869248.xml","xslF345X03/wf-form4_150611985748299.xml","xslF345X03/wf-form4_150534679922791.xml","xslF345X03/wf-form4_149012728056550.xml","xslF345X03/wf-form4_148978192501038.xml","xslF345X03/wf-form4_148919286559681.xml","xslF345X03/wf-form4_147569821433563.xml","xslF345X03/wf-form4_147466475554757.xml","xslF345X03/wf-form4_147431657862969.xml","xslF345X03/wf-form4_147250627149184.xml","xslF345X03/wf-form4_145981842812442.xml","xslF345X03/wf-form4_145834561653072.xml","xslF345X03/wf-form4_144382084630623.xml","xslF345X03/wf-form4_144260738203440.xml","xslF345X03/wf-form4_143017671657803.xml","xslF345X03/wf-form4_142689662977516.xml","xslF345X03/wf-form4_141116360183892.xml","xslF345X03/wf-form4_139544653257585.xml","xslF345X03/wf-form4_138135806747304.xml","xslF345X02/wf-form3_138135797745502.xml"],"primaryDocDescription":["FORM
+        4","","FORM 4","FORM 4","","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM
+        4","","FORM 4","FORM 4","FORM 4","","","FORM 4","FORM 4","FORM 4","","FORM
+        4","","FORM 4","FORM 4","FORM 4","FORM 4","","FORM 4","","FORM 4","FORM 4","","FORM
+        4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","","FORM 4","","FORM 4","FORM
+        4","FORM 4/A","FORM 4/A","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM
+        4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM
+        4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM
+        4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM
+        4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM
+        4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM
+        4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM 4","FORM
+        4","FORM 3"]},"files":[]}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      connection:
+      - keep-alive
+      content-length:
+      - '19850'
+      content-type:
+      - application/json
+      date:
+      - Sun, 25 Oct 2026 12:18:37 GMT
+      strict-transport-security:
+      - max-age=31536000 ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-apigw-id:
+      - FzMArHbEIAMEAHA=
+      x-amzn-requestid:
+      - d07bd0ec-05e3-48c8-abbf-dc45d163c586
+      x-amzn-trace-id:
+      - Root=1-6addf39d-5250fff23a2fa1ea45dd3521
+    status:
+      code: 200
+      message: OK
+version: 1
