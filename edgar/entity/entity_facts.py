@@ -80,6 +80,60 @@ def load_company_facts_from_local(cik: int) -> Dict[str, Any]:
     return json.loads(company_facts_file.read_text())
 
 
+def _load_company_facts_json(cik: int) -> Dict[str, Any]:
+    if is_using_local_storage():
+        return load_company_facts_from_local(cik)
+    return download_company_facts_from_sec(cik)
+
+
+def _with_predecessor_facts(cik: int, company_facts_json: Dict[str, Any]) -> Dict[str, Any]:
+    """Add the history a successor registrant's predecessor filed under its own CIK (GH #1821)."""
+    from edgar.reference.successors import get_predecessor
+    predecessor = get_predecessor(cik)
+    if predecessor is None:
+        return company_facts_json
+    try:
+        predecessor_json = _load_company_facts_json(predecessor.cik)
+    except CompanyFactsNotFoundError:
+        warnings.warn(f"No company facts found for CIK {predecessor.cik}, the predecessor of CIK {cik}; "
+                      f"facts from before {predecessor.effective_date} are missing.", stacklevel=3)
+        return company_facts_json
+    return merge_predecessor_facts(company_facts_json, predecessor_json, predecessor.effective_date)
+
+
+def merge_predecessor_facts(successor_json: Dict[str, Any], predecessor_json: Dict[str, Any],
+                            effective_date: str) -> Dict[str, Any]:
+    """
+    Merge a predecessor's companyfacts JSON into its successor's.
+
+    Only predecessor facts for periods that ended before ``effective_date`` are taken,
+    so a predecessor that keeps filing as a subsidiary adds nothing after the
+    succession. Where both CIKs report the same concept, unit and period, the
+    successor's value wins.
+
+    The inputs are not modified.
+    """
+    merged = dict(successor_json)
+    merged_facts = {taxonomy: dict(concepts) for taxonomy, concepts in successor_json.get('facts', {}).items()}
+    for taxonomy, concepts in predecessor_json.get('facts', {}).items():
+        target = merged_facts.setdefault(taxonomy, {})
+        for concept, body in concepts.items():
+            existing = target.get(concept)
+            units = dict(existing['units']) if existing else {}
+            for unit, rows in body.get('units', {}).items():
+                have = list(units.get(unit, []))
+                periods = {(row.get('start'), row.get('end')) for row in have}
+                have.extend(row for row in rows
+                            if row.get('end', '') < effective_date
+                            and (row.get('start'), row.get('end')) not in periods)
+                if have:
+                    units[unit] = have
+            if units:
+                target[concept] = {**(existing or body), 'units': units}
+    merged['facts'] = merged_facts
+    return merged
+
+
 # Revenue variants for get_revenue() and get_revenue_detailed(), in priority
 # order. The filed total, Revenues, comes first, as in the statement builder's
 # _REVENUE_CONCEPTS and Financials.get_revenue() (edgartools-jrqvs).
@@ -125,10 +179,9 @@ def get_company_facts(cik: int):
         _company_facts_cache.move_to_end(cik)
         return cached
 
-    if is_using_local_storage():
-        company_facts_json = load_company_facts_from_local(cik)
-    else:
-        company_facts_json = download_company_facts_from_sec(cik)
+    company_facts_json = _load_company_facts_json(cik)
+    if company_facts_json:
+        company_facts_json = _with_predecessor_facts(cik, company_facts_json)
     if not company_facts_json:
         warnings.warn(
             f"Could not retrieve company facts for CIK {cik}. "

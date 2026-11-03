@@ -1,0 +1,11 @@
+successor_cik,predecessor_cik,effective_date,evidence_accession,note
+2115436,34088,2026-07-01,0001193125-26-291990,ExxonMobil Holdings Corp became the holding company of Exxon Mobil Corp; XOM moved to the successor; 230 shared facts 0 differ
+2119322,1438231,2026-05-18,0001437749-26-017527,Digimarc holding-company reorganization; DMRC moved; 155 shared facts 0 differ
+2081043,1840904,2025-12-31,0001140361-25-046926,atai Life Sciences N.V. redomiciled to Luxembourg (later AtaiBeckley; delisted 2026-09); 327 shared facts 16 differ
+2011641,1832433,2024-08-01,0001193125-24-190512,Ferguson plc redomiciled to Delaware as Ferguson Enterprises; FERG moved; 577 shared facts 8 differ
+2024218,1549922,2024-08-01,0001013762-24-003515,Summit Midstream Partners LP converted to Summit Midstream Corp; SMC; 333 shared facts 9 differ
+2013745,1340122,2024-07-10,0001193125-24-177313,Calumet Specialty Products Partners LP converted to Calumet Inc; CLMT; 362 shared facts 11 differ
+1996862,1144519,2023-11-01,0001104659-23-113123,Bunge Ltd redomiciled to Switzerland as Bunge Global SA; BG moved; 705 shared facts 17 differ
+1984060,1910950,2023-10-03,0001193125-23-249501,Atlas Energy Solutions up-C simplification (New Atlas HoldCo); AESI moved; 214 shared facts 1 differs
+1993004,73088,2023-10-02,0001628280-23-033388,NorthWestern Energy Group holding company of NorthWestern Corp; NWE moved; 885 shared facts 4 differ
+1958086,1000229,2023-05-01,0001193125-23-130765,Core Laboratories N.V. redomiciled to Delaware; CLB moved; 670 shared facts 18 differ

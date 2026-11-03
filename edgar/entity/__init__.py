@@ -10,6 +10,7 @@ from edgar.entity.core import (
     Company,
     CompanyNotFoundError,
     Entity,
+    PredecessorHistoryWarning,
     SecFiler,
     get_company,
     get_entity,
@@ -45,6 +46,7 @@ __all__ = [
     'SecFiler',
     'Entity',
     'Company',
+    'PredecessorHistoryWarning',
     'FundSeries',
 
     # Data classes

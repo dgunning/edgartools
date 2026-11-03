@@ -35,6 +35,7 @@ from edgar.exceptions import CompanyFactsNotFoundError, CompanyNotFoundError
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.display.formatting import cik_text, datefmt, reverse_name
+from edgar.reference.successors import get_predecessor
 from edgar.reference.tickers import find_cik
 from edgar.richtools import Docs, repr_rich
 
@@ -555,6 +556,10 @@ class Entity(SecFiler):
         return not self.not_found
 
 
+class PredecessorHistoryWarning(UserWarning):
+    """This company's earlier filings are under the CIK of the registrant it succeeded."""
+
+
 class Company(Entity):
     """
     Represents a public company that files with the SEC.
@@ -594,6 +599,41 @@ class Company(Entity):
             return self.data.exchanges
         return []
 
+    @cached_property
+    def predecessor(self) -> Optional['Company']:
+        """
+        The registrant this company succeeded, when its filing history stays there.
+
+        When a company forms a holding company or redomiciles, SEC gives the ticker to
+        the new CIK and leaves the earlier 10-Ks and XBRL facts under the old one.
+        get_facts() already includes the predecessor's facts; get_financials() reads
+        this company's own latest annual report. Only successions reviewed by hand
+        are listed.
+
+        Example::
+
+            >>> Company("XOM").predecessor     # ExxonMobil Holdings Corp -> Exxon Mobil Corp
+            >>> Company("XOM").predecessor.get_financials()
+
+        Returns:
+            The predecessor Company, or None if this company has no listed predecessor
+        """
+        predecessor = get_predecessor(self.cik)
+        return Company(predecessor.cik) if predecessor else None
+
+    def _warn_history_with_predecessor(self, problem: str, method: str) -> None:
+        predecessor = get_predecessor(self.cik)
+        if predecessor is None:
+            return
+        import warnings
+        warnings.warn(
+            f"{self.name} (CIK {self.cik}) {problem}. It succeeded CIK {predecessor.cik} on "
+            f"{predecessor.effective_date}, and the earlier filings are under that CIK: "
+            f"Company({predecessor.cik}).{method}() or company.predecessor.{method}()",
+            PredecessorHistoryWarning,
+            stacklevel=3,
+        )
+
     def get_financials(self) -> Optional[Financials]:
         """
         Get financial statements from this company's latest annual report.
@@ -626,6 +666,7 @@ class Company(Entity):
             filing = self.get_filings(form=form, amendments=False, trigger_full_load=False).latest()
             if filing is not None:
                 return Financials.extract(filing)
+        self._warn_history_with_predecessor("has filed no annual report yet", "get_financials")
         return None
 
     def get_quarterly_financials(self) -> Optional[Financials]:

@@ -89,3 +89,12 @@ sharp_edges:
     solution: |
       revenue = financials.get_revenue()  # Already in dollars
       print(f"${revenue/1e9:.1f}B")       # Format for display
+
+  - id: ticker-moved-to-successor
+    summary: A ticker that moved to a new registrant (holding company, redomicile) leaves 10-Ks on the old CIK
+    severity: high
+    solution: |
+      xom = Company("XOM")                 # ExxonMobil Holdings Corp (CIK 2115436) since 2026-07-01
+      xom.get_facts().income_statement()   # already includes predecessor history (FY2016-)
+      xom.get_financials()                 # None + PredecessorHistoryWarning: no 10-K filed yet
+      financials = xom.predecessor.get_financials()   # Exxon Mobil Corp (CIK 34088) latest 10-K
