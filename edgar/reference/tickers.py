@@ -20,7 +20,7 @@ __all__ = ['cusip_ticker_mapping', 'get_ticker_from_cusip', 'get_company_tickers
            'get_cik_tickers', 'get_company_ticker_name_exchange', 'get_companies_by_exchange', 'popular_us_stocks',
            'get_mutual_fund_tickers', 'find_mutual_fund_cik', 'list_all_tickers', 'find_ticker', 'find_ticker_safe', 'get_cik_ticker_lookup',
            'get_company_cik_lookup', 'get_cik_tickers_from_ticker_txt', 'get_cik_tickers', 'get_company_tickers',
-           'Exchange'
+           'Exchange', 'find_retired_ticker_cik'
            ]
 
 from edgar.urls import build_company_tickers_exchange_url, build_company_tickers_url, build_mutual_fund_tickers_url, build_ticker_url
@@ -578,7 +578,7 @@ def find_company_ticker(cik: Union[int, str]) -> Union[str, List[str], None]:
 
 def find_cik(ticker):
     """
-    Find the CIK for a given ticker, checking both company and mutual fund/ETF data.
+    Find the CIK for a given ticker, checking company, mutual fund/ETF and retired-ticker data.
 
     :param ticker: String, the ticker symbol to look up
     :return: Integer, the CIK for the given ticker, or None if not found
@@ -589,7 +589,35 @@ def find_cik(ticker):
         return cik
 
     # If not found, check mutual fund/ETF CIKs
-    return find_mutual_fund_cik(ticker)
+    cik = find_mutual_fund_cik(ticker)
+    if cik is not None:
+        return cik
+
+    # Last, a ticker SEC has retired. Current mappings always win, so a reused ticker
+    # resolves to its new owner (GH #1829).
+    return find_retired_ticker_cik(ticker)
+
+
+@lru_cache(maxsize=1)
+def _get_retired_ticker_lookup() -> Dict[str, int]:
+    df = read_csv_from_package('retired_tickers.csv', dtype={'ticker': str, 'cik': int})
+    return {ticker.upper(): int(cik) for ticker, cik in zip(df['ticker'], df['cik'], strict=True)}
+
+
+def find_retired_ticker_cik(ticker: str) -> Optional[int]:
+    """
+    Find the CIK a ticker belonged to before SEC dropped it from its ticker map.
+
+    SEC's company_tickers.json lists current tickers only, so a renamed company's old
+    ticker stops resolving (EQR became VMRK in 2026; CIK 906107 is unchanged). The
+    bundled ``retired_tickers.csv`` keeps those associations. It is reviewed by hand.
+
+    :param ticker: The ticker symbol to look up
+    :return: The CIK, or None if the ticker is not a known retired ticker
+    """
+    if not isinstance(ticker, str):
+        return None
+    return _get_retired_ticker_lookup().get(ticker.upper().replace('.', '-'))
 
 
 def get_ticker_from_cusip(cusip: str) -> Optional[str]:
