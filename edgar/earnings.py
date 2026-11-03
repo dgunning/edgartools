@@ -238,6 +238,8 @@ def _classify_row_type(label: str, parent_context: str = '') -> RowType:
         for pattern in patterns:
             if pattern in label_lower:
                 return row_type
+    if re.search(r'\beps\b', label_lower):
+        return RowType.PER_SHARE
     # If no match but we have parent context, classify using parent
     # Check SHARES before PER_SHARE to handle parents like
     # "Shares used in computing earnings per share:" (contains both patterns)
@@ -446,6 +448,54 @@ def _label_to_concept(label: str) -> str:
 
 # ── Unit mapping from RowType ─────────────────────────────────────────────
 
+_CURRENCIES = {
+    'TWD': r'NT\$|\bTWD\b|New Taiwan [Dd]ollars',
+    'USD': r'US\$|\bUSD\b|U\.?S\.? [Dd]ollars',
+    'EUR': r'€|\bEUR\b|\beuros?\b',
+    'CNY': r'\bRMB\b|\bCNY\b|[Rr]enminbi',
+    'HKD': r'HK\$|\bHKD\b|Hong Kong [Dd]ollars',
+    'JPY': r'\bJPY\b|Japanese [Yy]en',
+}
+
+
+def _currency(text):
+    matches = [code for code, pattern in _CURRENCIES.items() if re.search(pattern, text, re.I)]
+    return matches[0] if len(matches) == 1 else None
+
+
+def _table_context(table_node, title=None):
+    """Read adjacent declarations/notes without assuming a text-only DOM node."""
+    node, parent = table_node, getattr(table_node, 'parent', None)
+    while (parent is not None and len(getattr(parent, 'children', None) or []) == 1
+           and getattr(parent, 'parent', None) is not None):
+        node, parent = parent, parent.parent
+    siblings = getattr(parent, 'children', None) or []
+    position = next((i for i, sibling in enumerate(siblings) if sibling is node), None)
+    if position is None:
+        return [title or ''], []
+
+    def text(sibling):
+        content = getattr(sibling, 'content', None)
+        if not isinstance(content, str) or not content.strip():
+            getter = getattr(sibling, 'text', None)
+            content = getter() if callable(getter) else ''
+        return content.strip() if isinstance(content, str) else ''
+
+    before = [text(s) for s in siblings[max(0, position - 3):position]]
+    after = [text(s) for s in siblings[position + 1:position + 5]]
+    return [title or '', *before], [s for s in after if s]
+
+
+def _declared_table_units(context):
+    """Nearest explicit unit declaration; unknown/mixed currencies stay unknown."""
+    for text in reversed(context):
+        match = re.search(r'(?:\(?\s*units?\s*:\s*|\(\s*(?:amounts?\s+)?in\s+)[^)\n]+', text, re.I)
+        if match:
+            declaration = match[0]
+            return declaration, _currency(declaration), Scale.detect(declaration)
+    return None
+
+
 _ROW_TYPE_UNITS = {
     RowType.AMOUNT: 'USD',
     RowType.PER_SHARE: 'USD/shares',
@@ -479,6 +529,9 @@ class FinancialTable:
 
     row_types: Union[dict, list] = field(default_factory=list)
     """List of RowType by position, or legacy dict of label → RowType."""
+
+    currency: Optional[str] = 'USD'
+    """Reported currency. USD remains the legacy default; an explicit unknown is None."""
 
     def __bool__(self) -> bool:
         """FinancialTable is truthy if it has data."""
@@ -606,6 +659,7 @@ class FinancialTable:
                 "title": self.title,
                 "shape": list(self.dataframe.shape)
             }
+            result["metadata"]["currency"] = self.currency
 
         return json.dumps(result, indent=2, default=str)
 
@@ -660,12 +714,13 @@ class FinancialTable:
         lines.append(f"=== {title} ===")
 
         scale_hint = ""
+        currency_units = self.currency or 'currency units'
         if self.scale == Scale.MILLIONS:
-            scale_hint = " (multiply by 1,000,000 for actual USD)"
+            scale_hint = f" (multiply by 1,000,000 for actual {currency_units})"
         elif self.scale == Scale.THOUSANDS:
-            scale_hint = " (multiply by 1,000 for actual USD)"
+            scale_hint = f" (multiply by 1,000 for actual {currency_units})"
         elif self.scale == Scale.BILLIONS:
-            scale_hint = " (multiply by 1,000,000,000 for actual USD)"
+            scale_hint = f" (multiply by 1,000,000,000 for actual {currency_units})"
 
         if scale_hint:
             lines.append(f"Scale: {self.scale.name}{scale_hint}")
@@ -755,7 +810,10 @@ class FinancialTable:
                     'label': label,
                     'value': str(raw_val),
                     'numeric_value': numeric_val,
-                    'unit': _ROW_TYPE_UNITS.get(row_type, 'USD'),
+                    'unit': (f'{self.currency}/shares' if self.currency else None)
+                    if row_type == RowType.PER_SHARE else self.currency
+                    if row_type in (RowType.AMOUNT, RowType.OTHER)
+                    else _ROW_TYPE_UNITS[row_type],
                     'period_type': period_info['period_type'],
                     'period_start': period_info['period_start'],
                     'period_end': period_info['period_end'],
@@ -811,7 +869,9 @@ class FinancialTable:
             title=self.title,
             statement_type=self.statement_type,
             periods=self.periods,
-            raw_index=self.raw_index
+            raw_index=self.raw_index,
+            row_types=self.row_types.copy(),
+            currency=self.currency,
         )
 
     def with_clean_columns(self, column_names: Optional[List[str]] = None) -> 'FinancialTable':
@@ -860,7 +920,9 @@ class FinancialTable:
             title=self.title,
             statement_type=self.statement_type,
             periods=self.periods,
-            raw_index=self.raw_index
+            raw_index=self.raw_index,
+            row_types=self.row_types.copy(),
+            currency=self.currency,
         )
 
     def _display_dataframe(self) -> pd.DataFrame:
@@ -1309,6 +1371,10 @@ class EarningsRelease:
             statement_type = _classify_statement(table_node, df)
             scale = _detect_table_scale(table_node, df, doc_scale)
             title = _extract_title(table_node)
+            context, _ = _table_context(table_node, title)
+            units = _declared_table_units(context)
+            if units:
+                scale = units[2]
 
             # Detect periods using year pattern (handles any year from 1900-2099)
             periods = [c for c in df.columns
@@ -1331,6 +1397,7 @@ class EarningsRelease:
                 periods=periods,
                 raw_index=idx,
                 row_types=row_types,
+                currency=units[1] if units else 'USD',
             )
             tables.append(table)
 
@@ -2166,9 +2233,14 @@ def _parse_numeric(val) -> Union[float, str, None]:
     negative = s_for_sign_check.startswith('(') or s_for_sign_check.endswith(')')
     cleaned = s.replace(',', '').replace('$', '').replace('€', '').replace('£', '').replace('¥', '').replace('(', '').replace(')', '').replace('%', '').replace('*', '').strip()
 
+    # A lowercase trailing letter is a table footnote (TSMC's 29.43b), not
+    # part of the amount. Uppercase magnitude suffixes and prose stay untouched.
+    footnoted = re.fullmatch(r'([+-]?(?:\d+(?:\.\d*)?|\.\d+))[a-z]', cleaned)
+    if footnoted:
+        cleaned = footnoted[1]
     try:
         num = float(cleaned)
-        return -num if negative else num
+        return -abs(num) if negative else num
     except ValueError:
         # Return original string for non-numeric values (e.g., "N/A", "n/m")
         return s
