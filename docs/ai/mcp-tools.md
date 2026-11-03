@@ -319,6 +319,7 @@ Insider transactions (Form 4) or institutional portfolios (13F).
 |-----------|-------------|
 | `identifier` | Ticker, CIK, or fund CIK (required) |
 | `analysis_type` | `insiders`, `fund_portfolio`, or `portfolio_diff` (required) |
+| `days` | `insiders` only: Form 4s filed in the last N days (default: 90) |
 | `limit` | Max results (default: 20) |
 
 **Try asking Claude:**
