@@ -87,8 +87,10 @@ def test_the_series_is_revenue_rather_than_a_concept_containing_the_word():
     """Apple read as revenue falling from $383B to $7.7B."""
     from edgar.ai.mcp.tools.trends import edgar_trends
 
+    # Wide enough that the three asserted years stay in the window as Apple files new
+    # 10-Ks: periods=3 dropped FY2023 when the FY2026 10-K landed on 2026-11-03
     values = _trend_values(asyncio.run(
-        edgar_trends("AAPL", concepts=["revenue"], periods=3)))
+        edgar_trends("AAPL", concepts=["revenue"], periods=6)))
 
     assert values["2025"] == 416_161_000_000
     assert values["2024"] == 391_035_000_000
@@ -115,8 +117,9 @@ def test_the_broad_substrings_return_their_own_concept():
     """`Assets`/`Liabilities` collided with every Current/Other/Intangible variant."""
     from edgar.ai.mcp.tools.trends import edgar_trends
 
+    # periods=1 is the latest year only, which moved to FY2026 on 2026-11-03
     result = asyncio.run(edgar_trends(
-        "AAPL", concepts=["total_assets", "total_liabilities"], periods=1))
+        "AAPL", concepts=["total_assets", "total_liabilities"], periods=4))
 
     assert _trend_values(result, "total_assets")["2025"] == 359_241_000_000
     assert _trend_values(result, "total_liabilities")["2025"] == 285_508_000_000
