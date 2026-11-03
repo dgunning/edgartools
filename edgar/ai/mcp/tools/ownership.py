@@ -28,6 +28,11 @@ logger = logging.getLogger(__name__)
 # one call fetch every Form 4 a company has ever filed.
 _MAX_LIMIT = 100
 
+# Trades reported per Form 4 entry. Form4 lists market sales before exercises
+# and derivative rows, so a low cap hides exercises behind a run of sale lines;
+# `transaction_total` and `transactions_truncated` say when rows were left out.
+_MAX_TRADES_PER_FILING = 25
+
 
 @tool(
     name="edgar_ownership",
@@ -140,26 +145,32 @@ async def _get_insider_transactions(identifier: str, days: int, limit: int) -> A
 
 
 def _insider_entry(filing) -> dict[str, Any]:
-    """Summarise one Form 4: who filed it, their role, and up to five transactions."""
+    """Summarise one Form 4: who filed it, their role, and its transactions."""
     entry: dict[str, Any] = {
+        "form": filing.form,
         "filing_date": str(filing.filing_date),
         "accession_number": filing.accession_number,
     }
     try:
         form4 = filing.obj()
         summary = form4.get_ownership_summary()
+        owners = form4.reporting_owners.owners
+        insider = {
+            "insider_name": form4.insider_name,
+            "title": form4.position,
+            "is_officer": any(o.is_officer for o in owners),
+            "is_director": any(o.is_director for o in owners),
+            "is_ten_pct_owner": any(o.is_ten_pct_owner for o in owners),
+        }
     except Exception as e:
         logger.debug(f"Could not parse Form 4 {filing.accession_number}: {e}")
         entry["error"] = f"Could not parse Form 4: {e}"
         return entry
 
-    owners = form4.reporting_owners.owners
-    entry["insider_name"] = form4.insider_name
-    entry["title"] = form4.position
-    entry["is_officer"] = any(o.is_officer for o in owners)
-    entry["is_director"] = any(o.is_director for o in owners)
-    entry["is_ten_pct_owner"] = any(o.is_ten_pct_owner for o in owners)
-
+    entry.update(insider)
+    trades = summary.transactions
+    entry["transaction_total"] = len(trades)
+    entry["transactions_truncated"] = len(trades) > _MAX_TRADES_PER_FILING
     entry["transactions"] = [
         {
             "type": t.transaction_type,
@@ -171,7 +182,7 @@ def _insider_entry(filing) -> dict[str, Any]:
             "value": t.value_numeric,
             "is_derivative": t.is_derivative,
         }
-        for t in summary.transactions[:5]  # Limit transactions per filing
+        for t in trades[:_MAX_TRADES_PER_FILING]
     ]
     return entry
 
