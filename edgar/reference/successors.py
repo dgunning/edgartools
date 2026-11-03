@@ -4,6 +4,11 @@ Successor registrants: companies whose history SEC left under an earlier CIK.
 When a company forms a holding company or redomiciles, SEC moves its ticker to a
 new CIK and its filing history stays on the old one. ``successor_registrants.csv``
 lists the pairs reviewed by hand (GH #1821).
+
+New successions arrive as ``successor-review`` issues from the weekly scan in
+``scripts/scan_successor_registrants.py``. Add a row only for a continuation: the
+successor holds the ticker, the predecessor stopped filing 10-Ks and 10-Qs at the
+succession, at most 5% of shared facts differ, and it is not a merger.
 """
 from functools import lru_cache
 from typing import Dict, NamedTuple, Optional, Union

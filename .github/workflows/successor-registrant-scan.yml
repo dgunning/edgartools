@@ -1,0 +1,49 @@
+# Weekly scan for successor registrants (GH #1821).
+#
+# edgar/reference/data/successor_registrants.csv is reviewed by hand. This job files one
+# `successor-review` issue per new 8-K12B/8-K12G3 succession, with predecessor candidates
+# and a fact comparison, and re-checks open issues until the successor has facts. It never
+# edits the table: a person decides, because a merger can pass the fact check.
+# See scripts/scan_successor_registrants.py.
+
+name: Successor registrant scan
+
+on:
+  schedule:
+    - cron: '0 9 * * 1'   # Mondays 09:00 UTC; SEC's form index has the previous week by then
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Look back this many days"
+        default: "14"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: successor-registrant-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      issues: write
+    steps:
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - name: Set up Python 3.11
+      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      with:
+        python-version: "3.11"
+    - name: Install edgartools
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e .
+    - name: Scan and file issues
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        EDGAR_IDENTITY: "S Robinson Robinson@edgar.tools"
+        DAYS: ${{ github.event.inputs.days || '14' }}
+      run: python scripts/scan_successor_registrants.py --days "$DAYS" --repo "${{ github.repository }}"
