@@ -18,6 +18,15 @@ Ground truth: NVIDIA Form 4 0001588670-26-000014 (filed 2026-09-18) by Colette
 Kress, EVP & Chief Financial Officer. Read from the filing's XML: shares withheld
 for tax (F) 40,747 at $212.17, and open-market sales (S) of 4,681 at $218.0144,
 20,369 at $219.0172 and 9,868 at $219.5932.
+
+Follow-up: each entry kept only the first five trades, and Form4 lists market
+sales before exercises, so a filing with five or more sale lines lost its option
+exercise without saying so. Entries now keep up to 25 trades and report
+``transaction_total``, ``transactions_truncated`` and ``form`` (4 or 4/A).
+Ground truth: Tesla Form 4 0001104659-26-055079 (filed 2026-05-04) by director
+Kathleen Wilson-Thompson. Read from the filing's XML: 18 transactions, 16
+open-market sales and an option exercise (M) of 40,948 shares at $14.99 reported
+in both the non-derivative and derivative tables.
 """
 from datetime import date, timedelta
 
@@ -27,6 +36,8 @@ from edgar import Filing
 from edgar.ai.mcp.tools import ownership
 from edgar.ai.mcp.tools.ownership import _insider_entry, edgar_ownership
 
+WILSON_THOMPSON_FORM4 = dict(cik=1318605, company="Tesla, Inc.", form="4",
+                             filing_date="2026-05-04", accession_no="0001104659-26-055079")
 KRESS_FORM4 = dict(cik=1045810, company="NVIDIA CORP", form="4",
                    filing_date="2026-09-18", accession_no="0001588670-26-000014")
 
@@ -37,6 +48,9 @@ def test_insider_entry_reads_insider_role_and_trades():
 
     assert "error" not in entry
     assert entry["accession_number"] == "0001588670-26-000014"
+    assert entry["form"] == "4"
+    assert entry["transaction_total"] == 4
+    assert entry["transactions_truncated"] is False
     assert entry["insider_name"] == "Colette Kress"
     assert entry["title"] == "EVP & Chief Financial Officer"
     assert entry["is_officer"] is True
@@ -52,6 +66,73 @@ def test_insider_entry_reads_insider_role_and_trades():
     }
     sales = [t for t in entry["transactions"] if t["code"] == "S"]
     assert all(t["description"] == "Open Market Sale" for t in sales)
+
+
+@pytest.mark.vcr
+def test_insider_entry_keeps_the_exercise_behind_many_sales():
+    entry = _insider_entry(Filing(**WILSON_THOMPSON_FORM4))
+
+    assert entry["insider_name"] == "Kathleen Wilson-Thompson"
+    assert entry["is_director"] is True
+    assert entry["transaction_total"] == 18
+    assert entry["transactions_truncated"] is False
+    assert len(entry["transactions"]) == 18
+
+    codes = [t["code"] for t in entry["transactions"]]
+    assert codes.count("S") == 16
+    exercises = [(t["shares"], t["price"], t["is_derivative"])
+                 for t in entry["transactions"] if t["code"] == "M"]
+    assert sorted(exercises) == [(40948, 14.99, False), (40948, 14.99, True)]
+
+
+class _Trade:
+    transaction_type = "sale"
+    code = "S"
+    code_description = "Open Market Sale"
+    security_title = "Common Stock"
+    shares_numeric = 100
+    price_numeric = 10.0
+    value_numeric = 1000.0
+    is_derivative = False
+
+
+class _Owner:
+    is_officer = False
+    is_director = True
+    is_ten_pct_owner = False
+
+
+class _ReportingOwners:
+    owners = [_Owner()]
+
+
+class _ManyTradesForm4:
+    insider_name = "Test Insider"
+    position = "Director"
+    reporting_owners = _ReportingOwners()
+
+    def get_ownership_summary(self):
+        class _Summary:
+            transactions = [_Trade() for _ in range(30)]
+        return _Summary()
+
+
+class _ManyTradesFiling:
+    form = "4/A"
+    filing_date = "2026-10-13"
+    accession_number = "0000000000-26-000002"
+
+    def obj(self):
+        return _ManyTradesForm4()
+
+
+def test_a_cut_trade_list_says_so():
+    entry = _insider_entry(_ManyTradesFiling())
+
+    assert entry["form"] == "4/A"
+    assert entry["transaction_total"] == 30
+    assert entry["transactions_truncated"] is True
+    assert len(entry["transactions"]) == ownership._MAX_TRADES_PER_FILING == 25
 
 
 class _Filings:
@@ -131,6 +212,7 @@ async def test_days_leaves_out_older_form4s(monkeypatch):
 
 
 class _UnparseableFiling:
+    form = "4"
     filing_date = "2026-10-13"
     accession_number = "0000000000-26-000001"
 
@@ -143,4 +225,5 @@ def test_unparseable_form4_reports_the_error():
 
     assert entry["accession_number"] == "0000000000-26-000001"
     assert entry["error"] == "Could not parse Form 4: no ownershipDocument in the XML"
+    assert entry["form"] == "4"
     assert "insider_name" not in entry

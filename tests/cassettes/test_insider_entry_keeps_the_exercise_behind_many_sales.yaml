@@ -1,0 +1,602 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1318605/000110465926055079/0001104659-26-055079.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0001104659-26-055079.txt : 20260504\n<SEC-HEADER>0001104659-26-055079.hdr.sgml
+        : 20260504\n<ACCEPTANCE-DATETIME>20260504190015\nACCESSION NUMBER:\t\t0001104659-26-055079\nCONFORMED
+        SUBMISSION TYPE:\t4\nPUBLIC DOCUMENT COUNT:\t\t1\nCONFORMED PERIOD OF REPORT:\t20260430\nFILED
+        AS OF DATE:\t\t20260504\nDATE AS OF CHANGE:\t\t20260504\n\nREPORTING-OWNER:\t\n\n\tOWNER
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tWilson-Thompson Kathleen\n\t\tCENTRAL
+        INDEX KEY:\t\t\t0001331680\n\t\tORGANIZATION NAME:           \t\n\n\tFILING
+        VALUES:\n\t\tFORM TYPE:\t\t4\n\t\tSEC ACT:\t\t1934 Act\n\t\tSEC FILE NUMBER:\t001-34756\n\t\tFILM
+        NUMBER:\t\t26939729\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\t6555 STATE HWY
+        161\n\t\tCITY:\t\t\tIRVING\n\t\tSTATE:\t\t\tTX\n\t\tZIP:\t\t\t75039\n\nISSUER:\t\t\n\n\tCOMPANY
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tTesla, Inc.\n\t\tCENTRAL INDEX KEY:\t\t\t0001318605\n\t\tSTANDARD
+        INDUSTRIAL CLASSIFICATION:\tMOTOR VEHICLES & PASSENGER CAR BODIES [3711]\n\t\tORGANIZATION
+        NAME:           \t04 Manufacturing\n\t\tEIN:\t\t\t\t912197729\n\t\tSTATE OF
+        INCORPORATION:\t\t\tTX\n\t\tFISCAL YEAR END:\t\t\t1231\n\n\tBUSINESS ADDRESS:\t\n\t\tSTREET
+        1:\t\t1 TESLA ROAD\n\t\tCITY:\t\t\tAUSTIN\n\t\tSTATE:\t\t\tTX\n\t\tZIP:\t\t\t78725\n\t\tBUSINESS
+        PHONE:\t\t512-516-8177\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\t1 TESLA ROAD\n\t\tCITY:\t\t\tAUSTIN\n\t\tSTATE:\t\t\tTX\n\t\tZIP:\t\t\t78725\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tTESLA MOTORS INC\n\t\tDATE OF NAME
+        CHANGE:\t20050222\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>4\n<SEQUENCE>1\n<FILENAME>tm2613330-1_4seq1.xml\n<DESCRIPTION>OWNERSHIP
+        DOCUMENT\n<TEXT>\n<XML>\n<?xml version=\"1.0\"?>\n<ownershipDocument>\n\n
+        \   <schemaVersion>X0609</schemaVersion>\n\n    <documentType>4</documentType>\n\n
+        \   <periodOfReport>2026-04-30</periodOfReport>\n\n    <notSubjectToSection16>0</notSubjectToSection16>\n\n
+        \   <issuer>\n        <issuerCik>0001318605</issuerCik>\n        <issuerName>Tesla,
+        Inc.</issuerName>\n        <issuerTradingSymbol>TSLA</issuerTradingSymbol>\n
+        \       <issuerForeignTradingSymbol></issuerForeignTradingSymbol>\n    </issuer>\n\n
+        \   <reportingOwner>\n        <reportingOwnerId>\n            <rptOwnerCik>0001331680</rptOwnerCik>\n
+        \           <rptOwnerName>Wilson-Thompson Kathleen</rptOwnerName>\n        </reportingOwnerId>\n
+        \       <reportingOwnerAddress>\n            <rptOwnerNonUSAddressFlag>false</rptOwnerNonUSAddressFlag>\n
+        \           <rptOwnerStreet1>C/O TESLA, INC.</rptOwnerStreet1>\n            <rptOwnerStreet2>1
+        TESLA ROAD</rptOwnerStreet2>\n            <rptOwnerCity>AUSTIN</rptOwnerCity>\n
+        \           <rptOwnerState>TX</rptOwnerState>\n            <rptOwnerZipCode>78725</rptOwnerZipCode>\n
+        \           <rptOwnerStateDescription></rptOwnerStateDescription>\n        </reportingOwnerAddress>\n
+        \       <reportingOwnerRelationship>\n            <isDirector>1</isDirector>\n
+        \           <isOfficer>0</isOfficer>\n            <isTenPercentOwner>0</isTenPercentOwner>\n
+        \           <isOther>0</isOther>\n            <officerTitle></officerTitle>\n
+        \           <otherText></otherText>\n        </reportingOwnerRelationship>\n
+        \   </reportingOwner>\n\n    <aff10b5One>1</aff10b5One>\n\n    <nonDerivativeTable>\n
+        \       <nonDerivativeTransaction>\n            <securityTitle>\n                <value>Common
+        Stock</value>\n            </securityTitle>\n            <transactionDate>\n
+        \               <value>2026-04-30</value>\n            </transactionDate>\n
+        \           <deemedExecutionDate></deemedExecutionDate>\n            <transactionCoding>\n
+        \               <transactionFormType>4</transactionFormType>\n                <transactionCode>M</transactionCode>\n
+        \               <equitySwapInvolved>0</equitySwapInvolved>\n                <footnoteId
+        id=\"F1\"/>\n            </transactionCoding>\n            <transactionTimeliness></transactionTimeliness>\n
+        \           <transactionAmounts>\n                <transactionShares>\n                    <value>40948</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>14.99</value>\n                </transactionPricePerShare>\n
+        \               <transactionAcquiredDisposedCode>\n                    <value>A</value>\n
+        \               </transactionAcquiredDisposedCode>\n            </transactionAmounts>\n
+        \           <postTransactionAmounts>\n                <sharesOwnedFollowingTransaction>\n
+        \                   <value>74808</value>\n                </sharesOwnedFollowingTransaction>\n
+        \           </postTransactionAmounts>\n            <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>840</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>369.010</value>\n                    <footnoteId
+        id=\"F2\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>73968</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>1520</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>369.769</value>\n                    <footnoteId
+        id=\"F3\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>72448</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>1275</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>370.929</value>\n                    <footnoteId
+        id=\"F4\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>71173</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>1020</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>371.881</value>\n                    <footnoteId
+        id=\"F5\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>70153</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>619</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>372.819</value>\n                    <footnoteId
+        id=\"F6\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>69534</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>520</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>374.402</value>\n                    <footnoteId
+        id=\"F7\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>69014</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>280</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>375.149</value>\n                    <footnoteId
+        id=\"F8\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>68734</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>1081</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>376.689</value>\n                    <footnoteId
+        id=\"F9\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>67653</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>3003</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>377.487</value>\n                    <footnoteId
+        id=\"F10\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>64650</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>3480</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>378.573</value>\n                    <footnoteId
+        id=\"F11\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>61170</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>1760</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>379.427</value>\n                    <footnoteId
+        id=\"F12\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>59410</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>1755</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>380.756</value>\n                    <footnoteId
+        id=\"F13\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>57655</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>6896</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>381.607</value>\n                    <footnoteId
+        id=\"F14\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>50759</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>680</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>382.414</value>\n                    <footnoteId
+        id=\"F15\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>50079</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>1240</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>383.612</value>\n                    <footnoteId
+        id=\"F16\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>48839</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n        <nonDerivativeTransaction>\n
+        \           <securityTitle>\n                <value>Common Stock</value>\n
+        \           </securityTitle>\n            <transactionDate>\n                <value>2026-04-30</value>\n
+        \           </transactionDate>\n            <deemedExecutionDate></deemedExecutionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>S</transactionCode>\n                <equitySwapInvolved>0</equitySwapInvolved>\n
+        \               <footnoteId id=\"F1\"/>\n            </transactionCoding>\n
+        \           <transactionTimeliness></transactionTimeliness>\n            <transactionAmounts>\n
+        \               <transactionShares>\n                    <value>440</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>384.284</value>\n                    <footnoteId
+        id=\"F17\"/>\n                </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>D</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>48399</value>\n
+        \               </sharesOwnedFollowingTransaction>\n            </postTransactionAmounts>\n
+        \           <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n    </nonDerivativeTable>\n\n
+        \   <derivativeTable>\n        <derivativeTransaction>\n            <securityTitle>\n
+        \               <value>Non-Qualified Stock Option (right to buy)</value>\n
+        \           </securityTitle>\n            <conversionOrExercisePrice>\n                <value>14.990</value>\n
+        \           </conversionOrExercisePrice>\n            <transactionDate>\n
+        \               <value>2026-04-30</value>\n            </transactionDate>\n
+        \           <deemedExecutionDate></deemedExecutionDate>\n            <transactionCoding>\n
+        \               <transactionFormType>4</transactionFormType>\n                <transactionCode>M</transactionCode>\n
+        \               <equitySwapInvolved>0</equitySwapInvolved>\n                <footnoteId
+        id=\"F1\"/>\n            </transactionCoding>\n            <transactionTimeliness></transactionTimeliness>\n
+        \           <transactionAmounts>\n                <transactionShares>\n                    <value>40948</value>\n
+        \               </transactionShares>\n                <transactionPricePerShare>\n
+        \                   <value>0.000</value>\n                </transactionPricePerShare>\n
+        \               <transactionAcquiredDisposedCode>\n                    <value>D</value>\n
+        \               </transactionAcquiredDisposedCode>\n            </transactionAmounts>\n
+        \           <exerciseDate>\n                <footnoteId id=\"F18\"/>\n            </exerciseDate>\n
+        \           <expirationDate>\n                <value>2026-06-18</value>\n
+        \           </expirationDate>\n            <underlyingSecurity>\n                <underlyingSecurityTitle>\n
+        \                   <value>Common Stock</value>\n                </underlyingSecurityTitle>\n
+        \               <underlyingSecurityShares>\n                    <value>40948</value>\n
+        \               </underlyingSecurityShares>\n            </underlyingSecurity>\n
+        \           <postTransactionAmounts>\n                <sharesOwnedFollowingTransaction>\n
+        \                   <value>0</value>\n                </sharesOwnedFollowingTransaction>\n
+        \           </postTransactionAmounts>\n            <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </derivativeTransaction>\n    </derivativeTable>\n\n
+        \   <footnotes>\n        <footnote id=\"F1\">The transactions reported on
+        this Form 4 were effected pursuant to a Rule 10b5-1 trading plan adopted by
+        the reporting person on November 26, 2025.</footnote>\n        <footnote id=\"F2\">The
+        price reported in Column 4 is a weighted average price. These shares were
+        sold in multiple transactions at prices ranging from $368.360 to $369.350,
+        inclusive. The reporting person undertakes to provide Tesla, Inc., any security
+        holder of Tesla, Inc. or the staff of the Securities and Exchange Commission,
+        upon request, full information regarding the number of shares sold at each
+        separate price within the range set forth in this footnote.</footnote>\n        <footnote
+        id=\"F3\">The price reported in Column 4 is a weighted average price. These
+        shares were sold in multiple transactions at prices ranging from $369.360
+        to $370.320, inclusive. The reporting person undertakes to provide Tesla,
+        Inc., any security holder of Tesla, Inc. or the staff of the Securities and
+        Exchange Commission, upon request, full information regarding the number of
+        shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F4\">The price reported in Column 4 is a weighted average
+        price. These shares were sold in multiple transactions at prices ranging from
+        $370.380 to $371.360, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F5\">The price reported in Column 4 is a weighted average
+        price. These shares were sold in multiple transactions at prices ranging from
+        $371.380 to $372.370, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F6\">The price reported in Column 4 is a weighted average
+        price. These shares were sold in multiple transactions at prices ranging from
+        $372.380 to $373.350, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F7\">The price reported in Column 4 is a weighted average
+        price. These shares were sold in multiple transactions at prices ranging from
+        $373.910 to $374.870, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F8\">The price reported in Column 4 is a weighted average
+        price. These shares were sold in multiple transactions at prices ranging from
+        $374.940 to $375.600, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F9\">The price reported in Column 4 is a weighted average
+        price. These shares were sold in multiple transactions at prices ranging from
+        $376.000 to $376.970, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F10\">The price reported in Column 4 is a weighted
+        average price. These shares were sold in multiple transactions at prices ranging
+        from $377.020 to $377.990, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F11\">The price reported in Column 4 is a weighted
+        average price. These shares were sold in multiple transactions at prices ranging
+        from $378.050 to $379.040, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F12\">The price reported in Column 4 is a weighted
+        average price. These shares were sold in multiple transactions at prices ranging
+        from $379.090 to $380.070, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F13\">The price reported in Column 4 is a weighted
+        average price. These shares were sold in multiple transactions at prices ranging
+        from $380.130 to $381.120, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F14\">The price reported in Column 4 is a weighted
+        average price. These shares were sold in multiple transactions at prices ranging
+        from $381.140 to $382.110, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F15\">The price reported in Column 4 is a weighted
+        average price. These shares were sold in multiple transactions at prices ranging
+        from $382.140 to $382.800, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F16\">The price reported in Column 4 is a weighted
+        average price. These shares were sold in multiple transactions at prices ranging
+        from $383.140 to $384.110, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F17\">The price reported in Column 4 is a weighted
+        average price. These shares were sold in multiple transactions at prices ranging
+        from $384.150 to $384.660, inclusive. The reporting person undertakes to provide
+        Tesla, Inc., any security holder of Tesla, Inc. or the staff of the Securities
+        and Exchange Commission, upon request, full information regarding the number
+        of shares sold at each separate price within the range set forth in this footnote.</footnote>\n
+        \       <footnote id=\"F18\">1/36th of the shares granted shall become vested
+        and exercisable as of each monthly anniversary from June 18, 2019, such that
+        all shares subject to the option were fully vested and exercisable by June
+        18, 2022.</footnote>\n    </footnotes>\n\n    <ownerSignature>\n        <signatureName>By:
+        Aaron Beckman, Power of Attorney For: Kathleen Wilson-Thompson</signatureName>\n
+        \       <signatureDate>2026-05-04</signatureDate>\n    </ownerSignature>\n</ownershipDocument>\n</XML>\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      cache-control:
+      - no-cache, no-store, no-transform, proxy-revalidate
+      connection:
+      - keep-alive
+      content-length:
+      - '40160'
+      content-security-policy:
+      - frame-ancestors 'self'
+      content-type:
+      - text/plain
+      date:
+      - Tue, 03 Nov 2026 21:27:43 GMT
+      etag:
+      - '"764a68cd2a86b33b057e2ce9e74061b1-gzip"'
+      last-modified:
+      - Mon, 04 May 2026 23:00:38 GMT
+      permissions-policy:
+      - geolocation=(), microphone=(), camera=()
+      pragma:
+      - no-cache
+      referrer-policy:
+      - strict-origin-when-cross-origin
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - fox9J9ND6cROYhAmBmbRM188YU2q7GMPWMC5CNe8nKOaMDYm+1b7whGPlFueO5umrzDaN7RoW1w=
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - 0QY5AMCV1WBAGNXA
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - c4HS2Y5CFb29GvJIF01YWqaRCrQybNE7
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK0001331680.json
+  response:
+    body:
+      string: '{"cik":"0001331680","entityType":"other","sic":"","sicDescription":"","ownerOrg":"","insiderTransactionForOwnerExists":1,"insiderTransactionForIssuerExists":0,"name":"Wilson-Thompson
+        Kathleen","tickers":[],"exchanges":[],"ein":null,"lei":null,"description":"","website":"","investorWebsite":"","category":"","fiscalYearEnd":null,"stateOfIncorporation":"","stateOfIncorporationDescription":"","addresses":{"mailing":{"street1":"6555
+        STATE HWY 161","street2":null,"city":"IRVING","stateOrCountry":"TX","zipCode":"75039","stateOrCountryDescription":"TX","isForeignLocation":0,"foreignStateTerritory":null,"country":null,"countryCode":null},"business":{"street1":null,"street2":null,"city":null,"stateOrCountry":null,"zipCode":null,"stateOrCountryDescription":null,"isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null}},"phone":null,"flags":"","formerNames":[],"filings":{"recent":{"accessionNumber":["0000927653-26-000207","0001628280-26-033529","0001628280-26-032874","0001104659-26-055079","0001950047-26-003863","0001104659-26-038682","0001950047-26-003078","0001104659-26-021746","0001950047-26-001763","0000927653-25-000082","0000110471-25-000073","0001104659-25-043639","0000950170-25-003585","0001950047-25-000122","0000950170-24-134264","0001950047-24-009437","0000950170-24-126580","0001950047-24-008368","0001062993-24-014308","0000110471-24-000091","0001062993-23-015294","0000110471-23-000055","0001771340-22-000010","0001771340-22-000007","0001062993-22-016745","0001209191-22-027279","0001062993-22-003298","0001062993-22-001394","0001209191-21-031325","0001209191-21-031302","0001771340-21-000001","0001771340-20-000015","0001771340-20-000013","0001618921-20-000123","0001618921-20-000096","0001771340-20-000009","0001771364-20-000017","0001618921-20-000071","0001771364-20-000014","0001127602-20-003166","0001618921-19-000120","0001618921-19-000110","0001618921-19-000078","0001771340-19-000010","0001618921-19-000053","0001771340-19-000006","0001771364-19-000003","0001127602-19-005337","0001494732-19-000005","0001494732-19-000001","0001618921-18-000084","0001618921-18-000059","0001618921-18-000039","0001562180-18-002480","0001127602-18-002682","0001618921-17-000088","0001127602-17-030792","0001618921-17-000076","0001618921-17-000060","0001127602-17-023971","0001127602-17-023969","0001225208-17-011496","0001618921-16-000091","0001618921-16-000078","0001618921-16-000057","0001618921-16-000048","0001618921-16-000039","0001618921-16-000030","0001618921-16-000028","0001225208-16-033398","0001618921-16-000010","0001618921-16-000009","0000104207-16-000112","0000104207-15-000107","0001225208-15-011796","0000104207-15-000006","0000104207-14-000142","0000104207-14-000136","0000104207-14-000135","0000104207-14-000090","0000104207-14-000073","0001225208-14-012628","0000104207-13-000116","0000104207-13-000091","0000104207-13-000071","0001225208-13-012045","0000104207-13-000001","0000104207-12-000112","0000104207-12-000089","0001225208-12-012349","0000104207-11-000075","0000104207-11-000063","0001225208-11-015838","0000104207-10-000081","0001225208-10-014550","0000104207-10-000008","0000104207-10-000007","0001225208-09-024626","0001225208-09-022546","0001225208-09-021637","0001225208-09-004703","0001225208-09-004291","0001225208-09-003763","0001225208-08-017569","0001225208-08-003474","0001225208-08-003174","0001225208-08-002468","0001225208-08-002277","0001225208-07-003097","0001225208-07-003070","0001225208-07-001495","0001225208-06-005425","0001225208-06-004586","0001225208-06-002842","0000055067-06-000161","0000055067-06-000159","0000055067-06-000120","0000055067-06-000044","0000055067-05-000213","0000055067-05-000187"],"filingDate":["2026-07-23","2026-05-11","2026-05-08","2026-05-04","2026-04-30","2026-04-01","2026-03-30","2026-02-27","2026-02-25","2025-07-31","2025-05-05","2025-05-01","2025-01-08","2025-01-06","2024-12-06","2024-12-04","2024-11-13","2024-11-12","2024-08-01","2024-05-06","2023-07-25","2023-05-05","2022-09-12","2022-08-02","2022-07-26","2022-05-04","2022-02-09","2022-01-21","2021-05-10","2021-05-10","2021-01-05","2020-12-02","2020-11-03","2020-11-02","2020-10-30","2020-10-05","2020-09-02","2020-09-02","2020-08-04","2020-02-03","2019-12-11","2019-11-04","2019-10-30","2019-10-11","2019-08-23","2019-08-16","2019-05-01","2019-02-12","2019-01-09","2019-01-07","2018-11-02","2018-10-25","2018-08-17","2018-05-15","2018-01-26","2017-11-02","2017-11-01","2017-10-25","2017-08-18","2017-07-21","2017-07-21","2017-06-19","2016-11-29","2016-11-02","2016-10-24","2016-09-12","2016-07-18","2016-07-12","2016-06-13","2016-05-16","2016-03-18","2016-03-11","2016-01-05","2015-11-03","2015-05-11","2015-01-02","2014-12-16","2014-11-03","2014-11-03","2014-10-08","2014-09-03","2014-05-12","2013-11-01","2013-10-10","2013-09-04","2013-05-13","2013-01-07","2012-11-02","2012-10-12","2012-05-15","2011-09-02","2011-08-16","2011-06-03","2010-09-03","2010-06-03","2010-01-06","2010-01-06","2009-12-17","2009-11-19","2009-11-04","2009-02-24","2009-02-19","2009-02-17","2008-11-06","2008-02-25","2008-02-20","2008-02-12","2008-02-06","2007-03-23","2007-03-21","2007-02-13","2006-11-06","2006-09-19","2006-05-17","2006-03-17","2006-03-15","2006-02-22","2006-02-13","2005-09-14","2005-06-29"],"reportDate":["2026-07-22","2026-05-07","2026-05-06","2026-04-30","","2026-03-30","","2026-02-25","","2025-07-30","2025-05-01","2025-05-01","2025-01-06","","2024-12-04","","2024-11-11","","2024-07-31","2024-05-02","2023-07-21","2023-05-03","2022-09-08","2022-07-29","2022-07-22","2022-05-03","2022-02-07","2022-01-13","2021-05-06","2021-05-05","2020-12-31","2020-11-30","2020-10-30","2020-11-01","2020-10-28","2020-09-30","2020-08-31","2020-09-01","2020-07-31","2020-01-30","2019-12-10","2019-11-01","2019-10-28","2019-06-18","2018-11-01","2019-08-14","2019-04-29","2019-02-08","2019-01-07","2018-12-27","2018-10-31","2018-10-23","2018-08-15","2018-05-11","2018-01-25","2017-11-01","2017-09-30","2017-10-23","2017-08-17","2017-07-19","2017-07-19","2017-06-15","2016-11-28","2016-11-01","2016-10-21","2016-09-08","2016-07-14","2016-07-08","2016-06-10","2016-05-16","2016-03-17","2016-03-09","2015-12-31","2015-10-30","2015-05-07","2014-12-31","2014-12-15","2014-11-01","2014-11-01","2014-10-07","2014-09-01","2014-05-08","2013-11-01","2013-10-09","2013-04-23","2013-05-09","2013-01-04","2012-11-01","2012-10-10","2012-05-11","2011-09-01","2011-08-15","2011-06-01","2010-09-01","2010-06-01","2010-01-04","2010-01-04","2009-12-11","2009-11-18","2009-11-02","2009-02-20","2009-02-17","2009-01-03","2008-11-04","2008-02-21","2008-02-18","2007-12-29","2008-02-04","2007-02-16","2007-03-19","2006-12-30","2006-11-02","2006-09-15","2006-05-15","2006-03-15","2006-03-13","2006-02-17","2005-12-31","2005-09-12","2005-07-05"],"acceptanceDateTime":["2026-07-23T20:45:05.000Z","2026-05-11T20:23:29.000Z","2026-05-08T20:11:40.000Z","2026-05-04T23:00:15.000Z","2026-04-30T20:25:00.000Z","2026-04-01T23:00:13.000Z","2026-03-30T21:31:46.000Z","2026-02-28T00:00:21.000Z","2026-02-25T21:27:12.000Z","2025-07-31T21:54:54.000Z","2025-05-05T20:19:30.000Z","2025-05-02T00:04:32.000Z","2025-01-09T00:00:05.000Z","2025-01-06T21:21:12.000Z","2024-12-07T00:00:05.000Z","2024-12-04T21:40:35.000Z","2024-11-14T00:00:14.000Z","2024-11-12T12:49:55.000Z","2024-08-01T21:36:23.000Z","2024-05-06T20:57:34.000Z","2023-07-25T19:19:38.000Z","2023-05-05T20:22:49.000Z","2022-09-13T01:44:02.000Z","2022-08-03T00:17:58.000Z","2022-07-26T22:48:36.000Z","2022-05-05T00:22:32.000Z","2022-02-09T20:40:00.000Z","2022-01-21T22:26:16.000Z","2021-05-10T21:20:59.000Z","2021-05-10T21:07:12.000Z","2021-01-06T01:49:56.000Z","2020-12-03T01:51:12.000Z","2020-11-04T01:56:50.000Z","2020-11-02T21:42:33.000Z","2020-10-30T21:05:40.000Z","2020-10-06T00:45:48.000Z","2020-09-03T00:50:50.000Z","2020-09-02T22:56:55.000Z","2020-08-05T01:17:52.000Z","2020-02-03T21:36:39.000Z","2019-12-11T22:32:52.000Z","2019-11-04T22:48:30.000Z","2019-10-30T21:37:11.000Z","2019-10-12T00:48:13.000Z","2019-08-23T20:29:34.000Z","2019-08-17T00:52:37.000Z","2019-05-02T00:51:06.000Z","2019-02-12T20:30:21.000Z","2019-01-10T02:46:01.000Z","2019-01-08T01:50:05.000Z","2018-11-02T21:02:23.000Z","2018-10-25T21:07:06.000Z","2018-08-17T11:25:01.000Z","2018-05-15T21:04:59.000Z","2018-01-26T23:03:27.000Z","2017-11-02T21:23:52.000Z","2017-11-01T20:47:47.000Z","2017-10-25T22:51:36.000Z","2017-08-18T20:03:23.000Z","2017-07-21T14:52:34.000Z","2017-07-21T14:50:12.000Z","2017-06-19T22:08:11.000Z","2016-11-29T23:36:49.000Z","2016-11-02T20:55:40.000Z","2016-10-24T22:16:34.000Z","2016-09-12T21:18:48.000Z","2016-07-18T22:11:53.000Z","2016-07-12T21:26:29.000Z","2016-06-13T21:11:24.000Z","2016-05-16T21:08:02.000Z","2016-03-18T21:01:49.000Z","2016-03-11T22:02:07.000Z","2016-01-05T21:53:34.000Z","2015-11-03T23:05:18.000Z","2015-05-11T16:04:20.000Z","2015-01-02T22:39:07.000Z","2014-12-16T23:37:17.000Z","2014-11-03T22:53:32.000Z","2014-11-03T22:53:02.000Z","2014-10-08T23:04:13.000Z","2014-09-03T21:10:06.000Z","2014-05-12T15:24:06.000Z","2013-11-01T23:34:53.000Z","2013-10-11T01:19:23.000Z","2013-09-04T22:12:15.000Z","2013-05-13T16:37:42.000Z","2013-01-07T22:50:54.000Z","2012-11-02T22:56:56.000Z","2012-10-12T22:27:54.000Z","2012-05-15T18:10:29.000Z","2011-09-02T22:02:00.000Z","2011-08-16T21:57:21.000Z","2011-06-03T16:13:51.000Z","2010-09-03T18:20:59.000Z","2010-06-03T13:17:12.000Z","2010-01-06T23:23:37.000Z","2010-01-06T19:41:09.000Z","2009-12-17T16:54:02.000Z","2009-11-19T17:39:18.000Z","2009-11-04T21:18:35.000Z","2009-02-24T22:10:46.000Z","2009-02-19T20:30:19.000Z","2009-02-17T15:44:18.000Z","2008-11-06T20:52:18.000Z","2008-02-25T22:58:55.000Z","2008-02-20T23:28:13.000Z","2008-02-12T23:20:33.000Z","2008-02-06T22:36:26.000Z","2007-03-23T18:27:16.000Z","2007-03-21T21:55:15.000Z","2007-02-13T19:34:53.000Z","2006-11-06T21:20:57.000Z","2006-09-19T18:38:15.000Z","2006-05-17T18:39:19.000Z","2006-03-17T18:01:05.000Z","2006-03-15T16:22:20.000Z","2006-02-22T16:52:43.000Z","2006-02-13T19:43:22.000Z","2005-09-14T18:38:11.000Z","2005-06-29T20:38:16.000Z"],"act":["34","34","34","34","","34","","34","","34","34","34","34","","34","","34","","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34","34"],"form":["4","4","4","4","144","4","144","4","144","4","4","4","4","144","4","144","4","144","4","4","4","4","4","4","4","4","4","3","4","3","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4/A","4","4","4","4","3","4","4","4","4","4","4","5","4","4","4","3","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","3","3","4","4","4","4","5","4","4","4","5","4","4","4","5","4","4","4","4","4","4","5","4","3"],"fileNumber":["001-13252","001-06024","001-06024","001-34756","","001-34756","","001-34756","","001-13252","001-06024","001-34756","001-34756","","001-34756","","001-34756","","001-13252","001-06024","001-13252","001-06024","001-34756","001-34756","001-13252","001-06024","001-13252","001-13252","001-06024","001-06024","001-34756","001-34756","001-34756","001-36759","001-36759","001-34756","001-34756","001-36759","001-34756","333-211719","001-36759","001-36759","001-36759","001-34756","001-36759","001-34756","001-34756","333-211719","001-34756","001-34756","001-36759","001-36759","001-36759","001-33841","333-211719","001-36759","333-211719","001-36759","001-36759","333-211719","333-211719","001-33841","001-36759","001-36759","001-36759","001-36759","001-36759","001-36759","001-36759","001-33841","001-36759","001-36759","001-36759","001-36759","001-33841","001-36759","001-00604","001-00604","001-00604","001-00604","001-00604","001-33841","001-00604","001-00604","001-00604","001-33841","001-00604","001-00604","001-00604","001-33841","001-00604","001-00604","001-33841","001-00604","001-33841","001-00604","001-00604","001-33841","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171","001-04171"],"filmNumber":["261197587","26963545","26958451","26939729","","26830041","","26702699","","251173047","25913262","25905135","25519669","","241533518","","241456251","","241168110","24918396","231108333","23894209","221239644","221130568","221108187","22893558","22606821","22546853","21908538","21908306","21508623","201365437","201284997","201280977","201278127","201225326","201158120","201157956","201075370","20569124","191280501","191190908","191181329","191148937","191049441","191034603","19789397","19590402","19519176","19514539","181157851","181139574","181024723","18837613","18553075","171173759","171169553","171154149","171041138","17975762","17975751","17919452","162023732","161968749","161948951","161881559","161772215","161764555","161711412","161655024","161516750","161501625","161323099","151194901","15849556","15502116","141290765","141190604","141190601","141148946","141081195","14831952","131187342","131146807","131078837","13836165","13516207","121178152","121142624","12843285","111074398","111040981","11890835","101057320","10874572","10512946","10511130","091246532","091195210","091157989","09631450","09621514","09608231","081167108","08640564","08630971","08600079","08582410","07714945","07710101","07608602","061190596","061097750","06848711","06694888","06687153","06635184","06602813","051084198","05925248"],"items":["","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","","",""],"core_type":["4","4","4","4","144","4","144","4","144","4","4","4","4","144","4","144","4","144","4","4","4","4","4","4","4","4","4","3","4","3","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4/A","4","4","4","4","3","4","4","4","4","4","4","5","4","4","4","3","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","4","3","3","4","4","4","4","5","4","4","4","5","4","4","4","5","4","4","4","4","4","4","5","4","3"],"size":[4984,5434,6917,40160,6774,38119,6063,21615,5350,479216,5304,8713,51433,6214,26301,5501,52693,5029,5453,5311,5366,5311,8642,13189,5334,5307,5386,521391,5306,6854,25685,45314,36201,10020,7317,25683,35467,5579,8332,5834,5879,8238,7624,5444,6046,4515,7430,5880,5304,4623,11801,7080,5308,7846,5584,8171,5084,7315,5305,7443,7050,5569,9259,8080,7319,14973,14535,15416,9716,5570,9724,14552,5549,19211,5666,11970,27168,4977,4977,5943,5499,5666,4977,13147,6606,5665,4795,4977,8809,5665,7112,4999,5665,7304,6124,7076,7507,5134,17006,6809,6647,7009,6755,10293,15598,7006,6754,5616,6769,58301,6755,5582,37985,5452,23567,8122,5342,6878,16818,19856],"isXBRL":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"isInlineXBRL":[0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0],"isXBRLNumeric":[0,0,0,0,0,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null],"primaryDocument":["xslF345X06/form4.xml","xslF345X06/wk-form4_1778531006.xml","xslF345X06/wk-form4_1778271097.xml","xslF345X06/tm2613330-1_4seq1.xml","xsl144X01/primary_doc.xml","xslF345X06/tm2610684-1_4seq1.xml","xsl144X01/primary_doc.xml","xslF345X05/tm267481-1_4seq1.xml","xsl144X01/primary_doc.xml","xslF345X05/form4.xml","xslF345X05/wk-form4_1746476360.xml","xslF345X05/tm2513581-6_4seq1.xml","xslF345X05/ownership.xml","xsl144X01/primary_doc.xml","xslF345X05/ownership.xml","xsl144X01/primary_doc.xml","xslF345X05/ownership.xml","xsl144X01/primary_doc.xml","xslF345X05/form4.xml","xslF345X05/wk-form4_1715029042.xml","xslF345X05/form4.xml","xslF345X04/wf-form4_168331815253128.xml","xslF345X03/primary_doc.xml","xslF345X03/edgardoc.xml","xslF345X03/form4.xml","xslF345X03/doc4.xml","xslF345X03/form4.xml","xslF345X02/form3.xml","xslF345X03/doc4.xml","xslF345X02/doc3.xml","xslF345X03/edgardoc.xml","xslF345X03/edgardoc.xml","xslF345X03/edgardoc.xml","xslF345X03/wf-form4_160435330776552.xml","xslF345X03/wf-form4_160409192555916.xml","xslF345X03/edgardoc.xml","xslF345X03/edgardoc.xml","xslF345X03/wf-form4_159908740022424.xml","xslF345X03/edgardoc.xml","xslF345X03/form4.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgardoc.xml","xslF345X03/edgar.xml","xslF345X03/edgardoc.xml","xslF345X03/edgardoc.xml","xslF345X03/form4.xml","xslF345X03/edgardoc.xml","xslF345X02/edgardoc.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/primarydocument.xml","xslF345X03/form4.xml","xslF345X03/edgar.xml","xslF345X03/form5.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/form4.xml","xslF345X02/form3.xml","xslF345X03/doc4.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/doc4.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/doc4.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/doc4.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/doc4.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/doc4.xml","xslF345X03/edgar.xml","xslF345X03/edgar.xml","xslF345X03/doc4.xml","xslF345X03/edgar.xml","xslF345X03/doc4.xml","xslF345X03/edgar.xml","xslF345X02/edgar.xml","xslF345X02/doc3.xml","xslF345X03/doc4.xml","xslF345X03/doc4.xml","xslF345X03/doc4.xml","xslF345X03/doc4.xml","xslF345X03/doc5.xml","xslF345X03/doc4.xml","xslF345X02/doc4.xml","xslF345X02/doc4.xml","xslF345X02/doc5.xml","xslF345X02/doc4.xml","xslF345X02/doc4.xml","xslF345X02/doc4.xml","xslF345X02/doc5.xml","xslF345X02/doc4.xml","xslF345X02/doc4.xml","xslF345X02/doc4.xml","xslF345X02/f4_wilsonthompson-03152006ex.xml","xslF345X02/f4_wilsonthompson-03132006ex.xml","xslF345X02/f4_wilsonthompson-02172006ex.xml","xslF345X02/f5_thompson-12312005ex.xml","xslF345X02/f4_wilsonthompson-09122005ex.xml","xslF345X02/f3_wilson-07052005ex.xml"],"primaryDocDescription":["STATEMENT
+        OF CHANGES IN BENEFICIAL OWNERSHIP OF SECURITIES","FORM 4","FORM 4","OWNERSHIP
+        DOCUMENT","","OWNERSHIP DOCUMENT","","OWNERSHIP DOCUMENT","","STATEMENT OF
+        CHANGES IN BENEFICIAL OWNERSHIP OF SECURITIES","FORM 4","OWNERSHIP DOCUMENT","4","","4","","4","","STATEMENT
+        OF CHANGES IN BENEFICIAL OWNERSHIP OF SECURITIES","FORM 4","STATEMENT OF CHANGES
+        IN BENEFICIAL OWNERSHIP OF SECURITIES","FORM 4","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","STATEMENT OF CHANGES IN BENEFICIAL OWNERSHIP OF SECURITIES","FORM
+        4 SUBMISSION","STATEMENT OF CHANGES IN BENEFICIAL OWNERSHIP OF SECURITIES","INITIAL
+        STATEMENT OF BENEFICIAL OWNERSHIP OF SECURITIES","FORM 4 SUBMISSION","FORM
+        3 SUBMISSION","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","FORM
+        4","FORM 4","PRIMARY DOCUMENT","PRIMARY DOCUMENT","FORM 4","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","PRIMARY DOCUMENT","","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","","PRIMARY DOCUMENT","PRIMARY DOCUMENT","PRIMARY
+        DOCUMENT","","PRIMARY DOCUMENT","PRIMARY DOCUMENT","","PRIMARY DOCUMENT","","PRIMARY
+        DOCUMENT","PRIMARY DOCUMENT","","","","","","","","","","","","","","","","","","","","","","",""]},"files":[]}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      connection:
+      - keep-alive
+      content-length:
+      - '21586'
+      content-type:
+      - application/json
+      date:
+      - Tue, 03 Nov 2026 21:27:43 GMT
+      strict-transport-security:
+      - max-age=31536000 ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-apigw-id:
+      - GSG4jGIsIAMEC8g=
+      x-amzn-requestid:
+      - 3ba3c9a2-5780-4a95-9bc2-76d2611ef382
+      x-amzn-trace-id:
+      - Root=1-6aea51cf-f12521ed693e7c792ad74971
+    status:
+      code: 200
+      message: OK
+version: 1
