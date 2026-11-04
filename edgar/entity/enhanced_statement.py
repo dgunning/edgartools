@@ -22,6 +22,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar.core import log
+from edgar.dates import calculate_fiscal_year_for_label, fiscal_year_end_month
 from edgar.ttm.calculator import QUARTER_MAX_DAYS, QUARTER_MIN_DAYS
 from edgar.entity.mappings_loader import (
     get_all_statements_for_concept,
@@ -1367,8 +1368,10 @@ def detect_fiscal_year_end(facts: List[FinancialFact]) -> int:
     if not fy_facts:
         return 12  # Default to December
 
-    # Find most common period_end month
-    months = [f.period_end.month for f in fy_facts]
+    # Most common year-end month. A year end in the first week of a month is the
+    # previous month's 52/53-week year drifting over (DNUT, SFM: 2023-01-01 is a
+    # December year), so it counts as that month (GH #1802).
+    months = [fiscal_year_end_month(f.period_end.month, f.period_end.day) for f in fy_facts]
     most_common = Counter(months).most_common(1)
 
     return most_common[0][0] if most_common else 12
@@ -1403,74 +1406,6 @@ def is_forward_looking_schedule(fiscal_year: Optional[int],
     if validate_fiscal_year_period_end(fiscal_year, period_end, fiscal_year_end_month):
         return False
     return fiscal_year < calculate_fiscal_year_for_label(period_end, fiscal_year_end_month)
-
-
-def calculate_fiscal_year_for_label(period_end: date, fiscal_year_end_month: int) -> int:
-    """
-    Calculate the fiscal year label for a period based on the dominant convention:
-    fiscal years are named by the calendar year in which they end.
-
-    This matches how companies, the SEC, Bloomberg, S&P Capital IQ, and other
-    financial data providers label fiscal years. For example, Autodesk's fiscal
-    year ending Jan 31, 2026 is "FY2026", and Q1 (Feb-Apr 2025) is "Q1 2026".
-
-    Args:
-        period_end: The period end date
-        fiscal_year_end_month: Company's fiscal year end month (1-12)
-
-    Returns:
-        The fiscal year number (the calendar year in which the fiscal year ends)
-
-    Examples:
-        >>> # NVIDIA (fiscal year ends in January)
-        >>> # Q3 ending October 26, 2025 → FY2026 (ends Jan 2026)
-        >>> calculate_fiscal_year_for_label(date(2025, 10, 26), 1)
-        2026
-
-        >>> # NVIDIA Q4 ending January 26, 2026 → FY2026
-        >>> calculate_fiscal_year_for_label(date(2026, 1, 26), 1)
-        2026
-
-        >>> # Apple (fiscal year ends in September)
-        >>> # Q1 ending December 30, 2023 → FY2024 (ends Sept 2024)
-        >>> calculate_fiscal_year_for_label(date(2023, 12, 30), 9)
-        2024
-
-        >>> # Apple Q3 ending June 28, 2024 → FY2024
-        >>> calculate_fiscal_year_for_label(date(2024, 6, 28), 9)
-        2024
-
-        >>> # Early January period (52/53-week calendar edge case)
-        >>> # Period ending Jan 1, 2023 for a Dec FYE company → FY2022
-        >>> calculate_fiscal_year_for_label(date(2023, 1, 1), 12)
-        2022
-
-        >>> # Costco (August FYE) year ending September 3, 2023 → FY2023
-        >>> calculate_fiscal_year_for_label(date(2023, 9, 3), 8)
-        2023
-    """
-    # Early January (Jan 1-7): Use prior year (52/53-week calendar convention)
-    # Companies with 52/53-week calendars can have fiscal year end dates
-    # fall in the first week of January (e.g., Jan 1 belongs to prior FY)
-    if period_end.month == 1 and period_end.day <= 7:
-        return period_end.year - 1
-
-    # The same drift for any fiscal year-end month: a 52/53-week year closes on
-    # the weekday nearest the month end, which can be a few days into the next
-    # month (Costco, August FYE: 2023-09-03; Home Depot, January FYE:
-    # 2026-02-01). That period closes the fiscal year, it does not open the next.
-    if period_end.month == fiscal_year_end_month % 12 + 1 and period_end.day <= 7:
-        return period_end.year
-
-    # Fiscal year convention: if the period ends after the FYE month,
-    # it belongs to the next fiscal year (which ends in FYE month of the following year)
-    # Example: Apple (Sept FYE) Q1 ends in Dec 2023 → FY2024 (ends Sept 2024)
-    # Example: NVIDIA (Jan FYE) Q1 ends in Apr 2025 → FY2026 (ends Jan 2026)
-    if period_end.month > fiscal_year_end_month:
-        return period_end.year + 1
-
-    # Period ends at or before FYE month — belongs to fiscal year ending this calendar year
-    return period_end.year
 
 
 class EnhancedStatementBuilder:
@@ -1817,7 +1752,12 @@ class EnhancedStatementBuilder:
             for pk, info in true_annual_periods:
                 fiscal_year = pk[0]
                 period_end_date = pk[2]
-                period_year = period_end_date.year if period_end_date else None
+                # Keyed by the fiscal year the period closes, not its calendar year: a
+                # 52/53-week filer can close two fiscal years in one calendar year
+                # (SFM: 2023-01-01 closes FY2022, 2023-12-31 closes FY2023), and a
+                # calendar-year key kept only one of them (GH #1802).
+                period_year = (calculate_fiscal_year_for_label(period_end_date, fiscal_year_end_month)
+                               if period_end_date else None)
 
                 if period_year:
                     facts_for_period = period_facts.get(pk, [])
@@ -1835,14 +1775,11 @@ class EnhancedStatementBuilder:
                             existing_period_end = existing_pk[2]
                             existing_filing_date = existing_info.get('filing_date')
 
-                            # Prefer period where fiscal_year matches expected value
-                            # For early January: expect fiscal_year = year - 1
-                            # For normal dates: expect fiscal_year = year
-                            is_early_jan = period_end_date.month == 1 and period_end_date.day <= 7
-                            existing_is_early_jan = existing_period_end.month == 1 and existing_period_end.day <= 7
-
-                            expected_fy = period_year - 1 if is_early_jan else period_year
-                            existing_expected_fy = period_year - 1 if existing_is_early_jan else period_year
+                            # Prefer the period whose SEC fiscal_year matches the fiscal
+                            # year its period_end closes
+                            expected_fy = period_year
+                            existing_expected_fy = calculate_fiscal_year_for_label(
+                                existing_period_end, fiscal_year_end_month)
 
                             # Score: 0 = matches expected, 1 = doesn't match
                             score = 0 if fiscal_year == expected_fy else 1
