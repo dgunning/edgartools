@@ -21,6 +21,7 @@ Features:
 import json
 import logging
 import re
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from enum import Enum
@@ -31,7 +32,9 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
-from edgar.documents import parse_html
+from edgar.documents import HTMLParser
+from edgar.documents import parse_html as parse_html
+from edgar.documents.strategies.table_processing import TableProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -487,13 +490,54 @@ def _table_context(table_node, title=None):
 
 
 def _declared_table_units(context):
-    """Nearest explicit unit declaration; unknown/mixed currencies stay unknown."""
+    """Nearest unit declaration, with currency and scale detected independently."""
     for text in reversed(context):
-        match = re.search(r'(?:\(?\s*units?\s*:\s*|\(\s*(?:amounts?\s+)?in\s+)[^)\n]+', text, re.I)
+        match = re.search(r'(?:\(?\s*units?\s*:\s*|\(\s*(?:(?:amounts?|dollars?)\s+)?in\s+)[^)\n]+', text, re.I)
         if match:
             declaration = match[0]
-            return declaration, _currency(declaration), Scale.detect(declaration)
+            scale = Scale.detect(declaration)
+            scale = scale if scale != Scale.UNITS else None
+            named_currency = any(re.search(pattern, declaration, re.I) for pattern in _CURRENCIES.values())
+            if not named_currency and scale is None and not re.match(r'\(?\s*units?\s*:', declaration, re.I):
+                # E.g. '(in constant currency)' is not an amount unit declaration.
+                continue
+            currency = _currency(declaration)
+            if not named_currency and re.match(
+                r'\(?\s*(?:(?:(?:amounts?|dollars?)\s+)?in\s+|units?\s*:\s*)'
+                r'(?:thousands?|millions?|billions?)\b', declaration, re.I
+            ):
+                currency = 'USD'  # Legacy default when only the scale is named.
+            return declaration, currency, scale
     return None
+
+
+class _EarningsTableProcessor(TableProcessor):
+    """Keep HTML footnote evidence until numeric earnings cells are extracted.
+
+    A plain suffix such as '1.2b' is ambiguous. Only raised single-letter
+    markers in an otherwise numeric cell are removed; the shared HTML parser
+    and the source document remain unchanged.
+    """
+
+    def _extract_cell_content(self, elem):
+        def is_footnote(node):
+            if not re.fullmatch(r'[a-zA-Z]', (node.text_content() or '').strip()):
+                return False
+            style = node.get('style', '')
+            return (node.tag == 'sup'
+                    or re.search(r'(?:^|;)\s*vertical-align\s*:\s*super\b', style, re.I)
+                    or (re.search(r'(?:^|;)\s*position\s*:\s*relative\b', style, re.I)
+                        and re.search(r'(?:^|;)\s*top\s*:\s*-\s*\d', style, re.I)))
+
+        if any(is_footnote(node) for node in elem.iterdescendants()):
+            cleaned = deepcopy(elem)
+            for node in list(cleaned.iterdescendants()):
+                if node.getparent() is not None and is_footnote(node):
+                    node.drop_tree()  # Preserve tails, including a closing parenthesis.
+            text = super()._extract_cell_content(cleaned)
+            if isinstance(_parse_numeric(text), float):
+                return text
+        return super()._extract_cell_content(elem)
 
 
 _ROW_TYPE_UNITS = {
@@ -1123,7 +1167,9 @@ class EarningsRelease:
                     return None
                 if isinstance(html_content, bytes):
                     html_content = html_content.decode('utf-8', errors='ignore')
-                self._document = parse_html(html_content)
+                parser = HTMLParser()
+                parser.strategies['table_processing'] = _EarningsTableProcessor(parser.config)
+                self._document = parser.parse(html_content)
             except (AttributeError, ValueError, TypeError) as e:
                 logger.error(f"Failed to parse attachment content: {e}")
                 return None
@@ -1373,8 +1419,6 @@ class EarningsRelease:
             title = _extract_title(table_node)
             context, _ = _table_context(table_node, title)
             units = _declared_table_units(context)
-            if units:
-                scale = units[2]
 
             # Detect periods using year pattern (handles any year from 1900-2099)
             periods = [c for c in df.columns
@@ -1681,31 +1725,19 @@ def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> S
                 return Scale.BILLIONS
 
     # 6. Check preceding sibling nodes (scale text often in a paragraph before the table).
-    # A table is often the only child of a wrapper <div>; its caption then precedes the
-    # wrapper, so climb through one-child wrappers first (GH #1779).
-    node = table_node
-    parent = getattr(node, 'parent', None)
-    while parent is not None and len(getattr(parent, 'children', None) or []) == 1 and parent.parent is not None:
-        node, parent = parent, parent.parent
-    if parent is not None and getattr(parent, 'children', None):
-        siblings = parent.children
-        for idx, child in enumerate(siblings):
-            if child is node:
-                # Check up to 3 preceding siblings, nearest first
-                for si in range(idx - 1, max(0, idx - 3) - 1, -1):
-                    sib = siblings[si]
-                    sib_text = sib.content or ''
-                    if not sib_text and hasattr(sib, 'text') and callable(sib.text):
-                        sib_text = sib.text() or ''
-                    if sib_text:
-                        sib_lower = sib_text.lower()
-                        if 'in thousands' in sib_lower or '(thousands)' in sib_lower:
-                            return Scale.THOUSANDS
-                        elif 'in millions' in sib_lower or '(millions)' in sib_lower:
-                            return Scale.MILLIONS
-                        elif 'in billions' in sib_lower or '(billions)' in sib_lower:
-                            return Scale.BILLIONS
-                break
+    # Share wrapper traversal with currency detection (GH #1779, GH #1824).
+    context, _ = _table_context(table_node)
+    for text in reversed(context):
+        declaration = _declared_table_units([text])
+        if declaration and declaration[2] is not None:
+            return declaration[2]
+        lower = text.lower()
+        if 'in thousands' in lower or '(thousands)' in lower:
+            return Scale.THOUSANDS
+        elif 'in millions' in lower or '(millions)' in lower:
+            return Scale.MILLIONS
+        elif 'in billions' in lower or '(billions)' in lower:
+            return Scale.BILLIONS
 
     return default_scale
 
@@ -2233,11 +2265,6 @@ def _parse_numeric(val) -> Union[float, str, None]:
     negative = s_for_sign_check.startswith('(') or s_for_sign_check.endswith(')')
     cleaned = s.replace(',', '').replace('$', '').replace('€', '').replace('£', '').replace('¥', '').replace('(', '').replace(')', '').replace('%', '').replace('*', '').strip()
 
-    # A lowercase trailing letter is a table footnote (TSMC's 29.43b), not
-    # part of the amount. Uppercase magnitude suffixes and prose stay untouched.
-    footnoted = re.fullmatch(r'([+-]?(?:\d+(?:\.\d*)?|\.\d+))[a-z]', cleaned)
-    if footnoted:
-        cleaned = footnoted[1]
     try:
         num = float(cleaned)
         return -abs(num) if negative else num
