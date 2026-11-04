@@ -180,6 +180,11 @@ class StatementStitcher:
         # switched to a completely different concept name across filing years.
         self._merge_known_concept_renames()
 
+        # Merge a line the company retagged between filings (GH #1802): same
+        # label, no stitched period in common, and the filings' comparatives
+        # show both tags carrying the same amount.
+        self._merge_retagged_lines()
+
         # Unaccumulate YTD cash flow periods into discrete quarters.
         # SEC requires only YTD cash flows in 10-Q filings (Q2 = 6-month cumulative,
         # Q3 = 9-month cumulative). This step derives the discrete quarter values
@@ -795,6 +800,77 @@ class StatementStitcher:
                 if overlap and not self._overlap_values_agree(a_data, b_data, overlap):
                     continue
                 self._merge_into(primary, secondary)
+
+    @staticmethod
+    def _label_key(label: Optional[str]) -> str:
+        return ' '.join((label or '').lower().split())
+
+    def _shown_to_be_same_nonzero_amount(self, key_a: str, key_b: str) -> bool:
+        """Like _shown_to_be_same_amount, but a shared zero is not evidence:
+        two unrelated lines both report 0 often enough to look identical."""
+        if not self._shown_to_be_same_amount(key_a, key_b):
+            return False
+        a, b = self._evidence_for(key_a), self._evidence_for(key_b)
+        return any(a[p] != 0 for p in a if p in b)
+
+    def _merge_retagged_lines(self):
+        """Merge a line item the company moved to a different XBRL concept.
+
+        Sprouts tagged net income as ``ProfitLoss`` through FY2023 and as
+        ``NetIncomeLoss`` from FY2024, and its two operating-lease lines moved
+        from ``sfm:`` extensions to ``us-gaap`` concepts. Neither pair is a name
+        variant or shares a standard concept, so each line stitched as two
+        half-empty rows (GH #1802).
+
+        Two rows merge only when all of these hold:
+
+        1. They carry the same label in the filings.
+        2. No stitched period has a value in both. A filer that presents both
+           lines in one statement (``ProfitLoss`` and ``NetIncomeLoss`` with a
+           non-controlling interest) fills both in the same periods, so its
+           rows never merge, even where the amounts are equal.
+        3. Some filing reports both concepts for a common period, every common
+           period agrees, and at least one agreeing amount is nonzero. This is
+           the same evidence rule as GH #1685, so a shared label alone (two
+           "Other" lines) is never enough.
+        4. A continuing-operations amount is not being folded into its total
+           where the filing reports discontinued cash (GH #1690).
+        """
+        label_to_keys: dict[str, list[str]] = defaultdict(list)
+        for concept_key in list(self.data.keys()):
+            metadata = self.concept_metadata.get(concept_key, {})
+            if metadata.get('is_abstract'):
+                continue
+            label = self._label_key(metadata.get('latest_label'))
+            if label:
+                label_to_keys[label].append(concept_key)
+
+        for keys in label_to_keys.values():
+            if len(keys) <= 1:
+                continue
+            merged = True
+            while merged:
+                merged = False
+                live_keys = [k for k in keys if k in self.data]
+                # The row with the most recent period is primary, so the merged
+                # row keeps the concept the company files today.
+                live_keys.sort(key=lambda k: (min((self.periods.index(p) for p in self.data[k]
+                                                   if p in self.periods), default=len(self.periods)),
+                                              -len(self.data[k]), k))
+                for i in range(len(live_keys)):
+                    if merged:
+                        break
+                    for j in range(i + 1, len(live_keys)):
+                        a_key, b_key = live_keys[i], live_keys[j]
+                        if set(self.data[a_key]) & set(self.data[b_key]):
+                            continue
+                        if not self._shown_to_be_same_nonzero_amount(a_key, b_key):
+                            continue
+                        if self._continuing_differs_from_total(a_key, b_key):
+                            continue
+                        self._merge_into(a_key, b_key)
+                        merged = True
+                        break
 
     # ------------------------------------------------------------------
     # YTD → discrete quarter unaccumulation (CashFlowStatement only)
