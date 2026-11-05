@@ -70,14 +70,16 @@ def test_six_k_financials_is_none_without_xbrl(no_xbrl):
     assert report.financials is None
 
 
-def test_get_quarterly_financials_is_none_when_the_6k_has_no_xbrl(no_xbrl):
+def test_get_quarterly_financials_is_none_when_the_6k_has_no_supported_statements(no_xbrl):
     from edgar.entity import core
 
     class _Filings:
-        def latest(self):
+        def head(self, n):
             filing = _Filing()
             filing.form = "6-K"
-            return filing
+            filing.filing_date = "2026-10-22"
+            filing.attachments = []
+            return [filing][:n]
 
     class _ForeignFiler:
         latest_tenq = None
