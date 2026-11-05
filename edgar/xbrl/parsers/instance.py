@@ -13,6 +13,7 @@ from lxml import etree as ET
 from edgar.xmltools import xml_parser
 
 from edgar.core import log
+from edgar.dates import calculate_fiscal_year_for_label, fiscal_year_end_month
 from edgar.xbrl.core import (
     NAMESPACES,
     classify_duration,
@@ -1052,20 +1053,17 @@ class InstanceParser(BaseParser):
 def _fiscal_year_for_date(d, fy_end_month: int, fy_end_day: int) -> int:
     """Determine the fiscal year a date belongs to.
 
-    The fiscal year is named by the calendar year in which it ends.
-    For example, AAPL's fiscal year ending Sep 2024 is FY2024.
-    A date in Dec 2024 (after Sep end) belongs to FY2025.
+    The fiscal year is named by the calendar year in which it ends: AAPL's year
+    ending September 2024 is FY2024, and a date in December 2024 is in FY2025.
+
+    Only the year-end month is compared, never the day. A 52/53-week filer's
+    year-end day moves every year (AAPL: 09-26, 09-27, 09-28), so comparing it
+    against this filing's day pushed a prior year that closed a day later into
+    the next fiscal year (GH #1802). A year-end in the first week of a month
+    (SFM ``--01-02``) is the previous month's year drifting over, so it is
+    treated as that month. The rule is shared with EntityFacts.
     """
-    import calendar
-    # Build the fiscal year end date for the same calendar year as d
-    # Clamp the day to the max valid day for that month
-    max_day = calendar.monthrange(d.year, fy_end_month)[1]
-    fy_end_date = d.replace(month=fy_end_month, day=min(fy_end_day, max_day))
-
-    if d > fy_end_date:
-        return d.year + 1
-    return d.year
-
+    return calculate_fiscal_year_for_label(d, fiscal_year_end_month(fy_end_month, fy_end_day))
 
 def _quarter_for_date(end_date, fy_end_month: int) -> str:
     """Determine the fiscal quarter (Q1-Q4) for a quarterly period end date.
