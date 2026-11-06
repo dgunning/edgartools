@@ -33,7 +33,11 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
-from edgar.bdc.investments import _get_investment_member_candidates, _parse_investment_identifier
+from edgar.bdc.investments import (
+    _get_investment_member_candidates,
+    _parse_investment_identifier,
+    _reported_total_fair_value,
+)
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
@@ -171,6 +175,11 @@ class NonAccrualResult:
     # "genuinely zero non-accruals" from "we may have failed to parse".
     warnings: List[str] = field(default_factory=list)
 
+    # Where total_portfolio_fair_value came from: 'balance_sheet' (the filer's
+    # undimensioned total), 'schedule_sum' (the schedule's identifier rows added
+    # up, which can count subtotals), or None when there is no total.
+    total_source: Optional[str] = None
+
     @property
     def has_warnings(self) -> bool:
         return bool(self.warnings)
@@ -262,7 +271,8 @@ class NonAccrualResult:
         if self.nonaccrual_fair_value is not None:
             lines.append(f'Non-Accrual Fair Value: ${self.nonaccrual_fair_value:,.0f}')
         if self.total_portfolio_fair_value is not None:
-            lines.append(f'Total Portfolio Fair Value: ${self.total_portfolio_fair_value:,.0f}')
+            source = ' (sum of schedule rows)' if self.total_source == 'schedule_sum' else ''
+            lines.append(f'Total Portfolio Fair Value: ${self.total_portfolio_fair_value:,.0f}{source}')
         lines.append(f'Evidence Level: {self.evidence_level}')
         lines.append(f'Extraction Method: {self.extraction_method}')
 
@@ -461,7 +471,7 @@ def _extract_nonaccrual_from_xbrl(
         return None
 
     # Total portfolio fair value (rate denominator)
-    total_fv = _sum_portfolio_fair_value(all_facts, period)
+    total_fv, total_source = _portfolio_total_fair_value(all_facts, period)
 
     # --- Layer 1: Footnote extraction ---
     nonaccrual_investments, recognized_footnotes = _extract_from_footnotes(
@@ -515,6 +525,7 @@ def _extract_nonaccrual_from_xbrl(
         custom_concept_rate=custom_concept_rate,
         aggregate_concept_value=aggregate_value,
         warnings=warnings,
+        total_source=total_source,
     )
 
 
@@ -804,6 +815,22 @@ def _determine_latest_instant(facts: List[dict], anchor_period: Optional[str] = 
         return anchor_period
 
     return all_instants.most_common(1)[0][0]
+
+
+def _portfolio_total_fair_value(facts: List[dict], period: str) -> Tuple[Optional[Decimal], Optional[str]]:
+    """The rate denominator and where it came from.
+
+    The balance-sheet total comes first. Many filers also tag subtotals and
+    totals on ``InvestmentIdentifierAxis`` ("Total Investments", "Debt
+    Investments", country and lien subtotals), so adding up the identifier rows
+    counted GSCR's FY2024 portfolio as $45.4B against a $7.27B balance sheet
+    (edgartools-7vl3h). The sum is only a fallback for filers with no total.
+    """
+    reported, _unit = _reported_total_fair_value(facts, period)
+    if reported is not None:
+        return reported, 'balance_sheet'
+    summed = _sum_portfolio_fair_value(facts, period)
+    return (summed, 'schedule_sum') if summed is not None else (None, None)
 
 
 def _sum_portfolio_fair_value(facts: List[dict], period: str) -> Optional[Decimal]:
