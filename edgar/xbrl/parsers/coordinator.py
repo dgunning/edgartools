@@ -328,6 +328,10 @@ class XBRLParser:
         self.instance_parser.parse_instance_content(content)
         self._fill_period_types_from_facts()
 
+    def parse_inline_footnotes_content(self, content: Union[str, bytes]) -> int:
+        """Read footnotes from an inline XBRL document when the instance had none."""
+        return self.instance_parser.extract_inline_footnotes(content)
+
     def _fill_period_types_from_facts(self) -> None:
         """
         Give each catalog entry that has no period type the one its facts carry.

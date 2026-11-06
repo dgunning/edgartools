@@ -487,6 +487,7 @@ class XBRLAttachments:
         # does not read it again. An attachment without an in-memory SGML copy
         # downloads on every .content access (edgartools-vk270.1).
         self._contents = dict()
+        self._attachments = attachments
         if attachments.data_files:
             for attachment in attachments.data_files:
                 if attachment.document_type in ["XML", 'EX-101.INS'] and attachment.extension.endswith(
@@ -527,6 +528,23 @@ class XBRLAttachments:
             return self._contents[doc_type]
         attachment = self._documents.get(doc_type)
         return attachment.content if attachment is not None else None
+
+    def inline_document(self):
+        """The inline XBRL document SEC extracted the instance from, or None.
+
+        SEC names an extracted instance after its source: `gecc-20241231.htm`
+        becomes `gecc-20241231_htm.xml`. Nothing is read here; the caller reads
+        `.content` only if it needs the document.
+        """
+        instance = self._documents.get('instance')
+        name = getattr(instance, 'document', None) or ''
+        if not name.lower().endswith('_htm.xml'):
+            return None
+        source = (name[:-len('_htm.xml')] + '.htm').lower()
+        for attachment in getattr(self._attachments, 'documents', None) or []:
+            if (getattr(attachment, 'document', None) or '').lower() == source:
+                return attachment
+        return None
 
     def prefetch(self) -> None:
         """Read every XBRL document now, so a failed download surfaces before parsing starts."""
@@ -577,6 +595,9 @@ class XBRL:
         self._sgml_period_of_report: Optional[str] = None
         self._validated_period_of_report_cache: Optional[str] = None
         self._period_of_report_warning_logged: bool = False
+        # The inline XBRL document to read footnotes from on first use, set only
+        # when the extracted instance had none (bead edgartools-s21p2).
+        self._inline_footnote_document = None
         # Set when the SGML date could not be read at all, which turns the
         # discrepancy check off rather than making it disagree. Carried so that
         # "the dates agreed" and "we never had a second date" are distinguishable
@@ -678,7 +699,32 @@ class XBRL:
     @property
     def footnotes(self):
         """Access to XBRL footnotes."""
+        self._load_inline_footnotes()
         return self.parser.footnotes
+
+    def _load_inline_footnotes(self) -> None:
+        """Fill footnotes from the inline XBRL document when the instance had none.
+
+        Some SEC-extracted instances drop every footnoteLink that the inline
+        document carries as ix:footnote/ix:relationship (bead edgartools-s21p2).
+        Runs at most once, and only when from_filing found the instance empty of
+        footnotes; the document is read on first use, not at parse time.
+        """
+        document = getattr(self, '_inline_footnote_document', None)
+        if document is None:
+            return
+        self._inline_footnote_document = None
+        try:
+            content = document.content
+        except Exception as e:
+            log.warning(f"Could not read inline XBRL document {getattr(document, 'document', '')} "
+                        f"for its footnotes: {e}")
+            return
+        if not content:
+            return
+        marker = b'relationship' if isinstance(content, bytes) else 'relationship'
+        if marker in content:
+            self.parser.parse_inline_footnotes_content(content)
 
     @property
     def standardization(self):
@@ -1184,6 +1230,10 @@ class XBRL:
 
         if xbrl_attachments.get('instance'):
             xbrl.parser.parse_instance_content(xbrl_attachments.content('instance'))
+            if not xbrl.parser.footnotes:
+                # Read lazily: most filings with no footnoteLink have no footnotes,
+                # and the inline document can be a large download (edgartools-s21p2).
+                xbrl._inline_footnote_document = xbrl_attachments.inline_document()
         elif not xbrl_attachments.empty:
             # Filing bundle is in local storage AND has linkbases, but the XBRL
             # instance document itself is missing. This is typical for iXBRL filings
@@ -1201,6 +1251,8 @@ class XBRL:
                         f"Fetching just the instance from the SEC homepage (network fallback)."
                     )
                     xbrl.parser.parse_instance_content(homepage_xbrl.get('instance').content)
+                    if not xbrl.parser.footnotes:
+                        xbrl._inline_footnote_document = homepage_xbrl.inline_document()
                 else:
                     log.warning(
                         f"XBRL instance document not found for {filing.accession_no} — "
@@ -3720,6 +3772,7 @@ class XBRL:
         Returns:
             List of Footnote objects associated with the fact
         """
+        self._load_inline_footnotes()
         footnotes = []
 
         # First check if any fact has this ID and get its footnote references
@@ -3738,6 +3791,7 @@ class XBRL:
         Returns:
             Dictionary of fact_key -> Fact for all facts with footnotes
         """
+        self._load_inline_footnotes()
         facts_with_footnotes = {}
         for key, fact in self.parser.facts.items():
             if fact.footnotes:
