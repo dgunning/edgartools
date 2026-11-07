@@ -1032,6 +1032,14 @@ def _affiliation_split_total(facts: List[dict], period: str) -> Optional[Decimal
             best[member] = (precision, Decimal(str(value)))
     if _AFFILIATED_PARENT in best and any(child in best for child in _AFFILIATED_CHILDREN):
         del best[_AFFILIATED_PARENT]
+    # A filer's own member restating a us-gaap line is one line, not two. SLR HC
+    # BDC tags its 96,665,000 of non-affiliated investments under both its
+    # custom member and us-gaap:InvestmentUnaffiliatedIssuerMember, which summed
+    # to twice its total (edgartools-m4qnb).
+    standard_values = {value for member, (_, value) in best.items() if member.startswith('us-gaap:')}
+    for member in [m for m, (_, value) in best.items()
+                   if not m.startswith('us-gaap:') and value in standard_values]:
+        del best[member]
     if len(best) < 2:
         return None
     return sum((value for _, value in best.values()), Decimal(0))
