@@ -137,6 +137,13 @@ Examples:
                            "Validated for all forms, applied only to 13F holdings.",
             "default": DEFAULT_HOLDINGS_LIMIT,
             "minimum": 0
+        },
+        "max_chars": {
+            "type": "integer",
+            "description": "Maximum characters per section (default 6000). Controls truncation of text sections. "
+                           "Does not apply to 13F-HR holdings, which are bounded by the 'limit' parameter.",
+            "default": 6000,
+            "minimum": 1
         }
     },
     required=[]
@@ -147,6 +154,7 @@ async def edgar_read(
     form: Optional[str] = None,
     sections: Optional[list[str]] = None,
     limit: Optional[int] = DEFAULT_HOLDINGS_LIMIT,
+    max_chars: Optional[int] = 6000,
 ) -> Any:
     """
     Read SEC filing content.
@@ -156,8 +164,11 @@ async def edgar_read(
 
     ``limit`` caps the rows of a 13F-HR ``holdings`` section; ``0`` returns all
     of them. It is validated for every form but applied only to 13F holdings,
-    which are also exempt from the 6,000-character cap that every other section
-    gets, so the rows ``limit`` asks for are all returned.
+    which are also exempt from the character cap that every other section gets,
+    so the rows ``limit`` asks for are all returned.
+
+    ``max_chars`` controls the maximum characters per text section (default 6000).
+    Does not apply to 13F-HR holdings.
     """
     sections = sections or ["summary"]
 
@@ -172,6 +183,21 @@ async def edgar_read(
             f"Invalid limit: {limit!r}",
             suggestions=[
                 "Use a non-negative integer: 30 (the default), a larger number, or 0 for every row",
+            ],
+            error_code="INVALID_ARGUMENTS"
+        )
+
+    if max_chars is None:
+        max_chars = 6000
+    # JSON Schema counts 6000.0 as an integer, so accept integral floats.
+    if isinstance(max_chars, float) and max_chars.is_integer():
+        max_chars = int(max_chars)
+    # bool is an int subclass: max_chars=True would silently mean one character.
+    if isinstance(max_chars, bool) or not isinstance(max_chars, int) or max_chars < 1:
+        return error(
+            f"Invalid max_chars: {max_chars!r}",
+            suggestions=[
+                "Use a positive integer: 6000 (the default) or a different limit",
             ],
             error_code="INVALID_ARGUMENTS"
         )
@@ -204,7 +230,7 @@ async def edgar_read(
 
         # Extract requested sections
         if not metadata_only:
-            extracted = await _extract_sections(filing, sections, limit=limit)
+            extracted = await _extract_sections(filing, sections, limit=limit, max_chars=max_chars)
             result["sections"] = extracted
 
         # Next steps
@@ -260,7 +286,7 @@ async def _get_filing(
     return None
 
 
-async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HOLDINGS_LIMIT) -> dict[str, Any]:
+async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HOLDINGS_LIMIT, max_chars: int = 6000) -> dict[str, Any]:
     """Extract requested sections from filing."""
     extracted = {}
 
@@ -298,11 +324,11 @@ async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HO
             if content:
                 text = str(content)
                 if _is_13f_holdings(filing.form, section):
-                    # Bounded by ``limit``, so the 6,000-char cap would only cut
+                    # Bounded by ``limit``, so the character cap would only cut
                     # off rows the caller asked for.
                     extracted[section] = text
                 else:
-                    extracted[section] = truncate_text(text, max_chars=6000)
+                    extracted[section] = truncate_text(text, max_chars=max_chars)
             else:
                 extracted[section] = None
 
@@ -313,7 +339,7 @@ async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HO
         # Try to get raw text as fallback
         try:
             if hasattr(filing, 'text'):
-                extracted["raw_text_preview"] = truncate_text(filing.text(), max_chars=4000)
+                extracted["raw_text_preview"] = truncate_text(filing.text(), max_chars=min(4000, max_chars))
         except Exception as e:
             logger.debug(f"Could not get raw text fallback: {e}")
 
