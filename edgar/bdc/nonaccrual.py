@@ -34,6 +34,8 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 import pandas as pd
 
 from edgar.bdc.investments import (
+    PortfolioInvestment,
+    _exclude_restated_rows,
     _get_investment_member_candidates,
     _parse_investment_identifier,
     _reported_total_fair_value,
@@ -100,6 +102,51 @@ _NONACCRUAL_RE = re.compile(r'non[- ]?accrual')
 # This threshold separates label-shaped footnotes from narrative ones.
 _LABEL_MAX_WORDS = 30
 
+# What a flag looks like, beyond mentioning non-accrual (edgartools-t75ot).
+# A footnote that holds two or more numbered notes is a bundle: some filers put
+# their whole "(1) ... (22) Investment is on non-accrual status" list in one
+# footnote linked to every holding that carries any of them, and XBRL does not
+# say which holding carries which note.
+_NUMBERED_NOTE = re.compile(r'(?:^|[.;:]\s*|\s)\(\s*\d{1,2}\s*\)\s*[a-z]')
+# A leading footnote mark: "(14)", "[a]", "3."
+_LEADING_MARK = re.compile(r'^\s*(?:\(\s*[0-9a-z]{1,3}\s*\)|\[[0-9a-z]{1,3}\]|[0-9]{1,2}[.)]\s)\s*')
+# First sentences that mention non-accrual without saying the holding is on it:
+# policy notes and portfolio-level counts.
+_NOT_A_FLAG_PATTERNS = [
+    r'except\s+(?:for\s+)?non[- ]?accru',                                     # Logan Ridge
+    r'recogni[sz]ed\s+on\s+non[- ]?accru',                                    # Oxford Square
+    r'may\s+be\s+(?:placed\s+)?on\s+non[- ]?accru',
+    r'\bhad\s+(?:one|two|three|four|five|six|seven|eight|nine|ten|\d+)\b.{0,80}non[- ]?accru',  # AGL
+]
+# A later sentence about the holding itself ("Our debt investment in this
+# portfolio company is on non-accrual status", after a liquidation note).
+_THIS_INVESTMENT_ON_NONACCRUAL = re.compile(
+    r'\b(?:our|this|the)\s+(?:debt\s+)?(?:investment|loan)\b.{0,60}?'
+    r'\b(?:is|was)\s+(?:currently\s+)?(?:on|placed\s+on)\s+non[- ]?accru'
+)
+
+
+def _first_sentence(text: str) -> str:
+    lead = _LEADING_MARK.sub('', text, count=1)
+    m = re.match(r'^(.*?[.;])(?:\s|$)', lead)
+    return m.group(1) if m else lead
+
+
+def _is_about_the_linked_holding(text_lower: str) -> bool:
+    """Whether a non-accrual footnote says its own holding is on non-accrual.
+
+    It must not be a bundle of numbered notes, and its first sentence must
+    mention non-accrual without being a policy note or a portfolio-level count,
+    unless a later sentence names the investment itself.
+    """
+    text = re.sub(r'\s+', ' ', text_lower).strip()
+    if len(_NUMBERED_NOTE.findall(text)) >= 2:
+        return False
+    first = _first_sentence(text)
+    if _NONACCRUAL_RE.search(first) and not any(re.search(p, first) for p in _NOT_A_FLAG_PATTERNS):
+        return True
+    return bool(_THIS_INVESTMENT_ON_NONACCRUAL.search(text))
+
 
 def _classify_nonaccrual_footnote(text_lower: str, linked_to_investments: bool) -> bool:
     """Decide whether a footnote flags non-accrual status for its linked investments.
@@ -124,10 +171,20 @@ def _classify_nonaccrual_footnote(text_lower: str, linked_to_investments: bool) 
     linkage: long rollforward/policy footnotes that mention non-accrual are
     excluded by length, and unlinked footnotes contribute nothing to Layer-1
     extraction anyway (it resolves investments by following the linkage).
+
+    Steps 3 and 4 also require the footnote to be about the holding it is
+    linked to (``_is_about_the_linked_holding``). Short policy notes ("All debt
+    investments are income producing except for non-accrual investments"),
+    portfolio-level counts ("the Company had one portfolio company investment
+    on non-accrual status") and bundles of numbered notes all passed 3 or 4 and
+    flagged every linked holding: Runway's FY2026 Q3 rate read 98.8%
+    (edgartools-t75ot).
     """
     if not _NONACCRUAL_RE.search(text_lower):
         return False
     if any(re.search(p, text_lower) for p in NEGATION_PATTERNS):
+        return False
+    if not _is_about_the_linked_holding(text_lower):
         return False
     if any(re.search(p, text_lower) for p in AFFIRMATIVE_PATTERNS):
         return True
@@ -176,8 +233,10 @@ class NonAccrualResult:
     warnings: List[str] = field(default_factory=list)
 
     # Where total_portfolio_fair_value came from: 'balance_sheet' (the filer's
-    # undimensioned total), 'schedule_sum' (the schedule's identifier rows added
-    # up, which can count subtotals), or None when there is no total.
+    # undimensioned total or its affiliation lines), 'identifier_total' (a
+    # grand-total row the filer tags as an identifier member), 'schedule_sum'
+    # (the schedule's identifier rows added up, which can count subtotals), or
+    # None when there is no total.
     total_source: Optional[str] = None
 
     @property
@@ -374,7 +433,9 @@ def extract_nonaccrual(
     Args:
         source: A Filing object or BDCEntity. If BDCEntity, fetches latest filing.
         form: Filing form type (default "10-K"). Only used with BDCEntity.
-        period: Reporting period (e.g., "2025-12-31"). If None, uses latest instant.
+        period: Reporting period (e.g., "2025-12-31"). If None, uses the filing's
+            period of report. Either is read as given: a filing with no investment
+            data at that period gives a result at that period with no rate.
 
     Returns:
         NonAccrualResult if the filing could be parsed, None if XBRL unavailable.
@@ -415,8 +476,8 @@ def _extract_nonaccrual_from_filing(filing, period: Optional[str] = None) -> Opt
     if xbrl is None:
         return None
 
-    # Use filing's reporting period as anchor when no explicit period given.
-    # This avoids resolving to filing dates or DEI dates instead of balance sheet dates.
+    # With no period given, read the filing's report date, never a filing or
+    # DEI date found among its facts.
     if period is None:
         period = getattr(filing, 'period_of_report', None)
 
@@ -460,13 +521,10 @@ def _extract_nonaccrual_from_xbrl(
         f['fact_id']: f for f in all_facts if f.get('fact_id')
     }
 
-    # Determine period — _determine_latest_instant is only reached when
-    # extract_nonaccrual couldn't provide a period_of_report anchor
+    # A known period is read as given, even when the filing has no investment
+    # data there; the result then has no rate (edgartools-a3m66).
     if period is None:
         period = _determine_latest_instant(all_facts)
-    else:
-        # Validate that the provided period has investment data, fall back if not
-        period = _determine_latest_instant(all_facts, anchor_period=period)
     if period is None:
         return None
 
@@ -758,7 +816,28 @@ def _extract_from_footnotes(
             footnote_text=footnote_text,
         ))
 
+    if identifier_axis:
+        investments = _drop_restated(investments)
     return investments, recognized
+
+
+def _drop_restated(investments: List[NonAccrualInvestment]) -> List[NonAccrualInvestment]:
+    """Leave out flagged rows that restate another flagged row.
+
+    Identifier-axis members carry no hierarchy, so a holding listed again in a
+    second schedule is a second row. Logan Ridge's FY2024 10-K flags MMI
+    Holdings in its schedule (with cost) and again under "Affiliate
+    investments" (without), so its non-accruals read $10.86M where the filing
+    states $7.9M (edgartools-wg5n8). The rule is the one
+    ``PortfolioInvestments.from_xbrl`` applies to the whole schedule, run over
+    the flagged rows only, so a row is dropped only when the row it restates is
+    flagged too.
+    """
+    rows = [PortfolioInvestment(identifier=inv.identifier, company_name=inv.company_name,
+                                investment_type=inv.investment_type, fair_value=inv.fair_value, cost=inv.cost)
+            for inv in investments]
+    kept, _excluded = _exclude_restated_rows(rows)
+    return [inv for inv, row in zip(investments, rows, strict=True) if any(row is k for k in kept)]
 
 
 # ---------------------------------------------------------------------------
@@ -868,47 +947,31 @@ def _resolve_filing(source, form: str = "10-K"):
         raise TypeError(f"Expected Filing or BDCEntity, got {type(source).__name__}")
 
 
-def _determine_latest_instant(facts: List[dict], anchor_period: Optional[str] = None) -> Optional[str]:
-    """Find the best period_instant for investment data extraction.
+def _determine_latest_instant(facts: List[dict]) -> Optional[str]:
+    """Find the period_instant to read when neither the caller nor the filing gives one.
 
-    When *anchor_period* is provided (typically from ``filing.period_of_report``),
-    it is used directly if investment facts exist on that date.  This avoids
-    resolving to filing dates, DEI dates, or other non-balance-sheet instants.
-
-    When no anchor is given or the anchor has no investment data, falls back to
-    the most common instant among investment facts (not max, which is susceptible
-    to outlier dates like filing dates).
+    The most common instant among investment facts (not max, which is
+    susceptible to outlier dates like filing dates), else the most common
+    instant of any fact. A known period is never replaced by this: a cover-page
+    10-K/A was labelled with its public-float date, and a 10-Q whose schedule
+    carries another quarter's dates with that quarter (edgartools-a3m66).
     """
-    # Collect instants that have investment data
     from collections import Counter
     investment_instants: Counter = Counter()
-    for f in facts:
-        pi = f.get('period_instant')
-        if pi and f.get(DIM_KEY):
-            investment_instants[pi] += 1
-
-    # If anchor period has investment data, use it directly
-    if anchor_period and anchor_period in investment_instants:
-        return anchor_period
-
-    # Pick the most common instant among investment facts
-    if investment_instants:
-        return investment_instants.most_common(1)[0][0]
-
-    # Fallback: no investment-dimensioned facts at all.
-    # Use anchor if it has any facts, otherwise pick the most common instant.
     all_instants: Counter = Counter()
     for f in facts:
         pi = f.get('period_instant')
-        if pi:
-            all_instants[pi] += 1
-    if not all_instants:
-        return None
+        if not pi:
+            continue
+        all_instants[pi] += 1
+        if f.get(DIM_KEY):
+            investment_instants[pi] += 1
 
-    if anchor_period and anchor_period in all_instants:
-        return anchor_period
-
-    return all_instants.most_common(1)[0][0]
+    if investment_instants:
+        return investment_instants.most_common(1)[0][0]
+    if all_instants:
+        return all_instants.most_common(1)[0][0]
+    return None
 
 
 def _portfolio_total_fair_value(facts: List[dict], period: str) -> Tuple[Optional[Decimal], Optional[str]]:
@@ -926,6 +989,9 @@ def _portfolio_total_fair_value(facts: List[dict], period: str) -> Tuple[Optiona
     split = _affiliation_split_total(facts, period)
     if split is not None:
         return split, 'balance_sheet'
+    tagged = _identifier_grand_total(facts, period)
+    if tagged is not None:
+        return tagged, 'identifier_total'
     summed = _sum_portfolio_fair_value(facts, period)
     return (summed, 'schedule_sum') if summed is not None else (None, None)
 
@@ -969,6 +1035,36 @@ def _affiliation_split_total(facts: List[dict], period: str) -> Optional[Decimal
     if len(best) < 2:
         return None
     return sum((value for _, value in best.values()), Decimal(0))
+
+
+# A grand-total row's member name: "Investments", "Investments in Securities",
+# "Total Investments - 148.3%". Not "... and Cash Equivalents" or "Net Assets".
+_GRAND_TOTAL_MEMBER = re.compile(
+    r'^\s*(?:total\s+)?investments(?:\s+in\s+securities)?(?:\s+at\s+fair\s+value)?'
+    r'(?:\s*[-\u2013]\s*[\d.,]+\s*%)?\s*$', re.IGNORECASE)
+
+
+def _identifier_grand_total(facts: List[dict], period: str) -> Optional[Decimal]:
+    """The filer's grand total when it is tagged as an identifier-axis member, or None.
+
+    With no balance-sheet total, the identifier rows were summed, subtotals and
+    totals included. Oxford Square's 10-Q for 2026-03-31 tags "Investments in
+    Securities" = $235,372,463 as a member and summed to $1.30B; Muzinich BDC
+    tags "Investments" = $214,085,177 against a $819M sum (edgartools-cpd1b).
+    Only a member named as the whole portfolio counts, and only when one value
+    is named so.
+    """
+    values = set()
+    for fact in facts:
+        if (fact.get('concept') != CONCEPT_FAIR_VALUE or fact.get('period_instant') != period
+                or list(_dims(fact)) != [DIM_KEY]):
+            continue
+        if not _GRAND_TOTAL_MEMBER.match(str(fact.get(DIM_KEY))):
+            continue
+        value = fact.get('numeric_value')
+        if value is not None and not pd.isna(value):
+            values.add(Decimal(str(value)))
+    return values.pop() if len(values) == 1 else None
 
 
 def _sum_portfolio_fair_value(facts: List[dict], period: str) -> Optional[Decimal]:
