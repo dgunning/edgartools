@@ -117,13 +117,13 @@ jobs:
         python -m pip install -e ".[ai]"
         python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock pytest-vcr "vcrpy>=8.3.0,<9" freezegun==1.5.1 filelock tqdm responses
 
-    # The floor leg also holds the pandas floor's major. We support pandas 2.x
-    # and 3.x, and until the Python floor rose pandas 2 was tested only by
-    # accident: pandas 3 requires Python 3.11, so the old 3.10 leg resolved to
-    # pandas 2.3.x while 3.13 got 3.x. Pinning here keeps both majors under test.
-    - name: Pin pandas 2.x on the floor leg
+    # The floor leg installs the declared pandas floor itself, so both majors
+    # stay under test and the floor in pyproject.toml is a tested version, not
+    # a claim: the 3.13 leg resolves to pandas 3.x. Keep this pin equal to the
+    # pandas floor in pyproject.toml.
+    - name: Pin the pandas floor on the floor leg
       if: matrix.python-version == '3.11'
-      run: python -m pip install "pandas>=2.0.0,<3"
+      run: python -m pip install "pandas==2.2.2"
 
     # A source scan, so it runs here rather than as its own job: this is the
     # only context pull requests are required to report, and adding a second
