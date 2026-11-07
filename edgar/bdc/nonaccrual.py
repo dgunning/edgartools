@@ -233,8 +233,10 @@ class NonAccrualResult:
     warnings: List[str] = field(default_factory=list)
 
     # Where total_portfolio_fair_value came from: 'balance_sheet' (the filer's
-    # undimensioned total), 'schedule_sum' (the schedule's identifier rows added
-    # up, which can count subtotals), or None when there is no total.
+    # undimensioned total or its affiliation lines), 'identifier_total' (a
+    # grand-total row the filer tags as an identifier member), 'schedule_sum'
+    # (the schedule's identifier rows added up, which can count subtotals), or
+    # None when there is no total.
     total_source: Optional[str] = None
 
     @property
@@ -987,6 +989,9 @@ def _portfolio_total_fair_value(facts: List[dict], period: str) -> Tuple[Optiona
     split = _affiliation_split_total(facts, period)
     if split is not None:
         return split, 'balance_sheet'
+    tagged = _identifier_grand_total(facts, period)
+    if tagged is not None:
+        return tagged, 'identifier_total'
     summed = _sum_portfolio_fair_value(facts, period)
     return (summed, 'schedule_sum') if summed is not None else (None, None)
 
@@ -1030,6 +1035,36 @@ def _affiliation_split_total(facts: List[dict], period: str) -> Optional[Decimal
     if len(best) < 2:
         return None
     return sum((value for _, value in best.values()), Decimal(0))
+
+
+# A grand-total row's member name: "Investments", "Investments in Securities",
+# "Total Investments - 148.3%". Not "... and Cash Equivalents" or "Net Assets".
+_GRAND_TOTAL_MEMBER = re.compile(
+    r'^\s*(?:total\s+)?investments(?:\s+in\s+securities)?(?:\s+at\s+fair\s+value)?'
+    r'(?:\s*[-\u2013]\s*[\d.,]+\s*%)?\s*$', re.IGNORECASE)
+
+
+def _identifier_grand_total(facts: List[dict], period: str) -> Optional[Decimal]:
+    """The filer's grand total when it is tagged as an identifier-axis member, or None.
+
+    With no balance-sheet total, the identifier rows were summed, subtotals and
+    totals included. Oxford Square's 10-Q for 2026-03-31 tags "Investments in
+    Securities" = $235,372,463 as a member and summed to $1.30B; Muzinich BDC
+    tags "Investments" = $214,085,177 against a $819M sum (edgartools-cpd1b).
+    Only a member named as the whole portfolio counts, and only when one value
+    is named so.
+    """
+    values = set()
+    for fact in facts:
+        if (fact.get('concept') != CONCEPT_FAIR_VALUE or fact.get('period_instant') != period
+                or list(_dims(fact)) != [DIM_KEY]):
+            continue
+        if not _GRAND_TOTAL_MEMBER.match(str(fact.get(DIM_KEY))):
+            continue
+        value = fact.get('numeric_value')
+        if value is not None and not pd.isna(value):
+            values.add(Decimal(str(value)))
+    return values.pop() if len(values) == 1 else None
 
 
 def _sum_portfolio_fair_value(facts: List[dict], period: str) -> Optional[Decimal]:
