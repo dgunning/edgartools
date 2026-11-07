@@ -34,6 +34,8 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 import pandas as pd
 
 from edgar.bdc.investments import (
+    PortfolioInvestment,
+    _exclude_restated_rows,
     _get_investment_member_candidates,
     _parse_investment_identifier,
     _reported_total_fair_value,
@@ -812,7 +814,28 @@ def _extract_from_footnotes(
             footnote_text=footnote_text,
         ))
 
+    if identifier_axis:
+        investments = _drop_restated(investments)
     return investments, recognized
+
+
+def _drop_restated(investments: List[NonAccrualInvestment]) -> List[NonAccrualInvestment]:
+    """Leave out flagged rows that restate another flagged row.
+
+    Identifier-axis members carry no hierarchy, so a holding listed again in a
+    second schedule is a second row. Logan Ridge's FY2024 10-K flags MMI
+    Holdings in its schedule (with cost) and again under "Affiliate
+    investments" (without), so its non-accruals read $10.86M where the filing
+    states $7.9M (edgartools-wg5n8). The rule is the one
+    ``PortfolioInvestments.from_xbrl`` applies to the whole schedule, run over
+    the flagged rows only, so a row is dropped only when the row it restates is
+    flagged too.
+    """
+    rows = [PortfolioInvestment(identifier=inv.identifier, company_name=inv.company_name,
+                                investment_type=inv.investment_type, fair_value=inv.fair_value, cost=inv.cost)
+            for inv in investments]
+    kept, _excluded = _exclude_restated_rows(rows)
+    return [inv for inv, row in zip(investments, rows, strict=True) if any(row is k for k in kept)]
 
 
 # ---------------------------------------------------------------------------
