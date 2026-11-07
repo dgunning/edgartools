@@ -100,6 +100,51 @@ _NONACCRUAL_RE = re.compile(r'non[- ]?accrual')
 # This threshold separates label-shaped footnotes from narrative ones.
 _LABEL_MAX_WORDS = 30
 
+# What a flag looks like, beyond mentioning non-accrual (edgartools-t75ot).
+# A footnote that holds two or more numbered notes is a bundle: some filers put
+# their whole "(1) ... (22) Investment is on non-accrual status" list in one
+# footnote linked to every holding that carries any of them, and XBRL does not
+# say which holding carries which note.
+_NUMBERED_NOTE = re.compile(r'(?:^|[.;:]\s*|\s)\(\s*\d{1,2}\s*\)\s*[a-z]')
+# A leading footnote mark: "(14)", "[a]", "3."
+_LEADING_MARK = re.compile(r'^\s*(?:\(\s*[0-9a-z]{1,3}\s*\)|\[[0-9a-z]{1,3}\]|[0-9]{1,2}[.)]\s)\s*')
+# First sentences that mention non-accrual without saying the holding is on it:
+# policy notes and portfolio-level counts.
+_NOT_A_FLAG_PATTERNS = [
+    r'except\s+(?:for\s+)?non[- ]?accru',                                     # Logan Ridge
+    r'recogni[sz]ed\s+on\s+non[- ]?accru',                                    # Oxford Square
+    r'may\s+be\s+(?:placed\s+)?on\s+non[- ]?accru',
+    r'\bhad\s+(?:one|two|three|four|five|six|seven|eight|nine|ten|\d+)\b.{0,80}non[- ]?accru',  # AGL
+]
+# A later sentence about the holding itself ("Our debt investment in this
+# portfolio company is on non-accrual status", after a liquidation note).
+_THIS_INVESTMENT_ON_NONACCRUAL = re.compile(
+    r'\b(?:our|this|the)\s+(?:debt\s+)?(?:investment|loan)\b.{0,60}?'
+    r'\b(?:is|was)\s+(?:currently\s+)?(?:on|placed\s+on)\s+non[- ]?accru'
+)
+
+
+def _first_sentence(text: str) -> str:
+    lead = _LEADING_MARK.sub('', text, count=1)
+    m = re.match(r'^(.*?[.;])(?:\s|$)', lead)
+    return m.group(1) if m else lead
+
+
+def _is_about_the_linked_holding(text_lower: str) -> bool:
+    """Whether a non-accrual footnote says its own holding is on non-accrual.
+
+    It must not be a bundle of numbered notes, and its first sentence must
+    mention non-accrual without being a policy note or a portfolio-level count,
+    unless a later sentence names the investment itself.
+    """
+    text = re.sub(r'\s+', ' ', text_lower).strip()
+    if len(_NUMBERED_NOTE.findall(text)) >= 2:
+        return False
+    first = _first_sentence(text)
+    if _NONACCRUAL_RE.search(first) and not any(re.search(p, first) for p in _NOT_A_FLAG_PATTERNS):
+        return True
+    return bool(_THIS_INVESTMENT_ON_NONACCRUAL.search(text))
+
 
 def _classify_nonaccrual_footnote(text_lower: str, linked_to_investments: bool) -> bool:
     """Decide whether a footnote flags non-accrual status for its linked investments.
@@ -124,10 +169,20 @@ def _classify_nonaccrual_footnote(text_lower: str, linked_to_investments: bool) 
     linkage: long rollforward/policy footnotes that mention non-accrual are
     excluded by length, and unlinked footnotes contribute nothing to Layer-1
     extraction anyway (it resolves investments by following the linkage).
+
+    Steps 3 and 4 also require the footnote to be about the holding it is
+    linked to (``_is_about_the_linked_holding``). Short policy notes ("All debt
+    investments are income producing except for non-accrual investments"),
+    portfolio-level counts ("the Company had one portfolio company investment
+    on non-accrual status") and bundles of numbered notes all passed 3 or 4 and
+    flagged every linked holding: Runway's FY2026 Q3 rate read 98.8%
+    (edgartools-t75ot).
     """
     if not _NONACCRUAL_RE.search(text_lower):
         return False
     if any(re.search(p, text_lower) for p in NEGATION_PATTERNS):
+        return False
+    if not _is_about_the_linked_holding(text_lower):
         return False
     if any(re.search(p, text_lower) for p in AFFIRMATIVE_PATTERNS):
         return True
