@@ -374,7 +374,9 @@ def extract_nonaccrual(
     Args:
         source: A Filing object or BDCEntity. If BDCEntity, fetches latest filing.
         form: Filing form type (default "10-K"). Only used with BDCEntity.
-        period: Reporting period (e.g., "2025-12-31"). If None, uses latest instant.
+        period: Reporting period (e.g., "2025-12-31"). If None, uses the filing's
+            period of report. Either is read as given: a filing with no investment
+            data at that period gives a result at that period with no rate.
 
     Returns:
         NonAccrualResult if the filing could be parsed, None if XBRL unavailable.
@@ -415,8 +417,8 @@ def _extract_nonaccrual_from_filing(filing, period: Optional[str] = None) -> Opt
     if xbrl is None:
         return None
 
-    # Use filing's reporting period as anchor when no explicit period given.
-    # This avoids resolving to filing dates or DEI dates instead of balance sheet dates.
+    # With no period given, read the filing's report date, never a filing or
+    # DEI date found among its facts.
     if period is None:
         period = getattr(filing, 'period_of_report', None)
 
@@ -460,13 +462,10 @@ def _extract_nonaccrual_from_xbrl(
         f['fact_id']: f for f in all_facts if f.get('fact_id')
     }
 
-    # Determine period — _determine_latest_instant is only reached when
-    # extract_nonaccrual couldn't provide a period_of_report anchor
+    # A known period is read as given, even when the filing has no investment
+    # data there; the result then has no rate (edgartools-a3m66).
     if period is None:
         period = _determine_latest_instant(all_facts)
-    else:
-        # Validate that the provided period has investment data, fall back if not
-        period = _determine_latest_instant(all_facts, anchor_period=period)
     if period is None:
         return None
 
@@ -868,47 +867,31 @@ def _resolve_filing(source, form: str = "10-K"):
         raise TypeError(f"Expected Filing or BDCEntity, got {type(source).__name__}")
 
 
-def _determine_latest_instant(facts: List[dict], anchor_period: Optional[str] = None) -> Optional[str]:
-    """Find the best period_instant for investment data extraction.
+def _determine_latest_instant(facts: List[dict]) -> Optional[str]:
+    """Find the period_instant to read when neither the caller nor the filing gives one.
 
-    When *anchor_period* is provided (typically from ``filing.period_of_report``),
-    it is used directly if investment facts exist on that date.  This avoids
-    resolving to filing dates, DEI dates, or other non-balance-sheet instants.
-
-    When no anchor is given or the anchor has no investment data, falls back to
-    the most common instant among investment facts (not max, which is susceptible
-    to outlier dates like filing dates).
+    The most common instant among investment facts (not max, which is
+    susceptible to outlier dates like filing dates), else the most common
+    instant of any fact. A known period is never replaced by this: a cover-page
+    10-K/A was labelled with its public-float date, and a 10-Q whose schedule
+    carries another quarter's dates with that quarter (edgartools-a3m66).
     """
-    # Collect instants that have investment data
     from collections import Counter
     investment_instants: Counter = Counter()
-    for f in facts:
-        pi = f.get('period_instant')
-        if pi and f.get(DIM_KEY):
-            investment_instants[pi] += 1
-
-    # If anchor period has investment data, use it directly
-    if anchor_period and anchor_period in investment_instants:
-        return anchor_period
-
-    # Pick the most common instant among investment facts
-    if investment_instants:
-        return investment_instants.most_common(1)[0][0]
-
-    # Fallback: no investment-dimensioned facts at all.
-    # Use anchor if it has any facts, otherwise pick the most common instant.
     all_instants: Counter = Counter()
     for f in facts:
         pi = f.get('period_instant')
-        if pi:
-            all_instants[pi] += 1
-    if not all_instants:
-        return None
+        if not pi:
+            continue
+        all_instants[pi] += 1
+        if f.get(DIM_KEY):
+            investment_instants[pi] += 1
 
-    if anchor_period and anchor_period in all_instants:
-        return anchor_period
-
-    return all_instants.most_common(1)[0][0]
+    if investment_instants:
+        return investment_instants.most_common(1)[0][0]
+    if all_instants:
+        return all_instants.most_common(1)[0][0]
+    return None
 
 
 def _portfolio_total_fair_value(facts: List[dict], period: str) -> Tuple[Optional[Decimal], Optional[str]]:
