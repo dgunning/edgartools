@@ -29,6 +29,9 @@ from .base import BaseParser
 XLINK_NS = "{http://www.w3.org/1999/xlink}"
 LINKBASE_NS = "{http://www.xbrl.org/2003/linkbase}"
 XML_NS = "{http://www.w3.org/XML/1998/namespace}"
+IX_NS = "{http://www.xbrl.org/2013/inlineXBRL}"
+FACT_FOOTNOTE_ARCROLE = "http://www.xbrl.org/2003/arcrole/fact-footnote"
+FOOTNOTE_ROLE = "http://www.xbrl.org/2003/role/footnote"
 
 # Elements whose content is a block: a break belongs after them, or the last
 # word of one runs into the first word of the next.
@@ -726,6 +729,126 @@ class InstanceParser(BaseParser):
             # Log the error but don't fail - footnotes are optional
             log.warning(f"Error extracting footnotes: {str(e)}")
 
+    def extract_inline_footnotes(self, content: Union[str, bytes]) -> int:
+        """
+        Read footnotes from an inline XBRL document when the instance had none.
+
+        SEC extracts an `_htm.xml` instance from every inline filing, and that
+        instance normally carries the footnotes as a footnoteLink. Some do not:
+        Great Elm Capital's FY2024 10-K (0000950170-25-036517) has 56
+        `ix:footnote`s and 56 fact-footnote `ix:relationship`s in its inline
+        document and no footnoteLink at all in its instance (bead
+        edgartools-s21p2). This reads them from the inline document into the
+        same `Footnote` objects and fact `footnotes` lists that
+        `_extract_footnotes` builds, keyed by the `ix:footnote` id -- the id
+        SEC's extraction uses as the footnote label.
+
+        Additive by construction: it does nothing when the instance already
+        produced footnotes. Returns the number of footnotes added.
+        """
+        if self.footnotes or not content:
+            return 0
+        try:
+            if isinstance(content, str):
+                content = content.encode('utf-8')
+            root = ET.XML(content, xml_parser(recover=True, huge_tree=True))
+            if root is None:
+                return 0
+
+            footnotes_by_id = {
+                elem.get('id'): elem for elem in root.iter(f'{IX_NS}footnote') if elem.get('id')
+            }
+            links = self._inline_footnote_links(root, footnotes_by_id)
+            if not links:
+                return 0
+
+            keys = self._add_inline_footnotes(root, footnotes_by_id)
+            self._link_inline_footnotes(links, keys)
+            log.debug(f"Extracted {len(keys)} footnotes from the inline XBRL document")
+            return len(keys)
+
+        except Exception as e:
+            # Footnotes are optional; a failure here must not lose the instance.
+            log.warning(f"Error extracting inline XBRL footnotes: {str(e)}")
+            return 0
+
+    @staticmethod
+    def _inline_footnote_links(root, footnotes_by_id: Dict[str, Any]) -> List[tuple]:
+        """``(fact ids, footnote ids)`` for each fact-footnote ix:relationship."""
+        links: List[tuple] = []
+        for rel in root.iter(f'{IX_NS}relationship'):
+            # arcrole defaults to fact-footnote; any other arcrole
+            # (fact-explanatoryFact, ...) links facts to facts.
+            if rel.get('arcrole', FACT_FOOTNOTE_ARCROLE) != FACT_FOOTNOTE_ARCROLE:
+                continue
+            to_ids = [ref for ref in (rel.get('toRefs') or '').split() if ref in footnotes_by_id]
+            from_ids = (rel.get('fromRefs') or '').split()
+            if to_ids and from_ids:
+                links.append((from_ids, to_ids))
+        return links
+
+    def _add_inline_footnotes(self, root, footnotes_by_id: Dict[str, Any]) -> Dict[str, str]:
+        """Store each ix:footnote as a Footnote; returns ``{footnote id: storage key}``."""
+        from edgar.xbrl.models import Footnote
+
+        continuations = {
+            elem.get('id'): elem for elem in root.iter(f'{IX_NS}continuation') if elem.get('id')
+        }
+        keys = {}
+        for footnote_id, footnote_elem in footnotes_by_id.items():
+            key = self._footnote_storage_key(footnote_id)
+            self.footnotes[key] = Footnote(
+                footnote_id=key,
+                text=self._inline_footnote_text(footnote_elem, continuations),
+                lang=self._inline_lang(footnote_elem),
+                role=footnote_elem.get('footnoteRole', FOOTNOTE_ROLE),
+                related_fact_ids=[]
+            )
+            keys[footnote_id] = key
+        return keys
+
+    def _link_inline_footnotes(self, links: List[tuple], keys: Dict[str, str]) -> None:
+        """Record each link on its footnote and on the fact it annotates."""
+        first_fact_by_id: Dict[Optional[str], Fact] = {}
+        for fact in self.facts.values():
+            first_fact_by_id.setdefault(fact.fact_id, fact)
+
+        for from_ids, to_ids in links:
+            for footnote_id in to_ids:
+                key = keys[footnote_id]
+                for fact_id in from_ids:
+                    self.footnotes[key].related_fact_ids.append(fact_id)
+                    self._attach_footnote_to_fact(fact_id, key, first_fact_by_id)
+
+    def _inline_footnote_text(self, footnote_elem, continuations: Dict[str, Any]) -> str:
+        """
+        An ix:footnote's text, followed through its `continuedAt` chain.
+
+        A continuation carries on the same run of text, so it is joined with no
+        break -- the way SEC's extraction writes it into the footnoteLink.
+        """
+        parts: List[str] = []
+        self._collect_footnote_text(footnote_elem, parts)
+        seen = set()
+        next_id = footnote_elem.get('continuedAt')
+        while next_id and next_id not in seen and next_id in continuations:
+            seen.add(next_id)
+            continuation = continuations[next_id]
+            self._collect_footnote_text(continuation, parts)
+            next_id = continuation.get('continuedAt')
+        return self._normalize_footnote_text(parts)
+
+    @staticmethod
+    def _inline_lang(elem) -> str:
+        """The xml:lang in scope for an element, as XML inherits it from ancestors."""
+        node = elem
+        while node is not None:
+            lang = node.get(f'{XML_NS}lang')
+            if lang:
+                return lang
+            node = node.getparent()
+        return 'en-US'
+
     def _footnote_storage_key(self, label: str) -> str:
         """
         The key a footnote resource is stored under.
@@ -763,7 +886,11 @@ class InstanceParser(BaseParser):
         """
         parts: List[str] = []
         self._collect_footnote_text(footnote_elem, parts)
+        return self._normalize_footnote_text(parts)
 
+    @staticmethod
+    def _normalize_footnote_text(parts: List[str]) -> str:
+        """Collapse whitespace within each line and drop empty lines."""
         lines = []
         for raw_line in ''.join(parts).split('\n'):
             line = ' '.join(raw_line.split())
