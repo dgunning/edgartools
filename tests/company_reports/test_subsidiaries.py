@@ -274,10 +274,12 @@ class TestBugFixes:
 class TestTenKSubsidiariesProperty:
     """Integration tests for TenK.subsidiaries property."""
 
+    # Apple's FY2025 10-K (0000320193-25-000079) lists 19 subsidiaries. Pinned:
+    # the latest 10-K moves each year, and FY2026's lists 20.
     @pytest.mark.network
     def test_aapl_tenk_subsidiaries(self):
-        from edgar import Company
-        tenk = Company("AAPL").get_filings(form="10-K").latest().obj()
+        from tests._offline_filings import offline_filing
+        tenk = offline_filing("0000320193-25-000079").obj()
         subs = tenk.subsidiaries
         assert subs is not None
         assert len(subs) == 19
@@ -295,8 +297,8 @@ class TestTenKSubsidiariesProperty:
 
     @pytest.mark.network
     def test_subsidiaries_to_dataframe(self):
-        from edgar import Company
-        tenk = Company("AAPL").get_filings(form="10-K").latest().obj()
+        from tests._offline_filings import offline_filing
+        tenk = offline_filing("0000320193-25-000079").obj()
         df = tenk.subsidiaries.to_dataframe()
         assert len(df) == 19
         assert "name" in df.columns

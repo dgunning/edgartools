@@ -24,9 +24,14 @@ class TestAnnualPeriodSelection:
         return None
     
     def _get_apple_annual_income(self, aapl_company):
-        """Helper method to get Apple's annual income statement"""
+        """Apple's annual income statement, reaching back past FY2020.
+
+        The window counts back from Apple's newest fiscal year, so a fixed six
+        periods lost FY2020 once FY2026 was filed. Ten periods keep FY2020 in
+        range through FY2029.
+        """
         facts = aapl_company.facts
-        return facts.income_statement(annual=True, periods=6)
+        return facts.income_statement(annual=True, periods=10)
     
     @pytest.mark.network
     @pytest.mark.slow
