@@ -683,6 +683,10 @@ class Company(Entity):
             XBRL (most 6-Ks don't). It is never how a failure is reported; a
             transport or parsing failure raises.
 
+            A 6-K filer's quarterly figures are usually in an HTML press
+            release instead; read them with
+            ``edgar.earnings.EarningsRelease.from_filing(filing)``.
+
         Example::
 
             quarterly = Company("AAPL").get_quarterly_financials()

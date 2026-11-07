@@ -118,6 +118,25 @@ income = quarterly.income_statement()
 | Annual (10-K) | `company.get_financials()` |
 | Quarterly (10-Q) | `company.get_quarterly_financials()` |
 
+### Foreign private issuers (6-K)
+
+A foreign private issuer such as TSMC files its annual report on Form 20-F with XBRL, so `get_financials()` works as usual. Its quarterly results arrive on Form 6-K, where the numbers sit in an HTML press release (an EX-99 exhibit) with no XBRL behind it. For those companies `get_quarterly_financials()` returns `None`, because there are no statements to read.
+
+To get the quarter's figures, read the press release tables with `EarningsRelease`:
+
+```python
+from edgar import Company, find
+from edgar.earnings import EarningsRelease
+
+Company("TSM").get_quarterly_financials()   # None: TSMC's 6-Ks carry no XBRL
+
+filing = find("0001046179-26-000726")        # TSMC's 3Q26 earnings release, filed 2026-10-15
+release = EarningsRelease.from_filing(filing)
+release.income_statement.dataframe
+```
+
+Net income for 3Q26 comes back as 763,064 against 452,302 a year earlier. The amounts are as printed in the release, which states its unit as "NT$ million", so check that note before comparing them with XBRL figures. To find the earnings releases among a company's 6-Ks, see the [6-K guide](sixk-data-object-guide.md).
+
 ---
 
 
