@@ -570,22 +570,108 @@ def _build_warnings(
 # Layer 1: Footnote-based extraction
 # ---------------------------------------------------------------------------
 
+def _dims(fact: dict) -> Dict[str, str]:
+    """The fact's dimensions as ``{axis key: member}``."""
+    return {key: value for key, value in fact.items() if key.startswith('dim_') and value}
+
+
+def _position_key(fact: dict):
+    """What identifies one holding: its identifier member, or its whole dimension set."""
+    return fact.get(DIM_KEY) or frozenset(_dims(fact).items())
+
+
+def _schedule_on_identifier_axis(all_facts: List[dict], period: str) -> bool:
+    """Whether the filing tags its schedule of investments on InvestmentIdentifierAxis for *period*."""
+    return any(f.get(DIM_KEY) and f.get('concept') == CONCEPT_FAIR_VALUE
+               and f.get('period_instant') == period for f in all_facts)
+
+
 def _investment_fv_facts_for_footnote(
     footnote,
     fact_by_id: Dict[str, dict],
+    identifier_axis: bool = True,
 ) -> List[dict]:
-    """Enriched investment fair-value facts a footnote is linked to (any period)."""
+    """Enriched investment fair-value facts a footnote is linked to (any period).
+
+    With ``identifier_axis`` only facts on InvestmentIdentifierAxis count. Without
+    it, any dimensioned fact does: schedules tagged before the identifier axis
+    name a holding by a set of axes instead (TPVG FY2024: industry, instrument,
+    loan and a company axis of its own; edgartools-jv32z).
+    """
     facts: List[dict] = []
     for fact_id in footnote.related_fact_ids:
         enriched = fact_by_id.get(fact_id)
         if enriched is None:
             continue
-        if enriched.get(DIM_KEY) is None:
-            continue
         if enriched.get('concept', '') != CONCEPT_FAIR_VALUE:
+            continue
+        if identifier_axis:
+            if enriched.get(DIM_KEY) is None:
+                continue
+        elif not _dims(enriched):
             continue
         facts.append(enriched)
     return facts
+
+
+def _drop_subtotals(flagged: List[Tuple[dict, str]]) -> List[Tuple[dict, str]]:
+    """Drop facts that roll up other flagged facts.
+
+    Off the identifier axis a footnote can annotate a company's or an industry's
+    subtotal as well as its loans: TPVG links "Nakd.com One World AB" at $8.47M
+    (no loan member) beside its two loans of $3.18M and $5.29M, and a "Financial
+    Software" industry total. A fact whose dimensions are a proper subset of
+    another flagged fact's is such a roll-up.
+    """
+    dim_sets = [frozenset(_dims(fact).items()) for fact, _ in flagged]
+    return [pair for pair, dims in zip(flagged, dim_sets, strict=True)
+            if not any(dims < other for other in dim_sets)]
+
+
+# Axes that name the portfolio company when a schedule is not on the identifier
+# axis: tpvg:PortfolioCompaniesAxis, us-gaap:RelatedPartyTransactionsByRelatedPartyAxis (OXSQ).
+_COMPANY_AXIS_RE = re.compile(r'compan|relatedparty|investee|borrower|obligor', re.IGNORECASE)
+# Axes that name the instrument, most specific first
+_INSTRUMENT_AXES = (
+    'dim_us-gaap_InvestmentTypeAxis',
+    'dim_us-gaap_StatementClassOfStockAxis',
+    'dim_us-gaap_LienCategoryAxis',
+    'dim_us-gaap_LongtermDebtTypeAxis',
+    'dim_us-gaap_FinancialInstrumentAxis',
+)
+_LABEL_ROLES = (
+    'http://www.xbrl.org/2003/role/label',
+    'http://www.xbrl.org/2003/role/terseLabel',
+    'http://www.xbrl.org/2003/role/verboseLabel',
+)
+
+
+def _member_label(xbrl, member: str) -> str:
+    """A member's label without its "[Member]" suffix.
+
+    A label ending in "[Member]" is the one the filer wrote. OXSQ's standard
+    label is generated from the element name ("Uni Tek Global Services Inc
+    Member") while its terse label reads "UniTek Global Services, Inc. [Member]";
+    TPVG's terse label drops the loan's number that its standard label keeps.
+    """
+    element = xbrl.element_catalog.get(member.replace(':', '_'))
+    labels = getattr(element, 'labels', None) or {}
+    candidates = [labels[role] for role in _LABEL_ROLES if labels.get(role)]
+    written = [label for label in candidates if re.search(r'\[Member\]\s*$', label)]
+    label = (written or candidates or [member.split(':')[-1]])[0]
+    return re.sub(r'\s*(?:\[Member\]|Member)\s*$', '', label).strip()
+
+
+def _describe_dimensional_position(xbrl, fact: dict) -> Tuple[str, str, str]:
+    """``(identifier, company_name, investment_type)`` for a holding named by several axes."""
+    dims = _dims(fact)
+    company_axis = next((axis for axis in sorted(dims) if _COMPANY_AXIS_RE.search(axis)), None)
+    company = _member_label(xbrl, dims[company_axis]) if company_axis else ''
+    instrument_axis = next((axis for axis in _INSTRUMENT_AXES if axis in dims), None)
+    investment_type = _member_label(xbrl, dims[instrument_axis]) if instrument_axis else 'Unknown'
+    others = [_member_label(xbrl, dims[axis]) for axis in sorted(dims) if axis != company_axis]
+    identifier = ' | '.join(part for part in [company, *others] if part)
+    return identifier, company or identifier, investment_type
 
 
 def _extract_from_footnotes(
@@ -605,13 +691,11 @@ def _extract_from_footnotes(
     if not footnotes:
         return [], 0
 
-    seen_identifiers: set = set()
-    investments: List[NonAccrualInvestment] = []
+    identifier_axis = _schedule_on_identifier_axis(all_facts, period)
+    flagged: List[Tuple[dict, str]] = []
     recognized = 0
-    # Bound company names by the filing's own members, as from_xbrl does; built on first use.
-    member_candidates = None
 
-    for fn_id, footnote in footnotes.items():
+    for footnote in footnotes.values():
         # Only process English footnotes
         lang = getattr(footnote, 'lang', 'en-US') or 'en-US'
         if not lang.startswith('en'):
@@ -621,7 +705,7 @@ def _extract_from_footnotes(
 
         # Pre-compute investment linkage so the classifier can use structure
         # as corroboration for wording it doesn't recognize.
-        linked_fv_facts = _investment_fv_facts_for_footnote(footnote, fact_by_id)
+        linked_fv_facts = _investment_fv_facts_for_footnote(footnote, fact_by_id, identifier_axis)
         linked_to_investments = bool(linked_fv_facts)
 
         if not _classify_nonaccrual_footnote(text_lower, linked_to_investments):
@@ -630,39 +714,49 @@ def _extract_from_footnotes(
         recognized += 1
 
         # This footnote flags non-accrual status for its linked investments.
-        for enriched in linked_fv_facts:
-            inv_identifier = enriched.get(DIM_KEY)
+        flagged.extend((enriched, footnote.text) for enriched in linked_fv_facts
+                       if enriched.get('period_instant') == period)
 
-            # Check period
-            if enriched.get('period_instant') != period:
-                continue
+    if not identifier_axis:
+        flagged = _drop_subtotals(flagged)
 
-            # Deduplicate by identifier
-            if inv_identifier in seen_identifiers:
-                continue
-            seen_identifiers.add(inv_identifier)
+    seen_positions: set = set()
+    investments: List[NonAccrualInvestment] = []
+    # Bound company names by the filing's own members, as from_xbrl does; built on first use.
+    member_candidates = None
 
+    for enriched, footnote_text in flagged:
+        # Deduplicate by holding
+        position = _position_key(enriched)
+        if position in seen_positions:
+            continue
+        seen_positions.add(position)
+
+        inv_identifier = enriched.get(DIM_KEY)
+        if inv_identifier:
             if member_candidates is None:
                 member_candidates = _get_investment_member_candidates(xbrl)
             _id, company_name, investment_type = _parse_investment_identifier(inv_identifier, member_candidates)
-            cost = _find_cost_for_investment(all_facts, inv_identifier, period)
+        else:
+            inv_identifier, company_name, investment_type = _describe_dimensional_position(xbrl, enriched)
+        cost = _find_cost_for_investment(all_facts, position, period)
 
-            fv = None
-            numeric = enriched.get('numeric_value')
-            if numeric is not None and not pd.isna(numeric):
-                try:
-                    fv = Decimal(str(numeric))
-                except (ValueError, InvalidOperation):
-                    pass
+        fv = None
+        numeric = enriched.get('numeric_value')
+        if numeric is not None and not pd.isna(numeric):
+            try:
+                fv = Decimal(str(numeric))
+            except (ValueError, InvalidOperation):
+                pass
 
-            investments.append(NonAccrualInvestment(
-                identifier=inv_identifier,
-                company_name=company_name,
-                investment_type=investment_type,
-                fair_value=fv,
-                cost=cost,
-                footnote_text=footnote.text,
-            ))
+        investments.append(NonAccrualInvestment(
+            identifier=inv_identifier,
+            company_name=company_name,
+            investment_type=investment_type,
+            fair_value=fv,
+            cost=cost,
+            footnote_text=footnote_text,
+        ))
 
     return investments, recognized
 
@@ -829,8 +923,52 @@ def _portfolio_total_fair_value(facts: List[dict], period: str) -> Tuple[Optiona
     reported, _unit = _reported_total_fair_value(facts, period)
     if reported is not None:
         return reported, 'balance_sheet'
+    split = _affiliation_split_total(facts, period)
+    if split is not None:
+        return split, 'balance_sheet'
     summed = _sum_portfolio_fair_value(facts, period)
     return (summed, 'schedule_sum') if summed is not None else (None, None)
+
+
+_AFFILIATION_AXIS = 'dim_us-gaap_InvestmentIssuerAffiliationAxis'
+# us-gaap's affiliated member is the parent of its controlled and non-controlled members
+_AFFILIATED_PARENT = 'us-gaap:InvestmentAffiliatedIssuerMember'
+_AFFILIATED_CHILDREN = ('us-gaap:InvestmentAffiliatedIssuerControlledMember',
+                        'us-gaap:InvestmentAffiliatedIssuerNoncontrolledMember')
+
+
+def _affiliation_split_total(facts: List[dict], period: str) -> Optional[Decimal]:
+    """The balance sheet's investments added up from its affiliation lines, or None.
+
+    A balance sheet can carry only the split ("Non-affiliated/non-control
+    investments", "Affiliated investments") with no undimensioned total: OXSQ
+    FY2024 tags 256,238,759 + 4,614,100 = 260,852,859 this way
+    (edgartools-jv32z). Only facts on that axis alone count, the most precise
+    per member, and at least two members, so one line is never taken for the whole.
+    """
+    best: Dict[str, Tuple[float, Decimal]] = {}
+    for fact in facts:
+        if fact.get('concept') != CONCEPT_FAIR_VALUE or fact.get('period_instant') != period:
+            continue
+        dims = _dims(fact)
+        if list(dims) != [_AFFILIATION_AXIS]:
+            continue
+        value = fact.get('numeric_value')
+        if value is None or pd.isna(value):
+            continue
+        decimals = str(fact.get('decimals'))
+        try:
+            precision = float('inf') if decimals.upper() == 'INF' else float(decimals)
+        except ValueError:
+            precision = -99.0
+        member = dims[_AFFILIATION_AXIS]
+        if member not in best or precision > best[member][0]:
+            best[member] = (precision, Decimal(str(value)))
+    if _AFFILIATED_PARENT in best and any(child in best for child in _AFFILIATED_CHILDREN):
+        del best[_AFFILIATED_PARENT]
+    if len(best) < 2:
+        return None
+    return sum((value for _, value in best.values()), Decimal(0))
 
 
 def _sum_portfolio_fair_value(facts: List[dict], period: str) -> Optional[Decimal]:
@@ -855,14 +993,14 @@ def _sum_portfolio_fair_value(facts: List[dict], period: str) -> Optional[Decima
 
 def _find_cost_for_investment(
     facts: List[dict],
-    identifier: str,
+    position,
     period: str,
 ) -> Optional[Decimal]:
-    """Find the InvestmentOwnedAtCost fact for a specific investment and period."""
+    """Find the InvestmentOwnedAtCost fact for a holding (see ``_position_key``) and period."""
     for f in facts:
         if (f.get('concept') == CONCEPT_COST
                 and f.get('period_instant') == period
-                and f.get(DIM_KEY) == identifier):
+                and _position_key(f) == position):
             value = f.get('numeric_value')
             if value is not None and not pd.isna(value):
                 try:
