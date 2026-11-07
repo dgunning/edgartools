@@ -14,18 +14,23 @@ GitHub Issue: https://github.com/dgunning/edgartools/issues/282
 """
 
 import pytest
-from edgar import Company, set_identity
+from edgar import Company
 from edgar.xbrl.xbrl import XBRL
+from tests._offline_filings import offline_filing
+
+# Apple's FY2025 10-K. Pinned rather than taken as the newest 10-K, which moves
+# every time Apple files and then misses this cassette (GH #1873).
+APPLE_10K = "0000320193-25-000079"
 
 
 
 @pytest.fixture
 def vcr_cassette_name():
-    """Every test here reads Apple's newest 10-K: 0000320193-25-000079 when recorded.
+    """Every XBRL test here reads Apple's 10-K 0000320193-25-000079.
 
-    That is the filing test_issue_826.py and test_issue_rv86_incorporated_mda.py
-    read, so all three share its cassette; this file added Apple's submissions to
-    it (recorded 2026-10-24).
+    test_issue_826.py and test_issue_rv86_incorporated_mda.py read the same
+    filing, so all three share its cassette; this file added Apple's
+    submissions to it (recorded 2026-10-24) for test_company_get_filings_api.
     """
     return "filing_0000320193-25-000079"
 
@@ -49,12 +54,7 @@ class TestIssue282XBRLAPIRegression:
 
     def test_xbrl_from_filing_api(self):
         """Test that XBRL.from_filing() API works correctly."""
-        company = Company("AAPL")
-        filings = company.get_filings(form="10-K", filing_date="2023-01-01:")
-
-        assert len(filings) >= 1, "Should have at least 1 Apple 10-K filing since 2023"
-
-        filing = filings[0]
+        filing = offline_filing(APPLE_10K)
         xbrl = XBRL.from_filing(filing)
 
         assert xbrl is not None, "XBRL should be successfully parsed"
@@ -64,10 +64,7 @@ class TestIssue282XBRLAPIRegression:
 
     def test_facts_query_api_for_diluted_shares(self):
         """Test that facts.query() API works for finding diluted shares."""
-        company = Company("AAPL")
-        filings = company.get_filings(form="10-K", filing_date="2023-01-01:")
-
-        filing = filings[0]
+        filing = offline_filing(APPLE_10K)
         xbrl = XBRL.from_filing(filing)
         facts = xbrl.facts
 
@@ -93,10 +90,7 @@ class TestIssue282XBRLAPIRegression:
 
     def test_decimal_adjustment_logic(self):
         """Test that decimal adjustment logic works correctly."""
-        company = Company("AAPL")
-        filings = company.get_filings(form="10-K", filing_date="2023-01-01:")
-
-        filing = filings[0]
+        filing = offline_filing(APPLE_10K)
         xbrl = XBRL.from_filing(filing)
         facts = xbrl.facts
 
@@ -126,10 +120,7 @@ class TestIssue282XBRLAPIRegression:
 
     def test_statement_level_api_still_works(self):
         """Test that the original statement-level API still works as fallback."""
-        company = Company("AAPL")
-        filings = company.get_filings(form="10-K", filing_date="2023-01-01:")
-
-        filing = filings[0]
+        filing = offline_filing(APPLE_10K)
         xbrl = XBRL.from_filing(filing)
 
         # Test statement-level access
@@ -154,9 +145,6 @@ class TestIssue282XBRLAPIRegression:
 
     def test_full_user_workflow(self):
         """Test the complete user workflow from the issue."""
-        company = Company("AAPL")
-        filings = company.get_filings(form="10-K", filing_date="2020-01-01:")
-
         concept = "us-gaap:WeightedAverageNumberOfDilutedSharesOutstanding"
         values = {}
 
@@ -165,8 +153,7 @@ class TestIssue282XBRLAPIRegression:
                 return num
             return num * (10 ** int(shift))
 
-        # Process first filing to test the workflow
-        filing = filings[0]
+        filing = offline_filing(APPLE_10K)
         xbrl = XBRL.from_filing(filing)
         facts = xbrl.facts
 
