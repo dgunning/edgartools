@@ -749,64 +749,21 @@ class InstanceParser(BaseParser):
         if self.footnotes or not content:
             return 0
         try:
-            from edgar.xbrl.models import Footnote
-
             if isinstance(content, str):
                 content = content.encode('utf-8')
-            parser = xml_parser(recover=True, huge_tree=True)
-            root = ET.XML(content, parser)
+            root = ET.XML(content, xml_parser(recover=True, huge_tree=True))
             if root is None:
                 return 0
 
-            continuations = {
-                elem.get('id'): elem
-                for elem in root.iter(f'{IX_NS}continuation')
-                if elem.get('id')
+            footnotes_by_id = {
+                elem.get('id'): elem for elem in root.iter(f'{IX_NS}footnote') if elem.get('id')
             }
-
-            footnotes_by_id = {}
-            for footnote_elem in root.iter(f'{IX_NS}footnote'):
-                footnote_id = footnote_elem.get('id')
-                if footnote_id:
-                    footnotes_by_id[footnote_id] = footnote_elem
-
-            links: List[tuple] = []
-            for rel in root.iter(f'{IX_NS}relationship'):
-                # arcrole defaults to fact-footnote; any other arcrole
-                # (fact-explanatoryFact, ...) links facts to facts.
-                if rel.get('arcrole', FACT_FOOTNOTE_ARCROLE) != FACT_FOOTNOTE_ARCROLE:
-                    continue
-                to_ids = [ref for ref in (rel.get('toRefs') or '').split() if ref in footnotes_by_id]
-                from_ids = (rel.get('fromRefs') or '').split()
-                if to_ids and from_ids:
-                    links.append((from_ids, to_ids))
-
+            links = self._inline_footnote_links(root, footnotes_by_id)
             if not links:
                 return 0
 
-            keys = {}
-            for footnote_id, footnote_elem in footnotes_by_id.items():
-                key = self._footnote_storage_key(footnote_id)
-                self.footnotes[key] = Footnote(
-                    footnote_id=key,
-                    text=self._inline_footnote_text(footnote_elem, continuations),
-                    lang=self._inline_lang(footnote_elem),
-                    role=footnote_elem.get('footnoteRole', FOOTNOTE_ROLE),
-                    related_fact_ids=[]
-                )
-                keys[footnote_id] = key
-
-            first_fact_by_id: Dict[Optional[str], Fact] = {}
-            for fact in self.facts.values():
-                first_fact_by_id.setdefault(fact.fact_id, fact)
-
-            for from_ids, to_ids in links:
-                for footnote_id in to_ids:
-                    key = keys[footnote_id]
-                    for fact_id in from_ids:
-                        self.footnotes[key].related_fact_ids.append(fact_id)
-                        self._attach_footnote_to_fact(fact_id, key, first_fact_by_id)
-
+            keys = self._add_inline_footnotes(root, footnotes_by_id)
+            self._link_inline_footnotes(links, keys)
             log.debug(f"Extracted {len(keys)} footnotes from the inline XBRL document")
             return len(keys)
 
@@ -814,6 +771,54 @@ class InstanceParser(BaseParser):
             # Footnotes are optional; a failure here must not lose the instance.
             log.warning(f"Error extracting inline XBRL footnotes: {str(e)}")
             return 0
+
+    @staticmethod
+    def _inline_footnote_links(root, footnotes_by_id: Dict[str, Any]) -> List[tuple]:
+        """``(fact ids, footnote ids)`` for each fact-footnote ix:relationship."""
+        links: List[tuple] = []
+        for rel in root.iter(f'{IX_NS}relationship'):
+            # arcrole defaults to fact-footnote; any other arcrole
+            # (fact-explanatoryFact, ...) links facts to facts.
+            if rel.get('arcrole', FACT_FOOTNOTE_ARCROLE) != FACT_FOOTNOTE_ARCROLE:
+                continue
+            to_ids = [ref for ref in (rel.get('toRefs') or '').split() if ref in footnotes_by_id]
+            from_ids = (rel.get('fromRefs') or '').split()
+            if to_ids and from_ids:
+                links.append((from_ids, to_ids))
+        return links
+
+    def _add_inline_footnotes(self, root, footnotes_by_id: Dict[str, Any]) -> Dict[str, str]:
+        """Store each ix:footnote as a Footnote; returns ``{footnote id: storage key}``."""
+        from edgar.xbrl.models import Footnote
+
+        continuations = {
+            elem.get('id'): elem for elem in root.iter(f'{IX_NS}continuation') if elem.get('id')
+        }
+        keys = {}
+        for footnote_id, footnote_elem in footnotes_by_id.items():
+            key = self._footnote_storage_key(footnote_id)
+            self.footnotes[key] = Footnote(
+                footnote_id=key,
+                text=self._inline_footnote_text(footnote_elem, continuations),
+                lang=self._inline_lang(footnote_elem),
+                role=footnote_elem.get('footnoteRole', FOOTNOTE_ROLE),
+                related_fact_ids=[]
+            )
+            keys[footnote_id] = key
+        return keys
+
+    def _link_inline_footnotes(self, links: List[tuple], keys: Dict[str, str]) -> None:
+        """Record each link on its footnote and on the fact it annotates."""
+        first_fact_by_id: Dict[Optional[str], Fact] = {}
+        for fact in self.facts.values():
+            first_fact_by_id.setdefault(fact.fact_id, fact)
+
+        for from_ids, to_ids in links:
+            for footnote_id in to_ids:
+                key = keys[footnote_id]
+                for fact_id in from_ids:
+                    self.footnotes[key].related_fact_ids.append(fact_id)
+                    self._attach_footnote_to_fact(fact_id, key, first_fact_by_id)
 
     def _inline_footnote_text(self, footnote_elem, continuations: Dict[str, Any]) -> str:
         """
