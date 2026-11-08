@@ -433,7 +433,7 @@ Direct O(1) lookup for XBRL tags:
 from edgar.xbrl.standardization.reverse_index import (
     get_standard_concept,
     get_display_name,
-    lookup
+    get_reverse_index
 )
 
 # Simple lookup
@@ -443,13 +443,45 @@ concept = get_standard_concept("AccountsPayableCurrent")
 display = get_display_name("AccountsPayableCurrent")
 # Returns: "Accounts Payable"
 
-# Full result with metadata
-result = lookup("AccountsPayableCurrentAndNoncurrent")
-result.is_ambiguous          # True
-result.standard_concepts     # ['TradePayables', 'OtherOperatingNonCurrentLiabilities']
-result.display_names         # ['Accounts Payable', 'Other Non-Current Liabilities']
-result.comment               # None (not every ambiguous tag carries a comment)
+# Inspect stored mapping annotations when a mapping is returned
+index = get_reverse_index()
+result = index.lookup("us-gaap:PremiumsEarnedNet")
+if result is not None:
+    print(result.mapping_key, result.standard_concepts)
+    print(result.section, result.confidence, result.company_count)
+    print(result.metadata_origins)
 ```
+
+The annotations describe the effective mapping entry after any industry override,
+not each surviving candidate or an individual company's financial fact. Optional
+annotation fields may be `None`.
+
+| Field | Meaning and limits |
+|---|---|
+| `confidence` | Stored score of mixed origin, including generation scores and later corrections. It is not a uniform or comparable probability and must not rank candidates. |
+| `section`, `statement` | Mapping annotations, not the filing row's actual section, presentation role, or statement membership. |
+| `is_total` | Stored usage annotation, not proof that the source concept is a whole measure or belongs in a closed total family. |
+| `company_count` | Stored generation count that may predate candidate edits, not a live count or assurance of qualified-concept usage. Missing means unknown; zero with `years_present` zero and null `first_year`/`last_year` is a placeholder without a generation record, not observed zero-company usage. |
+| `mapping_key` | Exact stored key matched by the lookup. Treat it as opaque; a bare key does not establish a taxonomy namespace or version. |
+| `applied_industry` | Industry whose override actually matched, otherwise `None`. Supplying an industry alone does not mean an override was applied. |
+| `metadata_origins` | Source of each of the five annotations: `base`, `industry_override`, or `missing`. Explicit null keeps its source and has value `None`; an absent field has origin `missing`. |
+
+Overrides apply field by field. If an override changes only the candidates, inherited
+annotations still have origin `base`; they were not independently reassessed for the
+new candidates. Each lookup result has its own `metadata_origins` dictionary. Results
+constructed directly by callers may leave provenance unspecified with an empty dictionary.
+
+Metadata does not change candidate selection, exclusions, or total-membership guards.
+Unknown or excluded tags, and entries whose candidates are all rejected, still return
+`None`; for example, `us-gaap:SalesAndMarketingExpense` remains rejected. These
+annotations do not establish semantic equivalence or resolve entity, member, period,
+unit, sign, measurement basis, or missingness. Nil, empty, absent, and numeric zero
+remain distinct. The existing `is_deprecated=False` means no positive deprecation
+annotation was supplied, not that current taxonomy membership was verified.
+
+The new fields are appended with defaults, so existing six-argument `MappingResult`
+construction still works. `dataclasses.asdict()` now includes the new fields;
+consumers with strict serialized schemas should account for that additive change.
 
 ### Checking Coverage
 
