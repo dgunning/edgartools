@@ -226,6 +226,36 @@ BALANCE_SHEET_SECTIONS = {
 }
 
 
+def _label_column(df: pd.DataFrame) -> str:
+    return 'label' if 'label' in df.columns else df.columns[0]
+
+
+def _value_columns(df: pd.DataFrame) -> List[str]:
+    """The DataFrame's value columns, in order: numeric columns other than metadata."""
+    label_col = _label_column(df)
+    return [
+        c for c in df.columns
+        if c not in [label_col, 'level', 'concept', 'balance', 'weight', 'preferred_sign', 'unit', 'point_in_time']
+        and df[c].dtype in ['float64', 'int64', 'object']
+    ]
+
+
+def _select_period_column(df: pd.DataFrame) -> Optional[str]:
+    """The column every operand of the checks is read from.
+
+    The first value column that reports Total Assets: the statement's current
+    period. Each operand used to take the first non-null value of its own row,
+    so a total missing from the current column was taken from a comparative
+    one and the equation compared different dates (GH #1852).
+    """
+    if df is None or df.empty:
+        return None
+    for column in _value_columns(df):
+        if _find_value_by_labels(df, BALANCE_SHEET_TOTALS["total_assets"], [column]) is not None:
+            return column
+    return None
+
+
 def _find_value_by_labels(
     df: pd.DataFrame,
     label_variants: List[str],
@@ -245,17 +275,9 @@ def _find_value_by_labels(
     if df is None or df.empty:
         return None
 
-    # Determine label column
-    label_col = 'label' if 'label' in df.columns else df.columns[0]
-
-    # Determine value columns
+    label_col = _label_column(df)
     if value_columns is None:
-        # Use numeric columns, excluding 'level' if present
-        value_columns = [
-            c for c in df.columns
-            if c not in [label_col, 'level', 'concept', 'balance', 'weight', 'preferred_sign', 'unit', 'point_in_time']
-            and df[c].dtype in ['float64', 'int64', 'object']
-        ]
+        value_columns = _value_columns(df)
 
     # Search for each label variant
     for label in label_variants:
@@ -275,27 +297,72 @@ def _find_value_by_labels(
     return None
 
 
-def _get_balance_sheet_values(df: pd.DataFrame) -> Dict[str, Optional[float]]:
+def _get_balance_sheet_values(df: pd.DataFrame, column: Optional[str] = None) -> Dict[str, Optional[float]]:
     """
-    Extract key balance sheet values from a DataFrame.
+    Extract key balance sheet values from one column of a DataFrame.
 
     Args:
         df: Balance sheet DataFrame
+        column: The value column to read. Defaults to _select_period_column(df).
 
     Returns:
-        Dictionary with standardized keys and their values (or None if not found)
+        Dictionary with standardized keys and their values (or None if not found).
+        Every value comes from the same column.
     """
+    column = column if column is not None else _select_period_column(df)
     values = {}
-
-    for key, label_variants in BALANCE_SHEET_TOTALS.items():
-        result = _find_value_by_labels(df, label_variants)
+    for key, label_variants in {**BALANCE_SHEET_TOTALS, **BALANCE_SHEET_SECTIONS}.items():
+        result = _find_value_by_labels(df, label_variants, [column]) if column is not None else None
         values[key] = result[1] if result else None
-
-    for key, label_variants in BALANCE_SHEET_SECTIONS.items():
-        result = _find_value_by_labels(df, label_variants)
-        values[key] = result[1] if result else None
-
     return values
+
+
+def _check_section_totals(values: Dict[str, Optional[float]], tolerance: float) -> List[ValidationIssue]:
+    """Current + non-current subtotals against total assets and total liabilities."""
+    issues = []
+    sections = [
+        ("current_assets", "noncurrent_assets", "total_assets", "ASSET_SECTION_MISMATCH",
+         "Current Assets + Non-Current Assets", "Total Assets"),
+        ("current_liabilities", "noncurrent_liabilities", "total_liabilities", "LIABILITY_SECTION_MISMATCH",
+         "Current Liabilities + Non-Current Liabilities", "Total Liabilities"),
+    ]
+    for current_key, noncurrent_key, total_key, code, parts_label, total_label in sections:
+        current, noncurrent, total = values.get(current_key), values.get(noncurrent_key), values.get(total_key)
+        if current is None or noncurrent is None or total is None:
+            continue
+        expected = current + noncurrent
+        diff = abs(total - expected)
+        if diff > tolerance:
+            issues.append(ValidationIssue(
+                severity=ValidationSeverity.WARNING,
+                code=code,
+                message=f"{parts_label} ({expected:,.0f}) != {total_label} ({total:,.0f})",
+                details={
+                    current_key: current,
+                    noncurrent_key: noncurrent,
+                    total_key: total,
+                    "difference": diff
+                }
+            ))
+    return issues
+
+
+def _incomplete_equation_issue(df: pd.DataFrame, column: str) -> ValidationIssue:
+    """The equation could not be checked in ``column``; name the columns that do report the totals."""
+    other_columns = [
+        c for c in _value_columns(df) if c != column and any(
+            _find_value_by_labels(df, BALANCE_SHEET_TOTALS[key], [c]) is not None
+            for key in ("liabilities_and_equity", "total_liabilities"))
+    ]
+    message = f"Could not validate equation for {column}: missing Liabilities and/or Equity totals"
+    if other_columns:
+        message += f" (reported only for {', '.join(map(str, other_columns))})"
+    return ValidationIssue(
+        severity=ValidationSeverity.WARNING,
+        code="INCOMPLETE_DATA",
+        message=message,
+        details={"period": column, "totals_reported_for": other_columns}
+    )
 
 
 def validate_balance_sheet(
@@ -312,6 +379,11 @@ def validate_balance_sheet(
 
     Or equivalently:
         Assets = Liabilities and Equity (combined total)
+
+    Every operand is read from one value column, the first that reports Total
+    Assets (the current period), named in ``metadata["period"]``. When that
+    column lacks the liabilities or equity totals the equation is reported as
+    INCOMPLETE_DATA rather than compared against another period's totals.
 
     Args:
         statement_or_df: A Statement object or pandas DataFrame containing balance sheet data
@@ -370,8 +442,10 @@ def validate_balance_sheet(
             metadata={}
         )
 
-    # Extract values
-    values = _get_balance_sheet_values(df)
+    # Extract values, all from one column so the checks compare a single date
+    column = _select_period_column(df)
+    values = _get_balance_sheet_values(df, column)
+    metadata["period"] = column
     metadata["extracted_values"] = {k: v for k, v in values.items() if v is not None}
 
     # Level 1: Fundamental equation check
@@ -475,56 +549,12 @@ def validate_balance_sheet(
 
     # Warn if we couldn't perform either check
     if not equation_validated and assets is not None:
-        issues.append(ValidationIssue(
-            severity=ValidationSeverity.WARNING,
-            code="INCOMPLETE_DATA",
-            message="Could not validate equation: missing Liabilities and/or Equity totals"
-        ))
+        issues.append(_incomplete_equation_issue(df, column))
 
     # Level 2: Section validation
     if level in (ValidationLevel.SECTIONS, ValidationLevel.DETAILED):
         checks.append("section_totals")
-
-        current_assets = values.get("current_assets")
-        noncurrent_assets = values.get("noncurrent_assets")
-        current_liabilities = values.get("current_liabilities")
-        noncurrent_liabilities = values.get("noncurrent_liabilities")
-
-        # Check if current + non-current = total for assets
-        if current_assets is not None and noncurrent_assets is not None and assets is not None:
-            expected_assets = current_assets + noncurrent_assets
-            diff = abs(assets - expected_assets)
-
-            if diff > tolerance:
-                issues.append(ValidationIssue(
-                    severity=ValidationSeverity.WARNING,
-                    code="ASSET_SECTION_MISMATCH",
-                    message=f"Current Assets + Non-Current Assets ({expected_assets:,.0f}) != Total Assets ({assets:,.0f})",
-                    details={
-                        "current_assets": current_assets,
-                        "noncurrent_assets": noncurrent_assets,
-                        "total_assets": assets,
-                        "difference": diff
-                    }
-                ))
-
-        # Check if current + non-current = total for liabilities
-        if current_liabilities is not None and noncurrent_liabilities is not None and liabilities is not None:
-            expected_liab = current_liabilities + noncurrent_liabilities
-            diff = abs(liabilities - expected_liab)
-
-            if diff > tolerance:
-                issues.append(ValidationIssue(
-                    severity=ValidationSeverity.WARNING,
-                    code="LIABILITY_SECTION_MISMATCH",
-                    message=f"Current Liabilities + Non-Current Liabilities ({expected_liab:,.0f}) != Total Liabilities ({liabilities:,.0f})",
-                    details={
-                        "current_liabilities": current_liabilities,
-                        "noncurrent_liabilities": noncurrent_liabilities,
-                        "total_liabilities": liabilities,
-                        "difference": diff
-                    }
-                ))
+        issues.extend(_check_section_totals(values, tolerance))
 
     # Determine overall validity (errors = invalid, warnings OK)
     is_valid = not any(i.severity == ValidationSeverity.ERROR for i in issues)
