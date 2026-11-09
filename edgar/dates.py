@@ -14,6 +14,7 @@ shim. The implementation lives HERE, not there -- aliasing the other way would
 leave the real code at the path 6.0 deletes (the edgartools-07lk.23 rename trap).
 """
 import datetime
+import re
 from datetime import date
 from typing import List, Optional, Sequence, Tuple, Union
 from zoneinfo import ZoneInfo
@@ -30,6 +31,7 @@ __all__ = [
     "current_year_and_quarter",
     "is_start_of_quarter",
     "parse_acceptance_datetime",
+    "normalize_period_boundary",
     "InvalidDateError",
 ]
 
@@ -193,6 +195,43 @@ def is_start_of_quarter():
             return True
 
     return False
+
+
+_WHOLE_DAY_DATETIME_RE = re.compile(r'(\d{4}-\d{2}-\d{2})T(00|24):00:00(?:\.0+)?')
+
+
+def normalize_period_boundary(text: Optional[str], is_end: bool) -> Optional[str]:
+    """An XBRL context period boundary (``xbrli:dateUnion``) in its date-only form.
+
+    The type collapses whitespace, so `` 2024-06-30 `` is 2024-06-30. A
+    date-only instant or ``endDate`` means the end of that day (XBRL 2.1
+    §4.7.2), so for an end boundary ``2025-01-01T00:00:00`` is the same point
+    as ``2024-12-31``. A ``startDate`` means the start of its day, so
+    ``2024-01-01T00:00:00`` is ``2024-01-01``. ``T24:00:00`` is the end of the
+    day it names. Both are folded onto the date-only spelling, so equal periods
+    share one key (GH #1762).
+
+    A dateTime that is not a whole-day boundary, or that carries a timezone,
+    has no date-only equivalent and comes back with only its whitespace
+    collapsed. The XBRL instance parser and the inline (edgar.documents) context
+    reader both use this, so the two readings cannot drift apart.
+    """
+    if text is None:
+        return None
+    value = ' '.join(text.split())
+    match = _WHOLE_DAY_DATETIME_RE.fullmatch(value)
+    if match is None:
+        return value
+    try:
+        day = date.fromisoformat(match.group(1))
+    except ValueError:
+        return value
+    midnight = match.group(2) == '00'
+    if is_end and midnight:
+        day -= datetime.timedelta(days=1)
+    elif not is_end and not midnight:
+        day += datetime.timedelta(days=1)
+    return day.isoformat()
 
 
 def parse_acceptance_datetime(acceptance_datetime: str) -> datetime.datetime:

@@ -3022,7 +3022,10 @@ class XBRL:
         Higher return value = more precise:
         - INF (infinite precision) returns 1_000_000
         - Numeric decimals return their value (e.g., -6 for millions, 2 for hundredths)
-        - None or invalid returns 0 (default/unknown precision)
+        - None or invalid returns -1_000_000: unknown accuracy, below any stated
+          one. It used to score 0, above every negative decimals, so a fact with
+          no stated accuracy beat one rounded to thousands (GH #1765). A fact
+          filed with @precision has its decimals inferred at parse time.
         - A valueless (nil) fact returns -2_000_000, below any valued fact, because
           its missing decimals says nothing about precision (GH #1750)
 
@@ -3040,8 +3043,8 @@ class XBRL:
             try:
                 return int(fact.decimals)
             except (ValueError, TypeError):
-                return 0
-        return 0  # Default/unknown precision
+                return -1_000_000
+        return -1_000_000  # Unknown accuracy: below any stated one, above nil
 
     @staticmethod
     def _select_most_precise_fact(facts: list):

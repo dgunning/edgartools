@@ -206,6 +206,8 @@ class Fact(BaseModel):
     value: str
     unit_ref: Optional[str] = None
     decimals: Optional[Union[int, str]] = None  # int or "INF"
+    # The @precision attribute as filed. decimals holds what it implies (XBRL 2.1 §4.6.6).
+    precision: Optional[str] = None
     numeric_value: Optional[float] = None
     footnotes: List[str] = Field(default_factory=list)
     instance_id: Optional[int] = None

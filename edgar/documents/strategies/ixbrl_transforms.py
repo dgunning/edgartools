@@ -36,6 +36,7 @@ __all__ = [
     'apply_transform',
     'is_known_format',
     'apply_scale',
+    'negate_exactly',
 ]
 
 
@@ -639,6 +640,19 @@ def apply_transform(format_attr: str, value: str) -> str:
 # Scale
 # ---------------------------------------------------------------------------
 
+def _plain_decimal(value: Decimal) -> str:
+    """Positional form of a finite Decimal without trailing fractional zeros.
+
+    Formatting with ``'f'`` and trimming the text never consults the decimal
+    context, unlike ``Decimal.normalize()``, which rounds to the caller's
+    precision.
+    """
+    text = f"{value:f}"
+    if '.' in text:
+        text = text.rstrip('0').rstrip('.')
+    return text or '0'
+
+
 def apply_scale(value: str, scale: str) -> Optional[str]:
     """
     Multiply a lexical numeric value by ``10 ** scale``, exactly.
@@ -649,6 +663,11 @@ def apply_scale(value: str, scale: str) -> Optional[str]:
     reached ``numeric_value``. Decimal keeps the result exact and free of
     exponent notation.
 
+    The scaling moves the exponent of the parsed digits and does no arithmetic,
+    so the caller's decimal context cannot round it. ``scaleb`` and
+    ``normalize`` both round to the ambient precision: under ``prec=8`` IBM's
+    927,264,332 shares became 927264330 (GH #1854).
+
     Returns None if either input is not numeric, leaving the caller's value
     untouched.
     """
@@ -656,10 +675,34 @@ def apply_scale(value: str, scale: str) -> Optional[str]:
         scale_factor = int(scale)
     except (TypeError, ValueError):
         return None
-    try:
-        scaled = Decimal(value.replace(',', '').strip()).scaleb(scale_factor)
-    except (InvalidOperation, AttributeError, ValueError):
+    number = exact_decimal(value.replace(',', '') if isinstance(value, str) else value)
+    if number is None:
         return None
-    # scaleb can leave an exponent (1.234E+9); 'f' renders positional digits.
-    # normalize() first so 7E-3 does not print as 0.007000.
-    return f"{scaled.normalize():f}"
+    sign, digits, exponent = number.as_tuple()
+    return _plain_decimal(Decimal((sign, digits, exponent + scale_factor)))
+
+
+def exact_decimal(value: str) -> Optional[Decimal]:
+    """Parse a lexical number into a finite Decimal, or None.
+
+    String construction is exact whatever the caller's context. A caller that
+    has switched off the ``InvalidOperation`` trap gets ``NaN`` back instead of
+    an exception, so finiteness is checked rather than assumed.
+    """
+    try:
+        number = Decimal(value.strip())
+    except (InvalidOperation, AttributeError, ValueError, TypeError):
+        return None
+    return number if number.is_finite() else None
+
+
+def negate_exactly(value: str) -> Optional[str]:
+    """The lexical negation of a number, independent of the decimal context.
+
+    Unary minus on a Decimal rounds to the caller's precision; ``copy_negate``
+    only flips the sign.
+    """
+    number = exact_decimal(value)
+    if number is None:
+        return None
+    return f"{number.copy_negate():f}"

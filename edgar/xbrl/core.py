@@ -5,6 +5,7 @@ This module provides common functions used throughout the XBRL parser.
 """
 
 from datetime import date, datetime
+from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
 
 # Constants for label roles
@@ -660,6 +661,40 @@ def normalize_decimals(decimals: Union[int, str, None]) -> Union[int, str, None]
         return int(decimals)
     except (ValueError, TypeError):
         return 0
+
+
+def decimals_from_precision(precision: Optional[str], value: Optional[str]) -> Union[int, str, None]:
+    """The decimals a fact reported with ``@precision`` implies (XBRL 2.1 §4.6.6).
+
+    ``decimals = precision - floor(log10(abs(value))) - 1``: two significant
+    digits of 2,000,000 are accurate to the hundred-thousand, decimals -5. An
+    ``INF`` precision, or a zero value, is INF. ``precision="0"`` says nothing
+    is known about the value's accuracy (§4.6.4), so it implies nothing and
+    returns None, as does an unreadable precision or value.
+
+    ``Decimal.adjusted()`` is the exact ``floor(log10(abs(value)))`` of the
+    lexical value, so no float rounding or decimal context is involved.
+    """
+    if precision is None:
+        return None
+    text = str(precision).strip()
+    if text.upper() == INFINITE_PRECISION:
+        return INFINITE_PRECISION
+    try:
+        digits = int(text)
+    except ValueError:
+        return None
+    if digits <= 0:
+        return None
+    try:
+        number = Decimal(str(value).strip())
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+    if not number.is_finite():
+        return None
+    if number.is_zero():
+        return INFINITE_PRECISION
+    return digits - number.adjusted() - 1
 
 
 def decimals_for_scaling(decimals: Union[int, str, None]) -> int:
