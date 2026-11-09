@@ -15,6 +15,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
+from edgar.exceptions import ValidationError
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,6 +25,27 @@ class ValidationLevel(str, Enum):
     FUNDAMENTAL = "fundamental"  # Basic equation: Assets = Liabilities + Equity
     SECTIONS = "sections"        # Section subtotals roll up correctly
     DETAILED = "detailed"        # Same checks as SECTIONS; line-item rollups are not implemented
+
+
+def _parse_level(level: Union["ValidationLevel", str]) -> "ValidationLevel":
+    """The ValidationLevel named by ``level``, a member or its value in any case.
+
+    Raises:
+        ValidationError: ``level`` names no level. An unknown string used to
+            fall back to FUNDAMENTAL, so a typo such as "detalied" ran the
+            equation check alone and reported success (bead edgartools-zvgw2).
+    """
+    if isinstance(level, ValidationLevel):
+        return level
+    try:
+        return ValidationLevel(level.lower())
+    except (AttributeError, ValueError):
+        valid = ", ".join(member.value for member in ValidationLevel)
+        raise ValidationError(
+            f"Unknown validation level {level!r}. Valid levels: {valid}",
+            parameter="level",
+            invalid_value=level,
+        ) from None
 
 
 class ValidationSeverity(str, Enum):
@@ -226,8 +249,71 @@ BALANCE_SHEET_SECTIONS = {
 }
 
 
+# The XBRL concept of each total, tried before the labels above. Filers word
+# these captions freely ("Total shareholders’ equity", "Total assets(a)"), so
+# matching on labels alone left 15 of 26 tracked fixtures, among them AAPL,
+# MSFT, JPM and NVDA, with an equation that was never checked (bead
+# edgartools-9g8um). Labels remain the fallback for frames without a concept
+# column and for filers that use an extension concept.
+BALANCE_SHEET_CONCEPTS = {
+    "total_assets": ["us-gaap_Assets", "ifrs-full_Assets"],
+    "total_liabilities": ["us-gaap_Liabilities", "ifrs-full_Liabilities"],
+    "stockholders_equity": ["us-gaap_StockholdersEquity", "ifrs-full_EquityAttributableToOwnersOfParent"],
+    "total_equity_with_nci": [
+        "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+        "ifrs-full_Equity",
+    ],
+    "noncontrolling_interest": ["us-gaap_MinorityInterest", "ifrs-full_NoncontrollingInterests"],
+    "liabilities_and_equity": ["us-gaap_LiabilitiesAndStockholdersEquity", "ifrs-full_EquityAndLiabilities"],
+    "current_assets": ["us-gaap_AssetsCurrent", "ifrs-full_CurrentAssets"],
+    "noncurrent_assets": ["us-gaap_AssetsNoncurrent", "ifrs-full_NoncurrentAssets"],
+    "current_liabilities": ["us-gaap_LiabilitiesCurrent", "ifrs-full_CurrentLiabilities"],
+    "noncurrent_liabilities": ["us-gaap_LiabilitiesNoncurrent", "ifrs-full_NoncurrentLiabilities"],
+}
+
+
 def _label_column(df: pd.DataFrame) -> str:
     return 'label' if 'label' in df.columns else df.columns[0]
+
+
+def _first_value(rows: pd.DataFrame, columns: List[str]) -> Optional[float]:
+    """The first non-null numeric value in ``columns``, scanning ``rows`` in order."""
+    for _, row in rows.iterrows():
+        for col in columns:
+            val = row.get(col)
+            if pd.notna(val):
+                try:
+                    return float(val)
+                except (ValueError, TypeError):
+                    continue
+    return None
+
+
+def _total_concept_rows(df: pd.DataFrame, concepts: List[str]) -> pd.DataFrame:
+    """The face rows tagged with one of ``concepts``: not abstract and not dimensional.
+
+    A statement frame repeats a concept on its breakdown rows (JPM tags its
+    segment and VIE assets us-gaap:Assets under a member, NFLX each equity
+    component us-gaap:StockholdersEquity), so only the row without a dimension
+    is the total.
+    """
+    if 'concept' not in df.columns:
+        return df.iloc[0:0]
+    mask = df['concept'].astype(str).str.replace(':', '_', regex=False).isin(concepts)
+    for flag in ('abstract', 'dimension'):
+        if flag in df.columns:
+            mask &= ~df[flag].eq(True)
+    return df[mask]
+
+
+def _find_total(df: pd.DataFrame, key: str, columns: List[str]) -> Optional[float]:
+    """The value of balance-sheet total ``key`` in ``columns``: by concept, then by label."""
+    value = _first_value(_total_concept_rows(df, BALANCE_SHEET_CONCEPTS.get(key, [])), columns)
+    if value is not None:
+        return value
+    labels = BALANCE_SHEET_TOTALS.get(key) or BALANCE_SHEET_SECTIONS.get(key, [])
+    result = _find_value_by_labels(df, labels, columns)
+    return result[1] if result else None
 
 
 def _value_columns(df: pd.DataFrame) -> List[str]:
@@ -251,7 +337,7 @@ def _select_period_column(df: pd.DataFrame) -> Optional[str]:
     if df is None or df.empty:
         return None
     for column in _value_columns(df):
-        if _find_value_by_labels(df, BALANCE_SHEET_TOTALS["total_assets"], [column]) is not None:
+        if _find_total(df, "total_assets", [column]) is not None:
             return column
     return None
 
@@ -310,11 +396,10 @@ def _get_balance_sheet_values(df: pd.DataFrame, column: Optional[str] = None) ->
         Every value comes from the same column.
     """
     column = column if column is not None else _select_period_column(df)
-    values = {}
-    for key, label_variants in {**BALANCE_SHEET_TOTALS, **BALANCE_SHEET_SECTIONS}.items():
-        result = _find_value_by_labels(df, label_variants, [column]) if column is not None else None
-        values[key] = result[1] if result else None
-    return values
+    return {
+        key: _find_total(df, key, [column]) if column is not None else None
+        for key in {**BALANCE_SHEET_TOTALS, **BALANCE_SHEET_SECTIONS}
+    }
 
 
 def _check_section_totals(values: Dict[str, Optional[float]], tolerance: float) -> List[ValidationIssue]:
@@ -351,7 +436,7 @@ def _incomplete_equation_issue(df: pd.DataFrame, column: str) -> ValidationIssue
     """The equation could not be checked in ``column``; name the columns that do report the totals."""
     other_columns = [
         c for c in _value_columns(df) if c != column and any(
-            _find_value_by_labels(df, BALANCE_SHEET_TOTALS[key], [c]) is not None
+            _find_total(df, key, [c]) is not None
             for key in ("liabilities_and_equity", "total_liabilities"))
     ]
     message = f"Could not validate equation for {column}: missing Liabilities and/or Equity totals"
@@ -406,7 +491,11 @@ def validate_balance_sheet(
         >>> result = validate_balance_sheet(bs)
         >>> print(result)
         ValidationResult: VALID (0 errors, 0 warnings)
+
+    Raises:
+        ValidationError: ``level`` is not a validation level.
     """
+    level = _parse_level(level)
     issues: List[ValidationIssue] = []
     checks: List[str] = []
     metadata: Dict[str, Any] = {}
@@ -592,7 +681,12 @@ def validate_statement(
 
     Returns:
         ValidationResult with validation status and any issues found
+
+    Raises:
+        ValidationError: ``level`` is not a validation level.
     """
+    level = _parse_level(level)
+
     # Try to detect statement type
     detected_type = statement_type
 
