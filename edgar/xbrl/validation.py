@@ -22,7 +22,7 @@ class ValidationLevel(str, Enum):
     """Validation strictness levels."""
     FUNDAMENTAL = "fundamental"  # Basic equation: Assets = Liabilities + Equity
     SECTIONS = "sections"        # Section subtotals roll up correctly
-    DETAILED = "detailed"        # All line items roll up to subtotals
+    DETAILED = "detailed"        # Same checks as SECTIONS; line-item rollups are not implemented
 
 
 class ValidationSeverity(str, Enum):
@@ -315,7 +315,10 @@ def validate_balance_sheet(
 
     Args:
         statement_or_df: A Statement object or pandas DataFrame containing balance sheet data
-        level: Validation level (FUNDAMENTAL, SECTIONS, or DETAILED)
+        level: Validation level. FUNDAMENTAL checks the equation; SECTIONS also
+            checks current + non-current subtotals against total assets and total
+            liabilities. DETAILED runs the same checks as SECTIONS: line-item
+            rollups to subtotals are not implemented.
         tolerance: Absolute tolerance for rounding differences (default: $1)
         tolerance_pct: Percentage tolerance (default: 0.1% = 0.001)
 
@@ -554,7 +557,8 @@ def validate_statement(
         statement: A Statement object
         statement_type: Optional statement type override. If not provided,
                        will attempt to detect from the statement.
-        level: Validation level (FUNDAMENTAL, SECTIONS, or DETAILED)
+        level: Validation level (FUNDAMENTAL, SECTIONS, or DETAILED). DETAILED
+            runs the same checks as SECTIONS; see validate_balance_sheet().
 
     Returns:
         ValidationResult with validation status and any issues found
