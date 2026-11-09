@@ -18,6 +18,8 @@ from typing import TYPE_CHECKING, Optional
 
 from lxml import etree
 
+from edgar.xmltools import parse_xml_boolean
+
 if TYPE_CHECKING:
     from edgar._filings import Filing
 
@@ -27,6 +29,9 @@ __all__ = ['extract_filing_fees_xbrl']
 # ix:nonNumeric / ix:nonFraction source casing and the libxml2-lowercased
 # parse survive.
 _IX_FACT_TAGS = ('nonnumeric', 'nonfraction')
+
+# Flags whose value is an xs:boolean, read from the transformed value.
+_BOOLEAN_FACTS = frozenset({'ffd:FnlPrspctsFlg'})
 
 
 def _get_filing_fees_attachment(filing: 'Filing'):
@@ -43,6 +48,23 @@ def _local_name(tag) -> str:
     if not isinstance(tag, str):  # comments / PIs have non-str tags
         return ''
     return tag.rsplit('}', 1)[-1].rsplit(':', 1)[-1].lower()
+
+
+def _transformed_value(format_attr: Optional[str], display: str) -> Optional[str]:
+    """The fact value its inline-XBRL ``format`` gives the display text.
+
+    None when there is no format, or the registry does not implement it or
+    rejects the text; the caller then keeps the display text.
+    """
+    if not format_attr:
+        return None
+    # Imported here: the registry lives in edgar.documents, whose package
+    # import is not needed by the rest of this module.
+    from edgar.documents.strategies.ixbrl_transforms import TransformError, apply_transform
+    try:
+        return apply_transform(format_attr, display)
+    except TransformError:
+        return None
 
 
 def _get_row_num(ctx: str) -> Optional[int]:
@@ -92,6 +114,7 @@ def extract_filing_fees_xbrl(filing: 'Filing') -> dict:
     summary: dict[str, str] = {}
     rows: dict[str, dict[str, str]] = {}
     seen_keys: set = set()
+    boolean_values: dict[str, str] = {}
 
     ROW_CONTEXT_PATTERNS = ['TypedMemberffdOfferingAxis', 'offrl_', 'offt_']
     SUMMARY_PREFIXES = ('ffd:Ttl', 'ffd:Net', 'ffd:Nrrtv')
@@ -107,13 +130,25 @@ def extract_filing_fees_xbrl(filing: 'Filing') -> dict:
         # The HTML parser lowercases attribute names, so contextRef -> contextref.
         ctx = elem.get('contextref') or ''
 
-        if elem.get('xsi:nil') == 'true':
+        if parse_xml_boolean(elem.get('xsi:nil')):
             continue
 
         # itertext() preserves whitespace between nested inline elements;
         # the prior get_text(strip=True) mashed multi-span titles together
         # (e.g. "Series APerpetual Stride" -> "Series A Perpetual Stride").
         value = ''.join(elem.itertext()).strip()
+
+        # The ``format`` attribute turns display text into the fact value
+        # (GH #1681). Amounts keep their display text ("4,200,000,000"), which
+        # callers parse, unless it has no digits to parse: ixt:fixed-zero over
+        # an em dash means 0. Booleans are read from the transformed value
+        # below, because ixt:booleantrue may sit over any sentence.
+        transformed = _transformed_value(elem.get('format'), value)
+        if transformed is not None and name in _BOOLEAN_FACTS:
+            boolean_values.setdefault(name, transformed)
+        if (transformed is not None and _local_name(elem.tag) == 'nonfraction'
+                and not any(ch.isdigit() for ch in value)):
+            value = transformed
 
         key = (name, ctx)
         if key in seen_keys:
@@ -154,7 +189,8 @@ def extract_filing_fees_xbrl(filing: 'Filing') -> dict:
         })
 
     # Check final prospectus flag
-    is_final = metadata.get('ffd:FnlPrspctsFlg', '').lower() == 'true'
+    is_final = parse_xml_boolean(
+        boolean_values.get('ffd:FnlPrspctsFlg', metadata.get('ffd:FnlPrspctsFlg'))) is True
 
     return {
         'has_exhibit': True,
