@@ -1,1 +1,0 @@
-**BDC non-accruals no longer count a holding listed in two schedules twice.** Logan Ridge's FY2024 10-K flags MMI Holdings in its schedule and again under "Affiliate investments", so its non-accruals read $10.86M; they now read $7.94M, the filing's $7.9M and 4.6%. Flagged rows go through the restated-row rule `PortfolioInvestments` already applies. (bead edgartools-wg5n8)
