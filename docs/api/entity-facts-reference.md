@@ -920,14 +920,17 @@ results = facts.query()\
 
 ### Error Handling
 
-The API uses graceful error handling:
+`None` means SEC has no company facts for the company; an invalid argument raises:
 
 ```python
-# Methods return None instead of raising exceptions
-stmt = company.income_statement()  # Returns None if no data
-if stmt:
+from edgar.exceptions import ValidationError
+
+stmt = company.income_statement()  # None if the company has no facts
+if stmt is not None:
     # Process statement
     pass
+
+company.income_statement(period="quarter")  # raises ValidationError: use "quarterly"
 ```
 
 ### Performance Considerations

@@ -1974,6 +1974,35 @@ class EntityFacts:
             )
         return resolved
 
+    @classmethod
+    def _resolve_balance_sheet_period(cls,
+                                      period: Optional[str],
+                                      annual: Optional[bool]) -> str:
+        """Collapse period/annual into 'annual' or 'quarterly' for a balance sheet.
+
+        A balance sheet is point-in-time, so 'ttm' is rejected along with any
+        other name, as `ValidationError` (IS-A `ValueError`) like its siblings.
+        """
+        if annual is not None:
+            resolved = "annual" if annual else "quarterly"
+        elif period is not None:
+            resolved = period.lower()
+        else:
+            resolved = "annual"
+        if resolved == "ttm":
+            raise ValidationError(
+                "TTM not applicable for Balance Sheet (point-in-time data)",
+                parameter="period",
+                invalid_value=resolved,
+            )
+        if resolved not in {"annual", "quarterly"}:
+            raise ValidationError(
+                "period must be one of: 'annual', 'quarterly'",
+                parameter="period",
+                invalid_value=resolved,
+            )
+        return resolved
+
     def _build_enhanced_statement(self,
                                   facts: List[FinancialFact],
                                   statement_type: str,
@@ -2091,14 +2120,7 @@ class EntityFacts:
             stmt = facts.balance_sheet(periods=4)
             df = stmt.to_dataframe()
         """
-        if annual is not None:
-            period = 'annual' if annual else 'quarterly'
-
-        period = period.lower()
-        if period == 'ttm':
-            raise ValueError("TTM not applicable for Balance Sheet (point-in-time data)")
-        if period not in {'annual', 'quarterly'}:
-            raise ValueError("period must be one of: 'annual', 'quarterly'")
+        period = self._resolve_balance_sheet_period(period, annual)
 
         if not as_of:
             return self._build_enhanced_statement(

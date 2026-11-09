@@ -760,22 +760,25 @@ mixed = company.income_statement(periods=8, annual=False)
 
 ## Error Handling
 
-The API is designed for graceful error handling:
+`None` answers "SEC has no company facts for this company"; it never means a
+failure. A ticker that does not exist, or an invalid argument, raises:
 
 ```python
-company = Company('INVALIDTICKER')
+from edgar.exceptions import CompanyNotFoundError, ValidationError
 
-# These will return None instead of raising exceptions
-income_stmt = company.income_statement()  # Returns None
-shares = company.shares_outstanding       # Returns None  
-facts = company.facts                     # Returns None
+try:
+    company = Company('INVALIDTICKER')
+except CompanyNotFoundError:
+    print("No such company")
 
-# Check before using
+company = Company('SNOW')
 if company.facts:
     # Facts are available
     stmt = company.income_statement()
 else:
-    print("No facts available for this company")
+    print("No facts available for this company")  # income_statement() would return None
+
+company.income_statement(period='quarter')  # raises ValidationError: use 'quarterly'
 ```
 
 ## Real-World Examples
