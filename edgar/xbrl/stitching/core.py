@@ -207,11 +207,18 @@ class StatementStitcher:
         """
         # Use a dictionary to track unique periods by their end date
         # This will handle cases where different period_ids reference the same date
-        unique_periods = {}  # key: date string, value: (period_id, datetime, statement_index)
+        unique_periods = {}  # key: normalized period, value: (period_id, datetime, statement_index, source_index)
 
         for i, statement in enumerate(statements):
             # Use statement index (i) to prioritize more recent filings
             # Lower index = more recent filing
+            # The filing this statement came from, as a position in the caller's
+            # xbrl_list. It is not i: the optimal-periods path passes one filtered
+            # statement per selected period, so a 10-Q contributing a quarter and a
+            # YTD column is two statements here, and a filing that lacks the
+            # statement is skipped. Enumerating gave ORCL's six-month column the
+            # index of the next filing and its Q1 an index past the end (GH #1837).
+            source_index = statement.get('source_index', i)
             for period_id, period_info in statement['periods'].items():
                 # Extract end date for sorting
                 try:
@@ -258,12 +265,12 @@ class StatementStitcher:
                         existing_idx = unique_periods[normalized_key][2]
                         # Only replace if this statement is from a more recent filing
                         if i < existing_idx:
-                            unique_periods[normalized_key] = (period_id, end_date, i)
+                            unique_periods[normalized_key] = (period_id, end_date, i, source_index)
                             # Use the enhanced label from period_info if available, otherwise fall back to display_date
                             self.period_dates[period_id] = period_info.get('label', display_date)
                     else:
                         # Add new period
-                        unique_periods[normalized_key] = (period_id, end_date, i)
+                        unique_periods[normalized_key] = (period_id, end_date, i, source_index)
                         # Use the enhanced label from period_info if available, otherwise fall back to display_date
                         self.period_dates[period_id] = period_info.get('label', display_date)
 
@@ -276,11 +283,11 @@ class StatementStitcher:
         # same answer to attribute a stitched fact to its source filing. Recomputing
         # it there would be a second copy of this rule, free to drift from it
         # (bead edgartools-qbm7).
-        self.period_sources = {period_id: statement_index
-                               for period_id, _, statement_index in unique_periods.values()}
+        self.period_sources = {period_id: source_index
+                               for period_id, _, _, source_index in unique_periods.values()}
 
         # Extract and sort the unique periods
-        all_periods = [(period_id, end_date) for period_id, end_date, _ in unique_periods.values()]
+        all_periods = [(period_id, end_date) for period_id, end_date, _, _ in unique_periods.values()]
 
         # Sort by date, newest first
         return sorted(all_periods, key=lambda x: x[1], reverse=True)
@@ -1213,7 +1220,8 @@ def stitch_statements(
                         'definition': statement['definition'],
                         'statement_type': statement['statement_type'],
                         'periods': {period_key: statement['periods'][period_key]},
-                        'data': statement['data']
+                        'data': statement['data'],
+                        'source_index': xbrl_index,
                     }
 
                     # Update the period label to include information from entity_info
@@ -1254,7 +1262,7 @@ def stitch_statements(
                     statements.append(filtered_statement)
     # Traditional approach without using entity info
     else:
-        for xbrl in xbrl_list:
+        for xbrl_index, xbrl in enumerate(xbrl_list):
             # Get statement data for the specified type.  This must be
             # get_statement_by_type() and not find_statement(): the latter
             # returns a (statements, role, statement_type) tuple of index
@@ -1268,7 +1276,8 @@ def stitch_statements(
             except StatementNotFoundError:
                 continue
             if statement:
-                statements.append(statement)
+                # A copy, so the caller's statement dict is not tagged in place
+                statements.append({**statement, 'source_index': xbrl_index})
 
     # Stitch the statements
     return stitcher.stitch_statements(statements, period_type, max_periods, standard,
