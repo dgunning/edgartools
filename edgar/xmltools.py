@@ -38,6 +38,7 @@ __all__ = [
     'get_footnote_ids',
     'local_name',
     'optional_decimal',
+    'parse_xml_boolean',
     'parse_xml',
     'xml_parser',
     'add_safe_resolver',
@@ -424,6 +425,27 @@ def optional_decimal(parent: XmlNode,
         if text == "N/A":
             return None
         return Decimal(text)
+
+
+def parse_xml_boolean(value: Optional[str]) -> Optional[bool]:
+    """Read an XML Schema boolean (``xs:boolean``).
+
+    The lexical space is ``true``, ``false``, ``1`` and ``0``, after collapsing
+    whitespace. Comparing against the word ``true`` alone reads a valid ``1`` as
+    False (GH #1724). Case is folded because SEC data is not always strict
+    about it.
+
+    Returns None for a missing, empty or non-boolean value, so callers can tell
+    "false" from "not stated".
+    """
+    if value is None:
+        return None
+    normalized = str(value).strip().lower()
+    if normalized in ('true', '1'):
+        return True
+    if normalized in ('false', '0'):
+        return False
+    return None
 
 
 def extract_child_text(tag: XmlNode,

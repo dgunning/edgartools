@@ -1077,32 +1077,30 @@ class Company(Entity):
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
         Returns:
-            MultiPeriodStatement, TTMStatement, or DataFrame with income statement data
+            MultiPeriodStatement, TTMStatement, or DataFrame with income statement data,
+            or None if SEC has no company facts for this company
+
+        Raises:
+            ValidationError: If period is not 'annual', 'quarterly' or 'ttm'
 
         Example:
             >>> company = Company("AAPL")
             >>> stmt = company.income_statement(period='ttm')  # Trailing 12 months
             >>> stmt = company.income_statement(period='quarterly', periods=8)
         """
-        # Handle legacy parameter
-        if annual is not None:
-            period = 'annual' if annual else 'quarterly'
+        # Validate before looking for facts: a bad argument is an error whether
+        # or not this company has facts (GH #1732). `annual` overrides `period`.
+        period = EntityFacts._resolve_period(period, annual)
 
         facts = self.facts
         if not facts:
             return None
-
-        try:
-            return facts.income_statement(
-                periods=periods,
-                period=period,
-                as_dataframe=as_dataframe,
-                concise_format=concise_format
-            )
-        except Exception as e:
-            from edgar.core import log
-            log.debug(f"Error getting income statement for {self.name}: {e}")
-        return None
+        return facts.income_statement(
+            periods=periods,
+            period=period,
+            as_dataframe=as_dataframe,
+            concise_format=concise_format
+        )
 
     def balance_sheet(
         self,
@@ -1123,30 +1121,24 @@ class Company(Entity):
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
         Returns:
-            MultiPeriodStatement or DataFrame with balance sheet data
+            MultiPeriodStatement or DataFrame with balance sheet data,
+            or None if SEC has no company facts for this company
 
         Raises:
-            ValueError: If period='ttm' (not applicable for balance sheet)
+            ValidationError: If period is not 'annual' or 'quarterly' ('ttm' is not
+                applicable to a balance sheet). ValidationError IS-A ValueError.
         """
-        if annual is not None:
-            period = 'annual' if annual else 'quarterly'
-
-        if period == 'ttm':
-            raise ValueError("TTM not applicable for Balance Sheet (point-in-time data)")
+        period = EntityFacts._resolve_balance_sheet_period(period, annual)
 
         facts = self.facts
-        if facts:
-            try:
-                return facts.balance_sheet(
-                    periods=periods,
-                    period=period,
-                    as_dataframe=as_dataframe,
-                    concise_format=concise_format
-                )
-            except Exception as e:
-                from edgar.core import log
-                log.debug(f"Error getting balance sheet for {self.name}: {e}")
-        return None
+        if not facts:
+            return None
+        return facts.balance_sheet(
+            periods=periods,
+            period=period,
+            as_dataframe=as_dataframe,
+            concise_format=concise_format
+        )
 
     def cash_flow_statement(
         self,
@@ -1167,26 +1159,23 @@ class Company(Entity):
             concise_format: If True, display values as $1.0B, if False display as $1,000,000,000
 
         Returns:
-            MultiPeriodStatement, TTMStatement, or DataFrame with cash flow data
+            MultiPeriodStatement, TTMStatement, or DataFrame with cash flow data,
+            or None if SEC has no company facts for this company
+
+        Raises:
+            ValidationError: If period is not 'annual', 'quarterly' or 'ttm'
         """
-        if annual is not None:
-            period = 'annual' if annual else 'quarterly'
+        period = EntityFacts._resolve_period(period, annual)
 
         facts = self.facts
         if not facts:
             return None
-
-        try:
-            return facts.cash_flow_statement(
-                periods=periods,
-                period=period,
-                as_dataframe=as_dataframe,
-                concise_format=concise_format
-            )
-        except Exception as e:
-            from edgar.core import log
-            log.debug(f"Error getting cash flow for {self.name}: {e}")
-        return None
+        return facts.cash_flow_statement(
+            periods=periods,
+            period=period,
+            as_dataframe=as_dataframe,
+            concise_format=concise_format
+        )
 
     # -------------------------------------------------------------------------
     # Concept Discovery Methods

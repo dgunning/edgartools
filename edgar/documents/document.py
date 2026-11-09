@@ -798,6 +798,10 @@ def _flatten_column_name(col) -> str:
     return ' '.join(out)
 
 
+# Columns Document.to_dataframe adds to every table's frame.
+_TABLE_METADATA_COLUMNS = ('_table_index', '_table_type', '_table_caption')
+
+
 def _flatten_table_frame(df: 'pd.DataFrame') -> 'pd.DataFrame':
     """Give one table's frame flat, unique, string column names and a clean index.
 
@@ -833,15 +837,27 @@ def _flatten_table_frame(df: 'pd.DataFrame') -> 'pd.DataFrame':
     # Flat, string, and unique. Duplicate header texts are ordinary in filings
     # ('' repeated across spacer columns), and duplicate names would make the
     # concatenated frame ambiguous to index into.
-    seen: Dict[str, int] = {}
+    #
+    # A suffix must not land on a name some other column already carries:
+    # headers 'Revenue, Revenue, Revenue.1' used to give 'Revenue.1' twice, and
+    # the concat then raised InvalidIndexError (GH #1734). So every literal
+    # name is reserved before any suffix is chosen, along with the metadata
+    # columns Document.to_dataframe adds, and a duplicate takes the lowest free
+    # suffix. Where nothing collides this is the same .1, .2, ... as before.
+    base_names = [_flatten_column_name(col) or f'column_{position}'
+                  for position, col in enumerate(df.columns)]
+    reserved = set(base_names)
+    used = set(_TABLE_METADATA_COLUMNS)
+    next_suffix: Dict[str, int] = {}
     names = []
-    for position, col in enumerate(df.columns):
-        name = _flatten_column_name(col) or f'column_{position}'
-        if name in seen:
-            seen[name] += 1
-            name = f'{name}.{seen[name]}'
-        else:
-            seen[name] = 0
+    for name in base_names:
+        if name in used:
+            suffix = next_suffix.get(name, 1)
+            while f'{name}.{suffix}' in used or f'{name}.{suffix}' in reserved:
+                suffix += 1
+            next_suffix[name] = suffix + 1
+            name = f'{name}.{suffix}'
+        used.add(name)
         names.append(name)
     df.columns = pd.Index(names, dtype=object)
     return df
