@@ -504,6 +504,12 @@ class ConceptGraph:
             - computed: float (weighted sum of children)
             - difference: float (expected - computed)
             - valid: bool (True if within tolerance)
+            - missing_children: list of child concept IDs with no value in the
+              report, left out of ``computed`` (XBRL 2.1 section 5.2.5.2)
+
+        A total is checked when it and at least one child have a value in the
+        report. A total with no value, or none of whose children has one, is
+        not checked and does not appear in the results.
         """
         results = []
         statement_reports = self._metalinks.get_reports_by_category('Statements')
@@ -516,6 +522,22 @@ class ConceptGraph:
                     tolerance, results, visited, meta_report.report_key
                 )
         return results
+
+    def _sum_contributors(self, children_tags: list, role: str,
+                          report_key: Optional[str]) -> tuple:
+        """Weighted sum of the children with a value in the report, and the IDs of those without one."""
+        child_sum = 0.0
+        missing = []
+        for child_tag in children_tags:
+            child_concept = self._get_or_create_concept(child_tag.tag_id)
+            child_val = child_concept._fact_numeric_value(report_key) if child_concept else None
+            if child_val is None:
+                missing.append(child_tag.tag_id)
+                continue
+            entry = child_tag.calculation_in(role)
+            weight = entry.weight if entry else 1.0
+            child_sum += child_val * weight
+        return child_sum, missing
 
     def _validate_recursive(self, tag_id: str, role: str, role_name: str,
                             tolerance: float, results: list, visited: set,
@@ -536,22 +558,10 @@ class ConceptGraph:
         if parent_val is None:
             return
 
-        child_sum = 0.0
-        all_parsed = True
-        for child_tag in children_tags:
-            child_concept = self._get_or_create_concept(child_tag.tag_id)
-            if not child_concept:
-                all_parsed = False
-                break
-            child_val = child_concept._fact_numeric_value(report_key)
-            if child_val is None:
-                all_parsed = False
-                break
-            entry = child_tag.calculation_in(role)
-            weight = entry.weight if entry else 1.0
-            child_sum += child_val * weight
-
-        if all_parsed:
+        child_sum, missing = self._sum_contributors(children_tags, role, report_key)
+        # XBRL 2.1 section 5.2.5.2: nil and absent facts are not contributing
+        # items, and a calculation binds when at least one contributor is present.
+        if len(missing) < len(children_tags):
             diff = parent_val - child_sum
             results.append({
                 'parent': parent_concept,
@@ -560,6 +570,7 @@ class ConceptGraph:
                 'computed': child_sum,
                 'difference': diff,
                 'valid': abs(diff) <= tolerance,
+                'missing_children': missing,
             })
 
         # Recurse into children

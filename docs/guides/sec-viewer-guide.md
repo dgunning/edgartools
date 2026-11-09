@@ -212,7 +212,7 @@ The viewer can verify that children sum to their parents across every statement 
 ```python
 issues = viewer.validate()
 
-# Each result has: parent, role, expected, computed, difference, valid
+# Each result has: parent, role, expected, computed, difference, valid, missing_children
 for r in issues:
     if not r['valid']:
         parent = r['parent']
@@ -226,6 +226,8 @@ issues = viewer.validate(tolerance=0.01)
 ```
 
 A clean filing with no validation failures returns an empty list for `[r for r in issues if not r['valid']]`.
+
+A child with no value in the report, such as a nil "Commitments and contingencies" line, is left out of the sum, as XBRL 2.1 calculations do, and its ID is listed in `r['missing_children']`. A total is checked as long as at least one of its children has a value.
 
 ## Cross-Validate Against the XBRL Parser
 
