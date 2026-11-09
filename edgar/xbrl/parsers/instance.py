@@ -16,7 +16,7 @@ from typing import Any, Dict, List, Optional, Union
 from lxml import etree as ET
 
 from edgar.core import log
-from edgar.dates import calculate_fiscal_year_for_label, fiscal_year_end_month
+from edgar.dates import calculate_fiscal_year_for_label, fiscal_year_end_month, normalize_period_boundary
 from edgar.xbrl.core import (
     INFINITE_PRECISION,
     NAMESPACES,
@@ -533,20 +533,29 @@ class InstanceParser(BaseParser):
                 if period_elem is not None:
                     # Check for instant period
                     instant_elem = period_elem.find('.//{http://www.xbrl.org/2003/instance}instant')
-                    if instant_elem is not None and instant_elem.text:
+                    # Collapsed and folded onto the date-only spelling, so a
+                    # padded date or a whole-day dateTime keys the same
+                    # period as the plain date it equals (GH #1762).
+                    instant = normalize_period_boundary(
+                        instant_elem.text if instant_elem is not None else None, is_end=True)
+                    if instant:
                         context.period = {
                             'type': 'instant',
-                            'instant': instant_elem.text
+                            'instant': instant
                         }
 
                     # Check for duration period
                     start_elem = period_elem.find('.//{http://www.xbrl.org/2003/instance}startDate')
                     end_elem = period_elem.find('.//{http://www.xbrl.org/2003/instance}endDate')
-                    if start_elem is not None and end_elem is not None and start_elem.text and end_elem.text:
+                    start = normalize_period_boundary(
+                        start_elem.text if start_elem is not None else None, is_end=False)
+                    end = normalize_period_boundary(
+                        end_elem.text if end_elem is not None else None, is_end=True)
+                    if start and end:
                         context.period = {
                             'type': 'duration',
-                            'startDate': start_elem.text,
-                            'endDate': end_elem.text
+                            'startDate': start,
+                            'endDate': end
                         }
 
                     # Check for forever period

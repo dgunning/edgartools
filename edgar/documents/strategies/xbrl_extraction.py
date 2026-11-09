@@ -8,6 +8,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from lxml.etree import tostring
 from lxml.html import HtmlElement
 
+from edgar.dates import normalize_period_boundary
 from edgar.documents.strategies.ixbrl_transforms import (
     TransformError,
     UnknownTransformError,
@@ -247,16 +248,19 @@ class XBRLExtractor:
         if period is None:
             return {}
 
+        # The same reading as the instance parser: whitespace collapsed and a
+        # whole-day dateTime folded onto its date (GH #1762).
         instant = self._find_first(period, 'instant')
         if instant is not None:
-            return {'instant': (instant.text or '').strip(), 'period_type': 'instant'}
+            return {'instant': normalize_period_boundary(instant.text or '', is_end=True),
+                    'period_type': 'instant'}
 
         start = self._find_first(period, 'startdate')
         end = self._find_first(period, 'enddate')
         if start is not None and end is not None:
             return {
-                'start_date': (start.text or '').strip(),
-                'end_date': (end.text or '').strip(),
+                'start_date': normalize_period_boundary(start.text or '', is_end=False),
+                'end_date': normalize_period_boundary(end.text or '', is_end=True),
                 'period_type': 'duration',
             }
         return {}
