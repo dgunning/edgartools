@@ -1,0 +1,1 @@
+- **Balance-sheet validation checks the equation for filers whose captions it did not recognise**: `validate_balance_sheet()` now finds Assets, Liabilities, equity and their combined total by XBRL concept before label. It had returned INCOMPLETE_DATA for 18 of 33 tracked fixtures, among them Apple, Microsoft and JPMorgan; now 32 balance and one reports a genuine gap.
