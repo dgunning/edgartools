@@ -6,7 +6,7 @@ for combining multiple XBRL statements across different time periods.
 """
 
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
@@ -1051,6 +1051,17 @@ class StatementStitcher:
         old_label = self.period_dates.get(longer_pid, '')
         if 'YTD' in old_label:
             new_label = old_label.replace('YTD ', '')
+        elif ' to ' in old_label.partition(': ')[2]:
+            # A filing's own label, "Nine Months: September 28, 2025 to June 27,
+            # 2026", names the cumulative range. The value is now the quarter that
+            # starts the day after the shorter period ends, so the label names that
+            # range instead of keeping the nine-month dates (GH #1697). The prefix
+            # keeps it distinct from a reported "Quarterly: ..." column for the same
+            # dates, which would otherwise collide as a DataFrame column.
+            quarter_start = datetime.strptime(shorter_pid.split('_')[2], '%Y-%m-%d') + timedelta(days=1)
+            quarter_end = datetime.strptime(longer_pid.split('_')[2], '%Y-%m-%d')
+            new_label = (f"{discrete_label} Quarterly: {quarter_start:%B %d, %Y} "
+                         f"to {quarter_end:%B %d, %Y}")
         else:
             new_label = f"{discrete_label} {old_label}" if old_label else discrete_label
         self.period_dates[longer_pid] = new_label
