@@ -47,7 +47,8 @@ def results(graph):
 
 
 def test_every_statement_check_foots(results):
-    assert len(results) == 19
+    # 21 since GH #1740: two totals with one child lacking a value are now checked
+    assert len(results) == 21
     failed = [cid for cid, r in results.items() if not r["valid"]]
     assert failed == []
 

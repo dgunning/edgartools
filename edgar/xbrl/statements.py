@@ -1995,8 +1995,10 @@ class Statement:
         Args:
             level: Validation level - "fundamental", "sections", or "detailed"
                    - fundamental: Basic equation check
-                   - sections: Also validates section subtotals
-                   - detailed: Full line-item rollup validation
+                   - sections: Also checks that current and non-current
+                     subtotals add up to total assets and total liabilities
+                   - detailed: The same checks as "sections"; line-item
+                     rollups to subtotals are not implemented
 
         Returns:
             ValidationResult with is_valid flag and any issues found
