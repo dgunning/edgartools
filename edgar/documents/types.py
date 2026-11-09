@@ -156,6 +156,9 @@ class XBRLFact:
     scale: Optional[str] = None
     format: Optional[str] = None
     sign: Optional[str] = None
+    # @precision as filed (significant digits), the alternative to decimals
+    # that XBRL 2.1 §4.6.6 allows. It was dropped, leaving no stated accuracy.
+    precision: Optional[str] = None
 
     # escape="true" means the fact's value IS the child markup rather than the
     # text flattened out of it; continued_at names the next ix:continuation in
@@ -203,6 +206,7 @@ class XBRLFact:
             'scale': self.scale,
             'format': self.format,
             'sign': self.sign,
+            'precision': self.precision,
             'escape': self.escape,
             'continued_at': self.continued_at,
             'context': self.context,

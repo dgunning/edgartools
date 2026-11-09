@@ -127,6 +127,7 @@ class XBRLExtractor:
             scale=context.get('scale'),
             format=context.get('format'),
             sign=context.get('sign'),
+            precision=context.get('precision'),
             escape=bool(context.get('escape')),
             continued_at=context.get('continuedAt')
         )
@@ -346,6 +347,7 @@ class XBRLExtractor:
             'contextRef': element.get('contextRef') or element.get('contextref'),
             'unitRef': element.get('unitRef') or element.get('unitref'),
             'decimals': element.get('decimals'),
+            'precision': element.get('precision'),
             'scale': element.get('scale'),
             'format': element.get('format'),
             'sign': element.get('sign')

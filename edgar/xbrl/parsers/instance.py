@@ -21,6 +21,7 @@ from edgar.xbrl.core import (
     INFINITE_PRECISION,
     NAMESPACES,
     classify_duration,
+    decimals_from_precision,
     duration_days,
     is_amendment_document_type,
     is_annual_document_type,
@@ -822,6 +823,17 @@ class InstanceParser(BaseParser):
                         except (ValueError, TypeError):
                             pass
 
+                # A fact may state its accuracy as @precision (significant
+                # digits) instead of @decimals; the two are exclusive. A
+                # consumer infers decimals from it (XBRL 2.1 §4.6.6) so the
+                # fact ranks and scales like any other. The attribute itself
+                # is kept on the fact (GH #1765).
+                precision = element.get('precision')
+                if decimals is None and precision is not None and unit_ref:
+                    inferred = decimals_from_precision(precision, value)
+                    # As a string, the form a filed @decimals arrives in.
+                    decimals = str(inferred) if inferred is not None else None
+
                 # Create base key for duplicate detection
                 base_key = self._create_normalized_fact_key(element_id, context_ref)
 
@@ -849,6 +861,7 @@ class InstanceParser(BaseParser):
                     value=value,
                     unit_ref=unit_ref,
                     decimals=decimals,
+                    precision=precision,
                     numeric_value=numeric_value,
                     instance_id=instance_id,
                     fact_id=fact_id
