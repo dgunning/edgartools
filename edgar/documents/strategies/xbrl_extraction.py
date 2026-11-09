@@ -3,7 +3,6 @@ XBRL extraction strategy for inline XBRL documents.
 """
 
 import logging
-from decimal import Decimal, InvalidOperation
 from typing import Any, Dict, List, Optional, Tuple
 
 from lxml.etree import tostring
@@ -14,6 +13,7 @@ from edgar.documents.strategies.ixbrl_transforms import (
     UnknownTransformError,
     apply_scale,
     apply_transform,
+    negate_exactly,
 )
 from edgar.documents.types import XBRLFact
 
@@ -529,11 +529,11 @@ class XBRLExtractor:
 
         # Apply sign if specified
         if element.get('sign') == '-' and value:
-            try:
-                value = f"{-Decimal(value):f}"
-            except (InvalidOperation, ValueError):
-                if not value.startswith('-'):
-                    value = '-' + value
+            negated = negate_exactly(value)
+            if negated is not None:
+                value = negated
+            elif not value.startswith('-'):
+                value = '-' + value
 
         return value.strip(), issue
 
