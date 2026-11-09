@@ -17,6 +17,8 @@
 
 **[Docs](https://edgartools.readthedocs.io/en/latest/)** · **[Cheat sheet](https://edgartools.readthedocs.io/en/latest/quick-guide/)** · Agents: **[Skill](https://edgartools.readthedocs.io/en/latest/ai/skills/)** · **[MCP server](https://edgartools.readthedocs.io/en/latest/ai/mcp-setup/)** · Hosted: **[edgar.tools](https://www.edgar.tools)**
 
+**EdgarTools 6.0** needs Python 3.11 or newer and renames or removes some 5.x APIs. Read [Upgrading to 6.0](https://edgartools.readthedocs.io/en/latest/upgrade/6.0/) before you upgrade.
+
 ![EdgarTools SEC filing data extraction demo](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-demo.gif)
 
 ## Quick Start
