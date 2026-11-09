@@ -15,6 +15,8 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
+from edgar.exceptions import ValidationError
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,6 +25,27 @@ class ValidationLevel(str, Enum):
     FUNDAMENTAL = "fundamental"  # Basic equation: Assets = Liabilities + Equity
     SECTIONS = "sections"        # Section subtotals roll up correctly
     DETAILED = "detailed"        # Same checks as SECTIONS; line-item rollups are not implemented
+
+
+def _parse_level(level: Union["ValidationLevel", str]) -> "ValidationLevel":
+    """The ValidationLevel named by ``level``, a member or its value in any case.
+
+    Raises:
+        ValidationError: ``level`` names no level. An unknown string used to
+            fall back to FUNDAMENTAL, so a typo such as "detalied" ran the
+            equation check alone and reported success (bead edgartools-zvgw2).
+    """
+    if isinstance(level, ValidationLevel):
+        return level
+    try:
+        return ValidationLevel(level.lower())
+    except (AttributeError, ValueError):
+        valid = ", ".join(member.value for member in ValidationLevel)
+        raise ValidationError(
+            f"Unknown validation level {level!r}. Valid levels: {valid}",
+            parameter="level",
+            invalid_value=level,
+        ) from None
 
 
 class ValidationSeverity(str, Enum):
@@ -468,7 +491,11 @@ def validate_balance_sheet(
         >>> result = validate_balance_sheet(bs)
         >>> print(result)
         ValidationResult: VALID (0 errors, 0 warnings)
+
+    Raises:
+        ValidationError: ``level`` is not a validation level.
     """
+    level = _parse_level(level)
     issues: List[ValidationIssue] = []
     checks: List[str] = []
     metadata: Dict[str, Any] = {}
@@ -654,7 +681,12 @@ def validate_statement(
 
     Returns:
         ValidationResult with validation status and any issues found
+
+    Raises:
+        ValidationError: ``level`` is not a validation level.
     """
+    level = _parse_level(level)
+
     # Try to detect statement type
     detected_type = statement_type
 

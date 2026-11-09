@@ -1,0 +1,1 @@
+- **An unknown validation level raises instead of running the basic check**: `Statement.validate(level="detalied")` ran only the fundamental equation check and reported success. It, `validate_statement()` and `validate_balance_sheet()` now raise `ValidationError` naming the 3 valid levels; the levels stay case-insensitive and accept `ValidationLevel` members.

@@ -2003,6 +2003,10 @@ class Statement:
         Returns:
             ValidationResult with is_valid flag and any issues found
 
+        Raises:
+            ValidationError: ``level`` is not one of the three levels
+                (case-insensitive) or a ValidationLevel member.
+
         Example:
             >>> bs = xbrl.statements.balance_sheet()
             >>> result = bs.validate()
@@ -2012,17 +2016,10 @@ class Statement:
             ...     for error in result.errors:
             ...         print(f"Error: {error.message}")
         """
-        from edgar.xbrl.validation import validate_statement, ValidationLevel
+        from edgar.xbrl.validation import validate_statement
 
-        # Map string level to enum
-        level_map = {
-            "fundamental": ValidationLevel.FUNDAMENTAL,
-            "sections": ValidationLevel.SECTIONS,
-            "detailed": ValidationLevel.DETAILED,
-        }
-        validation_level = level_map.get(level.lower(), ValidationLevel.FUNDAMENTAL)
-
-        return validate_statement(self, self.classified_type, level=validation_level)
+        # validate_statement parses the level and raises on an unknown one
+        return validate_statement(self, self.classified_type, level=level)
 
     def calculate_ratios(self, period: Optional[str] = None) -> Dict[str, float]:
         """Calculate common financial ratios for this statement.
