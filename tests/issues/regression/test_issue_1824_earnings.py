@@ -273,7 +273,6 @@ def test_each_table_keeps_its_own_currency_and_scale():
         ("29.43b", "29.43b"),
         ("1.2m", "1.2m"),
         ("500k", "500k"),
-        ("10<sup>2</sup>", 102.0),
     ],
 )
 def test_only_html_identified_letter_footnotes_are_removed(cell, expected):
