@@ -650,7 +650,8 @@ class FinancialTable:
 
         Only AMOUNT rows are scaled. PER_SHARE, SHARES, and PERCENTAGE rows
         are left unchanged since they should not be multiplied by the table's
-        scale factor.
+        scale factor. Columns whose header contains '%' and names no scale
+        (YoY/QoQ change columns) are left unchanged too.
         """
         if self.scale == Scale.UNITS:
             return self.dataframe.copy()
@@ -662,6 +663,11 @@ class FinancialTable:
         skip_labels = {str(df.index[pos]) for pos in skip_positions}
 
         for col_idx in range(len(df.columns)):
+            header = str(df.columns[col_idx])
+            if '%' in header and Scale.detect(header) == Scale.UNITS:
+                # A percent-change column is not an amount. A header that also names a
+                # scale ('(% of change ...) - Sales revenues - Million yen') still is.
+                continue
             col_series = df.iloc[:, col_idx]
             numeric = pd.to_numeric(col_series, errors='coerce')
             mask = numeric.notna()

@@ -47,6 +47,17 @@ def test_real_tsm_units_and_eps_are_correct_without_financials_adapter(income):
     assert eps["numeric_value"].iloc[0] == 29.43
 
 
+def test_real_tsm_percent_change_columns_are_not_scaled(income):
+    # Filed row: "Net income 763,064 | 452,302 | 68.7 | 706,562 | 8.0" under
+    # "(Unit: NT$ million)", with "YoY Inc. (Dec.) %" and "QoQ Inc. (Dec.) %" columns.
+    scaled = income.scaled_dataframe
+    yoy, qoq = [c for c in scaled.columns if "%" in str(c)]
+    assert scaled.loc["Net income"].iloc[0] == 763_064_000_000
+    assert scaled.loc["Net income", yoy] == 68.7
+    assert scaled.loc["Net income", qoq] == 8.0
+    assert scaled.loc["Net sales", yoy] == 50.9
+
+
 def test_cleaned_tables_keep_currency_and_row_types(income):
     renamed = income.with_standardized_labels({"EPS (NT$)": "Reported EPS"})
     cleaned = income.with_clean_columns()
@@ -241,6 +252,20 @@ TOYOTA_INCOME_HEADER = """<html><body><p>Unaudited Condensed Semi-Annual Consoli
 <tr><td> Net income</td><td>&nbsp;&nbsp;</td><td>&nbsp;</td><td>1,000</td><td>&nbsp;</td>
 <td>&nbsp;</td><td>&nbsp;</td><td>2,000</td><td>&nbsp;</td></tr>
 </table></body></html>"""
+
+
+def test_percent_column_unscaled_but_amount_column_under_a_percent_banner_scaled():
+    # Toyota's summary table nests "Million yen" amount columns under a
+    # "(% of change from previous first half)" banner; Deere/Delta use "% Change".
+    html = """<html><body><p>(in millions)</p><div><table>
+    <tr><th>Item</th><th>(% of change) Sales revenues Million yen</th><th>Q1 2025 % Change</th></tr>
+    <tr><td>Revenue</td><td>12</td><td>9.5</td></tr>
+    <tr><td>Net income</td><td>2</td><td>-7.4</td></tr>
+    </table></div></body></html>"""
+    scaled = release_from_html(html).financial_tables[0].scaled_dataframe
+    assert scaled.loc["Revenue"].iloc[0] == 12_000_000
+    assert scaled.loc["Revenue"].iloc[1] == 9.5
+    assert scaled.loc["Net income"].iloc[1] == -7.4
 
 
 def test_toyota_unit_header_row_reports_jpy():
