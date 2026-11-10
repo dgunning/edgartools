@@ -199,6 +199,61 @@ def test_unsupported_explicit_currency_is_not_silently_changed_to_usd():
     assert income.scale is Scale.MILLIONS
 
 
+@pytest.mark.parametrize(
+    "note, currency",
+    [
+        ("(in millions of yen)", "JPY"),
+        ("(Yen in millions)", "JPY"),
+        ("(¥ in millions)", "JPY"),
+        ("(€ in millions)", "EUR"),
+        ("(RMB in thousands)", "CNY"),
+        # A named currency the table does not map is unknown, never the USD default.
+        ("(in millions of Canadian dollars)", None),
+        ("(in thousands of pounds sterling)", None),
+        ("(£ in millions)", None),
+        # Only a scale is named: the legacy USD default stands.
+        ("(in thousands)", "USD"),
+        ("(in millions, except per share data)", "USD"),
+        ("(in millions of dollars)", "USD"),
+        ("(Shares in thousands)", "USD"),
+    ],
+)
+def test_declared_currency_is_named_currency_or_unknown_never_wrong_usd(note, currency):
+    income = release_from_html(financial_html(note)).income_statement
+    assert income.currency == currency
+
+
+# Toyota 6-K 0001193125-26-448368, EX-99.2 d87505dex992.htm (filed 2026-11-05):
+# the semi-annual statement of income puts its unit in a header row, "Yen in
+# millions", above "For the first half ended September 30, 2025 / 2026".
+# Sales of products: 22,324,109 and 24,231,768 million yen. Markup trimmed of styles.
+TOYOTA_INCOME_HEADER = """<html><body><p>Unaudited Condensed Semi-Annual Consolidated Statement of Income</p>
+<table>
+<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;&nbsp;</td><td colspan="6"><b>Yen in millions</b></td><td>&nbsp;</td></tr>
+<tr><td>&nbsp;</td><td>&nbsp;&nbsp;</td>
+<td colspan="2" nowrap><b>For&nbsp;the&nbsp;first&nbsp;half&nbsp;ended</b><br><b>September&nbsp;30, 2025</b></td>
+<td>&nbsp;</td><td>&nbsp;</td>
+<td colspan="2" nowrap><b>For&nbsp;the&nbsp;first&nbsp;half&nbsp;ended</b><br><b>September&nbsp;30, 2026</b></td>
+<td>&nbsp;</td></tr>
+<tr><td> Sales of products</td><td>&nbsp;&nbsp;</td><td>&nbsp;</td><td>22,324,109</td><td>&nbsp;</td>
+<td>&nbsp;</td><td>&nbsp;</td><td>24,231,768</td><td>&nbsp;</td></tr>
+<tr><td> Net income</td><td>&nbsp;&nbsp;</td><td>&nbsp;</td><td>1,000</td><td>&nbsp;</td>
+<td>&nbsp;</td><td>&nbsp;</td><td>2,000</td><td>&nbsp;</td></tr>
+</table></body></html>"""
+
+
+def test_toyota_unit_header_row_reports_jpy():
+    tables = release_from_html(TOYOTA_INCOME_HEADER).financial_tables
+    assert tables, "Toyota income statement snippet produced no financial table"
+    table = tables[0]
+    assert table.currency == "JPY"
+    assert table.scale is Scale.MILLIONS
+    assert table.scaled_dataframe.loc["Sales of products"].iloc[-1] == 24_231_768_000_000
+    facts = table.to_facts_dataframe()
+    assert set(facts.loc[facts["label"] == "Sales of products", "unit"]) == {"JPY"}
+
+
 def test_each_table_keeps_its_own_currency_and_scale():
     twd = financial_html("(Unit: TWD million)")
     usd = financial_html("(Amounts in thousands, except EPS)")

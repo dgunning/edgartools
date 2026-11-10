@@ -457,13 +457,61 @@ _CURRENCIES = {
     'EUR': r'€|\bEUR\b|\beuros?\b',
     'CNY': r'\bRMB\b|\bCNY\b|[Rr]enminbi',
     'HKD': r'HK\$|\bHKD\b|Hong Kong [Dd]ollars',
-    'JPY': r'\bJPY\b|Japanese [Yy]en',
+    'JPY': r'\bJPY\b|\byen\b|¥',
 }
+
+# A currency the table above does not map. A declaration naming one is reported
+# as unknown (None), never as the legacy USD default. Case-sensitive on purpose:
+# 'Canadian dollars' and 'GBP' are currencies, 'of dollars' and 'EPS' are not.
+_OTHER_CURRENCY = re.compile(
+    r'[£₩₹₣₽]|\b[A-Z]{1,2}\$|'
+    r'\b(?i:pounds?|sterling|francs?|won|rupees?|pesos?|reais|yuan|rand|zloty|lira|kron[aeo]r?)\b|'
+    r'\b(?!US\b)[A-Z][a-z]+ (?i:dollars?)\b|'
+    r'\b(?!EPS\b|ADS\b|ADR\b)[A-Z]{3}\b'
+)
+
+# '(in millions ...', '(Amounts in thousands ...', '(€ in millions ...', '(Unit: NT$ million ...'
+_UNIT_DECLARATION = re.compile(
+    r'(?:\(?\s*units?\s*:\s*|\(\s*(?:(?P<lead>[^\s()]{1,8})\s+)?in\s+)[^)\n]+', re.I
+)
 
 
 def _currency(text):
     matches = [code for code, pattern in _CURRENCIES.items() if re.search(pattern, text, re.I)]
     return matches[0] if len(matches) == 1 else None
+
+
+def _names_currency(text):
+    return any(re.search(pattern, text, re.I) for pattern in _CURRENCIES.values())
+
+
+def _declared_currency(declaration, scale):
+    """Currency a unit declaration names: a code, None for unknown, USD when it names only a scale."""
+    if _names_currency(declaration):
+        return _currency(declaration)  # None when it names more than one
+    if scale is None or _OTHER_CURRENCY.search(declaration):
+        return None
+    return 'USD'  # Legacy default when only the scale is named.
+
+
+def _table_unit_cells(table_node):
+    """Short unit cells in a table's caption, header and first rows, e.g. 'Yen in millions'."""
+    texts = [getattr(table_node, 'caption', None) or '']
+    for row in getattr(table_node, 'headers', None) or []:
+        texts.extend(getattr(cell, 'content', '') for cell in row)
+    for row in (getattr(table_node, 'rows', None) or [])[:3]:
+        texts.extend(getattr(cell, 'content', '') for cell in getattr(row, 'cells', []))
+    return [t for t in texts
+            if isinstance(t, str) and 0 < len(t) <= 60 and Scale.detect(t) != Scale.UNITS]
+
+
+def _table_currency(table_node, context):
+    """Currency of one table: its own unit cells first, then the nearest declaration, else USD."""
+    for text in _table_unit_cells(table_node):
+        if _names_currency(text) or _OTHER_CURRENCY.search(text):
+            return _currency(text)
+    units = _declared_table_units(context)
+    return units[1] if units else 'USD'
 
 
 def _table_context(table_node, title=None):
@@ -492,22 +540,16 @@ def _table_context(table_node, title=None):
 def _declared_table_units(context):
     """Nearest unit declaration, with currency and scale detected independently."""
     for text in reversed(context):
-        match = re.search(r'(?:\(?\s*units?\s*:\s*|\(\s*(?:(?:amounts?|dollars?)\s+)?in\s+)[^)\n]+', text, re.I)
-        if match:
-            declaration = match[0]
+        for match in _UNIT_DECLARATION.finditer(text):
+            declaration, lead = match[0], match['lead']
+            if lead and not (re.fullmatch(r'amounts?|dollars?', lead, re.I)
+                             or _names_currency(lead) or _OTHER_CURRENCY.search(lead)):
+                continue  # '(Shares in thousands)', '(Decrease in ...)' declare no amount unit.
             scale = Scale.detect(declaration)
             scale = scale if scale != Scale.UNITS else None
-            named_currency = any(re.search(pattern, declaration, re.I) for pattern in _CURRENCIES.values())
-            if not named_currency and scale is None and not re.match(r'\(?\s*units?\s*:', declaration, re.I):
-                # E.g. '(in constant currency)' is not an amount unit declaration.
-                continue
-            currency = _currency(declaration)
-            if not named_currency and re.match(
-                r'\(?\s*(?:(?:(?:amounts?|dollars?)\s+)?in\s+|units?\s*:\s*)'
-                r'(?:thousands?|millions?|billions?)\b', declaration, re.I
-            ):
-                currency = 'USD'  # Legacy default when only the scale is named.
-            return declaration, currency, scale
+            if not _names_currency(declaration) and scale is None and not match[0].lstrip('( ').lower().startswith('unit'):
+                continue  # E.g. '(in constant currency)' is not an amount unit declaration.
+            return declaration, _declared_currency(declaration, scale), scale
     return None
 
 
@@ -1418,7 +1460,7 @@ class EarningsRelease:
             scale = _detect_table_scale(table_node, df, doc_scale)
             title = _extract_title(table_node)
             context, _ = _table_context(table_node, title)
-            units = _declared_table_units(context)
+            currency = _table_currency(table_node, context)
 
             # Detect periods using year pattern (handles any year from 1900-2099)
             periods = [c for c in df.columns
@@ -1441,7 +1483,7 @@ class EarningsRelease:
                 periods=periods,
                 raw_index=idx,
                 row_types=row_types,
-                currency=units[1] if units else 'USD',
+                currency=currency,
             )
             tables.append(table)
 
