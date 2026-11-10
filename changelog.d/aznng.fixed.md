@@ -1,0 +1,1 @@
+**`business_category` no longer calls Netflix an ETF.** The ETF name check was a substring test, so NETFLIX, JETFLEET and MARKETFIELD were labelled ETFs; "ETF" now has to start or end a word. 60 of the 391 SEC company names containing those letters change, all out of ETF.
