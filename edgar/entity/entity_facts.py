@@ -905,19 +905,18 @@ class EntityFacts:
                           'fiscal_period', 'fiscal_year') \
             .head(periods)
 
-        if not df.empty:
-            # Compute duration_days for duration facts; instant facts get None.
-            # Use a comprehension so date/datetime/None mixes are handled safely.
-            df = df.assign(
-                duration_days=[
-                    (e - s).days if (s is not None and e is not None) else None
-                    for s, e in zip(df['period_start'], df['period_end'])
-                ]
-            )
-            df = df[['period_start', 'period_end', 'duration_days',
-                     'numeric_value', 'fiscal_period', 'fiscal_year']]
-
-        return df
+        # Compute duration_days for duration facts; instant facts get None.
+        # Use a comprehension so date/datetime/None mixes are handled safely.
+        # An empty frame takes the same path: the documented columns are a
+        # property of the query, not of which rows matched (GH #1709).
+        df = df.assign(
+            duration_days=[
+                (e - s).days if (s is not None and e is not None) else None
+                for s, e in zip(df['period_start'], df['period_end'])
+            ]
+        )
+        return df[['period_start', 'period_end', 'duration_days',
+                   'numeric_value', 'fiscal_period', 'fiscal_year']]
 
     # DEI (Document and Entity Information) helpers
     def dei_facts(self, as_of: Optional[date] = None) -> pd.DataFrame:
