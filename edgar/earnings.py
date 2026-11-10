@@ -467,7 +467,10 @@ _OTHER_CURRENCY = re.compile(
     r'[£₩₹₣₽]|\b[A-Z]{1,2}\$|'
     r'\b(?i:pounds?|sterling|francs?|won|rupees?|pesos?|reais|yuan|rand|zloty|lira|kron[aeo]r?)\b|'
     r'\b(?!US\b)[A-Z][a-z]+ (?i:dollars?)\b|'
-    r'\b(?!EPS\b|ADS\b|ADR\b)[A-Z]{3}\b'
+    # ISO 4217 codes, listed rather than any three capitals: US notes name
+    # metrics like DAU, ARR or FTE in "except per share and DAU data".
+    r'\b(?:GBP|CAD|AUD|NZD|CHF|SGD|INR|KRW|BRL|MXN|ZAR|SEK|NOK|DKK|PLN|'
+    r'CZK|HUF|TRY|ILS|RUB|ARS|CLP|COP|PEN|IDR|MYR|THB|PHP|VND|SAR|AED)\b'
 )
 
 # '(in millions ...', '(Amounts in thousands ...', '(€ in millions ...', '(Unit: NT$ million ...'

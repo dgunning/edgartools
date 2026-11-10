@@ -227,6 +227,10 @@ def test_unsupported_explicit_currency_is_not_silently_changed_to_usd():
         ("(in millions, except per share data)", "USD"),
         ("(in millions of dollars)", "USD"),
         ("(Shares in thousands)", "USD"),
+        # Metric acronyms in a US note are not currency codes.
+        ("(in thousands, except per share and DAU data)", "USD"),
+        ("(in millions, except per share, ARR and FTE data)", "USD"),
+        ("(in thousands of GBP)", None),
     ],
 )
 def test_declared_currency_is_named_currency_or_unknown_never_wrong_usd(note, currency):
