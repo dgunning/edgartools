@@ -24,9 +24,11 @@ from edgar.xbrl.core import (
     classify_duration,
     decimals_from_precision,
     duration_days,
+    expanded_measure_name,
     is_amendment_document_type,
     is_annual_document_type,
     is_quarterly_document_type,
+    unit_definition,
 )
 from edgar.xbrl.models import Context, Fact, XBRLProcessingError
 from edgar.xmltools import xml_parser
@@ -324,6 +326,41 @@ def _serialize_element(element: ET.Element) -> str:
             parts.append(_serialize_element(child))
         parts.append(escape((child.tail or '').strip()))
     return f"<{name}{attributes}>{''.join(parts)}</{name}>"
+
+
+def _read_measures(measure_elems: List[ET.Element]) -> tuple[List[str], List[Optional[str]]]:
+    """
+    The filed (lexical) measures of a unit part, and each one's expanded QName.
+
+    Lexical measures are stripped: a pretty-printed <measure> carries whitespace
+    that breaks every iso4217: prefix test downstream (GH #1704). Each QName is
+    resolved against its own element's in-scope namespaces, so the default
+    namespace and a local declaration both count; an undeclared prefix gives None.
+    """
+    measures: List[str] = []
+    names: List[Optional[str]] = []
+    for elem in measure_elems:
+        measure = (elem.text or '').strip()
+        if measure:
+            measures.append(measure)
+            names.append(expanded_measure_name(measure, elem.nsmap))
+    return measures, names
+
+
+def _definition_or_none(unit_id: Optional[str], numerator: List[Optional[str]], denominator: List[Optional[str]],
+                        lexical_numerator: List[str], lexical_denominator: List[str],
+                        divide: bool = False) -> Optional[Dict[str, Any]]:
+    """
+    A unit's common definition descriptor (GH #1747, #1746), or None when it has
+    no numerator, a division has no denominator (XBRL 2.1 section 4.8.3), or a
+    measure's prefix is undeclared. An unresolved unit is reported downstream as
+    unavailable, never guessed from its id.
+    """
+    if not numerator or (divide and not denominator) or None in numerator or None in denominator:
+        log.warning(f"XBRL unit '{unit_id}' has a measure that cannot be resolved; "
+                    f"statements report its unit as unavailable")
+        return None
+    return unit_definition(numerator, denominator, lexical_numerator, lexical_denominator)
 
 
 class InstanceParser(BaseParser):
@@ -657,15 +694,15 @@ class InstanceParser(BaseParser):
         measure_elems = unit_elem.findall(f'{XBRLI_NS}measure')
         if not measure_elems:
             measure_elems = unit_elem.findall(f'.//{XBRLI_NS}measure')[:1]
-        # Strip: a pretty-printed <measure> carries whitespace that breaks
-        # every iso4217: prefix test downstream (GH #1704).
-        measures = [(elem.text or '').strip() for elem in measure_elems]
-        measures = [measure for measure in measures if measure]
+        measures, names = _read_measures(measure_elems)
         if not measures:
             return None
         if len(measures) == 1:
-            return {'type': 'simple', 'measure': measures[0]}
-        return {'type': 'product', 'measures': measures}
+            unit = {'type': 'simple', 'measure': measures[0]}
+        else:
+            unit = {'type': 'product', 'measures': measures}
+        unit['definition'] = _definition_or_none(unit_elem.get('id'), names, [], measures, [])
+        return unit
 
     def _extract_units(self, root: ET.Element) -> None:
         """Extract units from instance document."""
@@ -697,14 +734,17 @@ class InstanceParser(BaseParser):
                     denominator_elem = divide_elem.find('.//{http://www.xbrl.org/2003/instance}unitDenominator')
 
                     if numerator_elem is not None and denominator_elem is not None:
-                        # Get measures
-                        numerator_measures = [elem.text.strip() for elem in numerator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text and elem.text.strip()]
-                        denominator_measures = [elem.text.strip() for elem in denominator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text and elem.text.strip()]
-
+                        numerator_measures, numerator_names = _read_measures(
+                            numerator_elem.findall(f'.//{XBRLI_NS}measure'))
+                        denominator_measures, denominator_names = _read_measures(
+                            denominator_elem.findall(f'.//{XBRLI_NS}measure'))
                         self.units[unit_id] = {
                             'type': 'divide',
                             'numerator': numerator_measures,
-                            'denominator': denominator_measures
+                            'denominator': denominator_measures,
+                            'definition': _definition_or_none(
+                                unit_id, numerator_names, denominator_names,
+                                numerator_measures, denominator_measures, divide=True),
                         }
 
         except Exception as e:
