@@ -84,6 +84,10 @@ class DefinitionParser(BaseParser):
         # parse.
         self._relationships_by_role: Dict[str, List[Dict[str, Any]]] = {}
 
+        # axis -> every default member declared for it in any role. A
+        # dimension-default arc is global, not scoped to its extended link.
+        self._defaults_by_axis: Dict[str, set] = {}
+
     # ------------------------------------------------------------------
     # Parsing
     # ------------------------------------------------------------------
@@ -201,6 +205,7 @@ class DefinitionParser(BaseParser):
         self.axes_by_role.clear()
         self.domains_by_role.clear()
         self._resolve_relationships()
+        self._index_defaults()
 
         # Three passes over every role, so that resolving a cross-role hop never
         # depends on which extended link happened to be parsed first.
@@ -212,6 +217,14 @@ class DefinitionParser(BaseParser):
             self._build_tables(role)
 
         self._rebuild_merged_views()
+
+    def _index_defaults(self) -> None:
+        """Every default member declared for each axis, across all roles."""
+        self._defaults_by_axis.clear()
+        for relationships in self._relationships_by_role.values():
+            for rel in relationships:
+                if rel['arcrole'] == DIMENSION_DEFAULT:
+                    self._defaults_by_axis.setdefault(rel['from_element'], set()).add(rel['to_element'])
 
     def _arcs(self, role: str, arcrole: str, from_element: Optional[str] = None) -> List[Dict[str, Any]]:
         """Arcs of one arcrole in one role, in filed order."""
@@ -244,8 +257,10 @@ class DefinitionParser(BaseParser):
         """
         Attach each of this role's axes to its domain and default member.
 
-        Both may be declared in another extended link, reached through the
-        hypercube-dimension arc's `xbrldt:targetRole`.
+        The domain may be declared in another extended link, reached through
+        the hypercube-dimension arc's `xbrldt:targetRole`. The default may be
+        declared in any extended link at all: a dimension-default arc is
+        global (see `_global_default`).
         """
         for rel in self._arcs(role, HYPERCUBE_DIMENSION):
             axis_id = rel['to_element']
@@ -275,6 +290,44 @@ class DefinitionParser(BaseParser):
         for rel in self._arcs(domain_role, DIMENSION_DEFAULT, axis.element_id):
             axis.default_member_id = rel['to_element']
             break
+        else:
+            if axis.default_member_id is None:
+                axis.default_member_id = self._global_default(role, axis)
+
+    def _global_default(self, role: str, axis: Axis) -> Optional[str]:
+        """
+        The axis's default declared in any role, if it applies in `role`.
+
+        A dimension-default relationship is global (XBRL Dimensions 1.0
+        section 2.7.1): it holds in every extended link that uses the dimension
+        and whose domain contains the default, and `xbrldt:targetRole` plays no
+        part. Tesla files `srt_RangeAxis -> srt_RangeMember` in one role and
+        uses the axis, with that member as its domain, in 26 others (gh #1725).
+
+        Only a default the DTS declares once is taken: two different defaults
+        for one dimension is an invalid DTS, and choosing one would be a guess.
+        """
+        defaults = self._defaults_by_axis.get(axis.element_id)
+        if not defaults or len(defaults) != 1 or axis.domain_id is None:
+            return None
+        default = next(iter(defaults))
+        return default if self._domain_contains(role, axis.domain_id, default) else None
+
+    def _domain_contains(self, role: str, root: str, member: str) -> bool:
+        """Whether `member` is `root` or sits anywhere beneath it in `role`."""
+        domains = self.domains_by_role.get(role, {})
+        pending, seen = [root], set()
+        while pending:
+            element = pending.pop()
+            if element == member:
+                return True
+            if element in seen:
+                continue
+            seen.add(element)
+            domain = domains.get(element)
+            if domain is not None:
+                pending.extend(domain.members)
+        return False
 
     def _copy_domain_into_role(self, role: str, source_role: str, domain_id: str) -> None:
         """
