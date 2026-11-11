@@ -2,6 +2,7 @@
 Type definitions for the HTML parser.
 """
 
+import dataclasses
 import re
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -173,6 +174,13 @@ class XBRLFact:
     # Additional metadata
     metadata: Optional[Dict[str, Any]] = None
 
+    # The filed id attribute, and the ids of the ix:footnotes an
+    # ix:relationship links this fact to (keys of Document.xbrl_footnotes).
+    # The same names the XBRL instance path's Fact uses, so the two paths
+    # join by id (GH #1756).
+    fact_id: Optional[str] = None
+    footnotes: List[str] = dataclasses.field(default_factory=list)
+
     @property
     def numeric_value(self) -> Optional[float]:
         """Get numeric value if applicable.
@@ -212,7 +220,9 @@ class XBRLFact:
             'context': self.context,
             'unit': self.unit,
             'is_numeric': self.is_numeric,
-            'numeric_value': self.numeric_value
+            'numeric_value': self.numeric_value,
+            'fact_id': self.fact_id,
+            'footnotes': list(self.footnotes),
         }
 
 

@@ -131,7 +131,8 @@ class XBRLExtractor:
             sign=context.get('sign'),
             precision=context.get('precision'),
             escape=bool(context.get('escape')),
-            continued_at=context.get('continuedAt')
+            continued_at=context.get('continuedAt'),
+            fact_id=element.get('id'),
         )
 
         # Resolve references
@@ -146,6 +147,65 @@ class XBRLExtractor:
             fact.metadata['format_issue'] = issue
 
         return fact
+
+    def link_footnotes(self, facts: List[XBRLFact], footnotes: List[HtmlElement],
+                       relationships: List[HtmlElement]) -> Dict[str, Any]:
+        """
+        Read each ix:footnote and attach it to the facts its ix:relationships name.
+
+        Returns ``{footnote id: Footnote}``, the lookup ``XBRL.footnotes`` gives
+        on the instance path, and fills each linked fact's ``footnotes`` with
+        footnote ids, as the instance path's ``Fact.footnotes`` does (GH #1756).
+        Which relationship is a footnote link and how a footnote's text and
+        language are read are the instance parser's rules, shared through
+        ``edgar.xbrl.footnote_links``. Only fact-footnote relationships link;
+        any other arcrole relates facts in another way and is not a footnote.
+        """
+        if not footnotes:
+            return {}
+        if not self._initialized:
+            self._initialize_context(footnotes[0])
+        from edgar.xbrl.footnote_links import (
+            FOOTNOTE_ROLE,
+            fact_footnote_links,
+            inherited_lang,
+            inline_footnote_text,
+        )
+        from edgar.xbrl.models import Footnote
+
+        # The tree is lxml.html: attribute names are lower-cased and xml:lang
+        # is a literal attribute name (see the class docstring).
+        by_id: Dict[str, Footnote] = {}
+        for element in footnotes:
+            footnote_id = element.get('id')
+            if not footnote_id or footnote_id in by_id:
+                continue
+            by_id[footnote_id] = Footnote(
+                footnote_id=footnote_id,
+                text=inline_footnote_text(element, self.continuations, ('continuedAt', 'continuedat')),
+                lang=inherited_lang(element, 'xml:lang'),
+                role=element.get('footnoteRole') or element.get('footnoterole') or FOOTNOTE_ROLE,
+            )
+
+        links = fact_footnote_links(
+            ((rel.get('arcrole'),
+              rel.get('fromRefs') or rel.get('fromrefs'),
+              rel.get('toRefs') or rel.get('torefs'))
+             for rel in relationships),
+            by_id)
+
+        first_fact_by_id: Dict[str, XBRLFact] = {}
+        for fact in facts:
+            if fact.fact_id:
+                first_fact_by_id.setdefault(fact.fact_id, fact)
+        for from_ids, to_ids in links:
+            for footnote_id in to_ids:
+                for fact_id in from_ids:
+                    by_id[footnote_id].related_fact_ids.append(fact_id)
+                    fact = first_fact_by_id.get(fact_id)
+                    if fact is not None and footnote_id not in fact.footnotes:
+                        fact.footnotes.append(footnote_id)
+        return by_id
 
     def _is_xbrl_element(self, element: HtmlElement) -> bool:
         """Check if element is an XBRL element."""
@@ -397,8 +457,8 @@ class XBRLExtractor:
         """Extract ix:footnote element."""
         return {
             'type': 'footnote',
-            'footnoteRole': element.get('footnoteRole'),
-            'footnoteID': element.get('footnoteID')
+            'id': element.get('id'),
+            'footnoteRole': element.get('footnoteRole') or element.get('footnoterole'),
         }
 
     def _extract_fraction(self, element: HtmlElement) -> Dict[str, Any]:
