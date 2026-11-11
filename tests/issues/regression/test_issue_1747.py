@@ -47,8 +47,10 @@ def units():
 
 @pytest.mark.fast
 def test_product_unit_keeps_every_measure_including_repeats(units):
-    assert units["sqft"] == {"type": "product", "measures": ["my:feet", "my:feet"]}
-    assert units["usdShares"] == {"type": "product", "measures": ["iso4217:USD", "xbrli:shares"]}
+    assert units["sqft"] == {"type": "product", "measures": ["my:feet", "my:feet"],
+                             "definition": {"numerator": ["{http://example.com/my}feet", "{http://example.com/my}feet"], "denominator": [], "expression": "my:feet*my:feet"}}
+    assert units["usdShares"] == {"type": "product", "measures": ["iso4217:USD", "xbrli:shares"],
+                                  "definition": {"numerator": ["{http://www.xbrl.org/2003/iso4217}USD", "{http://www.xbrl.org/2003/instance}shares"], "denominator": [], "expression": "iso4217:USD*xbrli:shares"}}
 
 
 @pytest.mark.fast
@@ -56,15 +58,17 @@ def test_product_with_a_currency_factor_is_not_a_currency(units):
     assert unit_currency(units["usdShares"]) is None
     assert unit_currency_measure(units["usdShares"]) is None
     # The single-measure unit beside it still is one.
-    assert units["usd"] == {"type": "simple", "measure": "iso4217:USD"}
+    assert units["usd"] == {"type": "simple", "measure": "iso4217:USD", "definition": {"numerator": ["{http://www.xbrl.org/2003/iso4217}USD"], "denominator": [], "expression": "iso4217:USD"}}
     assert unit_currency(units["usd"]) == "USD"
 
 
 @pytest.mark.fast
 def test_real_filing_units_are_unchanged():
     xbrl = XBRL.from_directory(Path("tests/fixtures/xbrl/aapl/10k_2023"))
-    assert xbrl.units["usd"] == {"type": "simple", "measure": "iso4217:USD"}
-    assert xbrl.units["shares"] == {"type": "simple", "measure": "shares"}  # filed unprefixed
+    assert xbrl.units["usd"] == {"type": "simple", "measure": "iso4217:USD", "definition": {"numerator": ["{http://www.xbrl.org/2003/iso4217}USD"], "denominator": [], "expression": "iso4217:USD"}}
+    # filed unprefixed, under the default (XBRL instance) namespace
+    assert xbrl.units["shares"] == {"type": "simple", "measure": "shares", "definition": {"numerator": ["{http://www.xbrl.org/2003/instance}shares"], "denominator": [], "expression": "shares"}}
     assert xbrl.units["usdPerShare"] == {"type": "divide", "numerator": ["iso4217:USD"],
-                                         "denominator": ["shares"]}
+                                         "denominator": ["shares"],
+                                         "definition": {"numerator": ["{http://www.xbrl.org/2003/iso4217}USD"], "denominator": ["{http://www.xbrl.org/2003/instance}shares"], "expression": "iso4217:USD/shares"}}
     assert not [u for u in xbrl.units.values() if u["type"] == "product"]

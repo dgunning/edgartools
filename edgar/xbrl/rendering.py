@@ -26,15 +26,20 @@ from edgar.xbrl import standardization
 from edgar.xbrl.core import (
     CURRENCY_SYMBOLS,
     INFINITE_PRECISION,
+    UNIT_UNAVAILABLE,
+    SourceKeyLookup,
     decimals_for_scaling,
     determine_dominant_scale,
     format_date,
     format_value,
+    is_numeric_cell,
     is_period_boundary_label_role,
     is_period_end_label_role,
     is_period_start_label_role,
     iso4217_code,
     parse_date,
+    record_cell_unit,
+    summarize_unit_definitions,
     unit_currency_measure,
 )
 from edgar.xbrl.parsers.instance import _quarter_for_date
@@ -627,8 +632,8 @@ class RenderedStatement:
             pd.DataFrame: DataFrame with statement data and optional unit/point-in-time columns
         """
         try:
-            from edgar.xbrl.core import get_unit_display_name, row_metadata_value
             from edgar.xbrl.core import is_point_in_time as get_is_point_in_time
+            from edgar.xbrl.core import row_metadata_value
 
             # Create rows for the DataFrame
             df_rows = []
@@ -673,9 +678,7 @@ class RenderedStatement:
 
                 # Add unit column if requested
                 if include_unit:
-                    unit_ref = row_metadata_value(row.metadata.get('units'),
-                                                  self.header.period_keys)
-                    df_row['unit'] = get_unit_display_name(unit_ref)
+                    df_row['unit'] = _row_unit_summary(row, self.header.period_keys)
 
                 # Add point_in_time column if requested
                 if include_point_in_time:
@@ -1424,6 +1427,20 @@ def _presentation_sign_source(row: 'StatementRow',
     return row.metadata.get('preferred_signs', {}), column_key
 
 
+def _row_unit_summary(row: 'StatementRow', period_keys: List[str]) -> Optional[str]:
+    """A rendered row's unit, from the unit definitions of its shown numbers (GH #1746).
+
+    A row restored from an older serialization has no ``unit_definitions``;
+    if it shows numbers, its unit is reported as unavailable rather than
+    guessed from the unit id.
+    """
+    definitions = row.metadata.get('unit_definitions')
+    if definitions is None:
+        has_numbers = any(is_numeric_cell(cell.value) for cell in row.cells)
+        return UNIT_UNAVAILABLE if has_numbers else None
+    return summarize_unit_definitions(definitions[key] for key in period_keys if key in definitions)
+
+
 # How a selected balance cell's own unit resolved (GH #1655)
 _UNIT_CURRENCY = 'currency'
 _UNIT_NON_CURRENCY = 'non_currency'
@@ -2058,6 +2075,7 @@ def render_statement(
                 concept_occurrence_count[concept] = concept_occurrence_count.get(concept, 0) + 1
 
     concept_current_index = {}
+    unit_defs = getattr(xbrl_instance, 'units', None) or {}
 
     # Detect if this statement has dimensional display (for Member filtering logic)
     has_dimensional_display = any(item.get('is_dimension', False) for item in statement_data)
@@ -2143,10 +2161,16 @@ def render_statement(
             has_dimension_children=item.get('has_dimension_children', False)
         )
 
+        # GH #1746: each shown number's own unit definition, keyed by column, so
+        # to_dataframe() summarizes the row's unit without the XBRL object.
+        row_values = SourceKeyLookup(item['values'])
+        row.metadata['unit_definitions'] = {}
+
         # Add values for each period
         for period in formatted_period_objects:
             period_key = period.key
-            value = item['values'].get(period_key, "")
+            row_values.source_key = None
+            value = row_values.get(period_key, "")
 
             # Issue #450: For Statement of Equity with duration periods, match instant facts
             # at the appropriate date based on position in roll-forward structure
@@ -2161,14 +2185,14 @@ def render_statement(
                         start_dt = datetime.strptime(period.start_date, '%Y-%m-%d')
                         beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
                         instant_key = f"instant_{beginning_date}"
-                        value = item['values'].get(instant_key, "")
+                        value = row_values.get(instant_key, "")
                     except (ValueError, AttributeError):
                         pass  # Fall through to try end_date
 
                 # If still no value, try instant at end_date (ending balance)
                 if value == "":
                     instant_key = f"instant_{period.end_date}"
-                    value = item['values'].get(instant_key, "")
+                    value = row_values.get(instant_key, "")
 
             # edgartools-0609: General roll-forward mapping for periodStart/periodEnd
             # balances (e.g. cash flow's "Cash, beginning/ending balances").
@@ -2185,10 +2209,14 @@ def render_statement(
                 value, source_key = _select_period_boundary_cell(
                     item['values'], period_key, period, item_preferred_label)
                 if source_key is not None:
+                    row_values.source_key = source_key
                     selected = _selected_cell(item, source_key, value)
                     row.metadata.setdefault('selected_cells', {})[period_key] = selected
                     selected = _selected_balance_formatter_fields(
                         item, selected, xbrl_instance, is_monetary_statement)
+
+            record_cell_unit(row.metadata['unit_definitions'], period_key, value,
+                             item.get('units'), row_values.source_key, unit_defs)
 
             # Get comparison info for this item and period if available
             comparison_info = None

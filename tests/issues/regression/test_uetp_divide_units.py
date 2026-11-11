@@ -71,8 +71,10 @@ def test_a_filing_now_has_divided_units_at_all(aapl, jpm):
 
 def test_simple_units_are_untouched(aapl):
     """The overwhelming majority of units are simple and must stay that way."""
-    assert aapl.units["usd"] == {"type": "simple", "measure": "iso4217:USD"}
-    assert aapl.units["shares"] == {"type": "simple", "measure": "shares"}
+    assert aapl.units["usd"] == {"type": "simple", "measure": "iso4217:USD",
+                                 "definition": {"numerator": ["{http://www.xbrl.org/2003/iso4217}USD"], "denominator": [], "expression": "iso4217:USD"}}
+    assert aapl.units["shares"] == {"type": "simple", "measure": "shares",
+                                    "definition": {"numerator": ["{http://www.xbrl.org/2003/instance}shares"], "denominator": [], "expression": "shares"}}
 
     simple = [u for u in aapl.units.values() if u.get("type") == "simple"]
     assert len(simple) == 8
