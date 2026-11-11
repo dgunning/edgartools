@@ -392,6 +392,17 @@ _FALLBACK_CONCEPT_MAPPINGS = {
     'ProceedsFromSaleOfInvestments': 'CashFlowStatement',
     'ProceedsFromIssuanceOfLongTermDebt': 'CashFlowStatement',
     'ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities': 'CashFlowStatement',
+    # Crypto assets at fair value (ASU 2023-08, GH #1447). The learned data
+    # predates these 2024-taxonomy elements, so without an entry their facts
+    # carry no statement and no statement shows them.
+    'CryptoAssetFairValue': 'BalanceSheet',
+    'CryptoAssetFairValueCurrent': 'BalanceSheet',
+    'CryptoAssetFairValueNoncurrent': 'BalanceSheet',
+    'CryptoAssetUnrealizedGainLossOperatingAndNonoperating': 'IncomeStatement',
+    'CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating': 'IncomeStatement',
+    'PaymentForAcquisitionCryptoAsset': 'CashFlowStatement',
+    'ProceedsFromDisposalCryptoAsset': 'CashFlowStatement',
+    'ProceedsFromCryptoAssetOperatingActivity': 'CashFlowStatement',
 }
 
 

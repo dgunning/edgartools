@@ -25,6 +25,8 @@
           "PropertyPlantAndEquipmentNet",
           "Goodwill",
           "IntangibleAssetsNetExcludingGoodwill",
+          "CryptoAssetFairValueNoncurrent",
+          "CryptoAssetFairValue",
           "AssetsCurrentAbstract",
           "OperatingLeaseRightOfUseAsset",
           "OtherAssetsNoncurrent"
@@ -240,7 +242,8 @@
           "AccountsReceivableNetCurrent",
           "InventoryNet",
           "AssetsCurrent",
-          "PrepaidExpenseAndOtherAssetsCurrent"
+          "PrepaidExpenseAndOtherAssetsCurrent",
+          "CryptoAssetFairValueCurrent"
         ],
         "occurrence_rate": 0.5166163141993958,
         "is_abstract": true,
@@ -379,6 +382,36 @@
         "occurrence_rate": 0.32326283987915405,
         "is_abstract": false,
         "is_total": false
+      },
+      "CryptoAssetFairValueCurrent": {
+        "concept": "CryptoAssetFairValueCurrent",
+        "label": "Crypto Assets, Current",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 3.803809523809524,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CryptoAssetFairValueNoncurrent": {
+        "concept": "CryptoAssetFairValueNoncurrent",
+        "label": "Crypto Assets, Noncurrent",
+        "parent": "AssetsAbstract",
+        "depth": 3.5879396984924625,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CryptoAssetFairValue": {
+        "concept": "CryptoAssetFairValue",
+        "label": "Crypto Assets",
+        "parent": "AssetsAbstract",
+        "depth": 3.5879396984924625,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
       }
     },
     "roots": [
@@ -406,7 +439,9 @@
           "OperatingIncomeLoss",
           "RevenueFromContractWithCustomerExcludingAssessedTax",
           "SellingGeneralAndAdministrativeExpense",
-          "OtherNonoperatingIncomeExpense"
+          "OtherNonoperatingIncomeExpense",
+          "CryptoAssetUnrealizedGainLossOperatingAndNonoperating",
+          "CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating"
         ],
         "occurrence_rate": 0.8821752265861027,
         "is_abstract": true,
@@ -596,6 +631,26 @@
         "occurrence_rate": 0.4259818731117825,
         "is_abstract": false,
         "is_total": false
+      },
+      "CryptoAssetUnrealizedGainLossOperatingAndNonoperating": {
+        "concept": "CryptoAssetUnrealizedGainLossOperatingAndNonoperating",
+        "label": "Crypto Assets, Unrealized Gain (Loss)",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.6515679442508713,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating": {
+        "concept": "CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating",
+        "label": "Crypto Assets, Realized and Unrealized Gain (Loss)",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.6515679442508713,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
       }
     },
     "roots": [
@@ -646,6 +701,7 @@
         "children": [
           "ProfitLoss",
           "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+          "ProceedsFromCryptoAssetOperatingActivity",
           "NetCashProvidedByUsedInOperatingActivities"
         ],
         "occurrence_rate": 0.7915407854984894,
@@ -720,7 +776,9 @@
           "PaymentsToAcquireBusinessesNetOfCashAcquired",
           "NetCashProvidedByUsedInInvestingActivities",
           "PaymentsForProceedsFromOtherInvestingActivities",
-          "PaymentsToAcquirePropertyPlantAndEquipment"
+          "PaymentsToAcquirePropertyPlantAndEquipment",
+          "PaymentForAcquisitionCryptoAsset",
+          "ProceedsFromDisposalCryptoAsset"
         ],
         "occurrence_rate": 0.7522658610271903,
         "is_abstract": true,
@@ -943,6 +1001,36 @@
         "depth": 4.435714285714286,
         "children": [],
         "occurrence_rate": 0.311178247734139,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentForAcquisitionCryptoAsset": {
+        "concept": "PaymentForAcquisitionCryptoAsset",
+        "label": "Payments to Acquire Crypto Assets",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.829383886255924,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromDisposalCryptoAsset": {
+        "concept": "ProceedsFromDisposalCryptoAsset",
+        "label": "Proceeds from Disposal of Crypto Assets",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.829383886255924,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromCryptoAssetOperatingActivity": {
+        "concept": "ProceedsFromCryptoAssetOperatingActivity",
+        "label": "Proceeds from Conversion of Crypto Consideration",
+        "parent": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.3286624203821655,
+        "children": [],
+        "occurrence_rate": 0.01,
         "is_abstract": false,
         "is_total": false
       }
