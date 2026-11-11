@@ -206,6 +206,30 @@ for fact, footnote in revenue_footnotes:
     print(f"Revenue fact {fact.fact_id}: {footnote.text}")
 ```
 
+## Footnotes in a Parsed HTML Document
+
+`parse_html()` reads the inline XBRL in a filing's HTML, and its facts carry the same
+`fact_id` and `footnotes` (footnote ids) as the XBRL path. `Document.xbrl_footnotes` maps
+each id to the same `Footnote` model `XBRL.footnotes` uses:
+
+```python
+from edgar import find
+from edgar.documents import parse_html
+
+doc = parse_html(find("0000014272-26-000010").html())   # BMY 10-Q, Q1 2026
+for fact in doc.xbrl_facts:
+    if fact.fact_id == "f-57":
+        print(fact.concept, fact.value, fact.footnotes)
+        # us-gaap:CostOfGoodsAndServicesSold 3421000000 ['fn-1']
+        print(doc.xbrl_footnotes["fn-1"].text)
+        # Excludes amortization of acquired intangible assets
+```
+
+On both paths only fact-footnote relationships (an `ix:relationship` or `footnoteArc` with
+the `fact-footnote` arcrole, or none) attach a footnote. A relationship with any other
+arcrole, such as `fact-explanatoryFact` between two facts, is not an ordinary footnote and
+is not attached; EdgarTools does not yet model those relationships.
+
 ## XBRL Technical Details
 
 ### Footnote Structure in XBRL
@@ -313,6 +337,14 @@ footnotes = parser.footnotes  # Ready to use!
 ### Fact.fact_id
 - **Type**: `Optional[str]`
 - **Description**: Original `id` attribute from the XML element
+
+### Document.xbrl_footnotes
+- **Type**: `Dict[str, Footnote]`
+- **Description**: Inline XBRL footnotes of a parsed HTML document, keyed by `ix:footnote` id; `{}` when it has none
+
+### XBRLFact.fact_id / XBRLFact.footnotes
+- **Type**: `Optional[str]` / `List[str]`
+- **Description**: An inline fact's filed `id` (`None` when none is filed) and the ids of the footnotes linked to it
 
 ---
 

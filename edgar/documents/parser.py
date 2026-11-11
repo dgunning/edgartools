@@ -140,6 +140,8 @@ class HTMLParser:
         # already swallows its own errors, so it must not be able to surface as
         # a fatal HTMLParsingError.
         xbrl_facts = []
+        # Filled by _extract_xbrl_pre_process: {ix:footnote id: Footnote}
+        self._xbrl_footnotes = {}
         if self.config.extract_xbrl:
             xbrl_facts = self._extract_xbrl_pre_process(html)
 
@@ -176,6 +178,8 @@ class HTMLParser:
             # Add XBRL facts to metadata if found
             if xbrl_facts:
                 metadata.xbrl_data = xbrl_facts
+            if self._xbrl_footnotes:
+                metadata.xbrl_footnotes = self._xbrl_footnotes
 
             # Build document
             document = self._build_document(tree, metadata)
@@ -327,6 +331,8 @@ class HTMLParser:
             extractor = XBRLExtractor()
 
             facts = []
+            # Resources, linked to the facts once every fact is known (GH #1756)
+            footnotes, relationships = [], []
 
             # Find all XBRL elements (including those in ix:hidden)
             # Simple approach: find all elements with ix: prefix
@@ -353,7 +359,17 @@ class HTMLParser:
                                         break
                                 parent = parent.getparent()
                             facts.append(fact)
+                    elif local_name == 'footnote':
+                        footnotes.append(element)
+                    elif local_name == 'relationship':
+                        relationships.append(element)
 
+            try:
+                self._xbrl_footnotes = extractor.link_footnotes(facts, footnotes, relationships)
+            except Exception as e:
+                # Footnotes are optional: a failure linking them must not
+                # lose the facts already extracted.
+                logger.warning("Failed to link inline XBRL footnotes (%s: %s)", type(e).__name__, e)
             return facts
 
         except etree.ParserError as e:

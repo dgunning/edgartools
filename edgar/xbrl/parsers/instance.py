@@ -28,6 +28,15 @@ from edgar.xbrl.core import (
     is_annual_document_type,
     is_quarterly_document_type,
 )
+from edgar.xbrl.footnote_links import (
+    FOOTNOTE_ROLE,
+    collect_footnote_text,
+    fact_footnote_links,
+    inherited_lang,
+    inline_footnote_text,
+    is_fact_footnote_arcrole,
+    normalize_footnote_text,
+)
 from edgar.xbrl.models import Context, Fact, XBRLProcessingError
 from edgar.xmltools import xml_parser
 
@@ -37,21 +46,6 @@ XLINK_NS = "{http://www.w3.org/1999/xlink}"
 LINKBASE_NS = "{http://www.xbrl.org/2003/linkbase}"
 XML_NS = "{http://www.w3.org/XML/1998/namespace}"
 IX_NS = "{http://www.xbrl.org/2013/inlineXBRL}"
-FACT_FOOTNOTE_ARCROLE = "http://www.xbrl.org/2003/arcrole/fact-footnote"
-FOOTNOTE_ROLE = "http://www.xbrl.org/2003/role/footnote"
-
-# Elements whose content is a block: a break belongs after them, or the last
-# word of one runs into the first word of the next.
-_BLOCK_ELEMENTS = frozenset({
-    'address', 'article', 'blockquote', 'br', 'div', 'dd', 'dl', 'dt',
-    'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3',
-    'h4', 'h5', 'h6', 'header', 'hr', 'li', 'main', 'nav', 'ol', 'p', 'pre',
-    'section', 'table', 'tbody', 'tfoot', 'thead', 'tr', 'ul',
-})
-
-# Cells sit side by side on one line, so they take a space rather than a break.
-_CELL_ELEMENTS = frozenset({'td', 'th'})
-
 XBRLI_NS = "{http://www.xbrl.org/2003/instance}"
 XSI_NS = "{http://www.w3.org/2001/XMLSchema-instance}"
 
@@ -1010,6 +1004,12 @@ class InstanceParser(BaseParser):
                     to_ref = arc_elem.get(f'{XLINK_NS}to')
                     if not from_ref or not to_ref:
                         continue
+                    # Only a fact-footnote arc is an ordinary footnote. A
+                    # fact-explanatoryFact arc or a filer's own arcrole relates
+                    # them some other way; the inline readers already skip
+                    # these, and Fact.footnotes has no room for them (GH #1767).
+                    if not is_fact_footnote_arcrole(arc_elem.get(f'{XLINK_NS}arcrole')):
+                        continue
 
                     # Fall back to the label when the arc names no locator —
                     # that is how this resolved for filings where it resolved.
@@ -1086,19 +1086,12 @@ class InstanceParser(BaseParser):
             return 0
 
     @staticmethod
-    def _inline_footnote_links(root, footnotes_by_id: Dict[str, Any]) -> List[tuple]:
+    def _inline_footnote_links(root, footnote_ids) -> List[tuple]:
         """``(fact ids, footnote ids)`` for each fact-footnote ix:relationship."""
-        links: List[tuple] = []
-        for rel in root.iter(f'{IX_NS}relationship'):
-            # arcrole defaults to fact-footnote; any other arcrole
-            # (fact-explanatoryFact, ...) links facts to facts.
-            if rel.get('arcrole', FACT_FOOTNOTE_ARCROLE) != FACT_FOOTNOTE_ARCROLE:
-                continue
-            to_ids = [ref for ref in (rel.get('toRefs') or '').split() if ref in footnotes_by_id]
-            from_ids = (rel.get('fromRefs') or '').split()
-            if to_ids and from_ids:
-                links.append((from_ids, to_ids))
-        return links
+        return fact_footnote_links(
+            ((rel.get('arcrole'), rel.get('fromRefs'), rel.get('toRefs'))
+             for rel in root.iter(f'{IX_NS}relationship')),
+            footnote_ids)
 
     def _add_inline_footnotes(self, root, footnotes_by_id: Dict[str, Any]) -> Dict[str, str]:
         """Store each ix:footnote as a Footnote; returns ``{footnote id: storage key}``."""
@@ -1112,8 +1105,8 @@ class InstanceParser(BaseParser):
             key = self._footnote_storage_key(footnote_id)
             self.footnotes[key] = Footnote(
                 footnote_id=key,
-                text=self._inline_footnote_text(footnote_elem, continuations),
-                lang=self._inline_lang(footnote_elem),
+                text=inline_footnote_text(footnote_elem, continuations),
+                lang=inherited_lang(footnote_elem, f'{XML_NS}lang'),
                 role=footnote_elem.get('footnoteRole', FOOTNOTE_ROLE),
                 related_fact_ids=[]
             )
@@ -1132,35 +1125,6 @@ class InstanceParser(BaseParser):
                 for fact_id in from_ids:
                     self.footnotes[key].related_fact_ids.append(fact_id)
                     self._attach_footnote_to_fact(fact_id, key, first_fact_by_id)
-
-    def _inline_footnote_text(self, footnote_elem, continuations: Dict[str, Any]) -> str:
-        """
-        An ix:footnote's text, followed through its `continuedAt` chain.
-
-        A continuation carries on the same run of text, so it is joined with no
-        break -- the way SEC's extraction writes it into the footnoteLink.
-        """
-        parts: List[str] = []
-        self._collect_footnote_text(footnote_elem, parts)
-        seen = set()
-        next_id = footnote_elem.get('continuedAt')
-        while next_id and next_id not in seen and next_id in continuations:
-            seen.add(next_id)
-            continuation = continuations[next_id]
-            self._collect_footnote_text(continuation, parts)
-            next_id = continuation.get('continuedAt')
-        return self._normalize_footnote_text(parts)
-
-    @staticmethod
-    def _inline_lang(elem) -> str:
-        """The xml:lang in scope for an element, as XML inherits it from ancestors."""
-        node = elem
-        while node is not None:
-            lang = node.get(f'{XML_NS}lang')
-            if lang:
-                return lang
-            node = node.getparent()
-        return 'en-US'
 
     def _footnote_storage_key(self, label: str) -> str:
         """
@@ -1198,37 +1162,8 @@ class InstanceParser(BaseParser):
         word of the next.
         """
         parts: List[str] = []
-        self._collect_footnote_text(footnote_elem, parts)
-        return self._normalize_footnote_text(parts)
-
-    @staticmethod
-    def _normalize_footnote_text(parts: List[str]) -> str:
-        """Collapse whitespace within each line and drop empty lines."""
-        lines = []
-        for raw_line in ''.join(parts).split('\n'):
-            line = ' '.join(raw_line.split())
-            if line:
-                lines.append(line)
-        return '\n'.join(lines)
-
-    def _collect_footnote_text(self, node, parts: List[str]) -> None:
-        """Append this node's text, its children's, and their tails, in order."""
-        if node.text:
-            parts.append(node.text)
-
-        for child in node:
-            tag = child.tag
-            name = tag.rsplit('}', 1)[-1].lower() if isinstance(tag, str) else ''
-
-            self._collect_footnote_text(child, parts)
-
-            if name in _BLOCK_ELEMENTS:
-                parts.append('\n')
-            elif name in _CELL_ELEMENTS:
-                parts.append(' ')
-
-            if child.tail:
-                parts.append(child.tail)
+        collect_footnote_text(footnote_elem, parts)
+        return normalize_footnote_text(parts)
 
     def _extract_entity_info(self) -> None:
         """Extract entity information from contexts and DEI facts."""

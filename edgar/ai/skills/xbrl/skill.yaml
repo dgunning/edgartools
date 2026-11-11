@@ -72,6 +72,20 @@ patterns:
       # unit_ref is the filing's unit id ("usd", "shares", "number"); currency is "USD" for
       # money and None otherwise.
 
+  - name: Fact Footnotes
+    when: Need the footnote a filer attached to a fact (e.g. "Excludes amortization ...")
+    code: |
+      # XBRL path: xbrl.footnotes is {footnote id: Footnote(text, lang, role, related_fact_ids)}
+      notes = xbrl.get_footnotes_for_fact("f-57")   # by the fact's filed id
+
+      # Inline HTML path: the same ids and the same Footnote model
+      from edgar.documents import parse_html
+      doc = parse_html(filing.html())
+      for fact in doc.xbrl_facts:
+          texts = [doc.xbrl_footnotes[fid].text for fid in fact.footnotes]
+      # fact.fact_id is the filed id (None when none is filed); fact.footnotes is [] when none.
+      # Only fact-footnote relationships attach; other arcroles are not ordinary footnotes.
+
   - name: Calculation Linkbase as DataFrame
     when: Need per-filer concept hierarchy, extension → us-gaap mapping, or signed weights
     code: |
