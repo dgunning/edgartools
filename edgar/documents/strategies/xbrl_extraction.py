@@ -486,12 +486,10 @@ class XBRLExtractor:
             if continuation is None:
                 logger.debug("iXBRL continuation %r referenced but not found", next_id)
                 break
-            # The whitespace between an origin element and its continuation
-            # lives outside both, so concatenating strictly would glue the last
-            # word of one to the first of the next. Escaped content is markup
-            # and is joined verbatim.
-            if not escape:
-                parts.append(' ')
+            # The chain's content is concatenated with nothing in between
+            # (Inline XBRL 1.1, section 4.1.1): the filer decides where the
+            # split falls, and it can fall inside a word or a number, as in
+            # Cooper's "6" + "101 Bollinger Canyon Road" (GH #1748).
             self._collect_content(continuation, parts, escape)
             next_id = continuation.get('continuedAt') or continuation.get('continuedat')
 

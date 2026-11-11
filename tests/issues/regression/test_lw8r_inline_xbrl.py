@@ -128,9 +128,12 @@ def test_continuation_chains_are_followed():
     """
     facts = {f.concept: f for f in parse(CONTINUATION_HTML).metadata.xbrl_data}
 
-    assert facts['us-gaap:TwoHop'].value == 'Alpha nested beta tail gamma'
+    # The chain is concatenated with nothing inserted (Inline XBRL 1.1
+    # section 4.1.1, GH #1748): whitespace between the elements belongs to
+    # neither, and the SEC's extracted instances join them the same way.
+    assert facts['us-gaap:TwoHop'].value == 'Alpha nested beta tailgamma'
     assert facts['us-gaap:OneHop'].value == (
-        'First disclosure sentence. Second disclosure sentence.'
+        'First disclosure sentence.Second disclosure sentence.'
     )
     assert facts['us-gaap:TwoHop'].continued_at == 'k1'
 
@@ -203,7 +206,7 @@ def test_a_continuation_cycle_does_not_hang():
     <ix:continuation id="b" continuedAt="a">end</ix:continuation>
     </body></html>"""
     facts = {f.concept: f for f in parse(html).metadata.xbrl_data}
-    assert facts['us-gaap:Loop'].value == 'start middle end'
+    assert facts['us-gaap:Loop'].value == 'startmiddleend'
 
 
 # ---------------------------------------------------------------------------
