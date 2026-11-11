@@ -129,6 +129,21 @@ patterns:
       # (income), CryptoPurchases, CryptoSaleProceeds (investing), CryptoConversionProceeds
       # (operating)
 
+  - name: Cash Income Taxes Paid by Jurisdiction
+    when: Federal, state and local, or foreign cash taxes paid, gross payments, or refunds (ASU 2023-09)
+    code: |
+      df = xbrl.statements.cash_flow_statement().render(standard=True).to_dataframe()
+      paid = df[~df["dimension"] & df["standard_concept"].isin(
+          ["IncomeTaxesPaidFederal", "IncomeTaxesPaidStateLocal", "IncomeTaxesPaidForeign"])]
+      # ServiceNow FY2025: 46M + 83M + 154M = 283M, net of refunds
+
+      # Also: IncomeTaxesPaidFederalGross / ...StateLocalGross / ...ForeignGross (before
+      # refunds) and IncomeTaxRefundsFederal / ...StateLocal / ...Foreign (refunds received).
+      # "Federal" = federal or national jurisdiction. Components only, never tax expense;
+      # state/country rows (dimension=True) are inside these totals, so do not add them.
+      # Some filers put these in the income tax note, not the cash flow statement.
+      # The total stays unmapped: use facts.get_concept("income_taxes_paid") (EntityFacts).
+
 when_to_use:
   appropriate:
     - Segment/dimensional breakdowns

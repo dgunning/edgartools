@@ -20022,6 +20022,78 @@
     "first_year": 2017,
     "last_year": 2025
   },
+  "IncomeTaxPaidFederalAfterRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidFederal"
+    ],
+    "display_name": "Income Taxes Paid, Federal, Net of Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 277,
+    "comment": "Cash paid for income taxes to the federal or national tax jurisdiction (not only the United States), after refunds received; negative when refunds exceed payments. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
+  "IncomeTaxPaidFederalBeforeRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidFederalGross"
+    ],
+    "display_name": "Income Taxes Paid, Federal, Before Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 9,
+    "comment": "Cash paid for income taxes to the federal or national tax jurisdiction (not only the United States), before refunds received. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
+  "IncomeTaxPaidForeignAfterRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidForeign"
+    ],
+    "display_name": "Income Taxes Paid, Foreign, Net of Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 127,
+    "comment": "Cash paid for income taxes to foreign tax jurisdictions, after refunds received; negative when refunds exceed payments. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
+  "IncomeTaxPaidForeignBeforeRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidForeignGross"
+    ],
+    "display_name": "Income Taxes Paid, Foreign, Before Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 5,
+    "comment": "Cash paid for income taxes to foreign tax jurisdictions, before refunds received. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
+  "IncomeTaxPaidStateAndLocalAfterRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidStateLocal"
+    ],
+    "display_name": "Income Taxes Paid, State and Local, Net of Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 200,
+    "comment": "Cash paid for income taxes to state and local tax jurisdictions, after refunds received; negative when refunds exceed payments. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
+  "IncomeTaxPaidStateAndLocalBeforeRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidStateLocalGross"
+    ],
+    "display_name": "Income Taxes Paid, State and Local, Before Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 6,
+    "comment": "Cash paid for income taxes to state and local tax jurisdictions, before refunds received. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
   "IncomeTaxReceivable": {
     "standard_tags": [
       "IncomeTaxReceivable"
@@ -33277,6 +33349,42 @@
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025
+  },
+  "ProceedsFromIncomeTaxRefundFederal": {
+    "standard_tags": [
+      "IncomeTaxRefundsFederal"
+    ],
+    "display_name": "Income Tax Refunds Received, Federal",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 1,
+    "comment": "Cash refunds of income taxes received from the federal or national tax jurisdiction (not only the United States). A component of cash income taxes (gross payments less refunds), not a tax benefit or negative tax expense."
+  },
+  "ProceedsFromIncomeTaxRefundForeign": {
+    "standard_tags": [
+      "IncomeTaxRefundsForeign"
+    ],
+    "display_name": "Income Tax Refunds Received, Foreign",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 1,
+    "comment": "Cash refunds of income taxes received from foreign tax jurisdictions. A component of cash income taxes (gross payments less refunds), not a tax benefit or negative tax expense."
+  },
+  "ProceedsFromIncomeTaxRefundStateAndLocal": {
+    "standard_tags": [
+      "IncomeTaxRefundsStateLocal"
+    ],
+    "display_name": "Income Tax Refunds Received, State and Local",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 1,
+    "comment": "Cash refunds of income taxes received from state and local tax jurisdictions. A component of cash income taxes (gross payments less refunds), not a tax benefit or negative tax expense."
   },
   "ProceedsFromInsuranceSettlementInvestingActivities": {
     "standard_tags": [
