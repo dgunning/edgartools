@@ -615,32 +615,44 @@ class SECSectionExtractor:
             m = self._SECTION_KEY_RE.match(name)
             if not m or boundary.start_element is not None or name in self._pinned_starts:
                 continue
-            own_item = m.group(2).upper()
-            starts = find_anchor_targets(tree, boundary.anchor_id)
-            if not starts or heading_block(starts[0]) is not None:
+            new_start = self._own_heading_before_anchor(
+                tree, boundary, m.group(2).upper(), is_own_heading, anchor_ids)
+            if new_start is None:
                 continue
-            anchor = starts[0]
-            if ' '.join(anchor.text_content().split()):
-                continue
-            following = self._first_text_block(anchor)
-            if following is not None and is_own_heading(self._collapsed_text(following), own_item):
-                continue
-            heading = self._preceding_text_block(anchor, anchor_ids - {boundary.anchor_id})
-            if heading is None:
-                continue
-            text = self._collapsed_text(heading)
-            if len(text) > self._ITEM_HEADING_MAX or not is_own_heading(text, own_item):
-                continue
-            tables = [a for a in heading.iterancestors() if a.tag == 'table']
-            new_start = tables[-1] if tables else heading
-            if tables and len(self._collapsed_text(new_start)) > self._ITEM_HEADING_MAX:
-                continue  # a row of a larger table (a contents page), not a heading
             boundary.start_element = new_start
-            for other in self.section_boundaries.values():
-                if other is not boundary and other.end_element is None \
-                        and other.end_element_id == boundary.anchor_id:
-                    other.end_element = new_start
+            self._end_sections_at(boundary, new_start)
             logger.info("Section %s starts at its heading before the TOC anchor", name)
+
+    def _own_heading_before_anchor(self, tree, boundary, own_item, is_own_heading, anchor_ids):
+        """The element a section should start at when its own "Item N" heading
+        sits just before an empty TOC anchor, or ``None`` when it doesn't."""
+        starts = find_anchor_targets(tree, boundary.anchor_id)
+        if not starts or heading_block(starts[0]) is not None:
+            return None
+        anchor = starts[0]
+        if self._collapsed_text(anchor):
+            return None
+        following = self._first_text_block(anchor)
+        if following is not None and is_own_heading(self._collapsed_text(following), own_item):
+            return None
+        heading = self._preceding_text_block(anchor, anchor_ids - {boundary.anchor_id})
+        if heading is None:
+            return None
+        text = self._collapsed_text(heading)
+        if len(text) > self._ITEM_HEADING_MAX or not is_own_heading(text, own_item):
+            return None
+        tables = [a for a in heading.iterancestors() if a.tag == 'table']
+        new_start = tables[-1] if tables else heading
+        if tables and len(self._collapsed_text(new_start)) > self._ITEM_HEADING_MAX:
+            return None  # a row of a larger table (a contents page), not a heading
+        return new_start
+
+    def _end_sections_at(self, boundary, new_start) -> None:
+        """End any section that ended at ``boundary``'s anchor at ``new_start``."""
+        for other in self.section_boundaries.values():
+            if other is not boundary and other.end_element is None \
+                    and other.end_element_id == boundary.anchor_id:
+                other.end_element = new_start
 
     @staticmethod
     def _collapsed_text(el) -> str:
