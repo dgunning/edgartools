@@ -3640,13 +3640,9 @@ class XBRL:
         """
         Convert XBRL data to pandas DataFrames.
 
-        When a fact's concept is in the element catalog, the facts frame
-        includes ``element_name``, ``element_type``, ``element_period_type``,
-        ``element_balance`` and ``element_label`` from that entry. The lookup
-        tries ``fact.element_id`` as stored, then the same id with only its
-        namespace separator changed from ``:`` to ``_``. Fact identifiers,
-        contexts, values and signs stay as filed. A field the catalog does
-        not have stays missing, and balance is not applied to the amount.
+        Facts include element_name, element_type, element_period_type,
+        element_balance and element_label when the concept is in the catalog.
+        Lookup tries the stored id, then only its namespace ``:`` changed to ``_``.
 
         Args:
             statement_role: Optional role URI to convert only a specific statement
