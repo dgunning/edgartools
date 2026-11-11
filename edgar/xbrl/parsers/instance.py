@@ -29,7 +29,7 @@ from edgar.xbrl.core import (
     is_quarterly_document_type,
 )
 from edgar.xbrl.models import Context, Fact, XBRLProcessingError
-from edgar.xmltools import xml_parser
+from edgar.xmltools import is_xsi_nil, xml_parser
 
 from .base import BaseParser
 
@@ -79,14 +79,9 @@ _STRUCTURAL_ELEMENTS = frozenset({
 # co-registrant's, not the filer's (GH #1420, #1710).
 _ENTITY_AXES = ('dei:LegalEntityAxis', 'srt:ConsolidatedEntitiesAxis')
 
-# xsi:nil is a boolean: true/false or 1/0.
-_NIL_TRUE = frozenset({'true', '1'})
-
-
 def _is_nil(element: ET.Element) -> bool:
-    """Whether an element is marked ``xsi:nil``."""
-    nil = element.get(f"{XSI_NS}nil")
-    return isinstance(nil, str) and nil.strip().lower() in _NIL_TRUE
+    """Whether an element is marked ``xsi:nil``: the rule the inline extractor shares."""
+    return is_xsi_nil(element)
 
 
 def _xbrli_child(element: ET.Element, local_name: str) -> Optional[ET.Element]:

@@ -173,15 +173,20 @@ class XBRLFact:
     # Additional metadata
     metadata: Optional[Dict[str, Any]] = None
 
+    # Whether the filer marked the fact xsi:nil, the same source flag as
+    # edgar.xbrl.models.Fact.is_nil (GH #1757). A nil fact has no value: its
+    # content is kept as filed, untransformed, and numeric_value is None.
+    is_nil: bool = False
+
     @property
     def numeric_value(self) -> Optional[float]:
         """Get numeric value if applicable.
 
         Only a fact with a unit (ix:nonFraction) is numeric. An ix:nonNumeric
         identifier such as a CIK parses as a float but is text (GH #1755), the
-        same rule the instance parser applies.
+        same rule the instance parser applies. A nil fact has no value.
         """
-        if not self.unit_ref:
+        if not self.unit_ref or self.is_nil:
             return None
         try:
             # Remove commas and convert
@@ -212,7 +217,8 @@ class XBRLFact:
             'context': self.context,
             'unit': self.unit,
             'is_numeric': self.is_numeric,
-            'numeric_value': self.numeric_value
+            'numeric_value': self.numeric_value,
+            'is_nil': self.is_nil,
         }
 
 

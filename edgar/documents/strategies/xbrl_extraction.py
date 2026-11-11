@@ -19,6 +19,7 @@ from edgar.documents.strategies.ixbrl_transforms import (
     negate_exactly,
 )
 from edgar.documents.types import XBRLFact
+from edgar.xmltools import is_xsi_nil
 
 logger = logging.getLogger(__name__)
 
@@ -116,8 +117,13 @@ class XBRLExtractor:
         if not context:
             return None
 
-        # Get fact value
-        value, issue = self._get_fact_value(element, escape=bool(context.get('escape')))
+        # Get fact value. Nil is read first: a nil fact's content is not a value
+        # to transform, scale or sign (Inline XBRL 1.1 section 11.2.3).
+        is_nil = is_xsi_nil(element)
+        if is_nil:
+            value, issue = self._relevant_content(element, escape=bool(context.get('escape'))).strip(), None
+        else:
+            value, issue = self._get_fact_value(element, escape=bool(context.get('escape')))
 
         # Create fact
         fact = XBRLFact(
@@ -131,7 +137,8 @@ class XBRLExtractor:
             sign=context.get('sign'),
             precision=context.get('precision'),
             escape=bool(context.get('escape')),
-            continued_at=context.get('continuedAt')
+            continued_at=context.get('continuedAt'),
+            is_nil=is_nil,
         )
 
         # Resolve references

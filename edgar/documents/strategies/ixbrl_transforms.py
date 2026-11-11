@@ -42,6 +42,8 @@ from decimal import Decimal, InvalidOperation
 from functools import lru_cache
 from typing import Callable, Dict, Optional
 
+from edgar.xmltools import prefix_namespace
+
 __all__ = [
     'TransformError',
     'UnknownTransformError',
@@ -97,23 +99,6 @@ TR5_NS = 'http://www.xbrl.org/inlineXBRL/transformation/2022-02-16'
 IXT_SEC_NS = 'http://www.sec.gov/inlineXBRL/transformation/2015-08-31'
 
 
-def _prefix_namespace(element, prefix: str) -> Optional[str]:
-    """The namespace URI ``prefix`` is bound to where ``element`` sits, or None."""
-    nsmap = getattr(element, 'nsmap', None)
-    if nsmap and prefix in nsmap:          # a namespace-aware (XML) tree
-        return nsmap[prefix]
-    # An lxml.html tree keeps xmlns declarations as ordinary attributes; the
-    # nearest declaration wins, as it would in XML.
-    attribute = f'xmlns:{prefix}'
-    node = element
-    while node is not None:
-        uri = node.get(attribute)
-        if uri is not None:
-            return uri.strip()
-        node = node.getparent()
-    return None
-
-
 def expand_format(element, format_attr: Optional[str]) -> Optional[str]:
     """
     The ``format`` attribute of ``element`` as an expanded name.
@@ -126,7 +111,7 @@ def expand_format(element, format_attr: Optional[str]) -> Optional[str]:
     if not name or name.startswith('{') or ':' not in name:
         return format_attr
     prefix, local = name.split(':', 1)
-    uri = _prefix_namespace(element, prefix)
+    uri = prefix_namespace(element, prefix)
     return f'{{{uri}}}{local}' if uri else format_attr
 
 
