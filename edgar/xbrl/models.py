@@ -166,6 +166,11 @@ class ElementCatalog:
         return self.name
 
 
+# How a typed member the filer marked xsi:nil is shown: the SEC's own rendering
+# prints "(nil)" (GH #1751). The member's value is ''.
+NIL_MEMBER_LABEL = "(nil)"
+
+
 class Context(BaseModel):
     """
     An XBRL context defining entity, period, and dimensional information.
@@ -176,6 +181,9 @@ class Context(BaseModel):
     entity: Dict[str, Any] = Field(default_factory=dict)
     period: Dict[str, Any] = Field(default_factory=dict)
     dimensions: Dict[str, str] = Field(default_factory=dict)
+    # Typed axes whose member the filer marked xsi:nil. The axis stays in
+    # `dimensions` with the value '' (GH #1751).
+    nil_dimensions: List[str] = Field(default_factory=list)
 
     @property
     def period_string(self) -> str:

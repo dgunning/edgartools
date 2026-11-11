@@ -38,7 +38,7 @@ from edgar.xbrl.core import (
     split_element_id,
     unit_currency_measure,
 )
-from edgar.xbrl.models import Axis, Domain, PresentationNode, is_negated_label_role
+from edgar.xbrl.models import NIL_MEMBER_LABEL, Axis, Domain, PresentationNode, is_negated_label_role
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.periods import get_period_views
 from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
@@ -3242,7 +3242,8 @@ class XBRL:
                 coregistrant_members[role] = member
         return coregistrant_members
 
-    def _describe_dimension(self, dim_name: str, dim_value: str, typed: bool) -> Dict[str, Any]:
+    def _describe_dimension(self, dim_name: str, dim_value: str, typed: bool,
+                            nil: bool = False) -> Dict[str, Any]:
         """One context dimension with display labels, for `_find_facts_for_element`."""
         # An explicit member is a QName naming a concept, keyed in the catalog
         # with '_'. A typed value is data: it is rewritten only when it too is a
@@ -3277,7 +3278,7 @@ class XBRL:
 
         # Clean up labels (remove [Axis], [Member], etc.)
         dim_label = dim_label.replace('[Axis]', '').replace('[Domain]', '').strip()
-        mem_label = mem_label.replace('[Member]', '').strip()
+        mem_label = NIL_MEMBER_LABEL if nil else mem_label.replace('[Member]', '').strip()
         format_key = f"{dim_label}: {mem_label}"
         return {
             'dimension': dim_name,
@@ -3358,7 +3359,8 @@ class XBRL:
 
                     typed_dimensions = getattr(self.parser, 'typed_dimensions', ())
                     for dim_name, dim_value in sorted(context.dimensions.items()):
-                        info = self._describe_dimension(dim_name, dim_value, dim_name in typed_dimensions)
+                        info = self._describe_dimension(dim_name, dim_value, dim_name in typed_dimensions,
+                                                        nil=dim_name in context.nil_dimensions)
                         dim_keys.append(info['format_key'])
                         dimension_info.append(info)
 

@@ -287,8 +287,13 @@ def _typed_member_value(child: ET.Element) -> str:
     content is the child serialized as filed, so two contexts whose nested
     values differ keep different values (XBRL Dimensions 1.0 section 3.1.4.4);
     reading the empty text of such a child gave every context the child's tag
-    (gh #1761). A nil or empty child still yields the child's tag, as before.
+    (gh #1761). A nil child has no value: it yields '' and its axis is
+    recorded in Context.nil_dimensions, rather than the child's tag, which
+    read as a member name (gh #1751). An empty non-nil child still yields the
+    child's tag, as before.
     """
+    if _is_nil(child):
+        return ''
     text = (child.text or '').strip()
     if text:
         return text
@@ -563,13 +568,13 @@ class InstanceParser(BaseParser):
                     # Get segment dimensions if present
                     segment_elem = entity_elem.find('.//{http://www.xbrl.org/2003/instance}segment')
                     if segment_elem is not None:
-                        self._read_dimension_members(segment_elem, context.dimensions)
+                        self._read_dimension_members(segment_elem, context)
 
                 # Dimensions may also sit in the context's scenario (XBRL Dimensions 1.0 §3.1.4.1);
                 # without them a scenario-qualified fact reads as the undimensioned total.
                 scenario_elem = context_elem.find('{http://www.xbrl.org/2003/instance}scenario')
                 if scenario_elem is not None:
-                    self._read_dimension_members(scenario_elem, context.dimensions)
+                    self._read_dimension_members(scenario_elem, context)
 
                 # Extract period information
                 period_elem = context_elem.find('.//{http://www.xbrl.org/2003/instance}period')
@@ -614,8 +619,9 @@ class InstanceParser(BaseParser):
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting contexts: {str(e)}") from e
 
-    def _read_dimension_members(self, container: ET.Element, dimensions: Dict[str, str]) -> None:
+    def _read_dimension_members(self, container: ET.Element, context: Context) -> None:
         """Read explicit and typed dimension members from a segment or scenario element."""
+        dimensions = context.dimensions
         for dim_elem in container.findall('.//{http://xbrl.org/2006/xbrldi}explicitMember'):
             dimension = dim_elem.get('dimension')
             value = dim_elem.text
@@ -633,6 +639,8 @@ class InstanceParser(BaseParser):
             child = next((c for c in dim_elem if isinstance(c.tag, str)), None)
             if child is not None:
                 dimensions[dimension] = _typed_member_value(child)
+                if _is_nil(child) and dimension not in context.nil_dimensions:
+                    context.nil_dimensions.append(dimension)
 
     @staticmethod
     def _measure_unit(unit_elem: ET.Element) -> Optional[Dict[str, Any]]:
