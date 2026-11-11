@@ -25,6 +25,7 @@ __all__ = [
     'extract_fee_tables',
     'extract_performance_table',
     'extract_fund_metadata',
+    'extract_cover_ticker',
 ]
 
 
@@ -945,6 +946,75 @@ def extract_fund_metadata(html: str) -> Dict:
             pass
 
     return result
+
+
+# The cover ends where the summary's first section starts.
+_COVER_END_RE = re.compile(
+    r'\b(?:investment\s+(?:objective|goal)s?|fees\s+and\s+expenses)\b', re.IGNORECASE
+)
+_LABELLED_TICKER_RE = re.compile(
+    r'(?i:\b(?:ticker(?:\s+symbol)?|trading\s+symbol))\s*[:\-\u2013\u2014]?\s*'
+    r'(?P<ticker>[A-Z]{1,5})(?![\w/.])'
+)
+# "(Cboe BZX — XDSQ)": the listing exchange, a dash or colon, the ticker.
+_EXCHANGE_TICKER_RE = re.compile(
+    r'(?i:\b(?:cboe(?:\s+bzx)?|nyse(?:\s+arca)?|nasdaq))[^()]{0,30}?\s[:\-\u2013\u2014]\s*'
+    r'(?P<ticker>[A-Z]{2,5})(?![\w/.])'
+)
+# Past this many text blocks it is not the cover any more (a supplement has no
+# "Investment Objective" heading to stop at).
+_COVER_BLOCKS = 40
+_BARE_TICKER_RE = re.compile(r'^[A-Z]{2,5}$')
+_NOT_A_TICKER = frozenset({
+    'ETF', 'ETFS', 'FUND', 'LLC', 'INC', 'LP', 'USA', 'NYSE', 'ARCA', 'CBOE', 'BZX', 'NAV', 'TRUST',
+    'CLASS', 'SHARE', 'SHARES', 'THE', 'AND', 'FOR', 'II', 'III', 'IV', 'VI', 'VII', 'VIII', 'IX',
+})
+_BLOCK_XPATH = (
+    'descendant-or-self::*[self::p or self::div or self::td or self::th or self::center '
+    'or self::h1 or self::h2 or self::h3 or self::h4 or self::h5 or self::h6]'
+    '[not(.//p or .//div or .//td or .//th or .//table)]'
+)
+
+
+def extract_cover_ticker(html: str) -> Optional[str]:
+    """
+    The one ticker a summary prospectus prints on its cover, or None.
+
+    Filers often leave ``<CLASS-CONTRACT-TICKER-SYMBOL>`` out of the SGML header
+    for a newly launched ETF class, and the ticker then appears only on the
+    cover: Ocean Park High Income ETF (0001580642-24-004234) prints ``DUKH`` as
+    a centred paragraph above "Primary Listing Exchange for the Fund". The cover
+    is read up to the first section heading ("Investment Objective", "Fees and
+    Expenses"), at most 40 text blocks; a ticker is a block that is nothing but
+    2-5 capitals, the value after a "Ticker"/"Ticker Symbol" label, or the value
+    after a listing exchange ("(Cboe BZX — XDSQ)"). More than one distinct
+    candidate is ambiguous and yields None, so this only answers for a cover
+    that names exactly one ticker.
+    """
+    root = _parse_html(html)
+    if root is None:
+        return None
+    found = []
+    blocks = 0
+    for block in root.xpath(_BLOCK_XPATH):
+        text = ' '.join(chunk.strip() for chunk in block.itertext() if chunk.strip())
+        text = re.sub(r'\s+', ' ', text.replace('\xa0', ' ')).strip()
+        if not text:
+            continue
+        blocks += 1
+        if blocks > _COVER_BLOCKS or _COVER_END_RE.search(text):
+            break
+        candidates = [
+            match.group('ticker')
+            for pattern in (_LABELLED_TICKER_RE, _EXCHANGE_TICKER_RE)
+            for match in pattern.finditer(text)
+        ]
+        if not candidates and _BARE_TICKER_RE.match(text):
+            candidates = [text]
+        for candidate in candidates:
+            if candidate not in _NOT_A_TICKER and candidate not in found:
+                found.append(candidate)
+    return found[0] if len(found) == 1 else None
 
 
 # ---------------------------------------------------------------------------
