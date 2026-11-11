@@ -424,9 +424,11 @@ def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
     Returns:
         Formatted value string
     """
-    # Handle non-numeric or zero values
-    if not isinstance(value, (int, float)) or value == 0:
-        return "" if value == 0 else str(value)
+    # Non-numeric values pass through. Zero is formatted like any other number
+    # ("$0", "0.00"); it used to return the control character U+0014.
+    if not isinstance(value, (int, float)):
+        return str(value)
+    value += 0  # -0.0 + 0 is 0.0, so a negative zero cannot format as "-0"
 
     # Apply scaling
     scaled_value = value
