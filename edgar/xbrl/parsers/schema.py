@@ -65,6 +65,45 @@ class SchemaParser(BaseParser):
         except Exception as e:
             raise XBRLProcessingError(f"Error parsing schema file {file_path}: {str(e)}") from e
 
+    @staticmethod
+    def _catalog_entry(element_id: str, element) -> ElementCatalog:
+        """Read one xs:element declaration into an ElementCatalog entry."""
+        # Check for balance and period type
+        # First check as attributes on the element (modern XBRL style)
+        balance_type = element.get('{http://www.xbrl.org/2003/instance}balance')
+        period_type = element.get('{http://www.xbrl.org/2003/instance}periodType')
+        # xs:boolean: "true" and "1" are both true (XBRL 2.1 section 5.1.1)
+        abstract = element.get('abstract', 'false').strip().lower() in ('true', '1')
+
+        # If not found as attributes, look in nested annotations (legacy style)
+        if not balance_type or not period_type:
+            annotation = element.find('.//{http://www.w3.org/2001/XMLSchema}annotation')
+            if annotation is not None:
+                for appinfo in annotation.findall('.//{http://www.w3.org/2001/XMLSchema}appinfo'):
+                    if not balance_type:
+                        balance_element = appinfo.find('.//{http://www.xbrl.org/2003/instance}balance')
+                        if balance_element is not None:
+                            balance_type = balance_element.text
+
+                    if not period_type:
+                        period_element = appinfo.find('.//{http://www.xbrl.org/2003/instance}periodType')
+                        if period_element is not None:
+                            period_type = period_element.text
+
+        return ElementCatalog(
+            name=element_id,
+            data_type=element.get('type', ''),
+            period_type=period_type or "duration",  # Default to duration
+            balance=balance_type,
+            abstract=abstract,
+            labels={},
+            substitution_group=element.get('substitutionGroup'),
+            # A dimension is typed when its declaration carries
+            # xbrldt:typedDomainRef; without reading it, every dimension
+            # looks explicit and the False is a default, not an answer.
+            typed_domain_ref=element.get(f'{XBRLDT_NS}typedDomainRef')
+        )
+
     def parse_schema_content(self, content: str) -> None:
         """Parse schema content and extract element information."""
         try:
@@ -74,49 +113,8 @@ class SchemaParser(BaseParser):
             # Extract element declarations
             for element in root.findall('.//{http://www.w3.org/2001/XMLSchema}element'):
                 element_id = element.get('id') or element.get('name')
-                if not element_id:
-                    continue
-
-                # Extract element properties
-                data_type = element.get('type', '')
-
-                # Check for balance and period type
-                # First check as attributes on the element (modern XBRL style)
-                balance_type = element.get('{http://www.xbrl.org/2003/instance}balance')
-                period_type = element.get('{http://www.xbrl.org/2003/instance}periodType')
-                abstract = element.get('abstract', 'false').lower() == 'true'
-
-                # If not found as attributes, look in nested annotations (legacy style)
-                if not balance_type or not period_type:
-                    annotation = element.find('.//{http://www.w3.org/2001/XMLSchema}annotation')
-                    if annotation is not None:
-                        for appinfo in annotation.findall('.//{http://www.w3.org/2001/XMLSchema}appinfo'):
-                            if not balance_type:
-                                balance_element = appinfo.find('.//{http://www.xbrl.org/2003/instance}balance')
-                                if balance_element is not None:
-                                    balance_type = balance_element.text
-
-                            if not period_type:
-                                period_element = appinfo.find('.//{http://www.xbrl.org/2003/instance}periodType')
-                                if period_element is not None:
-                                    period_type = period_element.text
-
-                # A dimension is typed when its declaration carries
-                # xbrldt:typedDomainRef; without reading it, every dimension
-                # looks explicit and the False is a default, not an answer.
-                typed_domain_ref = element.get(f'{XBRLDT_NS}typedDomainRef')
-
-                # Create element catalog entry
-                self.element_catalog[element_id] = ElementCatalog(
-                    name=element_id,
-                    data_type=data_type,
-                    period_type=period_type or "duration",  # Default to duration
-                    balance=balance_type,
-                    abstract=abstract,
-                    labels={},
-                    substitution_group=element.get('substitutionGroup'),
-                    typed_domain_ref=typed_domain_ref
-                )
+                if element_id:
+                    self.element_catalog[element_id] = self._catalog_entry(element_id, element)
 
             # Extract embedded linkbases if present
             embedded_linkbases = self._extract_embedded_linkbases(content)
