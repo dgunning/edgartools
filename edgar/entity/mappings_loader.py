@@ -534,7 +534,13 @@ _IFRS_FALLBACK_MAPPINGS = {
     'RepaymentsOfBorrowingsClassifiedAsFinancingActivities': 'CashFlowStatement',
     'PaymentsOfLeaseLiabilitiesClassifiedAsFinancingActivities': 'CashFlowStatement',
     'DividendsPaidClassifiedAsFinancingActivities': 'CashFlowStatement',
-    'DividendsPaid': 'CashFlowStatement',
+    'DividendsPaidToEquityHoldersOfParentClassifiedAsFinancingActivities': 'CashFlowStatement',
+    'DividendsPaidToNoncontrollingInterestsClassifiedAsFinancingActivities': 'CashFlowStatement',
+    # ifrs-full:DividendsPaid is "dividends recognised as distributions to
+    # owners", an IAS 1 statement-of-changes-in-equity element, not a cash flow.
+    # Classed as cash flow it filled the "Dividends paid" row: SAP's FY2025
+    # equity total of EUR 2,746M instead of the filed EUR 2,743M (GH #1679).
+    'DividendsPaid': 'StatementOfEquity',
     'PaymentsToAcquireOrRedeemEntitysShares': 'CashFlowStatement',
     'ProceedsFromIssuingShares': 'CashFlowStatement',
     'InterestPaidClassifiedAsFinancingActivities': 'CashFlowStatement',
