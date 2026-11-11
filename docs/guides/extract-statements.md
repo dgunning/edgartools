@@ -359,6 +359,7 @@ cash_flow = multi_financials.cash_flow_statement()
 
 # Use view="detailed" to include dimensional breakdowns (e.g., cost by segment)
 income_detailed = multi_financials.income_statement(view="detailed")
+income_quarterly = multi_financials.income_statement(include_quarterly=True)
 
 print("Multi-Year Income Statement:")
 print(income_statement)

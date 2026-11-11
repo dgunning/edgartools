@@ -1426,8 +1426,30 @@ class MultiFinancials:
     def balance_sheet(self, view: ViewType = None) -> Optional[StitchedStatement]:
         return self.xbs.statements.balance_sheet(view=view)
 
-    def income_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
-        return self.xbs.statements.income_statement(view=view)
+    def income_statement(self, view: ViewType = None, *, include_quarterly: bool = False) -> Optional[StitchedStatement]:
+        """
+        Get the stitched income statement.
+
+        The default is the year-to-date or annual column from each filing.
+        ``include_quarterly=True`` also surfaces a discrete quarter when that
+        filing reported one. The flag is keyword-only and is forwarded to the
+        stitched statement. It does not derive a quarter or fill a value the
+        filing did not report.
+
+        Args:
+            view: StatementView controlling dimensional data display.
+                  Accepted positionally.
+                  STANDARD: Face presentation matching SEC Viewer (display default)
+                  DETAILED: All dimensional data included (to_dataframe default)
+                  SUMMARY: Non-dimensional totals only
+            include_quarterly: If True, surface discrete-quarter columns alongside
+                  the year-to-date or annual columns from each filing (GH #780).
+                  Default False.
+
+        Returns:
+            A StitchedStatement for the income statement
+        """
+        return self.xbs.statements.income_statement(view=view, include_quarterly=include_quarterly)
 
     def cash_flow_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
         return self.xbs.statements.cash_flow_statement(view=view)
