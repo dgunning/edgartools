@@ -1,0 +1,1 @@
+**`extract_nonaccrual()` dropped a non-accrual flag linked to a holding's rate or principal instead of its fair value.** The flag now reads that holding's fair value at the same date: New Mountain Finance's 10-Q for 2026-09-30 reads 9 holdings, 1.75%, where it read none. (bead edgartools-jv8b8)

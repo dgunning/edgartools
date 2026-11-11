@@ -86,13 +86,15 @@ patterns:
       result = extract_nonaccrual(filing)        # a BDC 10-K/10-Q Filing, or a BDCEntity
       result.nonaccrual_rate                     # non-accrual FV / portfolio FV
       result.evidence_level                      # 'investment' | 'aggregate' | 'none'
-      result.num_nonaccrual                      # int only when 'investment'; else None
+      result.num_nonaccrual                      # int when 'investment', 0 when tagged zero; else None
       result.investments                         # NonAccrualInvestment rows (company_name, fair_value, cost)
     note: |
       num_nonaccrual None means the filing does not itemize non-accruals: an
       aggregate rate (evidence_level 'aggregate') proves some exist without a
-      count, and 'none' means no XBRL signal. Never read None as zero. The count
-      is of schedule rows, so one company with two loans counts twice.
+      count, and 'none' means no XBRL signal. Never read None as zero. A filer
+      that tags its non-accruals as zero reads extraction_method 'tagged_zero',
+      rate 0.0 and num_nonaccrual 0. The count is of schedule rows, so one
+      company with two loans counts twice.
 
   - name: Report Backlinks
     when: Navigate from report to filing

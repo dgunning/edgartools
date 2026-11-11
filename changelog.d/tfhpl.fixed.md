@@ -1,0 +1,1 @@
+**`extract_nonaccrual()` read no non-accruals from BlackRock's three BDCs.** Their schedules mark holdings "Non-accruing debt investment.", which the non-accrual pattern did not match, so every filing read `extraction_method="none"`. BlackRock TCP Capital's 10-Q for 2026-09-30 now reads 17 holdings, 3.27% at fair value. (bead edgartools-tfhpl)

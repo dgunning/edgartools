@@ -1,0 +1,1 @@
+**`extract_nonaccrual()` read a BDC that tags zero non-accruals as unknown.** A zero amount or count of non-accrual investments, with no non-accrual footnote, now gives `extraction_method="tagged_zero"`, a rate of 0.0 and `num_nonaccrual` 0; 8 of 179 active BDCs, Stone Point Credit among them, read this way. (bead edgartools-rol2k)

@@ -8,6 +8,8 @@ Extracts non-accrual status data using three layered approaches:
 2. **Custom XBRL concepts** — 6/11 BDCs use proprietary taxonomy extensions
    (rate only, no investment-level detail).
 3. **Standard us-gaap aggregate** — single concept fallback (dollar amount only).
+4. **A tagged zero** — an amount or count of non-accruals tagged as 0, with no
+   non-accrual footnote, reads as a 0% rate (``extraction_method='tagged_zero'``).
 
 Usage::
 
@@ -59,17 +61,21 @@ CONCEPT_NONACCRUAL_LOANS_FV = (
     'us-gaap:FairValueOptionLoansHeldAsAssetsAggregateAmountInNonaccrualStatus'
 )
 
+# "Non-accrual", or the participle BlackRock's BDCs use: "Non-accruing debt
+# investment." (edgartools-tfhpl).
+_NA = r'non[- ]?accru(?:al|ing)'
+
 # Negation patterns — footnotes that explicitly deny non-accrual status.
 # These must be checked BEFORE affirmative patterns.
 # Examples: "there were no investments on non-accrual status",
 #           "the Company had no portfolio company investment on non-accrual"
 NEGATION_PATTERNS = [
-    r'\bno\s+(?:investments?|loans?|portfolio\s+company).{0,40}non[- ]?accrual',
-    r'\bnone\b.{0,40}non[- ]?accrual',
-    r'(?:were|was|is|are)\s+not\s+(?:on\s+)?non[- ]?accrual',
-    r'did\s+not\s+have\s+any.{0,40}non[- ]?accrual',
-    r'\bzero\b.{0,40}non[- ]?accrual',
-    r'there\s+were\s+no.{0,40}non[- ]?accrual',
+    rf'\bno\s+(?:investments?|loans?|portfolio\s+company).{{0,40}}{_NA}',
+    rf'\bnone\b.{{0,40}}{_NA}',
+    rf'(?:were|was|is|are)\s+not\s+(?:on\s+)?{_NA}',
+    rf'did\s+not\s+have\s+any.{{0,40}}{_NA}',
+    rf'\bzero\b.{{0,40}}{_NA}',
+    rf'there\s+were\s+no.{{0,40}}{_NA}',
 ]
 
 # Affirmative patterns — footnotes that directly state an investment is on non-accrual.
@@ -82,19 +88,19 @@ NEGATION_PATTERNS = [
 # sentence pattern (e.g. PSEC "Investment on non-accrual status as of the
 # reporting date"). See _classify_nonaccrual_footnote for the full decision.
 AFFIRMATIVE_PATTERNS = [
-    r'(?:was|were)\s+(?:on|placed\s+on)\s+non[- ]?accrual\s+status',
-    r'(?:was|were)\s+(?:on|placed\s+on)\s+non[- ]?accrual(?:\s|[,.])',
-    r'(?:is|are)\s+(?:on|currently\s+on)\s+non[- ]?accrual\s+status',
-    r'(?:is|are)\s+(?:on|currently\s+on)\s+non[- ]?accrual(?:\s|[,.])',
-    r'(?:loan|debt|investment)\s+was\s+(?:on|placed\s+on)\s+non[- ]?accrual',
-    r'(?:loan|debt|investment)\s+is\s+(?:on|currently\s+on)\s+non[- ]?accrual',
-    r'^non[- ]?accrual\s+(?:and|or)\s+non[- ]?income',
-    r'the\s+investment\s+is\s+on\s+non[- ]?accrual',
+    rf'(?:was|were)\s+(?:on|placed\s+on)\s+{_NA}\s+status',
+    rf'(?:was|were)\s+(?:on|placed\s+on)\s+{_NA}(?:\s|[,.])',
+    rf'(?:is|are)\s+(?:on|currently\s+on)\s+{_NA}\s+status',
+    rf'(?:is|are)\s+(?:on|currently\s+on)\s+{_NA}(?:\s|[,.])',
+    rf'(?:loan|debt|investment)\s+was\s+(?:on|placed\s+on)\s+{_NA}',
+    rf'(?:loan|debt|investment)\s+is\s+(?:on|currently\s+on)\s+{_NA}',
+    rf'^{_NA}\s+(?:and|or)\s+non[- ]?income',
+    rf'the\s+investment\s+is\s+on\s+{_NA}',
 ]
 
 # A bare non-accrual mention (adjacency required, so "non-cash ... accrual" in a
 # narrative paragraph does not count).
-_NONACCRUAL_RE = re.compile(r'non[- ]?accrual')
+_NONACCRUAL_RE = re.compile(_NA)
 
 # Schedule-of-investments non-accrual markers are short labels (observed range:
 # 5-25 words across ARCC/FSK/GBDC/MAIN/PSEC). Footnotes that merely *mention*
@@ -222,7 +228,7 @@ class NonAccrualResult:
     total_portfolio_fair_value: Optional[Decimal]
 
     # Extraction metadata
-    extraction_method: str  # 'footnote' | 'custom_concept' | 'aggregate_concept' | 'none'
+    extraction_method: str  # 'footnote' | 'custom_concept' | 'aggregate_concept' | 'tagged_zero' | 'none'
     custom_concept_rate: Optional[float] = None
     aggregate_concept_value: Optional[Decimal] = None
 
@@ -258,13 +264,14 @@ class NonAccrualResult:
 
         * ``'investment'`` — footnotes resolved individual investments, so they can be counted.
         * ``'aggregate'`` — only a portfolio-level rate or amount (a custom or us-gaap
-          concept); nothing says which investments, or how many.
+          concept); nothing says which investments, or how many, unless the
+          filer tags its non-accruals as zero (``extraction_method`` ``'tagged_zero'``).
         * ``'none'`` — no signal at all. That means unknown, not zero: a BDC can
           disclose non-accruals only in prose.
         """
         if self.investments:
             return 'investment'
-        if self.extraction_method in ('custom_concept', 'aggregate_concept'):
+        if self.extraction_method in ('custom_concept', 'aggregate_concept', 'tagged_zero'):
             return 'aggregate'
         return 'none'
 
@@ -273,9 +280,13 @@ class NonAccrualResult:
         """Count of non-accrual investment rows, or None when the filing does not identify them.
 
         Counts rows as the schedule lists them, so a company with two non-accrual
-        loans counts twice. None when ``evidence_level`` is ``'aggregate'`` or ``'none'``:
-        an aggregate rate proves non-accruals exist without saying how many.
+        loans counts twice. 0 when the filer tags its non-accruals as zero
+        (``extraction_method`` ``'tagged_zero'``). None otherwise when
+        ``evidence_level`` is ``'aggregate'`` or ``'none'``: an aggregate rate
+        proves non-accruals exist without saying how many.
         """
+        if self.extraction_method == 'tagged_zero':
+            return 0
         if self.evidence_level != 'investment':
             return None
         return len(self.investments)
@@ -427,6 +438,8 @@ def extract_nonaccrual(
        related_fact_ids to identify specific investments with their fair values.
     2. **Custom XBRL concepts** — searches facts for concepts containing "nonaccrual".
     3. **Standard us-gaap aggregate** — checks one standard concept.
+    4. **A tagged zero** — an amount or count of non-accruals tagged as 0, when no
+       footnote flags non-accrual, gives a 0% rate.
 
     All three results are captured in NonAccrualResult for cross-validation.
 
@@ -559,6 +572,12 @@ def _extract_nonaccrual_from_xbrl(
     elif aggregate_value is not None:
         method = 'aggregate_concept'
         nonaccrual_fv = aggregate_value
+    elif recognized_footnotes == 0 and _tagged_zero(all_facts, period):
+        # A footnote flag outranks a tagged zero, even one that resolved no
+        # holdings: Antares Strategic Credit tags PortfolioCompaniesNonAccrual = 0
+        # beside "Position is on non-accrual status".
+        method = 'tagged_zero'
+        nonaccrual_fv = Decimal(0)
     else:
         method = 'none'
         nonaccrual_fv = None
@@ -644,10 +663,20 @@ def _schedule_on_identifier_axis(all_facts: List[dict], period: str) -> bool:
                and f.get('period_instant') == period for f in all_facts)
 
 
+def _fair_values_by_position(all_facts: List[dict]) -> Dict[tuple, List[dict]]:
+    """Dimensioned InvestmentOwnedAtFairValue facts keyed by ``(_position_key, instant)``."""
+    index: Dict[tuple, List[dict]] = {}
+    for fact in all_facts:
+        if fact.get('concept') == CONCEPT_FAIR_VALUE and _dims(fact):
+            index.setdefault((_position_key(fact), fact.get('period_instant')), []).append(fact)
+    return index
+
+
 def _investment_fv_facts_for_footnote(
     footnote,
     fact_by_id: Dict[str, dict],
     identifier_axis: bool = True,
+    fv_by_position: Optional[Dict[tuple, List[dict]]] = None,
 ) -> List[dict]:
     """Enriched investment fair-value facts a footnote is linked to (any period).
 
@@ -655,20 +684,39 @@ def _investment_fv_facts_for_footnote(
     it, any dimensioned fact does: schedules tagged before the identifier axis
     name a holding by a set of axes instead (TPVG FY2024: industry, instrument,
     loan and a company axis of its own; edgartools-jv32z).
+
+    A footnote linked to another cell of a holding's row stands for that
+    holding's fair value at the same date. New Mountain Finance attaches its
+    non-accrual footnote to the PIK rate and spread, never the fair value, and
+    SuRo to the principal (edgartools-jv8b8); ``fv_by_position`` (from
+    ``_fair_values_by_position``) resolves them. Only instant facts resolve: a
+    flag on a duration fact is not a flag at its end date (Logan Ridge marks
+    its Q1 2025 industry name for a loan its schedule does not mark).
+    Undimensioned facts are never positions, so a footnote on a total pulls in
+    nothing.
     """
     facts: List[dict] = []
+    seen: set = set()
     for fact_id in footnote.related_fact_ids:
         enriched = fact_by_id.get(fact_id)
         if enriched is None:
-            continue
-        if enriched.get('concept', '') != CONCEPT_FAIR_VALUE:
             continue
         if identifier_axis:
             if enriched.get(DIM_KEY) is None:
                 continue
         elif not _dims(enriched):
             continue
-        facts.append(enriched)
+        if enriched.get('concept', '') == CONCEPT_FAIR_VALUE:
+            resolved = [enriched]
+        elif fv_by_position is not None and enriched.get('period_instant'):
+            resolved = fv_by_position.get((_position_key(enriched), enriched['period_instant']), [])
+        else:
+            continue
+        for fact in resolved:
+            key = fact.get('fact_id') or (fact.get('concept'), _position_key(fact), fact.get('period_instant'))
+            if key not in seen:
+                seen.add(key)
+                facts.append(fact)
     return facts
 
 
@@ -750,6 +798,7 @@ def _extract_from_footnotes(
         return [], 0
 
     identifier_axis = _schedule_on_identifier_axis(all_facts, period)
+    fv_by_position = _fair_values_by_position(all_facts)
     flagged: List[Tuple[dict, str]] = []
     recognized = 0
 
@@ -763,7 +812,7 @@ def _extract_from_footnotes(
 
         # Pre-compute investment linkage so the classifier can use structure
         # as corroboration for wording it doesn't recognize.
-        linked_fv_facts = _investment_fv_facts_for_footnote(footnote, fact_by_id, identifier_axis)
+        linked_fv_facts = _investment_fv_facts_for_footnote(footnote, fact_by_id, identifier_axis, fv_by_position)
         linked_to_investments = bool(linked_fv_facts)
 
         if not _classify_nonaccrual_footnote(text_lower, linked_to_investments):
@@ -924,6 +973,46 @@ def _extract_aggregate_concept(
                 except (ValueError, InvalidOperation):
                     pass
     return None
+
+
+# ---------------------------------------------------------------------------
+# Layer 4: a tagged zero
+# ---------------------------------------------------------------------------
+
+# Non-accrual concepts whose zero does not mean "no investments on non-accrual":
+# policy text, the days-past-due threshold, interest income recognized on
+# non-accrual loans, and the part of them with no allowance.
+_NOT_A_NONACCRUAL_BALANCE = re.compile(
+    r'textblock|policy|threshold|pastdue|income|allowance|writeoff|reversal|reversed|recover'
+)
+
+
+def _tagged_zero(all_facts: List[dict], period: str) -> bool:
+    """Whether the filer tags its non-accruals at *period* as zero, and nothing else.
+
+    Many BDCs with no non-accruals have no footnote to read but tag an amount or
+    count of zero: Stone Point Credit tags
+    us-gaap:FinancingReceivableRecordedInvestmentNonaccrualStatus = 0, AGL
+    NumberPortfolioCompanyInvestmentOnNonAccrualStatus = 0 (edgartools-rol2k).
+    Only undimensioned facts at the instant count, and all of them must be zero:
+    a non-zero amount or count, at cost or at fair value, rules it out.
+    """
+    found = False
+    for fact in all_facts:
+        concept = (fact.get('concept') or '').lower()
+        if 'nonaccrual' not in concept and 'non_accrual' not in concept:
+            continue
+        if _NOT_A_NONACCRUAL_BALANCE.search(concept):
+            continue
+        if fact.get('period_instant') != period or _dims(fact):
+            continue
+        value = fact.get('numeric_value')
+        if value is None or pd.isna(value):
+            continue
+        if float(value) != 0:
+            return False
+        found = True
+    return found
 
 
 # ---------------------------------------------------------------------------
