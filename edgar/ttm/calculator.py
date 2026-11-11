@@ -111,15 +111,26 @@ EPS_NUMERATOR_CONCEPTS = {
     ),
 }
 
+# How far apart the filer's own preferred and substitute EPS numerators may be
+# (relative to the preferred value) before the substitute is refused. GH #1692
+# refuses a substitute the filer shows differing materially, such as net income
+# where preferred dividends separate it from income available to common (10% in
+# that issue's case). A gap within 0.5% bounds the EPS error at 0.5%: GOOGL's
+# Q3 2026 10-Q (0001652044-26-000084) tags 9M diluted 201,239M against basic
+# 200,855M (0.19%), which left TTM diluted EPS NaN wherever a diluted quarter
+# was missing (bead edgartools-91gqw).
+EPS_NUMERATOR_REL_TOLERANCE = 0.005
+
 
 def numerator_agrees_within(preferred: List[FinancialFact], substitute: List[FinancialFact],
                             start: date, end: date) -> bool:
     """May ``substitute`` stand in for the ``preferred`` EPS numerator over [start, end]?
 
     Yes unless the filer's own facts say they differ: some period overlapping the
-    span is tagged with both concepts and the latest-filed values disagree (a
-    preferred dividend, say, separates income available to common from net
-    income). Periods tagged with only one of them are no evidence either way.
+    span is tagged with both concepts and the latest-filed values disagree by
+    more than ``EPS_NUMERATOR_REL_TOLERANCE`` of the preferred value (a preferred
+    dividend, say, separates income available to common from net income).
+    Periods tagged with only one of them are no evidence either way.
     """
     def latest_by_period(facts):
         best = {}
@@ -136,7 +147,10 @@ def numerator_agrees_within(preferred: List[FinancialFact], substitute: List[Fin
     substitutes = latest_by_period(substitute)
     for key, fact in latest_by_period(preferred).items():
         other = substitutes.get(key)
-        if other is not None and abs(fact.numeric_value - other.numeric_value) > max(1.0, 1e-6 * abs(other.numeric_value)):
+        if other is None:
+            continue
+        allowed = max(1.0, EPS_NUMERATOR_REL_TOLERANCE * abs(fact.numeric_value))
+        if abs(fact.numeric_value - other.numeric_value) > allowed:
             return False
     return True
 
