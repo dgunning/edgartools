@@ -5,9 +5,9 @@ standardized as NonoperatingIncomeExpense
 ``us-gaap:GrossInvestmentIncomeOperating`` is an investment company's operating
 total (interest + dividends + fees). ``gaap_mappings.json`` mapped it to
 ``NonoperatingIncomeExpense``, so ``standard_concept`` called the top line of
-every BDC statement of operations nonoperating. There is no standard concept
-with that meaning, so the mapping is removed and the row keeps its filed label,
-concept and amounts with no standard concept.
+every BDC statement of operations nonoperating. #1915 removed the mapping; the
+follow-up decision (bead edgartools-k7mi8.6) maps it to ``Revenue``, the
+investment company's top line, so it is never nonoperating.
 
 Ground truth (read from the filings):
 - Golub Capital BDC 10-Q for the quarter ended 2025-03-31, accession
@@ -40,13 +40,14 @@ def _total_investment_income_row(statement) -> pd.Series:
 
 
 def test_gross_investment_income_operating_has_no_nonoperating_mapping():
-    assert get_reverse_index().lookup("us-gaap:GrossInvestmentIncomeOperating") is None
+    result = get_reverse_index().lookup("us-gaap:GrossInvestmentIncomeOperating")
+    assert result.standard_concepts == ["Revenue"]  # edgartools-k7mi8.6; was None after #1915
 
 
 def test_gbdc_total_investment_income_is_not_nonoperating():
     statement = XBRL.from_directory(FIXTURE).statements.income_statement()
     row = _total_investment_income_row(statement)
-    assert pd.isna(row["standard_concept"])
+    assert row["standard_concept"] == "Revenue"
     assert row["2025-03-31 (Q2)"] == 213_892_000
 
 
@@ -58,5 +59,5 @@ def test_bbdc_total_investment_income_is_not_nonoperating():
     statement = xbrl.statements[
         "http://ir.barings.com/role/UnauditedConsolidatedStatementsofOperations"]
     row = _total_investment_income_row(statement)
-    assert pd.isna(row["standard_concept"])
+    assert row["standard_concept"] == "Revenue"
     assert row["2026-06-30 (Q2)"] == 65_202_000

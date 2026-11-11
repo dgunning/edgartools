@@ -149,6 +149,8 @@ The number of standardized concepts varies by provider:
 | `Revenue` | Revenue | 139 | `AdmissionsRevenue`, `AdvertisingRevenue`, `BinderSalesRevenue`, ... |
 | `CostOfGoodsAndServicesSold` | Cost of Revenue | 142 | `AdvertisingRevenueCost`, `AffiliateCosts`, `AircraftRentalAndLandingFees`, ... |
 | `GrossProfit` | Gross Profit | 1 | `GrossProfit` |
+| `InvestmentExpenses` | Investment Expenses | 1 | `InvestmentIncomeInvestmentExpense` |
+| `NetInvestmentIncome` | Net Investment Income | 1 | `NetInvestmentIncome` |
 
 
 ### Income Statement - Operating Expenses
@@ -292,6 +294,22 @@ This includes:
 - `SalesRevenueNet`
 - `SalesRevenueGoodsNet`
 - And 135 more industry-specific variations
+
+#### Investment Companies (BDCs)
+
+A BDC's statement of operations runs total investment income, less expenses, equals net
+investment income. Total investment income (`GrossInvestmentIncomeOperating`) is its
+`Revenue`; total expenses are `InvestmentExpenses`; net investment income is
+`NetInvestmentIncome`, never `Revenue`. An insurer's net investment income is one line
+inside its revenues and takes `NetInvestmentIncome` too, so its `Revenue` is still the
+filed total.
+
+```python
+df = xbrl.statements.income_statement().to_dataframe(standard=True)
+df[~df["dimension"] & (df["standard_concept"] == "Revenue")]
+# Main Street Capital, FY2025: $566.4M total investment income
+# ($199.7M InvestmentExpenses, $366.7M NetInvestmentIncome)
+```
 
 #### Cost of Revenue
 

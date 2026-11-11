@@ -441,7 +441,9 @@
           "SellingGeneralAndAdministrativeExpense",
           "OtherNonoperatingIncomeExpense",
           "CryptoAssetUnrealizedGainLossOperatingAndNonoperating",
-          "CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating"
+          "CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating",
+          "GrossInvestmentIncomeOperating",
+          "InvestmentIncomeInvestmentExpense"
         ],
         "occurrence_rate": 0.8821752265861027,
         "is_abstract": true,
@@ -651,6 +653,26 @@
         "occurrence_rate": 0.01,
         "is_abstract": false,
         "is_total": false
+      },
+      "GrossInvestmentIncomeOperating": {
+        "concept": "GrossInvestmentIncomeOperating",
+        "label": "Total Investment Income",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.6515679442508713,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "InvestmentIncomeInvestmentExpense": {
+        "concept": "InvestmentIncomeInvestmentExpense",
+        "label": "Total Investment Expenses",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.6515679442508713,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": true
       }
     },
     "roots": [

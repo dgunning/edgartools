@@ -592,9 +592,17 @@ class Financials:
         # and MGE Energy's returned its $29.6M "Gas revenue" component for a
         # $161.2M total (gh #1665). It is a total, so it goes before contract
         # revenue, which a utility can report as one of its components.
+        #
+        # A BDC's top line is total investment income
+        # (us-gaap:GrossInvestmentIncomeOperating: interest, dividends and fees
+        # before expenses). The 'Revenue' list above comes from
+        # concept_mappings.json, not gaap_mappings.json, so it does not carry
+        # it, and Main Street's FY2025 10-K returned None for $566.4M
+        # (edgartools-k7mi8.6). An insurer files Revenues, which comes first.
         result = self._get_standardized_concept_by_xbrl(
             'income',
-            ['Revenue', 'us-gaap_RevenuesNetOfInterestExpense',
+            ['Revenue', 'us-gaap_GrossInvestmentIncomeOperating',
+             'us-gaap_RevenuesNetOfInterestExpense',
              'us-gaap_RegulatedAndUnregulatedOperatingRevenue'],
             period_offset
         )

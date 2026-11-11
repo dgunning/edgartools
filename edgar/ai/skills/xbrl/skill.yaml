@@ -158,6 +158,18 @@ patterns:
       # Some filers put these in the income tax note, not the cash flow statement.
       # The total stays unmapped: use facts.get_concept("income_taxes_paid") (EntityFacts).
 
+  - name: BDC Revenue and Net Investment Income
+    when: Revenue, expenses or net investment income of a BDC or other investment company
+    code: |
+      df = xbrl.statements.income_statement().to_dataframe(standard=True)
+      plain = df[~df["dimension"]]
+      plain[plain["standard_concept"].isin(["Revenue", "InvestmentExpenses", "NetInvestmentIncome"])]
+      # Revenue = total investment income (GrossInvestmentIncomeOperating); Main Street FY2025: 566.4M
+      # InvestmentExpenses = total expenses; NetInvestmentIncome = income less expenses (366.7M), never Revenue
+      from edgar.financials import Financials
+      Financials(xbrl).get_revenue()   # total investment income for a BDC
+      # An insurer's NetInvestmentIncome is one line inside Revenues; its Revenue is the filed total.
+
 when_to_use:
   appropriate:
     - Segment/dimensional breakdowns

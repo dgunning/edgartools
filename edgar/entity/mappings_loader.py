@@ -416,6 +416,13 @@ _FALLBACK_CONCEPT_MAPPINGS = {
     'ProceedsFromIncomeTaxRefundFederal': 'CashFlowStatement',
     'ProceedsFromIncomeTaxRefundStateAndLocal': 'CashFlowStatement',
     'ProceedsFromIncomeTaxRefundForeign': 'CashFlowStatement',
+    # An investment company's (BDC's) statement of operations: total
+    # investment income and total expenses (edgartools-k7mi8.6). The learned
+    # data has neither, so their facts carried no statement and a BDC's income
+    # statement showed net investment income with nothing above it.
+    # NetInvestmentIncome already comes from concept_linkages.json.
+    'GrossInvestmentIncomeOperating': 'IncomeStatement',
+    'InvestmentIncomeInvestmentExpense': 'IncomeStatement',
 }
 
 
