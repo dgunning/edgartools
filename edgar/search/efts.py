@@ -41,9 +41,8 @@ EFTS_LAST_OFFSET = EFTS_RESULT_WINDOW - EFTS_PAGE_SIZE
 class EFTSResult:
     """A single filing result from EFTS full-text search.
 
-    ``company`` is the filer's name with the ticker and CIK decoration EFTS
-    appends removed (``NVIDIA CORP  (NVDA)  (CIK 0001045810)`` is
-    ``NVIDIA CORP``). The CIK stays on ``cik``.
+    ``company`` is the filer name with EFTS ticker and CIK decoration removed.
+    The CIK stays on ``cik``.
     """
     accession_number: str
     form: str
