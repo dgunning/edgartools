@@ -420,18 +420,71 @@ def _num_dash(value: str) -> str:
 # Duration transforms (ixt-sec)
 # ---------------------------------------------------------------------------
 
-def _duration_number(designator: str, time_part: bool = False) -> Callable[[str], str]:
-    """A bare count of years/months/days/hours to an xs:duration."""
+# An xs:duration allows a fraction only on its seconds, so the SEC's rules
+# spill a fractional count into the next smaller unit and truncate there:
+# 9.5 years is P9Y6M, 2.5 months P2M15D (a month is 30.4375 days), 1.5 days
+# P1DT12H, 1.5 weeks P10D (xs:duration has no weeks) and 1.5 hours PT1H.
+_DAYS_PER_MONTH = Decimal('30.4375')
+
+
+def _split_years(n: Decimal):
+    years = int(n)
+    months = (n - years) * 12
+    return years, int(months), int((months - int(months)) * _DAYS_PER_MONTH), None
+
+
+def _split_months(n: Decimal):
+    months = int(n)
+    return None, months, int((n - months) * _DAYS_PER_MONTH), None
+
+
+def _split_weeks(n: Decimal):
+    return None, None, int(n * 7), None
+
+
+def _split_days(n: Decimal):
+    days = int(n)
+    return None, None, days, int((n - days) * 24)
+
+
+def _split_hours(n: Decimal):
+    return None, None, None, int(n)
+
+
+_DURATION_SPLITS = {'Y': _split_years, 'M': _split_months, 'W': _split_weeks,
+                    'D': _split_days, 'H': _split_hours}
+
+
+def _duration_lexical(years, months, days, hours, negative: bool = False) -> str:
+    """
+    Components to an xs:duration, as the SEC's ixt-sec implementation writes it.
+
+    ``None`` means the rule does not produce that component. The first component
+    the rule produces is always written and a later one only when it is not zero,
+    so 9 years is ``P9Y``, half a year ``P0Y6M``, and zero years ``P0Y`` with no sign.
+    """
+    parts = [(years, 'Y'), (months, 'M'), (days, 'D'), (hours, 'H')]
+    produced = [(count, unit) for count, unit in parts if count is not None]
+    if not any(count for count, _ in produced):
+        negative = False
+    produced = produced[:1] + [(count, unit) for count, unit in produced[1:] if count]
+    date_part = ''.join(f"{count}{unit}" for count, unit in produced if unit != 'H')
+    time_part = ''.join(f"T{count}H" for count, unit in produced if unit == 'H')
+    return ('-' if negative else '') + 'P' + date_part + time_part
+
+
+def _duration_number(designator: str) -> Callable[[str], str]:
+    """A count of years/months/weeks/days/hours to an xs:duration."""
+    split = _DURATION_SPLITS[designator]
+
     def transform(value: str) -> str:
         text = _clean(value)
         # "10", "10 years" and "10-year" all appear in filings for these formats.
-        text = re.sub(r'[-\s]*(years?|months?|days?|hours?)$', '', text, flags=re.I).strip()
-        if not re.fullmatch(r'\d+(\.\d+)?', text):
+        text = re.sub(r'[-\s]*(years?|months?|weeks?|days?|hours?)$', '', text, flags=re.I).strip()
+        if not re.fullmatch(r'[+-]?(\d+(\.\d*)?|\.\d+)', text):
             text = _num_words_en(text)
-        number = text.rstrip('.')
-        if number.startswith('.'):
-            number = '0' + number
-        return f"PT{number}{designator}" if time_part else f"P{number}{designator}"
+        number = Decimal(text)
+        return _duration_lexical(*split(abs(number)), negative=number < 0)
 
     return transform
 
@@ -445,6 +498,11 @@ _DURATION_ORDER = ('Y', 'M', 'W', 'D', 'H', 'MIN', 'S')
 # text took 7 s; anything longer than this cannot be a duration and is refused
 # before matching (attack-surface audit 2026-10-22).
 _DUR_WORDS_MAX_LEN = 200
+
+
+_DUR_WORDS_PART = re.compile(
+    r'([\w\s-]+?)[\s-]+(years?|months?|weeks?|days?|hours?|minutes?|seconds?)\b')
+_DUR_WORDS_GAP = re.compile(r'[\s,;-]*(?:and\b[\s-]*)?')
 
 
 def _dur_words_en(value: str) -> str:
@@ -463,30 +521,50 @@ def _dur_words_en(value: str) -> str:
         raise _fail(text[:40] + '...',
                     f'an English duration (longer than {_DUR_WORDS_MAX_LEN} characters)')
     text = re.sub(r"'s\b|\bs\b", '', text)
-    parts = re.findall(r'([\w\s]+?)[\s-]+(years?|months?|weeks?|days?|hours?|minutes?|seconds?)\b', text)
-    if not parts:
+    matches = list(_DUR_WORDS_PART.finditer(text))
+    # Every character must belong to a component or to the punctuation between
+    # them. findall alone skipped what it could not read, so "5.5 years" lost
+    # its "5." and came out as P5Y.
+    ends = [0] + [m.end() for m in matches]
+    starts = [m.start() for m in matches] + [len(text)]
+    if not matches or any(_DUR_WORDS_GAP.fullmatch(text[e:s]) is None for e, s in zip(ends, starts, strict=True)):
         raise _fail(value, 'an English duration')
+    parts = [m.groups() for m in matches]
 
-    amounts: Dict[str, str] = {}
+    amounts: Dict[str, int] = {}
     for count_text, unit_text in parts:
-        count_text = count_text.replace(' and ', ' ').strip()
-        count_text = re.sub(r'^(a|an|the|of|for|approximately|about|up to)\b\s*', '', count_text).strip()
-        if not count_text:
-            count_text = 'one'
-        count = count_text if re.fullmatch(r'\d+(\.\d+)?', count_text) else _num_words_en(count_text)
-        unit = _DURATION_UNITS[unit_text.rstrip('s')]
-        if unit_text.startswith('minute'):
-            unit = 'MIN'
+        unit = 'MIN' if unit_text.startswith('minute') else _DURATION_UNITS[unit_text.rstrip('s')]
         if unit in amounts:
             raise _fail(value, 'an English duration with distinct units')
-        amounts[unit] = count
+        amounts[unit] = _duration_word_count(count_text, value)
 
-    date_part = ''.join(f"{amounts[u]}{u}" for u in ('Y', 'M', 'W', 'D') if u in amounts)
+    # xs:duration has no weeks; a week is seven days, as in ixt-sec:durweek.
+    if 'W' in amounts:
+        amounts['D'] = amounts.get('D', 0) + 7 * amounts.pop('W')
+    date_part = ''.join(f"{amounts[u]}{u}" for u in ('Y', 'M', 'D') if u in amounts)
     time_units = [(u, 'M' if u == 'MIN' else u) for u in ('H', 'MIN', 'S') if u in amounts]
     time_part = ''.join(f"{amounts[u]}{designator}" for u, designator in time_units)
     if not date_part and not time_part:
         raise _fail(value, 'an English duration')
     return 'P' + date_part + ('T' + time_part if time_part else '')
+
+
+def _duration_word_count(count_text: str, value: str) -> int:
+    """
+    One duration component's count, written in words or digits.
+
+    The SEC's grammar for these phrases takes whole numbers only: "5.5 years"
+    is not one of them, and writing it as P5.5Y is not an xs:duration either.
+    """
+    count_text = count_text.replace(' and ', ' ').strip()
+    count_text = re.sub(r'^(a|an|the|of|for|approximately|about|up to)\b\s*', '', count_text).strip()
+    if not count_text:
+        return 1
+    if re.fullmatch(r'\d+', count_text):
+        return int(count_text)
+    if re.fullmatch(r'\d*\.\d+', count_text):
+        raise _fail(value, 'an English duration in whole units')
+    return int(_num_words_en(count_text))
 
 
 # ---------------------------------------------------------------------------
@@ -781,7 +859,7 @@ _IXT_SEC: Dict[str, Callable[[str], str]] = {
     'durmonth': _duration_number('M'),
     'durweek': _duration_number('W'),
     'durday': _duration_number('D'),
-    'durhour': _duration_number('H', time_part=True),
+    'durhour': _duration_number('H'),
     'durwordsen': _dur_words_en,
     'datequarterend': _date_quarter_end,
     'numinf': _fixed('INF'),
