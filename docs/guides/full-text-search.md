@@ -322,7 +322,7 @@ search_filings(
 | `accession_number` | `str` | Filing accession number |
 | `form` | `str` | Form type |
 | `filed` | `str` | Filing date (YYYY-MM-DD) |
-| `company` | `str` | Company name |
+| `company` | `str` | Company name, without the ticker and CIK EFTS appends |
 | `cik` | `str` | CIK number |
 | `score` | `float` | EFTS relevance score |
 | `file_type` | `str` | Document type that matched (EX-10.1, 8-K, etc.) |

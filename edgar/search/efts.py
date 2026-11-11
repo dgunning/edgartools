@@ -39,7 +39,12 @@ EFTS_LAST_OFFSET = EFTS_RESULT_WINDOW - EFTS_PAGE_SIZE
 
 @dataclass
 class EFTSResult:
-    """A single filing result from EFTS full-text search."""
+    """A single filing result from EFTS full-text search.
+
+    ``company`` is the filer's name with the ticker and CIK decoration EFTS
+    appends removed (``NVIDIA CORP  (NVDA)  (CIK 0001045810)`` is
+    ``NVIDIA CORP``). The CIK stays on ``cik``.
+    """
     accession_number: str
     form: str
     filed: str
@@ -506,11 +511,17 @@ def _parse_hit(hit: dict) -> EFTSResult:
     raw_id = hit.get("_id", "")
     document_id = raw_id.split(":", 1)[1] if ":" in raw_id else None
 
+    # Same cleaner resolve_accession uses. It returns "" for "" and raises on
+    # None, so a null name is left as None and an empty name stays empty.
+    selected_name = names[0] if names else None
+    if isinstance(selected_name, str):
+        selected_name = _clean_display_name(selected_name)
+
     return EFTSResult(
         accession_number=_format_accession(source.get("adsh", "")),
         form=source.get("form", ""),
         filed=source.get("file_date", ""),
-        company=names[0] if names else None,
+        company=selected_name,
         cik=str(ciks[0]) if ciks else None,
         period=source.get("period_ending"),
         score=hit.get("_score", 0.0) or 0.0,
