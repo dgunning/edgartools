@@ -5,9 +5,12 @@ This module contains utility functions for rendering and converting stitched
 statement data.
 """
 
-from typing import Any, Dict, List, Optional
+from collections import Counter
+from typing import Any, Dict, List, Optional, Tuple
 
 import pandas as pd
+
+from edgar.exceptions import ValidationError
 
 
 def render_stitched_statement(
@@ -57,7 +60,49 @@ def render_stitched_statement(
     )
 
 
-def to_pandas(stitched_data: Dict[str, Any], presentation: bool = True) -> pd.DataFrame:
+PERIOD_COLUMN_FORMATS = ("end_date", "interval")
+
+
+def _interval_column(period_id: str) -> str:
+    """The exact-interval column name of one stitched period id (GH #1741)."""
+    parts = period_id.split('_')
+    if parts[0] == 'instant' and len(parts) == 2:
+        return parts[1]
+    if parts[0] == 'duration' and len(parts) == 3:
+        return f"{parts[1]} to {parts[2]}"
+    raise ValidationError(
+        f"Cannot name the stitched period {period_id!r} by its interval: expected "
+        "'instant_<date>' or 'duration_<start>_<end>'",
+        parameter="period_columns", invalid_value=period_id,
+        suggestions=["Use period_columns='end_date' for periods without exact dates"])
+
+
+def period_column_names(periods: List[Tuple[str, str]], period_columns: str = "end_date") -> List[str]:
+    """Name the DataFrame column of each stitched ``(period_id, label)``, in order.
+
+    ``"end_date"`` (the default) names a column by its end date, ``2023-07-01``, and
+    falls back to the period label when two selected periods share an end date. A
+    name can therefore depend on which other periods were selected, and a three-,
+    six- and nine-month column look alike. ``"interval"`` names every column by its
+    exact dates, whatever else was selected: ``2022-09-25 to 2023-07-01`` for a
+    duration and ``2023-07-01`` for an instant (GH #1741).
+    """
+    if period_columns == "interval":
+        return [_interval_column(period_id) for period_id, _ in periods]
+    if period_columns != "end_date":
+        raise ValidationError(
+            f"period_columns must be one of {PERIOD_COLUMN_FORMATS}, got {period_columns!r}",
+            parameter="period_columns", invalid_value=period_columns,
+            suggestions=list(PERIOD_COLUMN_FORMATS))
+    # When two periods share an end date (a 10-Q's discrete quarter and its YTD
+    # under include_quarterly=True, GH #780), fall back to the period label.
+    end_date_counts = Counter(period_id[-10:] for period_id, _ in periods)
+    return [period_id[-10:] if end_date_counts[period_id[-10:]] == 1 else period_label
+            for period_id, period_label in periods]
+
+
+def to_pandas(stitched_data: Dict[str, Any], presentation: bool = True,
+              period_columns: str = "end_date") -> pd.DataFrame:
     """
     Convert stitched statement data to a pandas DataFrame.
 
@@ -66,6 +111,8 @@ def to_pandas(stitched_data: Dict[str, Any], presentation: bool = True) -> pd.Da
         presentation: If True (default), apply preferred_sign to values so they match
                      SEC HTML display (e.g., cash outflows shown as negative).
                      If False, return raw XBRL instance values.
+        period_columns: ``"end_date"`` (default) or ``"interval"``; see
+                     :func:`period_column_names`.
 
     Returns:
         DataFrame with periods as columns and concepts as index
@@ -73,21 +120,10 @@ def to_pandas(stitched_data: Dict[str, Any], presentation: bool = True) -> pd.Da
     # Extract periods and statement data
     statement_data = stitched_data['statement_data']
 
-    # Create ordered list of period column names (preserving the original ordering).
-    # Default naming uses the end_date (YYYY-MM-DD); when two periods share the same
-    # end date (e.g., a 10-Q's discrete Q and YTD both end the same day under
-    # include_quarterly=True, GH #780), fall back to the disambiguated period_label.
-    end_date_counts: Dict[str, int] = {}
-    for period_id, _ in stitched_data['periods']:
-        end_date_counts[period_id[-10:]] = end_date_counts.get(period_id[-10:], 0) + 1
-
-    period_id_to_col: Dict[str, str] = {}
-    period_columns: List[str] = []
-    for period_id, period_label in stitched_data['periods']:
-        end_date = period_id[-10:]
-        col = end_date if end_date_counts[end_date] == 1 else period_label
-        period_id_to_col[period_id] = col
-        period_columns.append(col)
+    # Column names in period order (newest first)
+    period_columns = period_column_names(stitched_data['periods'], period_columns)
+    period_id_to_col = {period_id: col
+                        for (period_id, _), col in zip(stitched_data['periods'], period_columns, strict=True)}
 
     # Create a dictionary for the DataFrame with ordered columns
     # Start with metadata columns
