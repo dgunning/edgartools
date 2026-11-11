@@ -360,6 +360,11 @@ cash_flow = multi_financials.cash_flow_statement()
 # Use view="detailed" to include dimensional breakdowns (e.g., cost by segment)
 income_detailed = multi_financials.income_statement(view="detailed")
 
+# From 10-Qs, include_quarterly=True adds the quarter each filing reports
+# next to its year-to-date column (the default shows year-to-date only)
+quarterly = MultiFinancials.extract(company.get_filings(form="10-Q").head(2))
+quarterly_income = quarterly.income_statement(include_quarterly=True)
+
 print("Multi-Year Income Statement:")
 print(income_statement)
 ```

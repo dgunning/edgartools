@@ -1,105 +1,108 @@
 # SPDX-FileCopyrightText: 2022-present Dwight Gunning <dgunning@gmail.com>
 #
 # SPDX-License-Identifier: MIT
+import functools
 import logging
 import re
-import functools
+from typing import TYPE_CHECKING as _TYPE_CHECKING
 
-from edgar.__about__ import __version__
+if _TYPE_CHECKING:  # annotations only; nothing is imported at runtime (see below)
+    from edgar._filings import Filing
+    from edgar.entity import CompanySearchResults, Entity
+    from edgar.exceptions import DataObjectError
+    from edgar.funds import FundClass, FundCompany, FundSeries
 
-from edgar._filings import (
-    Attachment,
-    Attachments,
-    Filing,
-    FilingHeader,
-    FilingHomepage,
-    Filings,
-    get_by_accession_number,
-    get_filings,
-)
-from edgar._filings import get_by_accession_number_enriched as _get_by_accession_number_enriched
-from edgar.core import listify as _listify
-from edgar.settings import get_identity, set_identity
-from edgar.exceptions import (
-    AttachmentNotFoundError,
-    CompanyFactsNotFoundError,
-    CompanyNotFoundError,
-    DataObjectError,
-    EdgarError,
-    FilingNotFoundError,
-    IdentityNotSetError,
-    NotFoundError,
-    ParsingError,
-    SectionNotFoundError,
-    StatementNotFoundError,
-    TooManyRequestsError,
-    TransportError,
-    ValidationError,
-)
-from edgar.current_filings import CurrentFilings, get_all_current_filings, get_current_filings, iter_current_filings_pages
+# ---------------------------------------------------------------------------
+# `import edgar` imports no edgar submodule (GH #1325, bead edgartools-07lk.9).
+#
+# Every top-level name is served on first access by the module `__getattr__` at
+# the bottom of this file (PEP 562), from the table below. This is a correctness
+# rule, not only an import-cost one. A thread running
+# `from edgar.reference import describe_form` takes the import lock of
+# `edgar.reference` and then needs `edgar`. While this file imported its
+# submodules eagerly, a second thread running `import edgar` held `edgar`'s lock
+# and needed `edgar.reference`, and both imports failed (3 of 3). Ten modules
+# reached during package init imported `edgar.reference`, so removing any one
+# edge only moved the failure. With nothing imported here, the package lock is
+# held for a few statements only, and the other thread simply waits for them.
+#
+# So do not add a module-level `from edgar.x import ...` to this file: add the
+# name to _EXPORTS_BY_MODULE, and import inside any function defined here.
+# tests/issues/regression/test_issue_1325.py pins this.
+# ---------------------------------------------------------------------------
+_EXPORTS_BY_MODULE = {
+    "edgar.__about__": ("__version__",),
+    "edgar._filings": (
+        "Attachment", "Attachments", "Filing", "FilingHeader", "FilingHomepage", "Filings",
+        "get_by_accession_number", "get_filings",
+    ),
+    "edgar.settings": ("get_identity", "set_identity"),
+    "edgar.exceptions": (
+        "AttachmentNotFoundError", "CompanyFactsNotFoundError", "CompanyNotFoundError",
+        "DataObjectError", "EdgarError", "FilingNotFoundError", "IdentityNotSetError",
+        "NotFoundError", "ParsingError", "SectionNotFoundError", "StatementNotFoundError",
+        "TooManyRequestsError", "TransportError", "ValidationError",
+    ),
+    "edgar.current_filings": (
+        "CurrentFilings", "get_all_current_filings", "get_current_filings", "iter_current_filings_pages",
+    ),
+    "edgar.diagnose_ssl": ("diagnose_ssl",),
+    "edgar.entity": (
+        "Company", "CompanyData", "CompanyFiling", "CompanyFilings", "CompanySearchResults",
+        "Entity", "EntityData", "find_company", "get_company_facts", "get_company_tickers",
+        "get_entity", "get_icon_from_ticker",
+    ),
+    "edgar.filesystem": ("is_cloud_storage_enabled", "sync_to_cloud", "use_cloud_storage"),
+    "edgar.financials": ("Financials", "MultiFinancials"),
+    "edgar.funds": ("Fund", "FundClass", "FundCompany", "FundSeries", "find_fund", "find_funds"),
+    "edgar.funds.ncen": ("NCEN_FORMS", "FundCensus"),
+    "edgar.funds.ncsr": ("NCSR_FORMS", "FundShareholderReport"),
+    "edgar.funds.nmfp3": ("MONEY_MARKET_FORMS", "NMFP2_FORMS", "NMFP3_FORMS", "MoneyMarketFund"),
+    "edgar.funds.prospectus497k": ("PROSPECTUS497K_FORMS", "Prospectus497K"),
+    "edgar.funds.reports": ("NPORT_FORMS", "FundReport"),
+    "edgar.ats": (
+        "ATS_N_ALL_FORMS", "ATS_N_AMENDMENT_FORMS", "ATS_N_FORMS", "ATS_N_WITHDRAWAL_FORMS",
+        "AlternativeTradingSystem", "AlternativeTradingSystemWithdrawal",
+    ),
+    "edgar.bdc": ("BDCEntities", "BDCEntity", "get_bdc_list", "get_active_bdc_ciks", "is_bdc_cik"),
+    "edgar.httpclient": ("configure_http", "get_http_config"),
+    "edgar.npx": ("NPX",),
+    "edgar.proxy": ("PROXY_FORMS", "ProxyContests", "ProxyStatement", "proxy_contests"),
+    "edgar.storage": (
+        "StorageAnalysis", "StorageInfo", "analyze_storage", "availability_summary", "check_filing",
+        "check_filings_batch", "cleanup_storage", "clear_cache", "download_edgar_data",
+        "download_filings", "is_using_datamule_storage", "is_using_local_storage", "optimize_storage",
+        "set_local_storage_path", "storage_info", "use_datamule_storage", "use_local_storage",
+    ),
+    "edgar.correspondence": (
+        "CORRESPONDENCE_FORMS", "Correspondence", "CorrespondenceThread", "CorrespondenceType",
+    ),
+    "edgar.search.efts": ("EFTSResult", "EFTSSearch", "search_filings"),
+    "edgar.thirteenf": ("THIRTEENF_FORMS", "ThirteenF"),
+    "edgar.xbrl": ("XBRL",),
+    # The ownership family was the first lazy group (bead edgartools-07lk.12.1.1):
+    # edgar.Form4 is edgar.ownership.Form4, so isinstance agrees across spellings.
+    "edgar.ownership": ("Form3", "Form4", "Form5"),
+    "edgar.ownership.form144": ("Form144",),
+    "edgar.beneficial_ownership": ("Schedule13D", "Schedule13G"),
+}
+_LAZY_EXPORTS = {name: module for module, names in _EXPORTS_BY_MODULE.items() for name in names}
 
-# SSL diagnostic function
-from edgar.diagnose_ssl import diagnose_ssl
-from edgar.entity import (
-    Company,
-    CompanyData,
-    CompanyFiling,
-    CompanyFilings,
-    CompanyNotFoundError,
-    CompanySearchResults,
-    Entity,
-    EntityData,
-    find_company,
-    get_company_facts,
-    get_company_tickers,
-    get_entity,
-    get_icon_from_ticker,
-)
-from edgar.filesystem import is_cloud_storage_enabled, sync_to_cloud, use_cloud_storage
-from edgar.financials import Financials, MultiFinancials
-from edgar.funds import Fund, FundClass, FundCompany, FundSeries, find_fund, find_funds
-from edgar.funds.ncen import NCEN_FORMS, FundCensus
-from edgar.funds.ncsr import NCSR_FORMS, FundShareholderReport
-from edgar.funds.nmfp3 import MONEY_MARKET_FORMS, NMFP2_FORMS, NMFP3_FORMS, MoneyMarketFund
-from edgar.funds.prospectus497k import PROSPECTUS497K_FORMS, Prospectus497K
-from edgar.funds.reports import NPORT_FORMS, FundReport
-from edgar.ats import (
-    ATS_N_ALL_FORMS,
-    ATS_N_AMENDMENT_FORMS,
-    ATS_N_FORMS,
-    ATS_N_WITHDRAWAL_FORMS,
-    AlternativeTradingSystem,
-    AlternativeTradingSystemWithdrawal,
-)
-from edgar.bdc import BDCEntities, BDCEntity, get_bdc_list, get_active_bdc_ciks, is_bdc_cik
+# Other names for get_current_filings
+_ALIASES = {
+    "get_latest_filings": "get_current_filings",
+    "latest_filings": "get_current_filings",
+    "current_filings": "get_current_filings",
+}
 
-# HTTP configuration functions for runtime SSL/proxy configuration
-from edgar.httpclient import configure_http, get_http_config
-from edgar.npx import NPX
-from edgar.proxy import PROXY_FORMS, ProxyContests, ProxyStatement, proxy_contests
-from edgar.storage import (
-    StorageAnalysis,
-    StorageInfo,
-    analyze_storage,
-    availability_summary,
-    check_filing,
-    check_filings_batch,
-    cleanup_storage,
-    clear_cache,
-    download_edgar_data,
-    download_filings,
-    is_using_datamule_storage,
-    is_using_local_storage,
-    optimize_storage,
-    set_local_storage_path,
-    storage_info,
-    use_datamule_storage,
-    use_local_storage,
-)
-from edgar.correspondence import CORRESPONDENCE_FORMS, Correspondence, CorrespondenceThread, CorrespondenceType
-from edgar.search.efts import EFTSResult, EFTSSearch, search_filings
-from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
-from edgar.xbrl import XBRL
+# get_filings() pre-filtered to a form family: name -> (module, constant), or a literal form list
+_FORM_FILTERED_GET_FILINGS = {
+    "get_fund_portfolio_filings": ("edgar.funds.reports", "NPORT_FORMS"),     # fund portfolio reports
+    "get_money_market_filings": ("edgar.funds.nmfp3", "MONEY_MARKET_FORMS"),  # money market funds
+    "get_restricted_stock_filings": [144],                                    # restricted stock sales
+    "get_insider_transaction_filings": [3, 4, 5],                             # insider transactions
+    "get_portfolio_holding_filings": ("edgar.thirteenf", "THIRTEENF_FORMS"),  # 13F holdings
+}
 
 # Attach a NullHandler to the package-root logger so that edgartools never emits
 # log output unless the application configures logging itself, per the Python
@@ -108,36 +111,8 @@ from edgar.xbrl import XBRL
 # which is especially harmful in MCP / stdio environments.
 logging.getLogger(__name__).addHandler(logging.NullHandler())
 
-# One-time cache clears on first import (#457 locale-corrupted entries, #672 stale
-# empty responses). Run as a single migration pass so the cache is wiped at most
-# once, with markers kept outside the cache directory — one clear can never delete
-# another's marker (#1051).
-try:
-    from edgar.httpclient import _run_import_time_cache_migrations
-    _run_import_time_cache_migrations()
-except Exception:
-    # Silently continue if cache clearing fails - it's not critical
-    pass
-
-# Another name for get_current_filings
-get_latest_filings = get_current_filings
-latest_filings = get_current_filings
-current_filings = get_current_filings
-
-# Fund portfolio report filings
-get_fund_portfolio_filings = functools.partial(get_filings, form=NPORT_FORMS)
-
-# Money market fund filings
-get_money_market_filings = functools.partial(get_filings, form=MONEY_MARKET_FORMS)
-
-# Restricted stock sales
-get_restricted_stock_filings = functools.partial(get_filings, form=[144])
-
-# Insider transaction filings
-get_insider_transaction_filings = functools.partial(get_filings, form=[3, 4, 5])
-
-# 13F filings - portfolio holdings
-get_portfolio_holding_filings = functools.partial(get_filings, form=THIRTEENF_FORMS)
+# The one-time cache clears (#457, #672, #1051) used to run here. They run when
+# edgar.httpclient is first imported, which every request goes through.
 
 
 # ---------------------------------------------------------------------------
@@ -204,7 +179,7 @@ __all__ = [
     # The ownership family splits across three packages along the statute that
     # requires each form; see the docstrings of edgar.ownership (Section 16),
     # edgar.beneficial_ownership (Section 13(d)/(g)) and edgar.thirteenf
-    # (Section 13(f)). Served lazily: see _LAZY_EXPORTS below.
+    # (Section 13(f)).
     "Form3", "Form4", "Form5", "Form144",
     "Schedule13D", "Schedule13G",
     "ThirteenF", "NPX",
@@ -241,7 +216,7 @@ __all__ = [
 
 
 @functools.lru_cache(maxsize=16)
-def find(search_id: str | int) -> Filing | Entity | CompanySearchResults | FundCompany | FundClass | FundSeries | None:
+def find(search_id: str | int) -> "Filing | Entity | CompanySearchResults | FundCompany | FundClass | FundSeries | None":
     """This is an uber search function that can take a variety of search ids and return the appropriate object
         - accession number -> returns a Filing
         - CIK -> returns an Entity
@@ -253,6 +228,13 @@ def find(search_id: str | int) -> Filing | Entity | CompanySearchResults | FundC
 
     :type: object
     """
+    from edgar._filings import get_by_accession_number_enriched as _get_by_accession_number_enriched
+    from edgar.exceptions import CompanyNotFoundError, ValidationError
+
+    # Through the package namespace, as the eager imports did, so that
+    # monkeypatching edgar.Entity (or find_company, find_fund) still reaches find().
+    Entity, find_company, find_fund = _public("Entity"), _public("find_company"), _public("find_fund")  # noqa: N806
+
     if isinstance(search_id, int):
         return Entity(search_id)
     elif re.match(r"\d{10}-\d{2}-\d{6}", search_id):
@@ -292,9 +274,11 @@ def find(search_id: str | int) -> Filing | Entity | CompanySearchResults | FundC
         return find_company(search_id)
 
 
-def _matches_form(sec_filing: Filing,
+def _matches_form(sec_filing: "Filing",
                   form: str | list[str]) -> bool:
     """Check if the filing matches the forms"""
+    from edgar.core import listify as _listify
+
     form_list = _listify(form)
     if sec_filing.form in form_list + [f"{f}/A" for f in form_list if not f.endswith("/A")]:
         return True
@@ -419,12 +403,14 @@ def _get_obj_info(form: str) -> tuple[bool, str | None, str | None]:
     return (False, None, None)
 
 
-def _no_xml_to_parse(sec_filing: Filing) -> DataObjectError:
+def _no_xml_to_parse(sec_filing: "Filing") -> "DataObjectError":
     """The error for a form we model whose XML we could not get.
 
     Raised by `obj()` for Form 3, 4, 5, EFFECT and D (edgartools-07lk.10); in
     5.x it was a `FutureWarning` and `None`.
     """
+    from edgar.exceptions import DataObjectError
+
     error = DataObjectError(
         f"Form {sec_filing.form} filing {sec_filing.accession_no} has no XML document, "
         f"so there is nothing to build a data object from. This is a property of "
@@ -436,7 +422,7 @@ def _no_xml_to_parse(sec_filing: Filing) -> DataObjectError:
     return error
 
 
-def obj(sec_filing: Filing) -> object | None:
+def obj(sec_filing: "Filing") -> object | None:
     """
     Depending on the filing return the data object that contains the data for the filing
 
@@ -454,14 +440,30 @@ def obj(sec_filing: Filing) -> object | None:
     :param sec_filing: The filing
     :return:
     """
+    from edgar.ats import (
+        ATS_N_AMENDMENT_FORMS,
+        ATS_N_FORMS,
+        ATS_N_WITHDRAWAL_FORMS,
+        AlternativeTradingSystem,
+        AlternativeTradingSystemWithdrawal,
+    )
     from edgar.beneficial_ownership import Schedule13D, Schedule13G
     from edgar.company_reports import CurrentReport, EightK, SixK, TenK, TenQ, TwentyF
-    from edgar.offerings.effect import Effect
-    from edgar.ownership.form144 import Form144
+    from edgar.correspondence import CORRESPONDENCE_FORMS, Correspondence
+    from edgar.funds.ncen import NCEN_FORMS, FundCensus
+    from edgar.funds.ncsr import NCSR_FORMS, FundShareholderReport
+    from edgar.funds.nmfp3 import MONEY_MARKET_FORMS, MoneyMarketFund
+    from edgar.funds.prospectus497k import PROSPECTUS497K_FORMS, Prospectus497K
+    from edgar.funds.reports import FundReport
     from edgar.muniadvisors import MunicipalAdvisorForm
+    from edgar.npx import NPX
     from edgar.offerings import FormC, FormD
+    from edgar.offerings.effect import Effect
     from edgar.ownership import Form3, Form4, Form5, Ownership
+    from edgar.ownership.form144 import Form144
+    from edgar.proxy import PROXY_FORMS, ProxyStatement
     from edgar.tender_offers import Schedule14D9
+    from edgar.thirteenf import THIRTEENF_FORMS, ThirteenF
 
     if _matches_form(sec_filing, "6-K"):
         return SixK(sec_filing)
@@ -622,29 +624,6 @@ _REMOVED_IN_6_0 = {
 }
 
 
-# ---------------------------------------------------------------------------
-# Top-level names served on first access (bead edgartools-07lk.12.1.1).
-#
-# Until 5.60 the only path to these classes was the subpackage, so
-# `from edgar.ownership import Form4` was load-bearing API and the package names
-# could never change. A top-level path makes them interchangeable. The value is
-# the subpackage's own object, so `edgar.Form4 is edgar.ownership.Form4` and
-# isinstance agrees across both spellings.
-#
-# Lazy because neither package is otherwise imported by `import edgar`: loading
-# them eagerly measured +19 ms on a 599 ms import (3.2%), for users who never
-# touch an ownership form.
-# ---------------------------------------------------------------------------
-_LAZY_EXPORTS = {
-    "Form3": "edgar.ownership",
-    "Form4": "edgar.ownership",
-    "Form5": "edgar.ownership",
-    "Form144": "edgar.ownership.form144",
-    "Schedule13D": "edgar.beneficial_ownership",
-    "Schedule13G": "edgar.beneficial_ownership",
-}
-
-
 # Names that were importable from `edgar` through 5.x without being in
 # `__all__`, made private in 6.0 (edgartools-07lk.5). `edgar.X` says where each
 # one lives; `from edgar import X` cannot carry the message (Python replaces an
@@ -671,11 +650,44 @@ _PRIVATE_IN_6_0 = {
 }
 
 
-def __getattr__(name: str):
-    if name in _LAZY_EXPORTS:
-        import importlib
+def _resolve(name: str):
+    """The object a top-level name stands for, importing its module on first use."""
+    import importlib
 
-        value = getattr(importlib.import_module(_LAZY_EXPORTS[name]), name)
+    if name in _LAZY_EXPORTS:
+        return getattr(importlib.import_module(_LAZY_EXPORTS[name]), name)
+    if name in _ALIASES:
+        return _resolve(_ALIASES[name])
+    forms = _FORM_FILTERED_GET_FILINGS[name]
+    if isinstance(forms, tuple):
+        forms = getattr(importlib.import_module(forms[0]), forms[1])
+    return functools.partial(_resolve("get_filings"), form=forms)
+
+
+def _submodule(name: str):
+    """`edgar.xbrl` and the like, which eager imports used to leave on the package.
+
+    None when there is no such submodule. A submodule that exists but fails to
+    import raises its own error rather than a misleading AttributeError.
+    """
+    import importlib
+
+    try:
+        return importlib.import_module(f"{__name__}.{name}")
+    except ModuleNotFoundError as error:
+        if error.name == f"{__name__}.{name}":
+            return None
+        raise
+
+
+def _public(name: str):
+    """A top-level name as `edgar.<name>` would give it, including a patched one."""
+    return globals()[name] if name in globals() else __getattr__(name)
+
+
+def __getattr__(name: str):
+    if name in _LAZY_EXPORTS or name in _ALIASES or name in _FORM_FILTERED_GET_FILINGS:
+        value = _resolve(name)
         globals()[name] = value  # later lookups skip this hook
         return value
     if name in _REMOVED_IN_6_0:
@@ -685,8 +697,12 @@ def __getattr__(name: str):
             f"edgar.{name} is not part of the public API and was made private in "
             f"edgartools 6.0; {_PRIVATE_IN_6_0[name]}. See docs/upgrade/6.0.md."
         )
+    if not name.startswith("__"):
+        module = _submodule(name)
+        if module is not None:
+            return module
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
 def __dir__():
-    return sorted(set(globals()) | set(_LAZY_EXPORTS))
+    return sorted(set(globals()) | set(_LAZY_EXPORTS) | set(_ALIASES) | set(_FORM_FILTERED_GET_FILINGS))

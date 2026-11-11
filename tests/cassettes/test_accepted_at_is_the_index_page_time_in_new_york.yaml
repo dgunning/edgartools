@@ -1,0 +1,250 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/320193/000032019326000020/0000320193-26-000020-index-headers.html
+  response:
+    body:
+      string: "<HTML><HEAD><TITLE>SEC EDGAR Submission 0000320193-26-000020</TITLE>\n<!--\n<SEC-HEADER>0000320193-26-000020.hdr.sgml
+        : 20260731\n<ACCEPTANCE-DATETIME>20260731060102\n<ACCESSION-NUMBER>0000320193-26-000020\n<TYPE>10-Q\n<PUBLIC-DOCUMENT-COUNT>62\n<PERIOD>20260627\n<FILING-DATE>20260731\n<DATE-OF-FILING-DATE-CHANGE>20260731\n<FILER>\n<COMPANY-DATA>\n<CONFORMED-NAME>Apple
+        Inc.\n<CIK>0000320193\n<ASSIGNED-SIC>3571\n<ORGANIZATION-NAME>06 Technology\n<IRS-NUMBER>942404110\n<STATE-OF-INCORPORATION>CA\n<FISCAL-YEAR-END>0926\n</COMPANY-DATA>\n<FILING-VALUES>\n<FORM-TYPE>10-Q\n<ACT>34\n<FILE-NUMBER>001-36743\n<FILM-NUMBER>261225227\n</FILING-VALUES>\n<BUSINESS-ADDRESS>\n<STREET1>ONE
+        APPLE PARK WAY\n<CITY>CUPERTINO\n<STATE>CA\n<ZIP>95014\n<PHONE>(408) 996-1010\n</BUSINESS-ADDRESS>\n<MAIL-ADDRESS>\n<STREET1>ONE
+        APPLE PARK WAY\n<CITY>CUPERTINO\n<STATE>CA\n<ZIP>95014\n</MAIL-ADDRESS>\n<FORMER-COMPANY>\n<FORMER-CONFORMED-NAME>APPLE
+        INC\n<DATE-CHANGED>20070109\n</FORMER-COMPANY>\n<FORMER-COMPANY>\n<FORMER-CONFORMED-NAME>APPLE
+        COMPUTER INC\n<DATE-CHANGED>19970808\n</FORMER-COMPANY>\n</FILER>\n</SEC-HEADER>\n-->\n</HEAD><BODY>\n<PRE>&lt;SEC-DOCUMENT&gt;0000320193-26-000020-index.html
+        : 20260731\n&lt;SEC-HEADER&gt;0000320193-26-000020.hdr.sgml : 20260731\n&lt;ACCEPTANCE-DATETIME&gt;20260731060102\nACCESSION
+        NUMBER:\t\t0000320193-26-000020\nCONFORMED SUBMISSION TYPE:\t10-Q\nPUBLIC
+        DOCUMENT COUNT:\t\t62\nCONFORMED PERIOD OF REPORT:\t20260627\nFILED AS OF
+        DATE:\t\t20260731\nDATE AS OF CHANGE:\t\t20260731\n\nFILER:\n\n\tCOMPANY DATA:\t\n\t\tCOMPANY
+        CONFORMED NAME:\t\t\tApple Inc.\n\t\tCENTRAL INDEX KEY:\t\t\t0000320193\n\t\tSTANDARD
+        INDUSTRIAL CLASSIFICATION:\tELECTRONIC COMPUTERS [3571]\n\t\tORGANIZATION
+        NAME:           \t06 Technology\n\t\tEIN:\t\t\t\t942404110\n\t\tSTATE OF INCORPORATION:\t\t\tCA\n\t\tFISCAL
+        YEAR END:\t\t\t0926\n\n\tFILING VALUES:\n\t\tFORM TYPE:\t\t10-Q\n\t\tSEC ACT:\t\t1934
+        Act\n\t\tSEC FILE NUMBER:\t001-36743\n\t\tFILM NUMBER:\t\t261225227\n\n\tBUSINESS
+        ADDRESS:\t\n\t\tSTREET 1:\t\tONE APPLE PARK WAY\n\t\tCITY:\t\t\tCUPERTINO\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95014\n\t\tBUSINESS
+        PHONE:\t\t(408) 996-1010\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\tONE APPLE
+        PARK WAY\n\t\tCITY:\t\t\tCUPERTINO\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95014\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tAPPLE INC\n\t\tDATE OF NAME CHANGE:\t20070109\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tAPPLE COMPUTER INC\n\t\tDATE OF NAME
+        CHANGE:\t19970808\n&lt;/SEC-HEADER&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;10-Q\n&lt;SEQUENCE&gt;1\n&lt;FILENAME&gt;aapl-20260627.htm\n&lt;DESCRIPTION&gt;10-Q\n&lt;TEXT&gt;\n<a
+        href=\"aapl-20260627.htm\">Document 1 - file: aapl-20260627.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;EX-31.1\n&lt;SEQUENCE&gt;2\n&lt;FILENAME&gt;a10-qexhibit31106272026.htm\n&lt;DESCRIPTION&gt;EX-31.1\n&lt;TEXT&gt;\n<a
+        href=\"a10-qexhibit31106272026.htm\">Document 2 - file: a10-qexhibit31106272026.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;EX-31.2\n&lt;SEQUENCE&gt;3\n&lt;FILENAME&gt;a10-qexhibit31206272026.htm\n&lt;DESCRIPTION&gt;EX-31.2\n&lt;TEXT&gt;\n<a
+        href=\"a10-qexhibit31206272026.htm\">Document 3 - file: a10-qexhibit31206272026.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;EX-32.1\n&lt;SEQUENCE&gt;4\n&lt;FILENAME&gt;a10-qexhibit32106272026.htm\n&lt;DESCRIPTION&gt;EX-32.1\n&lt;TEXT&gt;\n<a
+        href=\"a10-qexhibit32106272026.htm\">Document 4 - file: a10-qexhibit32106272026.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;EX-101.SCH\n&lt;SEQUENCE&gt;5\n&lt;FILENAME&gt;aapl-20260627.xsd\n&lt;DESCRIPTION&gt;XBRL
+        TAXONOMY EXTENSION SCHEMA DOCUMENT\n&lt;TEXT&gt;\n<a href=\"aapl-20260627.xsd\">Document
+        5 - file: aapl-20260627.xsd</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;EX-101.CAL\n&lt;SEQUENCE&gt;6\n&lt;FILENAME&gt;aapl-20260627_cal.xml\n&lt;DESCRIPTION&gt;XBRL
+        TAXONOMY EXTENSION CALCULATION LINKBASE DOCUMENT\n&lt;TEXT&gt;\n<a href=\"aapl-20260627_cal.xml\">Document
+        6 - file: aapl-20260627_cal.xml</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;EX-101.DEF\n&lt;SEQUENCE&gt;7\n&lt;FILENAME&gt;aapl-20260627_def.xml\n&lt;DESCRIPTION&gt;XBRL
+        TAXONOMY EXTENSION DEFINITION LINKBASE DOCUMENT\n&lt;TEXT&gt;\n<a href=\"aapl-20260627_def.xml\">Document
+        7 - file: aapl-20260627_def.xml</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;EX-101.LAB\n&lt;SEQUENCE&gt;8\n&lt;FILENAME&gt;aapl-20260627_lab.xml\n&lt;DESCRIPTION&gt;XBRL
+        TAXONOMY EXTENSION LABEL LINKBASE DOCUMENT\n&lt;TEXT&gt;\n<a href=\"aapl-20260627_lab.xml\">Document
+        8 - file: aapl-20260627_lab.xml</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;EX-101.PRE\n&lt;SEQUENCE&gt;9\n&lt;FILENAME&gt;aapl-20260627_pre.xml\n&lt;DESCRIPTION&gt;XBRL
+        TAXONOMY EXTENSION PRESENTATION LINKBASE DOCUMENT\n&lt;TEXT&gt;\n<a href=\"aapl-20260627_pre.xml\">Document
+        9 - file: aapl-20260627_pre.xml</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;GRAPHIC\n&lt;SEQUENCE&gt;10\n&lt;FILENAME&gt;aapl-20260627_g1.jpg\n&lt;TEXT&gt;\n<a
+        href=\"aapl-20260627_g1.jpg\">Document 10 - file: aapl-20260627_g1.jpg</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;12\n&lt;FILENAME&gt;R1.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R1.htm\">Document 12 - file: R1.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;13\n&lt;FILENAME&gt;R2.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R2.htm\">Document 13 - file: R2.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;14\n&lt;FILENAME&gt;R3.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R3.htm\">Document 14 - file: R3.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;15\n&lt;FILENAME&gt;R4.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R4.htm\">Document 15 - file: R4.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;16\n&lt;FILENAME&gt;R5.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R5.htm\">Document 16 - file: R5.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;17\n&lt;FILENAME&gt;R6.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R6.htm\">Document 17 - file: R6.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;18\n&lt;FILENAME&gt;R7.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R7.htm\">Document 18 - file: R7.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;19\n&lt;FILENAME&gt;R8.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R8.htm\">Document 19 - file: R8.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;20\n&lt;FILENAME&gt;R9.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R9.htm\">Document 20 - file: R9.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;21\n&lt;FILENAME&gt;R10.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R10.htm\">Document 21 - file: R10.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;22\n&lt;FILENAME&gt;R11.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R11.htm\">Document 22 - file: R11.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;23\n&lt;FILENAME&gt;R12.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R12.htm\">Document 23 - file: R12.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;24\n&lt;FILENAME&gt;R13.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R13.htm\">Document 24 - file: R13.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;25\n&lt;FILENAME&gt;R14.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R14.htm\">Document 25 - file: R14.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;26\n&lt;FILENAME&gt;R15.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R15.htm\">Document 26 - file: R15.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;27\n&lt;FILENAME&gt;R16.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R16.htm\">Document 27 - file: R16.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;28\n&lt;FILENAME&gt;R17.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R17.htm\">Document 28 - file: R17.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;29\n&lt;FILENAME&gt;R18.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R18.htm\">Document 29 - file: R18.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;30\n&lt;FILENAME&gt;R19.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R19.htm\">Document 30 - file: R19.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;31\n&lt;FILENAME&gt;R20.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R20.htm\">Document 31 - file: R20.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;32\n&lt;FILENAME&gt;R21.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R21.htm\">Document 32 - file: R21.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;33\n&lt;FILENAME&gt;R22.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R22.htm\">Document 33 - file: R22.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;34\n&lt;FILENAME&gt;R23.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R23.htm\">Document 34 - file: R23.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;35\n&lt;FILENAME&gt;R24.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R24.htm\">Document 35 - file: R24.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;36\n&lt;FILENAME&gt;R25.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R25.htm\">Document 36 - file: R25.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;37\n&lt;FILENAME&gt;R26.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R26.htm\">Document 37 - file: R26.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;38\n&lt;FILENAME&gt;R27.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R27.htm\">Document 38 - file: R27.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;39\n&lt;FILENAME&gt;R28.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R28.htm\">Document 39 - file: R28.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;40\n&lt;FILENAME&gt;R29.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R29.htm\">Document 40 - file: R29.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;41\n&lt;FILENAME&gt;R30.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R30.htm\">Document 41 - file: R30.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;42\n&lt;FILENAME&gt;R31.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R31.htm\">Document 42 - file: R31.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;43\n&lt;FILENAME&gt;R32.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R32.htm\">Document 43 - file: R32.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;44\n&lt;FILENAME&gt;R33.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R33.htm\">Document 44 - file: R33.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;45\n&lt;FILENAME&gt;R34.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R34.htm\">Document 45 - file: R34.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;46\n&lt;FILENAME&gt;R35.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R35.htm\">Document 46 - file: R35.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;47\n&lt;FILENAME&gt;R36.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R36.htm\">Document 47 - file: R36.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;48\n&lt;FILENAME&gt;R37.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R37.htm\">Document 48 - file: R37.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;49\n&lt;FILENAME&gt;R38.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R38.htm\">Document 49 - file: R38.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;50\n&lt;FILENAME&gt;R39.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R39.htm\">Document 50 - file: R39.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;51\n&lt;FILENAME&gt;R40.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R40.htm\">Document 51 - file: R40.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;52\n&lt;FILENAME&gt;R41.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R41.htm\">Document 52 - file: R41.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;53\n&lt;FILENAME&gt;R42.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R42.htm\">Document 53 - file: R42.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;54\n&lt;FILENAME&gt;R43.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R43.htm\">Document 54 - file: R43.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;55\n&lt;FILENAME&gt;R44.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R44.htm\">Document 55 - file: R44.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;56\n&lt;FILENAME&gt;R45.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R45.htm\">Document 56 - file: R45.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;57\n&lt;FILENAME&gt;R46.htm\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"R46.htm\">Document 57 - file: R46.htm</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;58\n&lt;FILENAME&gt;report.css\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"report.css\">Document 58 - file: report.css</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;59\n&lt;FILENAME&gt;Show.js\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"Show.js\">Document 59 - file: Show.js</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;61\n&lt;FILENAME&gt;FilingSummary.xml\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"xsl/FilingSummary.xml\">Document 61
+        - file: FilingSummary.html</a><br>\n<a href=\"FilingSummary.xml\">Document
+        61 - RAW XML: FilingSummary.xml</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;JSON\n&lt;SEQUENCE&gt;64\n&lt;FILENAME&gt;MetaLinks.json\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"MetaLinks.json\">Document 64 - file:
+        MetaLinks.json</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;ZIP\n&lt;SEQUENCE&gt;65\n&lt;FILENAME&gt;0000320193-26-000020-xbrl.zip\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"0000320193-26-000020-xbrl.zip\">Document
+        65 - file: 0000320193-26-000020-xbrl.zip</a><br>\n&lt;/DOCUMENT&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;XML\n&lt;SEQUENCE&gt;66\n&lt;FILENAME&gt;aapl-20260627_htm.xml\n&lt;DESCRIPTION&gt;IDEA:
+        XBRL DOCUMENT\n&lt;TEXT&gt;\n<a href=\"xsl/aapl-20260627_htm.xml\">Document
+        66 - file: aapl-20260627_htm.html</a><br>\n<a href=\"aapl-20260627_htm.xml\">Document
+        66 - RAW XML: aapl-20260627_htm.xml</a><br>\n&lt;/DOCUMENT&gt;\n&lt;/SEC-DOCUMENT&gt;</PRE><script
+        type=\"text/javascript\"  src=\"/rmZXw/w/x-/sYIL/t4dKqNVq/uN5k4kQXkrtLS8/QwpAMw/bwNEMn4c/JUo\"></script></BODY></HTML>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      connection:
+      - keep-alive
+      content-length:
+      - '15678'
+      content-type:
+      - text/html
+      date:
+      - Wed, 11 Nov 2026 02:35:11 GMT
+      last-modified:
+      - Fri, 31 Jul 2026 10:07:05 GMT
+      set-cookie:
+      - _abck=D399E9797EE322CF1CFC6D8E5D451DDD~-1~YAAQpRghF18LcK+hAQAAk5V1yBCJuPlKbxSSlsCxsm38IfLoDKnHiJ43X/BJ3UluKJHEgp/8B16j72ECiLs73QkGNXJPPvXRG4YnY+y7AhLEN8J+eWFzCYvVxPknsSRmW85irqaspoV4oB6j7sD30TExTFL05teOqvieLZ4um8hcT3SES16czL38aDpPwusLdldMX8mKoJAvcTpgRjeaSVRdTGjtyx0+NinrIzWjGLIsRI/WqsoYAg4pYywJ5DCovAmTBQhprIKDtTY5bI9Fs6z/rNkbU7Y+8IKGWZOxTN3GPceUYOdAZRqCp7vRLcSvJziXs5UiHxilysiyouttyJYq2ZcJZIuU6RMWx3qvgQmzVQgRjNXasRP6pfDMXt9XwerRsG69nNPFSafhtgPdhzoaTbyAbsSOGupLEaj7vt6jajfC+T2/ZpicBnV1uYczD3hYQ5MdIhcVDw==~-1~-1~-1~-1~-1;
+        Domain=.sec.gov; Path=/; Expires=Thu, 11 Nov 2027 02:35:11 GMT; Max-Age=31536000;
+        SameSite=None; Secure
+      - bm_sz=6D22CAF2E608557ADBA32361A1896A2E~YAAQpRghF2ALcK+hAQAAk5V1yAFoBlr9DE7jVylPW91ZA5HwKUiPjpaLgj+PmijisiP29ILcibSGjccjE1Y2uwXayhwqQGPRBaLVKNdRjJu9XDqKZjB+Tz/ji+ViJyrd1AaKkdneu8kL9SwBvDj5WaHQjnQhpKyTu7WN+lOkiMzTAiMAI2c2TJbNS7DJkrSe/2NlrH2+iXXvk6n/VPLlkxrx6vauU4HXvuxt9E1IThdVKljUD2P3COgkfHGkaILOUeyc3fwVdtoE+4DedWyNNwaEmBQVNA4+7p5QmqocdqpM3SRii90Lg4yyo6Z06j4T4Q6MYVUjXGza+G/61OOTp2/U0321XypYwSlgBJG609UlVK626KF335Wlvrhy8Pmi+BkATCBiTLsjb5/Z~3294775~3425074;
+        Domain=.sec.gov; Path=/; Expires=Wed, 11 Nov 2026 06:35:11 GMT; Max-Age=14400;
+        SameSite=None; Secure
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-akamai-transformed:
+      - 0 - 0 -
+      x-amz-id-2:
+      - YUbFWcS4X3bDrBNKJBGHARzyR1t8JscVRfu+c/7BCI7iBbcePlQkhwHH8I5o1gWciMQa6iSb820=
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - RJF5ZZEAB7TFSNG1
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - ZeSXYeaGXOKHQNvsXgMuh2k_SXLubrDV
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      cookie:
+      - _abck=D399E9797EE322CF1CFC6D8E5D451DDD~-1~YAAQpRghF18LcK+hAQAAk5V1yBCJuPlKbxSSlsCxsm38IfLoDKnHiJ43X/BJ3UluKJHEgp/8B16j72ECiLs73QkGNXJPPvXRG4YnY+y7AhLEN8J+eWFzCYvVxPknsSRmW85irqaspoV4oB6j7sD30TExTFL05teOqvieLZ4um8hcT3SES16czL38aDpPwusLdldMX8mKoJAvcTpgRjeaSVRdTGjtyx0+NinrIzWjGLIsRI/WqsoYAg4pYywJ5DCovAmTBQhprIKDtTY5bI9Fs6z/rNkbU7Y+8IKGWZOxTN3GPceUYOdAZRqCp7vRLcSvJziXs5UiHxilysiyouttyJYq2ZcJZIuU6RMWx3qvgQmzVQgRjNXasRP6pfDMXt9XwerRsG69nNPFSafhtgPdhzoaTbyAbsSOGupLEaj7vt6jajfC+T2/ZpicBnV1uYczD3hYQ5MdIhcVDw==~-1~-1~-1~-1~-1;
+        bm_sz=6D22CAF2E608557ADBA32361A1896A2E~YAAQpRghF2ALcK+hAQAAk5V1yAFoBlr9DE7jVylPW91ZA5HwKUiPjpaLgj+PmijisiP29ILcibSGjccjE1Y2uwXayhwqQGPRBaLVKNdRjJu9XDqKZjB+Tz/ji+ViJyrd1AaKkdneu8kL9SwBvDj5WaHQjnQhpKyTu7WN+lOkiMzTAiMAI2c2TJbNS7DJkrSe/2NlrH2+iXXvk6n/VPLlkxrx6vauU4HXvuxt9E1IThdVKljUD2P3COgkfHGkaILOUeyc3fwVdtoE+4DedWyNNwaEmBQVNA4+7p5QmqocdqpM3SRii90Lg4yyo6Z06j4T4Q6MYVUjXGza+G/61OOTp2/U0321XypYwSlgBJG609UlVK626KF335Wlvrhy8Pmi+BkATCBiTLsjb5/Z~3294775~3425074
+      host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1059235/000105923526000004/0001059235-26-000004-index-headers.html
+  response:
+    body:
+      string: "<HTML><HEAD><TITLE>SEC EDGAR Submission 0001059235-26-000004</TITLE>\n<!--\n<SEC-HEADER>0001059235-26-000004.hdr.sgml
+        : 20260226\n<ACCEPTANCE-DATETIME>20260226183419\n<ACCESSION-NUMBER>0001059235-26-000004\n<TYPE>4\n<PUBLIC-DOCUMENT-COUNT>1\n<PERIOD>20260224\n<FILING-DATE>20260226\n<DATE-OF-FILING-DATE-CHANGE>20260226\n<REPORTING-OWNER>\n<OWNER-DATA>\n<CONFORMED-NAME>WAGNER
+        SUSAN\n<CIK>0001059235\n<ORGANIZATION-NAME>\n</OWNER-DATA>\n<FILING-VALUES>\n<FORM-TYPE>4\n<ACT>34\n<FILE-NUMBER>001-36743\n<FILM-NUMBER>26691411\n</FILING-VALUES>\n<MAIL-ADDRESS>\n<STREET1>C/O
+        BLACKROCK, INC.\n<STREET2>50 HUDSON YARDS\n<CITY>NEW YORK\n<STATE>NY\n<ZIP>10001\n</MAIL-ADDRESS>\n</REPORTING-OWNER>\n<ISSUER>\n<COMPANY-DATA>\n<CONFORMED-NAME>Apple
+        Inc.\n<CIK>0000320193\n<ASSIGNED-SIC>3571\n<ORGANIZATION-NAME>06 Technology\n<IRS-NUMBER>942404110\n<STATE-OF-INCORPORATION>CA\n<FISCAL-YEAR-END>0926\n</COMPANY-DATA>\n<BUSINESS-ADDRESS>\n<STREET1>ONE
+        APPLE PARK WAY\n<CITY>CUPERTINO\n<STATE>CA\n<ZIP>95014\n<PHONE>(408) 996-1010\n</BUSINESS-ADDRESS>\n<MAIL-ADDRESS>\n<STREET1>ONE
+        APPLE PARK WAY\n<CITY>CUPERTINO\n<STATE>CA\n<ZIP>95014\n</MAIL-ADDRESS>\n<FORMER-COMPANY>\n<FORMER-CONFORMED-NAME>APPLE
+        INC\n<DATE-CHANGED>20070109\n</FORMER-COMPANY>\n<FORMER-COMPANY>\n<FORMER-CONFORMED-NAME>APPLE
+        COMPUTER INC\n<DATE-CHANGED>19970808\n</FORMER-COMPANY>\n</ISSUER>\n</SEC-HEADER>\n-->\n</HEAD><BODY>\n<PRE>&lt;SEC-DOCUMENT&gt;0001059235-26-000004-index.html
+        : 20260226\n&lt;SEC-HEADER&gt;0001059235-26-000004.hdr.sgml : 20260226\n&lt;ACCEPTANCE-DATETIME&gt;20260226183419\nACCESSION
+        NUMBER:\t\t0001059235-26-000004\nCONFORMED SUBMISSION TYPE:\t4\nPUBLIC DOCUMENT
+        COUNT:\t\t1\nCONFORMED PERIOD OF REPORT:\t20260224\nFILED AS OF DATE:\t\t20260226\nDATE
+        AS OF CHANGE:\t\t20260226\n\nREPORTING-OWNER:\t\n\n\tOWNER DATA:\t\n\t\tCOMPANY
+        CONFORMED NAME:\t\t\tWAGNER SUSAN\n\t\tCENTRAL INDEX KEY:\t\t\t0001059235\n\t\tORGANIZATION
+        NAME:           \t\n\n\tFILING VALUES:\n\t\tFORM TYPE:\t\t4\n\t\tSEC ACT:\t\t1934
+        Act\n\t\tSEC FILE NUMBER:\t001-36743\n\t\tFILM NUMBER:\t\t26691411\n\n\tMAIL
+        ADDRESS:\t\n\t\tSTREET 1:\t\tC/O BLACKROCK, INC.\n\t\tSTREET 2:\t\t50 HUDSON
+        YARDS\n\t\tCITY:\t\t\tNEW YORK\n\t\tSTATE:\t\t\tNY\n\t\tZIP:\t\t\t10001\n\nISSUER:\t\t\n\n\tCOMPANY
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tApple Inc.\n\t\tCENTRAL INDEX KEY:\t\t\t0000320193\n\t\tSTANDARD
+        INDUSTRIAL CLASSIFICATION:\tELECTRONIC COMPUTERS [3571]\n\t\tORGANIZATION
+        NAME:           \t06 Technology\n\t\tEIN:\t\t\t\t942404110\n\t\tSTATE OF INCORPORATION:\t\t\tCA\n\t\tFISCAL
+        YEAR END:\t\t\t0926\n\n\tBUSINESS ADDRESS:\t\n\t\tSTREET 1:\t\tONE APPLE PARK
+        WAY\n\t\tCITY:\t\t\tCUPERTINO\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95014\n\t\tBUSINESS
+        PHONE:\t\t(408) 996-1010\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\tONE APPLE
+        PARK WAY\n\t\tCITY:\t\t\tCUPERTINO\n\t\tSTATE:\t\t\tCA\n\t\tZIP:\t\t\t95014\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tAPPLE INC\n\t\tDATE OF NAME CHANGE:\t20070109\n\n\tFORMER
+        COMPANY:\t\n\t\tFORMER CONFORMED NAME:\tAPPLE COMPUTER INC\n\t\tDATE OF NAME
+        CHANGE:\t19970808\n&lt;/SEC-HEADER&gt;\n&lt;DOCUMENT&gt;\n&lt;TYPE&gt;4\n&lt;SEQUENCE&gt;1\n&lt;FILENAME&gt;wk-form4_1772148856.xml\n&lt;DESCRIPTION&gt;FORM
+        4\n&lt;TEXT&gt;\n<a href=\"xslF345X05/wk-form4_1772148856.xml\">Document 1
+        - file: wk-form4_1772148856.html</a><br>\n<a href=\"wk-form4_1772148856.xml\">Document
+        1 - RAW XML: wk-form4_1772148856.xml</a><br>\n&lt;/DOCUMENT&gt;\n&lt;/SEC-DOCUMENT&gt;</PRE><script
+        type=\"text/javascript\"  src=\"/rmZXw/w/x-/sYIL/t4dKqNVq/uN5k4kQXkrtLS8/QwpAMw/bwNEMn4c/JUo\"></script></BODY></HTML>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      connection:
+      - keep-alive
+      content-length:
+      - '3262'
+      content-type:
+      - text/html
+      date:
+      - Wed, 11 Nov 2026 02:35:11 GMT
+      last-modified:
+      - Thu, 26 Feb 2026 23:34:32 GMT
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-akamai-transformed:
+      - 0 - 0 -
+      x-amz-id-2:
+      - +ppFSYphMeKRC8uLt+b5akBWLQ+eMpGKRj5z8bNirPuj4XF+OLN5PDcdTMcLz/5NS6WcnFmGemU=
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - 5780FH6M951XMTCK
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - 6g1TnEWB5tn8U9ZEYUe5BipvsBbz1CKH
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1

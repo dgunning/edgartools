@@ -71,6 +71,13 @@ patterns:
       filing = filings[4]                 # By index
       filing = filings.latest()           # Most recent
       page2 = filings.next()              # Paginate if >50
+
+      # Exact acceptance time (SEC's clock, tz-aware America/New_York); one small request each
+      filing.accepted_at                  # e.g. before or after the 16:00 close?
+      times = filings.accepted_at()       # Series indexed by accession number
+    note: |
+      For the moment SEC accepted a filing use filing.accepted_at, not
+      reported_acceptance_datetime (submissions JSON, has been hours off).
     examples: |
       get_filings(form="13F-HR", year=2024, quarter=3)   # Institutional holdings
       get_filings(form="SC 13D", year=2024, quarter=4)   # Activist stakes (5%+)
