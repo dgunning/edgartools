@@ -1,0 +1,1 @@
+**`edgar.xbrl.core.format_value()` no longer returns an invisible control character for zero.** A zero is now formatted like any other number (`$0`, or `0.00` when decimals call for it) instead of U+0014; statement cells keep showing a filed zero as blank.
