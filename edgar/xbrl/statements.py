@@ -50,6 +50,30 @@ STRUCTURAL_CONCEPT_SUFFIXES = ('Axis', 'Domain', 'Member', 'LineItems', 'Table')
 # _build_dataframe_from_raw_data() to _add_metadata_columns() (GH #1657).
 _ROW_SIGN = '_row_preferred_sign'
 _ROW_HAS_VALUES = '_row_has_values'
+# Working column that carries each row's own presentation parent (GH #1705).
+_ROW_PARENT = '_row_parent_abstract_concept'
+
+
+def _row_presentation_parents(raw_data: List[Dict[str, Any]]) -> List[Optional[str]]:
+    """
+    Return the presentation parent of each raw row, aligned with ``raw_data``.
+
+    A concept presented under two parents appears twice in the raw rows, each
+    occurrence with its own ``parent`` (GH #1705). A dimensional row has no
+    parent of its own, so it takes the parent of the nearest earlier
+    non-dimensional occurrence of its concept: the line it breaks down (#542).
+    """
+    parents: List[Optional[str]] = []
+    line_parent: Dict[str, Optional[str]] = {}
+    for item in raw_data:
+        concept = item.get('concept')
+        if item.get('is_dimension'):
+            parents.append(line_parent.get(concept))
+        else:
+            parent = item.get('parent')
+            line_parent[concept] = parent
+            parents.append(parent)
+    return parents
 
 
 def is_xbrl_structural_element(item: Dict[str, Any]) -> bool:
@@ -1374,7 +1398,8 @@ class Statement:
                 item_key = (concept, label)
                 item_occurrence_count[item_key] = item_occurrence_count.get(item_key, 0) + 1
 
-        for item in raw_data:
+        row_parents = _row_presentation_parents(raw_data)
+        for item, row_parent in zip(raw_data, row_parents, strict=True):
             # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
             # These are internal XBRL constructs, not financial data
             if is_xbrl_structural_element(item):
@@ -1542,6 +1567,7 @@ class Statement:
             row_signs = item.get('preferred_signs') or {}
             row[_ROW_SIGN] = next(iter(row_signs.values())) if row_signs else None
             row[_ROW_HAS_VALUES] = bool(item.get('values'))
+            row[_ROW_PARENT] = row_parent
 
             # Add structural columns
             row['level'] = item.get('level', 0)
@@ -1751,7 +1777,12 @@ class Statement:
         else:
             df['preferred_sign'] = concept_signs
         df['parent_concept'] = df['concept'].map(parent_concept_map)
-        df['parent_abstract_concept'] = df['concept'].map(parent_abstract_concept_map)
+        # GH #1705: each row's own presentation parent, so a concept presented
+        # under two parents keeps both; dimensional rows follow their line.
+        if _ROW_PARENT in df.columns:
+            df['parent_abstract_concept'] = df.pop(_ROW_PARENT)
+        else:
+            df['parent_abstract_concept'] = df['concept'].map(parent_abstract_concept_map)
 
         return df
 
