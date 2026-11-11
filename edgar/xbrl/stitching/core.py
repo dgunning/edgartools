@@ -898,7 +898,8 @@ class StatementStitcher:
           Q3_discrete = YTD_9M - YTD_6M
           Q4_discrete = FY - YTD_9M
 
-        The YTD periods are replaced in-place with the discrete quarter values.
+        Each YTD period is replaced by its discrete quarter, re-keyed to the
+        quarter's own dates (GH #1697).
         """
         from edgar.core import log
 
@@ -1005,11 +1006,10 @@ class StatementStitcher:
         For each concept that has values in both the longer and shorter periods,
         computes: discrete_value = longer_value - shorter_value.
 
-        The longer period entry is updated in-place with the discrete value.
-        The display label in self.period_dates is updated to reflect the discrete quarter.
+        The discrete values then move from the longer period's key to the
+        quarter's own key, ``duration_<day after shorter end>_<longer end>``,
+        with a label that names the quarter (GH #1697).
         """
-        from edgar.core import log
-
         for concept_key in list(self.data.keys()):
             longer_entry = self.data[concept_key].get(longer_pid)
             shorter_entry = self.data[concept_key].get(shorter_pid)
@@ -1047,24 +1047,67 @@ class StatementStitcher:
                 'decimals': longer_entry.get('decimals', 0),
             }
 
-        # Update the display label to indicate this is now a discrete quarter
-        old_label = self.period_dates.get(longer_pid, '')
+        # The values now cover the quarter, so the period is re-keyed to the
+        # quarter's own dates: the day after the shorter cumulative period ends,
+        # to the longer period's end (GH #1697).
+        quarter_start = datetime.strptime(shorter_pid.split('_')[2], '%Y-%m-%d') + timedelta(days=1)
+        quarter_end = datetime.strptime(longer_pid.split('_')[2], '%Y-%m-%d')
+        new_label = self._discrete_quarter_label(
+            self.period_dates.get(longer_pid, ''), discrete_label, quarter_start, quarter_end)
+        self._rekey_derived_quarter(
+            longer_pid, f"duration_{quarter_start:%Y-%m-%d}_{quarter_end:%Y-%m-%d}", new_label)
+
+    @staticmethod
+    def _discrete_quarter_label(old_label: str, discrete_label: str,
+                                quarter_start: datetime, quarter_end: datetime) -> str:
+        """The display label of a quarter derived from a cumulative period's label."""
         if 'YTD' in old_label:
-            new_label = old_label.replace('YTD ', '')
-        elif ' to ' in old_label.partition(': ')[2]:
+            # "Q3 YTD Jun 27, 2026" -> "Q3 Jun 27, 2026", the form a reported quarter takes
+            return old_label.replace('YTD ', '')
+        if old_label.startswith('FY '):
+            # "FY Sep 30, 2023" -> "Q4 Sep 30, 2023": the value is no longer the fiscal year
+            return f"{discrete_label} {old_label[3:]}"
+        if ' to ' in old_label.partition(': ')[2]:
             # A filing's own label, "Nine Months: September 28, 2025 to June 27,
-            # 2026", names the cumulative range. The value is now the quarter that
-            # starts the day after the shorter period ends, so the label names that
-            # range instead of keeping the nine-month dates (GH #1697). The prefix
-            # keeps it distinct from a reported "Quarterly: ..." column for the same
-            # dates, which would otherwise collide as a DataFrame column.
-            quarter_start = datetime.strptime(shorter_pid.split('_')[2], '%Y-%m-%d') + timedelta(days=1)
-            quarter_end = datetime.strptime(longer_pid.split('_')[2], '%Y-%m-%d')
-            new_label = (f"{discrete_label} Quarterly: {quarter_start:%B %d, %Y} "
-                         f"to {quarter_end:%B %d, %Y}")
+            # 2026", names the cumulative range, so the label names the quarter's
+            # range instead (GH #1697). The prefix keeps it distinct from a reported
+            # "Quarterly: ..." column for the same dates.
+            return (f"{discrete_label} Quarterly: {quarter_start:%B %d, %Y} "
+                    f"to {quarter_end:%B %d, %Y}")
+        return f"{discrete_label} {old_label}" if old_label else discrete_label
+
+    def _rekey_derived_quarter(self, cumulative_pid: str, quarter_pid: str, label: str):
+        """Move a derived quarter from its cumulative period key to its own key.
+
+        The values of ``cumulative_pid`` are the quarter's once subtracted, so the
+        key ``duration_<fiscal start>_<end>`` would claim a cumulative interval for
+        them. Everything keyed by period id moves: the values, the label, the source
+        filing and the position in the period order.
+
+        A filing can also carry three-month facts for the same dates (with
+        ``include_quarterly=True`` or ``use_optimal_periods=False``), which made a
+        second column for the same quarter. The two merge into one column, and where
+        both have a cell the reported fact is kept: it is the filer's own number for
+        that interval, while the derived one can mix a restated cumulative figure
+        with an original earlier quarter (MSFT's Q2 FY2026 investment gains: $9,931M
+        reported, $5,017M derived against the unrestated Q1). A derived cell fills a
+        concept the filing did not report for the quarter.
+        """
+        if quarter_pid == cumulative_pid:
+            return
+        for values in self.data.values():
+            derived = values.pop(cumulative_pid, None)
+            if derived is not None and quarter_pid not in values:
+                values[quarter_pid] = derived
+        cumulative_source = self.period_sources.pop(cumulative_pid, None)
+        cumulative_label = self.period_dates.pop(cumulative_pid, None)
+        if quarter_pid in self.periods:
+            self.periods = [pid for pid in self.periods if pid != cumulative_pid]
         else:
-            new_label = f"{discrete_label} {old_label}" if old_label else discrete_label
-        self.period_dates[longer_pid] = new_label
+            self.periods = [quarter_pid if pid == cumulative_pid else pid for pid in self.periods]
+        self.period_dates[quarter_pid] = label or cumulative_label or quarter_pid
+        if cumulative_source is not None:
+            self.period_sources[quarter_pid] = cumulative_source
 
     def _format_output_with_ordering(self, statements: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
