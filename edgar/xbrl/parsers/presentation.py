@@ -11,10 +11,17 @@ from typing import Any, Dict, List, Optional, Union
 from lxml import etree as ET
 
 from edgar.xbrl.core import PERIOD_END_LABEL, PERIOD_START_LABEL, extract_element_id, is_period_boundary_label_role
-from edgar.xbrl.models import ElementCatalog, PresentationNode, PresentationTree, XBRLProcessingError
+from edgar.xbrl.models import (
+    ElementCatalog,
+    PresentationNode,
+    PresentationRelationship,
+    PresentationTree,
+    XBRLProcessingError,
+)
 from edgar.xmltools import xml_parser
 
 from .base import BaseParser
+from .relationships import arc_candidate, effective_relationships
 
 # Roll-forward label roles legitimately repeat the same concept under one parent
 # (e.g. cash flow's "Cash, beginning/ending balances"). These must NOT be
@@ -92,13 +99,11 @@ class PresentationParser(BaseParser):
             # Collect them per role and build each tree once, after the last link,
             # so a later link does not replace an earlier one (GH #1745: IMAX's
             # FY2018 cash-flow role is split across a 56-arc and a 1-arc link).
-            # An arc repeated with the same endpoints, order and preferred label is
-            # an equivalent relationship and is kept once. A period start/end arc
-            # is kept once per endpoints and label whatever its order, with the
-            # first order seen: the tree builder never de-duplicates those, so a
-            # repeat at another order would add a second "beginning" row.
-            relationships_by_role: Dict[str, List[Dict[str, Any]]] = {}
-            seen_arcs_by_role: Dict[str, set] = {}
+            # Every arc is a candidate; prohibition and overriding then decide
+            # which relationships are in the network (XBRL 2.1 section
+            # 3.5.3.9.7), which also keeps an arc repeated with the same
+            # endpoints, order and preferred label once.
+            candidates_by_role: Dict[str, List[Dict[str, Any]]] = {}
 
             for link in presentation_links:
                 role = link.get(xlink_role)
@@ -106,15 +111,7 @@ class PresentationParser(BaseParser):
                     continue
 
                 # Store role information — prefer human-readable definition from schema
-                role_id = role.split('/')[-1] if '/' in role else role
-                schema_def = self.role_types.get(role, {}).get('definition')
-                role_def = schema_def if schema_def else role_id.replace('_', ' ')
-
-                self.presentation_roles[role] = {
-                    'roleUri': role,
-                    'definition': role_def,
-                    'roleId': role_id
-                }
+                self.presentation_roles[role] = self._role_record(role, self.role_types)
 
                 # Optimize: Pre-build locator map to avoid repeated XPath lookups
                 loc_map = {}
@@ -126,9 +123,7 @@ class PresentationParser(BaseParser):
                 # Optimize: Extract arcs using direct xpath with context
                 arcs = link.xpath('.//link:presentationArc', namespaces=nsmap)
 
-                relationships = relationships_by_role.setdefault(role, [])
-                relationships_append = relationships.append  # Local function reference for speed
-                seen_arcs = seen_arcs_by_role.setdefault(role, set())
+                candidates_append = candidates_by_role.setdefault(role, []).append
 
                 # Process arcs with optimized locator lookups
                 for arc in arcs:
@@ -154,37 +149,53 @@ class PresentationParser(BaseParser):
                     from_element = extract_element_id(from_href)
                     to_element = extract_element_id(to_href)
 
-                    if is_period_boundary_label_role(preferred_label):
-                        arc_key = (from_element, to_element, None, preferred_label)
-                    else:
-                        arc_key = (from_element, to_element, order, preferred_label)
-                    if arc_key in seen_arcs:
-                        continue
-                    seen_arcs.add(arc_key)
-
-                    # Add relationship using local function reference
-                    relationships_append({
+                    candidates_append(arc_candidate(arc, role, from_element, to_element, {
                         'from_element': from_element,
                         'to_element': to_element,
                         'order': order,
                         'preferred_label': preferred_label
-                    })
+                    }))
 
             # Build one presentation tree per role from all of its links
-            for role, relationships in relationships_by_role.items():
+            for role, candidates in candidates_by_role.items():
+                network = effective_relationships(candidates)
+                relationships = self._one_period_boundary_per_label(network)
                 if relationships:
-                    self._build_presentation_tree(role, relationships)
+                    self._build_presentation_tree(role, relationships, network)
 
         except Exception as e:
             raise XBRLProcessingError(f"Error parsing presentation content: {str(e)}") from e
 
-    def _build_presentation_tree(self, role: str, relationships: List[Dict[str, Any]]) -> None:
+    @staticmethod
+    def _one_period_boundary_per_label(relationships: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Keep a period start/end relationship once per endpoints and label.
+
+        The tree builder never de-duplicates those, so a repeat at another
+        order would add a second "beginning" row; the first order seen wins.
+        """
+        seen = set()
+        kept = []
+        for rel in relationships:
+            if is_period_boundary_label_role(rel['preferred_label']):
+                key = (rel['from_element'], rel['to_element'], rel['preferred_label'])
+                if key in seen:
+                    continue
+                seen.add(key)
+            kept.append(rel)
+        return kept
+
+    def _build_presentation_tree(self, role: str, relationships: List[Dict[str, Any]],
+                                 network: Optional[List[Dict[str, Any]]] = None) -> None:
         """
         Build a presentation tree from relationships.
 
         Args:
             role: Extended link role URI
             relationships: List of relationships (from_element, to_element, order, preferred_label)
+                the tree's nodes are built from
+            network: Every effective relationship of the role, kept on the tree
+                as filed; defaults to `relationships`
         """
         # Group relationships by source element
         from_map = {}
@@ -216,7 +227,16 @@ class PresentationParser(BaseParser):
             definition=self.presentation_roles[role]['definition'],
             root_element_id=root_elements[0],  # Use first sorted element
             root_element_ids=root_elements,     # Every root, not just the first
-            all_nodes={}
+            all_nodes={},
+            relationships=[
+                PresentationRelationship(
+                    parent_id=rel['from_element'],
+                    child_id=rel['to_element'],
+                    order=rel['order'],
+                    preferred_label=rel['preferred_label'],
+                )
+                for rel in (relationships if network is None else network)
+            ],
         )
 
         # Build tree recursively
