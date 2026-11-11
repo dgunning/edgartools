@@ -47,7 +47,8 @@ class CalculationParser(BaseParser):
     def __init__(self, calculation_roles: Dict[str, Dict[str, Any]],
                  calculation_trees: Dict[str, CalculationTree],
                  element_catalog: Dict[str, ElementCatalog],
-                 facts: Dict[str, Fact]):
+                 facts: Dict[str, Fact],
+                 role_types: Optional[Dict[str, Dict[str, Any]]] = None):
         """
         Initialize calculation parser with data structure references.
 
@@ -56,6 +57,7 @@ class CalculationParser(BaseParser):
             calculation_trees: Reference to calculation trees dictionary
             element_catalog: Reference to element catalog dictionary
             facts: Reference to facts dictionary
+            role_types: Shared dict of role type definitions from schema (human-readable definitions)
         """
         super().__init__()
 
@@ -64,6 +66,7 @@ class CalculationParser(BaseParser):
         self.calculation_trees = calculation_trees
         self.element_catalog = element_catalog
         self.facts = facts
+        self.role_types = role_types if role_types is not None else {}
 
         # Every arc seen so far, prohibiting ones included, grouped by the role
         # that declared it. The trees are rebuilt from the effective
@@ -102,13 +105,7 @@ class CalculationParser(BaseParser):
 
     def _record_role(self, role: str) -> None:
         """Store the human-readable identity of an extended link role."""
-        role_id = role.split('/')[-1] if '/' in role else role
-
-        self.calculation_roles[role] = {
-            'roleUri': role,
-            'definition': role_id.replace('_', ' '),
-            'roleId': role_id
-        }
+        self.calculation_roles[role] = self._role_record(role, self.role_types)
 
     def _collect_relationships(self, link, role: str) -> None:
         """Extract every calculation arc in one extended link into the store."""

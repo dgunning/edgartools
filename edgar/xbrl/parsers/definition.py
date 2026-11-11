@@ -45,7 +45,8 @@ class DefinitionParser(BaseParser):
                  tables: Dict[str, List[Table]],
                  axes: Dict[str, Axis],
                  domains: Dict[str, Domain],
-                 element_catalog: Dict[str, ElementCatalog]):
+                 element_catalog: Dict[str, ElementCatalog],
+                 role_types: Optional[Dict[str, Dict[str, Any]]] = None):
         """
         Initialize definition parser with data structure references.
 
@@ -55,6 +56,7 @@ class DefinitionParser(BaseParser):
             axes: Reference to the merged axes view (keyed on element ID)
             domains: Reference to the merged domains view (keyed on element ID)
             element_catalog: Reference to element catalog dictionary
+            role_types: Shared dict of role type definitions from schema (human-readable definitions)
         """
         super().__init__()
 
@@ -64,6 +66,7 @@ class DefinitionParser(BaseParser):
         self.axes = axes
         self.domains = domains
         self.element_catalog = element_catalog
+        self.role_types = role_types if role_types is not None else {}
 
         # The dimensional model proper: role -> element ID -> axis/domain. Owned
         # here rather than passed in, because `axes` and `domains` above are
@@ -116,13 +119,7 @@ class DefinitionParser(BaseParser):
 
     def _record_role(self, role: str) -> None:
         """Store the human-readable identity of an extended link role."""
-        role_id = role.split('/')[-1] if '/' in role else role
-
-        self.definition_roles[role] = {
-            'roleUri': role,
-            'definition': role_id.replace('_', ' '),
-            'roleId': role_id
-        }
+        self.definition_roles[role] = self._role_record(role, self.role_types)
 
     def _collect_relationships(self, link, role: str) -> None:
         """Extract every definition arc in one extended link into the store."""

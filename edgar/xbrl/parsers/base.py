@@ -64,6 +64,24 @@ class BaseParser:
         except (ValueError, TypeError):
             return 0.0
 
+    @staticmethod
+    def _role_record(role: str, role_types: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        The identity of an extended link role, for the presentation,
+        calculation and definition role dictionaries.
+
+        The definition is the schema's roleType definition when one is loaded
+        (XBRL 2.1 section 5.1.3.3: its human-readable meaning), otherwise one
+        derived from the role URI's last segment.
+        """
+        role_id = role.split('/')[-1] if '/' in role else role
+        schema_def = role_types.get(role, {}).get('definition')
+        return {
+            'roleUri': role,
+            'definition': schema_def if schema_def else role_id.replace('_', ' '),
+            'roleId': role_id,
+        }
+
     def _extract_role_info(self, role_element) -> Dict[str, Any]:
         """
         Extract role information from a role element.

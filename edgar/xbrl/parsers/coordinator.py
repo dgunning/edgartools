@@ -116,7 +116,8 @@ class XBRLParser:
             calculation_roles=self.calculation_roles,
             calculation_trees=self.calculation_trees,
             element_catalog=self.element_catalog,
-            facts=self.facts
+            facts=self.facts,
+            role_types=self.role_types
         )
 
         self.definition_parser = DefinitionParser(
@@ -124,7 +125,8 @@ class XBRLParser:
             tables=self.tables,
             axes=self.axes,
             domains=self.domains,
-            element_catalog=self.element_catalog
+            element_catalog=self.element_catalog,
+            role_types=self.role_types
         )
 
         self.instance_parser = InstanceParser(

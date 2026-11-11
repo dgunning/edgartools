@@ -111,15 +111,7 @@ class PresentationParser(BaseParser):
                     continue
 
                 # Store role information — prefer human-readable definition from schema
-                role_id = role.split('/')[-1] if '/' in role else role
-                schema_def = self.role_types.get(role, {}).get('definition')
-                role_def = schema_def if schema_def else role_id.replace('_', ' ')
-
-                self.presentation_roles[role] = {
-                    'roleUri': role,
-                    'definition': role_def,
-                    'roleId': role_id
-                }
+                self.presentation_roles[role] = self._role_record(role, self.role_types)
 
                 # Optimize: Pre-build locator map to avoid repeated XPath lookups
                 loc_map = {}
