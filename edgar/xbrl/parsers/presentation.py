@@ -280,7 +280,11 @@ class PresentationParser(BaseParser):
                 concept_name=elem_info.name,
                 schema_abstract=elem_info.abstract,
                 has_children=False,  # Will be updated after children are processed
-                has_values=False     # Will be determined later when facts are loaded
+                has_values=False,    # Will be determined later when facts are loaded
+                # The catalog leaves data_type None for an element whose
+                # declaration was not read (labels.py); otherwise the
+                # schema's abstract attribute is a real answer.
+                declared=elem_info.data_type is not None
             )
 
             node.labels = elem_info.labels

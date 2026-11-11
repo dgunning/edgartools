@@ -66,11 +66,12 @@ KNOWN_ABSTRACT_CONCEPTS: Set[str] = {
 # These are based on XBRL naming conventions
 ABSTRACT_CONCEPT_PATTERNS: List[str] = [
     r'.*Abstract$',           # Ends with "Abstract"
-    r'.*RollForward$',        # Ends with "RollForward" (roll forward tables)
+    r'.*Roll[Ff]orward$',     # Ends with "RollForward"/"Rollforward" (us-gaap spells it both ways)
     r'.*Table$',              # Ends with "Table" (dimensional tables)
     r'.*Axis$',               # Ends with "Axis" (dimensional axes)
     r'.*Domain$',             # Ends with "Domain" (dimension domains)
     r'.*LineItems$',          # Ends with "LineItems" (line item tables)
+    r'.*Member$',             # Ends with "Member" (domain members, always abstract in us-gaap/srt/dei)
 ]
 
 
@@ -78,12 +79,17 @@ def is_abstract_concept(
     concept_name: str,
     schema_abstract: bool = False,
     has_children: bool = False,
-    has_values: bool = False
+    has_values: bool = False,
+    declared: bool = False
 ) -> bool:
     """
     Determine if an XBRL concept should be marked as abstract using multiple fallback strategies.
 
     Strategy priority:
+    0. If the concept's schema declaration was read (``declared=True``), its
+       abstract attribute is the answer (XBRL 2.1 section 5.1.1); the guesses
+       below are only for concepts from imported taxonomies the filing does
+       not contain (us-gaap, dei, srt), whose declaration was never read.
     1. Trust schema if it explicitly says abstract=True
     2. Check against known abstract concepts list
     3. Apply pattern matching on concept name
@@ -95,6 +101,8 @@ def is_abstract_concept(
         schema_abstract: The abstract attribute from the schema (if available)
         has_children: Whether this concept has children in the presentation tree
         has_values: Whether this concept has fact values in the instance
+        declared: Whether ``schema_abstract`` comes from a declaration that was
+            actually read, rather than being a default for an unread one
 
     Returns:
         True if the concept should be marked as abstract, False otherwise
@@ -112,6 +120,10 @@ def is_abstract_concept(
         >>> is_abstract_concept('us-gaap_UnknownConcept', has_children=True, has_values=False)
         True
     """
+    # Strategy 0: a declaration that was read is authoritative, either way
+    if declared:
+        return bool(schema_abstract)
+
     # Strategy 1: Trust schema if it says True
     if schema_abstract:
         return True
