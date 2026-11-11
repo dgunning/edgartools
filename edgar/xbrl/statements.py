@@ -3529,7 +3529,7 @@ class StitchedStatement:
             show_date_range=show_date_range
         )
 
-    def to_dataframe(self, presentation: bool = True) -> pd.DataFrame:
+    def to_dataframe(self, presentation: bool = True, *, period_columns: str = "end_date") -> pd.DataFrame:
         """
         Convert the stitched statement to a pandas DataFrame.
 
@@ -3537,13 +3537,29 @@ class StitchedStatement:
             presentation: If True (default), apply preferred_sign so values match
                          SEC HTML display (e.g., cash outflows shown as negative).
                          If False, return raw XBRL instance values.
+            period_columns: How the period columns are named.
+                         ``"end_date"`` (default): the end date, ``"2023-07-01"``,
+                         or the period label when two columns share an end date.
+                         Stitched 10-Qs are year-to-date by default, so an end-date
+                         column can hold three, six or nine months.
+                         ``"interval"``: the exact dates, ``"2022-09-25 to 2023-07-01"``
+                         for a duration and ``"2023-07-01"`` for an instant.
 
         Returns:
             pandas DataFrame with periods as columns and concepts as rows
+
+        Raises:
+            ValueError: if ``period_columns`` is not ``"end_date"`` or ``"interval"``.
+
+        Example:
+            >>> income = xbrls.statements.income_statement(include_quarterly=True)
+            >>> income.to_dataframe(period_columns="interval").columns
+            # ['label', 'concept', 'standard_concept', '2023-04-02 to 2023-07-01',
+            #  '2022-09-25 to 2023-07-01', 'preferred_sign']
         """
         from edgar.xbrl.stitching import to_pandas
 
-        return to_pandas(self.statement_data, presentation=presentation)
+        return to_pandas(self.statement_data, presentation=presentation, period_columns=period_columns)
 
     def __rich__(self):
         """

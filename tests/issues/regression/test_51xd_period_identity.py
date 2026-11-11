@@ -216,4 +216,5 @@ def test_the_derivable_neighbour_on_the_same_period_still_converts():
     stitcher._unaccumulate_cashflow_ytd()
 
     operating = stitcher.data["Net cash provided by operating activities"]
-    assert operating[fy]["value"] == pytest.approx(91_328 - 63_609)
+    # Keyed by the derived quarter's own dates since GH #1697
+    assert operating["duration_2024-10-01_2024-12-31"]["value"] == pytest.approx(91_328 - 63_609)

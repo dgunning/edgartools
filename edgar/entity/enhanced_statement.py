@@ -1484,6 +1484,10 @@ class EnhancedStatementBuilder:
         'PaymentsOfDividends': 'DividendsPaid',
         'PaymentsForDividends': 'DividendsPaid',
         'PaymentsOfDividendsCommonStock': 'DividendsPaid',
+        # IFRS: cash dividends to the parent's shareholders are the common-stock
+        # dividends line; dividends to non-controlling interests keep their own
+        # row (GH #1679)
+        'DividendsPaidToEquityHoldersOfParentClassifiedAsFinancingActivities': 'DividendsPaid',
         # Share repurchase
         'PaymentsForRepurchaseOfEquity': 'PaymentsForRepurchaseOfCommonStock'
     }

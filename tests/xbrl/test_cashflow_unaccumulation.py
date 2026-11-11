@@ -72,9 +72,12 @@ class TestUnaccumulateCashflowYTD:
 
         stitcher._unaccumulate_cashflow_ytd()
 
-        # YTD_6M period should now hold Q2 discrete values
-        assert stitcher.data['us-gaap_OperatingCashFlow'][ytd6_pid]['value'] == 250   # 350 - 100
-        assert stitcher.data['us-gaap_CapitalExpenditure'][ytd6_pid]['value'] == -70  # -120 - (-50)
+        # The Q2 discrete values are keyed by the quarter's own dates (GH #1697)
+        q2_pid = 'duration_2024-04-01_2024-06-30'
+        assert stitcher.data['us-gaap_OperatingCashFlow'][q2_pid]['value'] == 250   # 350 - 100
+        assert stitcher.data['us-gaap_CapitalExpenditure'][q2_pid]['value'] == -70  # -120 - (-50)
+        assert ytd6_pid not in stitcher.data['us-gaap_OperatingCashFlow']
+        assert stitcher.periods == [q2_pid, q1_pid]
         # Q1 values should be unchanged
         assert stitcher.data['us-gaap_OperatingCashFlow'][q1_pid]['value'] == 100
         assert stitcher.data['us-gaap_CapitalExpenditure'][q1_pid]['value'] == -50
@@ -99,9 +102,9 @@ class TestUnaccumulateCashflowYTD:
         stitcher._unaccumulate_cashflow_ytd()
 
         # Q3 discrete: 600 - 350 = 250
-        assert stitcher.data['us-gaap_OperatingCashFlow'][ytd9_pid]['value'] == 250
+        assert stitcher.data['us-gaap_OperatingCashFlow']['duration_2024-07-01_2024-09-30']['value'] == 250
         # Q2 discrete: 350 - 100 = 250
-        assert stitcher.data['us-gaap_OperatingCashFlow'][ytd6_pid]['value'] == 250
+        assert stitcher.data['us-gaap_OperatingCashFlow']['duration_2024-04-01_2024-06-30']['value'] == 250
         # Q1 unchanged
         assert stitcher.data['us-gaap_OperatingCashFlow'][q1_pid]['value'] == 100
 
@@ -123,7 +126,8 @@ class TestUnaccumulateCashflowYTD:
         stitcher._unaccumulate_cashflow_ytd()
 
         # Q4 discrete: 900 - 600 = 300
-        assert stitcher.data['us-gaap_OperatingCashFlow'][fy_pid]['value'] == 300
+        assert stitcher.data['us-gaap_OperatingCashFlow']['duration_2024-10-01_2024-12-31']['value'] == 300
+        assert fy_pid not in stitcher.data['us-gaap_OperatingCashFlow']
         # YTD9 unchanged (no shorter YTD to subtract from it in this set)
         assert stitcher.data['us-gaap_OperatingCashFlow'][ytd9_pid]['value'] == 600
 
@@ -149,9 +153,10 @@ class TestUnaccumulateCashflowYTD:
         stitcher._unaccumulate_cashflow_ytd()
 
         assert stitcher.data['us-gaap_OperatingCashFlow'][q1_pid]['value'] == 100   # unchanged
-        assert stitcher.data['us-gaap_OperatingCashFlow'][ytd6_pid]['value'] == 250  # 350-100
-        assert stitcher.data['us-gaap_OperatingCashFlow'][ytd9_pid]['value'] == 250  # 600-350
-        assert stitcher.data['us-gaap_OperatingCashFlow'][fy_pid]['value'] == 400    # 1000-600
+        assert stitcher.data['us-gaap_OperatingCashFlow']['duration_2024-04-01_2024-06-30']['value'] == 250  # 350-100
+        assert stitcher.data['us-gaap_OperatingCashFlow']['duration_2024-07-01_2024-09-30']['value'] == 250  # 600-350
+        assert stitcher.data['us-gaap_OperatingCashFlow']['duration_2024-10-01_2024-12-31']['value'] == 400  # 1000-600
+        assert stitcher.periods == ['duration_2024-10-01_2024-12-31', 'duration_2024-07-01_2024-09-30', 'duration_2024-04-01_2024-06-30', q1_pid]
 
     def test_concept_missing_in_shorter_period_is_dropped(self):
         """A concept with no value in the shorter period is dropped, not kept.
@@ -199,12 +204,12 @@ class TestUnaccumulateCashflowYTD:
 
         stitcher._unaccumulate_cashflow_ytd()
 
-        assert ytd6_pid not in stitcher.data['us-gaap_SpecialItem'], (
+        assert stitcher.data['us-gaap_SpecialItem'] == {}, (
             "the un-derivable cumulative value survived under a discrete-quarter "
-            f"label: {stitcher.data['us-gaap_SpecialItem'].get(ytd6_pid)}")
+            f"label: {stitcher.data['us-gaap_SpecialItem']}")
         # Dropping the un-derivable cell must not cost the derivable neighbour,
         # or the fix would empty the column instead of correcting it.
-        assert stitcher.data['us-gaap_OperatingCashFlow'][ytd6_pid]['value'] == 250
+        assert stitcher.data['us-gaap_OperatingCashFlow']['duration_2024-04-01_2024-06-30']['value'] == 250
 
     def test_different_fiscal_year_starts_handled_independently(self):
         """Periods from different fiscal years don't interfere with each other."""
@@ -230,10 +235,10 @@ class TestUnaccumulateCashflowYTD:
         stitcher._unaccumulate_cashflow_ytd()
 
         # FY2023: Q2 = 500 - 200 = 300
-        assert stitcher.data['us-gaap_Revenue'][fy23_ytd6]['value'] == 300
+        assert stitcher.data['us-gaap_Revenue']['duration_2023-04-01_2023-06-30']['value'] == 300
         assert stitcher.data['us-gaap_Revenue'][fy23_q1]['value'] == 200
         # FY2024: Q2 = 700 - 300 = 400
-        assert stitcher.data['us-gaap_Revenue'][fy24_ytd6]['value'] == 400
+        assert stitcher.data['us-gaap_Revenue']['duration_2024-04-01_2024-06-30']['value'] == 400
         assert stitcher.data['us-gaap_Revenue'][fy24_q1]['value'] == 300
 
     def test_period_label_ytd_stripped(self):
@@ -252,7 +257,8 @@ class TestUnaccumulateCashflowYTD:
 
         stitcher._unaccumulate_cashflow_ytd()
 
-        assert stitcher.period_dates[ytd6_pid] == 'Q2 Jun 30, 2024'
+        assert stitcher.period_dates['duration_2024-04-01_2024-06-30'] == 'Q2 Jun 30, 2024'
+        assert ytd6_pid not in stitcher.period_dates
         # Q1 label untouched
         assert stitcher.period_dates[q1_pid] == 'Q1 Mar 31, 2024'
 
@@ -368,8 +374,9 @@ class TestDiscreteQuartersFlag:
         row = next(r for r in result['statement_data']
                    if r['concept'] == 'us-gaap_OperatingCashFlow')
 
-        # YTD should now be Q2 discrete: 350 - 100 = 250
-        assert row['values'][ytd6_pid] == 250
+        # YTD should now be Q2 discrete: 350 - 100 = 250, keyed by the quarter (GH #1697)
+        assert row['values'] == {'duration_2024-04-01_2024-06-30': 250, q1_pid: 100}
+        assert [pid for pid, _ in result['periods']] == ['duration_2024-04-01_2024-06-30', q1_pid]
         assert row['values'][q1_pid] == 100
 
     def test_flag_ignored_for_non_cashflow(self):

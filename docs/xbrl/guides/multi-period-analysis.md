@@ -301,6 +301,20 @@ On Apple's 10-Q for the quarter ended July 1, 2023, the default column `2023-07-
 holds nine-month net sales of $293,787 million, while `include_quarterly=True` adds
 `Q3 Jul 1, 2023` with the quarter's $81,797 million.
 
+To name every column by its exact dates, pass `period_columns="interval"`. A
+duration is named `start to end` and an instant by its date, and a column's name does
+not change with the other periods selected:
+
+```python
+df = income.to_dataframe(period_columns="interval")
+# Columns: '2023-04-02 to 2023-07-01', '2022-09-25 to 2023-07-01', ...
+```
+
+The option only names columns. Which periods are selected is still set by
+`include_quarterly`, and cash-flow quarters derived from year-to-date amounts come
+from `cash_flow_statement(discrete_quarters=True)`, which keys each derived quarter
+by its own dates.
+
 ### Manual Period Inspection
 
 To see what periods are available:

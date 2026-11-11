@@ -46,6 +46,12 @@ patterns:
       income = xbrls.statements.income_statement(view="detailed")  # with dimensional breakdowns
       df = income.to_dataframe()
 
+      # Stitched 10-Qs are year-to-date by default; include_quarterly=True adds the
+      # three-month column. period_columns="interval" names each column by its exact
+      # dates ("2023-04-02 to 2023-07-01") instead of the bare end date.
+      q = XBRLS.from_filings(company.get_filings(form="10-Q").head(4))
+      df = q.statements.income_statement(include_quarterly=True).to_dataframe(period_columns="interval")
+
   - name: Concept History
     when: Track a value over time
     code: |
