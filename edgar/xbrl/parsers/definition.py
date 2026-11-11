@@ -18,7 +18,7 @@ or a file, that has not been read yet.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 from edgar.xbrl.core import STANDARD_LABEL, extract_element_id
 from edgar.xbrl.models import Axis, Domain, ElementCatalog, Table, XBRLProcessingError
@@ -83,6 +83,14 @@ class DefinitionParser(BaseParser):
         # 3.5.3.9.7.5). The dimensional model is rebuilt from this after each
         # parse.
         self._relationships_by_role: Dict[str, List[Dict[str, Any]]] = {}
+
+        # axis -> every default member declared for it in any role. A
+        # dimension-default arc is global, not scoped to its extended link.
+        self._defaults_by_axis: Dict[str, set] = {}
+
+        # Dimension QNames the instance carries as xbrldi:typedMember. The
+        # coordinator replaces this with the instance parser's own set.
+        self.observed_typed_dimensions: Set[str] = set()
 
     # ------------------------------------------------------------------
     # Parsing
@@ -201,17 +209,28 @@ class DefinitionParser(BaseParser):
         self.axes_by_role.clear()
         self.domains_by_role.clear()
         self._resolve_relationships()
+        self._index_defaults()
 
         # Three passes over every role, so that resolving a cross-role hop never
         # depends on which extended link happened to be parsed first.
         for role in self._relationships_by_role:
             self._build_domain_hierarchy(role)
+        for role in list(self._relationships_by_role):
+            self._follow_member_continuations(role)
         for role in self._relationships_by_role:
             self._build_axes(role)
         for role in self._relationships_by_role:
             self._build_tables(role)
 
         self._rebuild_merged_views()
+
+    def _index_defaults(self) -> None:
+        """Every default member declared for each axis, across all roles."""
+        self._defaults_by_axis.clear()
+        for relationships in self._relationships_by_role.values():
+            for rel in relationships:
+                if rel['arcrole'] == DIMENSION_DEFAULT:
+                    self._defaults_by_axis.setdefault(rel['from_element'], set()).add(rel['to_element'])
 
     def _arcs(self, role: str, arcrole: str, from_element: Optional[str] = None) -> List[Dict[str, Any]]:
         """Arcs of one arcrole in one role, in filed order."""
@@ -244,8 +263,10 @@ class DefinitionParser(BaseParser):
         """
         Attach each of this role's axes to its domain and default member.
 
-        Both may be declared in another extended link, reached through the
-        hypercube-dimension arc's `xbrldt:targetRole`.
+        The domain may be declared in another extended link, reached through
+        the hypercube-dimension arc's `xbrldt:targetRole`. The default may be
+        declared in any extended link at all: a dimension-default arc is
+        global (see `_global_default`).
         """
         for rel in self._arcs(role, HYPERCUBE_DIMENSION):
             axis_id = rel['to_element']
@@ -275,6 +296,44 @@ class DefinitionParser(BaseParser):
         for rel in self._arcs(domain_role, DIMENSION_DEFAULT, axis.element_id):
             axis.default_member_id = rel['to_element']
             break
+        else:
+            if axis.default_member_id is None:
+                axis.default_member_id = self._global_default(role, axis)
+
+    def _global_default(self, role: str, axis: Axis) -> Optional[str]:
+        """
+        The axis's default declared in any role, if it applies in `role`.
+
+        A dimension-default relationship is global (XBRL Dimensions 1.0
+        section 2.7.1): it holds in every extended link that uses the dimension
+        and whose domain contains the default, and `xbrldt:targetRole` plays no
+        part. Tesla files `srt_RangeAxis -> srt_RangeMember` in one role and
+        uses the axis, with that member as its domain, in 26 others (gh #1725).
+
+        Only a default the DTS declares once is taken: two different defaults
+        for one dimension is an invalid DTS, and choosing one would be a guess.
+        """
+        defaults = self._defaults_by_axis.get(axis.element_id)
+        if not defaults or len(defaults) != 1 or axis.domain_id is None:
+            return None
+        default = next(iter(defaults))
+        return default if self._domain_contains(role, axis.domain_id, default) else None
+
+    def _domain_contains(self, role: str, root: str, member: str) -> bool:
+        """Whether `member` is `root` or sits anywhere beneath it in `role`."""
+        domains = self.domains_by_role.get(role, {})
+        pending, seen = [root], set()
+        while pending:
+            element = pending.pop()
+            if element == member:
+                return True
+            if element in seen:
+                continue
+            seen.add(element)
+            domain = domains.get(element)
+            if domain is not None:
+                pending.extend(domain.members)
+        return False
 
     def _copy_domain_into_role(self, role: str, source_role: str, domain_id: str) -> None:
         """
@@ -283,20 +342,61 @@ class DefinitionParser(BaseParser):
         A cross-role hop means the members live under the role that declared
         them; the caller asking about `role` still needs to see them.
         """
-        if role == source_role:
-            self._domain(role, domain_id)
-            return
+        self._domain(role, domain_id)
+        self._import_members(role, source_role, domain_id, set())
 
-        source = self.domains_by_role.get(source_role, {}).get(domain_id)
-        target = self._domain(role, domain_id)
+    def _import_members(self, role: str, source_role: str, element: str, seen: set) -> None:
+        """
+        Make everything beneath `element` in `source_role` visible from `role`.
+
+        The whole subtree is copied, not one level: a member that is itself a
+        domain keeps its own members after the role change (gh #1752). A
+        domain-member arc carrying `xbrldt:targetRole` says the member's own
+        children are found in that role (XBRL Dimensions 1.0 section 2.4,
+        example 7), so the walk continues there. `seen` stops a cycle.
+        """
+        key = (source_role, element)
+        if key in seen:
+            return
+        seen.add(key)
+
+        source = self.domains_by_role.get(source_role, {}).get(element)
         if source is None:
             return
+        if role != source_role:
+            target = self._domain(role, element)
+            for member in source.members:
+                if member not in target.members:
+                    target.members.append(member)
+            if target.parent is None:
+                target.parent = source.parent
 
-        for member in source.members:
-            if member not in target.members:
-                target.members.append(member)
-        if target.parent is None:
-            target.parent = source.parent
+        continuations = {rel['to_element']: rel['target_role']
+                         for rel in self._arcs(source_role, DOMAIN_MEMBER, element)
+                         if rel['target_role']}
+        for member in list(source.members):
+            member_role = continuations.get(member, source_role)
+            self._import_members(role, member_role, member, seen)
+            if member_role == role:
+                continue  # the role's own hierarchy already says where it hangs
+            nested = self.domains_by_role.get(role, {}).get(member)
+            if nested is not None and nested.parent is None:
+                nested.parent = element
+
+    def _follow_member_continuations(self, role: str) -> None:
+        """
+        Pull in the children a `targetRole` domain-member arc points at.
+
+        `_build_domain_hierarchy` reads one role's arcs; a member reached
+        through `xbrldt:targetRole` has its children declared in another role,
+        so they are imported here, once every role's own hierarchy is built.
+        """
+        for rel in self._arcs(role, DOMAIN_MEMBER):
+            if rel['target_role'] and rel['target_role'] != role:
+                self._import_members(role, rel['target_role'], rel['to_element'], set())
+                nested = self.domains_by_role.get(role, {}).get(rel['to_element'])
+                if nested is not None and nested.parent is None:
+                    nested.parent = rel['from_element']
 
     def _build_tables(self, role: str) -> None:
         """
@@ -414,13 +514,37 @@ class DefinitionParser(BaseParser):
         `is_typed_dimension=False` an answer rather than an untouched default.
 
         An axis declared only in an imported taxonomy is not in the catalog at
-        all — there is no xs:import traversal — so it still reports False. That
-        is the remaining half of gh #1234, tracked as edgartools-0c1q.16.1.
+        all — there is no xs:import traversal (edgartools-0c1q.16.1). The
+        instance still settles its kind: only a typed dimension may carry an
+        xbrldi:typedMember (XBRL Dimensions 1.0 section 3.1.4.4), so an axis
+        used that way is typed, with `typed_domain_ref` left empty because the
+        declaration that holds it was never read (gh #1234).
         """
         element = self.element_catalog.get(element_id)
         typed_domain_ref = getattr(element, 'typed_domain_ref', None) if element else None
+        if typed_domain_ref:
+            return True, typed_domain_ref
+        return element_id in self._observed_typed_axis_ids(), ""
 
-        return bool(typed_domain_ref), typed_domain_ref or ""
+    def _observed_typed_axis_ids(self) -> Set[str]:
+        """The observed typed dimensions as element IDs (`us-gaap_FooAxis`)."""
+        return {qname.replace(':', '_', 1) for qname in self.observed_typed_dimensions}
+
+    def mark_observed_typed_dimensions(self) -> None:
+        """
+        Mark axes the instance used as typed, after an instance is read.
+
+        The dimensional model may already be built when the instance arrives,
+        so the axes it holds are updated in place; a later rebuild reads the
+        same evidence through `_typed_dimension_info`.
+        """
+        typed_ids = self._observed_typed_axis_ids()
+        if not typed_ids:
+            return
+        views = [*self.axes_by_role.values(), self.axes]
+        for axes in views:
+            for element_id in typed_ids & axes.keys():
+                axes[element_id].is_typed_dimension = True
 
     def _get_element_label(self, element_id: str) -> str:
         """Get the label for an element, falling back to the element ID if not found."""

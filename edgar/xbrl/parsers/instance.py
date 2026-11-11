@@ -11,7 +11,8 @@ from datetime import datetime
 from decimal import MAX_EMAX, MIN_EMIN, ROUND_HALF_EVEN, Decimal, Inexact, InvalidOperation, localcontext
 from decimal import Context as DecimalContext
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Union
+from xml.sax.saxutils import escape, quoteattr
 
 from lxml import etree as ET
 
@@ -283,6 +284,48 @@ def _fraction_item(element: ET.Element) -> Optional[tuple[str, Optional[float], 
     return _format_decimal(quotient), _fraction_numeric_value(quotient), True
 
 
+def _typed_member_value(child: ET.Element) -> str:
+    """
+    A typed dimension's value: the content of the typedMember's child.
+
+    Simple content is its stripped text (`2026-09-01`, `10:30`). Element-only
+    content is the child serialized as filed, so two contexts whose nested
+    values differ keep different values (XBRL Dimensions 1.0 section 3.1.4.4);
+    reading the empty text of such a child gave every context the child's tag
+    (gh #1761). A nil or empty child still yields the child's tag, as before.
+    """
+    text = (child.text or '').strip()
+    if text:
+        return text
+    if any(isinstance(grandchild.tag, str) for grandchild in child):
+        return _serialize_element(child)
+    return child.tag
+
+
+def _prefixed_name(element: ET.Element, name: str) -> str:
+    """`{ns}local` as the document's own `prefix:local`, where it has one."""
+    qname = ET.QName(name)
+    if not qname.namespace:
+        return name
+    for prefix, uri in (element.nsmap or {}).items():
+        if uri == qname.namespace and prefix:
+            return f"{prefix}:{qname.localname}"
+    return qname.localname
+
+
+def _serialize_element(element: ET.Element) -> str:
+    """An element as compact XML: prefixed names, no namespace declarations."""
+    name = _prefixed_name(element, element.tag)
+    attributes = "".join(f" {_prefixed_name(element, key)}={quoteattr(value)}"
+                         for key, value in sorted(element.attrib.items()))
+    parts = [escape((element.text or '').strip())]
+    for child in element:
+        if isinstance(child.tag, str):
+            parts.append(_serialize_element(child))
+        parts.append(escape((child.tail or '').strip()))
+    return f"<{name}{attributes}>{''.join(parts)}</{name}>"
+
+
 class InstanceParser(BaseParser):
     """Parser for XBRL instance documents."""
 
@@ -317,6 +360,10 @@ class InstanceParser(BaseParser):
 
         # DEI facts extracted during entity info processing
         self.dei_facts: Dict[str, Fact] = {}
+
+        # Dimension QNames seen on an xbrldi:typedMember. Shared with the
+        # definition parser by the coordinator, which replaces this set.
+        self.typed_dimensions: Set[str] = set()
 
     def _create_normalized_fact_key(self, element_id: str, context_ref: str, instance_id: Optional[int] = None) -> str:
         """
@@ -572,8 +619,7 @@ class InstanceParser(BaseParser):
         except Exception as e:
             raise XBRLProcessingError(f"Error extracting contexts: {str(e)}") from e
 
-    @staticmethod
-    def _read_dimension_members(container: ET.Element, dimensions: Dict[str, str]) -> None:
+    def _read_dimension_members(self, container: ET.Element, dimensions: Dict[str, str]) -> None:
         """Read explicit and typed dimension members from a segment or scenario element."""
         for dim_elem in container.findall('.//{http://xbrl.org/2006/xbrldi}explicitMember'):
             dimension = dim_elem.get('dimension')
@@ -583,15 +629,43 @@ class InstanceParser(BaseParser):
 
         for dim_elem in container.findall('.//{http://xbrl.org/2006/xbrldi}typedMember'):
             dimension = dim_elem.get('dimension')
-            if dimension:
-                # The typed dimension value is the text content of the first child element
-                for child in dim_elem:
-                    if child.text and child.text.strip():
-                        dimensions[dimension] = child.text.strip()
-                    else:
-                        # Fallback to tag if no text content
-                        dimensions[dimension] = child.tag
-                    break
+            if not dimension:
+                continue
+            # Only a typed dimension may carry a typedMember, so this is
+            # evidence of the dimension's kind even when its declaration lives
+            # in a taxonomy that is never loaded (gh #1234).
+            self.typed_dimensions.add(dimension)
+            child = next((c for c in dim_elem if isinstance(c.tag, str)), None)
+            if child is not None:
+                dimensions[dimension] = _typed_member_value(child)
+
+    @staticmethod
+    def _measure_unit(unit_elem: ET.Element) -> Optional[Dict[str, Any]]:
+        """
+        A unit without xbrli:divide: one measure, or the product of several.
+
+        Sibling measures are multiplied (XBRL 2.1 section 4.8.2, example 20:
+        square feet is feet x feet), and two units are equal only when their
+        measures are (section 4.10). A product therefore keeps every factor,
+        repeats included, as `{'type': 'product', 'measures': [...]}`. It has
+        no single `measure`, so nothing downstream reads USD x shares as a
+        currency amount (gh #1747).
+        """
+        # A measure is a CHILD of xbrli:unit per the spec, so a direct-child
+        # search is the precise test; the descendant search is kept as a
+        # fallback for filings that nest one.
+        measure_elems = unit_elem.findall(f'{XBRLI_NS}measure')
+        if not measure_elems:
+            measure_elems = unit_elem.findall(f'.//{XBRLI_NS}measure')[:1]
+        # Strip: a pretty-printed <measure> carries whitespace that breaks
+        # every iso4217: prefix test downstream (GH #1704).
+        measures = [(elem.text or '').strip() for elem in measure_elems]
+        measures = [measure for measure in measures if measure]
+        if not measures:
+            return None
+        if len(measures) == 1:
+            return {'type': 'simple', 'measure': measures[0]}
+        return {'type': 'product', 'measures': measures}
 
     def _extract_units(self, root: ET.Element) -> None:
         """Extract units from instance document."""
@@ -612,21 +686,9 @@ class InstanceParser(BaseParser):
                 # (edgartools-uetp).
                 divide_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}divide')
                 if divide_elem is None:
-                    # A simple unit's measure is a CHILD of xbrli:unit per the
-                    # spec, so a direct-child search is the precise test; the
-                    # descendant search is kept as a fallback for filings that
-                    # nest it, which is safe now that divide is handled above.
-                    measure_elem = unit_elem.find('{http://www.xbrl.org/2003/instance}measure')
-                    if measure_elem is None:
-                        measure_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}measure')
-                    # Strip: a pretty-printed <measure> carries whitespace that
-                    # breaks every iso4217: prefix test downstream (GH #1704).
-                    measure_text = (measure_elem.text or '').strip() if measure_elem is not None else ''
-                    if measure_text:
-                        self.units[unit_id] = {
-                            'type': 'simple',
-                            'measure': measure_text
-                        }
+                    unit = self._measure_unit(unit_elem)
+                    if unit is not None:
+                        self.units[unit_id] = unit
                     continue
 
                 if divide_elem is not None:
