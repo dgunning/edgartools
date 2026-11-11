@@ -88,7 +88,8 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4,
         elif statement_type in EQUITY_STATEMENT_TYPES:
             candidate_periods = _select_equity_statement_periods(filtered_periods, xbrl.entity_info, max_periods, document_end_date)
         else:  # Income/Cash Flow statements (duration-based)
-            candidate_periods = _select_duration_periods(filtered_periods, xbrl.entity_info, max_periods, document_end_date)
+            candidate_periods = _select_duration_periods(filtered_periods, xbrl.entity_info, max_periods,
+                                                         document_end_date, statement_data)
 
         # Step 3: Filter out periods with insufficient data
         periods_with_data = _filter_periods_with_sufficient_data(xbrl, candidate_periods, statement_type)
@@ -285,12 +286,17 @@ def _select_equity_statement_periods(periods: List[Dict], entity_info: Dict[str,
     return _select_duration_periods(periods, entity_info, max_periods, period_of_report)
 
 
-def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], max_periods: int, period_of_report: Optional[str] = None) -> List[Tuple[str, str]]:
+def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], max_periods: int,
+                            period_of_report: Optional[str] = None,
+                            statement_data: Optional[List[Dict[str, Any]]] = None) -> List[Tuple[str, str]]:
     """
     Select duration periods for income/cash flow statements with fiscal intelligence.
 
     This consolidates the sophisticated fiscal year logic from the legacy system
     while keeping it simple and focused.
+
+    statement_data, the statement's own rows when known, lets the quarterly
+    selector anchor on a current period the statement actually presents.
     """
     duration_periods = [p for p in periods if p['type'] == 'duration']
 
@@ -329,11 +335,12 @@ def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], m
             return [(p['key'], p['label']) for p in scored_periods[:max_periods]]
 
     # For quarterly reports or if no annual periods found, use sophisticated quarterly logic
-    return _select_quarterly_periods(duration_periods, max_periods, period_of_report)
+    return _select_quarterly_periods(duration_periods, max_periods, period_of_report, statement_data)
 
 
 def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int,
-                              period_of_report: Optional[str] = None) -> List[Tuple[str, str]]:
+                              period_of_report: Optional[str] = None,
+                              statement_data: Optional[List[Dict[str, Any]]] = None) -> List[Tuple[str, str]]:
     """
     Select quarterly periods with intelligent investor-focused logic.
 
@@ -380,6 +387,7 @@ def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int,
         valid_anchors = [(p, _anchor_days(p)) for p in anchors]
         valid_anchors = [(p, d) for p, d in valid_anchors if d is not None and d >= 60]
         valid_anchors.sort(key=lambda pd: pd[1])  # shortest first
+        valid_anchors = _anchors_the_statement_presents(valid_anchors, statement_data)
 
         if valid_anchors:
             anchor_quarter = valid_anchors[0][0]
@@ -521,6 +529,38 @@ def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int,
     # Let data quality filtering in _filter_periods_with_sufficient_data choose the best ones
     # This mirrors the successful Balance Sheet fix from v4.20.1 (line 128)
     return selected_periods[:max_periods * 3]
+
+
+def _anchors_the_statement_presents(anchors: List[Tuple[Dict, int]],
+                                    statement_data: Optional[List[Dict[str, Any]]]) -> List[Tuple[Dict, int]]:
+    """
+    Keep the report-date anchors the statement itself presents in earnest.
+
+    The shortest duration ending on the report date is taken to be the current
+    quarter. AEON's 10-Q/A (GH #1841) also has August 1 - September 30, 2023
+    (61 days), which its operations statement presents only through one income
+    tax fact, so that became the anchor and the successor period July 23 -
+    September 30 (70 days, 40 rows) was never a candidate; the default frame
+    showed only the predecessor. A quarter-length anchor (under 150 days) is
+    kept when it carries at least half as many of the statement's rows as the
+    densest quarter-length anchor; year-to-date anchors are never compared with
+    it, since a statement can present more rows year to date than for the
+    quarter. Without the rows, or when no anchor has any, the anchors are
+    returned unchanged.
+    """
+    if not statement_data or not anchors:
+        return anchors
+    anchor_keys = {period['key'] for period, days in anchors if days < 150}
+    rows_per_key: Dict[str, int] = {}
+    for row in statement_data:
+        for key in (row.get('values') or {}):
+            if key in anchor_keys:
+                rows_per_key[key] = rows_per_key.get(key, 0) + 1
+    densest = max(rows_per_key.values(), default=0)
+    if not densest:
+        return anchors
+    return [(period, days) for period, days in anchors
+            if period['key'] not in anchor_keys or rows_per_key.get(period['key'], 0) * 2 >= densest]
 
 
 def _get_annual_periods(duration_periods: List[Dict]) -> List[Dict]:
