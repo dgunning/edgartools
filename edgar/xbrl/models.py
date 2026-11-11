@@ -302,6 +302,22 @@ class PresentationNode(BaseModel):
         return False
 
 
+class PresentationRelationship(BaseModel):
+    """
+    One parent-child presentation relationship, as filed.
+
+    Every relationship in the role's network is one of these, after prohibition
+    and overriding (XBRL 2.1 section 3.5.3.9.7). A parent may present the same
+    child twice with a different `order` or `preferred_label` (Bank of America
+    shows a receivable as a terse total and again as a verbose detail); both
+    are kept here, although `PresentationNode.children` lists the child once.
+    """
+    parent_id: str
+    child_id: str
+    order: float = 0.0
+    preferred_label: Optional[str] = None
+
+
 class PresentationTree(BaseModel):
     """
     A presentation tree for a specific role.
@@ -328,6 +344,11 @@ class PresentationTree(BaseModel):
     # path, which is what `XBRL._generate_line_items` does (edgartools-f07v).
     all_nodes: Dict[str, PresentationNode] = Field(default_factory=dict)
     order: int = 0
+    # Every relationship in the role's network, in filed order. `all_nodes` is
+    # the statement view and lists a child concept once per parent (GH #825),
+    # except a period start/end pair; this keeps each reference whose order or
+    # preferred label differs (GH #1758).
+    relationships: List[PresentationRelationship] = Field(default_factory=list)
 
     def model_post_init(self, __context) -> None:
         # A tree built by an older caller that only set the scalar still has a

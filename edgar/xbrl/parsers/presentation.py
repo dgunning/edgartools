@@ -11,7 +11,13 @@ from typing import Any, Dict, List, Optional, Union
 from lxml import etree as ET
 
 from edgar.xbrl.core import PERIOD_END_LABEL, PERIOD_START_LABEL, extract_element_id, is_period_boundary_label_role
-from edgar.xbrl.models import ElementCatalog, PresentationNode, PresentationTree, XBRLProcessingError
+from edgar.xbrl.models import (
+    ElementCatalog,
+    PresentationNode,
+    PresentationRelationship,
+    PresentationTree,
+    XBRLProcessingError,
+)
 from edgar.xmltools import xml_parser
 
 from .base import BaseParser
@@ -160,9 +166,10 @@ class PresentationParser(BaseParser):
 
             # Build one presentation tree per role from all of its links
             for role, candidates in candidates_by_role.items():
-                relationships = self._one_period_boundary_per_label(effective_relationships(candidates))
+                network = effective_relationships(candidates)
+                relationships = self._one_period_boundary_per_label(network)
                 if relationships:
-                    self._build_presentation_tree(role, relationships)
+                    self._build_presentation_tree(role, relationships, network)
 
         except Exception as e:
             raise XBRLProcessingError(f"Error parsing presentation content: {str(e)}") from e
@@ -186,13 +193,17 @@ class PresentationParser(BaseParser):
             kept.append(rel)
         return kept
 
-    def _build_presentation_tree(self, role: str, relationships: List[Dict[str, Any]]) -> None:
+    def _build_presentation_tree(self, role: str, relationships: List[Dict[str, Any]],
+                                 network: Optional[List[Dict[str, Any]]] = None) -> None:
         """
         Build a presentation tree from relationships.
 
         Args:
             role: Extended link role URI
             relationships: List of relationships (from_element, to_element, order, preferred_label)
+                the tree's nodes are built from
+            network: Every effective relationship of the role, kept on the tree
+                as filed; defaults to `relationships`
         """
         # Group relationships by source element
         from_map = {}
@@ -224,7 +235,16 @@ class PresentationParser(BaseParser):
             definition=self.presentation_roles[role]['definition'],
             root_element_id=root_elements[0],  # Use first sorted element
             root_element_ids=root_elements,     # Every root, not just the first
-            all_nodes={}
+            all_nodes={},
+            relationships=[
+                PresentationRelationship(
+                    parent_id=rel['from_element'],
+                    child_id=rel['to_element'],
+                    order=rel['order'],
+                    preferred_label=rel['preferred_label'],
+                )
+                for rel in (relationships if network is None else network)
+            ],
         )
 
         # Build tree recursively
