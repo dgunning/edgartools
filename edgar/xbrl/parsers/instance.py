@@ -34,6 +34,7 @@ from edgar.xbrl.footnote_links import (
     fact_footnote_links,
     inherited_lang,
     inline_footnote_text,
+    is_fact_footnote_arcrole,
     normalize_footnote_text,
 )
 from edgar.xbrl.models import Context, Fact, XBRLProcessingError
@@ -1002,6 +1003,12 @@ class InstanceParser(BaseParser):
                     from_ref = arc_elem.get(f'{XLINK_NS}from')
                     to_ref = arc_elem.get(f'{XLINK_NS}to')
                     if not from_ref or not to_ref:
+                        continue
+                    # Only a fact-footnote arc is an ordinary footnote. A
+                    # fact-explanatoryFact arc or a filer's own arcrole relates
+                    # them some other way; the inline readers already skip
+                    # these, and Fact.footnotes has no room for them (GH #1767).
+                    if not is_fact_footnote_arcrole(arc_elem.get(f'{XLINK_NS}arcrole')):
                         continue
 
                     # Fall back to the label when the arc names no locator —

@@ -225,9 +225,10 @@ for fact in doc.xbrl_facts:
         # Excludes amortization of acquired intangible assets
 ```
 
-Only fact-footnote relationships (`ix:relationship` with no arcrole, or the
-`fact-footnote` arcrole) attach a footnote; a relationship with any other arcrole is not an
-ordinary footnote and is not attached.
+On both paths only fact-footnote relationships (an `ix:relationship` or `footnoteArc` with
+the `fact-footnote` arcrole, or none) attach a footnote. A relationship with any other
+arcrole, such as `fact-explanatoryFact` between two facts, is not an ordinary footnote and
+is not attached; EdgarTools does not yet model those relationships.
 
 ## XBRL Technical Details
 
