@@ -244,6 +244,21 @@ The number of standardized concepts varies by provider:
 | `CryptoSaleProceeds` | Proceeds from Disposal of Crypto Assets | 1 | `ProceedsFromDisposalCryptoAsset` |
 | `CryptoConversionProceeds` | Proceeds from Conversion of Crypto Consideration | 1 | `ProceedsFromCryptoAssetOperatingActivity` |
 
+
+### Cash Income Taxes by Jurisdiction (ASU 2023-09)
+
+| Standard Concept | Display Name | XBRL Tags | Examples |
+|------------------|--------------|-----------|----------|
+| `IncomeTaxesPaidFederal` | Income Taxes Paid, Federal, Net of Refunds | 1 | `IncomeTaxPaidFederalAfterRefundReceived` |
+| `IncomeTaxesPaidStateLocal` | Income Taxes Paid, State and Local, Net of Refunds | 1 | `IncomeTaxPaidStateAndLocalAfterRefundReceived` |
+| `IncomeTaxesPaidForeign` | Income Taxes Paid, Foreign, Net of Refunds | 1 | `IncomeTaxPaidForeignAfterRefundReceived` |
+| `IncomeTaxesPaidFederalGross` | Income Taxes Paid, Federal, Before Refunds | 1 | `IncomeTaxPaidFederalBeforeRefundReceived` |
+| `IncomeTaxesPaidStateLocalGross` | Income Taxes Paid, State and Local, Before Refunds | 1 | `IncomeTaxPaidStateAndLocalBeforeRefundReceived` |
+| `IncomeTaxesPaidForeignGross` | Income Taxes Paid, Foreign, Before Refunds | 1 | `IncomeTaxPaidForeignBeforeRefundReceived` |
+| `IncomeTaxRefundsFederal` | Income Tax Refunds Received, Federal | 1 | `ProceedsFromIncomeTaxRefundFederal` |
+| `IncomeTaxRefundsStateLocal` | Income Tax Refunds Received, State and Local | 1 | `ProceedsFromIncomeTaxRefundStateAndLocal` |
+| `IncomeTaxRefundsForeign` | Income Tax Refunds Received, Foreign | 1 | `ProceedsFromIncomeTaxRefundForeign` |
+
 ---
 
 ## Concept Details
@@ -326,6 +341,28 @@ result.comment               # '... Excludes crypto assets held for platform use
 - `CryptoConversionProceeds` is operating cash from crypto received as noncash
   consideration in the ordinary course and converted to cash nearly immediately, not
   every crypto sale; a later sale is `CryptoSaleProceeds`.
+
+### Cash Income Taxes by Jurisdiction
+
+The nine concepts are components of cash income taxes paid, never income tax expense.
+"Federal" means the federal or national jurisdiction, so a non-US filer's national tax
+is `IncomeTaxesPaidFederal` too. The whole stays unmapped: `IncomeTaxesPaidNet`
+(net of refunds) and `IncomeTaxesPaid` (before refunds) are reached through the synonym
+groups `income_taxes_paid` and `income_taxes_paid_gross`.
+
+```python
+from edgar.xbrl.standardization.reverse_index import get_reverse_index
+
+result = get_reverse_index().lookup("us-gaap:IncomeTaxPaidFederalAfterRefundReceived")
+result.primary_concept       # 'IncomeTaxesPaidFederal'
+result.primary_display_name  # 'Income Taxes Paid, Federal, Net of Refunds'
+```
+
+- ServiceNow, FY2025: $46M federal + $83M state + $154M foreign = $283M paid, net of refunds.
+  A state or country row (on `IncomeTaxAuthorityAxis`) is already inside its jurisdiction's
+  total and takes no concept; do not add New Jersey's $15M to the $83M.
+- A net-of-refunds amount is negative in a year when refunds exceed payments (Allegro
+  MicroSystems, FY2026: $30,889K federal refund, $-27,081K net taxes paid).
 
 ---
 
