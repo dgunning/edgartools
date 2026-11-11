@@ -50,19 +50,20 @@ def _local_name(tag) -> str:
     return tag.rsplit('}', 1)[-1].rsplit(':', 1)[-1].lower()
 
 
-def _transformed_value(format_attr: Optional[str], display: str) -> Optional[str]:
+def _transformed_value(elem, display: str) -> Optional[str]:
     """The fact value its inline-XBRL ``format`` gives the display text.
 
     None when there is no format, or the registry does not implement it or
     rejects the text; the caller then keeps the display text.
     """
+    format_attr = elem.get('format')
     if not format_attr:
         return None
     # Imported here: the registry lives in edgar.documents, whose package
     # import is not needed by the rest of this module.
-    from edgar.documents.strategies.ixbrl_transforms import TransformError, apply_transform
+    from edgar.documents.strategies.ixbrl_transforms import TransformError, apply_transform, expand_format
     try:
-        return apply_transform(format_attr, display)
+        return apply_transform(expand_format(elem, format_attr), display)
     except TransformError:
         return None
 
@@ -108,7 +109,7 @@ def _fact_value(elem, name: str, boolean_values: dict[str, str]) -> str:
     # callers parse, unless it has no digits to parse: ixt:fixed-zero over
     # an em dash means 0. Booleans are read from the transformed value,
     # because ixt:booleantrue may sit over any sentence.
-    transformed = _transformed_value(elem.get('format'), value)
+    transformed = _transformed_value(elem, value)
     if transformed is None:
         return value
     if name in _BOOLEAN_FACTS:

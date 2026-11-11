@@ -7,11 +7,24 @@ fact's semantic value. Without the transformation the fact value is the display
 string, which is a different thing that happens to look plausible: ``"Delaware"``
 where the value is ``"DE"``, ``"ten years"`` where it is ``"P10Y"``.
 
-This module implements the transformations of Transformation Registry 1-4 and
-the SEC's ``ixt-sec`` extensions, keyed on a normalized form of the format name
-so that every registry version's spelling of the same transform resolves to one
-implementation (TR1's ``ixt:datemonthdayyearen`` and TR4's
-``ixt:date-monthname-day-year-en`` are the same rule).
+A ``format`` is an expanded name: a registry namespace URI plus a rule's local
+name (Inline XBRL 1.1, sections 10.1.1 and 11.1.1). :data:`REGISTRIES` keys each
+supported registry by its namespace URI, and a format whose prefix is declared
+in the document resolves only to a rule of THAT registry, by its exact local
+name: TR3 has no ``fixed-zero``, so ``{TR3}fixed-zero`` is unknown.
+
+A format whose prefix is not declared (a direct call such as
+``apply_transform('ixt:num-dot-decimal', ...)``, or a fragment parsed without its
+root) falls back to :data:`TRANSFORMS`, a compatibility view keyed on the
+normalized local name, in which the newest registry defining a name wins.
+
+Coverage is partial and stated here rather than implied. Implemented: every
+numeric, fixed-value, English, numeric-date and Roman-numeral-month rule of
+Transformation Registries 1-5, and every ``ixt-sec`` rule. Not implemented:
+the date rules written in languages other than English (TR3 ``*dk``/``*in``,
+TR4/TR5 ``*-bg`` ... ``*-sv``, ``-cy``, ``-hi``, ``-hu``, ``-lt``, ``-lv``),
+the CJK and Japanese-era rules, and ``calindaymonthyear``; those raise
+:class:`UnknownTransformError`.
 
 Two failures are reported rather than swallowed, because a silently untransformed
 value is indistinguishable from a correctly transformed one:
@@ -33,6 +46,7 @@ __all__ = [
     'TransformError',
     'UnknownTransformError',
     'normalize_format',
+    'expand_format',
     'apply_transform',
     'is_known_format',
     'apply_scale',
@@ -70,6 +84,50 @@ def normalize_format(format_attr: str) -> str:
     elif ':' in name:            # prefix:local-name
         name = name.rsplit(':', 1)[-1]
     return re.sub(r'[-_\s]', '', name).lower()
+
+
+# Registry namespace URIs (Inline XBRL Transformation Registries 1-5 and the
+# SEC's ixt-sec registry).
+TR1_PRE_REC_NS = 'http://www.xbrl.org/2008/inlineXBRL/transformation'
+TR1_NS = 'http://www.xbrl.org/inlineXBRL/transformation/2010-04-20'
+TR2_NS = 'http://www.xbrl.org/inlineXBRL/transformation/2011-07-31'
+TR3_NS = 'http://www.xbrl.org/inlineXBRL/transformation/2015-02-26'
+TR4_NS = 'http://www.xbrl.org/inlineXBRL/transformation/2020-02-12'
+TR5_NS = 'http://www.xbrl.org/inlineXBRL/transformation/2022-02-16'
+IXT_SEC_NS = 'http://www.sec.gov/inlineXBRL/transformation/2015-08-31'
+
+
+def _prefix_namespace(element, prefix: str) -> Optional[str]:
+    """The namespace URI ``prefix`` is bound to where ``element`` sits, or None."""
+    nsmap = getattr(element, 'nsmap', None)
+    if nsmap and prefix in nsmap:          # a namespace-aware (XML) tree
+        return nsmap[prefix]
+    # An lxml.html tree keeps xmlns declarations as ordinary attributes; the
+    # nearest declaration wins, as it would in XML.
+    attribute = f'xmlns:{prefix}'
+    node = element
+    while node is not None:
+        uri = node.get(attribute)
+        if uri is not None:
+            return uri.strip()
+        node = node.getparent()
+    return None
+
+
+def expand_format(element, format_attr: Optional[str]) -> Optional[str]:
+    """
+    The ``format`` attribute of ``element`` as an expanded name.
+
+    Returns ``{namespace-uri}local-name`` when the prefix is declared in scope,
+    and the attribute unchanged when it is not, which leaves resolution to the
+    compatibility view (see the module docstring).
+    """
+    name = (format_attr or '').strip()
+    if not name or name.startswith('{') or ':' not in name:
+        return format_attr
+    prefix, local = name.split(':', 1)
+    uri = _prefix_namespace(element, prefix)
+    return f'{{{uri}}}{local}' if uri else format_attr
 
 
 # ---------------------------------------------------------------------------
@@ -249,6 +307,11 @@ def _date_numeric(order: str) -> Callable[[str], str]:
         if not match:
             raise _fail(value, f'a numeric {"/".join(order)} date')
         fields = dict(zip(order, match.groups(), strict=True))
+        if 'd' not in fields:                                    # gYearMonth
+            month = int(fields['m'])
+            if not 1 <= month <= 12:
+                raise _fail(value, 'a valid month')
+            return f"{_expand_year(fields['y']):04d}-{month:02d}"
         if 'y' in fields:
             return _iso_date(_expand_year(fields['y']), int(fields['m']), int(fields['d']), value)
         month, day = int(fields['m']), int(fields['d'])
@@ -258,13 +321,17 @@ def _date_numeric(order: str) -> Callable[[str], str]:
     return transform
 
 
-def _date_words(order: str) -> Callable[[str], str]:
+def _date_words(order: str,
+                month_number: Callable[[str, str], int] = None) -> Callable[[str], str]:
     """
     Dates written with an English month name, in the given field order.
 
     ``order`` uses ``'M'`` for the month name and ``'d'`` / ``'y'`` for the
-    numeric fields.
+    numeric fields. ``month_number`` reads the month token; the default reads
+    an English name, :func:`_roman_month_number` a Roman numeral.
     """
+    month_number = month_number or _month_number
+
     def transform(value: str) -> str:
         # Split on the separator RUN, not on whitespace. Replacing commas with
         # spaces and calling .split() accepted only space-separated dates, so
@@ -276,7 +343,7 @@ def _date_words(order: str) -> Callable[[str], str]:
         if len(tokens) != len(order):
             raise _fail(value, f'a date of the form {order}')
         fields = dict(zip(order, tokens, strict=True))
-        month = _month_number(fields['M'], value)
+        month = month_number(fields['M'], value)
         if 'd' not in fields:                                    # gYearMonth
             year = fields['y']
             if not re.fullmatch(r'\d{1,4}', year):
@@ -303,6 +370,50 @@ def _date_month_year_words(value: str) -> str:
 
 def _date_year_month_words(value: str) -> str:
     return _date_words('yM')(value)
+
+
+_ROMAN_MONTHS = {'i': 1, 'ii': 2, 'iii': 3, 'iv': 4, 'v': 5, 'vi': 6, 'vii': 7,
+                 'viii': 8, 'ix': 9, 'x': 10, 'xi': 11, 'xii': 12}
+
+
+def _roman_month_number(token: str, value: str) -> int:
+    month = _ROMAN_MONTHS.get(token.strip('.').lower())
+    if month is None:
+        raise _fail(value, 'a Roman-numeral month')
+    return month
+
+
+# Apostrophes and primes that TR5's ``*-apos`` rules accept as a thousands
+# separator ("1'234'567.89").
+_APOSTROPHES = "'`´’′＇"
+
+# num-unit-decimal: an integer part, a unit word, then one or two digits of
+# fraction and an optional minor-unit word ("5 dollars 25 cents" is 5.25).
+_UNIT_DECIMAL = re.compile(r'([0-9.,，]+)[^0-9.,，][^0-9]*?([0-9]{1,2})[^0-9]*')
+
+
+def _num_unit_decimal(separators: str = '.,，') -> Callable[[str], str]:
+    def transform(value: str) -> str:
+        text = _clean(value)
+        for apostrophe in _APOSTROPHES:
+            if apostrophe in separators:
+                text = text.replace(apostrophe, ',')
+        match = _UNIT_DECIMAL.fullmatch(text)
+        if not match:
+            raise _fail(value, 'an amount in major and minor units')
+        major = re.sub(r'[.,，]', '', match.group(1))
+        if not major:
+            raise _fail(value, 'an amount in major and minor units')
+        return _plain_decimal(Decimal(f"{major}.{match.group(2).zfill(2)}"))
+    return transform
+
+
+def _num_dash(value: str) -> str:
+    """A lone dash means zero (TR1 numdash, TR2/TR3 zerodash)."""
+    text = _clean(value)
+    if text and text.strip(_DASHES + '-') == '':
+        return '0'
+    return _numeric(value, ', ', '.')
 
 
 # ---------------------------------------------------------------------------
@@ -530,107 +641,235 @@ def _entity_filer_category_en(value: str) -> str:
     return category
 
 
+def _yes_no_ballot_box(value: str) -> str:
+    """A checkbox glyph to Yes/No, per ixt-sec:yesnoballotbox."""
+    return 'Yes' if _bool_ballot_box(value) == 'true' else 'No'
+
+
+_QUARTER_MONTHS = {'1': 3, 'first': 3, '2': 6, 'second': 6, '3': 9, 'third': 9,
+                   '4': 12, 'fourth': 12, 'last': 12}
+_QUARTER = r'(1|first|2|second|3|third|4|fourth|last)'
+# "Q3 2024", "third quarter of 2024", "2024 Q3", "fiscal 2024, third quarter"
+_QUARTER_YEAR = re.compile(r'(?:(?![0-9]{2})\w[^0-9]*?)?' + _QUARTER + r'[^0-9]*?([0-9]{4})', re.I)
+_YEAR_QUARTER = re.compile(r'([0-9]{4})[^0-9]*?' + _QUARTER + r'(?:(?![0-9]).*\w+)?', re.I)
+
+
+def _date_quarter_end(value: str) -> str:
+    """A calendar quarter to the date it ends, per ixt-sec:datequarterend."""
+    text = _clean(value)
+    match = _QUARTER_YEAR.fullmatch(text)
+    if match:
+        quarter, year = match.group(1), match.group(2)
+    else:
+        match = _YEAR_QUARTER.fullmatch(text)
+        if not match:
+            raise _fail(value, 'a calendar quarter')
+        year, quarter = match.group(1), match.group(2)
+    month = _QUARTER_MONTHS[quarter.lower()]
+    return f"{int(year):04d}-{month:02d}-{31 if month in (3, 12) else 30:02d}"
+
+
 # ---------------------------------------------------------------------------
-# The registry
+# The registries
 # ---------------------------------------------------------------------------
 
-TRANSFORMS: Dict[str, Callable[[str], str]] = {
-    # -- numeric -----------------------------------------------------------
-    'numdotdecimal': lambda v: _numeric(v, thousands=', ', decimal='.'),
-    'numdotdecimalin': lambda v: _numeric(v, thousands=', ', decimal='.'),
-    'numcommadecimal': lambda v: _numeric(v, thousands='. ', decimal=','),
-    'numcomma': lambda v: _numeric(v, thousands='', decimal=','),
-    'numdotcomma': lambda v: _numeric(v, thousands='. ', decimal=','),
-    'numspacedot': lambda v: _numeric(v, thousands=' ', decimal='.'),
-    'numspacecomma': lambda v: _numeric(v, thousands=' ', decimal=','),
-    'numunitdecimal': lambda v: _numeric(v, thousands=', ', decimal='.'),
-    'numwordsen': _num_words_en,
+def _dot_decimal(value: str) -> str:
+    return _numeric(value, thousands=', ', decimal='.')
 
-    # -- fixed-output ------------------------------------------------------
-    'fixedzero': _fixed('0'),
-    'fixedempty': _fixed(''),
-    'nocontent': _fixed(''),
-    'fixedtrue': _fixed('true'),
-    'fixedfalse': _fixed('false'),
-    'booleantrue': _fixed('true'),
-    'booleanfalse': _fixed('false'),
-    'boolballotbox': _bool_ballot_box,
-    # zerodash is the one dash rule that is not fixed: only a dash becomes 0.
-    'zerodash': lambda v: '0' if _clean(v).strip(_DASHES + '-') == '' and _clean(v) else _numeric(v, ', ', '.'),
-    'numdash': lambda v: '0' if _clean(v).strip(_DASHES + '-') == '' and _clean(v) else _numeric(v, ', ', '.'),
 
-    # -- numeric dates -----------------------------------------------------
-    'datedoteu': _date_numeric('dmy'),
-    'datedotus': _date_numeric('mdy'),
-    'dateslasheu': _date_numeric('dmy'),
+def _comma_decimal(value: str) -> str:
+    return _numeric(value, thousands='. ', decimal=',')
+
+
+# Transformation Registry 1 (REC 2010-04-20; also the pre-REC 2008 namespace).
+_TR1: Dict[str, Callable[[str], str]] = {
     'dateslashus': _date_numeric('mdy'),
-    'datedaymonthyear': _date_numeric('dmy'),
-    'datemonthdayyear': _date_numeric('mdy'),
-    'dateyearmonthday': _date_numeric('ymd'),
-    'datedaymonth': _date_numeric('dm'),
-    'datemonthday': _date_numeric('md'),
-    'dateeu': _date_numeric('dmy'),
-    'dateus': _date_numeric('mdy'),
-
-    # -- dates written with a month name -----------------------------------
-    # TR1 spelled these ``datemonthdayyearen``; TR3/TR4 spell the same rule
-    # ``date-monthname-day-year-en``. Both keys land here.
-    'datemonthdayyearen': _date_words('Mdy'),
-    'datemonthnamedayyearen': _date_words('Mdy'),
+    'dateslasheu': _date_numeric('dmy'),
+    'datedotus': _date_numeric('mdy'),
+    'datedoteu': _date_numeric('dmy'),
     'datelongus': _date_words('Mdy'),
     'dateshortus': _date_words('Mdy'),
-    'datedaymonthyearen': _date_words('dMy'),
-    'datedaymonthnameyearen': _date_words('dMy'),
-    'datelongeu': _date_words('dMy'),
-    'dateshorteu': _date_words('dMy'),
-    'datemonthdayen': _date_words('Md'),
-    'datemonthnamedayen': _date_words('Md'),
-    'datelongmonthday': _date_words('Md'),
-    'dateshortmonthday': _date_words('Md'),
-    'datedaymonthen': _date_words('dM'),
-    'datedaymonthnameen': _date_words('dM'),
-    'datelongdaymonth': _date_words('dM'),
-    'dateshortdaymonth': _date_words('dM'),
-    'datemonthyearen': _date_month_year_words,
-    'datemonthnameyearen': _date_month_year_words,
+    'datelonguk': _date_words('dMy'),
+    'dateshortuk': _date_words('dMy'),
+    'numcommadot': lambda v: _numeric(v, thousands=',', decimal='.'),
+    'numdash': _num_dash,
+    'numspacedot': lambda v: _numeric(v, thousands=' ', decimal='.'),
+    'numdotcomma': lambda v: _numeric(v, thousands='. ', decimal=','),
+    'numcomma': lambda v: _numeric(v, thousands='', decimal=','),
+    'numspacecomma': lambda v: _numeric(v, thousands=' ', decimal=','),
+    'datelongdaymonthuk': _date_words('dM'),
+    'dateshortdaymonthuk': _date_words('dM'),
+    'datelongmonthdayus': _date_words('Md'),
+    'dateshortmonthdayus': _date_words('Md'),
+    'dateslashdaymontheu': _date_numeric('dm'),
+    'dateslashmonthdayus': _date_numeric('md'),
+    'datelongyearmonth': _date_year_month_words,
+    'dateshortyearmonth': _date_year_month_words,
     'datelongmonthyear': _date_month_year_words,
     'dateshortmonthyear': _date_month_year_words,
-    'dateyearmonthen': _date_year_month_words,
-    'dateyearmonthnameen': _date_year_month_words,
+}
 
-    # -- durations (ixt-sec) -----------------------------------------------
+# Transformation Registry 2 (REC 2011-07-31).
+_TR2: Dict[str, Callable[[str], str]] = {
+    'booleanfalse': _fixed('false'),
+    'booleantrue': _fixed('true'),
+    'datedaymonth': _date_numeric('dm'),
+    'datedaymonthen': _date_words('dM'),
+    'datedaymonthyear': _date_numeric('dmy'),
+    'datedaymonthyearen': _date_words('dMy'),
+    'datemonthday': _date_numeric('md'),
+    'datemonthdayen': _date_words('Md'),
+    'datemonthdayyear': _date_numeric('mdy'),
+    'datemonthdayyearen': _date_words('Mdy'),
+    'datemonthyearen': _date_month_year_words,
+    'dateyearmonthen': _date_year_month_words,
+    'nocontent': _fixed(''),
+    'numcommadecimal': _comma_decimal,
+    'zerodash': _num_dash,
+    'numdotdecimal': _dot_decimal,
+    'numunitdecimal': _num_unit_decimal(),
+}
+
+# Transformation Registry 3 (REC 2015-02-26): TR2 plus these.
+_TR3: Dict[str, Callable[[str], str]] = {
+    **_TR2,
+    'datemonthyear': _date_numeric('my'),
+    'dateyearmonthday': _date_numeric('ymd'),
+    'numdotdecimalin': _dot_decimal,
+    'numunitdecimalin': _num_unit_decimal(),
+}
+
+# Transformation Registry 4 (REC 2020-02-12). A fresh rule set, not TR3's.
+_TR4: Dict[str, Callable[[str], str]] = {
+    'date-day-month': _date_numeric('dm'),
+    'date-day-monthname-en': _date_words('dM'),
+    'date-day-monthroman': _date_words('dM', _roman_month_number),
+    'date-day-month-year': _date_numeric('dmy'),
+    'date-day-monthname-year-en': _date_words('dMy'),
+    'date-day-monthroman-year': _date_words('dMy', _roman_month_number),
+    'date-monthname-day-en': _date_words('Md'),
+    'date-monthname-day-year-en': _date_words('Mdy'),
+    'date-month-day': _date_numeric('md'),
+    'date-month-day-year': _date_numeric('mdy'),
+    'date-month-year': _date_numeric('my'),
+    'date-monthname-year-en': _date_month_year_words,
+    'date-monthroman-year': _date_words('My', _roman_month_number),
+    'date-year-month': _date_numeric('ym'),
+    'date-year-month-day': _date_numeric('ymd'),
+    'date-year-monthname-en': _date_year_month_words,
+    'fixed-empty': _fixed(''),
+    'fixed-false': _fixed('false'),
+    'fixed-true': _fixed('true'),
+    'fixed-zero': _fixed('0'),
+    'num-comma-decimal': _comma_decimal,
+    'num-dot-decimal': _dot_decimal,
+    'numdotdecimalin': _dot_decimal,
+    'num-unit-decimal': _num_unit_decimal(),
+}
+
+# Transformation Registry 5 (REC 2022-02-16): TR4 plus these.
+_TR5: Dict[str, Callable[[str], str]] = {
+    **_TR4,
+    'num-comma-decimal-apos': lambda v: _numeric(v, thousands='. ' + _APOSTROPHES, decimal=','),
+    'num-dot-decimal-apos': lambda v: _numeric(v, thousands=', ' + _APOSTROPHES, decimal='.'),
+    'num-unit-decimal-apos': _num_unit_decimal('.,，' + _APOSTROPHES),
+}
+
+# The SEC's ixt-sec registry (2015-08-31 namespace).
+_IXT_SEC: Dict[str, Callable[[str], str]] = {
     'duryear': _duration_number('Y'),
     'durmonth': _duration_number('M'),
     'durweek': _duration_number('W'),
     'durday': _duration_number('D'),
     'durhour': _duration_number('H', time_part=True),
     'durwordsen': _dur_words_en,
-
-    # -- SEC name-to-code (ixt-sec) ----------------------------------------
+    'datequarterend': _date_quarter_end,
+    'numinf': _fixed('INF'),
+    'numneginf': _fixed('-INF'),
+    'numnan': _fixed('NaN'),
+    'numwordsen': _num_words_en,
+    'boolballotbox': _bool_ballot_box,
+    'yesnoballotbox': _yes_no_ballot_box,
+    'countrynameen': _country_name_en,
     'stateprovnameen': _state_prov_name_en,
     'edgarprovcountryen': _edgar_prov_country_en,
-    'countrynameen': _country_name_en,
     'exchnameen': _exchange_name_en,
     'entityfilercategoryen': _entity_filer_category_en,
 }
 
+# Each supported registry by namespace URI, local name matched exactly.
+REGISTRIES: Dict[str, Dict[str, Callable[[str], str]]] = {
+    TR1_PRE_REC_NS: _TR1,
+    TR1_NS: _TR1,
+    TR2_NS: _TR2,
+    TR3_NS: _TR3,
+    TR4_NS: _TR4,
+    TR5_NS: _TR5,
+    IXT_SEC_NS: _IXT_SEC,
+}
+
+
+# Names no registry defines, kept because earlier releases accepted them on
+# direct calls. They are reachable only through the compatibility view.
+_LEGACY_ALIASES: Dict[str, Callable[[str], str]] = {
+    'dateeu': _date_numeric('dmy'),
+    'dateus': _date_numeric('mdy'),
+    'datelongeu': _date_words('dMy'),
+    'dateshorteu': _date_words('dMy'),
+    'datelongmonthday': _date_words('Md'),
+    'dateshortmonthday': _date_words('Md'),
+    'datelongdaymonth': _date_words('dM'),
+    'dateshortdaymonth': _date_words('dM'),
+}
+
+
+def _compatibility_view() -> Dict[str, Callable[[str], str]]:
+    """Every rule keyed on its normalized local name; the newest registry wins."""
+    view: Dict[str, Callable[[str], str]] = dict(_LEGACY_ALIASES)
+    for rules in (_TR1, _TR2, _TR3, _TR4, _TR5, _IXT_SEC):
+        for local_name, transform in rules.items():
+            view[normalize_format(local_name)] = transform
+    return view
+
+
+# For formats whose prefix is not declared in scope: direct calls, and
+# fragments parsed without their root element. See the module docstring.
+TRANSFORMS: Dict[str, Callable[[str], str]] = _compatibility_view()
+
+
+def _resolve(format_attr: str) -> Optional[Callable[[str], str]]:
+    name = (format_attr or '').strip()
+    if name.startswith('{') and '}' in name:
+        uri, local = name[1:].split('}', 1)
+        return REGISTRIES.get(uri.strip(), {}).get(local.strip())
+    return TRANSFORMS.get(normalize_format(name))
+
 
 def is_known_format(format_attr: str) -> bool:
-    """Whether this registry implements the named transformation."""
-    return normalize_format(format_attr) in TRANSFORMS
+    """
+    Whether this registry implements the named transformation.
+
+    ``format_attr`` is either an expanded name, ``{namespace-uri}local-name``,
+    which must name a rule of that registry exactly, or a prefixed or bare name,
+    resolved through the compatibility view.
+    """
+    return _resolve(format_attr) is not None
 
 
 def apply_transform(format_attr: str, value: str) -> str:
     """
     Apply the named transformation to an element's display text.
 
+    ``format_attr`` is resolved as :func:`is_known_format` describes; use
+    :func:`expand_format` to turn an element's prefixed ``format`` attribute
+    into the expanded name its document declares.
+
     Raises :class:`UnknownTransformError` if the format is not implemented, and
     :class:`TransformError` if it is implemented but the input does not satisfy
     it. Neither is swallowed here: returning ``value`` unchanged would make an
     untransformed display string indistinguishable from a real value.
     """
-    key = normalize_format(format_attr)
-    transform = TRANSFORMS.get(key)
+    transform = _resolve(format_attr)
     if transform is None:
         raise UnknownTransformError(f"No implementation for iXBRL format {format_attr!r}")
     return transform(value)

@@ -14,6 +14,7 @@ from edgar.documents.strategies.ixbrl_transforms import (
     UnknownTransformError,
     apply_scale,
     apply_transform,
+    expand_format,
     negate_exactly,
 )
 from edgar.documents.types import XBRLFact
@@ -515,7 +516,9 @@ class XBRLExtractor:
         format_attr = element.get('format')
         if format_attr:
             try:
-                value = apply_transform(format_attr, value)
+                # The format resolves in the registry its prefix is declared
+                # for, not by local name under any namespace (GH #1743).
+                value = apply_transform(expand_format(element, format_attr), value)
             except UnknownTransformError:
                 issue = f"unsupported format {format_attr}"
                 self._report_format_issue(format_attr, issue)
