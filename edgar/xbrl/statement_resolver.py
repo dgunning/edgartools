@@ -16,6 +16,24 @@ from edgar.exceptions import StatementNotFoundError
 from edgar.xbrl.statements import statement_to_concepts
 
 
+def declares_statement(definition: Optional[str], menu_category: Optional[str]) -> bool:
+    """Whether the filing itself declares a role to be a financial statement.
+
+    A FilingSummary entry is authoritative: its menu is "Statements" or it is
+    not. Only a role without one (a load with no FilingSummary, or a role the
+    summary does not list) falls back to the schema definition's exact category
+    segment, as in "9952153 - Statement - CONSOLIDATED STATEMENTS OF INCOME".
+
+    Args:
+        definition: The role's schema definition.
+        menu_category: The role's FilingSummary menu category, or None.
+    """
+    if menu_category:
+        return menu_category == 'Statements'
+    parts = (definition or '').split(' - ')
+    return len(parts) >= 3 and parts[1].strip().lower() == 'statement'
+
+
 class StatementCategory(Enum):
     """Categories of XBRL presentation sections."""
     FINANCIAL_STATEMENT = "statement"
