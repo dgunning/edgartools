@@ -52,7 +52,12 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, Iterator, List, Optional, Set, Union
 
+from edgar.exceptions import ValidationError
+
 log = logging.getLogger(__name__)
+
+# Measurement bases a SynonymGroup may declare (None = no basis distinction).
+VALID_BASES = (None, 'net', 'gross')
 
 # Module-level caches
 _default_instance: Optional['SynonymGroups'] = None
@@ -79,6 +84,11 @@ class SynonymGroup:
             - 'frequency': Order by usage frequency (most common first)
             - 'specificity': Order by tag specificity (most specific first)
         category: Financial statement category (e.g., 'income_statement', 'balance_sheet')
+        basis: Measurement basis of the group's tags, when the concept exists on more than
+            one basis and the groups for each must stay apart: 'net' or 'gross'. None (the
+            default) for groups with no such distinction. Cash interest paid, for example,
+            is 'net' of capitalized interest in `interest_paid` and 'gross' in
+            `interest_paid_gross` (GH #1858).
     """
     name: str
     synonyms: List[str]
@@ -86,6 +96,7 @@ class SynonymGroup:
     namespace: str = "us-gaap"
     priority_order: str = "listed"
     category: str = ""
+    basis: Optional[str] = None
     # Internal set for O(1) tag membership lookup (not serialized)
     _synonym_set: Set[str] = field(default_factory=set, repr=False, compare=False)
 
@@ -93,6 +104,13 @@ class SynonymGroup:
         """Normalize the synonym group after initialization."""
         # Ensure name is lowercase with underscores
         self.name = _normalize_name(self.name)
+        if self.basis not in VALID_BASES:
+            raise ValidationError(
+                f"SynonymGroup '{self.name}': basis must be one of 'net', 'gross' or None, "
+                f"got {self.basis!r}",
+                parameter='basis',
+                invalid_value=self.basis,
+            )
         # Remove namespace prefixes and deduplicate while preserving order
         seen: Set[str] = set()
         deduped: List[str] = []
@@ -152,7 +170,7 @@ class SynonymGroup:
 
     def to_dict(self) -> Dict:
         """Convert to dictionary for JSON serialization."""
-        return {
+        data = {
             'name': self.name,
             'synonyms': self.synonyms,
             'description': self.description,
@@ -160,6 +178,11 @@ class SynonymGroup:
             'priority_order': self.priority_order,
             'category': self.category
         }
+        # Only groups that carry a measurement basis serialize one, so the
+        # exported shape of every other group is unchanged.
+        if self.basis is not None:
+            data['basis'] = self.basis
+        return data
 
     @classmethod
     def from_dict(cls, data: Dict) -> 'SynonymGroup':
@@ -170,7 +193,8 @@ class SynonymGroup:
             description=data.get('description', ''),
             namespace=data.get('namespace', 'us-gaap'),
             priority_order=data.get('priority_order', 'listed'),
-            category=data.get('category', '')
+            category=data.get('category', ''),
+            basis=data.get('basis')
         )
 
 
@@ -759,6 +783,48 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             description='Dividends paid',
             category='cash_flow'
         ),
+        # Cash interest and income taxes paid (GH #1858). Net and gross are
+        # different measures (ASC 230-10-50-2: interest net of capitalized
+        # amounts; ASC 740-10-50-22: taxes net of refunds), so each basis is its
+        # own group, neither lists the other's tag, and there is no fallback
+        # between them. These are cash measures, kept apart from the accrual
+        # interest_expense / income_tax_expense groups (GH #1440, #1442).
+        SynonymGroup(
+            name='interest_paid',
+            synonyms=[
+                'InterestPaidNet',
+            ],
+            description='Cash paid for interest, net of capitalized interest',
+            category='cash_flow',
+            basis='net'
+        ),
+        SynonymGroup(
+            name='interest_paid_gross',
+            synonyms=[
+                'InterestPaid',
+            ],
+            description='Cash paid for interest, including capitalized interest',
+            category='cash_flow',
+            basis='gross'
+        ),
+        SynonymGroup(
+            name='income_taxes_paid',
+            synonyms=[
+                'IncomeTaxesPaidNet',
+            ],
+            description='Cash paid for income taxes, net of refunds',
+            category='cash_flow',
+            basis='net'
+        ),
+        SynonymGroup(
+            name='income_taxes_paid_gross',
+            synonyms=[
+                'IncomeTaxesPaid',
+            ],
+            description='Cash paid for income taxes, before refunds',
+            category='cash_flow',
+            basis='gross'
+        ),
         SynonymGroup(
             name='share_repurchases',
             synonyms=[
@@ -1093,7 +1159,8 @@ class SynonymGroups:
         description: str = "",
         namespace: str = "us-gaap",
         priority_order: str = "listed",
-        category: str = ""
+        category: str = "",
+        basis: Optional[str] = None
     ) -> SynonymGroup:
         """
         Register a custom synonym group.
@@ -1108,6 +1175,7 @@ class SynonymGroups:
             namespace: Default namespace for tags
             priority_order: How to order synonyms ('listed', 'frequency', 'specificity')
             category: Financial statement category
+            basis: Optional measurement basis, 'net' or 'gross' (default None)
 
         Returns:
             The registered SynonymGroup
@@ -1126,7 +1194,8 @@ class SynonymGroups:
             description=description,
             namespace=namespace,
             priority_order=priority_order,
-            category=category
+            category=category,
+            basis=basis
         )
         self._register_group_internal(group, is_user_defined=True)
         log.info(f"Registered custom synonym group: {group.name}")

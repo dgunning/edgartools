@@ -56,6 +56,8 @@ group.contains_tag('NetIncome')  # False
 - `namespace`: Default namespace (default: `us-gaap`)
 - `priority_order`: How to order synonyms (`listed`, `frequency`, `specificity`)
 - `category`: Financial statement category
+- `basis`: Measurement basis, `'net'` or `'gross'`, for concepts that exist on both bases
+  and must not be mixed (default `None`)
 
 ### SynonymGroups
 
@@ -151,7 +153,7 @@ synonyms.unregister_group('custom_capex')
 
 ## Builtin Groups
 
-The package includes 59 pre-built synonym groups organized by category:
+The package includes 63 pre-built synonym groups organized by category:
 
 ### Income Statement
 - `revenue`, `cost_of_revenue`, `gross_profit`
@@ -177,7 +179,39 @@ The package includes 59 pre-built synonym groups organized by category:
 - `operating_cash_flow`, `investing_cash_flow`, `financing_cash_flow`
 - `capital_expenditures`, `depreciation_adjustment`
 - `dividends_paid`, `share_repurchases`
+- `interest_paid`, `interest_paid_gross`, `income_taxes_paid`, `income_taxes_paid_gross`
 - `debt_issuance`, `debt_repayment`
+
+#### Cash interest and income taxes paid
+
+Cash paid for interest and income taxes is reported on two bases, and each basis is
+its own group. Neither group falls back to the other, so `interest_paid` returns
+`None` for a company that tags only `InterestPaid`; ask for `interest_paid_gross`
+when the gross figure is what you want.
+
+| Group | XBRL tag | Basis |
+|---|---|---|
+| `interest_paid` | `InterestPaidNet` | net of capitalized interest |
+| `interest_paid_gross` | `InterestPaid` | including capitalized interest |
+| `income_taxes_paid` | `IncomeTaxesPaidNet` | net of refunds |
+| `income_taxes_paid_gross` | `IncomeTaxesPaid` | before refunds |
+
+`get_concept(..., return_metadata=True)` adds a `basis` key (`'net'` or `'gross'`)
+for these groups. Oracle's fiscal 2026 10-K (accession 0001193125-26-277521):
+
+```python
+from edgar import Company
+
+facts = Company("ORCL").get_facts()
+cash_interest = facts.get_concept("interest_paid", period="2026-FY", return_metadata=True)
+cash_taxes = facts.get_concept("income_taxes_paid", period="2026-FY", return_metadata=True)
+cash_interest["value"], cash_interest["tag_used"], cash_interest["basis"]
+# (3896000000.0, 'us-gaap:InterestPaidNet', 'net')
+cash_taxes["value"]
+# 3704000000.0
+```
+
+This example is verified by `tests/issues/regression/test_issue_1858.py`.
 
 ### Shares
 - `shares_outstanding`, `weighted_average_shares_basic`

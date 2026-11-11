@@ -71,6 +71,20 @@ patterns:
       item.note.text                                     # narrative explanation
       bs.search('debt')                                  # fuzzy → ranked list of StatementLineItems
 
+  - name: Cash Interest and Income Taxes Paid
+    when: Need cash paid for interest or income taxes (not the accrual expense)
+    code: |
+      facts = company.get_facts()
+      facts.get_concept("interest_paid", period="2026-FY", return_metadata=True)
+      # {'value': 3896000000.0, 'tag_used': 'us-gaap:InterestPaidNet', 'basis': 'net', ...}  (ORCL)
+      facts.get_concept("income_taxes_paid")        # IncomeTaxesPaidNet (net of refunds)
+      facts.get_concept("interest_paid_gross")      # InterestPaid (incl. capitalized interest)
+      facts.get_concept("income_taxes_paid_gross")  # IncomeTaxesPaid (before refunds)
+    note: |
+      Net and gross are separate groups with no fallback: interest_paid is None for a
+      company that tags only InterestPaid (Boeing FY2025). Try the _gross group, and
+      check result['basis'] before comparing companies.
+
   - name: All Metrics at Once
     when: Comprehensive snapshot
     code: |
