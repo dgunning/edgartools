@@ -1440,7 +1440,7 @@ class MultiFinancials:
             view: StatementView controlling dimensional data display.
                   Accepted positionally.
                   STANDARD: Face presentation matching SEC Viewer (display default)
-                  DETAILED: All dimensional data included (to_dataframe default)
+                  DETAILED: All dimensional data included
                   SUMMARY: Non-dimensional totals only
             include_quarterly: If True, surface discrete-quarter columns alongside
                   the year-to-date or annual columns from each filing (GH #780).
