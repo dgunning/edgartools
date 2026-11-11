@@ -1276,7 +1276,8 @@ class Company(Entity):
     # TTM (Trailing Twelve Months) Methods
     # -------------------------------------------------------------------------
 
-    def get_ttm(self, concept: str, as_of: Optional[Union[date, str]] = None) -> TTMMetric:
+    def get_ttm(self, concept: str, as_of: Optional[Union[date, str]] = None, *,
+                filed_by: Optional[Union[date, str]] = None) -> TTMMetric:
         """Calculate Trailing Twelve Months value for a concept.
 
         Args:
@@ -1285,6 +1286,13 @@ class Company(Entity):
                    - date object
                    - ISO string 'YYYY-MM-DD'
                    - Quarter string 'YYYY-QN' (e.g., '2024-Q2')
+                   This is a reporting-period cutoff: a quarter may be read from a
+                   later filing's comparative.
+            filed_by: Keyword-only. Use only facts from filings made on or before
+                this date (inclusive, by SEC filing date): a date or ISO string
+                'YYYY-MM-DD' (quarter strings are rejected). Given alone it is also
+                the reporting cutoff. Returns the latest gap-free four-quarter
+                window, whose ``as_of_date`` may be earlier than the cutoff.
 
         Returns:
             TTMMetric with value, periods, and metadata
@@ -1297,19 +1305,27 @@ class Company(Entity):
             >>> company = Company("AAPL")
             >>> ttm = company.get_ttm("Revenues")
             >>> print(f"TTM Revenue: ${ttm.value / 1e9:.1f}B")
+            >>> # What was known from filings made by 2023-08-04
+            >>> ttm = company.get_ttm("RevenueFromContractWithCustomerExcludingAssessedTax", filed_by="2023-08-04")
         """
         facts = self.facts
         if not facts:
             raise KeyError("No company facts available")
-        return facts.get_ttm(concept, as_of)
+        return facts.get_ttm(concept, as_of, filed_by=filed_by)
 
-    def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None) -> TTMMetric:
+    def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None, *,
+                        filed_by: Optional[Union[date, str]] = None) -> TTMMetric:
         """Get Trailing Twelve Months revenue.
 
         Tries common revenue concepts in order of preference.
 
         Args:
-            as_of: Calculate TTM as of this date (optional)
+            as_of: Calculate TTM as of this date (optional); a reporting-period cutoff
+            filed_by: Keyword-only. Use only facts from filings made on or before
+                this date (inclusive, by SEC filing date): a date or ISO string
+                'YYYY-MM-DD' (quarter strings are rejected). Given alone it is also
+                the reporting cutoff. Returns the latest gap-free four-quarter
+                window, whose ``as_of_date`` may be earlier than the cutoff.
 
         Returns:
             TTMMetric with revenue value and metadata
@@ -1320,15 +1336,21 @@ class Company(Entity):
         facts = self.facts
         if not facts:
             raise KeyError("No company facts available")
-        return facts.get_ttm_revenue(as_of)
+        return facts.get_ttm_revenue(as_of, filed_by=filed_by)
 
-    def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None) -> TTMMetric:
+    def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None, *,
+                           filed_by: Optional[Union[date, str]] = None) -> TTMMetric:
         """Get Trailing Twelve Months net income.
 
         Tries common net income concepts in order of preference.
 
         Args:
-            as_of: Calculate TTM as of this date (optional)
+            as_of: Calculate TTM as of this date (optional); a reporting-period cutoff
+            filed_by: Keyword-only. Use only facts from filings made on or before
+                this date (inclusive, by SEC filing date): a date or ISO string
+                'YYYY-MM-DD' (quarter strings are rejected). Given alone it is also
+                the reporting cutoff. Returns the latest gap-free four-quarter
+                window, whose ``as_of_date`` may be earlier than the cutoff.
 
         Returns:
             TTMMetric with net income value and metadata
@@ -1339,7 +1361,7 @@ class Company(Entity):
         facts = self.facts
         if not facts:
             raise KeyError("No company facts available")
-        return facts.get_ttm_net_income(as_of)
+        return facts.get_ttm_net_income(as_of, filed_by=filed_by)
 
     def __str__(self):
         if self._data is not None and self._data.name:

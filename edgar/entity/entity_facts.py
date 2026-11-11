@@ -7,7 +7,7 @@ analytics and AI-ready interfaces.
 
 import warnings
 from collections import OrderedDict, defaultdict
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Union as TypingUnion
 
@@ -1863,11 +1863,60 @@ class EntityFacts:
 
         raise ValueError(f"Invalid date format: '{as_of}'. Use 'YYYY-MM-DD' or 'YYYY-QN'")
 
-    def get_ttm(self, concept: str, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
-        """Calculate Trailing Twelve Months value for a concept."""
+    def _parse_filed_by(self, filed_by: Optional[Union[date, str]]) -> Optional[date]:
+        """Parse a ``filed_by`` cutoff: a date or an ISO 'YYYY-MM-DD' string (GH #1699).
+
+        A quarter string is rejected: it names a reporting period, not the day a
+        filing was made.
+        """
+        from edgar.exceptions import InvalidDateError
+
+        if filed_by is None:
+            return None
+        if isinstance(filed_by, datetime):
+            return filed_by.date()
+        if isinstance(filed_by, date):
+            return filed_by
+        if not isinstance(filed_by, str):
+            raise TypeError(f"filed_by must be date, str, or None, got {type(filed_by).__name__}")
+        try:
+            return date.fromisoformat(filed_by.strip())
+        except ValueError:
+            hint = ("a quarter names a reporting period, not a filing date; pass as_of for that"
+                    if 'Q' in filed_by.upper() else "expected an ISO date YYYY-MM-DD")
+            raise InvalidDateError(
+                f"Invalid filed_by '{filed_by}': {hint}.",
+                parameter="filed_by", invalid_value=filed_by,
+                suggestions=["filed_by='2024-08-02'"]) from None
+
+    def _facts_filed_by(self, filed_by: date) -> List[FinancialFact]:
+        """Facts filed on or before ``filed_by``, split-adjusted using only those facts.
+
+        Built per call: the cached split-adjusted facts were adjusted with splits
+        that may have been disclosed after the cutoff (GH #1699).
+        """
+        from edgar.ttm.calculator import facts_filed_by
+        from edgar.ttm.splits import apply_split_adjustments, detect_splits
+
+        eligible = facts_filed_by(self._facts or [], filed_by)
+        splits = detect_splits(eligible)
+        return apply_split_adjustments(eligible, splits) if splits else eligible
+
+    def get_ttm(self, concept: str, as_of: Optional[Union[date, str]] = None, *,
+                filed_by: Optional[Union[date, str]] = None) -> 'TTMMetric':
+        """Calculate Trailing Twelve Months value for a concept.
+
+        ``as_of`` is a reporting-period cutoff. ``filed_by`` (keyword-only) also
+        limits the facts to filings made on or before that date; given alone it
+        is both cutoffs. See `TTMCalculator.calculate_ttm`.
+        """
         from edgar.ttm.calculator import TTMCalculator
 
-        facts = self._get_split_adjusted_facts()
+        filed_by_date = self._parse_filed_by(filed_by)
+        if filed_by_date is None:
+            facts = self._get_split_adjusted_facts()
+        else:
+            facts = self._facts_filed_by(filed_by_date)
 
         if ':' not in concept:
             concept_candidates = [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']
@@ -1877,17 +1926,19 @@ class EntityFacts:
         target_facts = [fact for fact in facts if fact.concept in concept_candidates]
 
         if not target_facts:
-            raise KeyError(f"Concept '{concept}' not found in facts")
+            filed = f" filed on or before {filed_by_date}" if filed_by_date else ""
+            raise KeyError(f"Concept '{concept}' not found in facts{filed}")
 
         calc = TTMCalculator(target_facts)
         as_of_date = self._parse_ttm_date(as_of)
-        return calc.calculate_ttm(as_of=as_of_date)
+        return calc.calculate_ttm(as_of=as_of_date, filed_by=filed_by_date)
 
     def _best_ttm_across_concepts(
         self,
         concepts: List[str],
         as_of: Optional[Union[date, str]],
         not_found_message: str,
+        filed_by: Optional[Union[date, str]] = None,
     ) -> 'TTMMetric':
         """Compute TTM for each candidate concept and return the freshest result.
 
@@ -1898,25 +1949,46 @@ class EntityFacts:
         order of magnitude, with no error (GH #893). Instead we evaluate every
         candidate and pick the one whose window ends most recently (by
         ``as_of_date``), tie-broken by the caller's priority order.
+
+        With ``filed_by``, each concept's result is already its latest gap-free
+        window, so only qualifying windows are ranked (GH #1699).
         """
+        from edgar.exceptions import ValidationError
+
+        # With filed_by, parse before the loop: a bad argument must raise, not be
+        # skipped as "this concept has no TTM". (Without it, as_of keeps its
+        # existing handling.)
+        filed_by = self._parse_filed_by(filed_by)
+        if filed_by is not None:
+            as_of = self._parse_ttm_date(as_of)
         best = None  # ((as_of_date, -priority_index), TTMMetric)
+        insufficient = False
         for priority_index, concept in enumerate(concepts):
             try:
-                metric = self.get_ttm(concept, as_of)
-            except (KeyError, ValueError):
-                # KeyError: concept absent. ValueError: present but <4 quarters.
-                # Either way it cannot yield a TTM — skip and keep searching so a
+                metric = self.get_ttm(concept, as_of, filed_by=filed_by)
+            except KeyError:
+                continue
+            except ValueError:
+                # Present but no usable window. Skip and keep searching so a
                 # stale-but-resolvable earlier candidate never masks a fresh one.
+                insufficient = True
                 continue
             key = (metric.as_of_date, -priority_index)
             if best is None or key > best[0]:
                 best = (key, metric)
 
         if best is None:
+            if filed_by is not None and insufficient:
+                raise ValidationError(
+                    f"{not_found_message}: no candidate concept has four gap-free quarters "
+                    f"ending on or before {as_of or filed_by} in filings made on or before {filed_by}.",
+                    parameter="filed_by", invalid_value=filed_by,
+                    suggestions=["Pass a later filed_by date"])
             raise KeyError(not_found_message)
         return best[1]
 
-    def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
+    def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None, *,
+                        filed_by: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months revenue using common revenue concepts."""
         revenue_concepts = [
             'Revenues',
@@ -1925,14 +1997,15 @@ class EntityFacts:
             'Revenue',
         ]
         return self._best_ttm_across_concepts(
-            revenue_concepts, as_of, "Could not find revenue concept in company facts"
+            revenue_concepts, as_of, "Could not find revenue concept in company facts", filed_by=filed_by
         )
 
-    def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
+    def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None, *,
+                           filed_by: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months net income using common net income concepts."""
         income_concepts = ['NetIncomeLoss', 'NetIncome', 'ProfitLoss']
         return self._best_ttm_across_concepts(
-            income_concepts, as_of, "Could not find net income concept in company facts"
+            income_concepts, as_of, "Could not find net income concept in company facts", filed_by=filed_by
         )
 
     @cached_property

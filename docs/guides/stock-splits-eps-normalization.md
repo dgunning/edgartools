@@ -213,6 +213,29 @@ Behind the scenes, `get_ttm()` calls the internal method `_get_split_adjusted_fa
 3. Applies adjustments using `apply_split_adjustments()`
 4. Returns normalized facts for TTM calculation
 
+### Point in time: `filed_by`
+
+`as_of` is a reporting-period cutoff: it picks quarters that end on or before
+that date, but it can read them from later filings' comparatives. To see only
+what had been filed by a date, pass the keyword-only `filed_by` (a date or
+`'YYYY-MM-DD'`, inclusive by SEC filing date). Given alone it is both cutoffs.
+
+```python
+apple = Company("AAPL")
+# Apple's Q3 FY2023 10-Q (0000320193-23-000077) was filed 2023-08-04
+before = apple.get_ttm_revenue(filed_by="2023-08-03")
+print(before.value, before.as_of_date)   # 385095000000.0 2023-04-01
+after = apple.get_ttm_revenue(filed_by="2023-08-04")
+print(after.value, after.as_of_date)     # 383933000000.0 2023-07-01
+```
+
+The cutoff applies to the original facts before any quarter is derived, so
+every operand of a derived quarter was filed by then, and splits are detected
+from those filings only. Only a window of four gap-free quarters qualifies; the
+result is the latest one, so check `as_of_date` and `is_stale`. When none
+qualifies, `ValidationError` names both cutoffs. `TTMMetric.period_end_cutoff`
+and `TTMMetric.filed_by` record what was asked.
+
 ---
 
 ## Complete Workflow: NVIDIA 10-for-1 Split Example
@@ -422,9 +445,9 @@ for f in sorted(shares_facts, key=lambda x: x.period_end)[-5:]:
 
 | Method | Returns | Description |
 |--------|---------|-------------|
-| `company.get_ttm(concept, as_of=None)` | `TTMMetric` | TTM for any concept (split-adjusted) |
-| `company.get_ttm_revenue(as_of=None)` | `TTMMetric` | TTM revenue (split-adjusted) |
-| `company.get_ttm_net_income(as_of=None)` | `TTMMetric` | TTM net income (split-adjusted) |
+| `company.get_ttm(concept, as_of=None, *, filed_by=None)` | `TTMMetric` | TTM for any concept (split-adjusted) |
+| `company.get_ttm_revenue(as_of=None, *, filed_by=None)` | `TTMMetric` | TTM revenue (split-adjusted) |
+| `company.get_ttm_net_income(as_of=None, *, filed_by=None)` | `TTMMetric` | TTM net income (split-adjusted) |
 
 ### Split Detection Parameters
 

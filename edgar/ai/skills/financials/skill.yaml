@@ -85,6 +85,20 @@ patterns:
       company that tags only InterestPaid (Boeing FY2025). Try the _gross group, and
       check result['basis'] before comparing companies.
 
+  - name: Trailing Twelve Months (TTM), point in time
+    when: Need TTM revenue or net income, or what was known from filings made by a date (backtests)
+    code: |
+      company.get_ttm_revenue()                               # latest four quarters
+      company.get_ttm_revenue(as_of="2023-07-01")             # quarters ending by July 1, any filing
+      ttm = company.get_ttm_revenue(filed_by="2023-08-03")    # only filings made by Aug 3 (AAPL)
+      ttm.value, ttm.as_of_date     # 385,095,000,000 to 2023-04-01: the Q3 10-Q came Aug 4
+      company.get_ttm("NetIncomeLoss", as_of="2023-12-31", filed_by="2024-02-12")
+    note: |
+      as_of limits period ends only; quarters may come from later filings' comparatives.
+      filed_by (keyword-only, date or 'YYYY-MM-DD', inclusive) limits the source filings too,
+      before any quarter is derived, and returns the latest gap-free window: check
+      ttm.as_of_date and ttm.is_stale. No such window raises ValidationError.
+
   - name: All Metrics at Once
     when: Comprehensive snapshot
     code: |
