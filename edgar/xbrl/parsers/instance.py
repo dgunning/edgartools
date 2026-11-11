@@ -1423,6 +1423,9 @@ class InstanceParser(BaseParser):
             elif period['type'] == 'instant':
                 date_obj = period['date_obj']
                 period['fiscal_year'] = _fiscal_year_for_date(date_obj, fy_end_month, fy_end_day)
+                fiscal_period = _fiscal_period_for_instant(date_obj, fy_end_month, fy_end_day)
+                if fiscal_period:
+                    period['fiscal_period'] = fiscal_period
 
 
 def _fiscal_year_for_date(d, fy_end_month: int, fy_end_day: int) -> int:
@@ -1439,6 +1442,26 @@ def _fiscal_year_for_date(d, fy_end_month: int, fy_end_day: int) -> int:
     treated as that month. The rule is shared with EntityFacts.
     """
     return calculate_fiscal_year_for_label(d, fiscal_year_end_month(fy_end_month, fy_end_day))
+
+def _fiscal_period_for_instant(d, fy_end_month: int, fy_end_day: int) -> Optional[str]:
+    """The fiscal period a balance-sheet date closes, or None if it closes none.
+
+    A date on the fiscal year end is 'FY', so a 10-K balance sheet matches its
+    income statement; a date on another quarter end is that quarter. Any other
+    date (a cover-page share count, a debt issue date) is not a period end and
+    gets None (GH #1897). A date in the first week of a month is the previous
+    month's 52/53-week end drifting over, as in _quarter_for_date.
+    """
+    month, day = d.month, d.day
+    if day <= 7:
+        month = 12 if month == 1 else month - 1
+    elif day < 24:
+        return None
+    offset = (month - fiscal_year_end_month(fy_end_month, fy_end_day)) % 12
+    if offset % 3:
+        return None
+    return 'FY' if offset == 0 else f"Q{offset // 3}"
+
 
 def _quarter_for_date(end_date, fy_end_month: int) -> str:
     """Determine the fiscal quarter (Q1-Q4) for a quarterly period end date.
