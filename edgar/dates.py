@@ -23,6 +23,9 @@ from pandas.tseries.offsets import BDay
 
 from edgar.exceptions import InvalidDateError
 
+# SEC's own clock: EDGAR acceptance times and market sessions are Eastern time.
+SEC_TIMEZONE = ZoneInfo("America/New_York")
+
 __all__ = [
     "calculate_fiscal_year_for_label",
     "fiscal_year_end_month",
@@ -32,6 +35,7 @@ __all__ = [
     "is_start_of_quarter",
     "parse_acceptance_datetime",
     "normalize_period_boundary",
+    "SEC_TIMEZONE",
     "InvalidDateError",
 ]
 
@@ -168,7 +172,7 @@ def filing_date_to_year_quarters(filing_date: str) -> List[Tuple[int, int]]:
 
 def current_year_and_quarter() -> Tuple[int, int]:
     # Define the Eastern timezone
-    eastern = ZoneInfo('America/New_York')
+    eastern = SEC_TIMEZONE
 
     # Get the current time in Eastern timezone
     now_eastern = datetime.datetime.now(eastern)
