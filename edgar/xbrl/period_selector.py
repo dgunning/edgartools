@@ -335,7 +335,17 @@ def _select_duration_periods(periods: List[Dict], entity_info: Dict[str, Any], m
             return [(p['key'], p['label']) for p in scored_periods[:max_periods]]
 
     # For quarterly reports or if no annual periods found, use sophisticated quarterly logic
-    return _select_quarterly_periods(duration_periods, max_periods, period_of_report, statement_data)
+    quarterly = _select_quarterly_periods(duration_periods, max_periods, period_of_report, statement_data)
+    if quarterly or is_annual:
+        return quarterly
+
+    # GH #1839: a registration statement (NLS's F-4) declares no fiscal focus
+    # and no period end, so it is neither annual nor quarterly above, and its
+    # financial statements are full years that no quarter or YTD bucket holds.
+    # Offer its annual periods rather than no column at all.
+    annual_periods = _get_annual_periods(duration_periods)
+    scored_periods = _score_fiscal_alignment(annual_periods, fiscal_year_end_month, fiscal_year_end_day)
+    return [(p['key'], p['label']) for p in scored_periods[:max_periods]]
 
 
 def _select_quarterly_periods(duration_periods: List[Dict], max_periods: int,
