@@ -656,6 +656,30 @@ class StatementResolver:
 
         return is_valid, confidence, reason
 
+    def _accepted_candidates(self, statements: List[Dict[str, Any]], statement_type: str) -> List[Dict[str, Any]]:
+        """Candidates that pass essential-concept validation (issue #659).
+
+        GH #1843: a filing's own primary need not use the ordinary concepts
+        (AEON's custom combined loss, a BDC's investment income). When no
+        candidate validates, one accepted on identity - typed this kind by its
+        root abstract and declared a statement - is returned instead, so a
+        validated role still wins over an unvalidated one.
+        """
+        valid = [s for s in statements if self._validate_statement(s, statement_type)[0]]
+        return valid or [s for s in statements if self._is_declared_primary(s, statement_type)]
+
+    @staticmethod
+    def _is_declared_primary(stmt: Dict[str, Any], statement_type: str) -> bool:
+        """Whether a role is, by the filing's own account, the statement asked for.
+
+        Its catalog type, read from its presentation abstract, is the requested
+        type, and the filing declares it a statement (GH #1843). A role typed by
+        its abstract but filed as a detail or a note does not qualify, which
+        keeps issue #659's protection against mislabeled roles.
+        """
+        return (stmt.get('type') == statement_type
+                and declares_statement(stmt.get('definition'), stmt.get('menu_category')))
+
     def _match_by_primary_concept(self, statement_type: str, is_parenthetical: bool = False) -> Tuple[List[Dict[str, Any]], Optional[str], float]:
         """
         Match statements using primary concept names.
@@ -1260,8 +1284,7 @@ class StatementResolver:
             # Issue #659: Validate that the top candidate actually contains the
             # essential concepts for this statement type. Filter out mislabeled roles.
             if needs_validation:
-                valid = [s for s in statements
-                         if self._validate_statement(s, statement_type)[0]]
+                valid = self._accepted_candidates(statements, statement_type)
                 if not valid:
                     continue
                 statements = valid
