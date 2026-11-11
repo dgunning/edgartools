@@ -1267,6 +1267,7 @@ class EntityFacts:
         - Income statement: 'revenue', 'net_income', 'operating_income', 'gross_profit', 'ebitda'
         - Balance sheet: 'total_assets', 'total_liabilities', 'stockholders_equity', 'cash_and_equivalents'
         - Cash flow: 'operating_cash_flow', 'capex', 'free_cash_flow', 'dividends_paid'
+        - Cash paid: 'interest_paid', 'income_taxes_paid' (net), and their '_gross' variants
         - Leases: 'operating_lease_payments', 'operating_lease_liability' (Phil Oakley framework)
 
         Args:
@@ -1278,6 +1279,8 @@ class EntityFacts:
         Returns:
             Concept value as float, or None if not found.
             If return_metadata=True, returns dict with 'value', 'tag_used', 'period'.
+            Groups with a measurement basis (e.g. 'interest_paid') also carry
+            'basis' ('net' or 'gross'); there is no fallback between bases.
 
         Example:
             >>> facts = company.get_facts()
@@ -1326,7 +1329,7 @@ class EntityFacts:
         def _build_result(value, tag, unit_used, fact):
             if not return_metadata:
                 return value
-            return {
+            result = {
                 'value': value,
                 # The fact's OWN qualified concept, not the lookup key that
                 # happened to match it. Since a concept is also indexed under its
@@ -1349,6 +1352,12 @@ class EntityFacts:
                 'concept_name': concept_name,
                 'synonyms_tried': synonyms_tried.copy(),
             }
+            # Measurement basis ('net' or 'gross') comes from the group
+            # definition, never from the name; groups without one (most of
+            # them) keep their existing metadata keys unchanged (GH #1858).
+            if group.basis is not None:
+                result['basis'] = group.basis
+            return result
 
         # Suppress warnings from get_fact() during synonym resolution
         self._suppress_warnings = True
