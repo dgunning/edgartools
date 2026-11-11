@@ -255,7 +255,7 @@ class TableProcessor:
             # Continue checking for headers if:
             # 1. We haven't found any headers yet, OR
             # 2. We've found headers but haven't seen data rows yet (multi-row headers)
-            if not data_rows_started:
+            if not data_rows_started and not self._is_report_fact_row(tr):
                 is_header_row = self._is_header_row(tr)
 
                 # Additional check for multi-row headers in financial tables
@@ -373,6 +373,27 @@ class TableProcessor:
                 cells.append(cell)
 
         return cells
+
+    @classmethod
+    def _is_report_fact_row(cls, tr: HtmlElement) -> bool:
+        """
+        True for a body row of an SEC XBRL viewer report (R1.htm, R2.htm, ...).
+
+        The viewer renders every header row with ``th`` cells and every fact row
+        with a ``td class="pl"`` label cell. Fact rows such as "Document Period End
+        Date | Mar. 29, 2025" read like period headers to the generic heuristics,
+        which moved Apple's cover-page facts into ``table.headers`` (GH #1477).
+        The markup states the row's role, so a row that carries a value is a body
+        row. Label-only abstract rows ("[Line Items]", "[Roll Forward]") are left
+        to the generic heuristics as before.
+        """
+        own_cells = cls._own_cells(tr)
+        if not own_cells:
+            return False
+        first = own_cells[0]
+        if first.tag != 'td' or 'pl' not in (first.get('class') or '').split():
+            return False
+        return any(_text_content(cell).replace('\xa0', ' ').strip() for cell in own_cells[1:])
 
     _DISPLAY_NONE = re.compile(r'(?:^|;)\s*display\s*:\s*none\s*(?:!important\s*)?(?:;|$)', re.IGNORECASE)
 
