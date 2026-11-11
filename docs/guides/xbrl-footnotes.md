@@ -93,6 +93,7 @@ class Fact(BaseModel):
     footnotes: List[str] = Field(default_factory=list)  # Footnote IDs
     instance_id: Optional[int] = None
     fact_id: Optional[str] = None  # Original XML id attribute
+    is_nil: bool = False  # The filer marked the item xsi:nil
 ```
 
 ### Footnote Model

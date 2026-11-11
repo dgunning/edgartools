@@ -200,6 +200,10 @@ class Fact(BaseModel):
 
     The fact_id field preserves the original id attribute from the XML element,
     enabling linkage with footnotes.
+
+    The is_nil field records that the source element carried
+    xsi:nil="true" (or "1"), telling a filed nil item apart from an element
+    with empty content; both have value '' and numeric_value None.
     """
     element_id: str
     context_ref: str
@@ -212,6 +216,10 @@ class Fact(BaseModel):
     footnotes: List[str] = Field(default_factory=list)
     instance_id: Optional[int] = None
     fact_id: Optional[str] = None  # Original id attribute from the XML
+    # Whether the filer marked the item xsi:nil. Source metadata only: it does
+    # not mean zero, not-applicable or a retraction, and a nil item still has
+    # value '' and numeric_value None (GH #1254).
+    is_nil: bool = False
 
 
 class Footnote(BaseModel):

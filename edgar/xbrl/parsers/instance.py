@@ -926,7 +926,10 @@ class InstanceParser(BaseParser):
                     precision=precision,
                     numeric_value=numeric_value,
                     instance_id=instance_id,
-                    fact_id=fact_id
+                    fact_id=fact_id,
+                    # The filer's nil marker, kept as source metadata; the
+                    # value and numeric_value above are unchanged (GH #1254).
+                    is_nil=_is_nil(element),
                 )
 
                 # Store fact with appropriate key
