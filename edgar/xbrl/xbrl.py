@@ -43,7 +43,7 @@ from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.periods import get_period_views
 from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
 from edgar.exceptions import NotFoundError
-from edgar.xbrl.statement_resolver import StatementResolver
+from edgar.xbrl.statement_resolver import StatementResolver, declares_statement
 from edgar.xbrl.statements import statement_to_concepts
 
 
@@ -87,6 +87,32 @@ def _declares_disclosure(role_def: str, primary_concept: str) -> bool:
     if any(part.strip() == _ROLE_CATEGORY_MARKER for part in role_def.split(' - ')):
         return True
     return role_def.startswith(_ROLE_CATEGORY_MARKER)
+
+
+def _statement_typing_concept(tree, menu_category: Optional[str]) -> str:
+    """The presentation node that says what kind of statement a role is.
+
+    That is the first node, except where a declared statement opens with its
+    hypercube: STERIS presents its income statement as StatementTable ->
+    StatementLineItems -> IncomeStatementAbstract (GH #1838). Only the filing's
+    own presentation path is followed, and only for a role the filing declares
+    a statement, since a standard abstract inside a disclosure says nothing
+    about the role.
+
+    Args:
+        tree: The role's presentation tree.
+        menu_category: The role's FilingSummary menu category, or None.
+    """
+    first = next(iter(tree.all_nodes))
+    if not first.endswith('Table') or not declares_statement(tree.definition, menu_category):
+        return first
+    table = tree.all_nodes[first]
+    for child in table.children:
+        if child.endswith('LineItems'):
+            line_items = tree.all_nodes.get(child)
+            if line_items is not None and line_items.children:
+                return line_items.children[0]
+    return first
 
 
 def _names_notes_section(role_def: str) -> bool:
@@ -1535,11 +1561,14 @@ class XBRL:
             role_def = tree.definition.lower()
             statement_type = None
             primary_concept = next(iter(tree.all_nodes))
+            # Typed by the abstract under a declared statement's line items when
+            # it opens with a table (GH #1838); primary_concept stays literal.
+            typing_concept = _statement_typing_concept(tree, self._filing_summary_menu_categories.get(role))
             statement_category = None
 
             # First try to match using statement_to_concepts (for backward compatibility)
             for statement_alias, statement_info in statement_to_concepts.items():
-                if primary_concept == statement_info.concept:
+                if typing_concept == statement_info.concept:
                     if 'parenthetical' in role_def:
                         statement_type = f"{statement_alias}Parenthetical"
                     else:
@@ -1558,7 +1587,7 @@ class XBRL:
                     "ifrs-full_StatementOfComprehensiveIncomeAbstract": "ComprehensiveIncome",
                     "ifrs-full_StatementOfProfitOrLossAndOtherComprehensiveIncomeAbstract": "ComprehensiveIncome",
                 }
-                matched_type = _IFRS_CONCEPT_TO_TYPE.get(primary_concept)
+                matched_type = _IFRS_CONCEPT_TO_TYPE.get(typing_concept)
                 if matched_type:
                     if 'parenthetical' in role_def:
                         statement_type = f"{matched_type}Parenthetical"

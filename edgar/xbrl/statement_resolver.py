@@ -16,6 +16,24 @@ from edgar.exceptions import StatementNotFoundError
 from edgar.xbrl.statements import statement_to_concepts
 
 
+def declares_statement(definition: Optional[str], menu_category: Optional[str]) -> bool:
+    """Whether the filing itself declares a role to be a financial statement.
+
+    A FilingSummary entry is authoritative: its menu is "Statements" or it is
+    not. Only a role without one (a load with no FilingSummary, or a role the
+    summary does not list) falls back to the schema definition's exact category
+    segment, as in "9952153 - Statement - CONSOLIDATED STATEMENTS OF INCOME".
+
+    Args:
+        definition: The role's schema definition.
+        menu_category: The role's FilingSummary menu category, or None.
+    """
+    if menu_category:
+        return menu_category == 'Statements'
+    parts = (definition or '').split(' - ')
+    return len(parts) >= 3 and parts[1].strip().lower() == 'statement'
+
+
 class StatementCategory(Enum):
     """Categories of XBRL presentation sections."""
     FINANCIAL_STATEMENT = "statement"
@@ -638,6 +656,30 @@ class StatementResolver:
 
         return is_valid, confidence, reason
 
+    def _accepted_candidates(self, statements: List[Dict[str, Any]], statement_type: str) -> List[Dict[str, Any]]:
+        """Candidates that pass essential-concept validation (issue #659).
+
+        GH #1843: a filing's own primary need not use the ordinary concepts
+        (AEON's custom combined loss, a BDC's investment income). When no
+        candidate validates, one accepted on identity - typed this kind by its
+        root abstract and declared a statement - is returned instead, so a
+        validated role still wins over an unvalidated one.
+        """
+        valid = [s for s in statements if self._validate_statement(s, statement_type)[0]]
+        return valid or [s for s in statements if self._is_declared_primary(s, statement_type)]
+
+    @staticmethod
+    def _is_declared_primary(stmt: Dict[str, Any], statement_type: str) -> bool:
+        """Whether a role is, by the filing's own account, the statement asked for.
+
+        Its catalog type, read from its presentation abstract, is the requested
+        type, and the filing declares it a statement (GH #1843). A role typed by
+        its abstract but filed as a detail or a note does not qualify, which
+        keeps issue #659's protection against mislabeled roles.
+        """
+        return (stmt.get('type') == statement_type
+                and declares_statement(stmt.get('definition'), stmt.get('menu_category')))
+
     def _match_by_primary_concept(self, statement_type: str, is_parenthetical: bool = False) -> Tuple[List[Dict[str, Any]], Optional[str], float]:
         """
         Match statements using primary concept names.
@@ -1242,8 +1284,7 @@ class StatementResolver:
             # Issue #659: Validate that the top candidate actually contains the
             # essential concepts for this statement type. Filter out mislabeled roles.
             if needs_validation:
-                valid = [s for s in statements
-                         if self._validate_statement(s, statement_type)[0]]
+                valid = self._accepted_candidates(statements, statement_type)
                 if not valid:
                     continue
                 statements = valid
