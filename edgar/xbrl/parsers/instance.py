@@ -593,6 +593,34 @@ class InstanceParser(BaseParser):
                         dimensions[dimension] = child.tag
                     break
 
+    @staticmethod
+    def _measure_unit(unit_elem: ET.Element) -> Optional[Dict[str, Any]]:
+        """
+        A unit without xbrli:divide: one measure, or the product of several.
+
+        Sibling measures are multiplied (XBRL 2.1 section 4.8.2, example 20:
+        square feet is feet x feet), and two units are equal only when their
+        measures are (section 4.10). A product therefore keeps every factor,
+        repeats included, as `{'type': 'product', 'measures': [...]}`. It has
+        no single `measure`, so nothing downstream reads USD x shares as a
+        currency amount (gh #1747).
+        """
+        # A measure is a CHILD of xbrli:unit per the spec, so a direct-child
+        # search is the precise test; the descendant search is kept as a
+        # fallback for filings that nest one.
+        measure_elems = unit_elem.findall(f'{XBRLI_NS}measure')
+        if not measure_elems:
+            measure_elems = unit_elem.findall(f'.//{XBRLI_NS}measure')[:1]
+        # Strip: a pretty-printed <measure> carries whitespace that breaks
+        # every iso4217: prefix test downstream (GH #1704).
+        measures = [(elem.text or '').strip() for elem in measure_elems]
+        measures = [measure for measure in measures if measure]
+        if not measures:
+            return None
+        if len(measures) == 1:
+            return {'type': 'simple', 'measure': measures[0]}
+        return {'type': 'product', 'measures': measures}
+
     def _extract_units(self, root: ET.Element) -> None:
         """Extract units from instance document."""
         try:
@@ -612,21 +640,9 @@ class InstanceParser(BaseParser):
                 # (edgartools-uetp).
                 divide_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}divide')
                 if divide_elem is None:
-                    # A simple unit's measure is a CHILD of xbrli:unit per the
-                    # spec, so a direct-child search is the precise test; the
-                    # descendant search is kept as a fallback for filings that
-                    # nest it, which is safe now that divide is handled above.
-                    measure_elem = unit_elem.find('{http://www.xbrl.org/2003/instance}measure')
-                    if measure_elem is None:
-                        measure_elem = unit_elem.find('.//{http://www.xbrl.org/2003/instance}measure')
-                    # Strip: a pretty-printed <measure> carries whitespace that
-                    # breaks every iso4217: prefix test downstream (GH #1704).
-                    measure_text = (measure_elem.text or '').strip() if measure_elem is not None else ''
-                    if measure_text:
-                        self.units[unit_id] = {
-                            'type': 'simple',
-                            'measure': measure_text
-                        }
+                    unit = self._measure_unit(unit_elem)
+                    if unit is not None:
+                        self.units[unit_id] = unit
                     continue
 
                 if divide_elem is not None:
