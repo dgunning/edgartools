@@ -657,6 +657,31 @@ facts_df = query.to_dataframe()
 count = len(facts_list)
 ```
 
+#### Nil facts
+
+A filer can report an item as `xsi:nil="true"`. Such a fact has `value == ''` and
+`numeric_value` of `None`, the same as an element filed with empty content, so the
+`is_nil` field tells the two apart. It appears on `Fact`, on every row of
+`execute()` and `FactsView.get_facts()`, as the last core column of
+`FactQuery.to_dataframe()` (nullable `boolean`), and in `FactsView.to_dataframe()`
+and `XBRL.to_pandas()['facts']`. It only records the filer's marker: it does not
+mean zero, not applicable, or a retraction of an earlier value.
+
+```python
+from edgar.xbrl import XBRL
+
+xbrl = XBRL.from_directory("tests/fixtures/xbrl/aapl/10k_2023")  # Apple FY2023 10-K
+nil = (xbrl.query()
+       .by_concept("us-gaap:CommitmentsAndContingencies", exact=True)
+       .to_dataframe("fact_id", "value", "numeric_value", "is_nil"))
+# fact_id f-194 and f-195: value '', numeric_value NaN, is_nil True
+```
+
+A nil fact and an empty non-nil fact with the same concept, context, decimals and
+unit are two rows in the DataFrame; two nil facts, or two empty ones, still
+collapse to one. Rows a query derives (aggregates) carry no nil marker, so their
+`is_nil` is `<NA>`.
+
 ## Multi-Period Analysis
 
 ### StitchedStatements

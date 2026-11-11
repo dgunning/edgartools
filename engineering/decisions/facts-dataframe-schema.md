@@ -71,7 +71,7 @@ turns a null into the *string* `"nan"` — silently converting missing data into
 data, on the floor version, in the method whose whole purpose here is to stop
 nulls from changing shape.
 
-### The declared core (24 columns)
+### The declared core (25 columns)
 
 Order is today's order, so this change alters presence and dtype only.
 
@@ -89,6 +89,10 @@ Order is today's order, so this change alters presence and dtype only.
 | `period_end` | `str` | `entity_scheme` | `str` |
 | `period_instant` | `str` | `fiscal_period` | `str` |
 | `is_dimensioned` | **`boolean`** | `fiscal_year` | **`Int64`** |
+| | | `is_nil` | **`boolean`** |
+
+`is_nil` was appended in GH #1254, after the original 24, so the existing
+core positions held. It is in `_PINNED` and in the de-duplication identity.
 
 Three dtype choices carry the reasoning:
 

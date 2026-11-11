@@ -75,12 +75,15 @@ _CORE_COLUMNS: Dict[str, Any] = {
     'entity_scheme': _STR_DTYPE,
     'fiscal_period': _STR_DTYPE,
     'fiscal_year': 'Int64',
+    # Last, so existing core positions hold (GH #1254). Nullable: a derived
+    # aggregate row is not a source fact and gets no invented nil state.
+    'is_nil': 'boolean',
 }
 
 # Declared dtype applied to populated columns too, so it holds whichever rows match.
 # `is_dimensioned` is always populated as a bool; pinning it to `boolean` keeps an
 # empty result, which must declare a nullable dtype, identical to a populated one.
-_PINNED = frozenset({'preferred_sign', 'fiscal_year', 'is_dimensioned'})
+_PINNED = frozenset({'preferred_sign', 'fiscal_year', 'is_dimensioned', 'is_nil'})
 
 # Dropped by include_contexts=False.
 _CONTEXT_COLUMNS = frozenset(
@@ -112,7 +115,10 @@ _SKIP_COLUMNS = frozenset({'fact_key', 'original_label',
 # in the frame long enough for it to run (gh #1181). Two spellings of one rule is
 # the bug this file has produced most often, so both read these names.
 _DEDUP_REQUIRED = ('concept', 'context_ref', 'value', 'decimals')
-_DEDUP_OPTIONAL = ('unit_ref',)
+# `is_nil` is in it because a filed nil item and an empty non-nil element share
+# every other identity field; without it the frame kept whichever came first
+# (GH #1254). Two nil items, or two empty ones, still collapse.
+_DEDUP_OPTIONAL = ('unit_ref', 'is_nil')
 
 
 def _source_column_presence(results: List[Dict[str, Any]], names) -> set:
@@ -1448,7 +1454,8 @@ class FactsView:
                 'unit_ref': fact.unit_ref,
                 'currency': _unit_currency(units.get(fact.unit_ref)) if fact.unit_ref else None,
                 'decimals': fact.decimals,
-                'numeric_value': fact.numeric_value
+                'numeric_value': fact.numeric_value,
+                'is_nil': fact.is_nil,
             }
 
             # Split element name from context for better concept display
