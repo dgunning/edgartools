@@ -2,6 +2,7 @@
 XBRL extraction strategy for inline XBRL documents.
 """
 
+import copy
 import logging
 from typing import Any, Dict, List, Optional, Tuple
 
@@ -14,6 +15,7 @@ from edgar.documents.strategies.ixbrl_transforms import (
     UnknownTransformError,
     apply_scale,
     apply_transform,
+    expand_format,
     negate_exactly,
 )
 from edgar.documents.types import XBRLFact
@@ -453,7 +455,7 @@ class XBRLExtractor:
 
             if escape and not self._is_xbrl_element(child):
                 # tostring() already includes the child's tail.
-                parts.append(tostring(child, encoding='unicode', method='html'))
+                parts.append(tostring(self._project_escaped(child), encoding='unicode', method='html'))
             else:
                 # An ix: element is not XHTML, so escaped content unwraps it:
                 # its own content contributes, its start and end tags do not.
@@ -461,6 +463,28 @@ class XBRLExtractor:
                 # "<ix:nonnumeric ...>" wrappers embedded in the markup.
                 self._collect_content(child, parts, escape)
                 parts.append(child.tail or '')
+
+    def _project_escaped(self, element: HtmlElement) -> HtmlElement:
+        """
+        The XHTML an escaped fact's child contributes, with the Inline XBRL removed.
+
+        The rules of ``_collect_content`` apply at every depth, not just to the
+        fact's direct children (Inline XBRL 1.1 section 11.1, GH #1770): an
+        ``ix:exclude`` subtree is dropped with its tail kept, and any other
+        ``ix:`` element is replaced by its content. The work happens on a
+        detached copy, so the parsed tree other passes read is untouched; an
+        element with no ``ix:`` descendant is returned as it is.
+        """
+        if not any(self._is_xbrl_element(node) for node in element.iterdescendants()):
+            return element
+        projected = copy.deepcopy(element)
+        for node in list(projected.iterdescendants()):
+            if self._get_local_name(node.tag) == 'exclude' and self._is_xbrl_element(node):
+                node.drop_tree()
+        for node in list(projected.iterdescendants()):
+            if self._is_xbrl_element(node):
+                node.drop_tag()
+        return projected
 
     def _relevant_content(self, element: HtmlElement, escape: bool = False) -> str:
         """
@@ -485,12 +509,10 @@ class XBRLExtractor:
             if continuation is None:
                 logger.debug("iXBRL continuation %r referenced but not found", next_id)
                 break
-            # The whitespace between an origin element and its continuation
-            # lives outside both, so concatenating strictly would glue the last
-            # word of one to the first of the next. Escaped content is markup
-            # and is joined verbatim.
-            if not escape:
-                parts.append(' ')
+            # The chain's content is concatenated with nothing in between
+            # (Inline XBRL 1.1, section 4.1.1): the filer decides where the
+            # split falls, and it can fall inside a word or a number, as in
+            # Cooper's "6" + "101 Bollinger Canyon Road" (GH #1748).
             self._collect_content(continuation, parts, escape)
             next_id = continuation.get('continuedAt') or continuation.get('continuedat')
 
@@ -515,7 +537,9 @@ class XBRLExtractor:
         format_attr = element.get('format')
         if format_attr:
             try:
-                value = apply_transform(format_attr, value)
+                # The format resolves in the registry its prefix is declared
+                # for, not by local name under any namespace (GH #1743).
+                value = apply_transform(expand_format(element, format_attr), value)
             except UnknownTransformError:
                 issue = f"unsupported format {format_attr}"
                 self._report_format_issue(format_attr, issue)
