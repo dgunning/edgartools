@@ -140,6 +140,11 @@ class XBRLParser:
             context_period_map=self.context_period_map
         )
 
+        # Dimension QNames the instance carries as xbrldi:typedMember. A typed
+        # value is not a member concept, so it is never rewritten or looked up
+        # as one (gh #1761).
+        self.typed_dimensions = self.instance_parser.typed_dimensions
+
         # Set up cross-references for embedded linkbase processing
         self.schema_parser.set_linkbase_parsers(
             labels_parser=self.labels_parser,

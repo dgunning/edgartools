@@ -63,6 +63,10 @@ _ROLE_CATEGORY_MARKER = 'disclosure'
 # Matches the Disclosures concept patterns in statement_resolver.py.
 _DISCLOSURE_CONCEPT_RE = re.compile(r"disclosures?abstract$", re.IGNORECASE)
 
+# A prefixed QName (prefix:local, both NCNames). A typed dimension value that is
+# one names a concept; any other typed value ('10:30') is data, kept as filed.
+_QNAME = re.compile(r"^[A-Za-z_][\w.-]*:[A-Za-z_][\w.-]*$")
+
 # The section sense of the word, kept deliberately generous: a definition that
 # matches here keeps the classification it already had, so a false positive
 # costs nothing while a false negative would move a real note.
@@ -3238,6 +3242,53 @@ class XBRL:
                 coregistrant_members[role] = member
         return coregistrant_members
 
+    def _describe_dimension(self, dim_name: str, dim_value: str, typed: bool) -> Dict[str, Any]:
+        """One context dimension with display labels, for `_find_facts_for_element`."""
+        # An explicit member is a QName naming a concept, keyed in the catalog
+        # with '_'. A typed value is data: it is rewritten only when it too is a
+        # QName (a QName.domain typed axis names concepts), so '10:30' stays as
+        # filed (gh #1761).
+        if not typed or _QNAME.match(dim_value):
+            dim_value = dim_value.replace(":", "_")
+        dim_label = dim_name
+        mem_label = dim_value
+        dim_element = self.element_catalog.get(dim_name)
+        mem_element = self.element_catalog.get(dim_value)
+
+        # Try to get human-readable dimension name
+        if dim_element is not None:
+            for role in ['http://www.xbrl.org/2003/role/terseLabel',
+                         'http://www.xbrl.org/2003/role/label',
+                         'http://www.xbrl.org/2003/role/verboseLabel']:
+                if role in dim_element.labels:
+                    dim_label = dim_element.labels[role]
+                    break
+
+        # Try to get human-readable member name. Prefer verboseLabel, which
+        # provides full accounting terms (e.g., "Rental equipment, net" vs
+        # "Sales of rental equipment")
+        if mem_element is not None:
+            for role in ['http://www.xbrl.org/2003/role/verboseLabel',
+                         'http://www.xbrl.org/2003/role/terseLabel',
+                         'http://www.xbrl.org/2003/role/label']:
+                if role in mem_element.labels:
+                    mem_label = mem_element.labels[role]
+                    break
+
+        # Clean up labels (remove [Axis], [Member], etc.)
+        dim_label = dim_label.replace('[Axis]', '').replace('[Domain]', '').strip()
+        mem_label = mem_label.replace('[Member]', '').strip()
+        format_key = f"{dim_label}: {mem_label}"
+        return {
+            'dimension': dim_name,
+            'member': dim_value,
+            'dimension_label': dim_label,
+            'member_label': mem_label,
+            'format_key': format_key,
+            'dimension_element': dim_element,
+            'member_element': mem_element
+        }
+
     def _find_facts_for_element(self, element_name: str, period_filter: Optional[str] = None,
                                 dimensions: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
@@ -3305,58 +3356,11 @@ class XBRL:
                     dimension_info = []
                     dim_keys = []
 
+                    typed_dimensions = getattr(self.parser, 'typed_dimensions', ())
                     for dim_name, dim_value in sorted(context.dimensions.items()):
-                        dim_value = dim_value.replace(":", "_")
-                        # Initialize with technical names
-                        dim_label = dim_name
-                        mem_label = dim_value
-
-                        # Get richer label information from element catalog
-                        dim_element = None
-                        mem_element = None
-
-                        # Try to get human-readable dimension name
-                        if dim_name in self.element_catalog:
-                            dim_element = self.element_catalog[dim_name]
-                            # Try different label roles in order of preference
-                            for role in ['http://www.xbrl.org/2003/role/terseLabel',
-                                         'http://www.xbrl.org/2003/role/label',
-                                         'http://www.xbrl.org/2003/role/verboseLabel']:
-                                if role in dim_element.labels:
-                                    dim_label = dim_element.labels[role]
-                                    break
-
-                        # Try to get human-readable member name
-                        if dim_value in self.element_catalog:
-                            mem_element = self.element_catalog[dim_value]
-                            # Try different label roles in order of preference
-                            # Prefer verboseLabel which provides full accounting terms
-                            # (e.g., "Rental equipment, net" vs "Sales of rental equipment")
-                            for role in ['http://www.xbrl.org/2003/role/verboseLabel',
-                                         'http://www.xbrl.org/2003/role/terseLabel',
-                                         'http://www.xbrl.org/2003/role/label']:
-                                if role in mem_element.labels:
-                                    mem_label = mem_element.labels[role]
-                                    break
-
-                        # Clean up labels (remove [Axis], [Member], etc.)
-                        dim_label = dim_label.replace('[Axis]', '').replace('[Domain]', '').strip()
-                        mem_label = mem_label.replace('[Member]', '').strip()
-
-                        # Format key for display
-                        format_key = f"{dim_label}: {mem_label}"
-                        dim_keys.append(format_key)
-
-                        # Store rich dimension information
-                        dimension_info.append({
-                            'dimension': dim_name,
-                            'member': dim_value,
-                            'dimension_label': dim_label,
-                            'member_label': mem_label,
-                            'format_key': format_key,
-                            'dimension_element': dim_element,
-                            'member_element': mem_element
-                        })
+                        info = self._describe_dimension(dim_name, dim_value, dim_name in typed_dimensions)
+                        dim_keys.append(info['format_key'])
+                        dimension_info.append(info)
 
                     # Store dimension information in the wrapper
                     wrapped_fact['dimension_info'] = dimension_info
