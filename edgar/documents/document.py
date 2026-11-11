@@ -44,6 +44,8 @@ class DocumentMetadata:
     parse_time: float = 0.0
     parser_version: str = "2.0.0"
     xbrl_data: Optional[List[XBRLFact]] = None
+    # {ix:footnote id: Footnote} -- see Document.xbrl_footnotes
+    xbrl_footnotes: Optional[Dict[str, Any]] = None
     preserve_whitespace: bool = False
     original_html: Optional[str] = None  # Store original HTML for anchor analysis
 
@@ -997,6 +999,21 @@ class Document:
         if self._xbrl_facts is None:
             self._xbrl_facts = self._extract_xbrl_facts()
         return self._xbrl_facts
+
+    @property
+    def xbrl_footnotes(self) -> Dict[str, Any]:
+        """
+        The inline XBRL footnotes, keyed by ix:footnote id.
+
+        Each value is an ``edgar.xbrl.models.Footnote`` (text, lang, role,
+        related_fact_ids), the same lookup ``XBRL.footnotes`` gives. A fact's
+        ``footnotes`` lists the ids it is linked to by a fact-footnote
+        ix:relationship::
+
+            for fact in doc.xbrl_facts:
+                notes = [doc.xbrl_footnotes[fid].text for fid in fact.footnotes]
+        """
+        return self.metadata.xbrl_footnotes or {}
 
     def text(self,
              clean: bool = True,

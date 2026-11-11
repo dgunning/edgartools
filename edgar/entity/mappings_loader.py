@@ -403,6 +403,19 @@ _FALLBACK_CONCEPT_MAPPINGS = {
     'PaymentForAcquisitionCryptoAsset': 'CashFlowStatement',
     'ProceedsFromDisposalCryptoAsset': 'CashFlowStatement',
     'ProceedsFromCryptoAssetOperatingActivity': 'CashFlowStatement',
+    # Cash income taxes by jurisdiction (ASU 2023-09, GH #1448): paid net of
+    # refunds, paid before refunds, and refunds received. Components of the
+    # cash taxes paid, never tax expense; 2024-taxonomy elements the learned
+    # data predates.
+    'IncomeTaxPaidFederalAfterRefundReceived': 'CashFlowStatement',
+    'IncomeTaxPaidStateAndLocalAfterRefundReceived': 'CashFlowStatement',
+    'IncomeTaxPaidForeignAfterRefundReceived': 'CashFlowStatement',
+    'IncomeTaxPaidFederalBeforeRefundReceived': 'CashFlowStatement',
+    'IncomeTaxPaidStateAndLocalBeforeRefundReceived': 'CashFlowStatement',
+    'IncomeTaxPaidForeignBeforeRefundReceived': 'CashFlowStatement',
+    'ProceedsFromIncomeTaxRefundFederal': 'CashFlowStatement',
+    'ProceedsFromIncomeTaxRefundStateAndLocal': 'CashFlowStatement',
+    'ProceedsFromIncomeTaxRefundForeign': 'CashFlowStatement',
 }
 
 

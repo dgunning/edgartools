@@ -24,9 +24,20 @@ from edgar.xbrl.core import (
     classify_duration,
     decimals_from_precision,
     duration_days,
+    expanded_measure_name,
     is_amendment_document_type,
     is_annual_document_type,
     is_quarterly_document_type,
+    unit_definition,
+)
+from edgar.xbrl.footnote_links import (
+    FOOTNOTE_ROLE,
+    collect_footnote_text,
+    fact_footnote_links,
+    inherited_lang,
+    inline_footnote_text,
+    is_fact_footnote_arcrole,
+    normalize_footnote_text,
 )
 from edgar.xbrl.models import Context, Fact, XBRLProcessingError
 from edgar.xmltools import is_xsi_nil, xml_parser
@@ -37,21 +48,6 @@ XLINK_NS = "{http://www.w3.org/1999/xlink}"
 LINKBASE_NS = "{http://www.xbrl.org/2003/linkbase}"
 XML_NS = "{http://www.w3.org/XML/1998/namespace}"
 IX_NS = "{http://www.xbrl.org/2013/inlineXBRL}"
-FACT_FOOTNOTE_ARCROLE = "http://www.xbrl.org/2003/arcrole/fact-footnote"
-FOOTNOTE_ROLE = "http://www.xbrl.org/2003/role/footnote"
-
-# Elements whose content is a block: a break belongs after them, or the last
-# word of one runs into the first word of the next.
-_BLOCK_ELEMENTS = frozenset({
-    'address', 'article', 'blockquote', 'br', 'div', 'dd', 'dl', 'dt',
-    'fieldset', 'figcaption', 'figure', 'footer', 'form', 'h1', 'h2', 'h3',
-    'h4', 'h5', 'h6', 'header', 'hr', 'li', 'main', 'nav', 'ol', 'p', 'pre',
-    'section', 'table', 'tbody', 'tfoot', 'thead', 'tr', 'ul',
-})
-
-# Cells sit side by side on one line, so they take a space rather than a break.
-_CELL_ELEMENTS = frozenset({'td', 'th'})
-
 XBRLI_NS = "{http://www.xbrl.org/2003/instance}"
 XSI_NS = "{http://www.w3.org/2001/XMLSchema-instance}"
 
@@ -324,6 +320,41 @@ def _serialize_element(element: ET.Element) -> str:
             parts.append(_serialize_element(child))
         parts.append(escape((child.tail or '').strip()))
     return f"<{name}{attributes}>{''.join(parts)}</{name}>"
+
+
+def _read_measures(measure_elems: List[ET.Element]) -> tuple[List[str], List[Optional[str]]]:
+    """
+    The filed (lexical) measures of a unit part, and each one's expanded QName.
+
+    Lexical measures are stripped: a pretty-printed <measure> carries whitespace
+    that breaks every iso4217: prefix test downstream (GH #1704). Each QName is
+    resolved against its own element's in-scope namespaces, so the default
+    namespace and a local declaration both count; an undeclared prefix gives None.
+    """
+    measures: List[str] = []
+    names: List[Optional[str]] = []
+    for elem in measure_elems:
+        measure = (elem.text or '').strip()
+        if measure:
+            measures.append(measure)
+            names.append(expanded_measure_name(measure, elem.nsmap))
+    return measures, names
+
+
+def _definition_or_none(unit_id: Optional[str], numerator: List[Optional[str]], denominator: List[Optional[str]],
+                        lexical_numerator: List[str], lexical_denominator: List[str],
+                        divide: bool = False) -> Optional[Dict[str, Any]]:
+    """
+    A unit's common definition descriptor (GH #1747, #1746), or None when it has
+    no numerator, a division has no denominator (XBRL 2.1 section 4.8.3), or a
+    measure's prefix is undeclared. An unresolved unit is reported downstream as
+    unavailable, never guessed from its id.
+    """
+    if not numerator or (divide and not denominator) or None in numerator or None in denominator:
+        log.warning(f"XBRL unit '{unit_id}' has a measure that cannot be resolved; "
+                    f"statements report its unit as unavailable")
+        return None
+    return unit_definition(numerator, denominator, lexical_numerator, lexical_denominator)
 
 
 class InstanceParser(BaseParser):
@@ -660,15 +691,15 @@ class InstanceParser(BaseParser):
         measure_elems = unit_elem.findall(f'{XBRLI_NS}measure')
         if not measure_elems:
             measure_elems = unit_elem.findall(f'.//{XBRLI_NS}measure')[:1]
-        # Strip: a pretty-printed <measure> carries whitespace that breaks
-        # every iso4217: prefix test downstream (GH #1704).
-        measures = [(elem.text or '').strip() for elem in measure_elems]
-        measures = [measure for measure in measures if measure]
+        measures, names = _read_measures(measure_elems)
         if not measures:
             return None
         if len(measures) == 1:
-            return {'type': 'simple', 'measure': measures[0]}
-        return {'type': 'product', 'measures': measures}
+            unit = {'type': 'simple', 'measure': measures[0]}
+        else:
+            unit = {'type': 'product', 'measures': measures}
+        unit['definition'] = _definition_or_none(unit_elem.get('id'), names, [], measures, [])
+        return unit
 
     def _extract_units(self, root: ET.Element) -> None:
         """Extract units from instance document."""
@@ -700,14 +731,17 @@ class InstanceParser(BaseParser):
                     denominator_elem = divide_elem.find('.//{http://www.xbrl.org/2003/instance}unitDenominator')
 
                     if numerator_elem is not None and denominator_elem is not None:
-                        # Get measures
-                        numerator_measures = [elem.text.strip() for elem in numerator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text and elem.text.strip()]
-                        denominator_measures = [elem.text.strip() for elem in denominator_elem.findall('.//{http://www.xbrl.org/2003/instance}measure') if elem.text and elem.text.strip()]
-
+                        numerator_measures, numerator_names = _read_measures(
+                            numerator_elem.findall(f'.//{XBRLI_NS}measure'))
+                        denominator_measures, denominator_names = _read_measures(
+                            denominator_elem.findall(f'.//{XBRLI_NS}measure'))
                         self.units[unit_id] = {
                             'type': 'divide',
                             'numerator': numerator_measures,
-                            'denominator': denominator_measures
+                            'denominator': denominator_measures,
+                            'definition': _definition_or_none(
+                                unit_id, numerator_names, denominator_names,
+                                numerator_measures, denominator_measures, divide=True),
                         }
 
         except Exception as e:
@@ -1013,6 +1047,12 @@ class InstanceParser(BaseParser):
                     to_ref = arc_elem.get(f'{XLINK_NS}to')
                     if not from_ref or not to_ref:
                         continue
+                    # Only a fact-footnote arc is an ordinary footnote. A
+                    # fact-explanatoryFact arc or a filer's own arcrole relates
+                    # them some other way; the inline readers already skip
+                    # these, and Fact.footnotes has no room for them (GH #1767).
+                    if not is_fact_footnote_arcrole(arc_elem.get(f'{XLINK_NS}arcrole')):
+                        continue
 
                     # Fall back to the label when the arc names no locator —
                     # that is how this resolved for filings where it resolved.
@@ -1089,19 +1129,12 @@ class InstanceParser(BaseParser):
             return 0
 
     @staticmethod
-    def _inline_footnote_links(root, footnotes_by_id: Dict[str, Any]) -> List[tuple]:
+    def _inline_footnote_links(root, footnote_ids) -> List[tuple]:
         """``(fact ids, footnote ids)`` for each fact-footnote ix:relationship."""
-        links: List[tuple] = []
-        for rel in root.iter(f'{IX_NS}relationship'):
-            # arcrole defaults to fact-footnote; any other arcrole
-            # (fact-explanatoryFact, ...) links facts to facts.
-            if rel.get('arcrole', FACT_FOOTNOTE_ARCROLE) != FACT_FOOTNOTE_ARCROLE:
-                continue
-            to_ids = [ref for ref in (rel.get('toRefs') or '').split() if ref in footnotes_by_id]
-            from_ids = (rel.get('fromRefs') or '').split()
-            if to_ids and from_ids:
-                links.append((from_ids, to_ids))
-        return links
+        return fact_footnote_links(
+            ((rel.get('arcrole'), rel.get('fromRefs'), rel.get('toRefs'))
+             for rel in root.iter(f'{IX_NS}relationship')),
+            footnote_ids)
 
     def _add_inline_footnotes(self, root, footnotes_by_id: Dict[str, Any]) -> Dict[str, str]:
         """Store each ix:footnote as a Footnote; returns ``{footnote id: storage key}``."""
@@ -1115,8 +1148,8 @@ class InstanceParser(BaseParser):
             key = self._footnote_storage_key(footnote_id)
             self.footnotes[key] = Footnote(
                 footnote_id=key,
-                text=self._inline_footnote_text(footnote_elem, continuations),
-                lang=self._inline_lang(footnote_elem),
+                text=inline_footnote_text(footnote_elem, continuations),
+                lang=inherited_lang(footnote_elem, f'{XML_NS}lang'),
                 role=footnote_elem.get('footnoteRole', FOOTNOTE_ROLE),
                 related_fact_ids=[]
             )
@@ -1135,35 +1168,6 @@ class InstanceParser(BaseParser):
                 for fact_id in from_ids:
                     self.footnotes[key].related_fact_ids.append(fact_id)
                     self._attach_footnote_to_fact(fact_id, key, first_fact_by_id)
-
-    def _inline_footnote_text(self, footnote_elem, continuations: Dict[str, Any]) -> str:
-        """
-        An ix:footnote's text, followed through its `continuedAt` chain.
-
-        A continuation carries on the same run of text, so it is joined with no
-        break -- the way SEC's extraction writes it into the footnoteLink.
-        """
-        parts: List[str] = []
-        self._collect_footnote_text(footnote_elem, parts)
-        seen = set()
-        next_id = footnote_elem.get('continuedAt')
-        while next_id and next_id not in seen and next_id in continuations:
-            seen.add(next_id)
-            continuation = continuations[next_id]
-            self._collect_footnote_text(continuation, parts)
-            next_id = continuation.get('continuedAt')
-        return self._normalize_footnote_text(parts)
-
-    @staticmethod
-    def _inline_lang(elem) -> str:
-        """The xml:lang in scope for an element, as XML inherits it from ancestors."""
-        node = elem
-        while node is not None:
-            lang = node.get(f'{XML_NS}lang')
-            if lang:
-                return lang
-            node = node.getparent()
-        return 'en-US'
 
     def _footnote_storage_key(self, label: str) -> str:
         """
@@ -1201,37 +1205,8 @@ class InstanceParser(BaseParser):
         word of the next.
         """
         parts: List[str] = []
-        self._collect_footnote_text(footnote_elem, parts)
-        return self._normalize_footnote_text(parts)
-
-    @staticmethod
-    def _normalize_footnote_text(parts: List[str]) -> str:
-        """Collapse whitespace within each line and drop empty lines."""
-        lines = []
-        for raw_line in ''.join(parts).split('\n'):
-            line = ' '.join(raw_line.split())
-            if line:
-                lines.append(line)
-        return '\n'.join(lines)
-
-    def _collect_footnote_text(self, node, parts: List[str]) -> None:
-        """Append this node's text, its children's, and their tails, in order."""
-        if node.text:
-            parts.append(node.text)
-
-        for child in node:
-            tag = child.tag
-            name = tag.rsplit('}', 1)[-1].lower() if isinstance(tag, str) else ''
-
-            self._collect_footnote_text(child, parts)
-
-            if name in _BLOCK_ELEMENTS:
-                parts.append('\n')
-            elif name in _CELL_ELEMENTS:
-                parts.append(' ')
-
-            if child.tail:
-                parts.append(child.tail)
+        collect_footnote_text(footnote_elem, parts)
+        return normalize_footnote_text(parts)
 
     def _extract_entity_info(self) -> None:
         """Extract entity information from contexts and DEI facts."""

@@ -878,7 +878,16 @@
         "depth": 1.536231884057971,
         "children": [
           "InterestPaidNet",
-          "IncomeTaxesPaidNet"
+          "IncomeTaxesPaidNet",
+          "IncomeTaxPaidFederalAfterRefundReceived",
+          "IncomeTaxPaidStateAndLocalAfterRefundReceived",
+          "IncomeTaxPaidForeignAfterRefundReceived",
+          "IncomeTaxPaidFederalBeforeRefundReceived",
+          "IncomeTaxPaidStateAndLocalBeforeRefundReceived",
+          "IncomeTaxPaidForeignBeforeRefundReceived",
+          "ProceedsFromIncomeTaxRefundFederal",
+          "ProceedsFromIncomeTaxRefundStateAndLocal",
+          "ProceedsFromIncomeTaxRefundForeign"
         ],
         "occurrence_rate": 0.5619335347432024,
         "is_abstract": true,
@@ -1029,6 +1038,96 @@
         "label": "Proceeds from Conversion of Crypto Consideration",
         "parent": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
         "depth": 3.3286624203821655,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidFederalAfterRefundReceived": {
+        "concept": "IncomeTaxPaidFederalAfterRefundReceived",
+        "label": "Income Taxes Paid, Federal, Net of Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidStateAndLocalAfterRefundReceived": {
+        "concept": "IncomeTaxPaidStateAndLocalAfterRefundReceived",
+        "label": "Income Taxes Paid, State and Local, Net of Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidForeignAfterRefundReceived": {
+        "concept": "IncomeTaxPaidForeignAfterRefundReceived",
+        "label": "Income Taxes Paid, Foreign, Net of Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidFederalBeforeRefundReceived": {
+        "concept": "IncomeTaxPaidFederalBeforeRefundReceived",
+        "label": "Income Taxes Paid, Federal, Before Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidStateAndLocalBeforeRefundReceived": {
+        "concept": "IncomeTaxPaidStateAndLocalBeforeRefundReceived",
+        "label": "Income Taxes Paid, State and Local, Before Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidForeignBeforeRefundReceived": {
+        "concept": "IncomeTaxPaidForeignBeforeRefundReceived",
+        "label": "Income Taxes Paid, Foreign, Before Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromIncomeTaxRefundFederal": {
+        "concept": "ProceedsFromIncomeTaxRefundFederal",
+        "label": "Income Tax Refunds Received, Federal",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromIncomeTaxRefundStateAndLocal": {
+        "concept": "ProceedsFromIncomeTaxRefundStateAndLocal",
+        "label": "Income Tax Refunds Received, State and Local",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromIncomeTaxRefundForeign": {
+        "concept": "ProceedsFromIncomeTaxRefundForeign",
+        "label": "Income Tax Refunds Received, Foreign",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
         "children": [],
         "occurrence_rate": 0.01,
         "is_abstract": false,

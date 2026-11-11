@@ -1285,14 +1285,21 @@ class Statement:
             view: StatementView controlling which dimensional data to include.
                   Used for STANDARD vs DETAILED filtering logic.
         """
-        from edgar.xbrl.core import (get_unit_display_name, is_period_end_label_role,
-                                     is_period_start_label_role, row_metadata_value)
+        from edgar.xbrl.core import (
+            SourceKeyLookup,
+            is_period_end_label_role,
+            is_period_start_label_role,
+            record_cell_unit,
+            row_metadata_value,
+            summarize_unit_definitions,
+        )
         from edgar.xbrl.core import is_point_in_time as get_is_point_in_time
         from edgar.xbrl.periods import determine_periods_to_display
         from edgar.xbrl.rendering import _is_html, html_to_text
 
         # Get raw statement data with view-based filtering
         raw_data = self.get_raw_data(period_filter=period_filter, view=view)
+        unit_defs = getattr(self.xbrl, 'units', None) or {}
         if not raw_data:
             return pd.DataFrame()
 
@@ -1454,8 +1461,12 @@ class Statement:
             }
 
             # Add period values (raw from instance document)
-            values_dict = item.get('values', {})
+            # GH #1746: remember which key each column's value came from, so the
+            # row's unit is read from the facts actually shown.
+            values_dict = SourceKeyLookup(item.get('values', {}))
+            cell_units: Dict[str, Optional[Dict[str, Any]]] = {}
             for period_key, period_label in periods_to_display:
+                values_dict.source_key = None
                 column_name = _period_column_names.get(period_key, period_label)
                 # Extract start/end dates for equity statement logic
                 start_date = None
@@ -1548,12 +1559,13 @@ class Statement:
                 # accounting standard changes). If we already have a value, don't overwrite with None.
                 if value is not None or column_name not in row:
                     row[column_name] = value
+                record_cell_unit(cell_units, column_name, value, item.get('units'),
+                                 values_dict.source_key, unit_defs)
 
-            # Add unit if requested
+            # Add unit if requested: from the shown cells' unit definitions,
+            # never the opaque unit id (GH #1746)
             if include_unit:
-                unit_ref = row_metadata_value(item.get('units'),
-                                              (key for key, _ in periods_to_display))
-                row['unit'] = get_unit_display_name(unit_ref)
+                row['unit'] = summarize_unit_definitions(cell_units.values())
 
             # Add point_in_time if requested
             if include_point_in_time:
