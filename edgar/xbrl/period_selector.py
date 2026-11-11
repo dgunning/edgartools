@@ -117,7 +117,7 @@ def select_periods(xbrl, statement_type: str, max_periods: int = 4,
                 xbrl.entity_name, statement_type, len(candidate_periods),
                 period_of_report, fiscal_year
             )
-            return candidate_periods[:max_periods]
+            return _keep_periods_with_statement_values(candidate_periods, statement_data)[:max_periods]
 
     except Exception as e:
         logger.error("Period selection failed for %s %s: %s", xbrl.entity_name, statement_type, e)
@@ -151,6 +151,25 @@ def _select_instant_only_statement_periods(statement_data: Optional[List[Dict[st
                    if p['type'] == 'instant' and rows_per_key.get(p['key'], 0) * 2 >= densest]
     own_periods = _sort_periods_by_date(own_periods, 'instant')
     return [(p['key'], p['label']) for p in own_periods[:max_periods]]
+
+
+def _keep_periods_with_statement_values(candidates: List[Tuple[str, str]],
+                                        statement_data: Optional[List[Dict[str, Any]]]) -> List[Tuple[str, str]]:
+    """
+    Drop candidates in which the statement itself has no value.
+
+    The no-sufficient-data fallback returns filing-wide candidates. Ambac's
+    comprehensive income statement is typed IncomeStatement by its abstract, so
+    no fact counted for ComprehensiveIncome and the fallback brought back a
+    FY2016 period whose only fact is a share-transfer restriction elsewhere in
+    the filing: an entirely empty column (GH #1840). Candidates are left alone
+    when the statement's rows are not known or none of the candidates has a value.
+    """
+    if not statement_data:
+        return candidates
+    keys_with_values = {key for row in statement_data for key in (row.get('values') or {})}
+    kept = [candidate for candidate in candidates if candidate[0] in keys_with_values]
+    return kept or candidates
 
 
 def _filter_by_document_date(periods: List[Dict], document_end_date: Optional[str]) -> List[Dict]:
