@@ -33,6 +33,13 @@ from .relationships import arc_candidate, candidate_key, effective_relationships
 XLINK = "{http://www.w3.org/1999/xlink}"
 LINKBASE = "{http://www.xbrl.org/2003/linkbase}"
 
+# The arcroles of a calculation relationship: XBRL 2.1 section 5.2.5.2 and
+# Calculations 1.1 section 4.1. Each is its own network (a different base set),
+# and an arc with any other arcrole is not a summation at all.
+SUMMATION_ITEM = "http://www.xbrl.org/2003/arcrole/summation-item"
+SUMMATION_ITEM_2023 = "https://xbrl.org/2023/arcrole/summation-item"
+SUMMATION_ITEM_ARCROLES = frozenset({SUMMATION_ITEM, SUMMATION_ITEM_2023})
+
 
 class CalculationParser(BaseParser):
     """Parser for XBRL calculation linkbases."""
@@ -116,6 +123,10 @@ class CalculationParser(BaseParser):
                 labels.setdefault(label, element)
 
         for arc in link.findall(f'.//{LINKBASE}calculationArc'):
+            arcrole = arc.get(f'{XLINK}arcrole')
+            if arcrole not in SUMMATION_ITEM_ARCROLES:
+                continue
+
             from_ref = arc.get(f'{XLINK}from')
             to_ref = arc.get(f'{XLINK}to')
             if not from_ref or not to_ref:
@@ -139,6 +150,7 @@ class CalculationParser(BaseParser):
                 'to_element': to_element,
                 'order': self._parse_order_attribute(arc),
                 'weight': self._parse_weight_attribute(arc),
+                'arcrole': arcrole,
             })
 
             # Re-reading the same linkbase must not duplicate an edge
@@ -167,16 +179,17 @@ class CalculationParser(BaseParser):
     @staticmethod
     def _one_per_edge(relationships: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
-        Keep the first effective relationship per parent and child.
+        Keep the first effective relationship per arcrole, parent and child.
 
         Equivalent relationships are already one by now (XBRL 2.1 section
         3.5.3.9.7.5). Two that are not, because their weight or order differs,
-        would count the child into the total twice.
+        would count the child into the total twice. Relationships with
+        different arcroles belong to different networks and are both kept.
         """
         seen = set()
         kept = []
         for rel in relationships:
-            edge = (rel['from_element'], rel['to_element'])
+            edge = (rel['arcrole'], rel['from_element'], rel['to_element'])
             if edge not in seen:
                 seen.add(edge)
                 kept.append(rel)
@@ -228,6 +241,7 @@ class CalculationParser(BaseParser):
                     child_id=rel['to_element'],
                     weight=rel['weight'],
                     order=rel['order'],
+                    arcrole=rel['arcrole'],
                 )
                 for rel in relationships
             ],

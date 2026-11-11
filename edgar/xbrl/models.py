@@ -366,6 +366,10 @@ class CalculationArc(BaseModel):
     child_id: str
     weight: float = 1.0
     order: float = 0.0
+    # The summation-item arcrole: XBRL 2.1's (http://www.xbrl.org/2003/...) or
+    # Calculations 1.1's (https://xbrl.org/2023/...). The two are separate
+    # networks with different validation rules; None for an arc built by hand.
+    arcrole: Optional[str] = None
 
 
 class CalculationTree(BaseModel):
