@@ -51,7 +51,7 @@ from rich import box
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar.bdc.industry import clean_industry_label, issuer_key, normalize_sector
+from edgar.bdc.industry import clean_industry_label, is_multi_member_industry, issuer_key, normalize_sector
 from edgar.bdc.investments import grouping_industries, identifier_industry, issuer_from_identifier
 from edgar.exceptions import ValidationError
 from edgar.httprequests import get_with_retry, is_unreachable
@@ -226,7 +226,11 @@ def _resolve_industry(df: pd.DataFrame, sources: list[str]) -> pd.DataFrame:
 
     issuers = _issuer_keys(df)
     if issuers is not None:
-        tagged = industry.notna() & issuers.notna()
+        multi = pd.Series(
+            [is_multi_member_industry(label, src) for label, src in zip(industry, source, strict=True)],
+            index=industry.index, dtype=bool,
+        )
+        tagged = industry.notna() & issuers.notna() & ~multi
         by_issuer = (
             pd.DataFrame({'issuer': issuers[tagged], 'industry': industry[tagged]})
             .groupby('issuer')['industry']
@@ -298,7 +302,10 @@ def _soi_industry(df: pd.DataFrame) -> pd.DataFrame:
     else:
         sources = [col for col in _SOI_FIELD_SOURCES['industry'] if col in df.columns]
         resolved = _resolve_industry(df, sources)
-    resolved['sector'] = resolved['industry'].map(normalize_sector)
+    sector = resolved['industry'].map(normalize_sector)
+    multi = [is_multi_member_industry(label, src)
+             for label, src in zip(resolved['industry'], resolved['industry_source'], strict=True)]
+    resolved['sector'] = sector.mask(pd.Series(multi, index=sector.index, dtype=bool))
     return resolved
 
 

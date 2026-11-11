@@ -241,6 +241,11 @@ Services" and "Software & Services" are all `'Software'`. A label the table
 does not know passes through as its own sector with a trailing "Sector"
 removed.
 
+If an enumeration value names several members, `industry` keeps all of them
+joined with `'; '` (for example `'Healthcare Sector; Technology Sector'`),
+`sector` is `None`, and the holding never lends its industry to another
+position of the same issuer. DERA's 2024Q3 to 2025Q4 data sets contain none.
+
 ### Convert to DataFrame
 
 For analysis in pandas:
