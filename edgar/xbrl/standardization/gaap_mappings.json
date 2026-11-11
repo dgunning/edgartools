@@ -18936,22 +18936,6 @@
     "first_year": 2021,
     "last_year": 2024
   },
-  "GrossInvestmentIncomeOperating": {
-    "standard_tags": [
-      "NonoperatingIncomeExpense"
-    ],
-    "display_name": "Non-Operating Income (Expense)",
-    "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
-    "is_total": true,
-    "confidence": 0.31,
-    "company_count": 150,
-    "occurrence_rate": 0.017,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
-  },
   "GrossProfit": {
     "standard_tags": [
       "GrossProfit"
