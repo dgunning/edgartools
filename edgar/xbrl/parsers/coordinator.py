@@ -142,8 +142,11 @@ class XBRLParser:
 
         # Dimension QNames the instance carries as xbrldi:typedMember. A typed
         # value is not a member concept, so it is never rewritten or looked up
-        # as one (gh #1761).
+        # as one (gh #1761). The definition parser reads the same set: a
+        # typedMember shows an axis is typed even when its declaration sits in
+        # an imported taxonomy that is never loaded (gh #1234).
         self.typed_dimensions = self.instance_parser.typed_dimensions
+        self.definition_parser.observed_typed_dimensions = self.typed_dimensions
 
         # Set up cross-references for embedded linkbase processing
         self.schema_parser.set_linkbase_parsers(
@@ -259,7 +262,7 @@ class XBRLParser:
             for instance_file in instance_files:
                 log.debug(f"Parsing instance: {instance_file}")
                 self.instance_parser.parse_instance(instance_file)
-            self._fill_period_types_from_facts()
+            self._after_instance()
 
             log.info(f"Successfully parsed XBRL directory with {len(self.facts)} facts")
 
@@ -328,16 +331,21 @@ class XBRLParser:
     def parse_instance(self, file_path: Union[str, Path]) -> None:
         """Parse instance document file and extract contexts, facts, and units."""
         self.instance_parser.parse_instance(file_path)
-        self._fill_period_types_from_facts()
+        self._after_instance()
 
     def parse_instance_content(self, content: str) -> None:
         """Parse instance document content and extract contexts, facts, and units."""
         self.instance_parser.parse_instance_content(content)
-        self._fill_period_types_from_facts()
+        self._after_instance()
 
     def parse_inline_footnotes_content(self, content: Union[str, bytes]) -> int:
         """Read footnotes from an inline XBRL document when the instance had none."""
         return self.instance_parser.extract_inline_footnotes(content)
+
+    def _after_instance(self) -> None:
+        """What every instance read is followed by."""
+        self._fill_period_types_from_facts()
+        self.definition_parser.mark_observed_typed_dimensions()
 
     def _fill_period_types_from_facts(self) -> None:
         """

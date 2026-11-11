@@ -18,7 +18,7 @@ or a file, that has not been read yet.
 """
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Set, Union
 
 from edgar.xbrl.core import STANDARD_LABEL, extract_element_id
 from edgar.xbrl.models import Axis, Domain, ElementCatalog, Table, XBRLProcessingError
@@ -87,6 +87,10 @@ class DefinitionParser(BaseParser):
         # axis -> every default member declared for it in any role. A
         # dimension-default arc is global, not scoped to its extended link.
         self._defaults_by_axis: Dict[str, set] = {}
+
+        # Dimension QNames the instance carries as xbrldi:typedMember. The
+        # coordinator replaces this with the instance parser's own set.
+        self.observed_typed_dimensions: Set[str] = set()
 
     # ------------------------------------------------------------------
     # Parsing
@@ -510,13 +514,37 @@ class DefinitionParser(BaseParser):
         `is_typed_dimension=False` an answer rather than an untouched default.
 
         An axis declared only in an imported taxonomy is not in the catalog at
-        all — there is no xs:import traversal — so it still reports False. That
-        is the remaining half of gh #1234, tracked as edgartools-0c1q.16.1.
+        all — there is no xs:import traversal (edgartools-0c1q.16.1). The
+        instance still settles its kind: only a typed dimension may carry an
+        xbrldi:typedMember (XBRL Dimensions 1.0 section 3.1.4.4), so an axis
+        used that way is typed, with `typed_domain_ref` left empty because the
+        declaration that holds it was never read (gh #1234).
         """
         element = self.element_catalog.get(element_id)
         typed_domain_ref = getattr(element, 'typed_domain_ref', None) if element else None
+        if typed_domain_ref:
+            return True, typed_domain_ref
+        return element_id in self._observed_typed_axis_ids(), ""
 
-        return bool(typed_domain_ref), typed_domain_ref or ""
+    def _observed_typed_axis_ids(self) -> Set[str]:
+        """The observed typed dimensions as element IDs (`us-gaap_FooAxis`)."""
+        return {qname.replace(':', '_', 1) for qname in self.observed_typed_dimensions}
+
+    def mark_observed_typed_dimensions(self) -> None:
+        """
+        Mark axes the instance used as typed, after an instance is read.
+
+        The dimensional model may already be built when the instance arrives,
+        so the axes it holds are updated in place; a later rebuild reads the
+        same evidence through `_typed_dimension_info`.
+        """
+        typed_ids = self._observed_typed_axis_ids()
+        if not typed_ids:
+            return
+        views = [*self.axes_by_role.values(), self.axes]
+        for axes in views:
+            for element_id in typed_ids & axes.keys():
+                axes[element_id].is_typed_dimension = True
 
     def _get_element_label(self, element_id: str) -> str:
         """Get the label for an element, falling back to the element ID if not found."""
