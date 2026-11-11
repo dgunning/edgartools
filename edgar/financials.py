@@ -1426,11 +1426,22 @@ class MultiFinancials:
     def balance_sheet(self, view: ViewType = None) -> Optional[StitchedStatement]:
         return self.xbs.statements.balance_sheet(view=view)
 
-    def income_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
-        return self.xbs.statements.income_statement(view=view)
+    def income_statement(self, view: ViewType = None, *,
+                         include_quarterly: bool = False) -> Optional[StitchedStatement]:
+        """The stitched income statement.
 
-    def cash_flow_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
-        return self.xbs.statements.cash_flow_statement(view=view)
+        Args:
+            view: StatementView controlling dimensional filtering.
+            include_quarterly: If True, also show the discrete quarter each 10-Q
+                reports next to its year-to-date column (GH #780, #1783). Quarters
+                are taken as filed, never derived. Default False: YTD/annual only.
+        """
+        return self.xbs.statements.income_statement(view=view, include_quarterly=include_quarterly)
+
+    def cash_flow_statement(self, view: ViewType = None, *,
+                            include_quarterly: bool = False) -> Optional[StitchedStatement]:
+        """The stitched cash flow statement. ``include_quarterly`` as on ``income_statement``."""
+        return self.xbs.statements.cash_flow_statement(view=view, include_quarterly=include_quarterly)
 
     def __rich__(self):
         return self.xbs.__rich__()

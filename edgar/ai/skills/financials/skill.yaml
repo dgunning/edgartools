@@ -60,6 +60,8 @@ patterns:
       filings = company.get_filings(form="10-K").head(3)
       multi = MultiFinancials.extract(filings)
       income_detailed = multi.income_statement(view="detailed")  # dimensional breakdowns across years
+      # From 10-Qs: include_quarterly=True adds each filed quarter next to its YTD column
+      quarterly = MultiFinancials.extract(company.get_filings(form="10-Q").head(2)).income_statement(include_quarterly=True)
 
       # Drill down: statement line item → note that explains it
       # (requires the filing object: tenk = company.get_filings(form="10-K")[0].obj())
