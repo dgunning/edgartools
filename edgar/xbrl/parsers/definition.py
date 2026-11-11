@@ -211,6 +211,8 @@ class DefinitionParser(BaseParser):
         # depends on which extended link happened to be parsed first.
         for role in self._relationships_by_role:
             self._build_domain_hierarchy(role)
+        for role in list(self._relationships_by_role):
+            self._follow_member_continuations(role)
         for role in self._relationships_by_role:
             self._build_axes(role)
         for role in self._relationships_by_role:
@@ -336,20 +338,61 @@ class DefinitionParser(BaseParser):
         A cross-role hop means the members live under the role that declared
         them; the caller asking about `role` still needs to see them.
         """
-        if role == source_role:
-            self._domain(role, domain_id)
-            return
+        self._domain(role, domain_id)
+        self._import_members(role, source_role, domain_id, set())
 
-        source = self.domains_by_role.get(source_role, {}).get(domain_id)
-        target = self._domain(role, domain_id)
+    def _import_members(self, role: str, source_role: str, element: str, seen: set) -> None:
+        """
+        Make everything beneath `element` in `source_role` visible from `role`.
+
+        The whole subtree is copied, not one level: a member that is itself a
+        domain keeps its own members after the role change (gh #1752). A
+        domain-member arc carrying `xbrldt:targetRole` says the member's own
+        children are found in that role (XBRL Dimensions 1.0 section 2.4,
+        example 7), so the walk continues there. `seen` stops a cycle.
+        """
+        key = (source_role, element)
+        if key in seen:
+            return
+        seen.add(key)
+
+        source = self.domains_by_role.get(source_role, {}).get(element)
         if source is None:
             return
+        if role != source_role:
+            target = self._domain(role, element)
+            for member in source.members:
+                if member not in target.members:
+                    target.members.append(member)
+            if target.parent is None:
+                target.parent = source.parent
 
-        for member in source.members:
-            if member not in target.members:
-                target.members.append(member)
-        if target.parent is None:
-            target.parent = source.parent
+        continuations = {rel['to_element']: rel['target_role']
+                         for rel in self._arcs(source_role, DOMAIN_MEMBER, element)
+                         if rel['target_role']}
+        for member in list(source.members):
+            member_role = continuations.get(member, source_role)
+            self._import_members(role, member_role, member, seen)
+            if member_role == role:
+                continue  # the role's own hierarchy already says where it hangs
+            nested = self.domains_by_role.get(role, {}).get(member)
+            if nested is not None and nested.parent is None:
+                nested.parent = element
+
+    def _follow_member_continuations(self, role: str) -> None:
+        """
+        Pull in the children a `targetRole` domain-member arc points at.
+
+        `_build_domain_hierarchy` reads one role's arcs; a member reached
+        through `xbrldt:targetRole` has its children declared in another role,
+        so they are imported here, once every role's own hierarchy is built.
+        """
+        for rel in self._arcs(role, DOMAIN_MEMBER):
+            if rel['target_role'] and rel['target_role'] != role:
+                self._import_members(role, rel['target_role'], rel['to_element'], set())
+                nested = self.domains_by_role.get(role, {}).get(rel['to_element'])
+                if nested is not None and nested.parent is None:
+                    nested.parent = rel['from_element']
 
     def _build_tables(self, role: str) -> None:
         """
