@@ -24,6 +24,7 @@ from edgar.xbrl.core import STANDARD_LABEL, extract_element_id
 from edgar.xbrl.models import Axis, Domain, ElementCatalog, Table, XBRLProcessingError
 
 from .base import BaseParser
+from .relationships import arc_candidate, candidate_key, effective_relationships
 
 # XBRL Dimensions arcrole URIs
 HYPERCUBE_DIMENSION = "http://xbrl.org/int/dim/arcrole/hypercube-dimension"
@@ -70,10 +71,15 @@ class DefinitionParser(BaseParser):
         self.axes_by_role: Dict[str, Dict[str, Axis]] = {}
         self.domains_by_role: Dict[str, Dict[str, Domain]] = {}
 
-        # Every relationship seen so far, grouped by the role that declared it.
-        # The dimensional model is rebuilt from this after each parse.
-        self._relationships_by_role: Dict[str, List[Dict[str, Any]]] = {}
+        # Every arc seen so far, prohibiting ones included, grouped by the role
+        # that declared it.
+        self._candidates_by_role: Dict[str, List[Dict[str, Any]]] = {}
         self._seen_arcs: set = set()
+
+        # The effective relationships among them (XBRL 2.1 section
+        # 3.5.3.9.7.5). The dimensional model is rebuilt from this after each
+        # parse.
+        self._relationships_by_role: Dict[str, List[Dict[str, Any]]] = {}
 
     # ------------------------------------------------------------------
     # Parsing
@@ -120,7 +126,7 @@ class DefinitionParser(BaseParser):
 
     def _collect_relationships(self, link, role: str) -> None:
         """Extract every definition arc in one extended link into the store."""
-        relationships = self._relationships_by_role.setdefault(role, [])
+        candidates = self._candidates_by_role.setdefault(role, [])
 
         # Resolve every xlink:label once. Searching the link per arc is
         # quadratic, and an extended link can carry hundreds of each.
@@ -150,13 +156,7 @@ class DefinitionParser(BaseParser):
             from_element = extract_element_id(from_href)
             to_element = extract_element_id(to_href)
 
-            # Re-reading the same linkbase must not duplicate members
-            key = (role, arcrole, from_element, to_element)
-            if key in self._seen_arcs:
-                continue
-            self._seen_arcs.add(key)
-
-            relationships.append({
+            candidate = arc_candidate(arc, role, from_element, to_element, {
                 'from_element': from_element,
                 'to_element': to_element,
                 'order': self._parse_order_attribute(arc),
@@ -165,6 +165,32 @@ class DefinitionParser(BaseParser):
                 'closed': arc.get(f'{XBRLDT}closed') in ('true', '1'),
                 'context_element': arc.get(f'{XBRLDT}contextElement') or 'segment',
             })
+
+            # Re-reading the same linkbase must not duplicate members
+            key = candidate_key(candidate)
+            if key in self._seen_arcs:
+                continue
+            self._seen_arcs.add(key)
+            candidates.append(candidate)
+
+    def _resolve_relationships(self) -> None:
+        """
+        Keep each role's effective relationships, one per arcrole and endpoints.
+
+        Prohibition and overriding come first (XBRL 2.1 section 3.5.3.9.7.5).
+        Of two effective relationships that still share an arcrole and both
+        endpoints, because an attribute such as order differs, the first is
+        kept, as before prohibition was honoured.
+        """
+        self._relationships_by_role.clear()
+        for role, candidates in self._candidates_by_role.items():
+            seen = set()
+            kept = self._relationships_by_role.setdefault(role, [])
+            for rel in effective_relationships(candidates):
+                edge = (rel['arcrole'], rel['from_element'], rel['to_element'])
+                if edge not in seen:
+                    seen.add(edge)
+                    kept.append(rel)
 
     # ------------------------------------------------------------------
     # Building the dimensional model
@@ -177,6 +203,7 @@ class DefinitionParser(BaseParser):
         self.domains.clear()
         self.axes_by_role.clear()
         self.domains_by_role.clear()
+        self._resolve_relationships()
 
         # Three passes over every role, so that resolving a cross-role hop never
         # depends on which extended link happened to be parsed first.

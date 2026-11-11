@@ -28,6 +28,7 @@ from edgar.xbrl.models import (
 )
 
 from .base import BaseParser
+from .relationships import arc_candidate, candidate_key, effective_relationships
 
 XLINK = "{http://www.w3.org/1999/xlink}"
 LINKBASE = "{http://www.xbrl.org/2003/linkbase}"
@@ -57,9 +58,11 @@ class CalculationParser(BaseParser):
         self.element_catalog = element_catalog
         self.facts = facts
 
-        # Every relationship seen so far, grouped by the role that declared it.
-        # The trees are rebuilt from this after each parse.
-        self._relationships_by_role: Dict[str, List[Dict[str, Any]]] = {}
+        # Every arc seen so far, prohibiting ones included, grouped by the role
+        # that declared it. The trees are rebuilt from the effective
+        # relationships among them after each parse: a prohibiting arc may sit
+        # in a later link or file than the arc it prohibits.
+        self._candidates_by_role: Dict[str, List[Dict[str, Any]]] = {}
         self._seen_arcs: set = set()
 
     def parse_calculation(self, file_path: Union[str, Path]) -> None:
@@ -102,7 +105,7 @@ class CalculationParser(BaseParser):
 
     def _collect_relationships(self, link, role: str) -> None:
         """Extract every calculation arc in one extended link into the store."""
-        relationships = self._relationships_by_role.setdefault(role, [])
+        candidates = self._candidates_by_role.setdefault(role, [])
 
         # Resolve every xlink:label once. Searching the link per arc is
         # quadratic, and an extended link can carry hundreds of each.
@@ -131,18 +134,19 @@ class CalculationParser(BaseParser):
             from_element = extract_element_id(from_href)
             to_element = extract_element_id(to_href)
 
-            # Re-reading the same linkbase must not duplicate an edge
-            key = (role, from_element, to_element)
-            if key in self._seen_arcs:
-                continue
-            self._seen_arcs.add(key)
-
-            relationships.append({
+            candidate = arc_candidate(arc, role, from_element, to_element, {
                 'from_element': from_element,
                 'to_element': to_element,
                 'order': self._parse_order_attribute(arc),
                 'weight': self._parse_weight_attribute(arc),
             })
+
+            # Re-reading the same linkbase must not duplicate an edge
+            key = candidate_key(candidate)
+            if key in self._seen_arcs:
+                continue
+            self._seen_arcs.add(key)
+            candidates.append(candidate)
 
     def _parse_weight_attribute(self, arc) -> float:
         """Parse the weight attribute, defaulting to 1.0 when absent or unusable."""
@@ -155,9 +159,28 @@ class CalculationParser(BaseParser):
         """Rebuild every role's tree from all the relationships seen so far."""
         self.calculation_trees.clear()
 
-        for role, relationships in self._relationships_by_role.items():
+        for role, candidates in self._candidates_by_role.items():
+            relationships = self._one_per_edge(effective_relationships(candidates))
             if relationships:
                 self._build_calculation_tree(role, relationships)
+
+    @staticmethod
+    def _one_per_edge(relationships: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+        """
+        Keep the first effective relationship per parent and child.
+
+        Equivalent relationships are already one by now (XBRL 2.1 section
+        3.5.3.9.7.5). Two that are not, because their weight or order differs,
+        would count the child into the total twice.
+        """
+        seen = set()
+        kept = []
+        for rel in relationships:
+            edge = (rel['from_element'], rel['to_element'])
+            if edge not in seen:
+                seen.add(edge)
+                kept.append(rel)
+        return kept
 
     def _build_calculation_tree(self, role: str, relationships: List[Dict[str, Any]]) -> None:
         """
