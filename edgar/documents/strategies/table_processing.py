@@ -362,12 +362,36 @@ class TableProcessor:
         # Process both td and th elements, td first (preserves the ordering the
         # previous ``findall('.//td') + findall('.//th')`` produced)
         own_cells = self._own_cells(tr)
+        visible_cells = [c for c in own_cells if not self._is_hidden_spacer(c)]
+        # A row made only of hidden spacers keeps them: emptying it would drop the
+        # row, which the matrix's leading-row heuristics count.
+        if visible_cells:
+            own_cells = visible_cells
         for cell_elem in [c for c in own_cells if c.tag != 'th'] + [c for c in own_cells if c.tag == 'th']:
             cell = self._process_cell(cell_elem, is_header or cell_elem.tag == 'th')
             if cell:
                 cells.append(cell)
 
         return cells
+
+    _DISPLAY_NONE = re.compile(r'(?:^|;)\s*display\s*:\s*none\s*(?:!important\s*)?(?:;|$)', re.IGNORECASE)
+
+    @classmethod
+    def _is_hidden_spacer(cls, elem: HtmlElement) -> bool:
+        """
+        True for an empty cell whose inline style is ``display:none``.
+
+        Browsers give such a cell no grid slot, but its colspan still counted
+        here, so rows carrying them (Workiva emits trailing colspan-3 spacers on
+        every non-header row) were wider than the header and their values were
+        shifted under the wrong period (GH #1847, JPM overhead ratios).
+        ``visibility:hidden`` keeps its layout slot and is not matched. A hidden
+        cell that holds text is kept, so no filed content is dropped.
+        """
+        style = elem.get('style')
+        if not style or not cls._DISPLAY_NONE.search(style):
+            return False
+        return not _text_content(elem).replace('\xa0', ' ').strip()
 
     def _process_cell(self, elem: HtmlElement, is_header: bool) -> Optional[Cell]:
         """Process table cell."""
