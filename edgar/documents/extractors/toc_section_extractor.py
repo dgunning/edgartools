@@ -255,6 +255,7 @@ class SECSectionExtractor:
         self._bound_sections_at_unlisted_item_headings(tree)
         self._bound_sections_at_part_dividers(tree)
         self._advance_starts_past_page_furniture(tree)
+        self._retreat_starts_to_preceding_own_heading(tree)
         self._bound_item_4_at_executive_officers(tree)
         self._split_exhibit_index_from_item_16(tree)
         self._split_exhibit_index_from_signatures(tree)
@@ -582,6 +583,122 @@ class SECSectionExtractor:
             boundary.start_element = tables[-1] if tables else target
             logger.info("Section %s starts after %d page-furniture block(s)", name, len(seen) - len(headings))
 
+
+    # Empty blocks (anchor markers, rules, blank lines) the backward walk may
+    # step over between a TOC anchor and the heading printed above it.
+    _PRECEDING_HEADING_MAX_STEPS = 6
+
+    def _retreat_starts_to_preceding_own_heading(self, tree) -> None:
+        """Start a section at its own heading when the TOC anchor sits after it.
+
+        Most filers place an item's anchor before its heading; BXP's 10-Q
+        0001037540-26-000034 places it after: ``<div>ITEM 1—Financial
+        Statements.</div><div id="…_22"></div>`` and then the balance sheet.
+        The section opened on the balance sheet and its heading fell into no
+        section (GH #1622).
+
+        Only an empty anchor block qualifies (an anchor inside its heading is
+        :func:`heading_block`'s case), and only when no own heading follows it.
+        Walk back over empty blocks to the first block with text; when that is
+        a short line opening on this section's own "Item N", start there, and
+        end any section that ended at this anchor at the heading instead. A
+        start another pass already placed, or another section's anchor met on
+        the way back, leaves the section alone.
+        """
+        schema = self.toc_analyzer.schema
+        if schema.title_based or not self.section_boundaries:
+            return
+        _, is_own_heading, _ = self._page_furniture_rules(tree)
+        anchor_ids = {b.anchor_id for b in self.section_boundaries.values() if b.anchor_id}
+
+        for name, boundary in self.section_boundaries.items():
+            m = self._SECTION_KEY_RE.match(name)
+            if not m or boundary.start_element is not None or name in self._pinned_starts:
+                continue
+            new_start = self._own_heading_before_anchor(
+                tree, boundary, m.group(2).upper(), is_own_heading, anchor_ids)
+            if new_start is None:
+                continue
+            boundary.start_element = new_start
+            self._end_sections_at(boundary, new_start)
+            logger.info("Section %s starts at its heading before the TOC anchor", name)
+
+    def _own_heading_before_anchor(self, tree, boundary, own_item, is_own_heading, anchor_ids):
+        """The element a section should start at when its own "Item N" heading
+        sits just before an empty TOC anchor, or ``None`` when it doesn't."""
+        starts = find_anchor_targets(tree, boundary.anchor_id)
+        if not starts or heading_block(starts[0]) is not None:
+            return None
+        anchor = starts[0]
+        if self._collapsed_text(anchor):
+            return None
+        following = self._first_text_block(anchor)
+        if following is not None and is_own_heading(self._collapsed_text(following), own_item):
+            return None
+        heading = self._preceding_text_block(anchor, anchor_ids - {boundary.anchor_id})
+        if heading is None:
+            return None
+        text = self._collapsed_text(heading)
+        if len(text) > self._ITEM_HEADING_MAX or not is_own_heading(text, own_item):
+            return None
+        tables = [a for a in heading.iterancestors() if a.tag == 'table']
+        new_start = tables[-1] if tables else heading
+        if tables and len(self._collapsed_text(new_start)) > self._ITEM_HEADING_MAX:
+            return None  # a row of a larger table (a contents page), not a heading
+        return new_start
+
+    def _end_sections_at(self, boundary, new_start) -> None:
+        """End any section that ended at ``boundary``'s anchor at ``new_start``."""
+        for other in self.section_boundaries.values():
+            if other is not boundary and other.end_element is None \
+                    and other.end_element_id == boundary.anchor_id:
+                other.end_element = new_start
+
+    @staticmethod
+    def _collapsed_text(el) -> str:
+        return ' '.join(el.text_content().split())
+
+    def _first_text_block(self, el):
+        """The first leaf block after ``el`` (in document order) that holds text."""
+        for event, node in iterwalk_from(el):
+            if event != 'start' or node is el or not isinstance(node.tag, str):
+                continue
+            if node.tag not in self._BLOCK_TAGS:
+                continue
+            if next(node.iterdescendants(*self._BLOCK_TAGS), None) is not None:
+                continue
+            if self._collapsed_text(node):
+                return node
+        return None
+
+    def _preceding_text_block(self, el, stop_ids):
+        """The last leaf block with text before ``el``, stepping back over at
+        most ``_PRECEDING_HEADING_MAX_STEPS`` empty elements; ``None`` when the
+        walk meets an anchor in ``stop_ids`` or runs out of steps."""
+        cur = el
+        for _ in range(self._PRECEDING_HEADING_MAX_STEPS):
+            prev = cur.getprevious()
+            while prev is None:
+                cur = cur.getparent()
+                if cur is None or cur.tag in ('body', 'html'):
+                    return None
+                prev = cur.getprevious()
+            cur = prev
+            if not isinstance(prev.tag, str):
+                continue
+            if any(d.get('id') in stop_ids or (d.tag == 'a' and d.get('name') in stop_ids)
+                   for d in prev.iter() if isinstance(d.tag, str)):
+                return None
+            if not self._collapsed_text(prev):
+                continue
+            leaf = prev
+            while True:
+                kids = [k for k in leaf if isinstance(k.tag, str) and k.tag in self._BLOCK_TAGS
+                        and self._collapsed_text(k)]
+                if not kids:
+                    return leaf
+                leaf = kids[-1]
+        return None
 
     def _page_furniture_rules(self, tree):
         """The three predicates the furniture passes share: a block's
