@@ -199,6 +199,13 @@ class EntityFilings(Filings):
 
     This extends the base Filings class with additional methods and properties
     specific to entity filings.
+
+    The ``to_pandas()`` columns keep the field names of SEC's submissions JSON
+    (``reportDate``, ``acceptanceDateTime``, ``fileNumber`` ...). The
+    ``acceptanceDateTime`` column is SEC's reported value, the same as
+    ``EntityFiling.reported_acceptance_datetime``: tz-aware UTC as SEC labels it,
+    but SEC has served it hours off for whole companies at a time (GH #1501).
+    For the exact acceptance time use ``filings.accepted_at()``.
     """
 
     def __init__(self,
