@@ -6,7 +6,7 @@ This module provides functions for formatting and displaying XBRL data.
 
 import math
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -17,12 +17,14 @@ from rich.panel import Panel
 from rich.table import Table as RichTable
 from rich.text import Text
 
-from edgar.documents import HTMLParser, ParserConfig
-from edgar.display import get_statement_styles, get_style, SYMBOLS
+from edgar.core import log
+from edgar.display import SYMBOLS, get_statement_styles, get_style
 from edgar.display.formatting import cik_text
+from edgar.documents import HTMLParser, ParserConfig
 from edgar.richtools import repr_rich, rich_to_text
 from edgar.xbrl import standardization
 from edgar.xbrl.core import (
+    CURRENCY_SYMBOLS,
     INFINITE_PRECISION,
     decimals_for_scaling,
     determine_dominant_scale,
@@ -31,7 +33,9 @@ from edgar.xbrl.core import (
     is_period_boundary_label_role,
     is_period_end_label_role,
     is_period_start_label_role,
+    iso4217_code,
     parse_date,
+    unit_currency_measure,
 )
 from edgar.xbrl.parsers.instance import _quarter_for_date
 
@@ -205,11 +209,11 @@ class CellFormatter:
     """
     __slots__ = ('item', 'period_key', 'is_monetary_statement',
                  'dominant_scale', 'shares_scale', 'comparison_info',
-                 'currency_symbol')
+                 'currency_symbol', 'selected')
 
     def __init__(self, item, period_key, is_monetary_statement,
                  dominant_scale, shares_scale, comparison_info,
-                 currency_symbol):
+                 currency_symbol, selected=None):
         self.item = item
         self.period_key = period_key
         self.is_monetary_statement = is_monetary_statement
@@ -217,8 +221,12 @@ class CellFormatter:
         self.shares_scale = shares_scale
         self.comparison_info = comparison_info
         self.currency_symbol = currency_symbol
+        # A period-boundary balance's own source fields and resolved unit (GH #1655)
+        self.selected = selected
 
     def __call__(self, value):
+        if self.selected is not None:
+            return _format_selected_balance(value, self)
         return _format_value_for_display_as_string(
             value, self.item, self.period_key,
             self.is_monetary_statement, self.dominant_scale,
@@ -679,16 +687,17 @@ class RenderedStatement:
                 # The cell holds the filed value; the presentation sign lives in
                 # the formatter, so it has to be applied here too or this frame
                 # disagrees with the rendered statement (edgartools-5ztr).
-                preferred_signs = row.metadata.get('preferred_signs', {})
                 for i, cell in enumerate(row.cells):
                     if i < len(self.header.periods):
                         column_name = column_map[i]
                         value = cell.value
                         if presentation:
-                            value = apply_presentation_sign(
-                                value, self.statement_type, preferred_signs,
-                                self.header.period_keys[i]
+                            signs, sign_key = _presentation_sign_source(
+                                row, self.header.period_keys[i]
                                 if i < len(self.header.period_keys) else None
+                            )
+                            value = apply_presentation_sign(
+                                value, self.statement_type, signs, sign_key
                             )
                         df_row[column_name] = value
 
@@ -1400,11 +1409,133 @@ def apply_presentation_sign(
     return value * preferred_sign
 
 
+def _presentation_sign_source(row: 'StatementRow',
+                              column_key: Optional[str]) -> Tuple[Dict[str, Any], Optional[str]]:
+    """The sign map and key a cell's presentation sign is read from.
+
+    A period-boundary balance shown under a duration column was filed under an
+    instant key, and ``preferred_signs`` is keyed by the filed key, so its sign
+    comes from the selected cell's source (GH #1655).
+    """
+    selected = (row.metadata.get('selected_cells') or {}).get(column_key) if column_key else None
+    if selected:
+        source_key = selected['source_period_key']
+        return {source_key: selected['preferred_sign']}, source_key
+    return row.metadata.get('preferred_signs', {}), column_key
+
+
+# How a selected balance cell's own unit resolved (GH #1655)
+_UNIT_CURRENCY = 'currency'
+_UNIT_NON_CURRENCY = 'non_currency'
+_UNIT_UNAVAILABLE = 'unavailable'
+UNIT_UNAVAILABLE_NOTE = '(unit unavailable)'
+
+
+def _select_period_boundary_cell(values: Dict[str, Any], period_key: str, period: Any,
+                                 preferred_label: Optional[str]) -> Tuple[Any, Optional[str]]:
+    """Pick a period-start/period-end balance for a duration column.
+
+    Returns the value and the key it was filed under, or ``("", None)``. A key
+    that is present ends the search even when its value is empty -- only an
+    absent key lets the next candidate in: the column's own entry, then for an
+    opening balance the instant the day before the period starts and then the
+    start date itself, and for a closing balance the period-end instant
+    (edgartools-0609, GH #1655).
+    """
+    candidates = [period_key]
+    start_date = getattr(period, 'start_date', None)
+    if is_period_start_label_role(preferred_label) and start_date:
+        try:
+            prior_day = datetime.strptime(start_date, '%Y-%m-%d') - timedelta(days=1)
+            candidates += [f"instant_{prior_day.strftime('%Y-%m-%d')}", f"instant_{start_date}"]
+        except (ValueError, TypeError):
+            pass
+    if is_period_end_label_role(preferred_label):
+        candidates.append(f"instant_{period.end_date}")
+    for key in candidates:
+        if key in values:
+            return values[key], key
+    return "", None
+
+
+def _selected_cell(item: Dict[str, Any], source_key: str, value: Any) -> Dict[str, Any]:
+    """The selected cell's source fields, read from the row's own per-period maps."""
+    return {
+        'value': value,
+        'source_period_key': source_key,
+        'unit_ref': (item.get('units') or {}).get(source_key),
+        'decimals': (item.get('decimals') or {}).get(source_key),
+        'preferred_sign': (item.get('preferred_signs') or {}).get(source_key),
+    }
+
+
+def _resolve_selected_unit(xbrl_instance: Any, unit_ref: Optional[str]) -> Tuple[str, Optional[str]]:
+    """Resolve a selected cell's own unit to (status, currency symbol).
+
+    No other fact is consulted and nothing defaults to dollars: a currency
+    without a configured symbol shows its ISO code, and a missing or unusable
+    unit is reported as unavailable.
+    """
+    units = getattr(xbrl_instance, 'units', None) or {}
+    unit_info = units.get(unit_ref) if isinstance(unit_ref, str) else None
+    if not isinstance(unit_info, dict):
+        return _UNIT_UNAVAILABLE, None
+    measure = unit_currency_measure(unit_info)
+    if measure:
+        return _UNIT_CURRENCY, CURRENCY_SYMBOLS.get(measure) or f"{iso4217_code(measure)} "
+    if unit_info.get('type') == 'simple' and unit_info.get('measure'):
+        return _UNIT_NON_CURRENCY, None
+    return _UNIT_UNAVAILABLE, None
+
+
+def _format_selected_balance(value: Any, formatter: 'CellFormatter') -> str:
+    """Format a period-boundary balance from its own source key, unit and accuracy."""
+    selected = formatter.selected
+    status = selected['unit_status']
+    text = _format_value_for_display_as_string(
+        value, formatter.item, selected['source_period_key'],
+        formatter.is_monetary_statement and status == _UNIT_CURRENCY,
+        formatter.dominant_scale, formatter.shares_scale,
+        formatter.comparison_info, selected['currency_symbol']
+    )
+    # Marked only where a currency symbol would otherwise have been shown
+    if text and status == _UNIT_UNAVAILABLE and _item_is_monetary(formatter.item, formatter.is_monetary_statement):
+        return f"{text} {UNIT_UNAVAILABLE_NOTE}"
+    return text
+
+
+def _selected_balance_formatter_fields(item: Dict[str, Any], selected: Dict[str, Any],
+                                       xbrl_instance: Any, is_monetary_statement: bool) -> Dict[str, Any]:
+    """Attach the resolved unit to a selected cell for its formatter, logging an unusable unit."""
+    status, symbol = _resolve_selected_unit(xbrl_instance, selected['unit_ref'])
+    value = selected['value']
+    if (status == _UNIT_UNAVAILABLE and _item_is_monetary(item, is_monetary_statement)
+            and isinstance(value, (int, float))
+            and not isinstance(value, bool) and value != 0):
+        log.warning(
+            f"{item.get('concept', '')}: no usable unit for the balance filed under "
+            f"{selected['source_period_key']} (unit_ref={selected['unit_ref']!r}); "
+            f"shown without a currency"
+        )
+    return dict(selected, unit_status=status, currency_symbol=symbol)
+
+
 def _filed_decimal_places(value: Union[int, float], decimals: Union[int, str, None]) -> int:
     """Decimal places a value was filed with: all of its digits when exact ('INF')."""
     if decimals == INFINITE_PRECISION and math.isfinite(value):
         return max(0, -Decimal(repr(value)).as_tuple().exponent)
     return decimals_for_scaling(decimals)
+
+
+def _item_is_monetary(item: Dict[str, Any], is_monetary_statement: bool) -> bool:
+    """Whether a row's values display as money: not shares, EPS or a ratio-labelled row."""
+    if not is_monetary_statement:
+        return False
+    concept = item.get('concept', '')
+    if concept in share_concepts or concept in eps_concepts:
+        return False
+    label = item.get('label', '').lower()
+    return not any(keyword in label for keyword in ('ratio', 'percentage', 'per cent'))
 
 
 def _format_value_for_display_as_string(
@@ -1448,19 +1579,7 @@ def _format_value_for_display_as_string(
     # Fast check for common share and EPS concepts
     is_share_value = concept in share_concepts
     is_eps_value = concept in eps_concepts
-
-    # Only perform expensive label operations if needed for monetary determination
-    is_monetary = is_monetary_statement
-    if is_eps_value or is_share_value:
-        is_monetary = False
-    elif not is_monetary:
-        # Skip label checks entirely if we already know it's not monetary
-        pass
-    else:
-        # Only check label for ratio-related items if we think it might be monetary
-        label = item.get('label', '').lower()
-        if any(keyword in label for keyword in ('ratio', 'percentage', 'per cent')):
-            is_monetary = False
+    is_monetary = _item_is_monetary(item, is_monetary_statement)
 
     # Get decimals with a default value to avoid conditional logic later.
     # A statement stores the filed accuracy, which may be the sentinel 'INF'
@@ -2058,21 +2177,18 @@ def render_statement(
             # the ending balance is the instant at the period end.
             # Only non-dimensional rows carry a reliable per-reference label;
             # dimensional rows share the node label and use the equity logic above.
+            # GH #1655: the selected cell keeps its own source key, unit, accuracy
+            # and sign, so its currency is not looked up under the duration key.
             item_preferred_label = None if item.get('is_dimension') else item.get('preferred_label')
+            selected = None
             if value == "" and period.end_date and is_period_boundary_label_role(item_preferred_label):
-                if (is_period_start_label_role(item_preferred_label)
-                        and getattr(period, 'start_date', None)):
-                    from datetime import datetime, timedelta
-                    try:
-                        start_dt = datetime.strptime(period.start_date, '%Y-%m-%d')
-                        beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
-                        value = item['values'].get(f"instant_{beginning_date}", "")
-                        if value == "":
-                            value = item['values'].get(f"instant_{period.start_date}", "")
-                    except (ValueError, AttributeError):
-                        pass
-                if value == "" and is_period_end_label_role(item_preferred_label):
-                    value = item['values'].get(f"instant_{period.end_date}", "")
+                value, source_key = _select_period_boundary_cell(
+                    item['values'], period_key, period, item_preferred_label)
+                if source_key is not None:
+                    selected = _selected_cell(item, source_key, value)
+                    row.metadata.setdefault('selected_cells', {})[period_key] = selected
+                    selected = _selected_balance_formatter_fields(
+                        item, selected, xbrl_instance, is_monetary_statement)
 
             # Get comparison info for this item and period if available
             comparison_info = None
@@ -2086,7 +2202,7 @@ def render_statement(
 
             # Pre-resolve currency to avoid capturing xbrl_instance in the closure
             cell_currency_symbol = None
-            if is_monetary_statement and period_key and xbrl_instance:
+            if selected is None and is_monetary_statement and period_key and xbrl_instance:
                 from edgar.xbrl.core import get_currency_symbol
                 element_name = current_item.get('name') or current_item.get('concept', '')
                 if element_name:
@@ -2097,7 +2213,7 @@ def render_statement(
             format_func = CellFormatter(
                 current_item, current_period_key,
                 is_monetary_statement, dominant_scale, shares_scale,
-                comparison_info, cell_currency_symbol
+                comparison_info, cell_currency_symbol, selected
             )
 
             # Create a cell and add it to the row
