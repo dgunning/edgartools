@@ -1457,11 +1457,11 @@ _NOT_AN_INDUSTRY_RE = re.compile(
     r'(?<!multi-sector )holdings?|'
     r'holdco|bidco|topco|midco|finco|opco|acquisition|acquisitions|buyer|purchaser|parent|'
     r'intermediate|intermediateco|group|partners|aggregator|borrower|'
-    r'sas|sarl|s\.a\.r\.l|ag|nv|n\.v|oy|pty|pte|spa|s\.p\.a|se|kg|bv|aps|a/s|ab|'
+    r'sas|sarl|s\.a\.r\.l|ag|nv|n\.v|oy|pty|pte|spa|s\.p\.a|se|kg|bv|aps|a/s|ab|scsp|scs|sca|sicav|'
     r'super|incremental|last out|first out|second out|portfolio|assets?|liabilities|'
     r'funds?|obligations|member|sofr|libor|euribor|prime|one|two|three|ii|iii|iv|'
     r'north|south|east|west|usd|eur|gbp|cad|aud|government|protective|advance|subordinate|'
-    r'receives|pays|corporate debt|company|related party|junior)\b',
+    r'receives|pays|corporate debt|company|related party|junior|middle)\b',
     re.IGNORECASE,
 )
 
@@ -1644,7 +1644,9 @@ def _industry_before_company(
             or _industry_key(span) in strong
             or _INDUSTRY_STOP_WORDS.match(rest) is not None
         )
-        if trusted:
+        # A taxonomy member can be the company itself ("Nordic Ferry
+        # Infrastructure AS" is an ARCC member); a grouping is never the company.
+        if trusted and not (company_name and issuer_key(span) == issuer_key(company_name)):
             return span
     if company_name and company_name not in (identifier, remainder):
         position = remainder.find(company_name)
