@@ -3618,9 +3618,36 @@ class XBRL:
             view=view
         )
 
+    def _element_catalog_entry(self, element_id: Optional[str]):
+        """Catalog entry for a concept id. The id itself is not rewritten.
+
+        Try the exact key first. A qualified id (``prefix:Local_Name``) then
+        tries the parser's namespace-separator spelling (``prefix_Local_Name``):
+        only the first colon changes, the same boundary as
+        ``BaseParser._normalize_element_id`` and ``facts._concept_spellings``.
+        An exact entry is never replaced by that fallback, and a local name
+        is never searched on its own. (GH #1711)
+        """
+        if not element_id:
+            return None
+        element = self.element_catalog.get(element_id)
+        if element is not None or ':' not in element_id:
+            return element
+        prefix, local_name = element_id.split(':', 1)
+        return self.element_catalog.get(f"{prefix}_{local_name}")
+
     def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:
         """
         Convert XBRL data to pandas DataFrames.
+
+        When a fact's concept is in the element catalog, the facts frame
+        includes ``element_name``, ``element_type``, ``element_period_type``,
+        ``element_balance`` and ``element_label`` from that entry. The lookup
+        tries ``fact.element_id`` as stored, then the same id with only its
+        namespace separator changed from ``:`` to ``_``. Fact identifiers,
+        contexts, values and signs stay as filed. A field the catalog does
+        not have stays missing, and balance is not applied to the amount.
+
         Args:
             statement_role: Optional role URI to convert only a specific statement
             standard: Whether to use standardized concept labels (default: True)
@@ -3690,10 +3717,9 @@ class XBRL:
                         dim_key = f"dim_{dim_name.replace(':', '_')}"
                         fact_dict[dim_key] = dim_value
 
-            # Try to get element information
-            element_id = fact.element_id
-            if element_id in self.element_catalog:
-                element = self.element_catalog[element_id]
+            # GH #1711: catalog keys use prefix_LocalName; facts keep prefix:LocalName.
+            element = self._element_catalog_entry(fact.element_id)
+            if element is not None:
                 fact_dict['element_name'] = element.name
                 fact_dict['element_type'] = element.data_type
                 fact_dict['element_period_type'] = element.period_type
