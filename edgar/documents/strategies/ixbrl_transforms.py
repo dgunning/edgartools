@@ -646,7 +646,11 @@ def _country_name_en(value: str) -> str:
 # expects in dei:SecurityExchangeName (the dei edgarExchangeCodeItemType
 # enumeration; the 21 names of SEC's ixt-sec:exchnameen registry are all here).
 # Matching is on the folded key, after the leading article and the corporate
-# suffix are dropped.
+# suffix are dropped. Every value must be a member of that enumeration, which
+# matches exactly, case included: NYSE Texas is NYSETX (dei 2026), and NYSE
+# Chicago, the former Chicago Stock Exchange, is CHX. The Long-Term Stock
+# Exchange and MEMX have no dei code, so their names are rejected rather than
+# given an invented one.
 _EXCHANGE_CODES = {
     'new york stock exchange': 'NYSE',
     'nyse': 'NYSE',
@@ -654,7 +658,7 @@ _EXCHANGE_CODES = {
     'american stock exchange': 'NYSEAMER',
     'nyse arca': 'NYSEArca',
     'nyse national': 'NYSENAT',
-    'nyse texas': 'NYSETXSE',
+    'nyse texas': 'NYSETX',
     'nasdaq': 'NASDAQ',
     'nasdaq stock market': 'NASDAQ',
     'nasdaq global select market': 'NASDAQ',
@@ -680,13 +684,10 @@ _EXCHANGE_CODES = {
     'chicago stock exchange': 'CHX',
     'investors exchange': 'IEX',
     'iex': 'IEX',
-    'long term stock exchange': 'LTSE',
-    'members exchange': 'MEMX',
-    'memx': 'MEMX',
     'miax pearl': 'PEARL',
     'miami international securities exchange': 'MIAX',
     'box exchange': 'BOX',
-    'nyse chicago': 'NYSECHX',
+    'nyse chicago': 'CHX',
     'bse': 'BX',
 }
 
