@@ -10,6 +10,7 @@
       "AllowanceForDoubtfulAccounts",
       "CashAndMarketableSecurities",
       "ContractAssets",
+      "CryptoAssetsCurrent",
       "DeferredTaxCurrentAssets",
       "IncomeTaxReceivable",
       "Inventories",
@@ -58,6 +59,7 @@
       "AccumulatedAmortizationIntangibles",
       "AccumulatedDepreciation",
       "AssetsHeldForSale",
+      "CryptoAssetsNoncurrent",
       "DeferredPolicyAcquisitionCosts",
       "DeferredTaxNoncurrentAssets",
       "DefinedBenefitPlanAssets",
@@ -236,6 +238,8 @@
     "Investing Activities": [
       "AcquisitionsNet",
       "CapitalExpenses",
+      "CryptoPurchases",
+      "CryptoSaleProceeds",
       "DivestitureProceeds",
       "InvestmentProceeds",
       "InvestmentPurchases",
@@ -244,6 +248,7 @@
       "PurchaseOfIntangibleAssets"
     ],
     "Operating Activities": [
+      "CryptoConversionProceeds",
       "DeferredIncomeTaxCF",
       "DepreciationAmortizationCF",
       "GainLossOnAssetSalesCF",

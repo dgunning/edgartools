@@ -107,6 +107,26 @@ patterns:
       # Note: calling extension_arcs() does NOT change render() output.
       # It's an opt-in additive view on top of the existing statement.
 
+  - name: Standard Concept of a Tag (e.g. Crypto Assets)
+    when: Find which standard concept a filed element maps to, or find crypto rows across filers
+    code: |
+      from edgar.xbrl.standardization.reverse_index import get_reverse_index
+
+      result = get_reverse_index().lookup("us-gaap:CryptoAssetFairValueNoncurrent")
+      result.primary_concept       # 'CryptoAssetsNoncurrent'
+      result.primary_display_name  # 'Crypto Assets, Noncurrent'
+      result.comment               # definition; excludes crypto held for platform users
+
+      # Rows of a statement by standard concept
+      df = xbrl.statements.balance_sheet().render(standard=True).to_dataframe()
+      crypto = df[df["standard_concept"].isin(["CryptoAssets", "CryptoAssetsCurrent", "CryptoAssetsNoncurrent"])]
+
+      # Crypto concepts (ASU 2023-08), one us-gaap element each:
+      # CryptoAssets, CryptoAssetsCurrent, CryptoAssetsNoncurrent (balance sheet; three
+      # different measures, never add them), CryptoUnrealizedGainLoss, CryptoGainLoss
+      # (income), CryptoPurchases, CryptoSaleProceeds (investing), CryptoConversionProceeds
+      # (operating)
+
 when_to_use:
   appropriate:
     - Segment/dimensional breakdowns

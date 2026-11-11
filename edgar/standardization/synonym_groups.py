@@ -509,6 +509,34 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             description='Deferred tax assets',
             category='balance_sheet'
         ),
+        # Crypto assets at fair value (ASU 2023-08, GH #1447). Three singleton
+        # groups: the total, current and noncurrent balances are different
+        # measures and must never be read as synonyms of each other. Each
+        # excludes crypto assets held for platform users.
+        SynonymGroup(
+            name='crypto_assets',
+            synonyms=[
+                'CryptoAssetFairValue',
+            ],
+            description='Crypto assets at fair value, excluding those held for platform users',
+            category='balance_sheet'
+        ),
+        SynonymGroup(
+            name='crypto_assets_current',
+            synonyms=[
+                'CryptoAssetFairValueCurrent',
+            ],
+            description='Crypto assets at fair value, current, excluding those held for platform users',
+            category='balance_sheet'
+        ),
+        SynonymGroup(
+            name='crypto_assets_noncurrent',
+            synonyms=[
+                'CryptoAssetFairValueNoncurrent',
+            ],
+            description='Crypto assets at fair value, noncurrent, excluding those held for platform users',
+            category='balance_sheet'
+        ),
         SynonymGroup(
             name='total_assets',
             synonyms=[

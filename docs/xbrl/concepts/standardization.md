@@ -230,6 +230,20 @@ The number of standardized concepts varies by provider:
 | `ForecastedIntangibleAmortizationYear5` | Forecasted Amortization, Year 5 | 1 | `FiniteLivedIntangibleAssetsAmortizationExpenseYearFive` |
 | `ForecastedIntangibleAmortizationAfterYear5` | Forecasted Amortization, Thereafter | 2 | `FiniteLivedIntangibleAssetsAmortizationExpenseAfterYearFive`, `FiniteLivedIntangibleAssetsAmortizationExpenseRollingAfterYearFive` |
 
+
+### Crypto Assets (ASU 2023-08)
+
+| Standard Concept | Display Name | XBRL Tags | Examples |
+|------------------|--------------|-----------|----------|
+| `CryptoAssets` | Crypto Assets | 1 | `CryptoAssetFairValue` |
+| `CryptoAssetsCurrent` | Crypto Assets, Current | 1 | `CryptoAssetFairValueCurrent` |
+| `CryptoAssetsNoncurrent` | Crypto Assets, Noncurrent | 1 | `CryptoAssetFairValueNoncurrent` |
+| `CryptoUnrealizedGainLoss` | Crypto Assets, Unrealized Gain (Loss) | 1 | `CryptoAssetUnrealizedGainLossOperatingAndNonoperating` |
+| `CryptoGainLoss` | Crypto Assets, Realized and Unrealized Gain (Loss) | 1 | `CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating` |
+| `CryptoPurchases` | Payments to Acquire Crypto Assets | 1 | `PaymentForAcquisitionCryptoAsset` |
+| `CryptoSaleProceeds` | Proceeds from Disposal of Crypto Assets | 1 | `ProceedsFromDisposalCryptoAsset` |
+| `CryptoConversionProceeds` | Proceeds from Conversion of Crypto Consideration | 1 | `ProceedsFromCryptoAssetOperatingActivity` |
+
 ---
 
 ## Concept Details
@@ -288,6 +302,30 @@ The taxonomy distinguishes between:
 - **Ongoing Provisions**: `OngoingOperatingProvisions(WarrantiesEtc)` - recurring obligations
 - **Definite-Lived Provisions**: `DefiniteLivedOperatingProvisions(DecommissioningEtc)` - asset retirement
 - **Restructuring**: `RestructuringProvisions` - one-time reorganization costs
+
+### Crypto Assets
+
+Each crypto concept maps exactly one us-gaap element, and every one of them excludes
+crypto assets held for platform users, as the FASB definitions do. The mapping's
+definition is in `lookup(...).comment`:
+
+```python
+from edgar.xbrl.standardization.reverse_index import get_reverse_index
+
+result = get_reverse_index().lookup("us-gaap:CryptoAssetFairValueNoncurrent")
+result.primary_concept       # 'CryptoAssetsNoncurrent'
+result.primary_display_name  # 'Crypto Assets, Noncurrent'
+result.comment               # '... Excludes crypto assets held for platform users.'
+```
+
+- `CryptoAssets`, `CryptoAssetsCurrent` and `CryptoAssetsNoncurrent` are three measures.
+  A filer can report the total and the noncurrent balance at the same amount (Tesla, FY2025:
+  $1,008M each); do not add them together or treat one as the other.
+- `CryptoUnrealizedGainLoss` excludes realized gains; `CryptoGainLoss` includes them.
+  Both combine the operating and nonoperating amounts, so neither has a section.
+- `CryptoConversionProceeds` is operating cash from crypto received as noncash
+  consideration in the ordinary course and converted to cash nearly immediately, not
+  every crypto sale; a later sale is `CryptoSaleProceeds`.
 
 ---
 

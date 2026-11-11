@@ -167,6 +167,8 @@ The package includes 59 pre-built synonym groups organized by category:
 - `accounts_receivable`, `inventory`, `prepaid_expenses`
 - `total_current_assets`, `total_assets`
 - `property_plant_equipment`, `goodwill`, `intangible_assets`
+- `crypto_assets`, `crypto_assets_current`, `crypto_assets_noncurrent` (one element each;
+  three different measures, never synonyms of each other)
 - `accounts_payable`, `accrued_liabilities`, `short_term_debt`
 - `total_current_liabilities`, `long_term_debt`, `total_liabilities`
 - `common_stock`, `retained_earnings`, `total_equity`

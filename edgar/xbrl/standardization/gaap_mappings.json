@@ -7893,6 +7893,66 @@
     "first_year": 2023,
     "last_year": 2024
   },
+  "CryptoAssetFairValue": {
+    "standard_tags": [
+      "CryptoAssets"
+    ],
+    "display_name": "Crypto Assets",
+    "statement": "BalanceSheet",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 122,
+    "comment": "Fair value of crypto assets (ASC 350-60) with no current or noncurrent classification; when a filer reports both, this is their total. Excludes crypto assets held for platform users."
+  },
+  "CryptoAssetFairValueCurrent": {
+    "standard_tags": [
+      "CryptoAssetsCurrent"
+    ],
+    "display_name": "Crypto Assets, Current",
+    "statement": "BalanceSheet",
+    "section": "Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 53,
+    "comment": "Fair value of crypto assets (ASC 350-60) classified as current. Excludes crypto assets held for platform users."
+  },
+  "CryptoAssetFairValueNoncurrent": {
+    "standard_tags": [
+      "CryptoAssetsNoncurrent"
+    ],
+    "display_name": "Crypto Assets, Noncurrent",
+    "statement": "BalanceSheet",
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 54,
+    "comment": "Fair value of crypto assets (ASC 350-60) classified as noncurrent. Excludes crypto assets held for platform users."
+  },
+  "CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating": {
+    "standard_tags": [
+      "CryptoGainLoss"
+    ],
+    "display_name": "Crypto Assets, Realized and Unrealized Gain (Loss)",
+    "statement": "IncomeStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 7,
+    "comment": "Realized and unrealized gain (loss) from remeasuring crypto assets, operating and nonoperating combined. Excludes crypto assets held for platform users."
+  },
+  "CryptoAssetUnrealizedGainLossOperatingAndNonoperating": {
+    "standard_tags": [
+      "CryptoUnrealizedGainLoss"
+    ],
+    "display_name": "Crypto Assets, Unrealized Gain (Loss)",
+    "statement": "IncomeStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 5,
+    "comment": "Unrealized gain (loss) from remeasuring crypto assets to fair value, operating and nonoperating combined; realized gains are not included. Excludes crypto assets held for platform users."
+  },
   "CurrentAssets": {
     "standard_tags": [
       "CurrentAssetsTotal"
@@ -31110,6 +31170,18 @@
     "first_year": 2021,
     "last_year": 2025
   },
+  "PaymentForAcquisitionCryptoAsset": {
+    "standard_tags": [
+      "CryptoPurchases"
+    ],
+    "display_name": "Payments to Acquire Crypto Assets",
+    "statement": "CashFlowStatement",
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 28,
+    "comment": "Cash paid to acquire crypto assets. Excludes crypto assets held for platform users."
+  },
   "PaymentOfFinancingAndStockIssuanceCosts": {
     "standard_tags": [
       "PaymentsOfDebtIssuanceCosts"
@@ -33054,6 +33126,18 @@
     "first_year": 2015,
     "last_year": 2025
   },
+  "ProceedsFromCryptoAssetOperatingActivity": {
+    "standard_tags": [
+      "CryptoConversionProceeds"
+    ],
+    "display_name": "Proceeds from Conversion of Crypto Consideration",
+    "statement": "CashFlowStatement",
+    "section": "Operating Activities",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 1,
+    "comment": "Cash from the nearly immediate conversion of crypto assets received as noncash consideration in the ordinary course of business (ASC 230-10-45-27A). Excludes crypto assets held for platform users."
+  },
   "ProceedsFromDebtNetOfIssuanceCosts": {
     "standard_tags": [
       "DebtProceeds"
@@ -33069,6 +33153,18 @@
     "years_present": 6,
     "first_year": 2020,
     "last_year": 2025
+  },
+  "ProceedsFromDisposalCryptoAsset": {
+    "standard_tags": [
+      "CryptoSaleProceeds"
+    ],
+    "display_name": "Proceeds from Disposal of Crypto Assets",
+    "statement": "CashFlowStatement",
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 15,
+    "comment": "Cash received from disposing of crypto assets. Excludes crypto assets held for platform users."
   },
   "ProceedsFromDivestitureOfBusinesses": {
     "standard_tags": [
