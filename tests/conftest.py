@@ -239,6 +239,36 @@ def cache_sec_submissions_for_session():
                   f"{stats['downloads']} live downloads, {saved} saved")
 
 
+@pytest.fixture(autouse=True)
+def cassette_tests_read_their_own_company_facts(request):
+    """Keep a ``@pytest.mark.vcr`` test's company facts on its cassette.
+
+    ``get_company_facts`` keeps the last company's EntityFacts in a module-level
+    cache (edgar/entity/entity_facts.py) that outlives a test and does not go
+    through vcr. A cassette test that ran after a live test of the same company
+    in the same xdist worker was handed that test's live facts instead of its
+    recording. That made main red: tests/entity/test_bug_408_annual_periods.py
+    fetches GOOGL's company facts live, and test_issue_910_ttm_eps then saw
+    GOOGL's Q3 2026 10-Q, which its 2026-10-24 cassette predates. The cache is
+    emptied before a cassette test, and again after it so recorded facts do not
+    leak into the next test either.
+
+    The session submissions memo above has the same shape but is left alone:
+    some cassettes were recorded while it served submissions, so they hold none
+    and would fail if a cassette test had to fetch them.
+    """
+    if request.node.get_closest_marker("vcr") is None:
+        yield
+        return
+    from edgar.entity.entity_facts import clear_company_facts_cache
+
+    clear_company_facts_cache()
+    try:
+        yield
+    finally:
+        clear_company_facts_cache()
+
+
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_call(item):
     """Skip network tests gracefully when SEC returns transient empty responses."""
