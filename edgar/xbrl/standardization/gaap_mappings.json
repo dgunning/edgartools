@@ -18996,6 +18996,18 @@
     "first_year": 2021,
     "last_year": 2024
   },
+  "GrossInvestmentIncomeOperating": {
+    "standard_tags": [
+      "Revenue"
+    ],
+    "display_name": "Revenue",
+    "statement": "IncomeStatement",
+    "section": "Revenue",
+    "is_total": true,
+    "confidence": 0.9,
+    "company_count": 203,
+    "comment": "Total investment income of an investment company (BDC, closed-end fund): interest, dividends and fees earned on the portfolio, before expenses; its statement of operations' top line. An insurer can file it for gross investment income, which then sits inside Revenues and NetInvestmentIncome."
+  },
   "GrossProfit": {
     "standard_tags": [
       "GrossProfit"
@@ -23176,19 +23188,15 @@
   },
   "InvestmentIncomeInvestmentExpense": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "InvestmentExpenses"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Investment Expenses",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": null,
     "is_total": true,
-    "confidence": 0.312,
-    "company_count": 182,
-    "occurrence_rate": 0.02,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
+    "confidence": 0.9,
+    "company_count": 250,
+    "comment": "Expenses of earning investment income. For a BDC, its total expenses (management and incentive fees, interest, administration) deducted from total investment income; for an insurer, the investment expenses netted inside net investment income. Never nonoperating."
   },
   "InvestmentIncomeNet": {
     "standard_tags": [
@@ -26732,19 +26740,15 @@
   },
   "NetInvestmentIncome": {
     "standard_tags": [
-      "Revenue"
+      "NetInvestmentIncome"
     ],
-    "display_name": "Revenue",
+    "display_name": "Net Investment Income",
     "statement": "IncomeStatement",
-    "section": "Revenue",
+    "section": null,
     "is_total": true,
-    "confidence": 0.321,
-    "company_count": 308,
-    "occurrence_rate": 0.034,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
+    "confidence": 0.9,
+    "company_count": 300,
+    "comment": "Investment income less investment expenses. For a BDC, the result before gains and losses on investments, not its revenue (that is GrossInvestmentIncomeOperating); for an insurer, one line inside Revenues."
   },
   "NetPeriodicDefinedBenefitsExpenseReversalOfExpenseExcludingServiceCostComponent": {
     "standard_tags": [

@@ -66,6 +66,8 @@
   "GoodwillWriteoffs": "Goodwill Impairment",
   "OperatingIncomeLoss": "Operating Income",
   "NonoperatingIncomeExpense": "Non-Operating Income (Expense)",
+  "InvestmentExpenses": "Investment Expenses",
+  "NetInvestmentIncome": "Net Investment Income",
   "CryptoUnrealizedGainLoss": "Crypto Assets, Unrealized Gain (Loss)",
   "CryptoGainLoss": "Crypto Assets, Realized and Unrealized Gain (Loss)",
   "InterestExpense": "Interest Expense",
