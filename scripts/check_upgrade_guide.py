@@ -2,15 +2,15 @@
 """Fail a pull request that stages a 6.0 change without telling the upgrade guide.
 
 Every user-visible 6.0 break ships in two halves: a warning in 5.x, then the
-break itself. The warning half is only useful if ``docs/upgrade/6.0.md`` says
-what to do about it, because that page is where a user porting to 6.0 (or
+break itself. The warning half is only useful if the current upgrade guide
+(``GUIDE`` below) says what to do about it, because that page is where a user porting to 6.0 (or
 their AI assistant) looks. A CHANGELOG entry gets written by habit; an
 upgrade-guide entry does not, and nothing caught the difference: PRs #1200 and
 #1201 shipped the edgar.files deprecations in 5.55.0 with no guide entry, and
 the entries had to be reconstructed after release (bead edgartools-07lk.14).
 
 THE RULE: a pull request whose added lines stage a 6.0 change must also touch
-``docs/upgrade/6.0.md``. Staging means any of
+the current upgrade guide (``GUIDE`` below, ``docs/upgrade/6.1.md``). Staging means any of
 
 - a call that warns about the future: ``warn_will_raise(...)``, or any function
   whose name says ``deprecat`` (``deprecated_alias``, ``_deprecation_warning``)
@@ -56,7 +56,9 @@ from collections import Counter
 from dataclasses import dataclass
 from typing import Iterable, Iterator
 
-GUIDE = "docs/upgrade/6.0.md"
+# The current upgrade guide. Bump it each minor release, together with the
+# GUIDE constant in tests/meta/test_upgrade_guide_gate.py.
+GUIDE = "docs/upgrade/6.1.md"
 SKIP_LABEL = "no-upgrade-guide"
 
 # Module-local helpers that exist only to emit a deprecation warning, whose

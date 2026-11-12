@@ -176,7 +176,7 @@ jobs:
         fi
 
     # A pull request that stages a 6.0 change (a deprecation, a will-raise
-    # warning, "removed in 6.0") has to touch docs/upgrade/6.0.md in the same PR.
+    # warning, "removed in 6.0") has to touch the current upgrade guide (docs/upgrade/6.1.md) in the same PR.
     # #1200/#1201 shipped 5.55.0 deprecations with no guide entry, and nothing
     # mechanical noticed (bead edgartools-07lk.14). Pull requests only: the check
     # reads the PR's diff, and main has no PR to read. Labels are read live

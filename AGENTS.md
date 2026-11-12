@@ -38,7 +38,7 @@ hatch run check-regression-provenance     # CI runs this before tests
 - The `Filing.text()`, `Filing.html()` and `Attachment.empty` contracts are frozen. Fix text extraction in `FilingSGML` or `edgar/documents`, never by rerouting `Filing.*`.
 - Test cassettes are recorded from live SEC, against `main`, and never edited afterwards (CONTRIBUTING.md, "Test Cassettes").
 - Never edit `CHANGELOG.md`. Add a fragment instead: `changelog.d/<issue>.<section>.md` (see `changelog.d/README.md`).
-- A deprecation or breaking change needs an entry in `docs/upgrade/6.0.md`. CI fails the PR without one.
+- A deprecation or breaking change needs an entry in the current upgrade guide, `docs/upgrade/6.1.md`. CI fails the PR without one.
 
 ## Definition of done
 
