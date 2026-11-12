@@ -81,6 +81,26 @@ def test_the_json_value_keeps_working_under_its_new_name():
         assert filing.acceptance_datetime == reported
 
 
+def test_to_pandas_keeps_the_sec_column_name_and_the_reported_value():
+    # Maintainer decision 2026-11-11: the to_pandas() column keeps SEC's field name
+    # (renaming a column cannot warn first), documented as the reported JSON value.
+    from edgar.entity.data import create_company_filings
+
+    row = dict(accessionNumber="0000320193-26-000020", filingDate="2026-07-31", reportDate="2026-06-27",
+               acceptanceDateTime="2026-07-31T14:01:02.000Z", act="34", form="10-Q", fileNumber="001-36743",
+               items="", size=1, isXBRL=1, isInlineXBRL=1, primaryDocument="aapl-20260627.htm",
+               primaryDocDescription="10-Q")
+    filings = create_company_filings({"recent": {k: [v] for k, v in row.items()}, "files": []},
+                                     320193, "Apple Inc.")
+    df = filings.to_pandas()
+    reported = datetime(2026, 7, 31, 14, 1, 2, tzinfo=timezone.utc)
+
+    assert "acceptanceDateTime" in df.columns
+    assert "reported_acceptance_datetime" not in df.columns
+    assert df["acceptanceDateTime"].iloc[0] == reported
+    assert filings[0].reported_acceptance_datetime == reported
+
+
 def test_a_header_without_an_acceptance_time_raises():
     filing = Filing(**APPLE_10Q)
     filing.__dict__["index_headers"] = SimpleNamespace(acceptance_datetime=None)
