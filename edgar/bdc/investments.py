@@ -17,7 +17,9 @@ from rich import box
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar.bdc.industry import INDUSTRY_SOURCES, clean_industry_label, issuer_key, normalize_sector
+from edgar.bdc.industry import (
+    INDUSTRY_SOURCES, clean_industry_label, is_multi_member_industry, issuer_key, normalize_sector,
+)
 from edgar.exceptions import ValidationError
 from edgar.richtools import repr_rich
 
@@ -1876,7 +1878,8 @@ def _fill_industries(investments: dict, member_candidates: tuple[str, ...] = ())
     by_company: dict[str, str] = {}
     for fields in investments.values():
         key = issuer_key(fields.get('company_name'))
-        if key and fields.get('industry') and key not in by_company:
+        if (key and fields.get('industry') and key not in by_company
+                and not is_multi_member_industry(fields['industry'], fields.get('industry_source'))):
             by_company[key] = fields['industry']
     for fields in investments.values():
         if fields.get('industry'):
@@ -1995,7 +1998,12 @@ class PortfolioInvestment:
 
     @property
     def sector(self) -> Optional[str]:
-        """The normalized sector for ``industry`` ('Software Sector' -> 'Software'), or None."""
+        """The normalized sector for ``industry`` ('Software Sector' -> 'Software'), or None.
+
+        None for a holding classified under several enumeration members.
+        """
+        if is_multi_member_industry(self.industry, self.industry_source):
+            return None
         return normalize_sector(self.industry)
 
     @property
