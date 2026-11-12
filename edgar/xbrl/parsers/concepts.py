@@ -160,16 +160,30 @@ _STANDARD_PREFIXES = ('us-gaap', 'srt')
 
 
 @lru_cache(maxsize=1)
-def _standard_balances() -> Dict[str, str]:
-    """``prefix:name`` -> 'debit'/'credit' for every bundled element that has a balance."""
+def _standard_elements():
+    """The bundled us-gaap and srt declarations: prefix, name, balance, abstract."""
     import pandas as pd
 
     ref = resources.files('edgar.xbrl.data').joinpath(TAXONOMY_ELEMENTS_FILE)
     with resources.as_file(ref) as path:
-        df = pd.read_parquet(path, columns=['prefix', 'name', 'balance'])
+        return pd.read_parquet(path, columns=['prefix', 'name', 'balance', 'abstract'])
+
+
+@lru_cache(maxsize=1)
+def _standard_balances() -> Dict[str, str]:
+    """``prefix:name`` -> 'debit'/'credit' for every bundled element that has a balance."""
+    df = _standard_elements()
     df = df[df['balance'].notna()]
     return {f"{prefix}:{name}": balance
             for prefix, name, balance in zip(df['prefix'].astype(str), df['name'], df['balance'].astype(str), strict=True)}
+
+
+@lru_cache(maxsize=1)
+def _standard_abstracts() -> Dict[str, bool]:
+    """``prefix:name`` -> the declared abstract flag for every bundled element."""
+    df = _standard_elements()
+    return {f"{prefix}:{name}": bool(abstract)
+            for prefix, name, abstract in zip(df['prefix'].astype(str), df['name'], df['abstract'], strict=True)}
 
 
 def _standard_key(concept: str) -> str:
@@ -211,6 +225,28 @@ def get_balance_type(concept: str) -> Optional[str]:
     if not concept:
         return None
     return _standard_balances().get(_standard_key(concept))
+
+
+def get_standard_abstract(concept: str) -> Optional[bool]:
+    """
+    Whether the standard taxonomy declares a concept abstract.
+
+    Reads the bundled us-gaap and srt element declarations and accepts the colon
+    and underscore spellings. Returns None for a concept the taxonomy does not
+    declare (company extensions, dei), so the caller can tell "not abstract"
+    from "not known".
+
+    Example:
+        >>> get_standard_abstract('us-gaap:AwardTypeAxis')
+        True
+        >>> get_standard_abstract('us-gaap_Revenues')
+        False
+        >>> get_standard_abstract('abc_CustomHeading') is None
+        True
+    """
+    if not concept:
+        return None
+    return _standard_abstracts().get(_standard_key(concept))
 
 
 def resolve_balance(declared: Optional[str], concept: str) -> Optional[str]:

@@ -13,7 +13,10 @@ abstract attribute information, defaulting to abstract=False.
 
 Solution:
 ---------
-This module implements a multi-tier fallback strategy for abstract detection:
+A declaration the filing's schema carries is the answer. For us-gaap and srt
+concepts the bundled FASB element table (edgar/xbrl/data/taxonomy_elements.parquet)
+is the answer (#1730). Only concepts neither source declares (dei, an undeclared
+extension) fall back to:
 1. Trust schema abstract attribute (if available and True)
 2. Check known abstract concepts (explicit list)
 3. Pattern matching on concept name
@@ -24,6 +27,8 @@ See: Issue #450 - Statement of Equity rendering problems
 
 import re
 from typing import List, Set
+
+from edgar.xbrl.parsers.concepts import get_standard_abstract
 
 # Known abstract concepts from US-GAAP taxonomy
 # These are explicitly marked abstract="true" in the US-GAAP taxonomy schemas
@@ -90,6 +95,7 @@ def is_abstract_concept(
        abstract attribute is the answer (XBRL 2.1 section 5.1.1); the guesses
        below are only for concepts from imported taxonomies the filing does
        not contain (us-gaap, dei, srt), whose declaration was never read.
+    0b. A us-gaap or srt concept takes the bundled FASB table's declaration.
     1. Trust schema if it explicitly says abstract=True
     2. Check against known abstract concepts list
     3. Apply pattern matching on concept name
@@ -124,6 +130,11 @@ def is_abstract_concept(
     if declared:
         return bool(schema_abstract)
 
+    # Strategy 0b: the standard taxonomy's declaration, from the bundled table
+    standard = get_standard_abstract(concept_name)
+    if standard is not None:
+        return standard
+
     # Strategy 1: Trust schema if it says True
     if schema_abstract:
         return True
@@ -145,6 +156,25 @@ def is_abstract_concept(
 
     # Strategy 5: Default to schema value (or False if not provided)
     return schema_abstract
+
+
+def element_is_abstract(element_id: str, element=None) -> bool:
+    """
+    Whether a concept is abstract, given its element-catalog entry (or None).
+
+    The one rule the presentation tree and ``XBRL.calculation_linkbase()``
+    share. The catalog leaves ``data_type`` None for an element whose
+    declaration was never read (labels.py), so only a read declaration is
+    authoritative; an element missing from the catalog altogether is looked up
+    by its id.
+    """
+    if element is None:
+        return is_abstract_concept(element_id)
+    return is_abstract_concept(
+        concept_name=element.name,
+        schema_abstract=element.abstract,
+        declared=element.data_type is not None,
+    )
 
 
 def add_known_abstract_concept(concept_name: str) -> None:

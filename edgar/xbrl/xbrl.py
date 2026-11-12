@@ -41,6 +41,7 @@ from edgar.xbrl.core import (
     unit_currency_measure,
 )
 from edgar.xbrl.models import NIL_MEMBER_LABEL, Axis, Domain, PresentationNode, is_negated_label_role
+from edgar.xbrl.abstract_detection import element_is_abstract
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.parsers.concepts import resolve_balance
 from edgar.xbrl.periods import get_period_views
@@ -978,7 +979,7 @@ class XBRL:
                 parent_tax, parent_local = split_element_id(arc.parent_id)
 
                 elem = self.element_catalog.get(element_id)
-                is_abstract = bool(elem.abstract) if elem else False
+                is_abstract = element_is_abstract(element_id, elem)
                 if is_abstract and not include_abstract:
                     continue
 
