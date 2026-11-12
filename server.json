@@ -7,18 +7,18 @@
     "url": "https://github.com/dgunning/edgartools",
     "source": "github"
   },
-  "version": "6.0.0",
+  "version": "6.1.0",
   "packages": [
     {
       "registryType": "pypi",
       "identifier": "edgartools",
-      "version": "6.0.0",
+      "version": "6.1.0",
       "runtimeHint": "uvx",
       "runtimeArguments": [
         {
           "type": "named",
           "name": "--with",
-          "value": "edgartools[ai]==6.0.0",
+          "value": "edgartools[ai]==6.1.0",
           "description": "Install the [ai] extra, which carries the MCP SDK"
         }
       ],
