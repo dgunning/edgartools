@@ -1,0 +1,246 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:country="http://xbrl.sec.gov/country/2026" xmlns:dei="http://xbrl.sec.gov/dei/2026" xmlns:ecd="http://xbrl.sec.gov/ecd/2026" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:msft="http://www.microsoft.com/20260930" xmlns:srt="http://fasb.org/srt/2026" xmlns:us-gaap="http://fasb.org/us-gaap/2026" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <link:schemaRef xlink:href="msft-20260930.xsd" xlink:type="simple"/>
+    <context id="C_a83a3d34-6061-4e74-9cae-2c40a21cf000">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="C_d978ff47-69e4-4cf8-86cc-6d2d42292a83">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2026-07-01</startDate>
+            <endDate>2026-09-30</endDate>
+        </period>
+    </context>
+    <context id="C_e5e6712e-ff28-4719-9feb-03f9a9fe992f">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-07-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="C_0f0d5699-2e38-4bac-ba00-b449c90646b4">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+        </entity>
+        <period>
+            <instant>2026-10-22</instant>
+        </period>
+    </context>
+    <context id="C_10d1f015-3e04-4689-af72-3d5162e04743">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+        </entity>
+        <period>
+            <instant>2026-09-30</instant>
+        </period>
+    </context>
+    <context id="C_2409c36a-e463-4aeb-8855-a4323992f937">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">msft:NotesTwoPointSixTwoFivePercentDueMayTwoTwentyThirtyThreeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2026-07-01</startDate>
+            <endDate>2026-09-30</endDate>
+        </period>
+    </context>
+    <context id="C_27a0560a-48ad-440b-8be9-fc5c151fec9e">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">msft:NotesThreePointOneTwoFivePercentDueDecemberSixTwentyTwentyEightMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2026-07-01</startDate>
+            <endDate>2026-09-30</endDate>
+        </period>
+    </context>
+    <context id="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+        </entity>
+        <period>
+            <startDate>2025-07-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+        </entity>
+        <period>
+            <startDate>2026-07-01</startDate>
+            <endDate>2026-09-30</endDate>
+        </period>
+    </context>
+    <context id="C_5159e4fe-d4d3-41e8-9878-0d0a9cee09e1">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2026-07-01</startDate>
+            <endDate>2026-09-30</endDate>
+        </period>
+    </context>
+    <context id="C_7105b026-8126-4b3d-afda-d8e7d8c4694a">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+        </entity>
+        <period>
+            <instant>2025-09-30</instant>
+        </period>
+    </context>
+    <context id="C_72599e7d-7c83-4892-a141-c19f71db785b">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000789019</identifier>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+    <unit id="U_shares">
+        <measure>shares</measure>
+    </unit>
+    <unit id="U_UnitedStatesOfAmericaDollarsShare">
+        <divide>
+            <unitNumerator>
+                <measure>iso4217:USD</measure>
+            </unitNumerator>
+            <unitDenominator>
+                <measure>shares</measure>
+            </unitDenominator>
+        </divide>
+    </unit>
+    <unit id="U_USD">
+        <measure>iso4217:USD</measure>
+    </unit>
+    <dei:EntityCentralIndexKey contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_e2f9c85b-8e80-4023-8276-904f87bf1792">0000789019</dei:EntityCentralIndexKey>
+    <dei:DocumentFiscalPeriodFocus contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_ca2ad767-bbe1-424a-9e37-9be81d63f2c7">Q1</dei:DocumentFiscalPeriodFocus>
+    <dei:CurrentFiscalYearEndDate contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_61c69878-525d-4dc0-ba69-a2777341935c">--06-30</dei:CurrentFiscalYearEndDate>
+    <dei:AmendmentFlag contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_acbd21e6-dd03-4e41-b5d7-f391e5c84147">false</dei:AmendmentFlag>
+    <dei:DocumentFiscalYearFocus contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_12926c8a-2ac5-425a-9d92-eba31b096435">2027</dei:DocumentFiscalYearFocus>
+    <dei:DocumentType contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_a55f3941-2c47-45f7-adcf-d3c8381d340a">10-Q</dei:DocumentType>
+    <dei:DocumentQuarterlyReport contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_cc27bb51-b831-4ef7-b3ca-e148fd2f912c">true</dei:DocumentQuarterlyReport>
+    <dei:DocumentPeriodEndDate contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_57a7e867-a3d9-401a-b3fa-9688f4bb7be5">2026-09-30</dei:DocumentPeriodEndDate>
+    <dei:DocumentTransitionReport contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_69bcadb2-02c7-437e-8519-000ca4736708">false</dei:DocumentTransitionReport>
+    <dei:EntityFileNumber contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_0bae63ea-c99f-40ba-ae8b-98928a1fe27f">001-37845</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_c61c2aa8-3c71-4162-bb3d-620b9a98f451">MICROSOFT CORPORATION</dei:EntityRegistrantName>
+    <dei:EntityIncorporationStateCountryCode contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_2945c18d-f5df-46ba-ad79-08f9bc789ce4">WA</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityTaxIdentificationNumber contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_afa94075-f310-4029-8490-5b4faa065a9b">91-1144442</dei:EntityTaxIdentificationNumber>
+    <dei:EntityAddressAddressLine1 contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_9c783724-b20c-4a59-a954-a968a4bda077">ONE MICROSOFT WAY</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_ead59d0b-2b38-4fa7-a0de-d61b34bbf144">REDMOND</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_cad2fe48-9b2e-42e2-89d0-48216d637d57">WA</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_fe26ec2f-2e37-4427-b44d-81fc0cd23d8f">98052-6399</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_7af02887-9fd4-413c-a15b-e582abbf6774">425</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_b738628e-e56c-404c-a49b-e0ee4afeeb86">882-8080</dei:LocalPhoneNumber>
+    <dei:Security12bTitle contextRef="C_d978ff47-69e4-4cf8-86cc-6d2d42292a83" id="F_882dd76d-d1e4-42db-9e5d-b9f58b2c9c68">Common stock, $0.00000625 par value per share</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="C_d978ff47-69e4-4cf8-86cc-6d2d42292a83" id="F_ea99e7b2-de90-4778-8ba7-20cf6e87c33f">MSFT</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="C_d978ff47-69e4-4cf8-86cc-6d2d42292a83" id="F_e3492347-f4ad-4bcb-b5d1-6f1d1824ad0f">NASDAQ</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="C_27a0560a-48ad-440b-8be9-fc5c151fec9e" id="F_bea10fd1-a172-48dd-b016-d6b592993cdf">3.125% Notes due 2028</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="C_27a0560a-48ad-440b-8be9-fc5c151fec9e" id="F_51739397-66a2-4369-bba6-106802f25e03">MSFT</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="C_27a0560a-48ad-440b-8be9-fc5c151fec9e" id="F_19a9bb76-40a1-42d5-b5ef-3b1678c04c62">NASDAQ</dei:SecurityExchangeName>
+    <dei:Security12bTitle contextRef="C_2409c36a-e463-4aeb-8855-a4323992f937" id="F_b3c72c97-7254-4e5c-a80d-004cdf39b21a">2.625% Notes due 2033</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="C_2409c36a-e463-4aeb-8855-a4323992f937" id="F_715edde7-2869-406f-926f-11e819bc5d33">MSFT</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="C_2409c36a-e463-4aeb-8855-a4323992f937" id="F_6bf77d85-c3a3-49e5-86d5-65084837ab59">NASDAQ</dei:SecurityExchangeName>
+    <dei:EntityCurrentReportingStatus contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_8ee6af43-cb4e-41f6-8449-488e7e87cbb2">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityInteractiveDataCurrent contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_d32a8dcf-6f1f-4ece-9f33-a9479e901aaf">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityFilerCategory contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_b9a1ea57-4fcf-4b75-8d78-74a7e7669fc2">Large Accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntitySmallBusiness contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_b34ba746-262d-419d-9d7d-51e582384ee3">false</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_63977bd9-9389-460a-b06c-db956b8e274c">false</dei:EntityEmergingGrowthCompany>
+    <dei:EntityShellCompany contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" id="F_418f24cb-8890-47c9-ac58-5da226d8a495">false</dei:EntityShellCompany>
+    <dei:EntityListingParValuePerShare contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="INF" id="F_e108566c-ba1b-4423-a991-ad3215bd75a5" unitRef="U_UnitedStatesOfAmericaDollarsShare">0.00000625</dei:EntityListingParValuePerShare>
+    <dei:EntityCommonStockSharesOutstanding contextRef="C_0f0d5699-2e38-4bac-ba00-b449c90646b4" decimals="0" id="F_005ff3a6-09df-4bdb-ae65-c393b93449b0" unitRef="U_shares">7426194552</dei:EntityCommonStockSharesOutstanding>
+    <us-gaap:NetIncomeLoss contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_0b917aa4-6d7c-4370-853b-c1994e74bb3d" unitRef="U_USD">36629000000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_1abe7915-d2bf-4cf8-ac8d-3d21f527e3a6" unitRef="U_USD">27747000000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_43b43863-8b85-4661-8b05-075bcf2eab97" unitRef="U_USD">36629000000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_497c5448-ed57-47dc-83d1-32c7b6aded0d" unitRef="U_USD">27747000000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_2e9b795c-3805-48df-8441-f315ab761c2c" unitRef="U_USD">36629000000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_b5623b3f-7a6e-4164-b289-a7779ac97171" unitRef="U_USD">27747000000</us-gaap:NetIncomeLoss>
+    <msft:DepreciationAmortizationAndOther contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_fb0fd998-5175-45a6-bbff-08ebe98fc040" unitRef="U_USD">11744000000</msft:DepreciationAmortizationAndOther>
+    <msft:DepreciationAmortizationAndOther contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_018b9dbf-c4f8-42ba-afb1-ed009c453f86" unitRef="U_USD">8147000000</msft:DepreciationAmortizationAndOther>
+    <us-gaap:ShareBasedCompensation contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_97e53887-2bf3-47bd-94c6-f471fce219f2" unitRef="U_USD">3134000000</us-gaap:ShareBasedCompensation>
+    <us-gaap:ShareBasedCompensation contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_d1c9f34e-6c38-4871-8ff2-aa4945e41677" unitRef="U_USD">2983000000</us-gaap:ShareBasedCompensation>
+    <msft:GainLossOnInvestmentsAndDerivativeInstruments contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_98d95469-d56a-4760-afcc-80c044cf3d5f" unitRef="U_USD">231000000</msft:GainLossOnInvestmentsAndDerivativeInstruments>
+    <msft:GainLossOnInvestmentsAndDerivativeInstruments contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_13b53d78-6bcc-4da5-ad54-697b66e84df6" unitRef="U_USD">-3907000000</msft:GainLossOnInvestmentsAndDerivativeInstruments>
+    <us-gaap:DeferredIncomeTaxesAndTaxCredits contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_992f4475-ed6a-4bba-b370-36b738ad2810" unitRef="U_USD">4609000000</us-gaap:DeferredIncomeTaxesAndTaxCredits>
+    <us-gaap:DeferredIncomeTaxesAndTaxCredits contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_1af24c88-c4fd-4464-bd42-b723fd524099" unitRef="U_USD">2491000000</us-gaap:DeferredIncomeTaxesAndTaxCredits>
+    <us-gaap:IncreaseDecreaseInAccountsReceivable contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_e5300605-1c58-49a0-8069-608ed124d516" unitRef="U_USD">-17104000000</us-gaap:IncreaseDecreaseInAccountsReceivable>
+    <us-gaap:IncreaseDecreaseInAccountsReceivable contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_699405ed-7083-42f2-b925-d8c738b3a9e3" unitRef="U_USD">-16490000000</us-gaap:IncreaseDecreaseInAccountsReceivable>
+    <us-gaap:IncreaseDecreaseInInventories contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_e0b47785-6ec9-484c-8fd3-70037a69daf7" unitRef="U_USD">436000000</us-gaap:IncreaseDecreaseInInventories>
+    <us-gaap:IncreaseDecreaseInInventories contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_24f002ae-730c-45a9-a2b3-eab98991e800" unitRef="U_USD">192000000</us-gaap:IncreaseDecreaseInInventories>
+    <us-gaap:IncreaseDecreaseInOtherCurrentAssets contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_4493807b-1dbf-42e0-a56b-faa9492d630b" unitRef="U_USD">1903000000</us-gaap:IncreaseDecreaseInOtherCurrentAssets>
+    <us-gaap:IncreaseDecreaseInOtherCurrentAssets contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_df24c65b-8f8f-4bc0-b4a3-4542e79e5621" unitRef="U_USD">1162000000</us-gaap:IncreaseDecreaseInOtherCurrentAssets>
+    <us-gaap:IncreaseDecreaseInOtherNoncurrentAssets contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_a842371b-d400-4fe7-9b10-80ec1d72862b" unitRef="U_USD">6389000000</us-gaap:IncreaseDecreaseInOtherNoncurrentAssets>
+    <us-gaap:IncreaseDecreaseInOtherNoncurrentAssets contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_93119dbc-8bca-45fa-8389-4f4fe9b967c8" unitRef="U_USD">394000000</us-gaap:IncreaseDecreaseInOtherNoncurrentAssets>
+    <us-gaap:IncreaseDecreaseInAccountsPayable contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_57b7e851-d6da-441a-b95e-3b6469f2e67a" unitRef="U_USD">525000000</us-gaap:IncreaseDecreaseInAccountsPayable>
+    <us-gaap:IncreaseDecreaseInAccountsPayable contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_191d4656-62f0-45b6-87a2-818e98869bec" unitRef="U_USD">-614000000</us-gaap:IncreaseDecreaseInAccountsPayable>
+    <us-gaap:IncreaseDecreaseInContractWithCustomerLiability contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_248a5e90-53ca-4fad-b39d-d7950c9e0c76" unitRef="U_USD">-5942000000</us-gaap:IncreaseDecreaseInContractWithCustomerLiability>
+    <us-gaap:IncreaseDecreaseInContractWithCustomerLiability contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_e04bc587-a5fa-47d5-8ea0-8959a1ac79b4" unitRef="U_USD">-5418000000</us-gaap:IncreaseDecreaseInContractWithCustomerLiability>
+    <us-gaap:IncreaseDecreaseInAccruedIncomeTaxesPayable contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_1b70e12c-b43c-43b6-a09d-98dd1eac336a" unitRef="U_USD">-556000000</us-gaap:IncreaseDecreaseInAccruedIncomeTaxesPayable>
+    <us-gaap:IncreaseDecreaseInAccruedIncomeTaxesPayable contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_cde76e19-afc3-4409-b5ee-bf4e00821b34" unitRef="U_USD">-2944000000</us-gaap:IncreaseDecreaseInAccruedIncomeTaxesPayable>
+    <us-gaap:IncreaseDecreaseInOtherCurrentLiabilities contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_158204e9-0bc9-46c8-ae5d-f47e2052357d" unitRef="U_USD">-4528000000</us-gaap:IncreaseDecreaseInOtherCurrentLiabilities>
+    <us-gaap:IncreaseDecreaseInOtherCurrentLiabilities contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_8057bc27-cea9-4172-ba03-aa32948ef87c" unitRef="U_USD">-5507000000</us-gaap:IncreaseDecreaseInOtherCurrentLiabilities>
+    <us-gaap:IncreaseDecreaseInOtherNoncurrentLiabilities contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_1a910315-111f-4d60-b9dd-2cf896a587c3" unitRef="U_USD">4240000000</us-gaap:IncreaseDecreaseInOtherNoncurrentLiabilities>
+    <us-gaap:IncreaseDecreaseInOtherNoncurrentLiabilities contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_8e384ad5-1677-42ae-9ab4-4b0430f2f1f5" unitRef="U_USD">-477000000</us-gaap:IncreaseDecreaseInOtherNoncurrentLiabilities>
+    <us-gaap:NetCashProvidedByUsedInOperatingActivities contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_76007561-24c3-42c7-9567-92453219b804" unitRef="U_USD">58000000000</us-gaap:NetCashProvidedByUsedInOperatingActivities>
+    <us-gaap:NetCashProvidedByUsedInOperatingActivities contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_886be3ce-5f83-4148-a7ce-21488688db31" unitRef="U_USD">45057000000</us-gaap:NetCashProvidedByUsedInOperatingActivities>
+    <us-gaap:RepaymentsOfDebtMaturingInMoreThanThreeMonths contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_0fcdae04-1f3a-48f5-9ea2-16cc85682aee" unitRef="U_USD">4850000000</us-gaap:RepaymentsOfDebtMaturingInMoreThanThreeMonths>
+    <us-gaap:RepaymentsOfDebtMaturingInMoreThanThreeMonths contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_3fae354f-4bd1-49f6-8c81-3eb3d06a43e0" unitRef="U_USD">0</us-gaap:RepaymentsOfDebtMaturingInMoreThanThreeMonths>
+    <us-gaap:ProceedsFromIssuanceOfCommonStock contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_b6b892b7-5856-4563-990d-1a2ecbad2c05" unitRef="U_USD">598000000</us-gaap:ProceedsFromIssuanceOfCommonStock>
+    <us-gaap:ProceedsFromIssuanceOfCommonStock contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_72046f12-5987-4529-9e47-ddb0bffc0959" unitRef="U_USD">689000000</us-gaap:ProceedsFromIssuanceOfCommonStock>
+    <us-gaap:PaymentsForRepurchaseOfCommonStock contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_c50dfef4-b871-4466-8d53-e79f75df863d" unitRef="U_USD">4379000000</us-gaap:PaymentsForRepurchaseOfCommonStock>
+    <us-gaap:PaymentsForRepurchaseOfCommonStock contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_205c25fe-f869-4a6f-b2b5-1bfd798bfb28" unitRef="U_USD">5650000000</us-gaap:PaymentsForRepurchaseOfCommonStock>
+    <us-gaap:PaymentsOfDividendsCommonStock contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_3777aeb9-efb6-42e9-9ebe-8d78fab42e33" unitRef="U_USD">6757000000</us-gaap:PaymentsOfDividendsCommonStock>
+    <us-gaap:PaymentsOfDividendsCommonStock contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_df32ad11-e0f6-4e97-a599-001be8284bba" unitRef="U_USD">6169000000</us-gaap:PaymentsOfDividendsCommonStock>
+    <us-gaap:ProceedsFromPaymentsForOtherFinancingActivities contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_f6114334-0879-43f3-b043-749cf6b81043" unitRef="U_USD">-1252000000</us-gaap:ProceedsFromPaymentsForOtherFinancingActivities>
+    <us-gaap:ProceedsFromPaymentsForOtherFinancingActivities contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_9fb9d64b-0da0-4645-a412-f946471f2f77" unitRef="U_USD">-669000000</us-gaap:ProceedsFromPaymentsForOtherFinancingActivities>
+    <us-gaap:NetCashProvidedByUsedInFinancingActivities contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_4e3133af-16b3-4b7a-9482-1d6f30b8ebf3" unitRef="U_USD">-16640000000</us-gaap:NetCashProvidedByUsedInFinancingActivities>
+    <us-gaap:NetCashProvidedByUsedInFinancingActivities contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_e062a85f-f359-4dfd-a5d4-85af554c2601" unitRef="U_USD">-11799000000</us-gaap:NetCashProvidedByUsedInFinancingActivities>
+    <us-gaap:PaymentsToAcquirePropertyPlantAndEquipment contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_f6e39483-6333-4dde-bd30-e764f188b04f" unitRef="U_USD">39367000000</us-gaap:PaymentsToAcquirePropertyPlantAndEquipment>
+    <us-gaap:PaymentsToAcquirePropertyPlantAndEquipment contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_4d7eec41-93c1-4cdc-9007-0cbb4a5b8b71" unitRef="U_USD">19394000000</us-gaap:PaymentsToAcquirePropertyPlantAndEquipment>
+    <msft:AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_1a7abb4a-8e2e-4559-ada0-3b8a605985a1" unitRef="U_USD">397000000</msft:AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets>
+    <msft:AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_b663134a-2ad7-433f-a454-c90fb2fdbe00" unitRef="U_USD">578000000</msft:AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets>
+    <us-gaap:PaymentsToAcquireInvestments contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_3a6eee6b-b794-4274-b1e0-ead76b170f6e" unitRef="U_USD">5394000000</us-gaap:PaymentsToAcquireInvestments>
+    <us-gaap:PaymentsToAcquireInvestments contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_e1842b7e-aef2-49a8-9299-ae693d6b42a4" unitRef="U_USD">17671000000</us-gaap:PaymentsToAcquireInvestments>
+    <us-gaap:ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_915350ad-aa44-4321-87b4-7de2e08f171b" unitRef="U_USD">5672000000</us-gaap:ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities>
+    <us-gaap:ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_2d42e5fa-c2a6-4d4d-9a7d-8a8487bf8c43" unitRef="U_USD">6031000000</us-gaap:ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities>
+    <msft:ProceedsFromInvestments contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_d2daf0a3-b933-459d-b480-0e24c7c01f26" unitRef="U_USD">10470000000</msft:ProceedsFromInvestments>
+    <msft:ProceedsFromInvestments contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_f0c611f7-2997-4bde-b9f7-c2652039d0bf" unitRef="U_USD">3262000000</msft:ProceedsFromInvestments>
+    <us-gaap:PaymentsForProceedsFromOtherInvestingActivities contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_b6c0f03d-02df-46a9-a31b-e0f02b060af6" unitRef="U_USD">12949000000</us-gaap:PaymentsForProceedsFromOtherInvestingActivities>
+    <us-gaap:PaymentsForProceedsFromOtherInvestingActivities contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_038c2edc-e5d3-453b-b874-8933ec46179b" unitRef="U_USD">6209000000</us-gaap:PaymentsForProceedsFromOtherInvestingActivities>
+    <us-gaap:NetCashProvidedByUsedInInvestingActivities contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_fb7a10f0-252b-46d7-a3e9-dee47ae06331" unitRef="U_USD">-41965000000</us-gaap:NetCashProvidedByUsedInInvestingActivities>
+    <us-gaap:NetCashProvidedByUsedInInvestingActivities contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_f3b0ab34-c85f-4e95-9a6b-d6f9cb84a460" unitRef="U_USD">-34559000000</us-gaap:NetCashProvidedByUsedInInvestingActivities>
+    <us-gaap:EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_472601d7-317e-40d4-8904-3b7604f785b9" unitRef="U_USD">-49000000</us-gaap:EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations>
+    <us-gaap:EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_2830561b-a669-4055-a4a1-1f10014daa70" unitRef="U_USD">-92000000</us-gaap:EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_00254e70-1c15-4cca-b803-edf1a001964f" unitRef="U_USD">-654000000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_bef8114a-55ce-4909-bea3-efb1a26a0527" unitRef="U_USD">-1393000000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents contextRef="C_72599e7d-7c83-4892-a141-c19f71db785b" decimals="-6" id="F_a3da6383-97e3-4c04-9279-cb3a900916a4" unitRef="U_USD">20935000000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents contextRef="C_a83a3d34-6061-4e74-9cae-2c40a21cf000" decimals="-6" id="F_ca946800-7fbc-4d5b-bcb4-894f926c21c1" unitRef="U_USD">30242000000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents contextRef="C_10d1f015-3e04-4689-af72-3d5162e04743" decimals="-6" id="F_9ad5771f-9471-476f-a5e9-e138fcc9e02c" unitRef="U_USD">20281000000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents contextRef="C_7105b026-8126-4b3d-afda-d8e7d8c4694a" decimals="-6" id="F_7d5033bd-33e9-49cc-8621-729c630012dc" unitRef="U_USD">28849000000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents>
+    <us-gaap:NetIncomeLoss contextRef="C_5159e4fe-d4d3-41e8-9878-0d0a9cee09e1" decimals="-6" id="F_84270f55-1f5a-44a1-8693-1b85dd3e4b1f" unitRef="U_USD">36629000000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="C_e5e6712e-ff28-4719-9feb-03f9a9fe992f" decimals="-6" id="F_8bcffbd8-bdc1-447b-a83b-8fa871f4d872" unitRef="U_USD">27747000000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="C_4ca01806-c4cd-49d2-87c6-16fd7f17ad5d" decimals="-6" id="F_2e240944-c46b-41a7-814a-e67aac780509" unitRef="U_USD">36629000000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="C_3e98baf2-1fc5-4f5b-9b8c-c6e2e1dea677" decimals="-6" id="F_7db0efea-54d7-44e2-8964-47470f7362f2" unitRef="U_USD">27747000000</us-gaap:NetIncomeLoss>
+    </xbrl>

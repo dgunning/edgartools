@@ -5,7 +5,7 @@ This module contains the core StatementStitcher class and related functionality
 for combining multiple XBRL statements across different time periods.
 """
 
-from collections import defaultdict
+from collections import Counter, defaultdict
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
@@ -99,6 +99,11 @@ class StatementStitcher:
         # Every value each filing reports for a concept, comparative columns
         # included, so merges can check that two lines are the same amount (GH #1685)
         self.value_evidence = defaultdict(dict)  # {concept: {period: value}}
+        # The values each filing presents in its statement columns, per filing
+        # (source index, lower = more recently filed). Discrete-quarter
+        # derivation reads its operands and reported quarters from here
+        # (bead edgartools-k7mi8.3).
+        self.filed_facts = defaultdict(dict)  # {concept: {period: {source: {value, decimals}}}}
 
     def stitch_statements(
         self,
@@ -131,6 +136,7 @@ class StatementStitcher:
         self.original_statement_order = []
         self.concept_to_label_map = {}  # Reset concept-to-label mapping for each stitch
         self.value_evidence = defaultdict(dict)
+        self.filed_facts = defaultdict(dict)
 
         # Initialize ordering manager for this statement type
         statement_type = statements[0].get('statement_type', 'IncomeStatement') if statements else 'IncomeStatement'
@@ -172,6 +178,11 @@ class StatementStitcher:
 
             # Store data for each item
             self._integrate_statement_data(processed_data, statement['periods'], relevant_periods)
+            # The values the filing presents in its statement, every column, with
+            # the filing they came from (bead edgartools-k7mi8.3)
+            self._record_filed_facts(processed_data,
+                                     statement.get('presented_periods', statement['periods']),
+                                     statement.get('source_index', _i))
 
         # Merge duplicate rows that map to the same standard_concept
         self._merge_duplicate_standard_concepts()
@@ -538,6 +549,48 @@ class StatementStitcher:
                             'decimals': decimals_for_scaling(item.get('decimals', {}).get(period_id))
                         }
 
+    def _record_filed_facts(self, statement_data: List[Dict[str, Any]],
+                            presented_periods, source_index: int):
+        """Record the values a filing presents in its statement, per line, period
+        and filing. A lower source index is a more recently filed input, the rule
+        ``_extract_periods`` uses to pick a period's filing.
+
+        Only the statement's own columns count (see ``_statement_columns``).
+        """
+        presented = self._statement_columns(statement_data, presented_periods)
+        for item in statement_data:
+            concept_key = self.concept_to_label_map.get(item.get('concept'))
+            if concept_key is None or item.get('is_dimension', False):
+                continue
+            for period_id, value in (item.get('values') or {}).items():
+                if value is None or period_id not in presented:
+                    continue
+                by_source = self.filed_facts[concept_key].setdefault(period_id, {})
+                by_source.setdefault(source_index, {
+                    'value': value,
+                    'decimals': decimals_for_scaling(item.get('decimals', {}).get(period_id)),
+                })
+
+    @staticmethod
+    def _statement_columns(statement_data: List[Dict[str, Any]], periods) -> Set[str]:
+        """The periods a statement presents as columns: those with values for at
+        least half as many lines as its fullest period.
+
+        A statement's periods also include contexts that only a few note facts
+        use, and a line's ``values`` carries them. JNJ's 10-Q 0000200406-26-000197
+        tags $17,500M of acquisitions for six months its cash flow statement says
+        were $263M, and NVDA's dividends of $6.0B for a quarter its statement only
+        shows cumulatively; neither is the line's amount for the period.
+        """
+        counts = Counter()
+        for item in statement_data:
+            if item.get('is_dimension', False):
+                continue
+            values = item.get('values') or {}
+            counts.update(p for p in periods if values.get(p) is not None)
+        fullest = max(counts.values(), default=0)
+        return {p for p, n in counts.items() if 2 * n >= fullest}
+
     @staticmethod
     def _extract_preferred_sign(item: Dict[str, Any]) -> Optional[int]:
         """Extract concept-level preferred_sign from a statement item.
@@ -686,6 +739,10 @@ class StatementStitcher:
         # Carry the secondary's evidence so later merges in a chain can use it
         for period_id, value in self.value_evidence.pop(secondary_key, {}).items():
             self.value_evidence[primary_key].setdefault(period_id, value)
+        for period_id, by_source in self.filed_facts.pop(secondary_key, {}).items():
+            merged = self.filed_facts[primary_key].setdefault(period_id, {})
+            for source, fact in by_source.items():
+                merged.setdefault(source, fact)
         # Remove the secondary entry
         if secondary_key in self.data:
             del self.data[secondary_key]
@@ -900,6 +957,13 @@ class StatementStitcher:
 
         Each YTD period is replaced by its discrete quarter, re-keyed to the
         quarter's own dates (GH #1697).
+
+        The inputs can disagree about a period when a later filing recasts it, so
+        the derivation uses the latest vintage without mixing vintages (bead
+        edgartools-k7mi8.3): the longer operand is its latest-filed value, the
+        shorter one comes from that filing or the latest one filed before it, and a
+        three-month value an input reports for the quarter is kept over the
+        derived one.
         """
         from edgar.core import log
 
@@ -941,8 +1005,54 @@ class StatementStitcher:
                     f"{shorter_pid} ({shorter['duration_days']}d)"
                 )
 
-                # Subtract shorter from longer for every concept
-                self._subtract_periods(longer_pid, shorter_pid, discrete_label)
+                # The longer operand is its latest-filed value and the shorter one
+                # is of the same vintage; the cells then show the latest-filed
+                # values, and shorter is subtracted from longer for every concept
+                shorter_operands = self._same_vintage_operands(longer_pid, shorter_pid)
+                self._use_latest_filed_values(longer_pid, shorter_pid)
+                self._subtract_periods(longer_pid, shorter_pid, discrete_label, shorter_operands)
+
+    def _same_vintage_operands(self, longer_pid: str, shorter_pid: str) -> Dict[str, Any]:
+        """The shorter operand to subtract, per line, so a derived quarter never
+        mixes vintages (bead edgartools-k7mi8.3).
+
+        The longer period's value is the latest-filed one. The shorter value comes
+        from the same filing when it presents that period, otherwise from the
+        latest input filed before it (the next higher source index); never from a
+        later filing. MSFT's Q1 FY2026 investment gains were $1,007M in the Q1
+        10-Q and recast to $(3,907)M in the next year's Q1 10-Q, which reports no
+        six-month figure, so the six months from the Q2 10-Q pair with $1,007M.
+        None means no such value exists. Lines with no filed longer value are
+        absent, and keep subtracting their cells.
+        """
+        operands = {}
+        for concept_key in self.data:
+            filed = self.filed_facts.get(concept_key, {})
+            longer_by_source = filed.get(longer_pid)
+            if not longer_by_source:
+                continue
+            vintage = min(longer_by_source)
+            shorter_by_source = filed.get(shorter_pid, {})
+            same_or_older = [source for source in shorter_by_source if source >= vintage]
+            operands[concept_key] = (shorter_by_source[min(same_or_older)]
+                                     if same_or_older else None)
+        return operands
+
+    def _use_latest_filed_values(self, *period_ids: str):
+        """Set each stitched line's cells for ``period_ids`` to the latest-filed value.
+
+        A period's cell holds the value of the filing chosen for that column, which
+        need not be the most recent filing that reports it. MSFT's Q1 FY2026
+        investment gains were $1,007M in the Q1 10-Q (0001193125-25-256321) and
+        recast to $(3,907)M as the comparative in 10-Q 0001193125-26-436133, which
+        the Q1 column shows when both are inputs (bead edgartools-k7mi8.3).
+        """
+        for concept_key, values in self.data.items():
+            filed = self.filed_facts.get(concept_key, {})
+            for period_id in period_ids:
+                by_source = filed.get(period_id)
+                if by_source:
+                    values[period_id] = dict(by_source[min(by_source)])
 
     def _parse_duration_periods(self) -> List[Dict[str, Any]]:
         """Parse duration period IDs into structured records with start/end dates and duration."""
@@ -1000,8 +1110,12 @@ class StatementStitcher:
         longer_pid: str,
         shorter_pid: str,
         discrete_label: str,
+        shorter_operands: Optional[Dict[str, Any]] = None,
     ):
         """Subtract shorter YTD values from longer YTD values in-place.
+
+        ``shorter_operands`` gives the shorter value per line where it differs from
+        the shorter cell (see ``_same_vintage_operands``).
 
         For each concept that has values in both the longer and shorter periods,
         computes: discrete_value = longer_value - shorter_value.
@@ -1012,7 +1126,8 @@ class StatementStitcher:
         """
         for concept_key in list(self.data.keys()):
             longer_entry = self.data[concept_key].get(longer_pid)
-            shorter_entry = self.data[concept_key].get(shorter_pid)
+            shorter_entry = (shorter_operands or {}).get(
+                concept_key, self.data[concept_key].get(shorter_pid))
 
             if longer_entry is None:
                 continue
@@ -1052,10 +1167,14 @@ class StatementStitcher:
         # to the longer period's end (GH #1697).
         quarter_start = datetime.strptime(shorter_pid.split('_')[2], '%Y-%m-%d') + timedelta(days=1)
         quarter_end = datetime.strptime(longer_pid.split('_')[2], '%Y-%m-%d')
+        quarter_pid = f"duration_{quarter_start:%Y-%m-%d}_{quarter_end:%Y-%m-%d}"
         new_label = self._discrete_quarter_label(
             self.period_dates.get(longer_pid, ''), discrete_label, quarter_start, quarter_end)
-        self._rekey_derived_quarter(
-            longer_pid, f"duration_{quarter_start:%Y-%m-%d}_{quarter_end:%Y-%m-%d}", new_label)
+        # A three-month value an input reports for the quarter, selected column or
+        # not, is placed under the quarter's key so the merge in
+        # _rekey_derived_quarter keeps it over the derived cell (k7mi8.3).
+        self._use_latest_filed_values(quarter_pid)
+        self._rekey_derived_quarter(longer_pid, quarter_pid, new_label)
 
     @staticmethod
     def _discrete_quarter_label(old_label: str, discrete_label: str,
@@ -1084,9 +1203,10 @@ class StatementStitcher:
         them. Everything keyed by period id moves: the values, the label, the source
         filing and the position in the period order.
 
-        A filing can also carry three-month facts for the same dates (with
-        ``include_quarterly=True`` or ``use_optimal_periods=False``), which made a
-        second column for the same quarter. The two merge into one column, and where
+        A filing can also carry three-month facts for the same dates (a selected
+        column with ``include_quarterly=True`` or ``use_optimal_periods=False``, or
+        placed there by ``_subtract_periods`` from any input that presents them),
+        which made a second column for the same quarter. The two merge into one column, and where
         both have a cell the reported fact is kept: it is the filer's own number for
         that interval, while the derived one can mix a restated cumulative figure
         with an original earlier quarter (MSFT's Q2 FY2026 investment gains: $9,931M
@@ -1274,6 +1394,9 @@ def stitch_statements(
                         'definition': statement['definition'],
                         'statement_type': statement['statement_type'],
                         'periods': {period_key: statement['periods'][period_key]},
+                        # Every column the filing presents, for the reported
+                        # values discrete-quarter derivation reads (k7mi8.3)
+                        'presented_periods': list(statement['periods']),
                         'data': statement['data'],
                         'source_index': xbrl_index,
                     }
