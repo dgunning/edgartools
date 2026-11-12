@@ -897,6 +897,13 @@ class XBRL:
 
     @property
     def entity_info(self):
+        """Cover-page facts: entity_name, identifier, document_type, fiscal_year, and so on.
+
+        ``reporting_end_date`` is dei:DocumentPeriodEndDate as a ``datetime.date``;
+        ``document_period_end_date`` is the same fact as filed; and
+        ``max_instant_context_date`` is the latest instant among all contexts,
+        usually the cover's share-count date (GH #1208).
+        """
         return self.parser.entity_info
 
     @property
