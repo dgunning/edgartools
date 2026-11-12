@@ -53,6 +53,7 @@ patterns:
       investments = arcc.portfolio_investments() # Parsed individual investments
       investments.filter(industry="software")    # by industry as filed or normalized sector
       investments.by_industry()                  # sector | num_investments | total_fair_value | pct_of_portfolio
+      investments.reported_industry_breakdown()  # filer's own subtotals: industry | fair_value | pct_of_reported_total (calc.) | pct_of_net_assets (filed)
       investments.reported_total_fair_value      # The filer's balance-sheet total: use this for the portfolio size
       investments.reconciliation_gap             # Rows vs reported total, e.g. 0.003; check before trusting sums
       investments.unfunded_commitments_fair_value  # Negative; FSK nets -1,448.1M out of its total, the gap allows for it
@@ -78,6 +79,12 @@ patterns:
       and from a peer BDC's tag for the same issuer; industry_source says
       which. An investment with no recoverable industry has industry, sector
       and industry_source all None, never an empty string.
+      Check industry_coverage before filter(industry=...) or by_industry():
+      ARCC's FY2025 10-K tags no industry on any of 1,417 holdings, so an
+      industry filter finds nothing (it logs a warning). The filing still
+      reports 23 industry subtotals summing to its 29,484.8M total; use
+      reported_industry_breakdown() for them. It is empty when the filer
+      reports none and for a filtered subset.
 
   - name: BDC Non-Accrual
     when: Which BDC loans are on non-accrual, or the non-accrual rate

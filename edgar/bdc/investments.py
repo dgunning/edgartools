@@ -2159,6 +2159,59 @@ def _as_float(value, default: float) -> float:
         return default
 
 
+DIM_EQUITY_SECURITIES_BY_INDUSTRY = 'dim_us-gaap_EquitySecuritiesByIndustryAxis'
+REPORTED_INDUSTRY_COLUMNS = ['industry', 'fair_value', 'pct_of_reported_total', 'pct_of_net_assets']
+
+
+def _industry_subtotal_member(fact, period: Optional[str]) -> Optional[str]:
+    """The industry member of a fact dimensioned by ``EquitySecuritiesByIndustryAxis`` alone, else None."""
+    if fact.get('period_instant') != period:
+        return None
+    dims = [key for key in fact if key.startswith('dim_') and fact.get(key)]
+    if dims != [DIM_EQUITY_SECURITIES_BY_INDUSTRY]:
+        return None
+    return str(fact[DIM_EQUITY_SECURITIES_BY_INDUSTRY])
+
+
+def _is_usd(fact) -> bool:
+    return str(fact.get('unit_ref') or '').upper() == 'USD' or str(fact.get('currency') or '').upper() == 'USD'
+
+
+def _reported_industry_rows(all_facts, period: Optional[str]) -> list:
+    """The filer's own fair value subtotal per industry, as ``(industry, fair_value, pct_of_net_assets)``.
+
+    ARCC tags none of its 1,417 holdings with an industry but files 23
+    ``InvestmentOwnedAtFairValue`` facts dimensioned by
+    ``EquitySecuritiesByIndustryAxis`` alone that sum to its reported total.
+    Only USD facts at ``period`` count, one per member (the most precise, so
+    identical duplicates count once). The percentage of net assets is the
+    filed ``InvestmentOwnedPercentOfNetAssets`` on that member, never derived.
+    """
+    values: dict = {}
+    percents: dict = {}
+    labels: dict = {}
+    for fact in all_facts:
+        concept = fact.get('concept')
+        if concept not in ('us-gaap:InvestmentOwnedAtFairValue', 'us-gaap:InvestmentOwnedPercentOfNetAssets'):
+            continue
+        member = _industry_subtotal_member(fact, period)
+        value = fact.get('numeric_value')
+        if member is None or value is None or pd.isna(value):
+            continue
+        if concept == 'us-gaap:InvestmentOwnedPercentOfNetAssets':
+            percents.setdefault(member, float(value))
+            continue
+        if not _is_usd(fact):
+            continue
+        precision = _as_float(fact.get('decimals'), -99)
+        if member not in values or precision > values[member][0]:
+            values[member] = (precision, float(value))
+            labels[member] = fact.get('dimension_member_label') or clean_industry_label(member)
+    rows = [(labels[member], value, percents.get(member, float('nan')))
+            for member, (_, value) in values.items()]
+    return sorted(rows, key=lambda row: row[1], reverse=True)
+
+
 # "Debt Investments Healthcare Services, Other and Total Marathon Health, LLC"
 _COMPANY_TOTAL_RE = re.compile(r'\bTotal\s+(.+)$')
 
@@ -2406,6 +2459,7 @@ class PortfolioInvestments:
         reported_total_fair_value: Optional[Decimal] = None,
         excluded: Optional[list['ExcludedInvestment']] = None,
         unfunded_commitments_fair_value: Optional[Decimal] = None,
+        reported_industry_rows: Optional[list] = None,
     ):
         self._investments = investments
         self._period = period
@@ -2413,6 +2467,7 @@ class PortfolioInvestments:
         self._reported_total_fair_value = reported_total_fair_value
         self._excluded = excluded or []
         self._unfunded_commitments_fair_value = unfunded_commitments_fair_value
+        self._reported_industry_rows = reported_industry_rows or []
 
     def __len__(self) -> int:
         return len(self._investments)
@@ -2645,6 +2700,18 @@ class PortfolioInvestments:
                 if inv.fair_value is not None and inv.fair_value >= min_fair_value
             ]
 
+        if industry and not investments and self.industry_coverage < 1:
+            missing = sum(1 for inv in self._investments if inv.industry is None)
+            log.warning(
+                "filter(industry=%r) matched no holdings, but %d of %d holdings have no "
+                "industry, so no matches does not mean zero exposure. "
+                "reported_industry_breakdown() has the filer's own fair value by industry "
+                "when it reports one.",
+                industry, missing, len(self._investments),
+            )
+
+        # A subset keeps neither the reported total nor the reported industry
+        # breakdown: both describe the whole portfolio, not these rows.
         return PortfolioInvestments(investments, period=self._period,
                                     nonaccrual_fair_value=self._nonaccrual_fair_value)
 
@@ -2696,6 +2763,67 @@ class PortfolioInvestments:
         unknown = grouped[grouped[by].isna()]
         return pd.concat([known, unknown]).reset_index(drop=True)
 
+    def reported_industry_breakdown(self) -> pd.DataFrame:
+        """
+        The filer's own fair value by industry, as reported in the filing.
+
+        Many BDCs tag no industry on their holdings but file a subtotal per
+        industry (``InvestmentOwnedAtFairValue`` dimensioned by
+        ``EquitySecuritiesByIndustryAxis`` alone). Ares Capital's FY2025 10-K
+        reports 23 such subtotals summing to its 29,484.8M total while none of
+        its 1,417 holdings carries an industry. Use this when
+        ``industry_coverage`` is low and ``by_industry()`` is mostly ``None``.
+
+        Returns:
+            DataFrame with columns:
+
+            * ``industry``: the filer's label for the industry member
+            * ``fair_value``: the filed subtotal
+            * ``pct_of_reported_total``: calculated by edgartools as
+              ``fair_value / reported_total_fair_value`` (NaN without a reported total)
+            * ``pct_of_net_assets``: the filed ``InvestmentOwnedPercentOfNetAssets``
+              as filed (0.4912 means 49.12%), NaN when the filer does not report it
+
+            sorted by fair value descending. ``df.attrs`` holds ``sum_fair_value``,
+            ``reported_total_fair_value`` and their ``difference``. Only the
+            portfolio's own period counts, never an earlier one. The frame is
+            empty, with the same columns, when the filing reports no such
+            breakdown and for a filtered subset, which is not the whole portfolio.
+        """
+        rows = self._reported_industry_rows
+        df = pd.DataFrame(
+            [(label, value, float('nan'), pct) for label, value, pct in rows],
+            columns=REPORTED_INDUSTRY_COLUMNS,
+        ).astype({'fair_value': float, 'pct_of_reported_total': float, 'pct_of_net_assets': float})
+        reported = float(self._reported_total_fair_value) if self._reported_total_fair_value is not None else None
+        if reported:
+            df['pct_of_reported_total'] = df['fair_value'] / reported
+        total = float(df['fair_value'].sum()) if rows else None
+        df.attrs['sum_fair_value'] = total
+        df.attrs['reported_total_fair_value'] = reported
+        df.attrs['difference'] = total - reported if total is not None and reported is not None else None
+        return df
+
+    def _industry_context_lines(self) -> list:
+        """The coverage line, and the filer's own breakdown when it reports one."""
+        known = sum(1 for inv in self._investments if inv.industry is not None)
+        lines = [f'Industry known for {known} of {len(self._investments)} positions']
+        if self._reported_industry_rows:
+            lines.append(f'Reported industry breakdown: {len(self._reported_industry_rows)} industries '
+                         f'(filed subtotals, see .reported_industry_breakdown())')
+        return lines
+
+    def _reported_industry_context_lines(self) -> list:
+        breakdown = self.reported_industry_breakdown()
+        if breakdown.empty:
+            return []
+        lines = ['', 'REPORTED INDUSTRY BREAKDOWN (filed fair value; % of reported total is calculated):']
+        for row in breakdown.head(10).itertuples(index=False):
+            share = f' ({row.pct_of_reported_total:.1%} calc.)' if pd.notna(row.pct_of_reported_total) else ''
+            filed = f', {row.pct_of_net_assets:.2%} of net assets filed' if pd.notna(row.pct_of_net_assets) else ''
+            lines.append(f'  {row.industry}: ${row.fair_value:,.0f}{share}{filed}')
+        return lines
+
     def to_context(self, detail: str = 'standard') -> str:
         """
         AI-optimized context string for LLM consumption.
@@ -2725,8 +2853,7 @@ class PortfolioInvestments:
 
         dq = self.data_quality
         lines.append(f'Composition: {dq.debt_count} debt, {dq.equity_count} equity')
-        if self.industry_coverage:
-            lines.append(f'Industry Coverage: {self.industry_coverage:.0%}')
+        lines.extend(self._industry_context_lines())
 
         # Health metrics
         if self._nonaccrual_fair_value is not None:
@@ -2758,10 +2885,12 @@ class PortfolioInvestments:
             lines.append(f'  {inv.company_name} ({inv.investment_type}) — {fv}')
 
         if detail == 'standard':
+            lines.extend(self._reported_industry_context_lines())
             lines.append('')
             lines.append('AVAILABLE ACTIONS:')
             lines.append('  .filter(investment_type=, company_name=, industry=)   Filter investments')
             lines.append('  .by_industry()       Fair value by normalized sector')
+            lines.append("  .reported_industry_breakdown()   Filer's own fair value by industry")
             lines.append('  .to_dataframe()      All holdings as DataFrame')
             lines.append('  .data_quality        Coverage metrics')
             lines.append('  .non_accrual_rate    Non-accrual rate at FV')
@@ -2782,11 +2911,13 @@ class PortfolioInvestments:
             for row in self.by_industry().head(10).itertuples(index=False):
                 label = row.sector if row.sector is not None else 'No industry'
                 lines.append(f'  {label}: ${row.total_fair_value:,.0f} ({row.pct_of_portfolio:.1%})')
+        lines.extend(self._reported_industry_context_lines())
 
         lines.append('')
         lines.append('AVAILABLE ACTIONS:')
         lines.append('  .filter(investment_type=, company_name=, industry=)   Filter investments')
         lines.append('  .by_industry()       Fair value by normalized sector')
+        lines.append("  .reported_industry_breakdown()   Filer's own fair value by industry")
         lines.append('  .to_dataframe()      All holdings as DataFrame')
         lines.append('  .data_quality        Coverage metrics')
         lines.append('  .non_accrual_rate    Non-accrual rate at FV')
@@ -3194,4 +3325,5 @@ class PortfolioInvestments:
 
         return cls(portfolio, period=period, nonaccrual_fair_value=nonaccrual_fv,
                    reported_total_fair_value=reported_total, excluded=excluded,
-                   unfunded_commitments_fair_value=unfunded)
+                   unfunded_commitments_fair_value=unfunded,
+                   reported_industry_rows=_reported_industry_rows(all_facts, period))
