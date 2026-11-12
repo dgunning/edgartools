@@ -26,7 +26,7 @@ from edgar.exceptions import ValidationError
 
 from edgar.datatools import STR_DTYPE, null_column as _null_column
 from edgar.richtools import repr_rich
-from edgar.xbrl.core import STANDARD_LABEL, iso4217_code, parse_date, unit_currency
+from edgar.xbrl.core import STANDARD_LABEL, element_catalog_key, iso4217_code, parse_date, unit_currency
 from edgar.xbrl.models import NIL_MEMBER_LABEL, is_negated_label_role, select_display_label
 
 
@@ -188,9 +188,8 @@ def _concept_spellings(concept: str) -> tuple:
     and in most SEC tooling. Only the NAMESPACE separator differs between them; a
     local name keeps whatever underscores the filer declared.
     """
-    if ':' in concept:
-        return (concept, concept.replace(':', '_', 1))
-    return (concept,)
+    key = element_catalog_key(concept)
+    return (concept, key) if key != concept else (concept,)
 
 
 def _sort_key(value: Any) -> tuple:
@@ -675,7 +674,7 @@ class FactQuery:
             return member_value
 
         # Normalize to match element catalog key format (colons -> underscores)
-        member_normalized = member_value.replace(':', '_')
+        member_normalized = element_catalog_key(member_value)
 
         if member_normalized in self._facts_view.xbrl.element_catalog:
             mem_element = self._facts_view.xbrl.element_catalog[member_normalized]
@@ -1529,7 +1528,7 @@ class FactsView:
                             mem_label = dim_value
 
                             # Look up human-readable dimension label from element catalog
-                            dim_name_normalized = dim_name.replace(':', '_')
+                            dim_name_normalized = element_catalog_key(dim_name)
                             if dim_name_normalized in self.xbrl.element_catalog:
                                 dim_element = self.xbrl.element_catalog[dim_name_normalized]
                                 for role in ['http://www.xbrl.org/2003/role/terseLabel',
@@ -1539,7 +1538,7 @@ class FactsView:
                                         break
 
                             # Look up human-readable member label from element catalog
-                            dim_value_normalized = dim_value.replace(':', '_')
+                            dim_value_normalized = element_catalog_key(dim_value)
                             if dim_value_normalized in self.xbrl.element_catalog:
                                 mem_element = self.xbrl.element_catalog[dim_value_normalized]
                                 for role in ['http://www.xbrl.org/2003/role/verboseLabel',
@@ -1595,8 +1594,8 @@ class FactsView:
                 fact_dict['is_dimensioned'] = False
 
             # Add element information and statement type
-            # Normalize element_id to match catalog keys (replace ':' with '_')
-            element_id = fact.element_id.replace(':', '_')
+            # Facts carry QNames; catalog and presentation keys use the element id
+            element_id = element_catalog_key(fact.element_id)
             if element_id in self.xbrl.element_catalog:
                 element = self.xbrl.element_catalog[element_id]
 

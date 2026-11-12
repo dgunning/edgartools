@@ -3,8 +3,9 @@
 GitHub Issue: https://github.com/dgunning/edgartools/issues/1711
 
 The export tested colon-form fact ids against an underscore-keyed catalog.
-Lookup tries the exact key, then only the namespace separator. A non-standard
-label is kept when the standard label is absent. Filed amounts stay put,
+Lookup tries the exact key, then only the namespace separator. Without a
+standard label a terse, verbose or other display label is used, never the
+documentation text (edgartools-gtmsn). Filed amounts stay put,
 including a zero and an empty fact, and a context's period, entity and
 dimensions are exported beside the new columns. Auburn National
 Bancorporation FY2023 10-K, accession 0001193125-24-067944.
@@ -18,7 +19,7 @@ from edgar.xbrl import XBRL
 from edgar.xbrl.core import STANDARD_LABEL
 from edgar.xbrl.models import Context, ElementCatalog, Fact
 
-AUBN = Path("tests/fixtures/xbrl/aubn/10k_2023")
+AUBN = Path(__file__).resolve().parents[2] / "fixtures" / "xbrl" / "aubn" / "10k_2023"
 METADATA = (
     "element_name",
     "element_type",
@@ -58,9 +59,12 @@ SPELLINGS = [
         "pref_Local_Name", "xbrli:monetaryItemType", "duration", "debit", "Embedded underscore"), "c-plain"),
     ("other-prefix", "other:EmployeeRetentionTaxCredit", "10", 10.0, None, "c-plain"),
     ("local-name", "EmployeeRetentionTaxCredit", "10", 10.0, None, "c-plain"),
-    # No standard label: the first other role is used, and unknown type and balance stay missing.
+    # No standard label: a display role is used, and unknown type and balance stay missing.
     ("alternate-label", "only_alt", "10", 10.0, (
-        "only_alt", None, "instant", None, "Docs only"), "c-plain"),
+        "only_alt", None, "instant", None, "Negated only"), "c-plain"),
+    # Documentation is a definition, not a label (edgartools-gtmsn).
+    ("documentation-only", "only_docs", "10", 10.0, (
+        "only_docs", None, "instant", None, None), "c-plain"),
 ]
 # A filed zero is a value. An empty fact stays empty. Neither invents metadata.
 # The dimensioned fact keeps its period, entity and member beside the catalog columns.
@@ -151,6 +155,9 @@ def exported_facts():
             "pref_Local_Name_collapsed", labels={STANDARD_LABEL: "All colons replaced"}),
         "only_alt": _entry(
             "only_alt", data_type=None, period_type="instant", balance=None,
+            labels={DOCUMENTATION_LABEL: "Docs first", NEGATED_LABEL: "Negated only"}),
+        "only_docs": _entry(
+            "only_docs", data_type=None, period_type="instant", balance=None,
             labels={DOCUMENTATION_LABEL: "Docs only"}),
         "ex_Assessments": _entry("ex_Assessments", labels={STANDARD_LABEL: "Assessments"}),
     }
@@ -209,7 +216,7 @@ def test_catalog_lookup_uses_exact_key_then_only_the_namespace_separator(
         exported_facts, fact_id, element_id, value, amount, metadata, context_ref):
     """Exact key wins. Another prefix, a second colon, or a bare local name does not match.
 
-    A concept whose only label is a non-standard role still exports that label.
+    A concept without a standard label exports a display label, never its documentation.
     """
     row = _row(exported_facts, fact_id)
     _assert_filed(row, element_id, value, amount, context_ref)

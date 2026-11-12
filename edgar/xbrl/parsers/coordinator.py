@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from edgar.core import log
+from edgar.xbrl.core import element_catalog_key
 from edgar.xbrl.models import (
     Axis,
     CalculationTree,
@@ -366,7 +367,7 @@ class XBRLParser:
                 period_type = 'duration'
             if period_type not in ('instant', 'duration'):
                 continue
-            element_id = fact.element_id.replace(':', '_', 1)
+            element_id = element_catalog_key(fact.element_id)
             if period_types.setdefault(element_id, period_type) != period_type:
                 period_types[element_id] = None
 

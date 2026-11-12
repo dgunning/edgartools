@@ -42,6 +42,7 @@ from edgar.bdc.investments import (
     _parse_investment_identifier,
     _reported_total_fair_value,
 )
+from edgar.xbrl.core import catalog_entry
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
@@ -760,7 +761,7 @@ def _member_label(xbrl, member: str) -> str:
     Member") while its terse label reads "UniTek Global Services, Inc. [Member]";
     TPVG's terse label drops the loan's number that its standard label keeps.
     """
-    element = xbrl.element_catalog.get(member.replace(':', '_'))
+    element = catalog_entry(xbrl.element_catalog, member)
     labels = getattr(element, 'labels', None) or {}
     candidates = [labels[role] for role in _LABEL_ROLES if labels.get(role)]
     written = [label for label in candidates if re.search(r'\[Member\]\s*$', label)]
