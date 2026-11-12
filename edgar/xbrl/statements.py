@@ -2044,7 +2044,12 @@ class Statement:
                      rollups to subtotals are not implemented
 
         Returns:
-            ValidationResult with is_valid flag and any issues found
+            ValidationResult with is_valid flag and any issues found.
+            ``result.status`` is "valid" only when every comparison the level
+            asks for ran without an error, "inconclusive" when one could not
+            run (a missing total, or a statement type with no validator, such
+            as an income statement), and "invalid" on any error.
+            ``is_valid`` stays True whenever there is no error.
 
         Raises:
             ValidationError: ``level`` is not one of the three levels
@@ -2055,6 +2060,8 @@ class Statement:
             >>> result = bs.validate()
             >>> print(result)
             ValidationResult: VALID (0 errors, 0 warnings)
+            >>> print(xbrl.statements.income_statement().validate())
+            ValidationResult: INCONCLUSIVE (0 errors, 0 warnings)
             >>> if not result.is_valid:
             ...     for error in result.errors:
             ...         print(f"Error: {error.message}")

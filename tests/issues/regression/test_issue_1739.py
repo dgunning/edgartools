@@ -34,7 +34,14 @@ def test_detailed_runs_the_section_checks(balance_sheet):
     detailed = balance_sheet.validate(level="detailed")
     assert detailed.checks_performed == sections.checks_performed == ["fundamental_equation", "section_totals"]
     assert detailed.is_valid is True
-    assert detailed.issues == sections.issues == []
+    # IBM reports no non-current subtotals, so neither section comparison runs
+    # and each leaves a SECTION_NOT_EVALUATED trace (GH #1210).
+    assert detailed.issues == sections.issues
+    assert [(i.code, i.details) for i in detailed.issues] == [
+        ("SECTION_NOT_EVALUATED", {"comparison": "asset_sections", "missing": ["noncurrent_assets"]}),
+        ("SECTION_NOT_EVALUATED", {"comparison": "liability_sections", "missing": ["noncurrent_liabilities"]}),
+    ]
+    assert detailed.checks_completed == sections.checks_completed == ["fundamental_equation"]
     assert detailed.metadata == sections.metadata
     assert detailed.metadata["liab_equity_check"]["assets"] == 137_175_000_000
     assert detailed.metadata["liab_equity_check"]["liabilities_and_equity"] == 137_175_000_000

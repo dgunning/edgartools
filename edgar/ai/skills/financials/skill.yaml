@@ -122,6 +122,19 @@ patterns:
       instant), end_date} or None (no value, or period not known). Divide two metrics only
       when both descriptors are non-None and equal; an equal end_date alone is not enough.
 
+  - name: Check the Balance Sheet Equation
+    when: Need to know whether Assets = Liabilities + Equity was checked and holds in a filing
+    code: |
+      result = filing.xbrl().statements.balance_sheet().validate()
+      result.status            # 'valid' | 'inconclusive' | 'invalid'
+      result.checks_completed  # ['fundamental_equation']
+    note: |
+      Read status, not is_valid: is_valid is True whenever there is no error, even when a total
+      was missing and nothing was compared. 'inconclusive' means a requested comparison did not
+      run (see the INCOMPLETE_DATA or SECTION_NOT_EVALUATED issue). Only balance sheets have a
+      validator, so other statements are always inconclusive. level="sections" also compares
+      current + non-current subtotals with total assets and total liabilities.
+
   - name: Compare Companies
     when: Side-by-side comparison, revenue trends, multi-company analysis
     code: |
