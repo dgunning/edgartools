@@ -1,1 +1,0 @@
-**XBRL lookups by QName missed the element catalog.** `check_period_data_quality()` found no fact by its `us-gaap:Assets`-style id and read 0% essential coverage for every filing (0 of 13,058 lookups hit on 4 test filings). Every catalog lookup now uses one rule in `edgar.xbrl.core`. (bead edgartools-gtmsn, GH #1711)
