@@ -4,7 +4,8 @@ XBRL extraction strategy for inline XBRL documents.
 
 import copy
 import logging
-from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
 from lxml.etree import tostring
 from lxml.html import HtmlElement
@@ -256,11 +257,22 @@ class XBRLExtractor:
                 return node
         return None
 
-    def _initialize_context(self, element: HtmlElement):
-        """Initialize context, unit and continuation information from document."""
-        # Find root element
-        root = element.getroottree().getroot()
+    def use_index(self, index: 'InlineXBRLSetIndex') -> None:
+        """
+        Resolve references against a document set's shared index.
 
+        An Inline XBRL Document Set (Inline XBRL 1.1, section 3) lets a fact in
+        one document use a context, unit or continuation defined in another, so
+        the definitions in the document being read are not enough. The index
+        replaces them; nothing is read from the document's own tree.
+        """
+        self.contexts = index.contexts
+        self.units = index.units
+        self.continuations = index.continuations
+        self._initialized = True
+
+    def _collect_definitions(self, root: HtmlElement) -> Tuple[List[HtmlElement], ...]:
+        """The context, unit and continuation elements under ``root``."""
         # One pass over the tree, bucketed by local name. Three separate
         # full-tree scans on a 20MB filing is the kind of cost that shows up.
         contexts, units, continuations = [], [], []
@@ -272,6 +284,12 @@ class XBRLExtractor:
                 units.append(node)
             elif local_name == 'continuation':
                 continuations.append(node)
+        return contexts, units, continuations
+
+    def _initialize_context(self, element: HtmlElement):
+        """Initialize context, unit and continuation information from document."""
+        root = element.getroottree().getroot()
+        contexts, units, continuations = self._collect_definitions(root)
 
         self._extract_contexts(contexts)
         self._extract_units(units)
@@ -648,3 +666,60 @@ class XBRLExtractor:
         if format_attr not in self._reported_formats:
             self._reported_formats.add(format_attr)
             logger.warning("Inline XBRL: %s; the raw display text is used instead", message)
+
+
+@dataclass(frozen=True)
+class InlineXBRLSetIndex:
+    """
+    The contexts, units and continuations of an Inline XBRL Document Set.
+
+    Inline XBRL 1.1 treats the documents of one submission as a single set:
+    only one of them needs an ix:header, and a fact in an exhibit can name a
+    context, unit or continuation defined in the primary document (IBM's FY2024
+    EX-13 defines none of its own). This index pools the definitions of every
+    supplied document so each document's facts resolve against the whole set.
+
+    An ID defined more than once, in one document or across several, is
+    ambiguous. It is left out of the lookups, so references to it resolve to
+    None, and recorded in ``ambiguous`` with the documents that define it. No
+    definition wins over another, so the result never depends on input order.
+    """
+
+    contexts: Dict[str, Dict[str, Any]]
+    units: Dict[str, str]
+    continuations: Dict[str, HtmlElement]
+    # kind ('context', 'unit', 'continuation') -> id -> defining documents,
+    # sorted and repeated once per definition.
+    ambiguous: Dict[str, Dict[str, Tuple[str, ...]]] = field(default_factory=dict)
+
+    KINDS = ('context', 'unit', 'continuation')
+
+    @classmethod
+    def build(cls, roots: Mapping[str, Optional[HtmlElement]]) -> 'InlineXBRLSetIndex':
+        """
+        Index the definitions under each named root (None for a document with
+        no parseable tree). Definitions are read by the same code a single
+        document uses, so a context means the same thing on either path.
+        """
+        reader = XBRLExtractor()
+        found: Dict[str, Dict[str, List[Tuple[str, HtmlElement]]]] = {kind: {} for kind in cls.KINDS}
+        for name, root in roots.items():
+            if root is None:
+                continue
+            for kind, nodes in zip(cls.KINDS, reader._collect_definitions(root), strict=True):
+                for node in nodes:
+                    node_id = node.get('id')
+                    if node_id:
+                        found[kind].setdefault(node_id, []).append((name, node))
+
+        unique = {kind: {node_id: defs[0][1] for node_id, defs in by_id.items() if len(defs) == 1}
+                  for kind, by_id in found.items()}
+        ambiguous = {kind: {node_id: tuple(sorted(name for name, _ in defs))
+                            for node_id, defs in by_id.items() if len(defs) > 1}
+                     for kind, by_id in found.items()}
+
+        reader._extract_contexts(list(unique['context'].values()))
+        reader._extract_units(list(unique['unit'].values()))
+        return cls(contexts=reader.contexts, units=reader.units,
+                   continuations=unique['continuation'],
+                   ambiguous={kind: ids for kind, ids in ambiguous.items() if ids})
