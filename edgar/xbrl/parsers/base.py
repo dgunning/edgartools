@@ -10,7 +10,7 @@ from typing import Any, Dict, Optional
 from lxml import etree as ET
 
 from edgar.core import log
-from edgar.xbrl.core import NAMESPACES
+from edgar.xbrl.core import NAMESPACES, element_catalog_key
 from edgar.xmltools import xml_parser
 
 
@@ -147,10 +147,7 @@ class BaseParser:
         Returns:
             Normalized element identifier
         """
-        if ':' in element_id:
-            prefix, name = element_id.split(':', 1)
-            return f"{prefix}_{name}"
-        return element_id
+        return element_catalog_key(element_id)
 
     def _log_parsing_progress(self, component: str, count: int, total: Optional[int] = None):
         """

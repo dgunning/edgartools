@@ -120,6 +120,38 @@ def split_element_id(element_id: str) -> Tuple[str, str]:
     prefix, _, local = element_id.partition('_')
     return prefix, local
 
+
+def element_catalog_key(element_id: str) -> str:
+    """The element catalog's spelling of a concept id.
+
+    Facts and context dimensions name a concept by its QName ('us-gaap:Assets');
+    the catalog is keyed on the schema's element id ('us-gaap_Assets'). Only the
+    namespace separator, the first colon, changes: a local name keeps whatever
+    underscores the filer declared.
+    """
+    if element_id and ':' in element_id:
+        prefix, _, local = element_id.partition(':')
+        return f"{prefix}_{local}"
+    return element_id
+
+
+def catalog_entry(element_catalog: Mapping[str, Any], element_id: Optional[str]) -> Optional[Any]:
+    """An element catalog entry for a concept id in either spelling, or None.
+
+    The exact key wins, then the catalog spelling (``element_catalog_key``). A
+    bare local name is never searched on its own. Every lookup of a QName in
+    the catalog goes through here (edgartools-gtmsn): copies of the rule had
+    drifted, and the period data check looked up every fact by its QName and
+    found none.
+    """
+    if not element_id:
+        return None
+    entry = element_catalog.get(element_id)
+    if entry is not None:
+        return entry
+    key = element_catalog_key(element_id)
+    return element_catalog.get(key) if key != element_id else None
+
 # XML namespaces
 NAMESPACES = {
     "xlink": "http://www.w3.org/1999/xlink",

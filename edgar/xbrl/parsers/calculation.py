@@ -17,7 +17,7 @@ set. One role may legally be split across several extended links, or files.
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
-from edgar.xbrl.core import extract_element_id
+from edgar.xbrl.core import catalog_entry, extract_element_id
 from edgar.xbrl.models import (
     CalculationArc,
     CalculationNode,
@@ -282,14 +282,7 @@ class CalculationParser(BaseParser):
         )
 
         # Add element information if available
-        elem_info = None
-        if element_id in self.element_catalog:
-            elem_info = self.element_catalog[element_id]
-        else:
-            # Try alternative element ID formats (colon vs underscore)
-            alt_element_id = element_id.replace(':', '_') if ':' in element_id else element_id.replace('_', ':')
-            if alt_element_id in self.element_catalog:
-                elem_info = self.element_catalog[alt_element_id]
+        elem_info = catalog_entry(self.element_catalog, element_id)
 
         if elem_info:
             node.balance_type = elem_info.balance

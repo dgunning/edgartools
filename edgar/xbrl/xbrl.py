@@ -32,6 +32,8 @@ from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import (
+    catalog_entry,
+    element_catalog_key,
     STANDARD_LABEL,
     STANDARD_TAXONOMIES,
     normalize_decimals,
@@ -66,6 +68,26 @@ _DISCLOSURE_CONCEPT_RE = re.compile(r"disclosures?abstract$", re.IGNORECASE)
 # A prefixed QName (prefix:local, both NCNames). A typed dimension value that is
 # one names a concept; any other typed value ('10:30') is data, kept as filed.
 _QNAME = re.compile(r"^[A-Za-z_][\w.-]*:[A-Za-z_][\w.-]*$")
+
+# Display-label roles, preferred in this order when a concept has no standard label.
+_FALLBACK_LABEL_ROLES = (
+    'http://www.xbrl.org/2003/role/terseLabel',
+    'http://www.xbrl.org/2003/role/verboseLabel',
+)
+_DOCUMENTATION_ROLE = 'http://www.xbrl.org/2003/role/documentation'
+
+
+def _element_label(labels: Optional[Dict[str, str]]) -> Optional[str]:
+    """A concept's display label: the standard label, else terse or verbose,
+    else any other label role. Documentation is a definition, not a label, so
+    it is never used (edgartools-gtmsn: a documentation-only concept exported
+    its definition as ``element_label``)."""
+    if not labels:
+        return None
+    for role in (STANDARD_LABEL, *_FALLBACK_LABEL_ROLES):
+        if labels.get(role):
+            return labels[role]
+    return next((text for role, text in labels.items() if role != _DOCUMENTATION_ROLE and text), None)
 
 # The section sense of the word, kept deliberately generous: a definition that
 # matches here keeps the classification it already had, so a false positive
@@ -2060,7 +2082,7 @@ class XBRL:
         weight = None   # Calculation weight from calculation linkbase
 
         # Get balance from element catalog
-        element_id_normalized = element_id.replace(':', '_')
+        element_id_normalized = element_catalog_key(element_id)
         if element_id_normalized in self.element_catalog:
             element = self.element_catalog[element_id_normalized]
             balance = element.balance
@@ -3253,7 +3275,9 @@ class XBRL:
             dim_value = dim_value.replace(":", "_")
         dim_label = dim_name
         mem_label = dim_value
-        dim_element = self.element_catalog.get(dim_name)
+        # The axis is a QName too: looked up raw it never matched, and its row
+        # keys read 'us-gaap:StatementBusinessSegmentsAxis: ...' (edgartools-gtmsn).
+        dim_element = catalog_entry(self.element_catalog, dim_name)
         mem_element = self.element_catalog.get(dim_value)
 
         # Try to get human-readable dimension name
@@ -3625,22 +3649,8 @@ class XBRL:
         )
 
     def _element_catalog_entry(self, element_id: Optional[str]):
-        """Catalog entry for a concept id. The id itself is not rewritten.
-
-        Try the exact key first. A qualified id (``prefix:Local_Name``) then
-        tries the parser's namespace-separator spelling (``prefix_Local_Name``):
-        only the first colon changes, the same boundary as
-        ``BaseParser._normalize_element_id`` and ``facts._concept_spellings``.
-        An exact entry is never replaced by that fallback, and a local name
-        is never searched on its own. (GH #1711)
-        """
-        if not element_id:
-            return None
-        element = self.element_catalog.get(element_id)
-        if element is not None or ':' not in element_id:
-            return element
-        prefix, local_name = element_id.split(':', 1)
-        return self.element_catalog.get(f"{prefix}_{local_name}")
+        """Catalog entry for a concept id in either spelling (GH #1711); see ``core.catalog_entry``."""
+        return catalog_entry(self.element_catalog, element_id)
 
     def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:
         """
@@ -3701,7 +3711,7 @@ class XBRL:
                 context = self.contexts[fact.context_ref]
 
                 # Add period information
-                if 'period' in context.model_dump() and context.period:
+                if context.period:
                     fact_dict['period_type'] = context.period.get('type')
                     if fact_dict['period_type'] == 'instant':
                         fact_dict['period_instant'] = context.period.get('instant')
@@ -3710,11 +3720,11 @@ class XBRL:
                         fact_dict['period_end'] = context.period.get('endDate')
 
                 # Add entity information
-                if 'entity' in context.model_dump() and context.entity:
+                if context.entity:
                     fact_dict['entity_identifier'] = context.entity.get('identifier')
 
                 # Add dimensions
-                if 'dimensions' in context.model_dump() and context.dimensions:
+                if context.dimensions:
                     for dim_name, dim_value in context.dimensions.items():
                         dim_key = f"dim_{dim_name.replace(':', '_')}"
                         fact_dict[dim_key] = dim_value
@@ -3728,14 +3738,7 @@ class XBRL:
                 fact_dict['element_balance'] = element.balance
 
                 # Add label
-                label = None
-                if element.labels:
-                    # Try standard label first
-                    label = element.labels.get(STANDARD_LABEL)
-                    if not label:
-                        # Take first available label
-                        label = next(iter(element.labels.values()), None)
-                fact_dict['element_label'] = label
+                fact_dict['element_label'] = _element_label(element.labels)
 
             fact_data.append(fact_dict)
 
