@@ -145,3 +145,4 @@ These older exception names resolved to the same objects in 5.x and emitted a `D
 
 - [Common Pitfalls](../common-pitfalls.md)
 - [Upgrading to 6.0](../upgrade/6.0.md)
+- [Upgrading to 6.1](../upgrade/6.1.md)
