@@ -1173,6 +1173,7 @@ class EarningsRelease:
         self._document = None
         self._tables: Optional[List[FinancialTable]] = None
         self._scale: Optional[Scale] = None
+        self._declared_scales: frozenset = frozenset()
 
     @classmethod
     def from_filing(cls, filing: 'Filing') -> Optional['EarningsRelease']:
@@ -1243,14 +1244,13 @@ class EarningsRelease:
             _parens_millions = r'\((?:dollars |amounts |figures )?in\s+millions'
             _parens_thousands = r'\((?:dollars |amounts |figures )?in\s+thousands'
             _parens_billions = r'\((?:dollars |amounts |figures )?in\s+billions'
-            if re.search(_parens_millions, text):
-                self._scale = Scale.MILLIONS
-            elif re.search(_parens_thousands, text):
-                self._scale = Scale.THOUSANDS
-            elif re.search(_parens_billions, text):
-                self._scale = Scale.BILLIONS
-            else:
-                self._scale = Scale.UNITS
+            found = {scale for scale, pattern in ((Scale.MILLIONS, _parens_millions),
+                                                  (Scale.THOUSANDS, _parens_thousands),
+                                                  (Scale.BILLIONS, _parens_billions))
+                     if re.search(pattern, text)}
+            self._declared_scales = frozenset(found)
+            self._scale = next((scale for scale in (Scale.MILLIONS, Scale.THOUSANDS, Scale.BILLIONS)
+                                if scale in found), Scale.UNITS)
         return self._scale
 
     @property
@@ -1468,16 +1468,6 @@ class EarningsRelease:
                 logger.debug(f"Skipping table {idx}: empty or insufficient rows (shape={df.shape})")
                 continue
 
-            statement_type = _classify_statement(table_node, df)
-            scale = _detect_table_scale(table_node, df, doc_scale)
-            title = _extract_title(table_node)
-            context, _ = _table_context(table_node, title)
-            currency = _table_currency(table_node, context)
-
-            # Detect periods using year pattern (handles any year from 1900-2099)
-            periods = [c for c in df.columns
-                      if c and str(c).strip() and _YEAR_PATTERN.search(str(c))]
-
             # Build row types as a positional list with parent context
             # (list avoids collisions when duplicate labels like "Basic" appear
             # in both EPS and share-count sections)
@@ -1486,6 +1476,16 @@ class EarningsRelease:
             for i, idx_label in enumerate(df.index):
                 parent = parent_contexts[i] if i < len(parent_contexts) else ''
                 row_types.append(_classify_row_type(str(idx_label), parent))
+
+            statement_type = _classify_statement(table_node, df)
+            scale = _detect_table_scale(table_node, df, doc_scale, self._declared_scales, row_types)
+            title = _extract_title(table_node)
+            context, _ = _table_context(table_node, title)
+            currency = _table_currency(table_node, context)
+
+            # Detect periods using year pattern (handles any year from 1900-2099)
+            periods = [c for c in df.columns
+                      if c and str(c).strip() and _YEAR_PATTERN.search(str(c))]
 
             table = FinancialTable(
                 dataframe=df,
@@ -1724,7 +1724,60 @@ def _classify_statement(table_node, df: pd.DataFrame) -> StatementType:
     return StatementType.UNKNOWN
 
 
-def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> Scale:
+# An amount cell: '431.5', '110,662', '(9,283)', '$ 22,185,750'. A bare year or a date
+# ('2025', '3/31/2025') is a period header, not an amount.
+_AMOUNT_CELL = re.compile(r'^\(?\$?\s*-?\d[\d,]*(?:\.\d+)?\s*\)?%?$')
+_YEAR_CELL = re.compile(r'^(?:19|20)\d\d$')
+_TITLE_ROW_LIMIT = 12
+
+
+def _title_rows(table_node):
+    """The rows before a table's first row of amounts, at most ``_TITLE_ROW_LIMIT``.
+
+    A row of amounts has a text label and at least one amount that is not a year.
+    """
+    for row in table_node.rows[:_TITLE_ROW_LIMIT]:
+        yield row
+        cells = [c.content.strip() for c in row.cells if c.content and c.content.strip()]
+        if (cells and not _AMOUNT_CELL.match(cells[0])
+                and any(_AMOUNT_CELL.match(c) and not _YEAR_CELL.match(c) for c in cells[1:])):
+            return
+
+
+# No filer reports an amount near $10 trillion (JPMorgan's total assets are about $4.5T).
+_IMPLAUSIBLE_AMOUNT = 1e13
+
+
+def _plausible_inherited_scale(df: pd.DataFrame, scale: Scale, declared=frozenset(),
+                               row_types: Optional[List[RowType]] = None) -> Scale:
+    """The document's scale for a table that declares none, unless it is impossible.
+
+    A table that declares no scale inherits the document's. That is right when one
+    declaration covers every table (AMD prints "(in millions)" once), and wrong when
+    the declaration belongs to another table: Snail's statement of operations prints
+    whole dollars, Revenues, net $ 22,185,750, and as millions that is $22 trillion.
+    Position cannot tell the two apart, so magnitude does: when the table's largest
+    amount, scaled, reaches ``_IMPLAUSIBLE_AMOUNT``, the next smaller scale the
+    document ``declared`` is tried (Netflix declares millions and thousands; its
+    statements are in thousands), and with none left the table is whole dollars
+    (GH #1779). Only amount rows are measured: a share count such as 33,239,620
+    weighted shares is not scaled (Alta Equipment).
+    """
+    if scale == Scale.UNITS or df.empty:
+        return scale
+    values = df.to_numpy()
+    if row_types is not None and len(row_types) == len(values):
+        values = values[[row_type == RowType.AMOUNT for row_type in row_types]]
+    largest = pd.to_numeric(pd.Series(values.ravel()), errors='coerce').abs().max()
+    if pd.isna(largest):
+        return scale
+    candidates = [scale, *sorted((s for s in declared if s.value < scale.value),
+                                 key=lambda s: s.value, reverse=True)]
+    return next((s for s in candidates if largest * s.value < _IMPLAUSIBLE_AMOUNT), Scale.UNITS)
+
+
+def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale,
+                        declared_scales=frozenset(), row_types: Optional[List[RowType]] = None) -> Scale:
     """Detect scale from table caption, headers, early content, footer, or index labels."""
     # 1. Check caption
     if table_node.caption:
@@ -1744,8 +1797,10 @@ def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> S
                 elif 'billion' in content:
                     return Scale.BILLIONS
 
-    # 3. Check first 3 data rows
-    for row in table_node.rows[:3]:
+    # 3. Check the title rows: a statement often prints its company name, title,
+    # "(Unaudited)" and period rows before "(in millions)" (Mueller Water: row 6;
+    # GH #1779). Scanning only the first 3 rows missed it.
+    for row in _title_rows(table_node):
         for cell in row.cells:
             content = cell.content.lower()
             if 'in millions' in content or '(millions)' in content:
@@ -1793,7 +1848,7 @@ def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> S
         elif 'in billions' in lower or '(billions)' in lower:
             return Scale.BILLIONS
 
-    return default_scale
+    return _plausible_inherited_scale(df, default_scale, declared_scales, row_types)
 
 
 def _extract_title(table_node) -> Optional[str]:
