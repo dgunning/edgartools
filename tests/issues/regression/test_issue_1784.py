@@ -15,6 +15,7 @@ always says how many positions have an industry, and an industry filter that
 matches nothing while holdings lack an industry warns instead of implying zero
 exposure. ``by_industry()`` and ``filter()`` populations are unchanged.
 """
+import json
 import logging
 import math
 from decimal import Decimal
@@ -27,6 +28,7 @@ from edgar.bdc.investments import (
     PortfolioInvestment,
     PortfolioInvestments,
     _reported_industry_rows,
+    _reported_total_fair_value,
 )
 
 AXIS = 'dim_us-gaap_EquitySecuritiesByIndustryAxis'
@@ -119,40 +121,74 @@ def test_empty_industry_filter_warns_when_industries_are_missing(caplog):
     assert caplog.text == ''
 
 
-# ---------------------------------------------------------------- network
+# ---------------------------------------------------------------- real filings, from extracted facts
+#
+# tests/fixtures/bdc/industry_breakdown_1784/ holds the fact rows these filings
+# report for the two concepts read here, verbatim from SEC (see its README).
+# The portfolio is built the way from_xbrl builds it: the reported total and
+# the breakdown at the report date, with no holdings.
 
-@pytest.mark.network
-@pytest.mark.vcr
-def test_arcc_fy2025_reported_industry_breakdown(caplog):
+def _from_fixture(name):
+    from tests.paths import FIXTURES_DIR
+
+    data = json.loads((FIXTURES_DIR / 'bdc' / 'industry_breakdown_1784' / name).read_text())
+    period = data['period_of_report']
+    reported_total, _ = _reported_total_fair_value(data['facts'], period)
+    portfolio = PortfolioInvestments([], period=period, reported_total_fair_value=reported_total,
+                                     reported_industry_rows=_reported_industry_rows(data['facts'], period))
+    return data, portfolio
+
+
+@pytest.mark.fast
+def test_arcc_fy2025_reported_industry_breakdown():
     """Ares Capital 10-K for 2025-12-31, accession 0001287750-26-000006."""
-    filing = Filing(cik=1287750, company='ARES CAPITAL CORP', form='10-K',
-                    filing_date='2026-02-04', accession_no='0001287750-26-000006')
-    portfolio = PortfolioInvestments.from_xbrl(filing.xbrl())
-    assert len(portfolio) == 1417
-    assert portfolio.industry_coverage == 0.0
+    data, portfolio = _from_fixture('arcc_10k_0001287750-26-000006.json')
+    assert data['accession_no'] == '0001287750-26-000006'
+    assert portfolio.reported_total_fair_value == Decimal('29484800000')
 
     df = portfolio.reported_industry_breakdown()
+    assert list(df.columns) == REPORTED_INDUSTRY_COLUMNS
     assert len(df) == 23
     assert df['fair_value'].sum() == 29_484_800_000
-    assert portfolio.reported_total_fair_value == Decimal('29484800000')
-    assert df.attrs['sum_fair_value'] == 29_484_800_000
-    assert df.attrs['difference'] == 0
+    assert df.attrs == {'sum_fair_value': 29_484_800_000, 'reported_total_fair_value': 29_484_800_000,
+                        'difference': 0}
 
     software = df[df['industry'] == 'Software and Services'].iloc[0]
     assert software['fair_value'] == 7_032_300_000
     assert round(software['pct_of_reported_total'], 4) == 0.2385   # calculated
     assert software['pct_of_net_assets'] == 0.4912                 # filed, as a fraction
 
-    context = portfolio.to_context()
-    assert 'Industry known for 0 of 1417 positions' in context
-    assert 'Reported industry breakdown: 23 industries' in context
+    # The prior year's 22 subtotals are in the filing but never used.
+    prior = [f for f in data['facts'] if f['period_instant'] == '2024-12-31' and AXIS in f and f['concept'] == FV]
+    assert len(prior) == 22
+    assert len(_reported_industry_rows(data['facts'], '2024-12-31')) == 22
+    assert 'Reported industry breakdown: 23 industries' in portfolio.to_context()
 
-    with caplog.at_level(logging.WARNING, logger='edgar.bdc.investments'):
-        subset = portfolio.filter(industry='software')
-    assert len(subset) == 0
-    assert '1417 of 1417 holdings have no industry' in caplog.text
-    assert subset.reported_industry_breakdown().empty
 
+@pytest.mark.fast
+def test_fsk_fy2025_reported_industry_breakdown():
+    """FS KKR 10-K for 2025-12-31, accession 0001628280-26-011734: rounded subtotals."""
+    _, portfolio = _from_fixture('fsk_10k_0001628280-26-011734.json')
+    df = portfolio.reported_industry_breakdown()
+    assert len(df) == 24
+    assert df.iloc[0]['industry'] == 'Software & Services'
+    assert df.iloc[0]['fair_value'] == 2_134_000_000
+    assert df['pct_of_net_assets'].isna().all()   # not filed on these members, never derived
+    assert df.attrs == {'sum_fair_value': 13_009_000_000, 'reported_total_fair_value': 13_008_600_000,
+                        'difference': 400_000}
+
+
+@pytest.mark.fast
+def test_main_street_reports_no_breakdown():
+    """Main Street 10-K for 2025-12-31, accession 0001396440-26-000016: no industry subtotals."""
+    _, portfolio = _from_fixture('main_10k_0001396440-26-000016.json')
+    assert portfolio.reported_total_fair_value == Decimal('5518117000')
+    df = portfolio.reported_industry_breakdown()
+    assert df.empty
+    assert list(df.columns) == REPORTED_INDUSTRY_COLUMNS
+
+
+# ---------------------------------------------------------------- network
 
 @pytest.mark.network
 @pytest.mark.vcr
@@ -160,8 +196,8 @@ def test_fsk_has_holding_industries_and_a_separate_breakdown():
     """FS KKR 10-K for 2025-12-31, accession 0001628280-26-011734.
 
     617 of 654 holdings carry an industry, and the filing also reports 24
-    industry subtotals summing to 13,009.0M against a 13,008.6M total
-    (rounded subtotals). The breakdown is the filer's, not a regrouping of rows.
+    industry subtotals. The breakdown is the filer's, not a regrouping of
+    rows, and a filtered subset does not inherit it.
     """
     filing = Filing(cik=1422183, company='FS KKR Capital Corp', form='10-K',
                     filing_date='2026-02-25', accession_no='0001628280-26-011734')
@@ -171,26 +207,8 @@ def test_fsk_has_holding_industries_and_a_separate_breakdown():
 
     df = portfolio.reported_industry_breakdown()
     assert len(df) == 24
-    assert df.iloc[0]['industry'] == 'Software & Services'
-    assert df.iloc[0]['fair_value'] == 2_134_000_000
-    assert df.attrs['sum_fair_value'] == 13_009_000_000
-    assert df.attrs['reported_total_fair_value'] == 13_008_600_000
     assert df.attrs['difference'] == 400_000
 
     software = portfolio.filter(industry='software')
-    assert len(software) > 0
+    assert len(software) == 142
     assert software.reported_industry_breakdown().empty
-
-
-@pytest.mark.network
-@pytest.mark.vcr
-def test_main_street_reports_no_breakdown():
-    """Main Street 10-K for 2025-12-31, accession 0001396440-26-000016: no industry subtotals."""
-    filing = Filing(cik=1396440, company='Main Street Capital CORP', form='10-K',
-                    filing_date='2026-02-27', accession_no='0001396440-26-000016')
-    portfolio = PortfolioInvestments.from_xbrl(filing.xbrl())
-    df = portfolio.reported_industry_breakdown()
-    assert df.empty
-    assert list(df.columns) == REPORTED_INDUSTRY_COLUMNS
-    assert portfolio.reported_total_fair_value == Decimal('5518117000')
-    assert 'Industry known for 21 of 674 positions' in portfolio.to_context(detail='minimal')
