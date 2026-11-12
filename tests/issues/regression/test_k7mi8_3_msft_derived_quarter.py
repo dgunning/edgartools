@@ -12,11 +12,13 @@ the Q1 10-Q (0001193125-25-256321) filed $1,007M for Q1, later recast to
 $(3,907)M (the comparative in 10-Q 0001193125-26-436133). The default
 ``discrete_quarters=True`` path showed Q2 = 6,024 - 1,007 = $5,017M.
 
-Decision (maintainer, 2026-11-11), latest vintage:
+Decision (maintainer, 2026-11-11, rule 2 amended 2026-11-12), latest vintage:
 1. A three-month value an input filing presents wins over derivation, in the
    default path as with ``include_quarterly=True`` (the GH #1697 merge rule).
-2. A derived quarter's operands are each the value from the latest-filed input
-   that presents that exact period.
+2. A derived quarter never mixes vintages: the longer period's value is the
+   latest-filed one, and the shorter value comes from that same filing, or else
+   the latest input filed before it, never from a later filing. Inputs are ordered
+   newest first (source index; ``XBRLS.from_filings`` sorts by filing date).
 Back-deriving a recast Q1 as H1 - Q2 from one filing is not done: with only the
 Q2 and Q1 10-Qs as input, Q1 stays $1,007M.
 """
@@ -80,26 +82,46 @@ def _statement(source_index, periods, lines):
     }
 
 
-@pytest.mark.fast
-def test_derived_quarter_takes_each_operand_from_the_latest_filing():
-    """No three-month value is filed for the derived quarter, and two inputs disagree
-    on the shorter period. Synthetic, shaped like NVDA's FY2026 purchases of debt
-    securities: the Q2 FY2026 10-Q filed $14,358M for six months and the Q2 FY2027
-    10-Q recast that comparative to $14,108M; the nine months are from the Q3 10-Q."""
-    current_six = "duration_2026-01-26_2026-07-26"
-    six = "duration_2025-01-27_2025-07-27"
-    nine = "duration_2025-01-27_2025-10-26"
-    q3 = "duration_2025-07-28_2025-10-26"
-    statements = [  # newest filing first
-        _statement(0, [current_six, six], {"Debt": {current_six: 9_000, six: 14_108},
-                                           "Other": {current_six: 1, six: 2}}),
-        _statement(1, [nine], {"Debt": {nine: 20_076}, "Other": {nine: 3}}),
-        _statement(2, [six], {"Debt": {six: 14_358}, "Other": {six: 2}}),
-    ]
+SIX = "duration_2025-01-27_2025-07-27"
+NINE = "duration_2025-01-27_2025-10-26"
+Q3 = "duration_2025-07-28_2025-10-26"
+CURRENT_SIX = "duration_2026-01-26_2026-07-26"
+
+
+def _stitch(statements):
     stitcher = StatementStitcher()
     stitcher.stitch_statements(statements, standard=False, discrete_quarters=True)
-    assert stitcher.data["Debt"][q3]["value"] == 20_076 - 14_108  # main: 20,076 - 14,358
-    assert stitcher.data["Debt"][six]["value"] == 14_108          # the operand cell too
+    return stitcher.data["Debt"]
+
+
+@pytest.mark.fast
+def test_a_later_recast_of_the_shorter_period_alone_does_not_change_the_quarter():
+    """No three-month value is filed. Synthetic, shaped like NVDA's FY2026 purchases
+    of debt securities: the Q2 FY2026 10-Q filed $14,358M for six months, the Q3 10-Q
+    $20,076M for nine, and the Q2 FY2027 10-Q recast the six months to $14,108M. The
+    nine months were never recast, so Q3 pairs them with the six months as filed
+    before them; 20,076 - 14,108 would mix vintages."""
+    debt = _stitch([  # newest filing first
+        _statement(0, [CURRENT_SIX, SIX], {"Debt": {CURRENT_SIX: 9_000, SIX: 14_108},
+                                           "Other": {CURRENT_SIX: 1, SIX: 2}}),
+        _statement(1, [NINE], {"Debt": {NINE: 20_076}, "Other": {NINE: 3}}),
+        _statement(2, [SIX], {"Debt": {SIX: 14_358}, "Other": {SIX: 2}}),
+    ])
+    assert debt[Q3]["value"] == 20_076 - 14_358
+    assert debt[SIX]["value"] == 14_108  # the six-month column shows the latest filing
+
+
+@pytest.mark.fast
+def test_a_later_recast_of_both_periods_uses_the_later_pair():
+    """A later filing that presents both the nine and the six months recast is the
+    latest vintage of the longer period, so its own six months are subtracted."""
+    debt = _stitch([
+        _statement(0, [NINE, SIX], {"Debt": {NINE: 19_800, SIX: 14_108},
+                                    "Other": {NINE: 3, SIX: 2}}),
+        _statement(1, [NINE], {"Debt": {NINE: 20_076}, "Other": {NINE: 3}}),
+        _statement(2, [SIX], {"Debt": {SIX: 14_358}, "Other": {SIX: 2}}),
+    ])
+    assert debt[Q3]["value"] == 19_800 - 14_108  # main: 20,076 - 14,358
 
 
 @pytest.mark.fast
