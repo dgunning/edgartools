@@ -390,6 +390,16 @@ print(f"Fiscal Year: {entity_info.get('fiscal_year')}")
 print(f"Fiscal Period: {entity_info.get('fiscal_period')}")
 ```
 
+Three keys hold dates, and they mean different things:
+
+| Key | Type | Meaning |
+|---|---|---|
+| `reporting_end_date` | `datetime.date` or None | the period the document reports on: `dei:DocumentPeriodEndDate` as a date |
+| `document_period_end_date` | str or None | the same fact as filed |
+| `max_instant_context_date` | `datetime.date` or None | the latest instant among all contexts, usually the cover's share-count date |
+
+Apple's FY2023 10-K reports to 2023-09-30 (`reporting_end_date`) and counts its shares on 2023-10-20 (`max_instant_context_date`). Before GH #1208, `reporting_end_date` held the second date.
+
 ## Error Handling
 
 ### Missing Statements

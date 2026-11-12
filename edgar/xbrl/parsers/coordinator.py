@@ -74,6 +74,7 @@ class XBRLParser:
             'identifier': None,
             'document_type': None,
             'reporting_end_date': None,
+            'max_instant_context_date': None,
             'document_period_end_date': None,
             'fiscal_year': None,
             'fiscal_period': None,

@@ -7,7 +7,7 @@ units, footnotes, and entity information extraction.
 
 import math
 import re
-from datetime import datetime
+from datetime import date, datetime
 from decimal import MAX_EMAX, MIN_EMIN, ROUND_HALF_EVEN, Decimal, Inexact, InvalidOperation, localcontext
 from decimal import Context as DecimalContext
 from pathlib import Path
@@ -74,6 +74,16 @@ _STRUCTURAL_ELEMENTS = frozenset({
 # Axes whose member names another legal entity: a DEI fact on one of them is a
 # co-registrant's, not the filer's (GH #1420, #1710).
 _ENTITY_AXES = ('dei:LegalEntityAxis', 'srt:ConsolidatedEntitiesAxis')
+
+def _parse_iso_date(value: Optional[str]) -> Optional[date]:
+    """A ``YYYY-MM-DD`` string as a date, or None when it is absent or not one."""
+    if not value:
+        return None
+    try:
+        return datetime.strptime(value.strip(), '%Y-%m-%d').date()
+    except ValueError:
+        return None
+
 
 def _is_nil(element: ET.Element) -> bool:
     """Whether an element is marked ``xsi:nil``: the rule the inline extractor shares."""
@@ -1208,6 +1218,23 @@ class InstanceParser(BaseParser):
         collect_footnote_text(footnote_elem, parts)
         return normalize_footnote_text(parts)
 
+    def _max_instant_context_date(self) -> Optional[date]:
+        """The latest instant among all contexts, whatever the fact in it.
+
+        Usually the cover's share-count date, after the period end: Apple's
+        FY2023 10-K reports to 2023-09-30 and counts shares on 2023-10-20.
+        Until GH #1208 this was ``reporting_end_date``.
+        """
+        latest = None
+        for ctx in self.contexts.values():
+            period = getattr(ctx, 'period', {})
+            if period.get('type') != 'instant':
+                continue
+            instant = _parse_iso_date(period.get('instant'))
+            if instant is not None and (latest is None or instant > latest):
+                latest = instant
+        return latest
+
     def _extract_entity_info(self) -> None:
         """Extract entity information from contexts and DEI facts."""
         try:
@@ -1264,7 +1291,9 @@ class InstanceParser(BaseParser):
                 'ticker':                  get_dei('TradingSymbol'),
                 'identifier':              identifier,
                 'document_type':           get_dei('DocumentType'),
-                'reporting_end_date':      None,
+                # The period the document reports on, as a date (GH #1208)
+                'reporting_end_date': _parse_iso_date(get_dei('DocumentPeriodEndDate')),
+                'max_instant_context_date': self._max_instant_context_date(),
                 'document_period_end_date':get_dei('DocumentPeriodEndDate'),
                 'fiscal_year':             get_dei('DocumentFiscalYearFocus','FiscalYearFocus','FiscalYear'),
                 'fiscal_period':           get_dei('DocumentFiscalPeriodFocus','FiscalPeriodFocus'),
@@ -1274,20 +1303,6 @@ class InstanceParser(BaseParser):
                 'quarterly_report':        False,
                 'amendment':               False,
             })
-
-            # Determine reporting_end_date from contexts
-            for ctx in self.contexts.values():
-                period = getattr(ctx, 'period', {})
-                if period.get('type') == 'instant':
-                    ds = period.get('instant')
-                    if ds:
-                        try:
-                            dt_obj = datetime.strptime(ds, '%Y-%m-%d').date()
-                            curr = self.entity_info['reporting_end_date']
-                            if curr is None or dt_obj > curr:
-                                self.entity_info['reporting_end_date'] = dt_obj
-                        except Exception:
-                            pass
 
             # Parse fiscal year end date into month/day
             fye = get_dei('CurrentFiscalYearEndDate','FiscalYearEnd')
