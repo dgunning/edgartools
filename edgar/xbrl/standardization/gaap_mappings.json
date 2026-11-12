@@ -4933,6 +4933,30 @@
     "first_year": 2015,
     "last_year": 2025
   },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectContinuingOperations": {
+    "standard_tags": [
+      "NetChangeInCashContinuingOpsExFX"
+    ],
+    "display_name": "Net Change in Cash, Continuing Operations, Excluding FX Effect",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 2,
+    "comment": "Increase (decrease) in cash, cash equivalents, restricted cash and restricted cash equivalents, excluding the effect of exchange rate changes, attributable to continuing operations. A component of the period's change in cash, not the whole: it is never the entity's total change in cash (NetChangeInCash), even when no discontinued-operations row is reported."
+  },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations": {
+    "standard_tags": [
+      "NetChangeInCashDiscontinuedOpsExFX"
+    ],
+    "display_name": "Net Change in Cash, Discontinued Operations, Excluding FX Effect",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 4,
+    "comment": "Increase (decrease) in cash, cash equivalents, restricted cash and restricted cash equivalents, excluding the effect of exchange rate changes, attributable to discontinued operations, as FASB defines the element (2025 and 2026 taxonomies). A component of the period's change in cash, not the whole (NetChangeInCash). Some filers use it for a held-for-sale disposal group that is not a discontinued operation; check the filed caption."
+  },
   "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect": {
     "standard_tags": [
       "NetChangeInCash"
@@ -4948,6 +4972,30 @@
     "years_present": 12,
     "first_year": 2012,
     "last_year": 2025
+  },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations": {
+    "standard_tags": [
+      "NetChangeInCashContinuingOps"
+    ],
+    "display_name": "Net Change in Cash, Continuing Operations, Including FX Effect",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 22,
+    "comment": "Increase (decrease) in cash, cash equivalents, restricted cash and restricted cash equivalents, including the effect of exchange rate changes, attributable to continuing operations. A component of the period's change in cash, not the whole: it is never the entity's total change in cash (NetChangeInCash), even when no discontinued-operations row is reported."
+  },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations": {
+    "standard_tags": [
+      "NetChangeInCashDiscontinuedOps"
+    ],
+    "display_name": "Net Change in Cash, Discontinued Operations, Including FX Effect",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 15,
+    "comment": "Increase (decrease) in cash, cash equivalents, restricted cash and restricted cash equivalents, including the effect of exchange rate changes, attributable to discontinued operations, as FASB defines the element (2025 and 2026 taxonomies). A component of the period's change in cash, not the whole (NetChangeInCash). Some filers use it for a held-for-sale disposal group that is not a discontinued operation; check the filed caption."
   },
   "CashDivestedFromDeconsolidation": {
     "standard_tags": [

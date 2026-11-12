@@ -261,6 +261,18 @@ The number of standardized concepts varies by provider:
 | `IncomeTaxRefundsStateLocal` | Income Tax Refunds Received, State and Local | 1 | `ProceedsFromIncomeTaxRefundStateAndLocal` |
 | `IncomeTaxRefundsForeign` | Income Tax Refunds Received, Foreign | 1 | `ProceedsFromIncomeTaxRefundForeign` |
 
+### Change in Cash by Continuing and Discontinued Operations
+
+The element names below share the prefix
+`CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecrease`.
+
+| Standard Concept | Display Name | XBRL Tags | Examples |
+|------------------|--------------|-----------|----------|
+| `NetChangeInCashContinuingOps` | Net Change in Cash, Continuing Operations, Including FX Effect | 1 | `...IncludingExchangeRateEffectContinuingOperations` |
+| `NetChangeInCashContinuingOpsExFX` | Net Change in Cash, Continuing Operations, Excluding FX Effect | 1 | `...ExcludingExchangeRateEffectContinuingOperations` |
+| `NetChangeInCashDiscontinuedOps` | Net Change in Cash, Discontinued Operations, Including FX Effect | 1 | `...IncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations` |
+| `NetChangeInCashDiscontinuedOpsExFX` | Net Change in Cash, Discontinued Operations, Excluding FX Effect | 1 | `...ExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations` |
+
 ---
 
 ## Concept Details
@@ -381,6 +393,31 @@ result.primary_display_name  # 'Income Taxes Paid, Federal, Net of Refunds'
   total and takes no concept; do not add New Jersey's $15M to the $83M.
 - A net-of-refunds amount is negative in a year when refunds exceed payments (Allegro
   MicroSystems, FY2026: $30,889K federal refund, $-27,081K net taxes paid).
+
+### Change in Cash by Continuing and Discontinued Operations
+
+The four concepts are components of the period's change in cash, never the whole. Only the
+undivided elements map to `NetChangeInCash`; a continuing-operations row does not, even when
+the filer reports no discontinued-operations row. Nothing is summed or derived from them.
+
+```python
+from edgar.xbrl.standardization.reverse_index import get_reverse_index
+
+element = ("us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+           "PeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations")
+get_reverse_index().lookup(element).primary_concept  # 'NetChangeInCashContinuingOps'
+```
+
+- Conagra, FY2025 (from the FY2026 10-K): net change in cash including held-for-sale balances
+  $-11.0M is `NetChangeInCash`, the held-for-sale change $-1.3M is
+  `NetChangeInCashDiscontinuedOps`, and the continuing-tagged $-9.7M is
+  `NetChangeInCashContinuingOps`.
+- FASB defines the `DisposalGroupIncludingDiscontinuedOperations` elements as attributable to
+  discontinued operations, and the concept follows the element. Conagra's disposal groups are
+  held for sale and not discontinued operations, so read the filed caption before treating
+  that row as discontinued operations.
+- DXC, FY2026: the only net-change row is continuing-tagged ($-59M), so the statement has
+  `NetChangeInCashContinuingOps` and no `NetChangeInCash` row.
 
 ---
 
