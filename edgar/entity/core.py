@@ -582,7 +582,11 @@ class Company(Entity):
 
     @property
     def tickers(self):
-        """Get all ticker symbols for this company."""
+        """Get all ticker symbols for this company.
+
+        This is SEC's current ticker list. For the securities a filing registered,
+        with their class of stock, use ``filing.obj().trading_symbols``.
+        """
         if hasattr(self.data, 'tickers'):
             return self.data.tickers
         return []

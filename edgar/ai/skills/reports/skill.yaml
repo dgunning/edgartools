@@ -38,6 +38,9 @@ patterns:
       tenk.subsidiaries                 # SubsidiaryList from EX-21 (TenK only), .to_dataframe()
       tenk.reports                      # Reports from FilingSummary.xml (statements, notes, details)
       tenk.notes                        # Notes collection (see "Notes & Disclosures" pattern below)
+      tenk.trading_symbols              # Securities the cover registered, in order: [{"symbol": "JPM",
+                                        #   "class_of_stock": "us-gaap:CommonStockMember", "context_ref": ...}, ...]
+                                        # [] without XBRL. Company.tickers is SEC's current list instead.
 
   - name: Notes & Disclosures
     when: Need the detail behind a financial statement number (debt terms, revenue recognition, leases, contingencies)
