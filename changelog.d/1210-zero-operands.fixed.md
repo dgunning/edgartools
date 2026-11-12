@@ -1,0 +1,1 @@
+**Balance-sheet validation mishandled operands of zero.** Zero total assets against liabilities and equity of $1,000,000,000 reported no imbalance because the percentage difference was forced to 0, and a reported total equity of 0 was replaced by parent equity, giving a false imbalance of 50 in a 500/500 case. Both now use the reported zero. (GH #1210)
