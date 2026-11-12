@@ -106,6 +106,27 @@ class CompanyReport:
             return extract_auditor_info(self.financials.xb)
         return None
 
+    @property
+    def trading_symbols(self) -> List[dict]:
+        """The securities this filing's cover registers, from its dei:TradingSymbol facts.
+
+        One dict per symbol, in document order: ``symbol``, ``class_of_stock``
+        (the member QName naming the security, such as
+        ``'us-gaap:CommonStockMember'``, or None) and ``context_ref``. The
+        first is the filing's ``ticker``. A filing without XBRL has none, so
+        the list is empty.
+
+        ``Company.tickers`` is SEC's current ticker list for the company; this
+        is what the filing itself registered.
+
+        Examples:
+            >>> tenk.trading_symbols[0]
+            {'symbol': 'JPM', 'class_of_stock': 'us-gaap:CommonStockMember', 'context_ref': 'c-2'}
+        """
+        if not self.financials or not self.financials.xb:
+            return []
+        return [dict(symbol) for symbol in self.financials.xb.entity_info.get('trading_symbols') or []]
+
     @cached_property
     def notes(self):
         """Notes to the financial statements — hierarchical, first-class access.
