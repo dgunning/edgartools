@@ -27,7 +27,7 @@ from edgar.exceptions import ValidationError
 from edgar.datatools import STR_DTYPE, null_column as _null_column
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import STANDARD_LABEL, iso4217_code, parse_date, unit_currency
-from edgar.xbrl.models import is_negated_label_role, select_display_label
+from edgar.xbrl.models import NIL_MEMBER_LABEL, is_negated_label_role, select_display_label
 
 
 # Probed once in edgar.datatools, where the entity path's declared schema reads it
@@ -755,7 +755,8 @@ class FactQuery:
 
         # Also update the 'label' column to match (GH-597 behavior for dimensional data)
         # Only update where we have a valid dimension_member_label
-        mask = df['dimension_member_label'].notna()
+        # A nil typed member's value is '' (GH #1751): it has no label to show.
+        mask = df['dimension_member_label'].notna() & (df['dimension_member_label'] != '')
         df.loc[mask, 'label'] = df.loc[mask, 'dimension_member_label']
 
         return df
@@ -1040,7 +1041,9 @@ class FactQuery:
                     # TypeError on any ordinary numeric fact. A fact with no
                     # numeric_value is not a number and cannot be aggregated.
                     numeric_value = fact.get('numeric_value')
-                    if dim_value and numeric_value is not None:
+                    # A nil typed member is '' and still a group (GH #1751);
+                    # only a fact without the axis is left out.
+                    if dim_value is not None and numeric_value is not None:
                         if dim_value not in groups:
                             groups[dim_value] = []
                         groups[dim_value].append(numeric_value)
@@ -1548,7 +1551,8 @@ class FactsView:
 
                             # Clean up labels (remove [Axis], [Member], etc.)
                             dim_label = dim_label.replace('[Axis]', '').replace('[Domain]', '').strip()
-                            mem_label = mem_label.replace('[Member]', '').strip()
+                            mem_label = (NIL_MEMBER_LABEL if dim_name in getattr(context, 'nil_dimensions', ())
+                                         else mem_label.replace('[Member]', '').strip())
 
                             dimension_metadata.append({
                                 'dimension': dim_name,

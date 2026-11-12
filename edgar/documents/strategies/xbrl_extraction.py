@@ -19,6 +19,7 @@ from edgar.documents.strategies.ixbrl_transforms import (
     negate_exactly,
 )
 from edgar.documents.types import XBRLFact
+from edgar.xmltools import is_xsi_nil
 
 logger = logging.getLogger(__name__)
 
@@ -116,8 +117,13 @@ class XBRLExtractor:
         if not context:
             return None
 
-        # Get fact value
-        value, issue = self._get_fact_value(element, escape=bool(context.get('escape')))
+        # Get fact value. Nil is read first: a nil fact's content is not a value
+        # to transform, scale or sign (Inline XBRL 1.1 section 11.2.3).
+        is_nil = is_xsi_nil(element)
+        if is_nil:
+            value, issue = self._relevant_content(element, escape=bool(context.get('escape'))).strip(), None
+        else:
+            value, issue = self._get_fact_value(element, escape=bool(context.get('escape')))
 
         # Create fact
         fact = XBRLFact(
@@ -133,6 +139,7 @@ class XBRLExtractor:
             escape=bool(context.get('escape')),
             continued_at=context.get('continuedAt'),
             fact_id=element.get('id'),
+            is_nil=is_nil,
         )
 
         # Resolve references
@@ -299,9 +306,12 @@ class XBRLExtractor:
             context_data.update(self._extract_period(context))
 
             # Extract dimensions
-            dimensions = self._extract_dimensions(context)
+            nil_dimensions: List[str] = []
+            dimensions = self._extract_dimensions(context, nil_dimensions)
             if dimensions:
                 context_data['dimensions'] = dimensions
+            if nil_dimensions:
+                context_data['nil_dimensions'] = nil_dimensions
 
             self.contexts[context_id] = context_data
 
@@ -328,12 +338,15 @@ class XBRLExtractor:
             }
         return {}
 
-    def _extract_dimensions(self, context: HtmlElement) -> Dict[str, str]:
+    def _extract_dimensions(self, context: HtmlElement,
+                            nil_dimensions: Optional[List[str]] = None) -> Dict[str, str]:
         """
         A context's dimensional members, keyed by axis.
 
         Members are carried in a segment or a scenario; the spec allows either
-        and filers use both.
+        and filers use both. A typed member the filer marked xsi:nil is '' and
+        its axis is appended to ``nil_dimensions``, as the instance parser
+        records it in ``Context.nil_dimensions`` (GH #1751).
         """
         dimensions: Dict[str, str] = {}
         for container_name in ('segment', 'scenario'):
@@ -348,7 +361,10 @@ class XBRLExtractor:
                 dim = member.get('dimension')
                 if dim:
                     child = next((c for c in member if isinstance(c.tag, str)), None)
-                    dimensions[dim] = (child.text or '').strip() if child is not None else ''
+                    nil = child is not None and is_xsi_nil(child)
+                    dimensions[dim] = (child.text or '').strip() if child is not None and not nil else ''
+                    if nil and nil_dimensions is not None and dim not in nil_dimensions:
+                        nil_dimensions.append(dim)
         return dimensions
 
     def _extract_units(self, units: List[HtmlElement]):
