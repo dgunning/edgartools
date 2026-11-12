@@ -275,6 +275,27 @@ print(f"Free Cash Flow: ${metrics['free_cash_flow']:,.0f}")
 
 `debt_to_assets` is **total liabilities divided by total assets**, as a fraction (Apple's fiscal 2023 balance sheet gives 290,437 / 352,583 = 0.82). Total liabilities include operating payables, deferred revenue, lease and tax liabilities, so the figure is higher than a ratio of borrowings alone (Apple's commercial paper and term debt are about 0.32 of assets).
 
+#### Which period each metric covers
+
+Each statement supplies its own current column, so the metrics need not cover one period. Quarterly filing access does not make every metric quarterly: on a second- or third-quarter 10-Q, income figures usually cover the three months, the cash flow statement covers the year to date, and balance-sheet figures are at the quarter end. Pass `include_periods=True` to get the dates behind each value:
+
+```python
+from edgar import Company
+
+filing = Company("AAPL").get_filings(form="10-Q", filing_date="2023-08-04").latest()
+financials = filing.obj().financials
+metrics = financials.get_financial_metrics(include_periods=True)
+
+metrics['periods']['revenue']
+# {'period_type': 'duration', 'start_date': '2023-04-02', 'end_date': '2023-07-01'}
+metrics['periods']['free_cash_flow']
+# {'period_type': 'duration', 'start_date': '2022-09-25', 'end_date': '2023-07-01'}
+metrics['periods']['total_assets']
+# {'period_type': 'instant', 'start_date': None, 'end_date': '2023-07-01'}
+```
+
+The metric values are the same with or without the option; it only adds the `periods` key. A metric with no value has a `None` period, and so does a value whose period can't be stated with certainty. `free_cash_flow` has a period only when operating cash flow and capital expenditures share it exactly, and the two ratios only when their inputs share one balance-sheet date. Before dividing one metric by another, check that both periods are present and equal; an equal end date alone is not enough, as Apple's quarter revenue and nine-month free cash flow above show.
+
 ### Cross-Company Analysis Made Simple
 
 Now comparing multiple companies is trivial:

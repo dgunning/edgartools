@@ -103,10 +103,24 @@ patterns:
     when: Comprehensive snapshot
     code: |
       metrics = financials.get_financial_metrics()  # Returns dict with:
-      # revenue, net_income, total_assets, total_liabilities, stockholders_equity,
-      # operating_cash_flow, free_cash_flow, current_assets, current_liabilities,
+      # revenue, operating_income, net_income, total_assets, total_liabilities,
+      # stockholders_equity, current_assets, current_liabilities,
+      # operating_cash_flow, capital_expenditures, free_cash_flow,
       # shares_outstanding_basic, shares_outstanding_diluted,
-      # current_ratio, debt_to_equity, return_on_equity, profit_margin
+      # current_ratio, debt_to_assets
+
+      # Add the period each value came from before combining two of them
+      metrics = financials.get_financial_metrics(include_periods=True)
+      metrics['periods']['revenue']
+      # {'period_type': 'duration', 'start_date': 'YYYY-MM-DD', 'end_date': 'YYYY-MM-DD'}
+    note: |
+      Each statement supplies its own current column, so the metrics need not share a period.
+      Quarterly filing access does not make every metric quarterly: on a Q2/Q3 10-Q, income
+      covers the quarter while cash flow (and free cash flow) is usually year-to-date, and
+      balance-sheet values are instants. include_periods=True (keyword-only) adds a 'periods'
+      dict: each metric key -> {period_type 'duration'|'instant', start_date (None for an
+      instant), end_date} or None (no value, or period not known). Divide two metrics only
+      when both descriptors are non-None and equal; an equal end_date alone is not enough.
 
   - name: Compare Companies
     when: Side-by-side comparison, revenue trends, multi-company analysis
