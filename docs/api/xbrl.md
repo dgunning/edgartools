@@ -1014,7 +1014,7 @@ EdgarTools provides a two-layer system for XBRL value handling:
 
 All statement DataFrames include XBRL metadata columns:
 
-- **`balance`**: Debit or credit classification from schema (accounting semantics)
+- **`balance`**: Debit or credit classification (accounting semantics): the filing's own schema declaration, or for us-gaap and srt concepts the FASB taxonomy's; `None` where neither declares one (share counts, the cash-flow totals)
 - **`weight`**: Calculation weight from calculation linkbase (+1.0 or -1.0)
 - **`preferred_sign`**: Presentation hint from presentation linkbase (+1 or -1)
 

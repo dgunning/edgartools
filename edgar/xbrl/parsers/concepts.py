@@ -1,14 +1,18 @@
 """
 Shared XBRL concept definitions for balance types and deprecated normalization lists.
 
-This module contains balance type mappings for common US-GAAP concepts to support
-the balance column in DataFrame exports without parsing full taxonomy schemas.
+get_balance_type() reads the balance the us-gaap and srt taxonomies declare
+from a bundled element table (edgar/xbrl/data/taxonomy_elements.parquet), for
+the balance column of statement and facts DataFrames.
 
 DEPRECATED: Static normalization concept lists (CONSISTENT_POSITIVE_CONCEPTS,
 LEGITIMATE_NEGATIVE_CONCEPTS) are kept for historical reference but no longer used.
 Testing confirmed that SEC XBRL instance data is already consistent across companies.
 See Issue #463 analysis for details.
 """
+from functools import lru_cache
+from importlib import resources
+from typing import Dict, Optional
 
 # =============================================================================
 # DEPRECATED CONCEPT LISTS (No longer used as of Issue #463)
@@ -141,244 +145,79 @@ LEGITIMATE_NEGATIVE_CONCEPTS = {
     'RestructuringChargesAndReversals'
 }
 
-# US-GAAP Balance Type Mappings (Issue #463)
-#
-# This mapping provides balance types for common US-GAAP concepts to support
-# the balance column in DataFrame exports without requiring full taxonomy parsing.
-#
-# Balance types:
-#   - "debit": Assets, Expenses (increase with debits, decrease with credits)
-#   - "credit": Liabilities, Equity, Revenue (increase with credits, decrease with debits)
-#
-# TODO: Eventually replace with full US-GAAP taxonomy parser that follows schema imports
-#
-US_GAAP_BALANCE_TYPES = {
-    # ============================================================================
-    # ASSETS (Balance: debit)
-    # ============================================================================
+# =============================================================================
+# BALANCE TYPES FROM THE BUNDLED TAXONOMY (Issues #463, #1728)
+# =============================================================================
+# A filing imports us-gaap and srt rather than declaring their elements, so the
+# element catalog parsed from the filing has no balance for a standard concept.
+# edgar/xbrl/data/taxonomy_elements.parquet carries the FASB declarations for
+# every us-gaap (2011-2026) and srt (2018-2026) element, built by
+# scripts/build_taxonomy_elements.py. It replaced a hand-written table of 124
+# concepts, three of which the taxonomy contradicted (#1728).
 
-    # Current Assets
-    'us-gaap:Cash': 'debit',
-    'Cash': 'debit',  # Short form
-    'us-gaap:CashAndCashEquivalentsAtCarryingValue': 'debit',
-    'CashAndCashEquivalentsAtCarryingValue': 'debit',  # Short form
-    'us-gaap:CashEquivalentsAtCarryingValue': 'debit',
-    'us-gaap:RestrictedCashAndCashEquivalents': 'debit',
-    'us-gaap:MarketableSecurities': 'debit',
-    'us-gaap:AvailableForSaleSecuritiesDebtSecurities': 'debit',
-    'us-gaap:ShortTermInvestments': 'debit',
-    'us-gaap:AccountsReceivableNetCurrent': 'debit',
-    'us-gaap:AccountsReceivableGrossCurrent': 'debit',
-    'us-gaap:Inventory': 'debit',
-    'us-gaap:InventoryNet': 'debit',
-    'us-gaap:PrepaidExpenseAndOtherAssetsCurrent': 'debit',
-    'us-gaap:DeferredTaxAssetsNetCurrent': 'debit',
-    'us-gaap:OtherAssetsCurrent': 'debit',
-    'us-gaap:AssetsCurrent': 'debit',
-
-    # Non-Current Assets
-    'us-gaap:PropertyPlantAndEquipmentNet': 'debit',
-    'us-gaap:PropertyPlantAndEquipmentGross': 'debit',
-    'us-gaap:Land': 'debit',
-    'us-gaap:BuildingsAndImprovementsGross': 'debit',
-    'us-gaap:MachineryAndEquipmentGross': 'debit',
-    'us-gaap:Goodwill': 'debit',
-    'us-gaap:IntangibleAssetsNetExcludingGoodwill': 'debit',
-    'us-gaap:IntangibleAssetsGrossExcludingGoodwill': 'debit',
-    'us-gaap:LongTermInvestments': 'debit',
-    'us-gaap:DeferredTaxAssetsNetNoncurrent': 'debit',
-    'us-gaap:OtherAssetsNoncurrent': 'debit',
-    'us-gaap:AssetsNoncurrent': 'debit',
-    'us-gaap:Assets': 'debit',
-    'Assets': 'debit',  # Short form
-
-    # ============================================================================
-    # LIABILITIES (Balance: credit)
-    # ============================================================================
-
-    # Current Liabilities
-    'us-gaap:AccountsPayableCurrent': 'credit',
-    'us-gaap:AccruedLiabilitiesCurrent': 'credit',
-    'us-gaap:DeferredRevenueCurrent': 'credit',
-    'us-gaap:ContractWithCustomerLiabilityCurrent': 'credit',
-    'us-gaap:ShortTermBorrowings': 'credit',
-    'us-gaap:LongTermDebtCurrent': 'credit',
-    'us-gaap:CommercialPaper': 'credit',
-    'us-gaap:AccruedIncomeTaxesCurrent': 'credit',
-    'us-gaap:DividendsPayableCurrent': 'credit',
-    'us-gaap:OtherLiabilitiesCurrent': 'credit',
-    'us-gaap:LiabilitiesCurrent': 'credit',
-
-    # Non-Current Liabilities
-    'us-gaap:LongTermDebtNoncurrent': 'credit',
-    'us-gaap:LongTermDebtAndCapitalLeaseObligations': 'credit',
-    'us-gaap:DeferredRevenueNoncurrent': 'credit',
-    'us-gaap:DeferredTaxLiabilitiesNoncurrent': 'credit',
-    'us-gaap:PensionAndOtherPostretirementDefinedBenefitPlansLiabilitiesNoncurrent': 'credit',
-    'us-gaap:OtherLiabilitiesNoncurrent': 'credit',
-    'us-gaap:LiabilitiesNoncurrent': 'credit',
-    'us-gaap:Liabilities': 'credit',
-
-    # ============================================================================
-    # EQUITY (Balance: credit)
-    # ============================================================================
-
-    'us-gaap:CommonStockValue': 'credit',
-    # Share counts (CommonStockSharesIssued, CommonStockSharesOutstanding) are
-    # sharesItemType, which the taxonomy gives no balance (GH #1728).
-    'us-gaap:PreferredStockValue': 'credit',
-    'us-gaap:AdditionalPaidInCapital': 'credit',
-    'us-gaap:AdditionalPaidInCapitalCommonStock': 'credit',
-    'us-gaap:RetainedEarningsAccumulatedDeficit': 'credit',
-    'us-gaap:TreasuryStockValue': 'debit',  # Contra-equity (debit balance)
-    'us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax': 'credit',
-    'us-gaap:StockholdersEquity': 'credit',
-    'us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest': 'credit',
-    'us-gaap:LiabilitiesAndStockholdersEquity': 'credit',
-
-    # ============================================================================
-    # REVENUE (Balance: credit)
-    # ============================================================================
-
-    'us-gaap:Revenues': 'credit',
-    'Revenues': 'credit',  # Short form
-    'Revenue': 'credit',  # Short form (singular)
-    'us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax': 'credit',
-    'RevenueFromContractWithCustomerExcludingAssessedTax': 'credit',  # Short form
-    'us-gaap:RevenueFromContractWithCustomerIncludingAssessedTax': 'credit',
-    'RevenueFromContractWithCustomerIncludingAssessedTax': 'credit',  # Short form
-    'us-gaap:SalesRevenueNet': 'credit',
-    'us-gaap:SalesRevenueGoodsNet': 'credit',
-    'us-gaap:SalesRevenueServicesNet': 'credit',
-    'us-gaap:InterestAndDividendIncomeOperating': 'credit',
-    'us-gaap:InterestIncomeOther': 'credit',
-    'us-gaap:InvestmentIncomeInterest': 'credit',
-    'us-gaap:GainLossOnSaleOfPropertyPlantEquipment': 'credit',
-    'us-gaap:GainLossOnInvestments': 'credit',
-    'us-gaap:OtherNonoperatingIncomeExpense': 'credit',
-
-    # ============================================================================
-    # EXPENSES & COSTS (Balance: debit)
-    # ============================================================================
-
-    # Cost of Revenue
-    'us-gaap:CostOfRevenue': 'debit',
-    'us-gaap:CostOfGoodsAndServicesSold': 'debit',
-    'us-gaap:CostsAndExpenses': 'debit',
-    'us-gaap:CostOfGoodsSold': 'debit',
-    'us-gaap:CostOfServices': 'debit',
-
-    # Operating Expenses
-    'us-gaap:ResearchAndDevelopmentExpense': 'debit',
-    'us-gaap:SellingGeneralAndAdministrativeExpense': 'debit',
-    'us-gaap:GeneralAndAdministrativeExpense': 'debit',
-    'us-gaap:SellingExpense': 'debit',
-    'us-gaap:SellingAndMarketingExpense': 'debit',
-    'us-gaap:MarketingExpense': 'debit',
-    'us-gaap:AdvertisingExpense': 'debit',
-    'us-gaap:DepreciationDepletionAndAmortization': 'debit',
-    'us-gaap:Depreciation': 'debit',
-    'us-gaap:AmortizationOfIntangibleAssets': 'debit',
-    'us-gaap:RestructuringCharges': 'debit',
-    'us-gaap:AssetImpairmentCharges': 'debit',
-    'us-gaap:ShareBasedCompensation': 'debit',
-
-    # Other Expenses
-    'us-gaap:InterestExpense': 'debit',
-    'us-gaap:InterestExpenseDebt': 'debit',
-    'us-gaap:IncomeTaxExpenseBenefit': 'debit',
-    'us-gaap:ProvisionForDoubtfulAccounts': 'debit',
-
-    # ============================================================================
-    # INCOME & TOTALS (Balance: credit)
-    # ============================================================================
-
-    'us-gaap:GrossProfit': 'credit',
-    'us-gaap:OperatingIncomeLoss': 'credit',
-    'us-gaap:IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest': 'credit',
-    'us-gaap:IncomeLossFromContinuingOperations': 'credit',
-    'us-gaap:NetIncomeLoss': 'credit',
-    'us-gaap:NetIncomeLossAvailableToCommonStockholdersBasic': 'credit',
-    'us-gaap:NetIncomeLossAvailableToCommonStockholdersDiluted': 'credit',
-    'us-gaap:ComprehensiveIncomeNetOfTax': 'credit',
-
-    # ============================================================================
-    # CASH FLOW STATEMENT
-    # ============================================================================
-
-    # Operating Activities
-    # NetCashProvidedByUsedInOperatingActivities has no balance in the taxonomy
-    # (it can be an inflow or an outflow), so it has no entry (GH #1728).
-    'us-gaap:DepreciationAndAmortization': 'debit',
-    'us-gaap:ShareBasedCompensationArrangementByShareBasedPaymentAwardExpenseRecognized': 'debit',
-    'us-gaap:DeferredIncomeTaxExpenseBenefit': 'debit',
-
-    # Investing Activities
-    'us-gaap:NetCashProvidedByUsedInInvestingActivities': 'debit',
-    'us-gaap:PaymentsToAcquirePropertyPlantAndEquipment': 'credit',  # Cash outflow
-    'us-gaap:PaymentsToAcquireBusinessesNetOfCashAcquired': 'credit',  # Cash outflow
-    'us-gaap:PaymentsToAcquireMarketableSecurities': 'credit',  # Cash outflow
-    'us-gaap:ProceedsFromSaleOfPropertyPlantAndEquipment': 'debit',  # Cash inflow
-    'us-gaap:ProceedsFromSaleOfAvailableForSaleSecuritiesDebt': 'debit',  # Cash inflow
-
-    # Financing Activities
-    'us-gaap:NetCashProvidedByUsedInFinancingActivities': 'debit',
-    'us-gaap:ProceedsFromIssuanceOfCommonStock': 'debit',  # Cash inflow
-    'us-gaap:ProceedsFromIssuanceOfLongTermDebt': 'debit',  # Cash inflow
-    'us-gaap:RepaymentsOfLongTermDebt': 'credit',  # Cash outflow
-    'us-gaap:PaymentsOfDividends': 'credit',  # Cash outflow
-    'us-gaap:PaymentsOfDividendsCommonStock': 'credit',  # Cash outflow
-    'us-gaap:PaymentsForRepurchaseOfCommonStock': 'credit',  # Cash outflow
-}
+TAXONOMY_ELEMENTS_FILE = 'taxonomy_elements.parquet'
+_STANDARD_PREFIXES = ('us-gaap', 'srt')
 
 
-def get_balance_type(concept: str) -> str:
+@lru_cache(maxsize=1)
+def _standard_balances() -> Dict[str, str]:
+    """``prefix:name`` -> 'debit'/'credit' for every bundled element that has a balance."""
+    import pandas as pd
+
+    ref = resources.files('edgar.xbrl.data').joinpath(TAXONOMY_ELEMENTS_FILE)
+    with resources.as_file(ref) as path:
+        df = pd.read_parquet(path, columns=['prefix', 'name', 'balance'])
+    df = df[df['balance'].notna()]
+    return {f"{prefix}:{name}": balance
+            for prefix, name, balance in zip(df['prefix'].astype(str), df['name'], df['balance'].astype(str), strict=True)}
+
+
+def _standard_key(concept: str) -> str:
+    """Normalize 'us-gaap_Cash', 'us_gaap_Cash' or bare 'Cash' to 'us-gaap:Cash'."""
+    if concept.startswith('us_gaap'):
+        concept = 'us-gaap' + concept[len('us_gaap'):]
+    if ':' in concept:
+        return concept
+    prefix, sep, name = concept.partition('_')
+    if sep and prefix in _STANDARD_PREFIXES:
+        return f"{prefix}:{name}"
+    # A bare local name is read as a us-gaap element.
+    return f"us-gaap:{concept}"
+
+
+def get_balance_type(concept: str) -> Optional[str]:
     """
-    Get the balance type for a concept.
+    The balance a standard taxonomy declares for a concept.
 
-    Looks up the balance type from the static US-GAAP mapping, handling
-    both colon and underscore namespace separators.
+    Reads the bundled us-gaap and srt element declarations and accepts the
+    colon and underscore spellings of a concept. Returns None for a concept the
+    taxonomy declares without a balance (share counts, the cash-flow totals) and
+    for one it does not declare at all (company extensions, dei).
 
     Args:
-        concept: The concept name (e.g., 'us-gaap:Revenue' or 'us-gaap_Revenue' or 'us_gaap_Revenue')
+        concept: The concept name (e.g., 'us-gaap:Revenues', 'us-gaap_Revenues' or 'us_gaap_Revenues')
 
     Returns:
-        Balance type ('debit', 'credit', or None if not found)
+        'debit', 'credit', or None
 
     Example:
         >>> get_balance_type('us-gaap:Cash')
         'debit'
-        >>> get_balance_type('us-gaap_Revenue')
+        >>> get_balance_type('us-gaap_Revenues')
         'credit'
-        >>> get_balance_type('us_gaap_Revenue')
-        'credit'
-        >>> get_balance_type('UnknownConcept')
-        None
+        >>> get_balance_type('us-gaap:CommonStockSharesOutstanding') is None
+        True
     """
-    # Try direct lookup first (standard form)
-    if concept in US_GAAP_BALANCE_TYPES:
-        return US_GAAP_BALANCE_TYPES[concept]
+    if not concept:
+        return None
+    return _standard_balances().get(_standard_key(concept))
 
-    # Normalize to standard form: us-gaap:LocalName
-    # Handle common namespace prefix variations
-    normalized = concept
 
-    # Replace known namespace patterns
-    # us_gaap_Cash -> us-gaap:Cash
-    # us-gaap_Cash -> us-gaap:Cash
-    if 'us_gaap' in normalized:
-        normalized = normalized.replace('us_gaap_', 'us-gaap:')
-        normalized = normalized.replace('us_gaap:', 'us-gaap:')
-    elif 'us-gaap' in normalized:
-        normalized = normalized.replace('us-gaap_', 'us-gaap:')
+def resolve_balance(declared: Optional[str], concept: str) -> Optional[str]:
+    """
+    A concept's balance: the filing's own declaration, else the standard taxonomy's.
 
-    # Try normalized form
-    if normalized in US_GAAP_BALANCE_TYPES:
-        return US_GAAP_BALANCE_TYPES[normalized]
-
-    # Try converting all underscores to colons (simple fallback)
-    concept_all_colons = concept.replace('_', ':')
-    if concept_all_colons in US_GAAP_BALANCE_TYPES:
-        return US_GAAP_BALANCE_TYPES[concept_all_colons]
-
-    return None
+    Every place that reports a balance (statement rows, the facts DataFrame,
+    calculation nodes) goes through here, so they cannot disagree.
+    """
+    return declared or get_balance_type(concept)
