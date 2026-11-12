@@ -328,6 +328,7 @@ print(xbrl.reporting_periods)
 | `financials.get_net_income()` | Net income value |
 | `financials.get_total_assets()` | Total assets value |
 | `financials.get_financial_metrics()` | Dict of all key metrics |
+| `financials.get_financial_metrics(include_periods=True)` | Same dict plus `periods`: the dates each metric covers (a 10-Q mixes quarter income with year-to-date cash flow) |
 
 ### Statement Object
 

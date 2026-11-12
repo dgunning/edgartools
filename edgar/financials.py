@@ -50,6 +50,67 @@ def _period_column_name(period) -> str:
     return period.label
 
 
+def _dates_descriptor(start, end, is_duration: bool = False) -> Optional[Dict[str, Optional[str]]]:
+    """A metric period descriptor from filed dates, or None when they don't state one.
+
+    A duration needs both dates; an instant has an end date and no start. A
+    period flagged as a duration without a start date is not stated, so None.
+    """
+    end_date = _parse_iso_date(end) if end else None
+    if end_date is None:
+        return None
+    if not start:
+        if is_duration:
+            return None
+        return {'period_type': 'instant', 'start_date': None, 'end_date': end_date.isoformat()}
+    start_date = _parse_iso_date(start)
+    if start_date is None:
+        return None
+    return {'period_type': 'duration', 'start_date': start_date.isoformat(), 'end_date': end_date.isoformat()}
+
+
+def _column_period_descriptor(rendered, column: str) -> Optional[Dict[str, Optional[str]]]:
+    """The period behind one rendered statement column (GH #1656).
+
+    Resolved from the ``PeriodData`` of the same rendered statement whose
+    column name is ``column``. None when no period, or more than one distinct
+    period, maps to that name: the column's dates are then not known.
+    """
+    stated = {(p.start_date or None, p.end_date or None, bool(p.is_duration))
+              for p in (getattr(rendered, 'periods', None) or [])
+              if _period_column_name(p) == column}
+    if len(stated) != 1:
+        return None
+    return _dates_descriptor(*stated.pop())
+
+
+def _common_period(descriptors: List[Optional[Dict[str, Optional[str]]]]) -> Optional[Dict[str, Optional[str]]]:
+    """The one period every descriptor states, or None.
+
+    None when there are none, when any is unknown, or when they differ in any
+    date, so an equal end date alone never makes two durations comparable.
+    """
+    if not descriptors or any(d is None for d in descriptors):
+        return None
+    first = descriptors[0]
+    return dict(first) if all(d == first for d in descriptors) else None
+
+
+def _select_period_column(rendered, df, period_offset: int):
+    """The value column ``period_offset`` selects in a rendered frame, with its period.
+
+    Returns ``(column, descriptor)``, or ``(None, None)`` when the frame has
+    too few period columns. The column is chosen exactly as before GH #1656;
+    the descriptor only describes it.
+    """
+    period_columns = _order_period_columns(
+        rendered, [col for col in df.columns if col not in _NON_PERIOD_COLUMNS])
+    if len(period_columns) <= period_offset:
+        return None, None
+    column = period_columns[period_offset]
+    return column, _column_period_descriptor(rendered, column)
+
+
 def _order_period_columns(rendered, df_period_columns: List[str]) -> List[str]:
     """Order a rendered statement's period columns most-relevant-first.
 
@@ -129,6 +190,9 @@ class Financials:
         # Set to a dict only for the duration of one get_financial_metrics() call;
         # None the rest of the time. See _render_statement_frame().
         self._statement_frame_memo: Optional[Dict[str, Any]] = None
+        # A list only while get_financial_metrics(include_periods=True) traces one
+        # getter; each lookup that returns a value appends the period it read.
+        self._period_trace: Optional[List[Optional[Dict[str, Optional[str]]]]] = None
 
     @classmethod
     def extract(cls, filing) -> Optional["Financials"]:
@@ -298,6 +362,11 @@ class Financials:
             return rendered, (None if df is None else df.copy())
         return rendered, df
 
+    def _note_source_period(self, descriptor: Optional[Dict[str, Optional[str]]]) -> None:
+        """Record the period a lookup's returned value came from, when tracing (GH #1656)."""
+        if self._period_trace is not None:
+            self._period_trace.append(descriptor)
+
     def _get_standardized_concept_by_xbrl(self, statement_type: str,
                                           standard_concept_names: List[str],
                                           period_offset: int = 0) -> Optional[Union[int, float]]:
@@ -338,13 +407,9 @@ class Financials:
 
             # Get period columns, ordered most-recent-first by period metadata
             # (positional df order is not recency-sorted — GH #885).
-            period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
-            period_columns = _order_period_columns(rendered, period_columns)
-
-            if len(period_columns) <= period_offset:
+            period_col, period = _select_period_column(rendered, df, period_offset)
+            if period_col is None:
                 return None
-
-            period_col = period_columns[period_offset]
 
             def _strip_ns(name: str) -> str:
                 # Normalize a concept name to its bare local-name for exact comparison.
@@ -395,9 +460,11 @@ class Financials:
 
                             # Convert to numeric
                             try:
-                                return float(value) if '.' in str(value) else int(value)
+                                number = float(value) if '.' in str(value) else int(value)
                             except (ValueError, TypeError):
                                 continue
+                            self._note_source_period(period)
+                            return number
 
             return None
 
@@ -436,11 +503,9 @@ class Financials:
             rendered, df = self._render_statement_frame('income')
             if df is None or df.empty:
                 return None
-            period_columns = _order_period_columns(
-                rendered, [col for col in df.columns if col not in _NON_PERIOD_COLUMNS])
-            if len(period_columns) <= period_offset:
+            column, _ = _select_period_column(rendered, df, period_offset)
+            if column is None:
                 return None
-            column = period_columns[period_offset]
             period = next((p for p in rendered.periods if _period_column_name(p) == column), None)
             if period is None or not period.start_date or not period.end_date:
                 return None
@@ -454,7 +519,11 @@ class Financials:
             if len(values) != 1:
                 return None
             value = values[0]
-            return int(value) if float(value).is_integer() else float(value)
+            number = int(value) if float(value).is_integer() else float(value)
+            # The facts were filtered to exactly these dates, so they are the
+            # value's period even when the column name is shared (GH #1656).
+            self._note_source_period(_dates_descriptor(period.start_date, period.end_date, True))
+            return number
         except Exception as e:
             log.debug(f"Error reading the filed {concept} fact: {e}")
             return None
@@ -500,12 +569,9 @@ class Financials:
                     # Get available period columns, ordered most-recent-first by
                     # period metadata (positional df order is not recency-sorted
                     # — GH #885).
-                    period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
-                    period_columns = _order_period_columns(rendered, period_columns)
+                    period_col, period = _select_period_column(rendered, df, period_offset)
 
-                    if len(period_columns) > period_offset:
-                        period_col = period_columns[period_offset]
-
+                    if period_col is not None:
                         # Try each match until we find one with a valid value
                         for idx in range(len(matches)):
                             value = matches.iloc[idx][period_col]
@@ -516,9 +582,11 @@ class Financials:
 
                             # Convert to numeric
                             try:
-                                return float(value) if '.' in str(value) else int(value)
+                                number = float(value) if '.' in str(value) else int(value)
                             except (ValueError, TypeError):
                                 continue
+                            self._note_source_period(period)
+                            return number
 
             return None
 
@@ -1123,11 +1191,9 @@ class Financials:
             # Get available period columns, ordered most-recent-first by period
             # metadata (positional df order is not recency-sorted — GH #885).
             # Invariant across patterns, so it is resolved once.
-            period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
-            period_columns = _order_period_columns(rendered, period_columns)
-            if len(period_columns) <= period_offset:
+            period_col, period = _select_period_column(rendered, df, period_offset)
+            if period_col is None:
                 return None
-            period_col = period_columns[period_offset]
 
             # Find the concept using pattern matching on concept column
             for pattern in concept_patterns:
@@ -1149,9 +1215,11 @@ class Financials:
 
                     # Convert to numeric
                     try:
-                        return float(value) if '.' in str(value) else int(value)
+                        number = float(value) if '.' in str(value) else int(value)
                     except (ValueError, TypeError):
                         continue
+                    self._note_source_period(period)
+                    return number
 
             return None
 
@@ -1234,13 +1302,35 @@ class Financials:
         ]
         return self._get_concept_value('income', concept_patterns, period_offset)
 
-    def get_financial_metrics(self) -> Dict[str, Any]:
+    def get_financial_metrics(self, *, include_periods: bool = False) -> Dict[str, Any]:
         """
         Get a dictionary of common financial metrics using standardized labels.
 
+        Each statement's value comes from its own current column, so the metrics
+        need not share one period. On a 10-Q, quarterly filing access does not
+        make every metric quarterly: income figures usually cover the three
+        months while the cash flow statement covers the year to date, and
+        balance sheet figures are at the quarter-end date. Pass
+        ``include_periods=True`` to see the dates of each value before you
+        combine two of them.
+
+        Args:
+            include_periods: Keyword-only. When True, the result carries one
+                more key, ``periods``, mapping every metric key to the period its
+                value came from, or None. A descriptor is
+                ``{"period_type": "duration" | "instant", "start_date":
+                "YYYY-MM-DD" (None for an instant), "end_date": "YYYY-MM-DD"}``.
+                A metric with no value has a None period; a value whose period
+                cannot be stated with certainty keeps its value with a None
+                period. ``free_cash_flow`` carries a period only when operating
+                cash flow and capital expenditures share the exact same start
+                and end; the two ratios only when their inputs share the same
+                instant. The metric values are the same either way.
+
         Returns:
-            Dictionary containing available financial metrics. Two keys are
-            ratios computed from the others:
+            Dictionary of the 15 metrics below (numbers, or None when not
+            available), plus ``periods`` when requested. Two keys are ratios
+            computed from the others:
 
             - ``current_ratio``: ``current_assets / current_liabilities``.
             - ``debt_to_assets``: ``total_liabilities / total_assets``, a
@@ -1255,6 +1345,11 @@ class Financials:
             >>> financials = company.get_financials()
             >>> metrics = financials.get_financial_metrics()
             >>> print(f"Revenue: ${metrics.get('revenue', 'N/A'):,}")
+
+            >>> # Compare two values only when their periods match exactly
+            >>> metrics = financials.get_financial_metrics(include_periods=True)
+            >>> metrics['periods']['operating_cash_flow']   # dates of the latest 10-K's year
+            {'period_type': 'duration', 'start_date': 'YYYY-MM-DD', 'end_date': 'YYYY-MM-DD'}
         """
         # Every getter below funnels into _render_statement_frame(), which without
         # this memo re-rendered and re-converted the same three statements once per
@@ -1262,52 +1357,72 @@ class Financials:
         # outlives the call that produced it.
         self._statement_frame_memo = {}
         try:
-            return self._collect_financial_metrics()
+            return self._collect_financial_metrics(include_periods)
         finally:
             self._statement_frame_memo = None
+            self._period_trace = None
 
-    def _collect_financial_metrics(self) -> Dict[str, Any]:
+    def _traced_metric(self, getter) -> tuple:
+        """Call one metric getter and return ``(value, period)`` (GH #1656).
+
+        The period is the one every lookup that contributed to the value read
+        from, or None when the value is None or those periods differ or are
+        unknown. Free cash flow traces both operating cash flow and capex, so it
+        gets a period only when the two share it exactly.
+        """
+        self._period_trace = []
+        try:
+            value = getter()
+            trace = self._period_trace
+        finally:
+            self._period_trace = None
+        return value, (None if value is None else _common_period(trace))
+
+    def _collect_financial_metrics(self, include_periods: bool = False) -> Dict[str, Any]:
         """The body of get_financial_metrics(), run with the per-call memo installed."""
+        getters = (
+            # Income Statement Metrics
+            ('revenue', self.get_revenue),
+            ('operating_income', self.get_operating_income),
+            ('net_income', self.get_net_income),
+            # Balance Sheet Metrics
+            ('total_assets', self.get_total_assets),
+            ('total_liabilities', self.get_total_liabilities),
+            ('stockholders_equity', self.get_stockholders_equity),
+            ('current_assets', self.get_current_assets),
+            ('current_liabilities', self.get_current_liabilities),
+            # Cash Flow Metrics
+            ('operating_cash_flow', self.get_operating_cash_flow),
+            ('capital_expenditures', self.get_capital_expenditures),
+            ('free_cash_flow', self.get_free_cash_flow),
+            # Share Metrics
+            ('shares_outstanding_basic', self.get_shares_outstanding_basic),
+            ('shares_outstanding_diluted', self.get_shares_outstanding_diluted),
+        )
         metrics = {}
-
-        # Income Statement Metrics
-        metrics['revenue'] = self.get_revenue()
-        metrics['operating_income'] = self.get_operating_income()
-        metrics['net_income'] = self.get_net_income()
-
-        # Balance Sheet Metrics
-        metrics['total_assets'] = self.get_total_assets()
-        metrics['total_liabilities'] = self.get_total_liabilities()
-        metrics['stockholders_equity'] = self.get_stockholders_equity()
-        metrics['current_assets'] = self.get_current_assets()
-        metrics['current_liabilities'] = self.get_current_liabilities()
-
-        # Cash Flow Metrics
-        metrics['operating_cash_flow'] = self.get_operating_cash_flow()
-        metrics['capital_expenditures'] = self.get_capital_expenditures()
-        metrics['free_cash_flow'] = self.get_free_cash_flow()
-
-        # Share Metrics
-        metrics['shares_outstanding_basic'] = self.get_shares_outstanding_basic()
-        metrics['shares_outstanding_diluted'] = self.get_shares_outstanding_diluted()
+        periods = {}
+        for key, getter in getters:
+            if include_periods:
+                metrics[key], periods[key] = self._traced_metric(getter)
+            else:
+                metrics[key] = getter()
 
         # Calculate basic ratios if we have the data
-        if metrics['current_assets'] and metrics['current_liabilities']:
-            try:
-                metrics['current_ratio'] = metrics['current_assets'] / metrics['current_liabilities']
-            except (TypeError, ZeroDivisionError):
-                metrics['current_ratio'] = None
-        else:
-            metrics['current_ratio'] = None
+        for key, numerator, denominator in (('current_ratio', 'current_assets', 'current_liabilities'),
+                                            ('debt_to_assets', 'total_liabilities', 'total_assets')):
+            metrics[key] = None
+            if metrics[numerator] and metrics[denominator]:
+                try:
+                    metrics[key] = metrics[numerator] / metrics[denominator]
+                except (TypeError, ZeroDivisionError):
+                    metrics[key] = None
+            if include_periods:
+                period = _common_period([periods[numerator], periods[denominator]])
+                instant = period is not None and period['period_type'] == 'instant'
+                periods[key] = period if (metrics[key] is not None and instant) else None
 
-        if metrics['total_liabilities'] and metrics['total_assets']:
-            try:
-                metrics['debt_to_assets'] = metrics['total_liabilities'] / metrics['total_assets']
-            except (TypeError, ZeroDivisionError):
-                metrics['debt_to_assets'] = None
-        else:
-            metrics['debt_to_assets'] = None
-
+        if include_periods:
+            metrics['periods'] = periods
         return metrics
 
     def __str__(self):

@@ -25,6 +25,16 @@ sharp_edges:
       quarterly = company.get_quarterly_financials() # 10-Q (quarter)
       # Compare same period types only
 
+  - id: metrics-mix-quarter-and-ytd
+    summary: get_financial_metrics() on a 10-Q mixes quarter income with year-to-date cash flow
+    severity: high
+    solution: |
+      metrics = quarterly.get_financial_metrics(include_periods=True)
+      p = metrics['periods']
+      if p['free_cash_flow'] is not None and p['free_cash_flow'] == p['revenue']:
+          fcf_margin = metrics['free_cash_flow'] / metrics['revenue']
+    detection_pattern: "get_financial_metrics\\(\\)\\[.free_cash_flow.\\]\\s*/"
+
   - id: none-return-values
     summary: Quick getters can return None if data missing
     severity: medium
