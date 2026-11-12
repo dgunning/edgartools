@@ -38,6 +38,31 @@ Ground truth, read from SEC:
 - e.l.f. Beauty FY2026 (companyfacts fixture, 0001600033-26-000020): federal $14,440K, state
   and local $3,491K, foreign $3,430K; IncomeTaxesPaidNet $21,361K.
 
+PR B of #1448 maps, definition only, the four 2023-taxonomy elements that split the change in
+cash by continuing and discontinued operations (prefix
+CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecrease):
+
+============================================================================  ==================================
+Suffix                                                                        Standard concept
+============================================================================  ==================================
+IncludingExchangeRateEffectContinuingOperations                               NetChangeInCashContinuingOps
+ExcludingExchangeRateEffectContinuingOperations                               NetChangeInCashContinuingOpsExFX
+IncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations       NetChangeInCashDiscontinuedOps
+ExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations       NetChangeInCashDiscontinuedOpsExFX
+============================================================================  ==================================
+
+None of them is NetChangeInCash: a continuing-operations row is never the whole change in cash,
+even when the filer reports no discontinued row. Nothing is summed or derived.
+
+Ground truth, read from SEC:
+- Conagra FY2026 10-K, 0001104659-26-083905 (R8), year ended 2025-05-25: net change in cash
+  including held-for-sale balances $-11.0M, "Less: net change in cash balances classified as
+  assets held for sale" $-1.3M, net change in cash (continuing-tagged) $-9.7M. The disposal
+  groups are held for sale, not discontinued operations, so the $-1.3M row gets a
+  "discontinued operations" concept from its element alone; the maintainer accepted that.
+- DXC FY2026 10-K, 0001688568-26-000022 (R8): the only net-change row is continuing-tagged,
+  $-59M (FY2026), $572M (FY2025), $-634M (FY2024), and it stays a component.
+
 GitHub Issue: https://github.com/dgunning/edgartools/issues/1448
 """
 
@@ -349,3 +374,188 @@ def test_allegro_federal_refund_and_a_net_refund_year(tmp_path):
     facts = xbrl.facts.to_dataframe()
     net = facts[(facts["concept"] == "us-gaap:IncomeTaxesPaidNet") & (facts["period_end"] == "2026-03-27")]
     assert list(net["numeric_value"]) == [-27_081_000]
+
+
+# ===========================================================================
+# PR B: the change in cash split by continuing and discontinued operations
+# ===========================================================================
+
+CHANGE = "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecrease"
+# element -> (concept, display name)
+CASH_CHANGE = {
+    CHANGE + "IncludingExchangeRateEffectContinuingOperations": (
+        "NetChangeInCashContinuingOps", "Net Change in Cash, Continuing Operations, Including FX Effect"),
+    CHANGE + "ExcludingExchangeRateEffectContinuingOperations": (
+        "NetChangeInCashContinuingOpsExFX", "Net Change in Cash, Continuing Operations, Excluding FX Effect"),
+    CHANGE + "IncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations": (
+        "NetChangeInCashDiscontinuedOps", "Net Change in Cash, Discontinued Operations, Including FX Effect"),
+    CHANGE + "ExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations": (
+        "NetChangeInCashDiscontinuedOpsExFX", "Net Change in Cash, Discontinued Operations, Excluding FX Effect"),
+}
+CHANGE_CONCEPTS = {concept for concept, _ in CASH_CHANGE.values()}
+# The whole change in cash: the only elements that are NetChangeInCash, before and after.
+WHOLE_CHANGE = {
+    "CashAndCashEquivalentsPeriodIncreaseDecrease",
+    CHANGE + "ExcludingExchangeRateEffect",
+    CHANGE + "IncludingExchangeRateEffect",
+    "IncreaseDecreaseInCashAndCashEquivalents",
+    "IncreaseDecreaseInCashAndCashEquivalentsBeforeEffectOfExchangeRateChanges",
+    "ifrs-full_IncreaseDecreaseInCashAndCashEquivalents",
+}
+
+
+@pytest.mark.parametrize("element", sorted(CASH_CHANGE))
+@pytest.mark.parametrize("spelling", ["us-gaap:{}", "us-gaap_{}", "{}"])
+def test_each_cash_change_element_maps_to_its_own_concept(index, element, spelling):
+    concept, display = CASH_CHANGE[element]
+    result = index.lookup(spelling.format(element))
+
+    assert result is not None
+    assert result.standard_concepts == [concept]
+    assert result.display_names == [display]
+    assert result.is_ambiguous is False
+    assert DISPLAY_NAMES[concept] == display
+
+
+@pytest.mark.parametrize("element", sorted(CASH_CHANGE))
+def test_cash_change_entries_follow_the_hand_added_convention(element):
+    concept, display = CASH_CHANGE[element]
+    entry = GAAP_MAPPINGS[element]
+
+    assert entry["standard_tags"] == [concept]
+    assert entry["display_name"] == display
+    assert entry["statement"] == "CashFlowStatement"
+    assert entry["section"] is None
+    # A component of the change in cash, never the total.
+    assert entry["is_total"] is False
+    assert entry["confidence"] == 0.9
+    assert entry["company_count"] > 0
+    for stat in ("occurrence_rate", "temporal_consistency", "years_present", "first_year", "last_year"):
+        assert stat not in entry
+
+
+@pytest.mark.parametrize("element", sorted(CASH_CHANGE))
+@pytest.mark.parametrize("context", ["CashFlowStatement", "IncomeStatement", "BalanceSheet"])
+def test_no_cash_change_component_is_ever_net_change_in_cash(index, element, context):
+    assert index.get_standard_concept(element, context=context) == CASH_CHANGE[element][0]
+    assert "NetChangeInCash" not in index.lookup(element).standard_concepts
+
+
+def test_net_change_in_cash_keeps_exactly_the_whole_change_elements():
+    members = {key for key, entry in GAAP_MAPPINGS.items()
+               if isinstance(entry, dict) and "NetChangeInCash" in entry.get("standard_tags", [])}
+    assert members == WHOLE_CHANGE
+    totals = json.loads((_STANDARDIZATION / "total_membership.json").read_text(encoding="utf-8"))
+    # The #1444 closed membership of the total lists none of the four either.
+    assert not set(totals["totals"]["NetChangeInCash"]) & set(CASH_CHANGE)
+    assert not CHANGE_CONCEPTS & set(totals["totals"])
+
+
+def test_four_elements_four_concepts():
+    assert len(CHANGE_CONCEPTS) == 4
+    keys = {key for key, entry in GAAP_MAPPINGS.items()
+            if isinstance(entry, dict) and set(entry.get("standard_tags", [])) & CHANGE_CONCEPTS}
+    assert keys == set(CASH_CHANGE)
+
+
+@pytest.mark.parametrize("element", sorted(CASH_CHANGE))
+def test_cash_change_definitions_keep_scope_and_fx_basis(index, element):
+    comment = index.lookup(element).comment
+    suffix = element.removeprefix(CHANGE)
+    if suffix.endswith("ContinuingOperations"):
+        assert "attributable to continuing operations" in comment
+        assert "never the entity's total change in cash (NetChangeInCash)" in comment
+    else:
+        assert "attributable to discontinued operations" in comment
+        assert "held-for-sale disposal group that is not a discontinued operation" in comment
+    basis = "including" if suffix.startswith("Including") else "excluding"
+    assert f"{basis} the effect of exchange rate changes" in comment
+
+
+@pytest.mark.parametrize("element", sorted(CASH_CHANGE))
+def test_entity_facts_gives_each_cash_change_element_its_own_row(element):
+    assert get_primary_statement(element) == "CashFlowStatement"
+    nodes = load_virtual_trees()["CashFlowStatement"]["nodes"]
+    children = nodes["StatementOfCashFlowsAbstract"]["children"]
+    assert children.index(element) > children.index(CHANGE + "IncludingExchangeRateEffect")
+    assert nodes[element]["label"] == CASH_CHANGE[element][1]
+    assert nodes[element]["is_total"] is False
+    assert nodes[element]["occurrence_rate"] < 0.3
+
+
+def test_conagra_entity_facts_shows_the_split_beside_the_whole():
+    """Conagra FY2026 10-K, 0001104659-26-083905, via trimmed SEC company facts: for the year
+    ended 2025-05-25, $-11.0M total, $-1.3M held for sale, $-9.7M continuing-tagged."""
+    raw = json.loads((FIXTURES / "issues" / "regression" / "issue_1448"
+                      / "conagra_cash_change_companyfacts.json").read_text("utf-8"))
+    facts = EntityFactsParser.parse_company_facts(raw)
+    frame = facts.cash_flow_statement(periods=3, annual=True, as_dataframe=True)
+
+    whole = CHANGE + "IncludingExchangeRateEffect"
+    continuing = CHANGE + "IncludingExchangeRateEffectContinuingOperations"
+    disposal = CHANGE + "IncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations"
+    assert frame.loc[whole, "FY 2025"] == -11_000_000
+    assert frame.loc[continuing, "FY 2025"] == -9_700_000
+    assert frame.loc[disposal, "FY 2025"] == -1_300_000
+    assert frame.loc[continuing, "label"] == CASH_CHANGE[continuing][1]
+    assert frame.loc[disposal, "label"] == CASH_CHANGE[disposal][1]
+    assert not frame.loc[continuing, "is_total"]
+    # The whole row is still the whole, and keeps its own value.
+    assert frame.loc[whole, "FY 2026"] == 150_000_000
+    assert frame.loc[whole, "FY 2025"] - frame.loc[disposal, "FY 2025"] == frame.loc[continuing, "FY 2025"]
+
+
+CAG_FOLDER = "https://www.sec.gov/Archives/edgar/data/23217/000110465926083905/"
+# No calculation or definition linkbase: the statement needs presentation and labels only.
+CAG_FILES = ("tmb-20260531.xsd", "tmb-20260531x10k_htm.xml", "tmb-20260531_pre.xml", "tmb-20260531_lab.xml")
+DXC_FOLDER = "https://www.sec.gov/Archives/edgar/data/1688568/000168856826000022/"
+DXC_FILES = ("dxc-20260331.xsd", "dxc-20260331_htm.xml", "dxc-20260331_pre.xml", "dxc-20260331_lab.xml")
+
+
+def _change_rows(xbrl):
+    """Undimensioned cash flow rows, and the change-in-cash rows among them by element."""
+    frame = xbrl.statements["CashFlowStatement"].render(standard=True).to_dataframe()
+    plain = frame[~frame["dimension"]]
+    rows = plain[plain["concept"].str.startswith("us-gaap_" + CHANGE)]
+    return plain, {concept.removeprefix("us-gaap_" + CHANGE): row
+                   for concept, row in zip(rows["concept"], rows.to_dict("records"), strict=True)}
+
+
+@pytest.mark.network
+@pytest.mark.vcr
+def test_conagra_continuing_and_held_for_sale_rows_stay_components(tmp_path):
+    """Conagra FY2026 10-K, 0001104659-26-083905 (R8), year ended 2025-05-25: total $-11.0M,
+    held for sale $-1.3M, continuing-tagged $-9.7M; FY2026 total and continuing both $150.0M."""
+    plain, rows = _change_rows(_xbrl(tmp_path, CAG_FOLDER, CAG_FILES))
+    assert set(rows) == {"IncludingExchangeRateEffect", "IncludingExchangeRateEffectContinuingOperations",
+                         "IncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations"}
+
+    whole = rows["IncludingExchangeRateEffect"]
+    continuing = rows["IncludingExchangeRateEffectContinuingOperations"]
+    disposal = rows["IncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations"]
+    assert whole["standard_concept"] == "NetChangeInCash"
+    assert continuing["standard_concept"] == "NetChangeInCashContinuingOps"
+    # Accepted risk: these disposal groups are held for sale, not discontinued operations.
+    assert disposal["standard_concept"] == "NetChangeInCashDiscontinuedOps"
+
+    assert (whole["2025-05-25"], disposal["2025-05-25"], continuing["2025-05-25"]) == (
+        -11_000_000, -1_300_000, -9_700_000)
+    assert whole["2025-05-25"] - disposal["2025-05-25"] == continuing["2025-05-25"]
+    assert whole["2026-05-31"] == continuing["2026-05-31"] == 150_000_000
+    # Exactly one row is the whole change in cash.
+    assert (plain["standard_concept"] == "NetChangeInCash").sum() == 1
+
+
+@pytest.mark.network
+@pytest.mark.vcr
+def test_dxc_continuing_only_row_is_not_promoted_to_the_whole(tmp_path):
+    """DXC FY2026 10-K, 0001688568-26-000022 (R8): the only net-change row is
+    continuing-tagged, $-59M (FY2026), $572M (FY2025), $-634M (FY2024)."""
+    plain, rows = _change_rows(_xbrl(tmp_path, DXC_FOLDER, DXC_FILES))
+    assert list(rows) == ["IncludingExchangeRateEffectContinuingOperations"]
+
+    row = rows["IncludingExchangeRateEffectContinuingOperations"]
+    assert row["standard_concept"] == "NetChangeInCashContinuingOps"
+    assert (row["2026-03-31"], row["2025-03-31"], row["2024-03-31"]) == (-59_000_000, 572_000_000, -634_000_000)
+    # No row is promoted to the whole change in cash.
+    assert not (plain["standard_concept"] == "NetChangeInCash").any()

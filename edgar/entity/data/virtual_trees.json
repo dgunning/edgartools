@@ -707,6 +707,10 @@
           "NetCashProvidedByUsedInInvestingActivitiesAbstract",
           "NetCashProvidedByUsedInFinancingActivitiesAbstract",
           "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectContinuingOperations",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations",
           "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
           "SupplementalCashFlowInformationAbstract",
           "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
@@ -882,6 +886,46 @@
         "occurrence_rate": 0.797583081570997,
         "is_abstract": false,
         "is_total": true
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations",
+        "label": "Net Change in Cash, Continuing Operations, Including FX Effect",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.8847184986595173,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectContinuingOperations": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectContinuingOperations",
+        "label": "Net Change in Cash, Continuing Operations, Excluding FX Effect",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.8847184986595173,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations",
+        "label": "Net Change in Cash, Discontinued Operations, Including FX Effect",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.8847184986595173,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations",
+        "label": "Net Change in Cash, Discontinued Operations, Excluding FX Effect",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.8847184986595173,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
       },
       "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
         "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",

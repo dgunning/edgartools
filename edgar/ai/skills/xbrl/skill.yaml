@@ -158,6 +158,20 @@ patterns:
       # Some filers put these in the income tax note, not the cash flow statement.
       # The total stays unmapped: use facts.get_concept("income_taxes_paid") (EntityFacts).
 
+  - name: Change in Cash by Continuing and Discontinued Operations
+    when: A filer splits the net change in cash into continuing and discontinued (or held-for-sale) rows
+    code: |
+      df = xbrl.statements.cash_flow_statement().render(standard=True).to_dataframe()
+      split = df[~df["dimension"] & df["standard_concept"].isin(
+          ["NetChangeInCash", "NetChangeInCashContinuingOps", "NetChangeInCashDiscontinuedOps"])]
+      # Conagra FY2025: total -11.0M, held for sale -1.3M, continuing -9.7M
+
+      # Also: NetChangeInCashContinuingOpsExFX / NetChangeInCashDiscontinuedOpsExFX (excluding
+      # the exchange-rate effect). These are components, never NetChangeInCash: a statement
+      # with only a continuing row (DXC FY2026, -59M) has no NetChangeInCash row, and nothing
+      # is summed for you. "DiscontinuedOps" follows the FASB element; some filers use it for
+      # held-for-sale groups that are not discontinued operations (Conagra), so check the label.
+
   - name: BDC Revenue and Net Investment Income
     when: Revenue, expenses or net investment income of a BDC or other investment company
     code: |
