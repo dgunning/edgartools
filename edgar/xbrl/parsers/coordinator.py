@@ -71,6 +71,7 @@ class XBRLParser:
         self.entity_info: Dict[str, Any] = {
             'entity_name': None,
             'ticker': None,
+            'trading_symbols': [],
             'identifier': None,
             'document_type': None,
             'reporting_end_date': None,
