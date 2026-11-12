@@ -9,12 +9,12 @@ This module tests the three new metadata columns added to DataFrame exports:
 
 import pytest
 from edgar import Company
-from edgar.xbrl.parsers.concepts import get_balance_type, US_GAAP_BALANCE_TYPES
+from edgar.xbrl.parsers.concepts import _standard_balances, get_balance_type
 
 
 @pytest.mark.fast
 class TestBalanceTypeMapping:
-    """Test the static US-GAAP balance type mapping."""
+    """Test the balance types read from the bundled us-gaap/srt taxonomy table."""
 
     def test_asset_concepts_have_debit_balance(self):
         """Asset concepts should have debit balance."""
@@ -43,7 +43,9 @@ class TestBalanceTypeMapping:
     def test_revenue_concepts_have_credit_balance(self):
         """Revenue concepts should have credit balance."""
         assert get_balance_type('us-gaap:Revenues') == 'credit'
-        assert get_balance_type('Revenue') == 'credit'  # Short form
+        assert get_balance_type('Revenues') == 'credit'  # Short form
+        # 'Revenue' is not a us-gaap element in any year, so it has no declared balance (#1728)
+        assert get_balance_type('Revenue') is None
         assert get_balance_type('us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax') == 'credit'
 
     def test_expense_concepts_have_debit_balance(self):
@@ -68,9 +70,8 @@ class TestBalanceTypeMapping:
         assert get_balance_type('xyz:FakeConcept') is None
 
     def test_mapping_coverage(self):
-        """Verify we have reasonable coverage of common concepts."""
-        # Should have at least 100 concepts mapped
-        assert len(US_GAAP_BALANCE_TYPES) >= 100
+        """The bundled table carries every us-gaap 2011-2026 and srt 2018-2026 element with a balance."""
+        assert len(_standard_balances()) == 10159
 
 
 @pytest.mark.network

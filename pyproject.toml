@@ -159,6 +159,7 @@ include = [
   "edgar/reference/data/*",
   "edgar/entity/data/*",
   "edgar/xbrl/standardization/*",
+  "edgar/xbrl/data/*",
   "LICENSE.txt"
 ]
 # Development tooling that lives under edgar/ but is not the library. The

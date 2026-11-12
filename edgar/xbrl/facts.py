@@ -1648,14 +1648,10 @@ class FactsView:
 
                 # Add balance from element catalog (Issue #463)
                 # Balance indicates accounting classification (debit/credit)
-                # Try element catalog first, then fall back to static US-GAAP mapping
-                balance = element.balance
-                if balance is None:
-                    # Import here to avoid circular dependencies
-                    from edgar.xbrl.parsers.concepts import get_balance_type
-                    # Try to get balance from static mapping using the original concept ID
-                    balance = get_balance_type(fact.element_id)
-                fact_dict['balance'] = balance  # "debit", "credit", or None
+                # The filing's own declaration first, then the standard taxonomy's (#1728)
+                # Import here to avoid circular dependencies
+                from edgar.xbrl.parsers.concepts import resolve_balance
+                fact_dict['balance'] = resolve_balance(element.balance, fact.element_id)  # "debit", "credit", or None
 
                 # Add preferred_sign from presentation linkbase (Issue #463)
                 # Convert preferredLabel to a numeric sign multiplier for display

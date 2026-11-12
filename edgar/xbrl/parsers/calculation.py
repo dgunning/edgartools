@@ -28,6 +28,7 @@ from edgar.xbrl.models import (
 )
 
 from .base import BaseParser
+from .concepts import resolve_balance
 from .relationships import arc_candidate, candidate_key, effective_relationships
 
 XLINK = "{http://www.w3.org/1999/xlink}"
@@ -284,8 +285,8 @@ class CalculationParser(BaseParser):
         # Add element information if available
         elem_info = catalog_entry(self.element_catalog, element_id)
 
+        node.balance_type = resolve_balance(elem_info.balance if elem_info else None, element_id)
         if elem_info:
-            node.balance_type = elem_info.balance
             node.period_type = elem_info.period_type
 
         # Add to collection
