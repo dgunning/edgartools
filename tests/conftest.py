@@ -189,6 +189,11 @@ def pytest_configure(config):
         )
 
 
+# While a @pytest.mark.vcr test runs, the submissions it has read from its cassette, by CIK;
+# None otherwise. Set by cassette_tests_read_their_own_company_facts.
+_cassette_submissions = None
+
+
 @pytest.fixture(scope="session", autouse=True)
 def cache_sec_submissions_for_session():
     """Memoize SEC *submissions* downloads for the whole test session.
@@ -206,19 +211,45 @@ def cache_sec_submissions_for_session():
     re-export are patched so the ``_filings.py`` caller is covered too.
 
     Set EDGAR_TEST_CACHE_STATS=1 to print hit/miss stats at session end.
+
+    A ``@pytest.mark.vcr`` test reads its submissions from its own cassette
+    first and falls back to the memo only when the cassette holds none (some
+    were recorded while the memo served submissions). Serving the memo first
+    handed a cassette test whatever an earlier live test had downloaded: with
+    NVIDIA's submissions fetched live on 2026-11-12, the 2026-11-02 cassette of
+    test_issue_1817's ``days`` test saw a Form 4 filed 2026-11-06 (bead
+    edgartools-k7mi8.18). Cassette reads are memoized for that test, as the
+    memo did while it was recorded (a cassette holds one copy, played once),
+    and kept apart from live downloads: a later cassette test that holds no
+    submissions may still fall back on them, as it did when it was recorded,
+    but a live test never sees a recording.
     """
     import os
+
+    from vcr.errors import CannotOverwriteExistingCassetteException
 
     import edgar.entity as _ent
     import edgar.entity.submissions as _subs
 
     cache = {}
-    stats = {"calls": 0, "downloads": 0}
+    recordings = {}  # submissions read from cassettes, by CIK
+    stats = {"calls": 0, "downloads": 0, "memo": cache}
     orig = _subs.download_entity_submissions_from_sec
     reexported = getattr(_ent, "download_entity_submissions_from_sec", None) is orig
 
     def cached_download(cik):
         stats["calls"] += 1
+        recorded = _cassette_submissions
+        if recorded is not None:
+            if cik in recorded:
+                return recorded[cik]
+            try:
+                recorded[cik] = recordings[cik] = orig(cik)
+                return recorded[cik]
+            except CannotOverwriteExistingCassetteException:
+                # Recorded while the memo served these submissions.
+                if cik in recordings:
+                    return recordings[cik]
         if cik not in cache:
             stats["downloads"] += 1
             cache[cik] = orig(cik)
@@ -253,19 +284,23 @@ def cassette_tests_read_their_own_company_facts(request):
     emptied before a cassette test, and again after it so recorded facts do not
     leak into the next test either.
 
-    The session submissions memo above has the same shape but is left alone:
-    some cassettes were recorded while it served submissions, so they hold none
-    and would fail if a cassette test had to fetch them.
+    The session submissions memo above has the same shape. It cannot be emptied
+    (some cassettes were recorded while it served submissions and hold none), so
+    this fixture gives the test its own memo instead, which the session memo
+    reads first.
     """
+    global _cassette_submissions
     if request.node.get_closest_marker("vcr") is None:
         yield
         return
     from edgar.entity.entity_facts import clear_company_facts_cache
 
     clear_company_facts_cache()
+    _cassette_submissions = {}
     try:
         yield
     finally:
+        _cassette_submissions = None
         clear_company_facts_cache()
 
 
