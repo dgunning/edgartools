@@ -1321,8 +1321,8 @@ class InstanceParser(BaseParser):
             # Build entity_info preserving existing keys
             self.entity_info.update({
                 'entity_name':             get_dei('EntityRegistrantName'),
-                'ticker':                  trading_symbols[0]['symbol'] if trading_symbols else None,
-                'trading_symbols':         trading_symbols,
+                'ticker': trading_symbols[0]['symbol'] if trading_symbols else None,
+                'trading_symbols': trading_symbols,
                 'identifier':              identifier,
                 'document_type':           get_dei('DocumentType'),
                 'reporting_end_date':      None,
