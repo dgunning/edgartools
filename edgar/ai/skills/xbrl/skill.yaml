@@ -86,6 +86,17 @@ patterns:
       # fact.fact_id is the filed id (None when none is filed); fact.footnotes is [] when none.
       # Only fact-footnote relationships attach; other arcroles are not ordinary footnotes.
 
+  - name: Inline XBRL Facts Across a Filing's Documents
+    when: An exhibit's inline facts (e.g. an inline EX-13) come back from parse_html with context None
+    code: |
+      # Only one document of a filing needs the ix:header; the others use its contexts and units.
+      from edgar.documents import parse_inline_xbrl_set
+      names = ["ibm-20241231.htm", "ibm-20241231_d2.htm"]   # primary + EX-13 of 0000051143-25-000015
+      docs = parse_inline_xbrl_set({n: filing.attachments[n].content for n in names})
+      facts = docs["ibm-20241231_d2.htm"].xbrl_facts       # only that document's facts, now resolved
+      # An ID defined in two documents is ambiguous: it resolves to None, with a warning.
+      # filing.xbrl() never needs this; it reads SEC's instance for the whole filing.
+
   - name: Calculation Linkbase as DataFrame
     when: Need per-filer concept hierarchy, extension → us-gaap mapping, or signed weights
     code: |
