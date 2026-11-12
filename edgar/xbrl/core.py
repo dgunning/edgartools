@@ -442,6 +442,16 @@ def get_currency_symbol(unit_measure: Optional[str]) -> str:
     return CURRENCY_SYMBOLS.get(unit_measure, '$')  # Default to USD if unknown
 
 
+def currency_display_symbol(code: str) -> str:
+    """The prefix a statement shows for an ISO 4217 currency code.
+
+    A configured symbol (``USD`` -> ``$``), else the code itself (``NZD`` ->
+    ``"NZD "``). Unlike :func:`get_currency_symbol` it never falls back to
+    dollars: the caller already knows the cell's currency from its unit.
+    """
+    return CURRENCY_SYMBOLS.get(f'iso4217:{code}') or f'{code} '
+
+
 def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
                  decimals: Optional[int] = None, currency_symbol: Optional[str] = None) -> str:
     """
