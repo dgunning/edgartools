@@ -19,7 +19,15 @@ from types import SimpleNamespace
 import pytest
 
 from edgar.documents import parse_html
-from edgar.earnings import EarningsRelease, RowType, Scale, _classify_row_type, _parse_numeric, _table_context
+from edgar.earnings import (
+    EarningsRelease,
+    RowType,
+    Scale,
+    _classify_row_type,
+    _declared_table_units,
+    _parse_numeric,
+    _table_context,
+)
 
 FIXTURES = Path(__file__).parents[2] / "fixtures" / "html" / "issue1824"
 
@@ -320,3 +328,27 @@ def test_footnote_handling_is_scoped_and_keeps_source_and_prose():
     # Other consumers of the canonical parser still get the original cell text.
     document = parse_html(html)
     assert any(cell.content == "29.43b" for row in document.tables[0].rows for cell in row.cells)
+
+
+def test_unit_declaration_scan_is_linear_on_long_whitespace():
+    # The 'units:' branch once started at every space of a whitespace run, so
+    # 200,000 spaces (padding in a <pre> exhibit) took about two minutes.
+    import time
+
+    padded = " " * 200_000 + "(in millions)"
+    started = time.perf_counter()
+    declaration = _declared_table_units([padded])
+    assert time.perf_counter() - started < 2
+    assert declaration == ("(in millions", "USD", Scale.MILLIONS)
+
+
+@pytest.mark.parametrize(
+    "text, declared",
+    [
+        ("(Unit: NT$ million, except for EPS)", True),
+        ("Units: millions", True),
+        ("subunits: 3", False),  # 'units' inside a word is not a declaration
+    ],
+)
+def test_units_branch_needs_a_word_start(text, declared):
+    assert (_declared_table_units([text]) is not None) is declared

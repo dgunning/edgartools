@@ -474,8 +474,11 @@ _OTHER_CURRENCY = re.compile(
 )
 
 # '(in millions ...', '(Amounts in thousands ...', '(€ in millions ...', '(Unit: NT$ million ...'
+# The 'units:' branch starts at '(' or a word boundary, never inside a whitespace run:
+# an optional '(' followed by '\s*' made every space a start position, which is
+# quadratic on long runs (8,000 spaces took 218 ms).
 _UNIT_DECLARATION = re.compile(
-    r'(?:\(?\s*units?\s*:\s*|\(\s*(?:(?P<lead>[^\s()]{1,8})\s+)?in\s+)[^)\n]+', re.I
+    r'(?:(?:\(\s*)?\bunits?\s*:\s*|\(\s*(?:(?P<lead>[^\s()]{1,8})\s+)?in\s+)[^)\n]+', re.I
 )
 
 
