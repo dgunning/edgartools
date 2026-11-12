@@ -3275,9 +3275,11 @@ class XBRL:
             dim_value = dim_value.replace(":", "_")
         dim_label = dim_name
         mem_label = dim_value
-        # The axis is a QName too: looked up raw it never matched, and its row
-        # keys read 'us-gaap:StatementBusinessSegmentsAxis: ...' (edgartools-gtmsn).
-        dim_element = catalog_entry(self.element_catalog, dim_name)
+        # The axis is looked up raw on purpose, so it keeps its QName: a statement
+        # row's dimension_label reads 'srt:ProductOrServiceAxis: Products', and
+        # callers filter on that (bdc/investments.py, GH #574, GH #1682). The
+        # axis label is in the facts frame; dimension_axis holds the QName.
+        dim_element = self.element_catalog.get(dim_name)
         mem_element = self.element_catalog.get(dim_value)
 
         # Try to get human-readable dimension name

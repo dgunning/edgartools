@@ -5,19 +5,16 @@ https://github.com/dgunning/edgartools/issues/1711, PR #1909)
 
 Facts and context dimensions name a concept by its QName ('us-gaap:Assets');
 the element catalog keys on 'us-gaap_Assets'. Each caller converted on its
-own, and two never did:
-
-- ``check_period_data_quality`` looked up every fact by its QName and found
-  none: on the Auburn, Apple, Microsoft and JPMorgan fixtures 0 of 13,058 fact
-  lookups hit, so every period read 0% essential coverage.
-- ``XBRL._describe_dimension`` converted the member but not the axis, so a
-  statement row's ``dimension_label`` read "srt:ConsolidatedEntitiesAxis:
-  Parent Company" where the facts frame reads "Consolidated Entity: Parent
-  Company". 818 rows across 20 statements on those four fixtures change, and
-  nothing else in the frames does.
+own, and ``check_period_data_quality`` never did: it looked up every fact by
+its QName and found none. On the Auburn, Apple, Microsoft and JPMorgan
+fixtures 0 of 13,058 fact lookups hit, so every period read 0% essential
+coverage.
 
 The rule now lives once in ``edgar.xbrl.core`` (``element_catalog_key``,
-``catalog_entry``) and every caller uses it.
+``catalog_entry``) and every caller uses it, except one exception kept on
+purpose: ``XBRL._describe_dimension`` looks up the axis raw, so a statement
+row's ``dimension_label`` keeps the axis QName. Callers string-match on it
+(``edgar/bdc/investments.py``, GH #574, GH #1682).
 """
 from pathlib import Path
 
@@ -67,15 +64,16 @@ def test_period_check_finds_the_balance_sheet_concepts(aubn):
     assert quality["essential_coverage"] > 0
 
 
-def test_a_statement_rows_dimension_label_names_the_axis_by_its_label(aubn):
-    """Auburn's parent-company noninterest expense: 239,000 for 2023, 326,000 for 2022."""
+def test_a_statement_rows_dimension_label_keeps_the_axis_qname(aubn):
+    """Auburn's parent-company noninterest expense: 239,000 for 2023, 326,000 for 2022.
+    The axis stays a QName in dimension_label; only the member reads as a label."""
     df = aubn.statements.income_statement(view="detailed").to_dataframe(view="detailed")
     row = df[(df["concept"] == "us-gaap_NoninterestExpense") & (df["dimension_member"] == "srt_ParentCompanyMember")]
     assert len(row) == 1
     row = row.iloc[0]
     assert (row["2023-12-31 (FY)"], row["2022-12-31 (FY)"]) == (239_000.0, 326_000.0)
     assert row["dimension_axis"] == "srt:ConsolidatedEntitiesAxis"
-    assert row["dimension_label"] == "Consolidated Entity: Parent Company"
+    assert row["dimension_label"] == "srt:ConsolidatedEntitiesAxis: Parent Company"
 
 
 def test_to_pandas_label_falls_back_to_a_display_role():
