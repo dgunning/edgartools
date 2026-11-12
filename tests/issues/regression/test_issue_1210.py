@@ -151,3 +151,20 @@ def test_constructor_order_is_unchanged():
     # Nothing was recorded as completed, so the status is not inferred from is_valid
     assert result.checks_completed == [] and result.level is None
     assert result.status == "inconclusive"
+
+
+def test_panel_title_names_the_validated_statement():
+    """An income statement's INCONCLUSIVE result must not be drawn as a balance-sheet check."""
+
+
+    def title(result):
+        console = Console(record=True, width=100)
+        console.print(result)
+        return console.export_text()
+
+    no_validator = ValidationResult(is_valid=True, metadata={"detected_type": "IncomeStatement"})
+    assert "Income Statement Validation" in title(no_validator)
+    assert "Balance Sheet" not in title(no_validator)
+    balance = ValidationResult(is_valid=True, checks_performed=["fundamental_equation"])
+    assert "Balance Sheet Validation" in title(balance)
+    assert "Statement Validation" in title(ValidationResult(is_valid=True))

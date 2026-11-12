@@ -8,6 +8,7 @@ Phase 1 of Context-Aware Standardization (Issue #494).
 """
 
 import logging
+import re
 from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import Enum
@@ -172,6 +173,16 @@ class ValidationResult:
             f"({self.error_count} errors, {self.warning_count} warnings)"
         )
 
+    def _panel_title(self) -> str:
+        """Name the statement that was validated, not always the balance sheet."""
+        detected = self.metadata.get("detected_type")
+        if detected:
+            readable = re.sub(r"(?<=[a-z])(?=[A-Z])", " ", str(detected))
+            return f"{readable} Validation"
+        if "fundamental_equation" in self.checks_performed:
+            return "Balance Sheet Validation"
+        return "Statement Validation"
+
     def __rich__(self):
         """Rich console representation."""
         from rich.console import Group
@@ -246,7 +257,7 @@ class ValidationResult:
 
         return Panel(
             Group(*sections),
-            title="Balance Sheet Validation",
+            title=self._panel_title(),
             border_style=status_color,
             padding=(0, 1)
         )
