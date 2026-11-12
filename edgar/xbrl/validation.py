@@ -48,6 +48,15 @@ def _parse_level(level: Union["ValidationLevel", str]) -> "ValidationLevel":
         ) from None
 
 
+# The comparisons each level asks for. A level is complete only when every one
+# of them ran its arithmetic (GH #1210).
+_REQUIRED_CHECKS = {
+    ValidationLevel.FUNDAMENTAL: ("fundamental_equation",),
+    ValidationLevel.SECTIONS: ("fundamental_equation", "asset_sections", "liability_sections"),
+    ValidationLevel.DETAILED: ("fundamental_equation", "asset_sections", "liability_sections"),
+}
+
+
 class ValidationSeverity(str, Enum):
     """Severity of validation issues."""
     ERROR = "error"      # Definite problem (e.g., equation doesn't balance)
@@ -84,6 +93,49 @@ class ValidationResult:
     metadata: Dict[str, Any] = field(default_factory=dict)
     """Additional metadata about the validation."""
 
+    checks_completed: List[str] = field(default_factory=list)
+    """The comparisons whose arithmetic ran: ``fundamental_equation``,
+    ``asset_sections`` and ``liability_sections``. A comparison skipped for a
+    missing input is not listed. ``checks_performed`` keeps the legacy
+    category names and lists a category even when nothing in it ran."""
+
+    level: Optional[str] = None
+    """The validation level that was requested ("fundamental", "sections" or
+    "detailed"). None on a result built by hand."""
+
+    @property
+    def checks_not_completed(self) -> List[str]:
+        """The comparisons the requested level asks for that did not run."""
+        if self.level is None:
+            return []
+        required = _REQUIRED_CHECKS.get(ValidationLevel(self.level), ())
+        return [check for check in required if check not in self.checks_completed]
+
+    @property
+    def validation_complete(self) -> bool:
+        """True when every comparison the requested level asks for ran.
+
+        False for a statement type with no validator, a statement that could
+        not be converted or was empty, and any comparison skipped for a missing
+        input. A result built by hand without ``level`` reflects only what it
+        recorded: it is complete when it lists at least one completed check.
+        """
+        if self.level is None:
+            return bool(self.checks_completed)
+        return bool(self.checks_completed) and not self.checks_not_completed
+
+    @property
+    def status(self) -> str:
+        """"invalid", "inconclusive" or "valid".
+
+        "invalid" when the result has an error (``is_valid`` is False);
+        otherwise "inconclusive" unless ``validation_complete``, else "valid".
+        Warnings are allowed in a valid result, as they are for ``is_valid``.
+        """
+        if self.errors or not self.is_valid:
+            return "invalid"
+        return "valid" if self.validation_complete else "inconclusive"
+
     @property
     def errors(self) -> List[ValidationIssue]:
         """Get only error-level issues."""
@@ -104,8 +156,17 @@ class ValidationResult:
         """Count of warning-level issues."""
         return len(self.warnings)
 
+    def _inconclusive_reason(self) -> str:
+        """Why the result is inconclusive, for display."""
+        if any(issue.code == "NO_VALIDATOR" for issue in self.issues):
+            return "no validator for this statement type"
+        not_run = self.checks_not_completed
+        if not_run:
+            return f"not evaluated: {', '.join(not_run)}"
+        return "no completed checks recorded"
+
     def __str__(self) -> str:
-        status = "VALID" if self.is_valid else "INVALID"
+        status = self.status.upper()
         return (
             f"ValidationResult: {status} "
             f"({self.error_count} errors, {self.warning_count} warnings)"
@@ -118,9 +179,8 @@ class ValidationResult:
         from rich.table import Table
         from rich.text import Text
 
-        status_color = "green" if self.is_valid else "red"
-        status_symbol = "✓" if self.is_valid else "✗"
-        status = "VALID" if self.is_valid else "INVALID"
+        status_color, status_symbol = _STATUS_STYLE[self.status]
+        status = self.status.upper()
 
         # Build content sections
         sections = []
@@ -130,6 +190,8 @@ class ValidationResult:
         header.append(f" {status_symbol} ", style=f"bold {status_color}")
         header.append("Validation: ", style="bold")
         header.append(status, style=f"bold {status_color}")
+        if self.status == "inconclusive":
+            header.append(f"  ({self._inconclusive_reason()})", style="dim")
         sections.append(header)
 
         # Equation check details (if available)
@@ -188,6 +250,13 @@ class ValidationResult:
             border_style=status_color,
             padding=(0, 1)
         )
+
+
+_STATUS_STYLE = {
+    "valid": ("green", "✓"),
+    "invalid": ("red", "✗"),
+    "inconclusive": ("yellow", "?"),
+}
 
 
 # Standard concepts for balance sheet validation
@@ -402,26 +471,65 @@ def _get_balance_sheet_values(df: pd.DataFrame, column: Optional[str] = None) ->
     }
 
 
-def _check_section_totals(values: Dict[str, Optional[float]], tolerance: float) -> List[ValidationIssue]:
-    """Current + non-current subtotals against total assets and total liabilities."""
+_SECTION_LABELS = {
+    "current_assets": "Current Assets",
+    "noncurrent_assets": "Non-Current Assets",
+    "total_assets": "Total Assets",
+    "current_liabilities": "Current Liabilities",
+    "noncurrent_liabilities": "Non-Current Liabilities",
+    "total_liabilities": "Total Liabilities",
+}
+
+_SECTION_COMPARISONS = [
+    ("asset_sections", "current_assets", "noncurrent_assets", "total_assets", "ASSET_SECTION_MISMATCH"),
+    ("liability_sections", "current_liabilities", "noncurrent_liabilities", "total_liabilities",
+     "LIABILITY_SECTION_MISMATCH"),
+]
+
+
+def _section_not_evaluated_issue(name: str, keys: Tuple[str, str, str], missing: List[str]) -> ValidationIssue:
+    """A section comparison skipped because ``missing`` inputs were not found.
+
+    INFO, not an error: a filer need not report a non-current subtotal, and its
+    absence is not a mismatch (GH #1210).
+    """
+    current, noncurrent, total = (_SECTION_LABELS[k] for k in keys)
+    return ValidationIssue(
+        severity=ValidationSeverity.INFO,
+        code="SECTION_NOT_EVALUATED",
+        message=(f"{current} + {noncurrent} not compared with {total}: "
+                 f"{', '.join(_SECTION_LABELS[k] for k in missing)} not found"),
+        details={"comparison": name, "missing": missing},
+    )
+
+
+def _check_section_totals(
+    values: Dict[str, Optional[float]], tolerance: float
+) -> Tuple[List[ValidationIssue], List[str]]:
+    """Current + non-current subtotals against total assets and total liabilities.
+
+    Returns the issues found and the names of the comparisons that ran. A
+    comparison missing an input is not run and leaves a SECTION_NOT_EVALUATED
+    issue instead of silently passing.
+    """
     issues = []
-    sections = [
-        ("current_assets", "noncurrent_assets", "total_assets", "ASSET_SECTION_MISMATCH",
-         "Current Assets + Non-Current Assets", "Total Assets"),
-        ("current_liabilities", "noncurrent_liabilities", "total_liabilities", "LIABILITY_SECTION_MISMATCH",
-         "Current Liabilities + Non-Current Liabilities", "Total Liabilities"),
-    ]
-    for current_key, noncurrent_key, total_key, code, parts_label, total_label in sections:
-        current, noncurrent, total = values.get(current_key), values.get(noncurrent_key), values.get(total_key)
-        if current is None or noncurrent is None or total is None:
+    completed = []
+    for name, current_key, noncurrent_key, total_key, code in _SECTION_COMPARISONS:
+        keys = (current_key, noncurrent_key, total_key)
+        missing = [key for key in keys if values.get(key) is None]
+        if missing:
+            issues.append(_section_not_evaluated_issue(name, keys, missing))
             continue
+        completed.append(name)
+        current, noncurrent, total = (values[key] for key in keys)
         expected = current + noncurrent
         diff = abs(total - expected)
         if diff > tolerance:
             issues.append(ValidationIssue(
                 severity=ValidationSeverity.WARNING,
                 code=code,
-                message=f"{parts_label} ({expected:,.0f}) != {total_label} ({total:,.0f})",
+                message=(f"{_SECTION_LABELS[current_key]} + {_SECTION_LABELS[noncurrent_key]} "
+                         f"({expected:,.0f}) != {_SECTION_LABELS[total_key]} ({total:,.0f})"),
                 details={
                     current_key: current,
                     noncurrent_key: noncurrent,
@@ -429,7 +537,7 @@ def _check_section_totals(values: Dict[str, Optional[float]], tolerance: float) 
                     "difference": diff
                 }
             ))
-    return issues
+    return issues, completed
 
 
 def _incomplete_equation_issue(df: pd.DataFrame, column: str) -> ValidationIssue:
@@ -448,6 +556,44 @@ def _incomplete_equation_issue(df: pd.DataFrame, column: str) -> ValidationIssue
         message=message,
         details={"period": column, "totals_reported_for": other_columns}
     )
+
+
+def _balance_sheet_frame(
+    statement_or_df: Union[Any, pd.DataFrame], level: ValidationLevel
+) -> Tuple[Optional[pd.DataFrame], Optional[ValidationResult]]:
+    """The statement as a DataFrame, or the failed result when it cannot be converted or is empty."""
+    if hasattr(statement_or_df, 'to_dataframe'):
+        try:
+            df = statement_or_df.to_dataframe(standard=True)
+        except Exception as e:
+            logger.warning("Failed to convert statement to DataFrame: %s", e)
+            return None, ValidationResult(
+                is_valid=False,
+                issues=[ValidationIssue(
+                    severity=ValidationSeverity.ERROR,
+                    code="CONVERSION_ERROR",
+                    message=f"Failed to convert statement to DataFrame: {e}"
+                )],
+                checks_performed=["statement_conversion"],
+                metadata={"error": str(e)},
+                level=level.value,
+            )
+    else:
+        df = statement_or_df
+
+    if df is None or df.empty:
+        return None, ValidationResult(
+            is_valid=False,
+            issues=[ValidationIssue(
+                severity=ValidationSeverity.ERROR,
+                code="EMPTY_STATEMENT",
+                message="Balance sheet is empty or could not be loaded"
+            )],
+            checks_performed=["data_check"],
+            metadata={},
+            level=level.value,
+        )
+    return df, None
 
 
 def validate_balance_sheet(
@@ -470,6 +616,12 @@ def validate_balance_sheet(
     column lacks the liabilities or equity totals the equation is reported as
     INCOMPLETE_DATA rather than compared against another period's totals.
 
+    ``result.status`` separates a check that passed from one that did not run:
+    "valid" when every comparison the level asks for ran without an error,
+    "inconclusive" when one could not run (``checks_completed`` lists those
+    that did), and "invalid" on any error. ``is_valid`` is unchanged: it is
+    True whenever there is no error, including when nothing could be compared.
+
     Args:
         statement_or_df: A Statement object or pandas DataFrame containing balance sheet data
         level: Validation level. FUNDAMENTAL checks the equation; SECTIONS also
@@ -491,6 +643,10 @@ def validate_balance_sheet(
         >>> result = validate_balance_sheet(bs)
         >>> print(result)
         ValidationResult: VALID (0 errors, 0 warnings)
+        >>> result.status, result.checks_completed
+        ('valid', ['fundamental_equation'])
+        >>> print(validate_statement(xbrl.statements.income_statement()))
+        ValidationResult: INCONCLUSIVE (0 errors, 0 warnings)
 
     Raises:
         ValidationError: ``level`` is not a validation level.
@@ -498,38 +654,12 @@ def validate_balance_sheet(
     level = _parse_level(level)
     issues: List[ValidationIssue] = []
     checks: List[str] = []
+    completed: List[str] = []
     metadata: Dict[str, Any] = {}
 
-    # Convert Statement to DataFrame if needed
-    if hasattr(statement_or_df, 'to_dataframe'):
-        try:
-            df = statement_or_df.to_dataframe(standard=True)
-        except Exception as e:
-            logger.warning("Failed to convert statement to DataFrame: %s", e)
-            return ValidationResult(
-                is_valid=False,
-                issues=[ValidationIssue(
-                    severity=ValidationSeverity.ERROR,
-                    code="CONVERSION_ERROR",
-                    message=f"Failed to convert statement to DataFrame: {e}"
-                )],
-                checks_performed=["statement_conversion"],
-                metadata={"error": str(e)}
-            )
-    else:
-        df = statement_or_df
-
-    if df is None or df.empty:
-        return ValidationResult(
-            is_valid=False,
-            issues=[ValidationIssue(
-                severity=ValidationSeverity.ERROR,
-                code="EMPTY_STATEMENT",
-                message="Balance sheet is empty or could not be loaded"
-            )],
-            checks_performed=["data_check"],
-            metadata={}
-        )
+    df, failure = _balance_sheet_frame(statement_or_df, level)
+    if failure is not None:
+        return failure
 
     # Extract values, all from one column so the checks compare a single date
     column = _select_period_column(df)
@@ -636,14 +766,18 @@ def validate_balance_sheet(
                 ))
             equation_validated = True
 
-    # Warn if we couldn't perform either check
-    if not equation_validated and assets is not None:
+    if equation_validated:
+        completed.append("fundamental_equation")
+    elif assets is not None:
+        # Warn if we couldn't perform either check
         issues.append(_incomplete_equation_issue(df, column))
 
     # Level 2: Section validation
     if level in (ValidationLevel.SECTIONS, ValidationLevel.DETAILED):
         checks.append("section_totals")
-        issues.extend(_check_section_totals(values, tolerance))
+        section_issues, section_checks = _check_section_totals(values, tolerance)
+        issues.extend(section_issues)
+        completed.extend(section_checks)
 
     # Determine overall validity (errors = invalid, warnings OK)
     is_valid = not any(i.severity == ValidationSeverity.ERROR for i in issues)
@@ -652,7 +786,9 @@ def validate_balance_sheet(
         is_valid=is_valid,
         issues=issues,
         checks_performed=checks,
-        metadata=metadata
+        metadata=metadata,
+        checks_completed=completed,
+        level=level.value,
     )
 
 
@@ -680,7 +816,12 @@ def validate_statement(
             runs the same checks as SECTIONS; see validate_balance_sheet().
 
     Returns:
-        ValidationResult with validation status and any issues found
+        ValidationResult with validation status and any issues found. For a
+        statement type with no validator, ``is_valid`` is True with a
+        NO_VALIDATOR issue and ``status`` is "inconclusive":
+
+        >>> print(xbrl.statements.income_statement().validate())
+        ValidationResult: INCONCLUSIVE (0 errors, 0 warnings)
 
     Raises:
         ValidationError: ``level`` is not a validation level.
@@ -715,5 +856,6 @@ def validate_statement(
             message=f"No validator available for statement type: {detected_type}"
         )],
         checks_performed=["type_detection"],
-        metadata={"detected_type": detected_type}
+        metadata={"detected_type": detected_type},
+        level=level.value,
     )

@@ -40,7 +40,15 @@ def test_no_cross_date_imbalance(npk_balance_sheet):
     result = npk_balance_sheet.validate(level="sections")
     assert "EQUATION_IMBALANCE" not in [issue.code for issue in result.issues]
     assert "liab_equity_check" not in result.metadata
-    [issue] = result.issues
+    # The section comparisons cannot run either (GH #1210): no non-current
+    # assets subtotal and no liabilities in the 2026-04-05 column.
+    issue, assets_section, liabilities_section = result.issues
+    assert assets_section.details == {"comparison": "asset_sections", "missing": ["noncurrent_assets"]}
+    assert liabilities_section.details == {
+        "comparison": "liability_sections",
+        "missing": ["current_liabilities", "noncurrent_liabilities", "total_liabilities"],
+    }
+    assert result.status == "inconclusive"
     assert issue.code == "INCOMPLETE_DATA"
     assert issue.details == {"period": "2026-04-05", "totals_reported_for": ["2025-12-31", "2026-03-31"]}
     assert "2026-04-05" in issue.message
@@ -67,7 +75,8 @@ def test_equation_is_checked_within_the_selected_column():
         "2025-12-31": [500_730_000.0, 500_730_000.0],
     })
     result = validate_balance_sheet(df, level=ValidationLevel.SECTIONS)
-    assert [issue.code for issue in result.issues] == ["INCOMPLETE_DATA"]
+    assert [issue.code for issue in result.issues] == [
+        "INCOMPLETE_DATA", "SECTION_NOT_EVALUATED", "SECTION_NOT_EVALUATED"]
     assert result.metadata["period"] == "2026-04-05"
 
     df.loc[1, "2026-04-05"] = 469_312_000.0
