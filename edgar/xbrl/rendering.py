@@ -24,10 +24,12 @@ from edgar.documents import HTMLParser, ParserConfig
 from edgar.richtools import repr_rich, rich_to_text
 from edgar.xbrl import standardization
 from edgar.xbrl.core import (
-    CURRENCY_SYMBOLS,
     INFINITE_PRECISION,
     UNIT_UNAVAILABLE,
     SourceKeyLookup,
+    UnitClass,
+    classify_unit_definition,
+    currency_display_symbol,
     decimals_for_scaling,
     determine_dominant_scale,
     format_date,
@@ -214,11 +216,11 @@ class CellFormatter:
     """
     __slots__ = ('item', 'period_key', 'is_monetary_statement',
                  'dominant_scale', 'shares_scale', 'comparison_info',
-                 'currency_symbol', 'selected')
+                 'currency_symbol', 'selected', 'unit_class')
 
     def __init__(self, item, period_key, is_monetary_statement,
                  dominant_scale, shares_scale, comparison_info,
-                 currency_symbol, selected=None):
+                 currency_symbol, selected=None, unit_class=None):
         self.item = item
         self.period_key = period_key
         self.is_monetary_statement = is_monetary_statement
@@ -228,6 +230,8 @@ class CellFormatter:
         self.currency_symbol = currency_symbol
         # A period-boundary balance's own source fields and resolved unit (GH #1655)
         self.selected = selected
+        # What the cell's own unit measures, or None when it has no definition (GH #1737)
+        self.unit_class = unit_class
 
     def __call__(self, value):
         if self.selected is not None:
@@ -235,7 +239,8 @@ class CellFormatter:
         return _format_value_for_display_as_string(
             value, self.item, self.period_key,
             self.is_monetary_statement, self.dominant_scale,
-            self.shares_scale, self.comparison_info, self.currency_symbol
+            self.shares_scale, self.comparison_info, self.currency_symbol,
+            unit_class=getattr(self, 'unit_class', None)
         )
 
 
@@ -1287,7 +1292,9 @@ def _format_period_labels(
 def _determine_shares_scale(rows: List[StatementRow]) -> Optional[int]:
     """Choose the finest share display scale used by the populated cells.
 
-    Read the same concept, value type and period decimals as each formatter.
+    Read the same unit, value type and period decimals as each formatter: a
+    cell is a share count when its unit is ``xbrli:shares`` (GH #1737), and only
+    a cell with no unit definition falls back to the share concept list.
     Exact, missing or unscaled precision contributes 0. Empty and nonfinite
     cells do not describe a share quantity and cannot choose its display unit.
     """
@@ -1297,8 +1304,7 @@ def _determine_shares_scale(rows: List[StatementRow]) -> Optional[int]:
             formatter = cell.formatter
             if not isinstance(formatter, CellFormatter):
                 continue
-            concept = formatter.item.get('concept', '')
-            if concept not in share_concepts or concept in eps_concepts:
+            if not _is_share_cell(formatter.item, getattr(formatter, 'unit_class', None)):
                 continue
             value = cell.value
             if type(value) not in (int, float) or not value:
@@ -1491,15 +1497,24 @@ def _resolve_selected_unit(xbrl_instance: Any, unit_ref: Optional[str]) -> Tuple
 
     No other fact is consulted and nothing defaults to dollars: a currency
     without a configured symbol shows its ISO code, and a missing or unusable
-    unit is reported as unavailable.
+    unit is reported as unavailable. A parsed unit is classified from its
+    definition (GH #1737); a unit dict without one -- built by hand rather than
+    by the instance parser -- keeps the measure-prefix reading.
     """
     units = getattr(xbrl_instance, 'units', None) or {}
     unit_info = units.get(unit_ref) if isinstance(unit_ref, str) else None
     if not isinstance(unit_info, dict):
         return _UNIT_UNAVAILABLE, None
+    if 'definition' in unit_info:
+        unit_class = classify_unit_definition(unit_info)
+        if unit_class is None:
+            return _UNIT_UNAVAILABLE, None
+        if unit_class.currency:
+            return _UNIT_CURRENCY, currency_display_symbol(unit_class.currency)
+        return _UNIT_NON_CURRENCY, None
     measure = unit_currency_measure(unit_info)
     if measure:
-        return _UNIT_CURRENCY, CURRENCY_SYMBOLS.get(measure) or f"{iso4217_code(measure)} "
+        return _UNIT_CURRENCY, currency_display_symbol(iso4217_code(measure))
     if unit_info.get('type') == 'simple' and unit_info.get('measure'):
         return _UNIT_NON_CURRENCY, None
     return _UNIT_UNAVAILABLE, None
@@ -1513,7 +1528,8 @@ def _format_selected_balance(value: Any, formatter: 'CellFormatter') -> str:
         value, formatter.item, selected['source_period_key'],
         formatter.is_monetary_statement and status == _UNIT_CURRENCY,
         formatter.dominant_scale, formatter.shares_scale,
-        formatter.comparison_info, selected['currency_symbol']
+        formatter.comparison_info, selected['currency_symbol'],
+        unit_class=getattr(formatter, 'unit_class', None)
     )
     # Marked only where a currency symbol would otherwise have been shown
     if text and status == _UNIT_UNAVAILABLE and _item_is_monetary(formatter.item, formatter.is_monetary_statement):
@@ -1538,14 +1554,21 @@ def _selected_balance_formatter_fields(item: Dict[str, Any], selected: Dict[str,
 
 
 def _filed_decimal_places(value: Union[int, float], decimals: Union[int, str, None]) -> int:
-    """Decimal places a value was filed with: all of its digits when exact ('INF')."""
+    """Decimal places a value was filed with: all of its digits when exact ('INF').
+
+    A float's trailing ``.0`` is not a filed digit, so an exact 1.0 has none.
+    """
     if decimals == INFINITE_PRECISION and math.isfinite(value):
-        return max(0, -Decimal(repr(value)).as_tuple().exponent)
+        return max(0, -Decimal(repr(value)).normalize().as_tuple().exponent)
     return decimals_for_scaling(decimals)
 
 
 def _item_is_monetary(item: Dict[str, Any], is_monetary_statement: bool) -> bool:
-    """Whether a row's values display as money: not shares, EPS or a ratio-labelled row."""
+    """Whether a row's values display as money: not shares, EPS or a ratio-labelled row.
+
+    The fallback for a cell with no unit definition; a cell whose unit is
+    known is money exactly when that unit is a currency (GH #1737).
+    """
     if not is_monetary_statement:
         return False
     concept = item.get('concept', '')
@@ -1553,6 +1576,75 @@ def _item_is_monetary(item: Dict[str, Any], is_monetary_statement: bool) -> bool
         return False
     label = item.get('label', '').lower()
     return not any(keyword in label for keyword in ('ratio', 'percentage', 'per cent'))
+
+
+def _is_share_cell(item: Dict[str, Any], unit_class: Optional[UnitClass]) -> bool:
+    """Whether a cell is a share count: its unit is ``xbrli:shares``.
+
+    Only a cell with no unit definition (a hand-built statement) is judged by
+    the share concept list instead.
+    """
+    if unit_class is not None:
+        return unit_class.kind == 'shares'
+    concept = item.get('concept', '')
+    return concept in share_concepts and concept not in eps_concepts
+
+
+def _format_per_share(value: Union[int, float], filed_decimals: Union[int, str, None]) -> str:
+    """A per-share amount, never scaled: 2-3 places, or finer when filed finer."""
+    if abs(value) >= 1000:
+        return f"{value:,.2f}"
+    if abs(value) >= 10:
+        return f"{value:.2f}"
+    # Keep any finer precision the value was filed with, so an exact
+    # $0.00001 par value does not round to zero (GH #1475).
+    places = max(3, _filed_decimal_places(value, filed_decimals))
+    formatted = f"{value:.{places}f}".rstrip('0').rstrip('.')
+    # Ensure at least 2 decimal places
+    if '.' not in formatted or len(formatted.split('.')[1]) < 2:
+        return f"{value:.2f}"
+    return formatted
+
+
+def _format_share_count(value: Union[int, float], shares_scale: Optional[int], fact_decimals: int) -> str:
+    """A share count in the statement's share scale (its own accuracy until one is chosen)."""
+    scale = shares_scale if shares_scale is not None else fact_decimals
+    if scale <= -3:
+        return f"{value / 10 ** (-scale):,.0f}"
+    return f"{value:,.0f}"
+
+
+def _format_unscaled(value: Union[int, float], filed_decimals: Union[int, str, None]) -> str:
+    """A pure or other non-monetary value as filed: no scale, the filed decimal places.
+
+    A rate stays in its filed basis (0.147, not 14.7%). A value with no
+    accuracy keeps all of its digits, like an exact one.
+    """
+    decimals = INFINITE_PRECISION if filed_decimals is None else filed_decimals
+    places = max(0, _filed_decimal_places(value, decimals))
+    text = f"{abs(value):,.{places}f}"
+    return f"({text})" if value < 0 else text
+
+
+def _format_by_unit(value: Union[int, float], unit_class: UnitClass, is_monetary_statement: bool,
+                    dominant_scale: int, shares_scale: Optional[int],
+                    filed_decimals: Union[int, str, None]) -> str:
+    """Format a number from what its own unit measures (GH #1737).
+
+    Money takes the statement's scale and its own currency's symbol; shares
+    take the share scale; per-share amounts are never scaled; pure and other
+    units are shown unscaled as filed.
+    """
+    kind = unit_class.kind
+    fact_decimals = decimals_for_scaling(filed_decimals)
+    if kind == 'currency':
+        symbol = currency_display_symbol(unit_class.currency) if is_monetary_statement else None
+        return format_value(value, is_monetary_statement, dominant_scale, fact_decimals, symbol)
+    if kind == 'currency_per_share':
+        return _format_per_share(value, filed_decimals)
+    if kind == 'shares':
+        return _format_share_count(value, shares_scale, fact_decimals)
+    return _format_unscaled(value, filed_decimals)
 
 
 def _format_value_for_display_as_string(
@@ -1563,7 +1655,8 @@ def _format_value_for_display_as_string(
     dominant_scale: int,
     shares_scale: Optional[int],
     comparison_info: Optional[Dict[str, Any]] = None,
-    currency_symbol: Optional[str] = None
+    currency_symbol: Optional[str] = None,
+    unit_class: Optional[UnitClass] = None
 ) -> str:
     """
     Format a value for display in a financial statement, returning a string.
@@ -1577,6 +1670,9 @@ def _format_value_for_display_as_string(
         shares_scale: The scale for share values, if present
         comparison_info: Optional comparison information for showing trends
         currency_symbol: Pre-resolved currency symbol (e.g., "$", "EUR")
+        unit_class: What the cell's own unit measures. When given, it alone
+            decides how the number is scaled and labelled (GH #1737); without
+            it, the concept lists and label words decide, as before.
 
     Returns:
         str: Formatted value as a string
@@ -1590,71 +1686,34 @@ def _format_value_for_display_as_string(
     if value_type not in (int, float, str):
         return ""
 
-    # Extract only needed metadata
-    concept = item.get('concept', '')
+    if value_type is str:
+        # String values - only check HTML if it might contain tags
+        if '<' in value and '>' in value and _is_html(value):
+            return html_to_text(value)
+        return value
 
-    # Fast check for common share and EPS concepts
-    is_share_value = concept in share_concepts
-    is_eps_value = concept in eps_concepts
-    is_monetary = _item_is_monetary(item, is_monetary_statement)
-
-    # Get decimals with a default value to avoid conditional logic later.
     # A statement stores the filed accuracy, which may be the sentinel 'INF'
     # (GH #1229); scaling needs a number, and an exact value implies no scale.
-    fact_decimals = 0
-    filed_decimals = None
-    if period_key:
-        decimals_dict = item.get('decimals', {})
-        if decimals_dict:
-            filed_decimals = decimals_dict.get(period_key)
-            fact_decimals = decimals_for_scaling(filed_decimals)
+    filed_decimals = (item.get('decimals') or {}).get(period_key) if period_key else None
 
     # Apply presentation logic for display (Issue #463)
     value = apply_presentation_sign(
         value, item.get('statement_type'), item.get('preferred_signs'), period_key
     )
 
-    # Format numeric values efficiently
-    if value_type in (int, float):
-        # Handle EPS values with decimal precision
-        if is_eps_value:
-            # EPS values should show 2-3 decimal places and not be scaled
-            if abs(value) >= 1000:
-                # For very large EPS values, use thousands separator
-                return f"{value:,.2f}"
-            elif abs(value) >= 10:
-                # For EPS values >= 10, use 2 decimal places
-                return f"{value:.2f}"
-            else:
-                # For typical EPS values < 10, use up to 3 decimal places but remove trailing zeros.
-                # Keep any finer precision the value was filed with, so an exact
-                # $0.00001 par value does not round to zero (GH #1475).
-                places = max(3, _filed_decimal_places(value, filed_decimals))
-                formatted = f"{value:.{places}f}".rstrip('0').rstrip('.')
-                # Ensure at least 2 decimal places for EPS
-                if '.' not in formatted or len(formatted.split('.')[1]) < 2:
-                    return f"{value:.2f}"
-                return formatted
-        # Handle share values with a specialized path
-        elif is_share_value:
-            scale = shares_scale if shares_scale is not None else fact_decimals
-            if scale <= -3:
-                # Efficiently apply scaling
-                scale_factor = 10 ** (-scale)
-                scaled_value = value / scale_factor
-                return f"{scaled_value:,.0f}"
-            else:
-                # For smaller share values, no scaling needed
-                return f"{value:,.0f}"
-        else:
-            # Use cached format_value function for other values
-            # currency_symbol is pre-resolved at closure-creation time
-            return format_value(value, is_monetary, dominant_scale, fact_decimals, currency_symbol)
-    else:
-        # String values - only check HTML if it might contain tags
-        if '<' in value and '>' in value and _is_html(value):
-            return html_to_text(value)
-        return value
+    if unit_class is not None:
+        return _format_by_unit(value, unit_class, is_monetary_statement,
+                               dominant_scale, shares_scale, filed_decimals)
+
+    concept = item.get('concept', '')
+    if concept in eps_concepts:
+        return _format_per_share(value, filed_decimals)
+    fact_decimals = decimals_for_scaling(filed_decimals)
+    if concept in share_concepts:
+        return _format_share_count(value, shares_scale, fact_decimals)
+    # currency_symbol is pre-resolved at closure-creation time
+    return format_value(value, _item_is_monetary(item, is_monetary_statement), dominant_scale,
+                        fact_decimals, currency_symbol)
 
 
 def _format_value_for_display(
@@ -2217,6 +2276,8 @@ def render_statement(
 
             record_cell_unit(row.metadata['unit_definitions'], period_key, value,
                              item.get('units'), row_values.source_key, unit_defs)
+            # GH #1737: the cell's own unit decides how it is scaled and labelled
+            cell_unit_class = classify_unit_definition(row.metadata['unit_definitions'].get(period_key))
 
             # Get comparison info for this item and period if available
             comparison_info = None
@@ -2230,7 +2291,8 @@ def render_statement(
 
             # Pre-resolve currency to avoid capturing xbrl_instance in the closure
             cell_currency_symbol = None
-            if selected is None and is_monetary_statement and period_key and xbrl_instance:
+            if (selected is None and cell_unit_class is None and is_monetary_statement
+                    and period_key and xbrl_instance):
                 from edgar.xbrl.core import get_currency_symbol
                 element_name = current_item.get('name') or current_item.get('concept', '')
                 if element_name:
@@ -2241,7 +2303,7 @@ def render_statement(
             format_func = CellFormatter(
                 current_item, current_period_key,
                 is_monetary_statement, dominant_scale, shares_scale,
-                comparison_info, cell_currency_symbol, selected
+                comparison_info, cell_currency_symbol, selected, cell_unit_class
             )
 
             # Create a cell and add it to the row
