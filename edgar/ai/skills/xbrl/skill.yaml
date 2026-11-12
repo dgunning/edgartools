@@ -17,6 +17,9 @@ patterns:
       xbrl.entity_info["fiscal_period"] # FY, Q1, Q2, Q3, Q4
       xbrl.entity_info["reporting_end_date"]        # date the document reports to (DocumentPeriodEndDate)
       xbrl.entity_info["max_instant_context_date"]  # latest context instant, e.g. the share-count date
+      xbrl.entity_info["ticker"]        # First dei:TradingSymbol on the cover (JPM, not AMJB)
+      xbrl.entity_info["trading_symbols"]  # Every cover symbol in document order:
+                                        # [{"symbol", "class_of_stock", "context_ref"}, ...]
 
   - name: Statements
     when: Get financial statements from XBRL

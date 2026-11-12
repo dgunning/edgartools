@@ -75,6 +75,7 @@ _STRUCTURAL_ELEMENTS = frozenset({
 # co-registrant's, not the filer's (GH #1420, #1710).
 _ENTITY_AXES = ('dei:LegalEntityAxis', 'srt:ConsolidatedEntitiesAxis')
 
+
 def _parse_iso_date(value: Optional[str]) -> Optional[date]:
     """A ``YYYY-MM-DD`` string as a date, or None when it is absent or not one."""
     if not value:
@@ -83,6 +84,25 @@ def _parse_iso_date(value: Optional[str]) -> Optional[date]:
         return datetime.strptime(value.strip(), '%Y-%m-%d').date()
     except ValueError:
         return None
+
+
+# Axes whose member names the security a dei:TradingSymbol fact lists. Most
+# covers use StatementClassOfStockAxis; ExxonMobil's uses CapitalUnitsByClassAxis
+# (GH #1252).
+_CLASS_OF_STOCK_AXES = ('us-gaap:StatementClassOfStockAxis', 'us-gaap:CapitalUnitsByClassAxis')
+
+
+def _is_dei_fact(fact: Fact) -> bool:
+    return _dei_concept(fact.element_id) is not None
+
+
+def _dei_concept(element_id: str) -> Optional[str]:
+    """The local name of a DEI fact's concept ('TradingSymbol'), or None for any other fact."""
+    if element_id.startswith('dei:'):
+        return element_id.split(':', 1)[1]
+    if element_id.startswith('dei_'):
+        return element_id.split('_', 1)[1]
+    return None
 
 
 def _is_nil(element: ET.Element) -> bool:
@@ -401,6 +421,11 @@ class InstanceParser(BaseParser):
 
         # DEI facts extracted during entity info processing
         self.dei_facts: Dict[str, Fact] = {}
+
+        # Every DEI fact in instance document order. self.facts cannot give that
+        # order: a duplicated fact's first copy is re-keyed, which moves it to
+        # where its second copy appears (GH #1252).
+        self.dei_facts_in_document_order: List[Fact] = []
 
         # Dimension QNames seen on an xbrldi:typedMember. Shared with the
         # definition parser by the coordinator, which replaces this set.
@@ -834,6 +859,7 @@ class InstanceParser(BaseParser):
             fact_count = 0
             facts_dict = {}
             base_keys = {}
+            facts_in_order: List[Fact] = []
 
             def process_element(element):
                 """Process a single element as a potential fact."""
@@ -982,6 +1008,7 @@ class InstanceParser(BaseParser):
                 # Store fact with appropriate key
                 key = self._create_normalized_fact_key(element_id, context_ref, instance_id)
                 facts_dict[key] = fact
+                facts_in_order.append(fact)
                 fact_count += 1
 
             # Use lxml's optimized traversal methods
@@ -1001,6 +1028,7 @@ class InstanceParser(BaseParser):
 
             # Update instance facts
             self.facts.update(facts_dict)
+            self.dei_facts_in_document_order = list(filter(_is_dei_fact, facts_in_order))
 
             log.debug(f"Extracted {fact_count} facts ({len(base_keys)} unique fact identifiers)")
 
@@ -1235,6 +1263,42 @@ class InstanceParser(BaseParser):
                 latest = instant
         return latest
 
+
+    def _is_co_registrant_fact(self, fact: Fact) -> bool:
+        """Whether a fact's context names another legal entity on an entity axis (GH #1420, #1710)."""
+        context = self.contexts.get(fact.context_ref)
+        return context is not None and any(axis in context.dimensions for axis in _ENTITY_AXES)
+
+    def _trading_symbols(self) -> List[Dict[str, Optional[str]]]:
+        """Every dei:TradingSymbol the filer reports, in instance document order.
+
+        A cover lists one symbol per registered security, each in a context
+        whose class-of-stock member names the security: JPMorgan's FY2023 10-K
+        lists ten, from JPM (common stock) to AMJB (an ETN guarantee). Each
+        entry is ``{'symbol', 'class_of_stock', 'context_ref'}``, where
+        ``class_of_stock`` is that member's QName, or None when the context has
+        none.
+
+        A co-registrant's symbols list another registrant's securities, and
+        are used only when the filer reports none, the same rule entity_info
+        applies to every DEI concept (GH #1420). A blank symbol is skipped.
+        The first entry is ``entity_info['ticker']`` (GH #1252).
+        """
+        own: List[Dict[str, Optional[str]]] = []
+        co_registrants: List[Dict[str, Optional[str]]] = []
+        for fact in self.dei_facts_in_document_order:
+            if _dei_concept(fact.element_id) != 'TradingSymbol' or not fact.value:
+                continue
+            context = self.contexts.get(fact.context_ref)
+            dimensions = context.dimensions if context is not None else {}
+            entry = {
+                'symbol': fact.value,
+                'class_of_stock': next((dimensions[axis] for axis in _CLASS_OF_STOCK_AXES if axis in dimensions), None),
+                'context_ref': fact.context_ref,
+            }
+            (co_registrants if self._is_co_registrant_fact(fact) else own).append(entry)
+        return own or co_registrants
+
     def _extract_entity_info(self) -> None:
         """Extract entity information from contexts and DEI facts."""
         try:
@@ -1262,15 +1326,10 @@ class InstanceParser(BaseParser):
             self.dei_facts: Dict[str, Fact] = {}
             co_registrant_facts: Dict[str, Fact] = {}
             for fact in self.facts.values():
-                eid = fact.element_id
-                if eid.startswith('dei:'):
-                    concept = eid.split(':', 1)[1]
-                elif eid.startswith('dei_'):
-                    concept = eid.split('_', 1)[1]
-                else:
+                concept = _dei_concept(fact.element_id)
+                if concept is None:
                     continue
-                context = self.contexts.get(fact.context_ref)
-                if context is not None and any(axis in context.dimensions for axis in _ENTITY_AXES):
+                if self._is_co_registrant_fact(fact):
                     co_registrant_facts[concept] = fact
                 else:
                     self.dei_facts[concept] = fact
@@ -1285,10 +1344,14 @@ class InstanceParser(BaseParser):
                         return f.value
                 return None
 
+            # The first of the filer's own symbols, in document order (GH #1252)
+            trading_symbols = self._trading_symbols()
+
             # Build entity_info preserving existing keys
             self.entity_info.update({
                 'entity_name':             get_dei('EntityRegistrantName'),
-                'ticker':                  get_dei('TradingSymbol'),
+                'ticker': trading_symbols[0]['symbol'] if trading_symbols else None,
+                'trading_symbols': trading_symbols,
                 'identifier':              identifier,
                 'document_type':           get_dei('DocumentType'),
                 # The period the document reports on, as a date (GH #1208)

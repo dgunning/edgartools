@@ -42,6 +42,7 @@ from edgar.xbrl.core import (
 )
 from edgar.xbrl.models import NIL_MEMBER_LABEL, Axis, Domain, PresentationNode, is_negated_label_role
 from edgar.xbrl.parsers import XBRLParser
+from edgar.xbrl.parsers.concepts import resolve_balance
 from edgar.xbrl.periods import get_period_views
 from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
 from edgar.exceptions import NotFoundError
@@ -2092,11 +2093,7 @@ class XBRL:
         element_id_normalized = element_catalog_key(element_id)
         if element_id_normalized in self.element_catalog:
             element = self.element_catalog[element_id_normalized]
-            balance = element.balance
-            if balance is None:
-                # Fallback to static US-GAAP mapping
-                from edgar.xbrl.parsers.concepts import get_balance_type
-                balance = get_balance_type(element_id)
+            balance = resolve_balance(element.balance, element_id)
 
         # Get weight and calculation parent from calculation trees (Issue #463, #514, GH-712)
         # A calculation relationship belongs to its own role (XBRL 2.1 section

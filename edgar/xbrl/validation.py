@@ -432,6 +432,16 @@ def _check_section_totals(values: Dict[str, Optional[float]], tolerance: float) 
     return issues
 
 
+def _relative_difference(diff: float, assets: float) -> float:
+    """``diff`` as a fraction of total assets, with a $1 floor on the denominator.
+
+    Zero total assets used to force the fraction to 0, so the percentage
+    tolerance always passed and assets of 0 against liabilities and equity of
+    1,000,000,000 reported no imbalance (GH #1210).
+    """
+    return diff / max(abs(assets), 1)
+
+
 def _incomplete_equation_issue(df: pd.DataFrame, column: str) -> ValidationIssue:
     """The equation could not be checked in ``column``; name the columns that do report the totals."""
     other_columns = [
@@ -542,7 +552,6 @@ def validate_balance_sheet(
 
     assets = values.get("total_assets")
     liabilities = values.get("total_liabilities")
-    equity = values.get("stockholders_equity") or values.get("total_equity_with_nci")
     liab_equity = values.get("liabilities_and_equity")
     nci = values.get("noncontrolling_interest")
 
@@ -560,7 +569,7 @@ def validate_balance_sheet(
     # This is most reliable as it uses the explicit total line
     if assets is not None and liab_equity is not None:
         diff = abs(assets - liab_equity)
-        diff_pct = diff / max(abs(assets), 1) if assets != 0 else 0
+        diff_pct = _relative_difference(diff, assets)
 
         metadata["liab_equity_check"] = {
             "assets": assets,
@@ -594,22 +603,25 @@ def validate_balance_sheet(
     # Use total_equity_with_nci first (more comprehensive), then stockholders_equity
     if not equation_validated and assets is not None and liabilities is not None:
         # Prefer comprehensive equity total over stockholders-only
-        equity_for_calc = values.get("total_equity_with_nci") or values.get("stockholders_equity")
+        # An explicit None test: a reported total equity of 0 is an operand, not
+        # a missing one, so it must not fall through to parent equity.
+        total_equity = values.get("total_equity_with_nci")
+        equity_for_calc = total_equity if total_equity is not None else values.get("stockholders_equity")
 
         if equity_for_calc is not None:
             expected = liabilities + equity_for_calc
             # Only add NCI if we're using stockholders_equity (not total_equity which already includes it)
-            if values.get("total_equity_with_nci") is None and nci is not None:
+            if total_equity is None and nci is not None:
                 expected += nci
 
             diff = abs(assets - expected)
-            diff_pct = diff / max(abs(assets), 1) if assets != 0 else 0
+            diff_pct = _relative_difference(diff, assets)
 
             metadata["equation_check"] = {
                 "assets": assets,
                 "liabilities": liabilities,
                 "equity": equity_for_calc,
-                "nci": nci if values.get("total_equity_with_nci") is None else None,
+                "nci": nci if total_equity is None else None,
                 "expected": expected,
                 "difference": diff,
                 "difference_pct": diff_pct

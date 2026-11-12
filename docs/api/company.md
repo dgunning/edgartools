@@ -89,6 +89,8 @@ def tickers(self) -> List[str]
 ```
 List of all ticker symbols associated with the company.
 
+`Company.tickers` is SEC's current ticker list. For the securities a filing registered, with their class of stock, use `filing.obj().trading_symbols`.
+
 ```python
 berkshire = Company("BRK-A")
 print(berkshire.tickers)  # ["BRK-A", "BRK-B"]
