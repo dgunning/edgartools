@@ -14389,7 +14389,8 @@
   },
   "DividendsPreferredStock": {
     "standard_tags": [
-      "PreferredDividendExpense"
+      "PreferredDividendExpense",
+      "DividendsEquity"
     ],
     "display_name": "Preferred Dividends",
     "statement": "IncomeStatement",
@@ -14401,7 +14402,8 @@
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025
+    "last_year": 2025,
+    "ambiguous": true
   },
   "DividendsPreferredStockCash": {
     "standard_tags": [
@@ -14437,11 +14439,12 @@
   },
   "DividendsReceivable": {
     "standard_tags": [
+      "OtherNonOperatingCurrentAssets",
       "OtherNonOperatingNonCurrentAssets"
     ],
-    "display_name": "Other Non-Operating Non-Current Assets",
+    "display_name": "Other Non-Operating Current Assets",
     "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
+    "section": "Current Assets",
     "is_total": false,
     "confidence": 0.5,
     "company_count": 39,
@@ -14449,7 +14452,8 @@
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025
+    "last_year": 2025,
+    "ambiguous": true
   },
   "DividendsRecognisedAsDistributionsToOwnersOfParentPerShare": {
     "standard_tags": [
@@ -19524,7 +19528,8 @@
   },
   "ImpairmentOfInvestments": {
     "standard_tags": [
-      "ImpairmentChargesCF"
+      "ImpairmentChargesCF",
+      "AssetImpairmentChargesIS"
     ],
     "display_name": "Impairment Charges (CF)",
     "statement": "CashFlowStatement",
@@ -19536,7 +19541,8 @@
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025
+    "last_year": 2025,
+    "ambiguous": true
   },
   "ImpairmentOfLeasehold": {
     "standard_tags": [

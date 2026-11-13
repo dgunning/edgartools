@@ -22,6 +22,14 @@ _NON_PERIOD_COLUMNS = frozenset(
      'is_breakdown', 'unit', 'point_in_time'}
 )
 
+# Operating cash of continuing operations only. It is the total when nothing is
+# discontinued, so get_operating_cash_flow() accepts it only then (GH #1452).
+_CONTINUING_OPERATING_CASH = 'us-gaap_NetCashProvidedByUsedInOperatingActivitiesContinuingOperations'
+# Local names of discontinued operating-cash rows: the us-gaap element
+# CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations and extension
+# elements built the same way.
+_DISCONTINUED_OPERATING_CASH = r'Cash.*Operating.*DiscontinuedOperations'
+
 
 def _parse_iso_date(value):
     try:
@@ -530,7 +538,8 @@ class Financials:
 
     def _get_standardized_concept_value(self, statement_type: str, concept_patterns: list,
                                       period_offset: int = 0,
-                                      exclude_concepts: Optional[str] = None) -> Optional[Union[int, float]]:
+                                      exclude_concepts: Optional[str] = None,
+                                      exclude_labels: Optional[str] = None) -> Optional[Union[int, float]]:
         """
         Helper method to extract standardized concept values from financial statements.
 
@@ -540,6 +549,8 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
             exclude_concepts: Regex (case-insensitive); rows whose concept matches
                 it are never returned, whatever their label
+            exclude_labels: Regex (case-insensitive); rows whose label matches
+                it are never returned
 
         Returns:
             The concept value if found, None otherwise
@@ -561,6 +572,9 @@ class Financials:
 
             if exclude_concepts and 'concept' in df.columns:
                 df = df[~df['concept'].astype(str).str.contains(exclude_concepts, case=False, na=False)]
+
+            if exclude_labels and 'label' in df.columns:
+                df = df[~df['label'].astype(str).str.contains(exclude_labels, case=False, na=False)]
 
             # Find the concept using pattern matching
             for pattern in concept_patterns:
@@ -1001,18 +1015,42 @@ class Financials:
         # IFRS files the same total as CashFlowsFromUsedInOperatingActivities,
         # which the mapping does not carry; Shell ("Cash flow from operating
         # activities") and BP matched no label pattern and got None (gh #1785).
+        #
+        # The 'Net Cash from Operating Activities' mapping also carries the
+        # continuing-operations element, which is the total only when there is
+        # no discontinued operating cash to add to it. On SEC's CY2025 frames 95
+        # filers report the continuing element without a total, and 88 of them
+        # also report discontinued operating cash (GH #1452). So a reported
+        # total wins, and the continuing figure answers only when the statement
+        # has no discontinued operating cash for the same period.
+        # The family is searched as explicit concepts, in the mapping's sorted
+        # order, so that the continuing element can be held back.
+        from edgar.xbrl.standardization import get_default_store
+        totals = [concept for concept in
+                  sorted(get_default_store().mappings.get('Net Cash from Operating Activities', []))
+                  if concept != _CONTINUING_OPERATING_CASH]
         result = self._get_standardized_concept_by_xbrl(
             'cashflow',
-            ['Net Cash from Operating Activities', 'ifrs-full_CashFlowsFromUsedInOperatingActivities'],
+            totals + ['ifrs-full_CashFlowsFromUsedInOperatingActivities'],
             period_offset
         )
 
         if result is not None:
             return result
 
+        if not self._reports_discontinued_operating_cash(period_offset):
+            result = self._get_standardized_concept_by_xbrl(
+                'cashflow', [_CONTINUING_OPERATING_CASH], period_offset)
+            if result is not None:
+                return result
+
         # Fallback to label-based search, for statements where the concept is
         # absent or unmapped — a custom extension tag, or an IFRS filer outside
-        # the mapping set.
+        # the mapping set. Continuing- and discontinued-operations rows are not
+        # the total: the standardized label of the continuing element is "Net
+        # Cash from Operating Activities", and a discontinued row such as "Net
+        # cash used in operating activities of discontinued operations" matches
+        # the last pattern, so both are excluded by concept and by label.
         patterns = [
             r'^Net Cash from Operating',          # Most specific - matches "Net Cash from Operating Activities"
             r'^Net Cash Provided by Operating',   # Alternative phrasing
@@ -1020,7 +1058,35 @@ class Financials:
             r'Operating.*Cash.*Flow',
             r'Net Cash.*Operations$',             # Avoid matching "adjustments to reconcile..."
         ]
-        return self._get_standardized_concept_value('cashflow', patterns, period_offset)
+        return self._get_standardized_concept_value(
+            'cashflow', patterns, period_offset,
+            exclude_concepts=r'ContinuingOperations|DiscontinuedOperations',
+            exclude_labels=r'continuing operations|discontinued operations')
+
+    def _reports_discontinued_operating_cash(self, period_offset: int = 0) -> bool:
+        """True when the cash flow statement has discontinued operating cash for the period.
+
+        The period is the column ``period_offset`` selects, the one the
+        operating-cash lookups answer for. A row that is present but empty for
+        that column does not count, and neither does a reported zero: with
+        nothing discontinued, continuing operations are the whole (GH #1452).
+        """
+        if self.xb is None:
+            return False
+        try:
+            rendered, df = self._render_statement_frame('cashflow')
+            if df is None or df.empty or 'concept' not in df.columns:
+                return False
+            column, _ = _select_period_column(rendered, df, period_offset)
+            if column is None:
+                return False
+            local = df['concept'].astype(str).str.split(r'[_:]', n=1).str[-1]
+            rows = df[local.str.contains(_DISCONTINUED_OPERATING_CASH, case=False, regex=True, na=False)]
+            values = pd.to_numeric(rows[column], errors='coerce')
+            return bool((values.notna() & (values != 0)).any())
+        except Exception as e:
+            log.debug(f"Error reading discontinued operating cash: {e}")
+            return False
 
     def get_free_cash_flow(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """

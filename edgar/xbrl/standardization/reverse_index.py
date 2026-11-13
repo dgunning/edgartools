@@ -24,6 +24,8 @@ import os
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Tuple
 
+from edgar.exceptions import ValidationError
+
 from .exclusions import EXCLUDED_TAGS, should_exclude
 
 logger = logging.getLogger(__name__)
@@ -412,7 +414,16 @@ class ReverseIndex:
 
         Returns:
             The standard concept name, or None if not found/excluded
+
+        Raises:
+            ValidationError: if xbrl_tag is not a string, or context is not a
+                dict for a tag with several candidates
         """
+        if not isinstance(xbrl_tag, str):
+            raise ValidationError(
+                f"xbrl_tag must be an XBRL concept name such as 'us-gaap:DividendsReceivable', "
+                f"not {type(xbrl_tag).__name__}",
+                parameter="xbrl_tag", invalid_value=xbrl_tag)
         result = self.lookup(xbrl_tag, industry=industry)
         if result is None:
             return None
@@ -420,6 +431,14 @@ class ReverseIndex:
         # Non-ambiguous tags: return primary concept
         if not result.is_ambiguous:
             return result.primary_concept
+
+        # Context is read only for a tag with several candidates, so only then
+        # is a context that is not a dict an error (an unread one never was).
+        if context is not None and not isinstance(context, dict):
+            raise ValidationError(
+                "context must be a dict such as {'section': 'Current Assets'} or "
+                f"{{'statement_type': 'IncomeStatement'}}, not {type(context).__name__}",
+                parameter="context", invalid_value=context)
 
         # Ambiguous tags: try to disambiguate using context
         resolution_method = "fallback"
@@ -529,6 +548,20 @@ class ReverseIndex:
                     )
                     if candidate_section and self._sections_match(section, candidate_section):
                         return candidate
+
+            # Then the statement, when the caller names it and the candidates
+            # sit on different statements: an element used on two statements
+            # keeps one candidate per statement (DividendsPreferredStock is a
+            # preferred dividend on the income statement and a dividend on the
+            # equity statement, GH #1452). Only a statement that exactly one
+            # candidate belongs to decides; otherwise the steps below do.
+            if context.get('statement_type'):
+                on_statement = [
+                    candidate for candidate in candidates
+                    if get_section_for_concept(candidate, statement_type)
+                ]
+                if len(on_statement) == 1:
+                    return on_statement[0]
 
             # Phase 3+: Use tag name hints for current/noncurrent disambiguation.
             # 'nonoperating' is not 'noncurrent': OtherNonOperatingCurrentAssets is current.
