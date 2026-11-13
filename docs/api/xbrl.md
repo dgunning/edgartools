@@ -213,7 +213,7 @@ Each field comes from the first source that states it: the filing's own schema (
 | `abstract` | bool \| None | Declared abstract flag; `None` when no declaration was read (dei) |
 | `documentation` | str \| None | Definition text |
 | `references` | tuple[AuthRef] \| None | ASC references; `()` when `MetaLinks.json` lists none |
-| `enumeration` | EnumerationDomain \| None | For an extensible-enumeration concept: `domain` (QName as written, e.g. `us-gaap:AssetsAbstract`), `linkrole`, `head_usable` (absent attribute is `False`) and `is_set`; `None` for any other concept |
+| `enumeration` | EnumerationDomain \| None | For an extensible-enumeration concept: `domain` (QName as written, e.g. `us-gaap:AssetsAbstract`), `linkrole`, `head_usable` (absent attribute is `False`) and `is_set`; `None` for any other concept. For a us-gaap or srt concept these come from the FASB release whose namespace the filing binds (`http://fasb.org/us-gaap/2023` reads 2023), since FASB moved every linkrole in 2026 |
 
 **Example:**
 ```python
@@ -236,7 +236,7 @@ Splits an extensible-enumeration fact value (one or more whitespace-separated `n
 ```python
 concept = "us-gaap:HedgedAssetStatementOfFinancialPositionExtensibleEnumeration"
 xbrl.element_metadata(concept).enumeration
-# EnumerationDomain(domain='us-gaap:AssetsAbstract', linkrole='http://fasb.org/srt/role/srt-eedm/ExtensibleEnumerationLists',
+# EnumerationDomain(domain='us-gaap:AssetsAbstract', linkrole='http://fasb.org/us-gaap/role/eedm/ExtensibleEnumerationLists',
 #                   head_usable=False, is_set=True)
 value = xbrl.facts.query().by_concept(concept).to_dataframe()['value'].iloc[0]
 [m.concept for m in xbrl.enumeration_members(value)]

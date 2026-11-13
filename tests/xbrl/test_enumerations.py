@@ -8,11 +8,13 @@ Ground truth from tracked fixtures, read offline:
   us-gaap:HedgedAssetStatementOfFinancialPositionExtensibleEnumeration is
   'http://fasb.org/us-gaap/2023#MarketableSecuritiesCurrent
   http://fasb.org/us-gaap/2023#MarketableSecuritiesNoncurrent'. The filing
-  imports the concept, so its declaration comes from the bundled FASB table:
-  us-gaap-2026.xsd declares it enum2:enumerationSetItemType with
+  imports the concept and binds http://fasb.org/us-gaap/2023, so the
+  declaration comes from the bundled FASB table's 2023 row: us-gaap-2023.xsd
+  declares it enum2:enumerationSetItemType with
   enum2:domain='us-gaap:AssetsAbstract', enum2:headUsable='false' and
-  enum2:linkrole='http://fasb.org/srt/role/srt-eedm/ExtensibleEnumerationLists'
-  (the newest year's declaration is kept).
+  enum2:linkrole='http://fasb.org/us-gaap/role/eedm/ExtensibleEnumerationLists'.
+  us-gaap-2026.xsd moved the linkrole to
+  'http://fasb.org/srt/role/srt-eedm/ExtensibleEnumerationLists'.
 - Microsoft's FY2024 10-K (accession 0000950170-24-087843),
   tests/fixtures/xbrl/msft/10k_2024: msft-20240730.xsd declares
   msft_DerivativeAssetStatementOfFinancialPositionExtensibleEnumerationNotDisclosedFlag
@@ -31,9 +33,9 @@ import pytest
 from edgar.exceptions import ValidationError
 from edgar.xbrl import XBRL, EnumerationDomain, EnumerationMember, parse_enumeration_value
 from edgar.xbrl.element_metadata import build_element_metadata
-from edgar.xbrl.enumerations import enumeration_domain, parse_head_usable
+from edgar.xbrl.enumerations import enumeration_domain, parse_head_usable, taxonomy_year
 from edgar.xbrl.models import ElementCatalog
-from edgar.xbrl.parsers.concepts import get_standard_declaration
+from edgar.xbrl.parsers.concepts import get_standard_declaration, get_standard_enumeration
 from edgar.xbrl.parsers.schema import SchemaParser
 
 FIXTURES = Path(__file__).resolve().parents[1] / "fixtures" / "xbrl"
@@ -45,6 +47,8 @@ AAPL_VALUE = ("http://fasb.org/us-gaap/2023#MarketableSecuritiesCurrent "
               "http://fasb.org/us-gaap/2023#MarketableSecuritiesNoncurrent")
 MSFT_CONCEPT = "msft_DerivativeAssetStatementOfFinancialPositionExtensibleEnumerationNotDisclosedFlag"
 US_GAAP_2023 = "http://fasb.org/us-gaap/2023"
+EEDM_US_GAAP = 'http://fasb.org/us-gaap/role/eedm/ExtensibleEnumerationLists'
+EEDM_SRT = 'http://fasb.org/srt/role/srt-eedm/ExtensibleEnumerationLists'
 
 
 @pytest.fixture(scope="module")
@@ -64,26 +68,56 @@ def _values(xbrl, concept):
 
 # --- the bundled FASB table -------------------------------------------------
 
-def test_bundled_table_carries_the_enumeration_attributes():
-    declaration = get_standard_declaration(AAPL_CONCEPT)
-    assert declaration['type'] == 'enum2:enumerationSetItemType'
-    assert declaration['enum_domain'] == 'us-gaap:AssetsAbstract'
-    assert declaration['enum_linkrole'] == 'http://fasb.org/srt/role/srt-eedm/ExtensibleEnumerationLists'
-    assert declaration['enum_head_usable'] == 'false'
+def test_bundled_table_carries_the_enumeration_attributes_per_year():
+    assert get_standard_declaration(AAPL_CONCEPT)['type'] == 'enum2:enumerationSetItemType'
+    assert get_standard_enumeration(AAPL_CONCEPT, 2023) == {
+        'year': 2023, 'domain': 'us-gaap:AssetsAbstract', 'linkrole': EEDM_US_GAAP, 'head_usable': 'false'}
+    assert get_standard_enumeration(AAPL_CONCEPT, 2026)['linkrole'] == EEDM_SRT
 
 
-def test_bundled_table_has_no_enumeration_attributes_for_other_concepts():
-    declaration = get_standard_declaration('us-gaap:Assets')
-    assert declaration['balance'] == 'debit'
-    assert (declaration['enum_domain'], declaration['enum_linkrole'], declaration['enum_head_usable']) == (None, None, None)
+@pytest.mark.parametrize("year, expected_year", [
+    (2023, 2023), (2026, 2026),
+    (2030, 2026),   # newer than the table: the newest row
+    (2019, 2026),   # older than the element's first enumeration year: the newest row
+    (None, 2026),   # no year known: the newest row
+])
+def test_standard_enumeration_year_selection(year, expected_year):
+    assert get_standard_enumeration(AAPL_CONCEPT, year)['year'] == expected_year
+
+
+def test_bundled_table_has_no_enumeration_for_other_concepts():
+    assert get_standard_declaration('us-gaap:Assets')['balance'] == 'debit'
+    assert get_standard_enumeration('us-gaap:Assets', 2023) is None
+
+
+@pytest.mark.parametrize("bindings, prefix, expected", [
+    ({'http://fasb.org/us-gaap/2023': 'us-gaap'}, 'us-gaap', 2023),
+    ({'http://fasb.org/us-gaap/2023': 'gaap'}, 'us-gaap', 2023),        # matched by URI, not prefix
+    ({'http://fasb.org/us-gaap/2024': 'us-gaap', 'http://fasb.org/srt/2024': 'srt'}, 'srt', 2024),
+    ({'http://fasb.org/us-gaap/2025': 'us-gaap'}, 'srt', 2025),          # srt falls back to the us-gaap year
+    ({'http://fasb.org/us-gaap/2021-01-31': 'us-gaap'}, 'us-gaap', 2021),
+    ({'http://xbrl.sec.gov/dei/2023': 'dei'}, 'us-gaap', None),
+    ({}, 'us-gaap', None),
+])
+def test_taxonomy_year_from_namespace_bindings(bindings, prefix, expected):
+    assert taxonomy_year(bindings, prefix) == expected
+
+
+def test_a_2026_binding_reports_the_srt_eedm_linkrole():
+    undeclared = ElementCatalog(AAPL_CONCEPT, None, 'instant')   # no declaration: from a label
+    meta = build_element_metadata(AAPL_CONCEPT, undeclared, None, {'http://fasb.org/us-gaap/2026': 'us-gaap'})
+    assert meta.enumeration == EnumerationDomain('us-gaap:AssetsAbstract', EEDM_SRT, False, True)
+    meta = build_element_metadata(AAPL_CONCEPT, undeclared, None, {'http://fasb.org/us-gaap/2024': 'us-gaap'})
+    assert meta.enumeration.linkrole == EEDM_US_GAAP
 
 
 # --- element_metadata().enumeration ----------------------------------------
 
-def test_imported_concept_enumeration_comes_from_the_bundled_table(aapl):
+def test_imported_concept_enumeration_comes_from_the_filing_taxonomy_year(aapl):
+    assert aapl.parser.namespace_prefixes[US_GAAP_2023] == 'us-gaap'
     assert aapl.element_metadata(AAPL_CONCEPT).enumeration == EnumerationDomain(
         domain='us-gaap:AssetsAbstract',
-        linkrole='http://fasb.org/srt/role/srt-eedm/ExtensibleEnumerationLists',
+        linkrole=EEDM_US_GAAP,
         head_usable=False,
         is_set=True)
 

@@ -15,6 +15,7 @@ records (``XBRL.enumeration_members(value)``). Neither validates a value
 against the domain or resolves member labels.
 """
 
+import re
 from dataclasses import dataclass
 from typing import Dict, Optional, Tuple
 
@@ -65,6 +66,28 @@ class EnumerationMember:
     namespace: str
     name: str
     concept: Optional[str]
+
+
+_FASB_NAMESPACE = re.compile(r'^https?://fasb\.org/(us-gaap|srt)/(\d{4})(?:-\d{2}-\d{2})?/?$')
+
+
+def taxonomy_year(namespace_prefixes: Optional[Dict[str, str]], prefix: str) -> Optional[int]:
+    """
+    The FASB taxonomy year a filing imports for ``prefix`` ('us-gaap' or 'srt'),
+    read from the namespace URI it binds, e.g. http://fasb.org/us-gaap/2023 -> 2023.
+
+    The URI is matched, not the prefix the filing chose. An srt concept in a
+    filing that binds no srt namespace takes the us-gaap year (the two are
+    released together). None when the filing binds neither, e.g. an XBRL built
+    without an instance.
+    """
+    years: Dict[str, int] = {}
+    for uri in (namespace_prefixes or {}):
+        match = _FASB_NAMESPACE.match(uri)
+        if match:
+            taxonomy, year = match.group(1), int(match.group(2))
+            years[taxonomy] = max(year, years.get(taxonomy, year))
+    return years.get(prefix, years.get('us-gaap'))
 
 
 def _type_local_name(data_type: Optional[str]) -> Optional[str]:

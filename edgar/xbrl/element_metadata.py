@@ -17,12 +17,12 @@ from a concept's name.
 
 from dataclasses import dataclass
 from pathlib import Path
-from typing import TYPE_CHECKING, Callable, Optional, Tuple
+from typing import TYPE_CHECKING, Callable, Dict, Optional, Tuple
 
 from edgar.core import log
 from edgar.sgml.metalinks import AuthRef, MetaLinks
-from edgar.xbrl.enumerations import EnumerationDomain, enumeration_domain
-from edgar.xbrl.parsers.concepts import get_standard_declaration
+from edgar.xbrl.enumerations import EnumerationDomain, enumeration_domain, taxonomy_year
+from edgar.xbrl.parsers.concepts import get_standard_declaration, get_standard_enumeration
 
 if TYPE_CHECKING:
     from edgar.xbrl.models import ElementCatalog
@@ -158,13 +158,19 @@ def directory_metalinks_source(directory: Path) -> Optional[MetaLinksSource]:
 
 def build_element_metadata(concept: str,
                            element: Optional['ElementCatalog'],
-                           metalinks: Optional[MetaLinks]) -> Optional[ElementMetadata]:
+                           metalinks: Optional[MetaLinks],
+                           namespace_prefixes: Optional[Dict[str, str]] = None) -> Optional[ElementMetadata]:
     """
     Combine the three sources for one concept, or None when none of them knows it.
 
     ``element`` is the concept's element-catalog entry. The catalog holds a
     declaration only when ``data_type`` is set; an entry without one came from
     a label, with a period type read from the concept's facts at most.
+
+    ``namespace_prefixes`` (namespace URI -> prefix, as the filing binds them)
+    picks which FASB release's enumeration attributes apply: the year of the
+    us-gaap or srt namespace the filing imports (see ``taxonomy_year`` and
+    ``get_standard_enumeration`` for the rule).
     """
     concept = concept_id(concept)
     prefix, _, name = concept.partition('_')
@@ -191,8 +197,12 @@ def build_element_metadata(concept: str,
                                          getattr(declared, 'enum_linkrole', None),
                                          getattr(declared, 'enum_head_usable', None))
     elif standard is not None:
-        enumeration = enumeration_domain(standard['type'], standard.get('enum_domain'),
-                                         standard.get('enum_linkrole'), standard.get('enum_head_usable'))
+        declared_enum = get_standard_enumeration(concept, taxonomy_year(namespace_prefixes, prefix))
+        if declared_enum is not None:
+            enumeration = enumeration_domain(standard['type'], declared_enum['domain'],
+                                             declared_enum['linkrole'], declared_enum['head_usable'])
+        else:
+            enumeration = enumeration_domain(standard['type'], None, None, None)
     else:
         enumeration = None
 

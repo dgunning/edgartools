@@ -931,7 +931,10 @@ class XBRL:
         for imported us-gaap and srt ones; the definition and the Accounting
         Standards Codification references come from the filing's MetaLinks.json,
         which the first call downloads (one small file) when the XBRL came from
-        a filing. A field no source states is None, never a guess.
+        a filing. A field no source states is None, never a guess. For an
+        extensible-enumeration concept, ``enumeration`` holds its domain and
+        linkrole as published in the FASB release whose us-gaap (or srt)
+        namespace this filing binds.
 
         Args:
             concept: A prefixed concept name.
@@ -951,7 +954,8 @@ class XBRL:
         """
         element_id = concept_id(concept)
         metalinks = self._metalinks_source.get() if self._metalinks_source is not None else None
-        return build_element_metadata(element_id, self.element_catalog.get(element_id), metalinks)
+        return build_element_metadata(element_id, self.element_catalog.get(element_id), metalinks,
+                                      self.parser.namespace_prefixes)
 
     def enumeration_members(self, value: Optional[str]) -> Tuple[EnumerationMember, ...]:
         """
