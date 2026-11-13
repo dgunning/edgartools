@@ -238,6 +238,10 @@ class TableProcessor:
         # Process tbody (or direct rows)
         tbody = self._own_section(element, 'tbody')
         rows_container = tbody if tbody is not None else element
+        # Without a tbody the rows container is the table itself, which also holds
+        # the tfoot rows; they belong to table.footer only (edgartools-niru).
+        tfoot = self._own_section(element, 'tfoot')
+        tfoot_rows = list(self._own_rows(tfoot)) if tfoot is not None else []
 
         # Track if we've seen headers and data rows
         headers_found = bool(table.headers)
@@ -247,6 +251,8 @@ class TableProcessor:
         for tr in self._own_rows(rows_container):
             # Skip if already processed in thead (identity, never id() - see above)
             if any(tr is head_row for head_row in thead_rows):
+                continue
+            if any(tr is foot_row for foot_row in tfoot_rows):
                 continue
 
             # Check if this might be a header row
@@ -347,13 +353,10 @@ class TableProcessor:
             )
 
         # Process tfoot
-        tfoot = self._own_section(element, 'tfoot')
-        if tfoot is not None:
-            for tr in self._own_rows(tfoot):
-                cells = self._process_row(tr, is_header=False)
-                if cells:
-                    row = Row(cells=cells, is_header=False)
-                    table.footer.append(row)
+        for tr in tfoot_rows:
+            cells = self._process_row(tr, is_header=False)
+            if cells:
+                table.footer.append(Row(cells=cells, is_header=False))
 
     def _process_row(self, tr: HtmlElement, is_header: bool) -> List[Cell]:
         """Process table row into cells."""
