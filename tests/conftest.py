@@ -360,7 +360,7 @@ def pytest_collection_modifyitems(config, items):
         'test_config', 'test_core', 'test_datatools',
         'test_auditor', 'test_beneficial_ownership', 'test_subsidiaries',
         'test_currency', 'test_thirteenf_rendering', 'test_sections_membership',
-        'test_standardization', 'test_abstract_detection', 'test_element_metadata', 'test_xbrl_validation',
+        'test_standardization', 'test_abstract_detection', 'test_element_metadata', 'test_enumerations', 'test_xbrl_validation',
         'test_urls', 'test_toc_filter', 'test_preprocessing',
         # Classified 2026-08-04 while closing the marker fall-through hole.
         # Each of these ran in NO CI job because its name matched no pattern

@@ -27,12 +27,33 @@ element catalog parsed from a filing has no balance for a standard concept.
 `edgar.xbrl.parsers.concepts.get_balance_type` reads this table when the filing
 declares none (GitHub issue #1728).
 
-Rebuild with `scripts/build_taxonomy_elements.py`, which downloads the schemas
-from https://xbrl.fasb.org/.
+## taxonomy_enumerations.parquet
+
+The extensible-enumeration attributes of the same schemas, one row per
+`(prefix, name, year)` for every year whose schema gives the element any of
+them: about 2,900 rows for 609 elements, 2021-2026, in roughly 19 KB. They are
+kept per year because they change between releases: in 2026 every us-gaap
+linkrole moved from `http://fasb.org/us-gaap/role/eedm/ExtensibleEnumerationLists`
+to `http://fasb.org/srt/role/srt-eedm/ExtensibleEnumerationLists`.
+
+| Column | Source attribute |
+|---|---|
+| `prefix`, `name` | as above |
+| `year` | the taxonomy year of the schema |
+| `domain` | `xs:element/@enum2:domain` (or enum 1.0 `@enum:domain`), the QName as written |
+| `linkrole` | `xs:element/@enum2:linkrole` (or `@enum:linkrole`) |
+| `head_usable` | `xs:element/@enum2:headUsable` (or `@enum:headUsable`), the string as written |
+
+`XBRL.element_metadata()` reads the row for the taxonomy year the filing
+imports (`edgar.xbrl.parsers.concepts.get_standard_enumeration`, GitHub issue
+#1255).
+
+Rebuild both files with `scripts/build_taxonomy_elements.py`, which downloads
+the schemas from https://xbrl.fasb.org/.
 
 ## Notice: Authorized Uses
 
-The data in `taxonomy_elements.parquet` is taken from the US GAAP Financial
+The data in `taxonomy_elements.parquet` and `taxonomy_enumerations.parquet` is taken from the US GAAP Financial
 Reporting Taxonomy and the SEC Reporting Taxonomy, which carry the following
 notices (https://xbrl.fasb.org/terms/TaxonomiesTermsConditions.html and
 https://xbrl.fasb.org/terms/SRT_TermsConditions.html).

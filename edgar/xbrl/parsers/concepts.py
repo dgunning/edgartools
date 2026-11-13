@@ -12,7 +12,7 @@ See Issue #463 analysis for details.
 """
 from functools import lru_cache
 from importlib import resources
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple
 
 # =============================================================================
 # DEPRECATED CONCEPT LISTS (No longer used as of Issue #463)
@@ -156,6 +156,7 @@ LEGITIMATE_NEGATIVE_CONCEPTS = {
 # concepts, three of which the taxonomy contradicted (#1728).
 
 TAXONOMY_ELEMENTS_FILE = 'taxonomy_elements.parquet'
+TAXONOMY_ENUMERATIONS_FILE = 'taxonomy_enumerations.parquet'
 _STANDARD_PREFIXES = ('us-gaap', 'srt')
 
 
@@ -252,6 +253,56 @@ def get_standard_declaration(concept: str) -> Optional[Dict[str, Any]]:
         return None
     declaration = _standard_declarations().get(_standard_key(concept))
     return dict(declaration) if declaration is not None else None
+
+
+@lru_cache(maxsize=1)
+def _standard_enumerations() -> Dict[str, Tuple[Tuple[int, Optional[str], Optional[str], Optional[str]], ...]]:
+    """``prefix:name`` -> ((year, domain, linkrole, head_usable), ...) in ascending year order."""
+    import pandas as pd
+
+    ref = resources.files('edgar.xbrl.data').joinpath(TAXONOMY_ENUMERATIONS_FILE)
+    with resources.as_file(ref) as path:
+        df = pd.read_parquet(path)
+    df = df.astype(object).where(df.notna(), None)
+    table: Dict[str, list] = {}
+    for prefix, name, year, domain, linkrole, head_usable in zip(
+            df['prefix'], df['name'], df['year'], df['domain'], df['linkrole'], df['head_usable'], strict=True):
+        table.setdefault(f"{prefix}:{name}", []).append((int(year), domain, linkrole, head_usable))
+    return {key: tuple(sorted(rows, key=lambda row: row[0])) for key, rows in table.items()}
+
+
+def get_standard_enumeration(concept: str, year: Optional[int] = None) -> Optional[Dict[str, Any]]:
+    """
+    The extensible-enumeration attributes FASB declares for a us-gaap or srt
+    concept, as published in one taxonomy year (GH #1255).
+
+    The attributes change between releases (in 2026 every us-gaap linkrole moved
+    from .../us-gaap/role/eedm/... to .../srt/role/srt-eedm/...), so the table
+    keeps one row per year that declares them. The row used is the newest one
+    whose year is at or below ``year``; when there is none (``year`` is older
+    than the element's first enumeration year) or ``year`` is None, the newest
+    row is used. A ``year`` newer than the table therefore gets the newest row.
+
+    Returns a dict with ``year``, ``domain``, ``linkrole`` and ``head_usable``
+    (attribute values verbatim, None where absent), or None for a concept no
+    year declares as an enumeration.
+
+    Example:
+        >>> get_standard_enumeration('us-gaap:HedgedAssetStatementOfFinancialPositionExtensibleEnumeration', 2023)['linkrole']
+        'http://fasb.org/us-gaap/role/eedm/ExtensibleEnumerationLists'
+    """
+    if not concept:
+        return None
+    rows = _standard_enumerations().get(_standard_key(concept))
+    if not rows:
+        return None
+    chosen = rows[-1]
+    if year is not None:
+        at_or_below = [row for row in rows if row[0] <= year]
+        if at_or_below:
+            chosen = at_or_below[-1]
+    row_year, domain, linkrole, head_usable = chosen
+    return {'year': row_year, 'domain': domain, 'linkrole': linkrole, 'head_usable': head_usable}
 
 
 def get_standard_abstract(concept: str) -> Optional[bool]:

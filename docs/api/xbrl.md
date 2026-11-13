@@ -213,6 +213,7 @@ Each field comes from the first source that states it: the filing's own schema (
 | `abstract` | bool \| None | Declared abstract flag; `None` when no declaration was read (dei) |
 | `documentation` | str \| None | Definition text |
 | `references` | tuple[AuthRef] \| None | ASC references; `()` when `MetaLinks.json` lists none |
+| `enumeration` | EnumerationDomain \| None | For an extensible-enumeration concept: `domain` (QName as written, e.g. `us-gaap:AssetsAbstract`), `linkrole`, `head_usable` (absent attribute is `False`) and `is_set`; `None` for any other concept. For a us-gaap or srt concept these come from the FASB release whose namespace the filing binds (`http://fasb.org/us-gaap/2023` reads 2023), since FASB moved every linkrole in 2026 |
 
 **Example:**
 ```python
@@ -223,6 +224,23 @@ meta = xbrl.element_metadata("us-gaap:IncreaseDecreaseInContractWithCustomerLiab
 meta.balance            # 'debit'
 [f"{r.topic}-{r.sub_topic}-{r.section}-{r.paragraph}" for r in meta.references]
 # ['912-310-45-11', '230-10-45-28']
+```
+
+#### enumeration_members()
+```python
+def enumeration_members(self, value: Optional[str]) -> Tuple[EnumerationMember, ...]
+```
+Splits an extensible-enumeration fact value (one or more whitespace-separated `namespace#LocalName` expanded names) into its members. Each `EnumerationMember` has the `namespace` URI, the local `name`, and the `concept` id built from the prefix this filing binds to the namespace, or `None` when the filing binds no prefix to it (no prefix is guessed from the URI). `None` or an empty (nil) value gives `()`; a token that is not an expanded name raises `ValidationError`. Members are not checked against the concept's domain. The same parser is available without an XBRL object as `edgar.xbrl.parse_enumeration_value(value, namespace_prefixes)`.
+
+**Example** (Apple FY2023 10-K, 0000320193-23-000106):
+```python
+concept = "us-gaap:HedgedAssetStatementOfFinancialPositionExtensibleEnumeration"
+xbrl.element_metadata(concept).enumeration
+# EnumerationDomain(domain='us-gaap:AssetsAbstract', linkrole='http://fasb.org/us-gaap/role/eedm/ExtensibleEnumerationLists',
+#                   head_usable=False, is_set=True)
+value = xbrl.facts.query().by_concept(concept).to_dataframe()['value'].iloc[0]
+[m.concept for m in xbrl.enumeration_members(value)]
+# ['us-gaap_MarketableSecuritiesCurrent', 'us-gaap_MarketableSecuritiesNoncurrent']
 ```
 
 #### Data Conversion

@@ -93,6 +93,10 @@ class XBRLParser:
         # Mapping of context IDs to period identifiers for easy lookup
         self.context_period_map: Dict[str, str] = {}
 
+        # Namespace URI -> prefix as the filing's instance and schema bind them
+        # (GH #1255). Shared by the schema and instance parsers.
+        self.namespace_prefixes: Dict[str, str] = {}
+
         # Initialize component parsers
         self._init_parsers()
 
@@ -149,6 +153,8 @@ class XBRLParser:
         # typedMember shows an axis is typed even when its declaration sits in
         # an imported taxonomy that is never loaded (gh #1234).
         self.typed_dimensions = self.instance_parser.typed_dimensions
+        self.instance_parser.namespace_prefixes = self.namespace_prefixes
+        self.schema_parser.namespace_prefixes = self.namespace_prefixes
         self.definition_parser.observed_typed_dimensions = self.typed_dimensions
 
         # Set up cross-references for embedded linkbase processing

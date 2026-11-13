@@ -16,6 +16,19 @@ from edgar.xbrl.models import ElementCatalog, XBRLProcessingError
 from .base import BaseParser
 
 XBRLDT_NS = "{http://xbrl.org/2005/xbrldt}"
+# Extensible enumerations 2.0 and 1.0, matched by namespace URI because a
+# filing may bind them to any prefix (GH #1255).
+ENUM_NAMESPACES = ("{http://xbrl.org/2020/extensible-enumerations-2.0}",
+                   "{http://xbrl.org/2014/extensible-enumerations}")
+
+
+def enum_attribute(element, local_name: str):
+    """An extensible-enumeration attribute of an xs:element, from either enum namespace."""
+    for namespace in ENUM_NAMESPACES:
+        value = element.get(f"{namespace}{local_name}")
+        if value is not None:
+            return value
+    return None
 
 
 class SchemaParser(BaseParser):
@@ -101,7 +114,10 @@ class SchemaParser(BaseParser):
             # A dimension is typed when its declaration carries
             # xbrldt:typedDomainRef; without reading it, every dimension
             # looks explicit and the False is a default, not an answer.
-            typed_domain_ref=element.get(f'{XBRLDT_NS}typedDomainRef')
+            typed_domain_ref=element.get(f'{XBRLDT_NS}typedDomainRef'),
+            enum_domain=enum_attribute(element, 'domain'),
+            enum_linkrole=enum_attribute(element, 'linkrole'),
+            enum_head_usable=enum_attribute(element, 'headUsable'),
         )
 
     def parse_schema_content(self, content: str) -> None:
@@ -109,6 +125,7 @@ class SchemaParser(BaseParser):
         try:
             # Use the safe XML parsing helper
             root = self._safe_parse_xml(content)
+            self._record_namespace_bindings(root)
 
             # Extract element declarations
             for element in root.findall('.//{http://www.w3.org/2001/XMLSchema}element'):

@@ -494,6 +494,7 @@ class InstanceParser(BaseParser):
 
             # Parse content with optimized settings
             root = ET.XML(content_bytes, parser)
+            self._record_namespace_bindings(root)
 
             # Extract data in optimal order (contexts first, then units, then facts)
             # This ensures dependencies are resolved before they're needed
