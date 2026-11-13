@@ -12,6 +12,11 @@ from edgar.documents.table_nodes import TableNode
 from edgar.documents.utils.table_matrix import TableMatrix
 
 
+def _one_line(text: str) -> str:
+    """Collapse a cell's whitespace, line breaks included, so it stays on its row."""
+    return ' '.join(text.split())
+
+
 def _escape_pipe_cell(text: str) -> str:
     """Escape a pipe-table cell so its text cannot change the table's shape.
 
@@ -345,12 +350,12 @@ class MarkdownRenderer:
         # Add headers
         if node.headers:
             for header_row in node.headers:
-                cells = [cell.text() for cell in header_row]
+                cells = [_one_line(cell.text()) for cell in header_row]
                 all_rows.append(" | ".join(cells))
 
         # Add data rows
         for row in [*node.rows, *node.footer]:
-            cells = [cell.text() for cell in row.cells]
+            cells = [_one_line(cell.text()) for cell in row.cells]
             all_rows.append(" | ".join(cells))
 
         if all_rows:
@@ -372,7 +377,7 @@ class MarkdownRenderer:
         # Add headers
         if node.headers:
             for header_row in node.headers:
-                cells = [cell.text() for cell in header_row]
+                cells = [_one_line(cell.text()) for cell in header_row]
                 rows.append("  ".join(cells))
 
         # Add separator if we have headers
@@ -381,7 +386,7 @@ class MarkdownRenderer:
 
         # Add data rows
         for row in [*node.rows, *node.footer]:
-            cells = [cell.text() for cell in row.cells]
+            cells = [_one_line(cell.text()) for cell in row.cells]
             rows.append("  ".join(cells))
 
         return "\n".join(rows)

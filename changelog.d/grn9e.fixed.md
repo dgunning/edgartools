@@ -1,0 +1,1 @@
+**Grid and simple markdown tables split a row at every line break in a cell.** A cell like `Line one<br>line two` broke its row over three lines and left the value after it in no column. Both formats now collapse a cell to one line, as the pipe format already did. (bead edgartools-grn9e)
