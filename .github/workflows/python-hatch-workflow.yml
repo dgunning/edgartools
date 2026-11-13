@@ -217,6 +217,48 @@ jobs:
           pytest -n auto --cov --cov-report=xml -m 'fast'
         fi
 
+    # Section-boundary accuracy, gated on the pull requests that can move it
+    # (bead edgartools-bdfuy.1). The two ratchets below pin how well section
+    # extraction finds where each 10-K/10-Q item starts and ends: start/end rates
+    # against the hand-labelled truth set (GH #1514), and the per-fixture set of
+    # items whose slice swallows a later item's heading (#1511). Both are marked
+    # slow, and test-slow skips pull requests, so until this step a change to
+    # edgar/documents merged without either being measured and a regression
+    # first showed up on main.
+    #
+    # Offline: they parse tracked fixtures only (html/, parity_gate/,
+    # heldout_retired/); the gitignored era corpus is absent on CI and those
+    # entries count as unmeasured, never as passing. --dist loadfile because each
+    # file builds one module-scoped scoring fixture; -n auto made every worker
+    # re-score the whole corpus (5:30 wall, 1,534 s CPU) where two workers, one
+    # per file, take ~5:00 locally.
+    #
+    # Scoped by the PR's file list (the API, for the shallow-checkout reason
+    # given above), and a step rather than its own job so it rides on the
+    # required "test-fast (3.13)" context — a separate job would need branch
+    # protection updated in lockstep (see the header of this file). The
+    # workflow file itself is in the trigger list so that editing this step
+    # exercises it.
+    - name: Check section boundaries have not regressed
+      if: github.event_name == 'pull_request'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        TRIGGERS=$(gh api --paginate \
+          "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
+          --jq '.[].filename' \
+          | grep -E '^(edgar/documents/|tests/fixtures/(parser_corpus|html|parity_gate|heldout_retired)/|tests/meta/test_(boundary_truth|section_self_consistency_ratchet)\.py$|\.github/workflows/python-hatch-workflow\.yml$)' || true)
+        if [ -z "$TRIGGERS" ]; then
+          echo "No section-extraction code or corpus changed; boundary ratchets not needed."
+          exit 0
+        fi
+        echo "Section-extraction inputs changed:"
+        echo "$TRIGGERS"
+        pytest -m slow -n 2 --dist loadfile \
+          tests/meta/test_boundary_truth.py \
+          tests/meta/test_section_self_consistency_ratchet.py
+
     - name: Upload coverage data
       uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
       if: matrix.python-version == '3.13' && github.event_name != 'pull_request'
