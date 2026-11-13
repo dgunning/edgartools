@@ -84,6 +84,9 @@ SCHEDULE_13G_FORMS = ("SC 13G", "SCHEDULE 13G")
 # Rows of a 13F-HR ``holdings`` section returned when the caller sets no ``limit``.
 DEFAULT_HOLDINGS_LIMIT = 30
 
+# Characters returned per text section when the caller sets no ``max_chars``.
+DEFAULT_MAX_CHARS = 6000
+
 # Share of the 6,000-character section cap given to each 8-K earnings statement.
 EARNINGS_STATEMENT_CHARS = 1800
 
@@ -140,9 +143,10 @@ Examples:
         },
         "max_chars": {
             "type": "integer",
-            "description": "Maximum characters per section (default 6000). Controls truncation of text sections. "
+            "description": "Maximum characters per text section (default 6000). Large values can return "
+                           "very large results, up to a whole filing in one response. "
                            "Does not apply to 13F-HR holdings, which are bounded by the 'limit' parameter.",
-            "default": 6000,
+            "default": DEFAULT_MAX_CHARS,
             "minimum": 1
         }
     },
@@ -154,7 +158,7 @@ async def edgar_read(
     form: Optional[str] = None,
     sections: Optional[list[str]] = None,
     limit: Optional[int] = DEFAULT_HOLDINGS_LIMIT,
-    max_chars: Optional[int] = 6000,
+    max_chars: Optional[int] = DEFAULT_MAX_CHARS,
 ) -> Any:
     """
     Read SEC filing content.
@@ -171,33 +175,24 @@ async def edgar_read(
     Does not apply to 13F-HR holdings.
     """
     sections = sections or ["summary"]
+    original_limit, original_max_chars = limit, max_chars
 
+    limit = _coerce_int(limit, default=DEFAULT_HOLDINGS_LIMIT, minimum=0)
     if limit is None:
-        limit = DEFAULT_HOLDINGS_LIMIT
-    # JSON Schema counts 30.0 as an integer, so accept integral floats.
-    if isinstance(limit, float) and limit.is_integer():
-        limit = int(limit)
-    # bool is an int subclass: limit=True would silently mean one row.
-    if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
         return error(
-            f"Invalid limit: {limit!r}",
+            f"Invalid limit: {original_limit!r}",
             suggestions=[
                 "Use a non-negative integer: 30 (the default), a larger number, or 0 for every row",
             ],
             error_code="INVALID_ARGUMENTS"
         )
 
+    max_chars = _coerce_int(max_chars, default=DEFAULT_MAX_CHARS, minimum=1)
     if max_chars is None:
-        max_chars = 6000
-    # JSON Schema counts 6000.0 as an integer, so accept integral floats.
-    if isinstance(max_chars, float) and max_chars.is_integer():
-        max_chars = int(max_chars)
-    # bool is an int subclass: max_chars=True would silently mean one character.
-    if isinstance(max_chars, bool) or not isinstance(max_chars, int) or max_chars < 1:
         return error(
-            f"Invalid max_chars: {max_chars!r}",
+            f"Invalid max_chars: {original_max_chars!r}",
             suggestions=[
-                "Use a positive integer: 6000 (the default) or a different limit",
+                f"Use a positive integer: {DEFAULT_MAX_CHARS} (the default) or a different limit",
             ],
             error_code="INVALID_ARGUMENTS"
         )
@@ -257,6 +252,22 @@ async def edgar_read(
         )
 
 
+def _coerce_int(value: Any, default: int, minimum: int) -> Optional[int]:
+    """Return ``value`` as an int of at least ``minimum``, or None if it is invalid.
+
+    ``None`` means "not set" and gives ``default``. JSON Schema counts 30.0 as an
+    integer, so integral floats are accepted. ``bool`` is an int subclass, so
+    ``True`` is rejected rather than silently meaning 1.
+    """
+    if value is None:
+        return default
+    if isinstance(value, float) and value.is_integer():
+        value = int(value)
+    if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
+        return None
+    return value
+
+
 async def _get_filing(
     accession_number: Optional[str],
     identifier: Optional[str],
@@ -286,7 +297,8 @@ async def _get_filing(
     return None
 
 
-async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HOLDINGS_LIMIT, max_chars: int = 6000) -> dict[str, Any]:
+async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HOLDINGS_LIMIT,
+                           max_chars: int = DEFAULT_MAX_CHARS) -> dict[str, Any]:
     """Extract requested sections from filing."""
     extracted = {}
 
