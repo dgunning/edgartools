@@ -445,12 +445,18 @@ display = get_display_name("AccountsPayableCurrent")
 
 # Inspect stored mapping annotations when a mapping is returned
 index = get_reverse_index()
-result = index.lookup("us-gaap:PremiumsEarnedNet")
+result = index.lookup("us-gaap:AccountsPayableCurrentAndNoncurrent")
 if result is not None:
     print(result.mapping_key, result.standard_concepts)
-    print(result.section, result.confidence, result.company_count)
+    print(result.is_ambiguous, result.section, result.statement)
+    print(result.confidence, result.company_count)
     print(result.metadata_origins)
 ```
+
+This entry maps to both `TradePayables` and `OtherOperatingNonCurrentLiabilities`,
+while its section annotation is `Current Liabilities`. Inspecting that metadata
+helps reveal the ambiguity; it does not choose between the candidates or establish
+their presentation in a filing.
 
 The annotations describe the effective mapping entry after any industry override,
 not each surviving candidate or an individual company's financial fact. Optional
