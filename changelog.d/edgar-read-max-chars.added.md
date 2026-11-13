@@ -1,0 +1,1 @@
+**`edgar_read` can now return more or less than 6,000 characters per text section.** The new optional `max_chars` parameter sets the cap per section; omitting it keeps the 6,000-character default, and 13F-HR holdings stay bounded by `limit`. Very large values can return a whole filing in one result.
