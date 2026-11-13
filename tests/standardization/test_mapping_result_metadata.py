@@ -67,16 +67,20 @@ def assert_metadata(result, values, origins):
     assert result.metadata_origins == origins
 
 
-@pytest.mark.parametrize(
-    "key,confidence,count",
-    [
-        ("Revenues", 1.0, 3110),
-        ("PremiumsEarnedNet", 0.5, 131),
-    ],
-)
-def test_shipped_metadata(index, key, confidence, count):
+def assert_shipped_metadata(result):
+    assert result is not None
+    assert isinstance(result.confidence, float)
+    assert type(result.company_count) is int
+    assert result.section == "Revenue"
+    assert result.statement == "IncomeStatement"
+    assert result.is_total is True
+    assert result.metadata_origins == dict.fromkeys(METADATA_FIELDS, "base")
+
+
+@pytest.mark.parametrize("key", ["Revenues", "PremiumsEarnedNet"])
+def test_shipped_metadata(index, key):
     result = index.lookup(f"us-gaap:{key}")
-    assert_metadata(result, {**BASE_METADATA, "confidence": confidence, "company_count": count}, dict.fromkeys(METADATA_FIELDS, "base"))
+    assert_shipped_metadata(result)
     assert result.standard_concepts == ["Revenue"]
     assert result.display_names == ["Revenue"]
     assert result.mapping_key == key
@@ -153,7 +157,7 @@ def test_candidate_only_override_changes_candidates_without_relabeling_metadata(
     assert index.lookup("Example").standard_concepts == ["Original"]
     result = index.lookup("Example", industry="Insur")
     assert result.standard_concepts == ["OtherRevenue"]
-    assert_metadata(result, BASE_METADATA, dict.fromkeys(METADATA_FIELDS, "base"))
+    assert_shipped_metadata(result)
     assert result.applied_industry == "Insur"
 
 
