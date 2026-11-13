@@ -35,6 +35,7 @@ Example usage:
 """
 
 from edgar.xbrl.currency import CurrencyConverter, ExchangeRate
+from edgar.xbrl.element_metadata import ElementMetadata
 from edgar.xbrl.facts import FactQuery, FactsView
 from edgar.xbrl.presentation import StatementView, normalize_view
 from edgar.xbrl.rendering import RenderedStatement
@@ -56,6 +57,7 @@ from edgar.xbrl.xbrl import XBRL, XBRLFilingWithNoXbrlData
 __all__ = [
     'XBRL',
     'XBRLFilingWithNoXbrlData',
+    'ElementMetadata',
     'XBRLS',
     'Statements',
     'Statement',

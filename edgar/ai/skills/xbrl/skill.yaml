@@ -102,6 +102,20 @@ patterns:
       # An ID defined in two documents is ambiguous: it resolves to None, with a warning.
       # filing.xbrl() never needs this; it reads SEC's instance for the whole filing.
 
+  - name: What a Concept Is (type, balance, ASC references)
+    when: Need a concept's balance, period type, abstract flag, FASB definition or ASC paragraphs
+    code: |
+      meta = xbrl.element_metadata("us-gaap:Assets")   # or "us-gaap_Assets"; None if unknown
+      meta.balance        # 'debit' / 'credit' / None (share counts, cash-flow totals have none)
+      meta.period_type    # 'instant' / 'duration'
+      meta.abstract       # declared flag; None when nothing declares it (e.g. dei)
+      meta.documentation  # FASB definition text, from the filing's MetaLinks.json
+      for r in meta.references:  # ASC references (edgar.sgml.AuthRef)
+          print(r.topic, r.sub_topic, r.section, r.paragraph)   # 942 210 S99 1
+      # references is None when MetaLinks.json is unavailable, () when it lists none.
+      # The first call downloads MetaLinks.json (one small file) unless the
+      # submission is already loaded; later calls are instant.
+
   - name: Calculation Linkbase as DataFrame
     when: Need per-filer concept hierarchy, extension → us-gaap mapping, or signed weights
     code: |

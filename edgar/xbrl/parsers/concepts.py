@@ -12,7 +12,7 @@ See Issue #463 analysis for details.
 """
 from functools import lru_cache
 from importlib import resources
-from typing import Dict, Optional
+from typing import Any, Dict, Optional
 
 # =============================================================================
 # DEPRECATED CONCEPT LISTS (No longer used as of Issue #463)
@@ -161,12 +161,13 @@ _STANDARD_PREFIXES = ('us-gaap', 'srt')
 
 @lru_cache(maxsize=1)
 def _standard_elements():
-    """The bundled us-gaap and srt declarations: prefix, name, balance, abstract."""
+    """The bundled us-gaap and srt declarations, one row per element."""
     import pandas as pd
 
     ref = resources.files('edgar.xbrl.data').joinpath(TAXONOMY_ELEMENTS_FILE)
     with resources.as_file(ref) as path:
-        return pd.read_parquet(path, columns=['prefix', 'name', 'balance', 'abstract'])
+        return pd.read_parquet(path, columns=['prefix', 'name', 'type', 'balance', 'period_type',
+                                              'abstract', 'substitution_group'])
 
 
 @lru_cache(maxsize=1)
@@ -225,6 +226,32 @@ def get_balance_type(concept: str) -> Optional[str]:
     if not concept:
         return None
     return _standard_balances().get(_standard_key(concept))
+
+
+@lru_cache(maxsize=1)
+def _standard_declarations() -> Dict[str, Dict[str, Any]]:
+    """``prefix:name`` -> the element's bundled declaration, missing values as None."""
+    df = _standard_elements()
+    df = df.astype(object).where(df.notna(), None)
+    return {f"{row['prefix']}:{row['name']}": row for row in df.to_dict('records')}
+
+
+def get_standard_declaration(concept: str) -> Optional[Dict[str, Any]]:
+    """
+    The standard taxonomy's declaration of a us-gaap or srt concept.
+
+    A dict with ``type``, ``balance``, ``period_type``, ``abstract`` and
+    ``substitution_group`` (None where FASB declares no value), or None for a
+    concept the bundled table does not declare (company extensions, dei).
+
+    Example:
+        >>> get_standard_declaration('us-gaap:Assets')['period_type']
+        'instant'
+    """
+    if not concept:
+        return None
+    declaration = _standard_declarations().get(_standard_key(concept))
+    return dict(declaration) if declaration is not None else None
 
 
 def get_standard_abstract(concept: str) -> Optional[bool]:
