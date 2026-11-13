@@ -144,6 +144,30 @@ _REVENUE_VARIANTS = [
     'Revenue',
     'TotalRevenues',
     'NetSales',
+    # A utility's total operating revenue comes before its contract revenue
+    # filed beside it: Duke's FY2025 10-K files 32.237B and 31.741B.
+    'RegulatedAndUnregulatedOperatingRevenue',
+    'RevenueFromContractWithCustomerIncludingAssessedTax',
+    'RevenuesNetOfInterestExpense',
+    'ifrs-full:RevenueFromContractsWithCustomers',
+]
+
+# A variant written with a taxonomy prefix ('ifrs-full:Equity') matches only
+# that concept. A bare name is also tried as us-gaap and ifrs-full and falls
+# back to a lowercased label, so a bare 'Equity' would pick up any fact
+# labelled "Equity" (edgartools-8p5ci).
+#
+# Parent-attributable profit comes before ProfitLoss: under IFRS ProfitLoss
+# includes non-controlling interests, so BHP's FY2025 20-F returned $11.143B
+# for $9.019B attributable to owners (US-GAAP filers tag NetIncomeLoss, which
+# already ranks first).
+_NET_INCOME_VARIANTS = [
+    'NetIncomeLoss',
+    'ifrs-full:ProfitLossAttributableToOwnersOfParent',
+    'ProfitLoss',
+    'NetIncome',
+    'NetEarnings',
+    'NetIncomeLossAttributableToParent',
 ]
 
 _COMPANY_FACTS_CACHE_MAXSIZE = 1
@@ -1082,13 +1106,7 @@ class EntityFacts:
             >>> annual_income = facts.get_net_income(period="2024-FY")
         """
         return self._get_standardized_concept_value(
-            concept_variants=[
-                'NetIncomeLoss',
-                'ProfitLoss',
-                'NetIncome',
-                'NetEarnings',
-                'NetIncomeLossAttributableToParent'
-            ],
+            concept_variants=_NET_INCOME_VARIANTS,
             period=period,
             unit=unit,
             annual=annual
@@ -1116,7 +1134,9 @@ class EntityFacts:
             concept_variants=[
                 'Assets',
                 'TotalAssets',
-                'AssetsCurrent'  # Fallback for some filings
+                # No AssetsCurrent fallback: current assets are not total
+                # assets, and a filer without a total gets None, as
+                # get_total_liabilities does (GH #1279, edgartools-8p5ci).
             ],
             period=period,
             unit=unit,
@@ -1181,7 +1201,16 @@ class EntityFacts:
                 'ShareholdersEquity',
                 'TotalEquity',
                 'PartnersCapital',  # For partnerships
-                'MembersEquity'     # For LLCs
+                'MembersEquity',    # For LLCs
+                # The parent-attributable total wins when a filing has both
+                # (same filing date, so list order breaks the tie); the total
+                # including non-controlling interest answers only when no
+                # parent total is filed, as in Financials (#1442). IFRS splits
+                # equity the same way (IAS 1.54(q)-(r)): Shell's FY2025 20-F
+                # files $174.392B to owners beside $175.319B in total.
+                'StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest',
+                'ifrs-full:EquityAttributableToOwnersOfParent',
+                'ifrs-full:Equity',
             ],
             period=period,
             unit=unit,
@@ -1210,7 +1239,8 @@ class EntityFacts:
                 'OperatingIncomeLoss',
                 'OperatingIncome',
                 'IncomeLossFromOperations',
-                'OperatingProfit'
+                'OperatingProfit',
+                'ifrs-full:ProfitLossFromOperatingActivities',
             ],
             period=period,
             unit=unit,
@@ -2637,7 +2667,8 @@ class EntityFacts:
             if not prior.numeric_value:
                 continue  # growth from nil revenue is undefined
             local = concept.rsplit(':', 1)[-1]
-            rank = _REVENUE_VARIANTS.index(local) if local in _REVENUE_VARIANTS else len(_REVENUE_VARIANTS)
+            rank = next((i for i, v in enumerate(_REVENUE_VARIANTS) if v in (concept, local)),
+                        len(_REVENUE_VARIANTS))
             pairs.append((unit != 'USD', rank, current, prior))
         if not pairs:
             return None
@@ -2753,8 +2784,11 @@ class EntityFacts:
             # which used to "win" purely by being tried first.
             candidates = []
             for concept in concept_variants:
-                # Try with all known taxonomy prefixes
-                for concept_variant in [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']:
+                if ':' in concept:
+                    spellings = [concept]  # a prefixed variant names one taxonomy
+                else:
+                    spellings = [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']
+                for concept_variant in spellings:
                     # Use annual fact if requested and no specific period provided
                     if annual and period is None:
                         fact = self.get_annual_fact(concept_variant)
@@ -3060,13 +3094,7 @@ class EntityFacts:
             UnitResult with value, unit info, and error details
         """
         return self._get_standardized_concept_value(
-            concept_variants=[
-                'NetIncomeLoss',
-                'ProfitLoss',
-                'NetIncome',
-                'NetEarnings',
-                'NetIncomeLossAttributableToParent'
-            ],
+            concept_variants=_NET_INCOME_VARIANTS,
             period=period,
             unit=unit,
             return_detailed=True,
