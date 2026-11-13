@@ -42,6 +42,13 @@ from edgar.xbrl.core import (
 )
 from edgar.xbrl.models import NIL_MEMBER_LABEL, Axis, Domain, PresentationNode, is_negated_label_role
 from edgar.xbrl.abstract_detection import element_is_abstract
+from edgar.xbrl.element_metadata import (
+    ElementMetadata,
+    build_element_metadata,
+    concept_id,
+    directory_metalinks_source,
+    filing_metalinks_source,
+)
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.parsers.concepts import resolve_balance
 from edgar.xbrl.periods import get_period_views
@@ -657,6 +664,8 @@ class XBRL:
         # "the dates agreed" and "we never had a second date" are distinguishable
         # (bead edgartools-35jj).
         self._period_validation_unavailable: Optional[str] = None
+        # Where element_metadata() reads MetaLinks.json from, on first use (GH #1426)
+        self._metalinks_source = None
 
         # Standardization cache for this XBRL instance (lazy-initialized)
         self._standardization_cache = None
@@ -910,6 +919,38 @@ class XBRL:
     @property
     def reporting_periods(self):
         return self.parser.reporting_periods
+
+    def element_metadata(self, concept: str) -> Optional[ElementMetadata]:
+        """
+        What a concept is: its type, balance, period type, abstract status,
+        definition and ASC references.
+
+        Accepts 'us-gaap:Assets' or 'us-gaap_Assets'. The filing's own schema
+        answers for its extension concepts and the bundled FASB element table
+        for imported us-gaap and srt ones; the definition and the Accounting
+        Standards Codification references come from the filing's MetaLinks.json,
+        which the first call downloads (one small file) when the XBRL came from
+        a filing. A field no source states is None, never a guess.
+
+        Args:
+            concept: A prefixed concept name.
+
+        Returns:
+            ElementMetadata, or None when no source knows the concept.
+
+        Raises:
+            ValueError: the concept has no namespace prefix.
+
+        Example:
+            >>> meta = xbrl.element_metadata("us-gaap:Assets")
+            >>> meta.balance, meta.period_type
+            ('debit', 'instant')
+            >>> [f"{r.topic}-{r.sub_topic}-{r.section}-{r.paragraph}" for r in meta.references][:1]
+            ['942-210-S99-1']
+        """
+        element_id = concept_id(concept)
+        metalinks = self._metalinks_source.get() if self._metalinks_source is not None else None
+        return build_element_metadata(element_id, self.element_catalog.get(element_id), metalinks)
 
     def calculation_linkbase(self, include_abstract: bool = False) -> pd.DataFrame:
         """Return the filing's calculation linkbase as a DataFrame of arcs.
@@ -1182,6 +1223,7 @@ class XBRL:
         """
         xbrl = cls()
         xbrl.parser.parse_directory(directory_path)
+        xbrl._metalinks_source = directory_metalinks_source(Path(directory_path))
 
         # Try to create legacy instance as well for compatibility
         directory = Path(directory_path)
@@ -1262,6 +1304,7 @@ class XBRL:
         # A large submission is mostly exhibits and PDFs; fetch just its XBRL files
         # when that is possible, else read the whole submission (edgartools-vk270.1).
         selective = _selective_xbrl_sources(filing)
+        xbrl._metalinks_source = filing_metalinks_source(filing)
         xbrl_attachments = selective.attachments if selective else XBRLAttachments(filing.attachments)
 
         if xbrl_attachments.empty:

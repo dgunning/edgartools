@@ -195,6 +195,36 @@ noninterest = calc[calc.parent_concept == 'NoninterestIncome']
 
 See the [Calculation Linkbase guide](../xbrl/guides/calculation-linkbase.md) for the longer walkthrough.
 
+#### element_metadata()
+```python
+def element_metadata(self, concept: str) -> Optional[ElementMetadata]
+```
+What a concept is: its type, balance, period type, abstract status, FASB definition and Accounting Standards Codification references. Accepts `us-gaap:Assets` or `us-gaap_Assets`, and returns `None` when no source knows the concept. A concept without a namespace prefix raises `ValueError`.
+
+Each field comes from the first source that states it: the filing's own schema (extension concepts), then the bundled FASB element table (us-gaap and srt), then the filing's `MetaLinks.json`. A field no source states is `None`; nothing is guessed from the name. `documentation` and `references` come from `MetaLinks.json`, which the first call reads from the loaded submission or downloads as one small file. They are `None` when the filing has no `MetaLinks.json` (before about 2012) or the XBRL was built from local files without one.
+
+| Field | Type | Description |
+|---|---|---|
+| `concept`, `prefix`, `name` | str | `us-gaap_Assets`, `us-gaap`, `Assets` |
+| `is_standard` | bool | True for us-gaap, srt, dei, ifrs-full and the other SEC taxonomies |
+| `data_type` | str \| None | Declared type as its source spells it, e.g. `xbrli:monetaryItemType` |
+| `balance` | str \| None | `debit`, `credit`, or `None` when none is declared |
+| `period_type` | str \| None | `instant` or `duration` |
+| `abstract` | bool \| None | Declared abstract flag; `None` when no declaration was read (dei) |
+| `documentation` | str \| None | Definition text |
+| `references` | tuple[AuthRef] \| None | ASC references; `()` when `MetaLinks.json` lists none |
+
+**Example:**
+```python
+from edgar import find
+
+xbrl = find("0001193125-26-389274").xbrl()   # Oracle 10-Q, quarter ended 2026-08-31
+meta = xbrl.element_metadata("us-gaap:IncreaseDecreaseInContractWithCustomerLiability")
+meta.balance            # 'debit'
+[f"{r.topic}-{r.sub_topic}-{r.section}-{r.paragraph}" for r in meta.references]
+# ['912-310-45-11', '230-10-45-28']
+```
+
 #### Data Conversion
 
 #### to_pandas()
