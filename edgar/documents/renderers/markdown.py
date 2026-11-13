@@ -7,7 +7,16 @@ from typing import Dict, List, Optional, Set
 from urllib.parse import urljoin
 
 from edgar.documents.document import Document
-from edgar.documents.nodes import HeadingNode, ImageNode, ListItemNode, ListNode, Node, ParagraphNode, TextNode
+from edgar.documents.nodes import (
+    HeadingNode,
+    ImageNode,
+    ListItemNode,
+    ListNode,
+    Node,
+    ParagraphNode,
+    TextNode,
+    inline_runs,
+)
 from edgar.documents.table_nodes import TableNode
 from edgar.documents.utils.table_matrix import TableMatrix
 
@@ -184,7 +193,11 @@ class MarkdownRenderer:
     def _render_paragraph(self, node: ParagraphNode) -> str:
         """Render paragraph node."""
         # Get paragraph content
-        content = self._render_children(node).strip()
+        if self._in_table or any(isinstance(child, (HeadingNode, ParagraphNode, TableNode, ListNode))
+                                 for child in node.children):
+            content = self._render_children(node).strip()
+        else:
+            content = self._render_inline_runs(node).strip()
         if not content:
             return ""
 
@@ -448,6 +461,43 @@ class MarkdownRenderer:
             return "\n\n".join(parts)
         else:
             return " ".join(parts)
+
+    def _render_inline_runs(self, node: ParagraphNode) -> str:
+        """Join a paragraph's inline children where ParagraphNode.text() puts word gaps.
+
+        Space-joining them split every word a filer wrote across two elements
+        ('PROPERT IES', '**Comp** *any*'); the gaps come from the same rule as the
+        paragraph's text instead (edgartools-8n9an).
+        """
+        runs = {i: (text, spaced) for i, text, spaced in inline_runs(node.children)}
+        out = []
+        for i, child in enumerate(node.children):
+            child_md = self._render_node(child)
+            if not child_md:
+                continue
+            if i in runs:
+                text, spaced = runs[i]
+                if spaced:
+                    # The run's leading space became the gap; drop it from the markup
+                    # too when the child rendered as plain text.
+                    if text != child.text() and child_md.startswith(' '):
+                        child_md = child_md.lstrip()
+                    child_md = ' ' + child_md
+            elif out:
+                # No text to judge by (an image): keep it apart from its neighbours.
+                child_md = ' ' + child_md
+            if out and not child_md.startswith(' '):
+                # One word in two runs of the same style: '**THE C****OMPANY**'
+                # reads as two bold spans, so continue the open one instead.
+                for close, open_ in (('**', '**'), ('</u>', '<u>'), ('*', '*')):
+                    if (out[-1].endswith(close) and child_md.startswith(open_)
+                            and not (close == '*' and (out[-1].endswith(('**', '\\*'))
+                                                       or child_md.startswith('**')))):
+                        out[-1] = out[-1][:-len(close)]
+                        child_md = child_md[len(open_):]
+                        break
+            out.append(child_md)
+        return ''.join(out)
 
     def _render_metadata(self, document: Document) -> str:
         """Render document metadata."""
