@@ -253,6 +253,11 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='revenue',
             synonyms=[
                 'Revenues',
+                # A utility's total operating revenue comes before contract
+                # revenue filed beside it: Duke's FY2025 10-K files 32.237B
+                # and 31.741B. Same order as EntityFacts.get_revenue()
+                # (edgartools-8p5ci).
+                'RegulatedAndUnregulatedOperatingRevenue',
                 'RevenueFromContractWithCustomerExcludingAssessedTax',
                 'RevenueFromContractWithCustomerIncludingAssessedTax',
                 'Revenue',
@@ -261,6 +266,10 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
                 'TotalRevenues',
                 'NetSales',
                 'OperatingRevenue',
+                # Banks' net revenue (Goldman Sachs, Morgan Stanley).
+                'RevenuesNetOfInterestExpense',
+                # IFRS 15 revenue
+                'RevenueFromContractsWithCustomers',
             ],
             description='Total revenue/sales from operations',
             category='income_statement'
@@ -713,15 +722,21 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='stockholders_equity',
             synonyms=[
                 'StockholdersEquity',
-                'StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest',
                 'StockholdersEquityAttributableToParent',
                 'EquityAttributableToParent',
                 'ShareholdersEquity',
                 'TotalEquity',
                 'PartnersCapital',
                 'MembersEquity',
-                # IFRS variant
+                # Totals including non-controlling interest come after every
+                # parent total, as in EntityFacts.get_shareholders_equity():
+                # within one filing the parent total wins on this order.
+                'StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest',
+                # IFRS (IAS 1.54(q)-(r)): owners of the parent, then the total.
+                # TD last filed EquityAttributableToOwnersOfParent in 2019, so
+                # without Equity this group returned its FY2019 figure.
                 'EquityAttributableToOwnersOfParent',
+                'Equity',
             ],
             description='Total stockholders equity',
             category='balance_sheet'
