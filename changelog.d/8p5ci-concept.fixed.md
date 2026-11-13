@@ -1,0 +1,1 @@
+**`get_concept('net_income')` returns profit attributable to owners for IFRS filers.** Its synonym group reached `ProfitLoss`, which includes non-controlling interests, before `ProfitLossAttributableToOwnersOfParent`, so it disagreed with `get_net_income()` once that was fixed: TSM's 1,157.52B against 1,158.38B attributable to owners.

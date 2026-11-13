@@ -374,13 +374,17 @@ def _get_builtin_groups_cached() -> List[SynonymGroup]:
             name='net_income',
             synonyms=[
                 'NetIncomeLoss',
+                # IFRS profit attributable to owners comes before ProfitLoss,
+                # which includes non-controlling interests: BHP's FY2025 20-F
+                # files 9.019B to owners and 11.143B in total. Same order as
+                # EntityFacts.get_net_income(), which must agree with this
+                # group (test_issue_637, edgartools-8p5ci).
+                'ProfitLossAttributableToOwnersOfParent',
                 'ProfitLoss',
                 'NetIncome',
                 'NetEarnings',
                 'NetIncomeLossAttributableToParent',
                 'IncomeLossFromContinuingOperations',
-                # IFRS variants
-                'ProfitLossAttributableToOwnersOfParent',
             ],
             description='Net income/loss',
             category='income_statement'
