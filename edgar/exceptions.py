@@ -60,6 +60,7 @@ __all__ = [
     # parsing
     "ParsingError",
     "XBRLProcessingError",
+    "LowConfidenceSectionError",
     "DataObjectError",
     # validation
     "ValidationError",
@@ -417,6 +418,31 @@ class ParsingError(EdgarError):
 
 class XBRLProcessingError(ParsingError):
     """An error occurred while processing XBRL."""
+
+
+class LowConfidenceSectionError(ParsingError):
+    """`report.section(item, strict=True)` found the item, but not reliably.
+
+    The section exists, so this is not a `SectionNotFoundError`: the parser
+    located it with a confidence below the caller's threshold, usually because
+    it came from a fallback detector or a size guardrail flagged it (an
+    incorporation-by-reference stub, content far larger or smaller than the
+    item normally is). `warnings` says which. The text is still reachable with
+    `strict=False`, which is the point of raising rather than returning None:
+    the caller decides whether a doubtful section is good enough.
+    """
+
+    def __init__(self, message: str = "", *, item=None, confidence=None,
+                 min_confidence=None, warnings=None, detection_method=None, **kwargs):
+        self.item = item
+        self.confidence = confidence
+        self.min_confidence = min_confidence
+        self.warnings = list(warnings or [])
+        self.detection_method = detection_method
+        if not message:
+            message = (f"Section {item!r} was located with confidence {confidence} "
+                       f"(below {min_confidence})")
+        super().__init__(message, **kwargs)
 
 
 class DataObjectError(ParsingError):

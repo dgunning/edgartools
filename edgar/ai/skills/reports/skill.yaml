@@ -29,6 +29,13 @@ patterns:
 
       tenk.items                        # List: ['Item 1', 'Item 1A', 'Item 2', ...]
 
+      # How reliably was the item located? section() returns the Section that
+      # tenk[...] reads (same lookup), with confidence and plain-sentence warnings.
+      item8 = tenk.section('Item 8')
+      item8.confidence, item8.warnings  # 0.95 from the TOC; 0.5 when flagged (e.g. a pointer)
+      item8.text()                      # == tenk['Item 8']
+      tenk.section('Item 7', strict=True)   # raises LowConfidenceSectionError below 0.8
+
       # Combined headings ("Items 1 and 2. Business and Properties") are ONE section,
       # keyed as the first item; both items return it.
       tenk['Item 2'] == tenk.business   # True when the filer combines Items 1 and 2

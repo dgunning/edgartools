@@ -48,6 +48,13 @@ sharp_edges:
           # Use XBRL for the numbers instead of the item text.
           financials = tenk.financials
 
+      # The parser flags the undersized pointer itself: section() exposes it.
+      # NVIDIA FY2025: Item 8 is a 207-char pointer to Item 15, confidence 0.5,
+      # with a warning that says "reads as an incorporation by reference".
+      section = tenk.section('Item 8')
+      if section.confidence < 0.8:
+          print(section.warnings)        # why it was flagged, as plain sentences
+
       # Some filers instead map items to printed PAGE RANGES in a
       # "Form 10-K Cross-Reference Index" (Citigroup). Items whose index row says
       # "Not Applicable" or carries only an asterisk have no content in the 10-K,

@@ -13,11 +13,11 @@ from rich.panel import Panel
 
 from edgar.core import log
 from edgar.documents import Document, HTMLParser
-from edgar.exceptions import SectionNotFoundError
+from edgar.exceptions import LowConfidenceSectionError, SectionNotFoundError, ValidationError
 from edgar.financials import Financials
 from edgar.richtools import repr_rich
 
-__all__ = ['CompanyReport', 'section_not_found', 'report_lookup_miss']
+__all__ = ['CompanyReport', 'section_not_found', 'report_lookup_miss', 'text_only_section']
 
 
 # True while we are inside `.get()`, where a missing item is the documented
@@ -66,6 +66,41 @@ def report_lookup_miss(report, item_or_part: str) -> None:
     if _absence_is_expected.get():
         return
     raise section_not_found(report, item_or_part)
+
+
+def text_only_section(name: str, title: str, text: str, *, detection_method: str,
+                      confidence: float, warnings=(), part=None, item=None):
+    """A `Section` for text a report found WITHOUT a detected section.
+
+    Some lookups end in a fallback that reads text directly: the 10-K Cross
+    Reference Index, the 8-K text-pattern scan of legacy filings, the 40-F AIF
+    heading scan. `report.section()` must still return a Section for those,
+    with a `detection_method` that says where the text came from and the
+    confidence of the detector it is equivalent to, rather than pretending it
+    was found in the table of contents. The text is already extracted, so the
+    extractor hands it back unchanged.
+    """
+    from edgar.documents.document import Section
+    from edgar.documents.nodes import SectionNode
+
+    class _TextOnlySection(Section):
+        # Section.text() runs boundary cleanup over what its extractor returns.
+        # This text is already final (it is what `report[item]` returned), so
+        # skip it: section(x).text() must equal report[x].
+        def text(self, **kwargs) -> str:
+            return text
+
+    return _TextOnlySection(
+        name=name,
+        title=title,
+        node=SectionNode(section_name=name),
+        confidence=confidence,
+        detection_method=detection_method,
+        part=part,
+        item=item,
+        warnings=list(warnings),
+        _text_extractor=lambda _name, **_kwargs: text,
+    )
 
 
 class CompanyReport:
@@ -271,18 +306,99 @@ class CompanyReport:
             >>> report["1A"]
             >>> report["Part I"]  # For 10-Q
         """
-        # Try to get section using new parser
+        return self._item_text(item_or_part)
+
+    # Lookup is split in two so that `report[item]` and `report.section(item)`
+    # resolve through the SAME rules: subclasses override `_resolve_section`
+    # only. Two copies of a lookup cascade would drift, and the item that
+    # `report['Item 8']` returns must be the one whose confidence
+    # `report.section('Item 8')` reports.
+    def _resolve_section(self, item_or_part: str):
+        """Find the section for `item_or_part`.
+
+        Returns `(section, text)`, or None when the filing has no such item.
+        `text` is the section's text when the lookup already had to extract it
+        (a cascade that skips empty sections reads it to decide), so a caller
+        that wants text does not extract twice; otherwise it is None.
+        """
+        # Exact key first, then the flexible item lookup ("Item 1", "1", ...).
         section = self.document.sections.get(item_or_part)
-        if section:
-            return section.text()
+        if section is None:
+            section = self.document.sections.get_item(item_or_part)
+        return (section, None) if section is not None else None
 
-        # Try flexible item lookup (handles "Item 1", "1", etc.)
-        section = self.document.sections.get_item(item_or_part)
-        if section:
-            return section.text()
-
+    def _item_text(self, item_or_part: str):
+        found = self._resolve_section(item_or_part)
+        if found is not None:
+            section, text = found
+            return text if text is not None else section.text()
         report_lookup_miss(self, item_or_part)
         return None
+
+    def section(self, item_or_part: str, *, strict: bool = False, min_confidence: float = 0.8):
+        """Get an item as a `Section`, with how reliably it was located.
+
+        `report[item]` returns only the text. This returns the section itself,
+        found by exactly the same lookup, so the caller can see what the text
+        alone hides:
+
+        - `.confidence`: 0.0-1.0. Sections located from the filing's table of
+          contents score 0.95; fallback detectors score lower, and a section a
+          size guardrail flagged (e.g. an incorporation-by-reference stub)
+          drops to 0.5.
+        - `.warnings`: why a section was flagged, as plain sentences.
+        - `.detection_method`: which detector found it ('toc', 'index',
+          'pattern', ...).
+        - `.text()` and `.markdown()`: the content, as from `report[item]`.
+
+        Args:
+            item_or_part: Any spelling `report[item]` accepts ("Item 7", "7",
+                "mda", "Part II, Item 1A" for a 10-Q, ...).
+            strict: When True, raise `LowConfidenceSectionError` instead of
+                returning a section located with confidence below
+                `min_confidence`. Use it in pipelines that would rather stop
+                than ingest a doubtful slice.
+            min_confidence: The threshold `strict` applies, 0.0-1.0. The
+                default 0.8 accepts table-of-contents and cross-reference-index
+                sections and refuses pattern-fallback and guardrail-flagged ones.
+
+        Returns:
+            Section
+
+        Raises:
+            SectionNotFoundError: the filing has no such item.
+            LowConfidenceSectionError: `strict=True` and the section's
+                confidence is below `min_confidence`.
+            ValidationError: `min_confidence` is outside 0.0-1.0.
+
+        Examples:
+            >>> item8 = tenk.section("Item 8")
+            >>> item8.confidence, item8.warnings
+            >>> tenk.section("Item 7", strict=True).text()
+        """
+        if (isinstance(min_confidence, bool) or not isinstance(min_confidence, (int, float))
+                or not 0.0 <= min_confidence <= 1.0):
+            raise ValidationError(
+                f"min_confidence must be a number from 0.0 to 1.0, got {min_confidence!r}")
+        found = self._resolve_section(item_or_part)
+        if found is None:
+            report_lookup_miss(self, item_or_part)
+            return None
+        section = found[0]
+        if strict and section.confidence < min_confidence:
+            raise LowConfidenceSectionError(
+                f"{item_or_part!r} was located with confidence {section.confidence:.2f}, "
+                f"below min_confidence={min_confidence} (detected by {section.detection_method!r})",
+                context={"warnings": list(section.warnings)} if section.warnings else None,
+                suggestions=["Read it anyway with strict=False and check .warnings",
+                             "Lower min_confidence if this detector is good enough for you"],
+                item=item_or_part,
+                confidence=section.confidence,
+                min_confidence=min_confidence,
+                warnings=section.warnings,
+                detection_method=section.detection_method,
+            )
+        return section
 
     def get(self, item_or_part: str, default=None):
         """Get item or part text, or `default` when the filing has no such item.

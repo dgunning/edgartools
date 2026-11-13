@@ -10,7 +10,7 @@ from rich.panel import Panel
 from rich.table import Table
 
 from edgar._filings import Attachments
-from edgar.company_reports._base import CompanyReport, report_lookup_miss
+from edgar.company_reports._base import CompanyReport, text_only_section
 from edgar.company_reports._structures import ItemOnlyFilingStructure, extract_items_from_sections
 from edgar.documents import HTMLParser, ParserConfig
 from edgar.richtools import repr_rich, rich_to_text
@@ -744,11 +744,18 @@ class CurrentReport(CompanyReport):
         Returns:
             Section text content as string, or None if not found
         """
+        return super().__getitem__(item_name)
+
+    def _resolve_section(self, item_name: str):
+        """The 8-K lookup behind `eightk[item]` and `eightk.section(item)`.
+
+        Returns `(section, text)` or None; see `CompanyReport._resolve_section`.
+        """
         # Strategy 1: Try new parser sections first (95% detection rate)
         if self.sections:
             # Direct key lookup
             if item_name in self.sections:
-                return self.sections[item_name].text()
+                return self.sections[item_name], None
 
             # Try fuzzy matching for different formats
             # Normalize: "Item 5.02" → "item_502", "5.02" → "502"
@@ -759,7 +766,7 @@ class CurrentReport(CompanyReport):
                 # Normalize section key: "item_502" → "502"
                 normalized_key = key.replace('item_', '').replace('_', '')
                 if normalized_key == normalized_input:
-                    return section.text()
+                    return section, None
 
         # Strategy 2: Text-based fallback for legacy SGML filings
         # This handles filings where HTML is unavailable but text exists
@@ -768,9 +775,15 @@ class CurrentReport(CompanyReport):
         if filing_text:
             content = _extract_item_content_from_text(filing_text, item_name)
             if content:
-                return content
+                # Read from raw filing text, not a detected section; carries the
+                # pattern extractor's lower-tier confidence so strict callers can
+                # tell (bead ywzj).
+                return text_only_section(
+                    item_name, item_name, content, detection_method='text_pattern',
+                    confidence=0.6,
+                    warnings=["Found by scanning the filing's raw text; no section "
+                              "was detected in the parsed document."]), content
 
-        report_lookup_miss(self, item_name)
         return None
 
     def view(self, item_or_part: str):
