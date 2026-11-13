@@ -16726,6 +16726,18 @@
     "first_year": 2021,
     "last_year": 2025
   },
+  "FinancialAssetPurchasedUnderAgreementToResell": {
+    "standard_tags": [
+      "ResaleAgreementAssets"
+    ],
+    "display_name": "Assets Purchased Under Agreements to Resell",
+    "statement": "BalanceSheet",
+    "section": "Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 0,
+    "comment": "Financial assets purchased under agreements to resell, the asset side; the newer, wider element beside SecuritiesPurchasedUnderAgreementsToResell. Not repurchase obligations, and not the combined federal funds sold and resale measure. No CY2025 frame exists for it, so its count is 0 here; that is not evidence nobody files it. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "FinancialInstrumentsOwnedPrincipalInvestmentsAtFairValue": {
     "standard_tags": [
       "LongtermInvestments"
@@ -22240,6 +22252,18 @@
     "first_year": 2024,
     "last_year": 2024
   },
+  "InterestIncomeOperatingPaidInKind": {
+    "standard_tags": [
+      "InterestIncomePaidInKind"
+    ],
+    "display_name": "Interest Income, Paid in Kind",
+    "statement": "IncomeStatement",
+    "section": "Banking Revenue",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 8,
+    "comment": "Operating interest income received in kind (noncash), as reported by BDCs and other investment companies. Not cash interest, and not combined interest-and-dividend PIK income. The frame count understates use: BDCs often report PIK per investment, with dimensions. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "InterestIncomeOther": {
     "standard_tags": [
       "InterestIncome"
@@ -23159,6 +23183,18 @@
     "years_present": 0,
     "first_year": null,
     "last_year": null
+  },
+  "InvestmentBankingRevenue": {
+    "standard_tags": [
+      "InvestmentBankingRevenue"
+    ],
+    "display_name": "Investment Banking Revenue",
+    "statement": "IncomeStatement",
+    "section": "Banking Revenue",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 27,
+    "comment": "Advisory and underwriting revenue. A component of a broker-dealer's net revenue, never the entity's total revenue. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
   },
   "InvestmentInPhysicalCommodities": {
     "standard_tags": [
@@ -24265,6 +24301,18 @@
     "years_present": 4,
     "first_year": 2021,
     "last_year": 2024
+  },
+  "LiabilityForFuturePolicyBenefits": {
+    "standard_tags": [
+      "FuturePolicyBenefits"
+    ],
+    "display_name": "Liability for Future Policy Benefits",
+    "statement": "BalanceSheet",
+    "section": "Non-Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 51,
+    "comment": "Present value of an insurer's future benefits and related expenses less the present value of future net premiums, before reinsurance. Not a net-of-reinsurance balance, policyholder funds, or claims payable. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
   },
   "LiabilityForUncertainTaxPositionsCurrent": {
     "standard_tags": [
@@ -32532,6 +32580,18 @@
     "first_year": 2021,
     "last_year": 2024
   },
+  "PolicyholderFunds": {
+    "standard_tags": [
+      "PolicyholderFunds"
+    ],
+    "display_name": "Policyholder Funds",
+    "statement": "BalanceSheet",
+    "section": "Non-Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 36,
+    "comment": "Amounts due to policyholders, such as unpaid policy dividends, retrospective refunds and undistributed participating earnings. Excludes future policy benefits and claim expense, which are separate liabilities. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "PostconfirmationDeferredIncomeTaxAssetsCurrent": {
     "standard_tags": [
       "DeferredTaxCurrentAssets"
@@ -36136,6 +36196,18 @@
     "first_year": 2021,
     "last_year": 2024
   },
+  "RegulatedOperatingRevenue": {
+    "standard_tags": [
+      "RegulatedOperatingRevenue"
+    ],
+    "display_name": "Regulated Operating Revenue",
+    "statement": "IncomeStatement",
+    "section": "Revenue",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 14,
+    "comment": "Revenue from rate-regulated operations. A component of RegulatedAndUnregulatedOperatingRevenue (Revenue), never the total, and not necessarily electric. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "RegulatoryAssets": {
     "standard_tags": [
       "RegulatedAssets"
@@ -38098,6 +38170,18 @@
     "first_year": 2012,
     "last_year": 2025
   },
+  "RevenuesNetOfInterestExpense": {
+    "standard_tags": [
+      "NetRevenueAfterInterestExpense"
+    ],
+    "display_name": "Net Revenue (Net of Interest Expense)",
+    "statement": "IncomeStatement",
+    "section": "Revenue",
+    "is_total": true,
+    "confidence": 0.9,
+    "company_count": 43,
+    "comment": "Revenues less operating interest expense: the top line of a broker-dealer's income statement (FASB role 140400), e.g. Goldman Sachs' total net revenues. Not gross revenue (Revenue) and not interest income alone. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "RightofuseAssets": {
     "standard_tags": [
       "OperatingLeaseRightOfUseAsset"
@@ -38724,6 +38808,18 @@
     "first_year": 2021,
     "last_year": 2025
   },
+  "SecuritiesBorrowed": {
+    "standard_tags": [
+      "SecuritiesBorrowed"
+    ],
+    "display_name": "Securities Borrowed",
+    "statement": "BalanceSheet",
+    "section": "Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 27,
+    "comment": "Securities borrowed, after the effects of master netting arrangements. An asset: not owned investments, collateral received, or a securities-lending liability. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "SecuritiesForReverseRepurchaseAgreements": {
     "standard_tags": [
       "OtherNonOperatingCurrentAssets"
@@ -38771,6 +38867,18 @@
     "years_present": 0,
     "first_year": null,
     "last_year": null
+  },
+  "SecuritiesPurchasedUnderAgreementsToResell": {
+    "standard_tags": [
+      "ResaleAgreementAssets"
+    ],
+    "display_name": "Assets Purchased Under Agreements to Resell",
+    "statement": "BalanceSheet",
+    "section": "Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 58,
+    "comment": "Securities purchased under agreements to resell (reverse repos), the asset side. Not repurchase obligations (SecuritiesSoldUnderAgreementsToRepurchase maps to ShortTermDebt), and not the combined federal funds sold and resale measure. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
   },
   "SecuritiesSoldUnderAgreementsToRepurchase": {
     "standard_tags": [
@@ -40520,6 +40628,18 @@
     "first_year": null,
     "last_year": null
   },
+  "TradingGainsLosses": {
+    "standard_tags": [
+      "TradingGainsLosses"
+    ],
+    "display_name": "Trading Gains (Losses)",
+    "statement": "IncomeStatement",
+    "section": "Banking Revenue",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 29,
+    "comment": "Gains and losses on trading assets and liabilities, including fair-value changes, separate from customer trading activity. A net result: a loss keeps its filed sign. Not gross proceeds, fees or a cash-flow amount. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "TradingSecurities": {
     "standard_tags": [
       "ShortTermInvestments",
@@ -41117,6 +41237,18 @@
     "years_present": 0,
     "first_year": null,
     "last_year": null
+  },
+  "UnregulatedOperatingRevenue": {
+    "standard_tags": [
+      "UnregulatedOperatingRevenue"
+    ],
+    "display_name": "Unregulated Operating Revenue",
+    "statement": "IncomeStatement",
+    "section": "Revenue",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 19,
+    "comment": "Revenue from operations not subject to rate regulation. A component of RegulatedAndUnregulatedOperatingRevenue (Revenue), never the total. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
   },
   "UnsecuredDebt": {
     "standard_tags": [
