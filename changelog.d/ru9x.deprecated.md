@@ -1,0 +1,1 @@
+**`ParserConfig(extract_images=...)` is deprecated.** The field defaulted to `False` and was documented as switching image extraction, but nothing read it, so every `<img>` became an `ImageNode` regardless. Passing it now raises a `DeprecationWarning`; it is removed in 7.0 and parsing output is unchanged. (bead edgartools-ru9x)
