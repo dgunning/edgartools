@@ -112,6 +112,22 @@ tenk.get("Item 16", "")             # the item that may not be there
 
 If an absent item is a normal outcome for your corpus rather than a problem, `report.get(item, default)` is the call you want.
 
+An item can also be present but doubtful: located by a fallback detector, or flagged by a size check, such as a one-sentence pointer to another part of the filing. `report[item]` returns the text either way. `report.section(item)` returns the same section with its `confidence` (0.0 to 1.0) and `warnings`, and `strict=True` turns a doubtful section into an error:
+
+```python
+from edgar.exceptions import LowConfidenceSectionError
+
+item8 = tenk.section("Item 8")
+item8.confidence, item8.warnings     # NVIDIA FY2025: 0.5, ["... reads as an incorporation by reference ..."]
+
+try:
+    text = tenk.section("Item 8", strict=True).text()
+except LowConfidenceSectionError as e:
+    print(e.confidence, e.warnings)  # the section exists; decide whether it is good enough
+```
+
+`min_confidence` sets the threshold `strict` applies; the default 0.8 accepts sections located from the table of contents (0.95) or a cross-reference index (0.85) and refuses fallback and flagged ones.
+
 ## Writing errors that help
 
 Every `EdgarError` carries optional structured detail, and `str(exc)` renders it:

@@ -3,7 +3,7 @@ import re
 from functools import cached_property
 from typing import List
 
-from edgar.company_reports._base import CompanyReport, report_lookup_miss
+from edgar.company_reports._base import CompanyReport
 from edgar.company_reports._structures import FilingStructure, item_sort_key
 from edgar.documents import HTMLParser, ParserConfig
 
@@ -216,11 +216,18 @@ class TwentyF(CompanyReport):
         Returns:
             Section text content as string, or None if not found
         """
+        return super().__getitem__(item_name)
+
+    def _resolve_section(self, item_name: str):
+        """The lookup cascade behind `report[item]` and `report.section(item)`.
+
+        Returns `(section, text)` or None; see `CompanyReport._resolve_section`.
+        """
         # Try new parser sections first
         if self.sections:
             # Direct key lookup
             if item_name in self.sections:
-                return self.sections[item_name].text()
+                return self.sections[item_name], None
 
             # Extract item number from input (e.g., "Item 5" → "5", "5" → "5", "Item 16A" → "16a")
             item_match = re.match(r'(?:item\s*)?(\d+[a-z]?)', item_name.lower().strip())
@@ -234,19 +241,18 @@ class TwentyF(CompanyReport):
                 for part in ['i', 'ii', 'iii', 'iv', 'v']:
                     key = f'part_{part}_item_{item_num}'
                     if key in self.sections:
-                        return self.sections[key].text()
+                        return self.sections[key], None
 
                 # Try direct item key (pattern-based detection)
                 item_key = f'item_{item_num}'
                 if item_key in self.sections:
-                    return self.sections[item_key].text()
+                    return self.sections[item_key], None
 
                 # Try "Item X" format (TOC-based with friendly names)
                 friendly_key = f'Item {item_num.upper()}'
                 if friendly_key in self.sections:
-                    return self.sections[friendly_key].text()
+                    return self.sections[friendly_key], None
 
-        report_lookup_miss(self, item_name)
         return None
 
     def __str__(self):
