@@ -359,15 +359,15 @@ class TableProcessor:
         """Process table row into cells."""
         cells = []
 
-        # Process both td and th elements, td first (preserves the ordering the
-        # previous ``findall('.//td') + findall('.//th')`` produced)
+        # Cells in document order: a row like <th>A</th><td>B</td> is [A, B]
+        # (edgartools-j99a; the old td-then-th order made it [B, A]).
         own_cells = self._own_cells(tr)
         visible_cells = [c for c in own_cells if not self._is_hidden_spacer(c)]
         # A row made only of hidden spacers keeps them: emptying it would drop the
         # row, which the matrix's leading-row heuristics count.
         if visible_cells:
             own_cells = visible_cells
-        for cell_elem in [c for c in own_cells if c.tag != 'th'] + [c for c in own_cells if c.tag == 'th']:
+        for cell_elem in own_cells:
             cell = self._process_cell(cell_elem, is_header or cell_elem.tag == 'th')
             if cell:
                 cells.append(cell)
