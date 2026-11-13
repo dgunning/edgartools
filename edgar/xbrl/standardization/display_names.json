@@ -259,5 +259,15 @@
   "TotalInterestIncomeOperating": "Total Interest Income",
   "UnearnedRevenue": "Unearned Revenue",
   "UnrealizedGainsLossesSecurities": "Unrealized Gains/Losses on Securities",
-  "ValuationAllowanceDTA": "Valuation Allowance on Deferred Tax Assets"
+  "ValuationAllowanceDTA": "Valuation Allowance on Deferred Tax Assets",
+  "ResaleAgreementAssets": "Assets Purchased Under Agreements to Resell",
+  "InterestIncomePaidInKind": "Interest Income, Paid in Kind",
+  "InvestmentBankingRevenue": "Investment Banking Revenue",
+  "FuturePolicyBenefits": "Liability for Future Policy Benefits",
+  "PolicyholderFunds": "Policyholder Funds",
+  "RegulatedOperatingRevenue": "Regulated Operating Revenue",
+  "NetRevenueAfterInterestExpense": "Net Revenue (Net of Interest Expense)",
+  "SecuritiesBorrowed": "Securities Borrowed",
+  "TradingGainsLosses": "Trading Gains (Losses)",
+  "UnregulatedOperatingRevenue": "Unregulated Operating Revenue"
 }

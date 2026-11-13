@@ -17,8 +17,10 @@
       "OtherNonOperatingCurrentAssets",
       "OtherOperatingCurrentAssets",
       "PrepaidExpenses",
+      "ResaleAgreementAssets",
       "RestrictedCashCurrent",
       "RetirementRelatedCurrentAssets",
+      "SecuritiesBorrowed",
       "ShortTermInvestments",
       "TradeReceivables"
     ],
@@ -91,12 +93,14 @@
       "DeferredTaxNonCurrentLiabilities",
       "DefinedBenefitPlanObligations",
       "DefiniteLivedOperatingProvisions(DecommissioningEtc)",
+      "FuturePolicyBenefits",
       "LongTermDebt",
       "OngoingOperatingProvisions(WarrantiesEtc)",
       "OperatingLeaseNonCurrentDebtEquivalent",
       "OtherNonOperatingNonCurrentLiabilities",
       "OtherOperatingNonCurrentLiabilities",
       "PensionObligations",
+      "PolicyholderFunds",
       "RegulatedLiabilities",
       "RestructuringProvisions",
       "RetirementRelatedNonCurrentLiabilities"
@@ -119,11 +123,14 @@
       "ProvisionForCreditLosses"
     ],
     "Banking Revenue": [
+      "InterestIncomePaidInKind",
+      "InvestmentBankingRevenue",
       "NetInterestIncome",
       "NetInterestIncomeAfterProvision",
       "NonInterestIncome",
       "OtherNonInterestIncome",
-      "TotalInterestIncomeOperating"
+      "TotalInterestIncomeOperating",
+      "TradingGainsLosses"
     ],
     "Cost of Revenue": [
       "CostOfGoodsAndServicesSold"
@@ -204,14 +211,17 @@
       "HealthCareRevenue",
       "LicensingRevenue",
       "ManagementFeeRevenue",
+      "NetRevenueAfterInterestExpense",
       "OilAndGasRevenue",
       "ProductRevenue",
+      "RegulatedOperatingRevenue",
       "RentalAndLeasingRevenue",
       "Revenue",
       "RoyaltyRevenue",
       "SubscriptionRevenue",
       "TechnologyServicesRevenue",
-      "TenantReimbursementsRevenue"
+      "TenantReimbursementsRevenue",
+      "UnregulatedOperatingRevenue"
     ]
   },
   "CashFlowStatement": {
