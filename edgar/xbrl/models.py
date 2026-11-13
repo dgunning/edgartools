@@ -141,6 +141,12 @@ class ElementCatalog:
         typed_domain_ref: The xbrldt:typedDomainRef of a TYPED dimension. Its
             presence is what makes a dimension typed rather than explicit, so
             None here means "declared without one", not "we never looked"
+        enum_domain: The enum2:domain (or enum 1.0 enum:domain) attribute of an
+            extensible-enumeration element, verbatim, e.g. 'us-gaap:AssetsAbstract';
+            None when the declaration carries none
+        enum_linkrole: The enum2:linkrole (or enum:linkrole) attribute, verbatim
+        enum_head_usable: The enum2:headUsable (or enum:headUsable) attribute,
+            verbatim ('true'/'false'); None when absent
     """
 
     def __init__(self,
@@ -151,7 +157,10 @@ class ElementCatalog:
                  abstract: bool = False,
                  labels: Optional[Dict[str, str]] = None,
                  substitution_group: Optional[str] = None,
-                 typed_domain_ref: Optional[str] = None
+                 typed_domain_ref: Optional[str] = None,
+                 enum_domain: Optional[str] = None,
+                 enum_linkrole: Optional[str] = None,
+                 enum_head_usable: Optional[str] = None
                  ):
         self.name = name
         self.data_type = data_type
@@ -161,6 +170,9 @@ class ElementCatalog:
         self.labels = labels if labels is not None else {}
         self.substitution_group = substitution_group
         self.typed_domain_ref = typed_domain_ref
+        self.enum_domain = enum_domain
+        self.enum_linkrole = enum_linkrole
+        self.enum_head_usable = enum_head_usable
 
     def __str__(self) -> str:
         return self.name

@@ -4,7 +4,7 @@
 
 The element declarations of the FASB US GAAP Financial Reporting Taxonomy
 (`us-gaap`, 2011-2026) and the SEC Reporting Taxonomy (`srt`, 2018-2026): one
-row per `prefix:name`, about 24,400 elements in roughly 310 KB.
+row per `prefix:name`, about 24,400 elements in roughly 315 KB.
 
 | Column | Source attribute |
 |---|---|
@@ -16,6 +16,9 @@ row per `prefix:name`, about 24,400 elements in roughly 310 KB.
 | `abstract` | `xs:element/@abstract == "true"` |
 | `substitution_group` | `xs:element/@substitutionGroup` |
 | `last_year` | the newest taxonomy year that declares the element |
+| `enum_domain` | `xs:element/@enum2:domain` (or enum 1.0 `@enum:domain`), the QName as written; null for non-enumerations |
+| `enum_linkrole` | `xs:element/@enum2:linkrole` (or `@enum:linkrole`) |
+| `enum_head_usable` | `xs:element/@enum2:headUsable` (or `@enum:headUsable`), the string as written |
 
 Values are copied unchanged from the published schemas. When several years
 declare an element, the newest year's declaration is kept, so deprecated
@@ -25,7 +28,8 @@ they were published in.
 A filing imports these taxonomies instead of declaring their elements, so the
 element catalog parsed from a filing has no balance for a standard concept.
 `edgar.xbrl.parsers.concepts.get_balance_type` reads this table when the filing
-declares none (GitHub issue #1728).
+declares none (GitHub issue #1728), and `XBRL.element_metadata()` reads the
+enumeration columns for the 605 extensible-enumeration elements (GitHub issue #1255).
 
 Rebuild with `scripts/build_taxonomy_elements.py`, which downloads the schemas
 from https://xbrl.fasb.org/.

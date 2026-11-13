@@ -21,6 +21,7 @@ from typing import TYPE_CHECKING, Callable, Optional, Tuple
 
 from edgar.core import log
 from edgar.sgml.metalinks import AuthRef, MetaLinks
+from edgar.xbrl.enumerations import EnumerationDomain, enumeration_domain
 from edgar.xbrl.parsers.concepts import get_standard_declaration
 
 if TYPE_CHECKING:
@@ -29,7 +30,7 @@ if TYPE_CHECKING:
 METALINKS_FILE = 'MetaLinks.json'
 _STANDARD_NAMESPACES = ('us-gaap', 'srt', 'dei', 'ecd', 'ifrs-full', 'country', 'stpr', 'currency', 'exch', 'naics', 'sic')
 
-__all__ = ['ElementMetadata', 'METALINKS_FILE']
+__all__ = ['ElementMetadata', 'EnumerationDomain', 'METALINKS_FILE']
 
 
 @dataclass(frozen=True)
@@ -57,6 +58,9 @@ class ElementMetadata:
         abstract: The declared abstract flag, or None when no declaration was read.
         documentation: The FASB (or filer) definition text.
         references: The ASC references, as ``edgar.sgml.AuthRef`` records.
+        enumeration: For an extensible-enumeration concept, its declared
+            domain, linkrole, headUsable flag and whether it is a set, as an
+            ``EnumerationDomain``; None for any other concept (GH #1255).
     """
     concept: str
     prefix: str
@@ -68,6 +72,7 @@ class ElementMetadata:
     abstract: Optional[bool]
     documentation: Optional[str]
     references: Optional[Tuple[AuthRef, ...]]
+    enumeration: Optional[EnumerationDomain] = None
 
     def __repr__(self) -> str:
         refs = 'unavailable' if self.references is None else len(self.references)
@@ -179,6 +184,18 @@ def build_element_metadata(concept: str,
     else:
         abstract = None
 
+    # The filing's declaration answers for its own concepts, the bundled table
+    # for us-gaap and srt; the two are not mixed field by field.
+    if declared is not None:
+        enumeration = enumeration_domain(declared.data_type, getattr(declared, 'enum_domain', None),
+                                         getattr(declared, 'enum_linkrole', None),
+                                         getattr(declared, 'enum_head_usable', None))
+    elif standard is not None:
+        enumeration = enumeration_domain(standard['type'], standard.get('enum_domain'),
+                                         standard.get('enum_linkrole'), standard.get('enum_head_usable'))
+    else:
+        enumeration = None
+
     return ElementMetadata(
         concept=concept,
         prefix=prefix,
@@ -199,4 +216,5 @@ def build_element_metadata(concept: str,
         documentation=(tag.documentation or None) if tag else None,
         references=(tuple(metalinks.get_auth_refs_for_tag(tag)) if tag
                     else (() if metalinks is not None else None)),
+        enumeration=enumeration,
     )

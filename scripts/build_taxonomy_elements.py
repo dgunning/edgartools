@@ -13,7 +13,10 @@ Source: the FASB element schemas, one per taxonomy and year, e.g.
 (srt starts in 2018; before that its elements were part of us-gaap).
 
 Columns: prefix, name, type, balance, period_type, abstract,
-substitution_group (attribute values copied verbatim from the schema), and
+substitution_group, and for extensible-enumeration elements enum_domain,
+enum_linkrole and enum_head_usable (the enum2:domain, enum2:linkrole and
+enum2:headUsable attributes, or their enum 1.0 equivalents, read by namespace
+URI; GH #1255) -- attribute values copied verbatim from the schema -- and
 last_year, the newest taxonomy year that declares the element. Rows are keyed
 by prefix:name; when several years declare an element, the newest year wins.
 
@@ -42,8 +45,11 @@ XBRLI = "{http://www.xbrl.org/2003/instance}"
 SRT_FIRST_YEAR = 2018
 # Through 2021 the schemas carry the release date in the file name.
 DATED_NAMES_UNTIL = 2021
+# Extensible enumerations: 2.0 (enum2:) and 1.0 (enum:), matched by namespace URI.
+ENUM_NAMESPACES = ("{http://xbrl.org/2020/extensible-enumerations-2.0}",
+                   "{http://xbrl.org/2014/extensible-enumerations}")
 COLUMNS = ["prefix", "name", "type", "balance", "period_type", "abstract",
-           "substitution_group", "last_year"]
+           "substitution_group", "last_year", "enum_domain", "enum_linkrole", "enum_head_usable"]
 
 
 def schema_url(prefix: str, year: int) -> str:
@@ -65,6 +71,15 @@ def fetch(url: str, cache_dir: Path) -> bytes:
     return content
 
 
+def enum_attribute(attrs, local_name: str):
+    """An extensible-enumeration attribute, from whichever enum namespace carries it."""
+    for namespace in ENUM_NAMESPACES:
+        value = attrs.get(f"{namespace}{local_name}")
+        if value is not None:
+            return value
+    return None
+
+
 def schema_rows(prefix: str, year: int, content: bytes):
     root = etree.fromstring(content)
     for element in root.iter(XS_ELEMENT):
@@ -74,7 +89,9 @@ def schema_rows(prefix: str, year: int, content: bytes):
             continue
         yield (prefix, name, attrs.get("type"), attrs.get(f"{XBRLI}balance"),
                attrs.get(f"{XBRLI}periodType"), attrs.get("abstract") == "true",
-               attrs.get("substitutionGroup"), year)
+               attrs.get("substitutionGroup"), year,
+               enum_attribute(attrs, "domain"), enum_attribute(attrs, "linkrole"),
+               enum_attribute(attrs, "headUsable"))
 
 
 def build(years, cache_dir: Path) -> pd.DataFrame:
@@ -91,7 +108,8 @@ def build(years, cache_dir: Path) -> pd.DataFrame:
             .drop_duplicates(["prefix", "name"], keep="last")
             .sort_values(["prefix", "name"])
             .reset_index(drop=True))
-    for column in ("prefix", "type", "balance", "period_type", "substitution_group"):
+    for column in ("prefix", "type", "balance", "period_type", "substitution_group",
+                   "enum_domain", "enum_linkrole", "enum_head_usable"):
         df[column] = df[column].astype("category")
     df["last_year"] = df["last_year"].astype("int16")
     return df
@@ -119,6 +137,7 @@ def main() -> None:
     print(f"elements      : {len(df):,}")
     print(f"with balance  : {int(df['balance'].notna().sum()):,}")
     print(f"abstract      : {int(df['abstract'].sum()):,}")
+    print(f"enumerations  : {int(df['enum_domain'].notna().sum()):,}")
     print(f"by prefix     : {df['prefix'].value_counts().to_dict()}")
     print(f"size          : {Path(args.output).stat().st_size / 1024:.0f} KB")
     print(f"wrote         : {args.output}")

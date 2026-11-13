@@ -36,6 +36,7 @@ Example usage:
 
 from edgar.xbrl.currency import CurrencyConverter, ExchangeRate
 from edgar.xbrl.element_metadata import ElementMetadata
+from edgar.xbrl.enumerations import EnumerationDomain, EnumerationMember, parse_enumeration_value
 from edgar.xbrl.facts import FactQuery, FactsView
 from edgar.xbrl.presentation import StatementView, normalize_view
 from edgar.xbrl.rendering import RenderedStatement
@@ -58,6 +59,9 @@ __all__ = [
     'XBRL',
     'XBRLFilingWithNoXbrlData',
     'ElementMetadata',
+    'EnumerationDomain',
+    'EnumerationMember',
+    'parse_enumeration_value',
     'XBRLS',
     'Statements',
     'Statement',

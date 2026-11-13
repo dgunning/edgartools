@@ -167,7 +167,8 @@ def _standard_elements():
     ref = resources.files('edgar.xbrl.data').joinpath(TAXONOMY_ELEMENTS_FILE)
     with resources.as_file(ref) as path:
         return pd.read_parquet(path, columns=['prefix', 'name', 'type', 'balance', 'period_type',
-                                              'abstract', 'substitution_group'])
+                                              'abstract', 'substitution_group',
+                                              'enum_domain', 'enum_linkrole', 'enum_head_usable'])
 
 
 @lru_cache(maxsize=1)
@@ -240,9 +241,11 @@ def get_standard_declaration(concept: str) -> Optional[Dict[str, Any]]:
     """
     The standard taxonomy's declaration of a us-gaap or srt concept.
 
-    A dict with ``type``, ``balance``, ``period_type``, ``abstract`` and
-    ``substitution_group`` (None where FASB declares no value), or None for a
-    concept the bundled table does not declare (company extensions, dei).
+    A dict with ``type``, ``balance``, ``period_type``, ``abstract``,
+    ``substitution_group`` and, for an extensible enumeration, ``enum_domain``,
+    ``enum_linkrole`` and ``enum_head_usable`` (the enum2 attributes verbatim;
+    None where FASB declares no value), or None for a concept the bundled table
+    does not declare (company extensions, dei).
 
     Example:
         >>> get_standard_declaration('us-gaap:Assets')['period_type']

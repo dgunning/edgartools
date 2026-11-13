@@ -49,6 +49,7 @@ from edgar.xbrl.element_metadata import (
     directory_metalinks_source,
     filing_metalinks_source,
 )
+from edgar.xbrl.enumerations import EnumerationMember, parse_enumeration_value
 from edgar.xbrl.parsers import XBRLParser
 from edgar.xbrl.parsers.concepts import resolve_balance
 from edgar.xbrl.periods import get_period_views
@@ -951,6 +952,34 @@ class XBRL:
         element_id = concept_id(concept)
         metalinks = self._metalinks_source.get() if self._metalinks_source is not None else None
         return build_element_metadata(element_id, self.element_catalog.get(element_id), metalinks)
+
+    def enumeration_members(self, value: Optional[str]) -> Tuple[EnumerationMember, ...]:
+        """
+        The members an extensible-enumeration fact value names.
+
+        The value is one or more whitespace-separated expanded names
+        ('namespace#LocalName'). Each member carries its namespace URI, local
+        name and concept id, the id built from the prefix this filing binds to
+        the namespace (None when the filing binds none). The members are not
+        checked against the concept's domain (see
+        ``element_metadata(concept).enumeration``).
+
+        Args:
+            value: An enumeration fact's value. None or '' (a nil fact) gives ().
+
+        Returns:
+            A tuple of ``EnumerationMember``, in the order the value lists them.
+
+        Raises:
+            ValidationError: a token is not a 'namespace#LocalName' expanded name.
+
+        Example:
+            >>> fact = xbrl.facts.query().by_concept(
+            ...     "us-gaap:HedgedAssetStatementOfFinancialPositionExtensibleEnumeration").to_dataframe().iloc[0]
+            >>> [m.concept for m in xbrl.enumeration_members(fact['value'])]
+            ['us-gaap_MarketableSecuritiesCurrent', 'us-gaap_MarketableSecuritiesNoncurrent']
+        """
+        return parse_enumeration_value(value, self.parser.namespace_prefixes)
 
     def calculation_linkbase(self, include_abstract: bool = False) -> pd.DataFrame:
         """Return the filing's calculation linkbase as a DataFrame of arcs.

@@ -21,6 +21,17 @@ class BaseParser:
         """Initialize base parser with common data structures."""
         # Common namespaces and utilities available to all parsers
         self.namespaces = NAMESPACES
+        # Namespace URI -> prefix, as the filing's own documents bind them
+        # (instance and schema roots). The coordinator shares one dict across
+        # parsers; it resolves the QNames in enumeration fact values (GH #1255).
+        self.namespace_prefixes: Dict[str, str] = {}
+
+    def _record_namespace_bindings(self, root) -> None:
+        """Keep the prefix bindings a document root declares; the first binding of a URI wins."""
+        nsmap = getattr(root, 'nsmap', None) or {}
+        for prefix, uri in nsmap.items():
+            if prefix and uri and uri not in self.namespace_prefixes:
+                self.namespace_prefixes[uri] = prefix
 
     def _safe_parse_xml(self, content: str) -> ET.Element:
         """
