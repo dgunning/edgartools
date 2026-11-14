@@ -1,0 +1,1 @@
+**Table footers were duplicated or dropped.** A `<tfoot>` table without `<tbody>` read its total rows twice (once as body, once as footer); one with `<tbody>` lost them from markdown, `text()` and `to_dataframe()`, which never read the footer. Footer rows now appear exactly once, after the body, in every output. (bead edgartools-niru)

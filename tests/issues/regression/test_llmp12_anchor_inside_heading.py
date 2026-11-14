@@ -82,10 +82,8 @@ def test_section_markdown_matches_text_boundaries(anchor_style):
 
     md = doc.sections["part_i_item_2"].markdown()
 
-    # The boundary is what is under test. The mid-word anchor itself renders as
-    # "PROPERT IES" in markdown (the renderer pads inline <a> elements), which is
-    # a renderer spacing defect, not a boundary one, so only the label is checked.
-    assert md.startswith("# ITEM 2. PROPERT"), f"markdown lost Item 2's heading: {md[:120]!r}"
+    # The mid-word anchor must not split the word (edgartools-8n9an).
+    assert md.startswith("# ITEM 2. PROPERTIES\n"), f"markdown lost Item 2's heading: {md[:120]!r}"
     assert "Body of item 2, sentence two" in md
     assert "ITEM 3" not in md, f"markdown leaked Item 3's heading: {md[-160:]!r}"
     assert "Body of item 3" not in md

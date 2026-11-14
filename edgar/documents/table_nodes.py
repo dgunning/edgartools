@@ -936,7 +936,7 @@ class TableNode(Node, CacheableMixin):
         # Build matrix to handle colspan/rowspan WITHOUT merging currencies
         # Old parser keeps $ as separate cells to maintain alignment
         matrix = TableMatrix()
-        clean_matrix = process_table_matrix(matrix, self.headers, self.rows)
+        clean_matrix = process_table_matrix(matrix, self.headers, [*self.rows, *self.footer])
 
         # Extract headers with proper alignment
         if self.headers:

@@ -646,8 +646,35 @@ class DocumentBuilder:
 
         return style
 
+    def _get_heading_text(self, element: HtmlElement) -> str:
+        """Get a heading's text as a browser lays it out.
+
+        Inline runs are concatenated as written: the preprocessor collapses the
+        whitespace at a tag boundary to one space rather than removing it, so a gap
+        that is not in the source is not a word gap. Stripping each run and
+        space-joining them read `PROPERT<a name="2">IES</a>` (a 2010 Bowne 10-K)
+        as 'PROPERT IES' and fed that to section detection (edgartools-8n9an).
+        Block children and <br> still break the line, so they keep a space.
+        """
+        parts = [element.text or '']
+        for child in element:
+            tag = child.tag.lower() if isinstance(child.tag, str) else ''
+            if tag and tag not in self.SKIP_ELEMENTS:
+                child_text = child.text_content()
+                if tag == 'br' or tag in self.BLOCK_ELEMENTS:
+                    child_text = f' {child_text} '
+                parts.append(child_text)
+            # Read the tail even for skipped children (gh-898).
+            parts.append(child.tail or '')
+        text = ''.join(parts)
+        if not self.config.preserve_whitespace and not self._is_preformatted(element):
+            text = _ASCII_WHITESPACE_RUN.sub(' ', text)
+        return text.strip()
+
     def _get_element_text(self, element: HtmlElement) -> str:
         """Get text content from element."""
+        if element.tag.lower() in ('h1', 'h2', 'h3', 'h4', 'h5', 'h6'):
+            return self._get_heading_text(element)
         inline = element.tag.lower() in self.INLINE_ELEMENTS
         text_parts = []
         block_breaks: set = set()  # indexes of parts that separate block children
@@ -660,34 +687,28 @@ class DocumentBuilder:
             else:
                 text_parts.append(element.text.strip())
 
-        # For simple elements, get all text content
-        if inline or element.tag.lower() in ['h1', 'h2', 'h3', 'h4', 'h5', 'h6']:
+        # Inline elements: get all text, including from child elements
+        if inline:
             # Get all text including from child elements
             for child in element:
                 if child.tag.lower() not in self.SKIP_ELEMENTS:
                     child_text = child.text_content()
                     if child_text:
-                        # For inline elements, preserve whitespace in child content too
-                        if inline:
-                            text_parts.append(child_text)
-                        else:
-                            text_parts.append(child_text.strip())
+                        # Preserve whitespace in child content too
+                        text_parts.append(child_text)
                 # Text following a child's closing tag lives on child.tail (lxml),
                 # not on the parent. Without capturing it, the unit word and the
                 # rest of the sentence after an inline fact (e.g. ix:nonfraction)
                 # are silently dropped. Read it even for skipped children, since
                 # their trailing text is still part of the document. (gh-898)
                 if child.tail:
-                    if inline:
-                        if child.tail.isspace() and child.tag.lower() not in self.INLINE_ELEMENTS:
-                            # The line break between two block children of an inline
-                            # element (<font><p>..</p>\n<p>..</p></font>) is the only
-                            # thing separating their paragraphs; it is not a run to
-                            # collapse (Merck's 2005 CORRESP letter lost all 67 lines).
-                            block_breaks.add(len(text_parts))
-                        text_parts.append(child.tail)
-                    elif child.tail.strip():
-                        text_parts.append(child.tail.strip())
+                    if child.tail.isspace() and child.tag.lower() not in self.INLINE_ELEMENTS:
+                        # The line break between two block children of an inline
+                        # element (<font><p>..</p>\n<p>..</p></font>) is the only
+                        # thing separating their paragraphs; it is not a run to
+                        # collapse (Merck's 2005 CORRESP letter lost all 67 lines).
+                        block_breaks.add(len(text_parts))
+                    text_parts.append(child.tail)
 
         # Collapse inner whitespace runs as a browser does; edges keep one space (gh-1370)
         if not self.config.preserve_whitespace and not self._is_preformatted(element):
