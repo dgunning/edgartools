@@ -3,6 +3,11 @@ from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
+from edgar._liability_derivation import (
+    LiabilityDerivation,
+    LiabilityDerivationError,
+    derive_from_balance_sheet,
+)
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl import XBRL, XBRLS, Statement
@@ -193,8 +198,9 @@ def _order_period_columns(rendered, df_period_columns: List[str]) -> List[str]:
 
 
 class Financials:
-    def __init__(self, xb: Optional[XBRL]):
+    def __init__(self, xb: Optional[XBRL], *, accession: Optional[str] = None):
         self.xb: XBRL = xb
+        self._accession = accession
         # Set to a dict only for the duration of one get_financial_metrics() call;
         # None the rest of the time. See _render_statement_frame().
         self._statement_frame_memo: Optional[Dict[str, Any]] = None
@@ -221,7 +227,7 @@ class Financials:
         xb = XBRL.from_filing(filing)
         if xb is None:
             return None
-        return Financials(xb)
+        return Financials(xb, accession=getattr(filing, "accession_no", None))
 
     def balance_sheet(self, *, view: ViewType = None):
         """
@@ -915,6 +921,30 @@ class Financials:
             r'^Assets$',
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
+
+    def derive_total_liabilities(self, period_offset: int = 0) -> LiabilityDerivation:
+        """
+        Reconstruct a missing US GAAP liabilities total from the filed balance sheet.
+        Sum independent liability components and reconcile against assets less
+        consolidated equity and any separately presented temporary equity.
+        Raise LiabilityDerivationError with a reason if the filing already
+        reports the total or the two calculations cannot be reconciled.
+        """
+        if type(period_offset) is not int or period_offset < 0:
+            raise LiabilityDerivationError("invalid-period-offset", str(period_offset))
+        rendered, frame = self._render_statement_frame("balance")
+        if frame is None:
+            raise LiabilityDerivationError("missing-balance-sheet", "No filed balance sheet")
+        _, period = _select_period_column(rendered, frame, period_offset)
+        if not period or period["period_type"] != "instant":
+            raise LiabilityDerivationError("missing-period", str(period_offset))
+        end = period["end_date"]
+        if self.get_total_liabilities(period_offset) is not None:
+            raise LiabilityDerivationError("already-reported", end)
+        _, role, _ = self.xb.find_statement("BalanceSheet")
+        if not role:
+            raise LiabilityDerivationError("missing-balance-sheet", "No balance-sheet role")
+        return derive_from_balance_sheet(self.xb, role, end, self._accession)
 
     def get_total_liabilities(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """

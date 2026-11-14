@@ -54,6 +54,27 @@ total_assets = financials.get_total_assets()
 
 All methods accept `period_offset` to access prior periods (0=current, 1=previous).
 
+### Reconstruct a missing total liabilities figure
+
+For a US GAAP balance sheet with no standalone total liabilities, call
+`derive_total_liabilities()` explicitly. The result gives the amount, reporting
+date, currency, filing accession (when known), and the inputs to both
+calculations. It requires the filed liability components to reconcile against
+assets less consolidated and separately presented temporary equity.
+
+```python
+from edgar.financials import LiabilityDerivationError
+
+if financials.get_total_liabilities() is None:
+    try:
+        result = financials.derive_total_liabilities()
+        print(result.value, result.currency, result.period)
+    except LiabilityDerivationError as error:
+        print(error.reason)
+```
+
+The existing getter and financial ratios continue to use filed totals.
+
 ---
 
 ## Available Statements
