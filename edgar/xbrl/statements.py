@@ -1837,6 +1837,14 @@ class Statement:
         from edgar.xbrl.rendering import PRESENTATION_SIGN_STATEMENTS
         if statement_type in PRESENTATION_SIGN_STATEMENTS:
             if 'preferred_sign' in result.columns:
+                # GH #1960: the column is object dtype when every row lacks a
+                # sign (KEYS FY2020's land-sale details have no facts at all).
+                # Multiplying by an empty object slice gave an empty object
+                # Series, and pandas 3 refuses to assign that into a float64
+                # column: "Invalid value '[]' for dtype 'float64'". Read the
+                # signs as numbers, and assign only when some row has one.
+                signs = pd.to_numeric(result['preferred_sign'], errors='coerce')
+                mask = signs.notna() & (signs != 0)
                 for col in period_cols:
                     if col not in result.columns:
                         continue
@@ -1847,9 +1855,8 @@ class Statement:
                         # FIX (Issue #599): Convert entire column to numeric first to prevent
                         # pandas FutureWarning about assigning incompatible dtype to object column
                         result[col] = numeric_col
-                        # Apply preferred_sign where it's not None and not 0
-                        mask = result['preferred_sign'].notna() & (result['preferred_sign'] != 0)
-                        result.loc[mask, col] = numeric_col[mask] * result.loc[mask, 'preferred_sign']
+                        if mask.any():
+                            result.loc[mask, col] = numeric_col[mask] * signs[mask]
 
         return result
 
