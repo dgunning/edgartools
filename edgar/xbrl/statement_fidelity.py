@@ -693,65 +693,104 @@ def _page_rows(ctx, cells: List[vv.ComparisonResult]) -> List[dict]:
     """The page's rows with their identity, or the reason they have none (emitted)."""
     rows = ctx.cr.rows
     contexts = vv._row_contexts(rows, ctx.names, ctx.check.index)
-    matched_rows = {r.row_index for r in cells if r.status == vv.MATCHED and r.row_index is not None}
-    reasons_by_row: Dict[int, List[str]] = defaultdict(list)
-    for r in cells:
-        if r.row_index is not None and r.reason:
-            reasons_by_row[r.row_index].append(f"{r.status}: {r.reason}")
-    occurrence_by_row = {r.row_index: r.row_occurrence for r in cells
-                         if r.row_index is not None and r.row_occurrence is not None}
+    evidence = _row_evidence(cells)
     header_id = None
     seen: Counter = Counter()
     seen_data: Counter = Counter()
     page_rows = []
     for i, crow in enumerate(rows):
-        if crow.is_header and crow.is_dimensional:
-            header_id = crow.concept_id
         if crow.is_header:
+            if crow.is_dimensional:
+                header_id = crow.concept_id
             continue
-        dims, reason = contexts[i]
-        concept = vv._normalize_concept_id(crow.concept_id)
-        base = dict(i=i, concept=concept, label=crow.label)
         if vv._is_data_row(crow):
-            if ctx.coregistrant and header_id is None:
-                _emit_row(ctx, '', 'coregistrant_parent_row', base, dims, reason=(
-                    f"co-registrant role ({ctx.coregistrant}): the page's plain rows show the parent's facts"))
-                continue
-            # Which row of the concept in this context it is, counted over every data row (the facts
-            # check's own count), so a row that is not aligned does not renumber the rows after it.
-            occurrence = occurrence_by_row.get(i)
-            if occurrence is None:
-                occurrence = seen_data[(contexts[i], crow.concept_id)]
-            seen_data[(contexts[i], crow.concept_id)] += 1
-            if ctx.coregistrant and header_id and header_id.partition('=')[2] == ctx.coregistrant \
-                    and dims is not None and len(dims) == 1:
-                dims = frozenset()  # the library shows the co-registrant's facts in plain rows
-            if dims is None or i not in matched_rows:
-                why = reason if dims is None else (
-                    "the facts check matched none of the row's cells, so its context is not established"
-                    + (f" ({'; '.join(sorted(set(reasons_by_row[i]))[:2])})" if reasons_by_row[i] else ''))
-                _emit_row(ctx, '', 'row_not_comparable', base, dims, reason=why, occurrence=occurrence)
-                if dims is not None:
-                    # The library row it would align with is the page's, not an extra one.
-                    ctx.unaligned_keys.add(('D', concept, dims, occurrence))
-                continue
-            base.update(dims=dims, key=('D', concept, dims, occurrence), kind='D')
-            page_rows.append(base)
-            continue
+            row = _page_data_row(ctx, i, crow, contexts[i], header_id, evidence, seen_data)
         elif crow.is_abstract and not crow.is_dimensional:
-            if header_id is not None:
-                _emit_row(ctx, '', 'row_not_comparable', base, dims, reason=(
-                    "a heading row under a member header: the page repeats headings under every "
-                    "header and the library shows each once"))
-                continue
-            kind, dims = 'A', frozenset()
+            row = _page_heading_row(ctx, i, crow, contexts[i], header_id, seen)
         else:
-            continue
-        key = (kind, concept, dims)
-        base.update(dims=dims, key=key + (seen[key],), kind=kind)
-        seen[key] += 1
-        page_rows.append(base)
+            row = None
+        if row is not None:
+            page_rows.append(row)
     return page_rows
+
+
+@dataclass
+class _RowEvidence:
+    """What the facts check found per page row: the rows with a matched cell, its cells' reasons,
+    and the occurrence it gave each row."""
+    matched: set
+    reasons: Dict[int, List[str]]
+    occurrence: Dict[int, int]
+
+
+def _row_evidence(cells: List[vv.ComparisonResult]) -> _RowEvidence:
+    """The facts check's per-row evidence, read from its cells."""
+    matched = {r.row_index for r in cells if r.status == vv.MATCHED and r.row_index is not None}
+    reasons: Dict[int, List[str]] = defaultdict(list)
+    for r in cells:
+        if r.row_index is not None and r.reason:
+            reasons[r.row_index].append(f"{r.status}: {r.reason}")
+    occurrence = {r.row_index: r.row_occurrence for r in cells
+                  if r.row_index is not None and r.row_occurrence is not None}
+    return _RowEvidence(matched=matched, reasons=reasons, occurrence=occurrence)
+
+
+def _page_data_row(ctx, i: int, crow, context, header_id, evidence: _RowEvidence, seen_data: Counter):
+    """A data row with its identity, or None when it has none (the reason is emitted)."""
+    dims, reason = context
+    concept = vv._normalize_concept_id(crow.concept_id)
+    base = dict(i=i, concept=concept, label=crow.label)
+    if ctx.coregistrant and header_id is None:
+        _emit_row(ctx, '', 'coregistrant_parent_row', base, dims, reason=(
+            f"co-registrant role ({ctx.coregistrant}): the page's plain rows show the parent's facts"))
+        return None
+    # Which row of the concept in this context it is, counted over every data row (the facts
+    # check's own count), so a row that is not aligned does not renumber the rows after it.
+    occurrence = evidence.occurrence.get(i)
+    if occurrence is None:
+        occurrence = seen_data[(context, crow.concept_id)]
+    seen_data[(context, crow.concept_id)] += 1
+    if _under_coregistrant_member(ctx, header_id, dims):
+        dims = frozenset()  # the library shows the co-registrant's facts in plain rows
+    if dims is None or i not in evidence.matched:
+        why = reason if dims is None else _context_not_established(evidence.reasons[i])
+        _emit_row(ctx, '', 'row_not_comparable', base, dims, reason=why, occurrence=occurrence)
+        if dims is not None:
+            # The library row it would align with is the page's, not an extra one.
+            ctx.unaligned_keys.add(('D', concept, dims, occurrence))
+        return None
+    base.update(dims=dims, key=('D', concept, dims, occurrence), kind='D')
+    return base
+
+
+def _under_coregistrant_member(ctx, header_id, dims) -> bool:
+    """Whether a one-axis row sits under the co-registrant's own member header."""
+    return bool(ctx.coregistrant and header_id and header_id.partition('=')[2] == ctx.coregistrant
+                and dims is not None and len(dims) == 1)
+
+
+def _context_not_established(cell_reasons: List[str]) -> str:
+    """Why a row whose cells the facts check matched none of is not comparable."""
+    why = "the facts check matched none of the row's cells, so its context is not established"
+    if cell_reasons:
+        why += f" ({'; '.join(sorted(set(cell_reasons))[:2])})"
+    return why
+
+
+def _page_heading_row(ctx, i: int, crow, context, header_id, seen: Counter):
+    """A heading row with its identity, or None under a member header (the reason is emitted)."""
+    concept = vv._normalize_concept_id(crow.concept_id)
+    base = dict(i=i, concept=concept, label=crow.label)
+    if header_id is not None:
+        _emit_row(ctx, '', 'row_not_comparable', base, context[0], reason=(
+            "a heading row under a member header: the page repeats headings under every "
+            "header and the library shows each once"))
+        return None
+    kind, dims = 'A', frozenset()
+    key = (kind, concept, dims)
+    base.update(dims=dims, key=key + (seen[key],), kind=kind)
+    seen[key] += 1
+    return base
 
 
 def _emit_row(ctx, surface: str, kind: str, row: dict, dims, reason: Optional[str] = None,
@@ -948,53 +987,14 @@ def _compare_cells(ctx, surface_name, surface, aligned, cells, role_frame, seen_
             fact_value=r.xbrl_fact_value, fact=r, **kw))
 
     def lookup(key: str):
-        """(surface, column, default view, None) for the period as a user gets it, or
-        (None, reason, None, raised) with raised True when the library's request raised.
-
-        The default view is read first; the period is requested alone only when
-        the default view does not show it.
-        """
-        if surface_name == 'rendered' and key in surface.keys:
-            return surface, key, True, None
-        expected = _dataframe_column(ctx.xbrl, key) if surface_name == 'dataframe' else None
-        if expected is not None and expected in surface.columns:
-            named = _named_alone(ctx, key)
-            if named is not None and named != expected:
-                return None, (f"to_dataframe(period_filter={key}) names its column {named!r}, not {expected!r} "
-                              "as the check expects"), None, False
-            return surface, expected, True, None
-        call = 'render' if surface_name == 'rendered' else 'to_dataframe'
-        single = _requested(ctx, surface_name, key)
-        if single.error:
-            if single.library_raised:
-                return None, f"{call}(period_filter={key}) raised {single.error}", None, True
-            return None, f"{call}(period_filter={key}): the check could not read it: {single.error}", None, False
-        if surface_name == 'rendered':
-            return (single, key, False, None) if key in single.keys else (
-                None, f"render(period_filter={key}) shows periods {single.keys}", None, False)
-        if len(single.columns) != 1:
-            return None, f"to_dataframe(period_filter={key}) gives columns {single.columns}", None, False
-        column = single.columns[0]
-        if expected is not None and column != expected:
-            return None, (f"to_dataframe(period_filter={key}) names its column {column!r}, not {expected!r} "
-                          "as the check expects"), None, False
-        return (surface, column, True, None) if column in surface.columns else (single, column, False, None)
+        return _lookup_period(ctx, surface_name, surface, key)
 
     for r in cells:
-        if r.row_index is None:
-            emit('cell_not_comparable', r, reason="the cell is in no row the facts check read")
+        why = _cell_not_comparable(r, aligned)
+        if why is not None:
+            emit('cell_not_comparable', r, reason=why)
             continue
-        if r.status != vv.MATCHED:
-            emit('cell_not_comparable', r, reason=f"facts check: {r.status}" + (f": {r.reason}" if r.reason else ''))
-            continue
-        library_row = aligned.get(r.row_index)
-        if library_row is None:
-            emit('cell_not_comparable', r, reason="the cell's row is not aligned")
-            continue
-        if r.column_period_key is None:
-            emit('cell_not_comparable', r, reason="the column's own period is not known: several durations "
-                                                  "in the filing render with its heading")
-            continue
+        library_row = aligned[r.row_index]
         # The page column's own period, as a user requesting it sees it.
         period_key = r.column_period_key
         source, column, default, raised = lookup(period_key)
@@ -1011,6 +1011,75 @@ def _compare_cells(ctx, surface_name, surface, aligned, cells, role_frame, seen_
                       seen_values)
         if kind != 'cell_matched' and r.xbrl_period_key and r.xbrl_period_key != period_key:
             _beside_fact_period(emit, lookup, r, library_row['key'])
+
+
+def _cell_not_comparable(r: vv.ComparisonResult, aligned) -> Optional[str]:
+    """Why a page cell cannot be compared with the library, or None when it can."""
+    if r.row_index is None:
+        return "the cell is in no row the facts check read"
+    if r.status != vv.MATCHED:
+        return f"facts check: {r.status}" + (f": {r.reason}" if r.reason else '')
+    if aligned.get(r.row_index) is None:
+        return "the cell's row is not aligned"
+    if r.column_period_key is None:
+        return "the column's own period is not known: several durations in the filing render with its heading"
+    return None
+
+
+def _lookup_period(ctx, surface_name: str, surface, key: str):
+    """(surface, column, default view, None) for the period as a user gets it, or
+    (None, reason, None, raised) with raised True when the library's request raised.
+
+    The default view is read first; the period is requested alone only when
+    the default view does not show it.
+    """
+    if surface_name == 'rendered':
+        return _lookup_rendered(ctx, surface, key)
+    return _lookup_dataframe(ctx, surface, key)
+
+
+def _lookup_rendered(ctx, surface, key: str):
+    """``_lookup_period`` for the rendered surface: the default view, else ``render(period_filter=key)``."""
+    if key in surface.keys:
+        return surface, key, True, None
+    single = _requested(ctx, 'rendered', key)
+    if single.error:
+        return _request_failed('render', key, single)
+    return (single, key, False, None) if key in single.keys else (
+        None, f"render(period_filter={key}) shows periods {single.keys}", None, False)
+
+
+def _lookup_dataframe(ctx, surface, key: str):
+    """``_lookup_period`` for the DataFrame surface: the default view's column the check expects for the
+    period, else ``to_dataframe(period_filter=key)``'s one column."""
+    expected = _dataframe_column(ctx.xbrl, key)
+    if expected is not None and expected in surface.columns:
+        named = _named_alone(ctx, key)
+        if named is not None and named != expected:
+            return _misnamed_column(key, named, expected)
+        return surface, expected, True, None
+    single = _requested(ctx, 'dataframe', key)
+    if single.error:
+        return _request_failed('to_dataframe', key, single)
+    if len(single.columns) != 1:
+        return None, f"to_dataframe(period_filter={key}) gives columns {single.columns}", None, False
+    column = single.columns[0]
+    if expected is not None and column != expected:
+        return _misnamed_column(key, column, expected)
+    return (surface, column, True, None) if column in surface.columns else (single, column, False, None)
+
+
+def _request_failed(call: str, key: str, single: _Surface):
+    """The lookup outcome of a period request that failed: raised by the library, or unreadable by the check."""
+    if single.library_raised:
+        return None, f"{call}(period_filter={key}) raised {single.error}", None, True
+    return None, f"{call}(period_filter={key}): the check could not read it: {single.error}", None, False
+
+
+def _misnamed_column(key: str, column: str, expected: str):
+    """The lookup outcome of a period column named other than the check expects."""
+    return None, (f"to_dataframe(period_filter={key}) names its column {column!r}, not {expected!r} "
+                  "as the check expects"), None, False
 
 
 def _dataframe_column(xbrl, period_key: str) -> Optional[str]:
@@ -1125,38 +1194,55 @@ def _judge(ctx, emit, surface_name, r, library_row, column, default, period_key,
              **common)
         return 'unit_column_not_shown'
     if surface_name == 'dataframe' and default and role_by_key:
-        # Compared only where the role's DataFrame has the same row and period column.
-        role_row = role_by_key.get(library_row['key'])
-        if role_row is not None and column in role_row['values'] and _differs(raw, role_row['values'][column]):
-            role_value = role_row['values'][column]
-            emit('access_path_disagrees', r, reason=f"statements[role] shows {role_value!r}", **common)
+        _check_access_path(emit, r, role_by_key.get(library_row['key']), column, raw, common)
     if value is None:
         emit('value_not_shown', r, **common)
         return 'value_not_shown'
-    page_sign, library_sign = _sign(r.viewer_value), _sign(value)
     if not _same_magnitude(value, r.xbrl_fact_value):
-        if (r.note or '').startswith(_LESS_PRECISE_NOTE) and library_sign == page_sign \
-                and _other_duplicate(ctx, r, value):
-            kind = 'less_precise_duplicate'
-            emit(kind, r, reason=r.note, **common)
-        else:
-            kind = 'value_differs'
-            emit(kind, r, reason=library_unit and library_unit != r.xbrl_unit and
-                 f"page unit {r.xbrl_unit}, library row unit {library_unit} (same measure)" or None, **common)
-        return kind
-    if library_sign == '-0':
-        kind = 'negative_zero'
-    elif library_sign != page_sign:
-        kind = 'sign_differs'
-    else:
-        kind = 'cell_matched'
+        return _judge_magnitude(ctx, emit, r, value, library_unit, common)
+    kind = _sign_kind(_sign(value), _sign(r.viewer_value))
     emit(kind, r, reason=f"label role {r.label_role}" if kind == 'sign_differs' else None, **common)
     if surface_name == 'rendered' and text is not None:
-        if not text.strip():
-            emit('zero_rendered_blank' if r.viewer_value == 0 else 'rendered_text_blank', r, **common)
-        elif _text_sign(text) != ('-' if r.viewer_value < 0 else '+'):
-            emit('rendered_text_sign_differs', r, **common)
+        _judge_rendered_text(emit, r, text, common)
     return kind
+
+
+def _check_access_path(emit, r, role_row, column, raw, common) -> None:
+    """Report a default-view DataFrame value that ``statements[role]`` shows otherwise.
+
+    Compared only where the role's DataFrame has the same row and period column.
+    """
+    if role_row is not None and column in role_row['values'] and _differs(raw, role_row['values'][column]):
+        role_value = role_row['values'][column]
+        emit('access_path_disagrees', r, reason=f"statements[role] shows {role_value!r}", **common)
+
+
+def _judge_magnitude(ctx, emit, r, value: float, library_unit, common) -> str:
+    """Emit the outcome of a library value whose magnitude is not the fact's; returns its kind."""
+    if (r.note or '').startswith(_LESS_PRECISE_NOTE) and _sign(value) == _sign(r.viewer_value) \
+            and _other_duplicate(ctx, r, value):
+        emit('less_precise_duplicate', r, reason=r.note, **common)
+        return 'less_precise_duplicate'
+    emit('value_differs', r, reason=library_unit and library_unit != r.xbrl_unit and
+         f"page unit {r.xbrl_unit}, library row unit {library_unit} (same measure)" or None, **common)
+    return 'value_differs'
+
+
+def _sign_kind(library_sign, page_sign) -> str:
+    """The outcome of a value of the fact's magnitude, by its sign against the page's."""
+    if library_sign == '-0':
+        return 'negative_zero'
+    if library_sign != page_sign:
+        return 'sign_differs'
+    return 'cell_matched'
+
+
+def _judge_rendered_text(emit, r, text: str, common) -> None:
+    """Report rendered text that is blank, or whose sign is not the page's."""
+    if not text.strip():
+        emit('zero_rendered_blank' if r.viewer_value == 0 else 'rendered_text_blank', r, **common)
+    elif _text_sign(text) != ('-' if r.viewer_value < 0 else '+'):
+        emit('rendered_text_sign_differs', r, **common)
 
 
 def _other_duplicate(ctx, r: vv.ComparisonResult, value: float) -> bool:

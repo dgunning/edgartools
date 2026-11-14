@@ -289,32 +289,72 @@ def draw_sample(seed: int, size: int, start: date, end: date, *,
     Returns:
         Sample, its rows in a seeded shuffled order
     """
+    _check_window(size, start, end)
+    eras = eras_for(start, end, era_splits)
+    if population is None:
+        population = load_population(start, end)
+    sic = _SicCache(_company_sic if sic_lookup is None else sic_lookup)
+    ex_acc, ex_cik = set(exclude_accessions), {int(c) for c in exclude_ciks}
+
+    strata = _strata(_one_per_accession(population), eras, ex_acc, ex_cik)
+    names = [f"{form} {era}" for form in FORMS for era, _lo, _hi in eras]
+    weights = {s: (FORM_WEIGHTS[s.split(' ')[0]] / len(eras) if strata.get(s) else 0) for s in names}
+    planned = allocate(size, weights)
+
+    rows, taken = _draw_strata(seed, names, strata, planned)
+    for r in rows:
+        r['sic'] = sic(int(r['cik']))
+        r['group'] = sic_group(r['sic'])
+
+    minimums = {g: math.ceil(share * size) for g, share in MIN_GROUP_SHARE.items()}
+    everyone = sorted((r for name in names for r in strata.get(name, [])), key=lambda r: r['accession_number'])
+    lookups = _top_up(seed, everyone, rows, taken, minimums, sic, eras)
+
+    random.Random(f"{seed}:order").shuffle(rows)
+    for r in rows:
+        r['seed'] = seed
+        r['filing_date'] = r['filing_date'].isoformat() if isinstance(r['filing_date'], date) else r['filing_date']
+    population_counts = {s: len(strata.get(s, [])) for s in names}
+    return Sample(rows=rows, seed=seed, size=size, start=start, end=end, eras=eras,
+                  population=population_counts, planned={s: planned.get(s, 0) for s in names},
+                  group_minimums=minimums, topup_lookups=lookups, sic_lookup_failures=len(sic.failures),
+                  excluded_accessions=len(ex_acc), excluded_ciks=len(ex_cik))
+
+
+def _check_window(size: int, start: date, end: date) -> None:
+    """Raise ScorecardError for a sample size or filing window a draw cannot use."""
     if size < 1:
         raise ScorecardError(f"--size must be at least 1, not {size}")
     if start > end:
         raise ScorecardError(f"--start {start} is after --end {end}")
     if end >= date.today():
         raise ScorecardError(f"--end {end} is not in the past; a sample needs a closed filing window")
-    eras = eras_for(start, end, era_splits)
-    if population is None:
-        population = load_population(start, end)
-    if sic_lookup is None:
-        sic_lookup = _company_sic
-    ex_acc, ex_cik = set(exclude_accessions), {int(c) for c in exclude_ciks}
-    sics: Dict[int, str] = {}
-    sic_failures: List[int] = []
 
-    def sic(cik: int) -> str:
-        if cik not in sics:
+
+class _SicCache:
+    """``sic_lookup`` called once per CIK; a failed lookup gives '' and is counted in ``failures``."""
+
+    def __init__(self, sic_lookup: Callable[[int], str]):
+        self.sic_lookup = sic_lookup
+        self.codes: Dict[int, str] = {}
+        self.failures: List[int] = []
+
+    def __call__(self, cik: int) -> str:
+        if cik not in self.codes:
             try:
-                sics[cik] = str(sic_lookup(cik) or '')
+                self.codes[cik] = str(self.sic_lookup(cik) or '')
             except Exception:  # a failed lookup puts the filer in 'unknown'; counted in the scorecard
-                sics[cik] = ''
-                sic_failures.append(cik)
-        return sics[cik]
+                self.codes[cik] = ''
+                self.failures.append(cik)
+        return self.codes[cik]
 
-    # The index lists a filing once per co-registrant. Keep one row per accession, under its lowest CIK,
-    # and sort by accession, so the draw does not depend on the order the population was read in.
+
+def _one_per_accession(population: Iterable[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    """One row per accession, under its lowest CIK with the others in ``co_registrant_ciks``, sorted by accession.
+
+    The index lists a filing once per co-registrant; sorting makes the draw independent of the order the
+    population was read in.
+    """
     by_accession: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for r in population:
         by_accession[r['accession_number']].append(r)
@@ -323,19 +363,28 @@ def draw_sample(seed: int, size: int, start: date, end: date, *,
         listed = sorted(by_accession[accession], key=lambda r: int(r['cik']))
         ciks = sorted({int(r['cik']) for r in listed})
         filings.append(dict(listed[0], co_registrant_ciks=';'.join(str(c) for c in ciks[1:])))
+    return filings
+
+
+def _excluded(r: Dict[str, Any], ex_acc: set, ex_cik: set) -> bool:
+    """Whether the filing's accession, its CIK or any co-registrant's CIK is excluded."""
+    return r['accession_number'] in ex_acc or int(r['cik']) in ex_cik or any(
+        int(c) in ex_cik for c in filter(None, r['co_registrant_ciks'].split(';')))
+
+
+def _strata(filings: List[Dict[str, Any]], eras, ex_acc: set, ex_cik: set) -> Dict[str, List[Dict[str, Any]]]:
+    """The drawable filings by stratum ("<form> <era>"), in their given order."""
     strata: Dict[str, List[Dict[str, Any]]] = defaultdict(list)
     for r in filings:
         era = era_of(r['filing_date'], eras)
-        if era is None or r['form'] not in FORMS:
-            continue
-        if r['accession_number'] in ex_acc or int(r['cik']) in ex_cik or any(
-                int(c) in ex_cik for c in filter(None, r['co_registrant_ciks'].split(';'))):
+        if era is None or r['form'] not in FORMS or _excluded(r, ex_acc, ex_cik):
             continue
         strata[f"{r['form']} {era}"].append(r)
-    names = [f"{form} {era}" for form in FORMS for era, _lo, _hi in eras]
-    weights = {s: (FORM_WEIGHTS[s.split(' ')[0]] / len(eras) if strata.get(s) else 0) for s in names}
-    planned = allocate(size, weights)
+    return strata
 
+
+def _draw_strata(seed: int, names: List[str], strata, planned: Dict[str, int]):
+    """The random draw: each stratum's planned count, from its own seeded generator; (rows, accessions taken)."""
     rows: List[Dict[str, Any]] = []
     taken = set()
     for name in names:
@@ -346,14 +395,16 @@ def draw_sample(seed: int, size: int, start: date, end: date, *,
         for r in rng.sample(pool, min(n, len(pool))):
             rows.append(dict(r, era=name.split(' ', 1)[1], stratum=name, topup=0))
             taken.add(r['accession_number'])
-    for r in rows:
-        r['sic'] = sic(int(r['cik']))
-        r['group'] = sic_group(r['sic'])
+    return rows, taken
 
-    minimums = {g: math.ceil(share * size) for g, share in MIN_GROUP_SHARE.items()}
+
+def _top_up(seed: int, everyone: List[Dict[str, Any]], rows: List[Dict[str, Any]], taken: set,
+            minimums: Dict[str, int], sic: _SicCache, eras) -> int:
+    """Add filings of groups below their minimum to ``rows``, in a seeded order; returns the SIC lookups spent.
+
+    Stops once every group has its minimum or ``TOPUP_MAX_LOOKUPS`` lookups are spent.
+    """
     have = Counter(r['group'] for r in rows)
-    everyone = [r for name in names for r in strata.get(name, [])]
-    everyone.sort(key=lambda r: r['accession_number'])
     rng = random.Random(f"{seed}:topup")
     lookups = 0
     for i in rng.sample(range(len(everyone)), len(everyone)) if everyone else ():
@@ -363,24 +414,15 @@ def draw_sample(seed: int, size: int, start: date, end: date, *,
         if r['accession_number'] in taken:
             continue
         cik = int(r['cik'])
-        if cik not in sics:
+        if cik not in sic.codes:
             lookups += 1
         g = sic_group(sic(cik))
         if g in minimums and have[g] < minimums[g]:
             era = era_of(r['filing_date'], eras)
-            rows.append(dict(r, era=era, stratum=f"{r['form']} {era}", topup=1, sic=sics[cik], group=g))
+            rows.append(dict(r, era=era, stratum=f"{r['form']} {era}", topup=1, sic=sic.codes[cik], group=g))
             taken.add(r['accession_number'])
             have[g] += 1
-
-    random.Random(f"{seed}:order").shuffle(rows)
-    for r in rows:
-        r['seed'] = seed
-        r['filing_date'] = r['filing_date'].isoformat() if isinstance(r['filing_date'], date) else r['filing_date']
-    population_counts = {s: len(strata.get(s, [])) for s in names}
-    return Sample(rows=rows, seed=seed, size=size, start=start, end=end, eras=eras,
-                  population=population_counts, planned={s: planned.get(s, 0) for s in names},
-                  group_minimums=minimums, topup_lookups=lookups, sic_lookup_failures=len(sic_failures),
-                  excluded_accessions=len(ex_acc), excluded_ciks=len(ex_cik))
+    return lookups
 
 
 def _company_sic(cik: int) -> str:
