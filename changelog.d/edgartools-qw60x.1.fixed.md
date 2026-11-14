@@ -1,0 +1,1 @@
+- **20-F Part sections hold their items.** `doc.sections['part_i']` on a 20-F returned only its divider line ('PART I') when the Part and its first item header scored the same heading level; a Part now runs to the next Part divider or SIGNATURES. Nine of fifteen corpus 20-Fs were affected, e.g. 0001213900-21-018959 `part_i` grows from 6 to 604,618 characters.
