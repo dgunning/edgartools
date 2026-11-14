@@ -1,0 +1,16 @@
+{
+ "accession": "0001298946-24-000052",
+ "filer": "DiamondRock Hospitality Co",
+ "form": "10-Q",
+ "filing_date": "2024-05-03",
+ "role": "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+ "page": "R3.htm",
+ "short_name": "CONSOLIDATED BALANCE SHEETS (Parenthetical)",
+ "sic": "6798",
+ "period_of_report": "2024-03-31",
+ "menu_categories": {
+  "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": "Statements",
+  "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical": "Statements"
+ },
+ "access": "balance_sheet(parenthetical=True)"
+}

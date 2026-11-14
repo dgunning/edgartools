@@ -1,0 +1,2189 @@
+{
+ "version": "2.1",
+ "instance": {
+  "brx-20201231.htm": {
+   "tag": {
+    "brx_A30thStreetPlazaCantonOHMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "30th Street Plaza, Canton, OH [Member]",
+        "label": "30th Street Plaza, Canton, OH [Member]",
+        "terseLabel": "30th Street Plaza"
+       }
+      }
+     },
+     "localname": "A30thStreetPlazaCantonOHMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_BartonvilleSquareBartonvilleILMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Bartonville Square, Bartonville, IL [Member]",
+        "label": "Bartonville Square, Bartonville, IL [Member]",
+        "terseLabel": "Bartonville Square"
+       }
+      }
+     },
+     "localname": "BartonvilleSquareBartonvilleILMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_BriceParkReynoldsburgOHMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Brice Park, Reynoldsburg, OH [Member]",
+        "label": "Brice Park, Reynoldsburg, OH [Member]",
+        "terseLabel": "Brice Park",
+        "verboseLabel": "Brice Park, Reynoldsburg, OH"
+       }
+      }
+     },
+     "localname": "BriceParkReynoldsburgOHMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/FairValueDisclosuresMeasurementsDetails",
+      "http://www.brixmor.com/role/ImpairmentsDetails",
+      "http://www.brixmor.com/role/ScheduleIIIRealEstateandAccumulatedDepreciationDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_BrixmorOperatingPartnershipLPMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Brixmor Operating Partnership LP [Member]",
+        "label": "Brixmor Operating Partnership LP [Member]",
+        "terseLabel": "Brixmor Operating Partnership LP"
+       }
+      }
+     },
+     "localname": "BrixmorOperatingPartnershipLPMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/CoverPage"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_BrooksvilleSquareBrooksvilleFLMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Brooksville Square, Brooksville, FL [Member]",
+        "label": "Brooksville Square, Brooksville, FL [Member]",
+        "terseLabel": "Brooksville Square"
+       }
+      }
+     },
+     "localname": "BrooksvilleSquareBrooksvilleFLMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_ChamberlainPlazaMeridenCTMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Chamberlain Plaza, Meriden, CT [Member]",
+        "label": "Chamberlain Plaza, Meriden, CT [Member]",
+        "terseLabel": "Chamberlain Plaza"
+       }
+      }
+     },
+     "localname": "ChamberlainPlazaMeridenCTMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_CountyLinePlazaJacksonMSMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "County Line Plaza, Jackson, MS [Member]",
+        "label": "County Line Plaza, Jackson, MS [Member]",
+        "terseLabel": "County Line Plaza"
+       }
+      }
+     },
+     "localname": "CountyLinePlazaJacksonMSMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_CovingtonGalleryCovingtonGaMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Covington Gallery, Covington, GA [Member]",
+        "label": "Covington Gallery, Covington, GA [Member]",
+        "terseLabel": "Covington Gallery"
+       }
+      }
+     },
+     "localname": "CovingtonGalleryCovingtonGaMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_CrossroadsCenterFairviewHeightsILMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Crossroads Center, Fairview Heights, IL [Member]",
+        "label": "Crossroads Center, Fairview Heights, IL [Member]",
+        "terseLabel": "Crossroads Center"
+       }
+      }
+     },
+     "localname": "CrossroadsCenterFairviewHeightsILMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_DoverParkPlazaYardvilleNJMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Dover Park Plaza, Yardville, NJ [Member]",
+        "label": "Dover Park Plaza, Yardville, NJ [Member]",
+        "terseLabel": "Dover Park Plaza"
+       }
+      }
+     },
+     "localname": "DoverParkPlazaYardvilleNJMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_ElkGroveTownCenterElkGroveVillageILMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Elk Grove Town Center, Elk Grove Village, IL [Member]",
+        "label": "Elk Grove Town Center, Elk Grove Village, IL [Member]",
+        "terseLabel": "Elk Grove Town Center",
+        "verboseLabel": "Elk Grove Town Center, Elk Grove Village, IL"
+       }
+      }
+     },
+     "localname": "ElkGroveTownCenterElkGroveVillageILMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails",
+      "http://www.brixmor.com/role/ScheduleIIIRealEstateandAccumulatedDepreciationDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_ElkhartPlazaWestElkhartINMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Elkhart Plaza West, Elkhart, IN [Member]",
+        "label": "Elkhart Plaza West, Elkhart, IN [Member]",
+        "terseLabel": "Elkhart Plaza West"
+       }
+      }
+     },
+     "localname": "ElkhartPlazaWestElkhartINMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_FryRoadCrossingKatyTXMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Fry Road Crossing, Katy, TX",
+        "label": "Fry Road Crossing, Katy, TX [Member]",
+        "terseLabel": "Fry Road Crossing"
+       }
+      }
+     },
+     "localname": "FryRoadCrossingKatyTXMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_GainsLossesonExtinguishmentofDebtIncludingDiscontinuedOperations": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 10.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Gains (Losses) on Extinguishment of Debt, Including Discontinued Operations",
+        "label": "Gains (Losses) on Extinguishment of Debt, Including Discontinued Operations",
+        "negatedLabel": "Loss on extinguishment of debt, net"
+       }
+      }
+     },
+     "localname": "GainsLossesonExtinguishmentofDebtIncludingDiscontinuedOperations",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "brx_GlendaleGalleriaGlendaleAZMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Glendale Galleria, Glendale, AZ [Member]",
+        "label": "Glendale Galleria, Glendale, AZ [Member]",
+        "terseLabel": "Glendale Galleria"
+       }
+      }
+     },
+     "localname": "GlendaleGalleriaGlendaleAZMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_IncreaseDecreaseInDeferredChargesAndPrepaidExpensesNet": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 12.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Increase (Decrease) in Deferred Charges and Prepaid Expenses, Net",
+        "label": "Increase (Decrease) in Deferred Charges and Prepaid Expenses, Net",
+        "negatedTerseLabel": "Deferred charges and prepaid expenses"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInDeferredChargesAndPrepaidExpensesNet",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "brx_IncreaseDecreaseInOtherLiabilitiesAndDueToRelatedParties": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 14.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Increase decrease in other liabilities and due to related parties.",
+        "label": "Increase Decrease In Other Liabilities And Due To Related Parties",
+        "negatedLabel": "Accounts payable, accrued expenses and other liabilities"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInOtherLiabilitiesAndDueToRelatedParties",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "brx_KleinSquareSpringTxMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Klein Square, Spring, TX [Member]",
+        "label": "Klein Square, Spring, TX [Member]",
+        "terseLabel": "Klein Square"
+       }
+      }
+     },
+     "localname": "KleinSquareSpringTxMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_KlinePlazaHarrisburgPAMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Kline Plaza, Harrisburg, PA [Member]",
+        "label": "Kline Plaza, Harrisburg, PA [Member]",
+        "terseLabel": "Kline Plaza"
+       }
+      }
+     },
+     "localname": "KlinePlazaHarrisburgPAMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_LincolnPlazaNewHavenINMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Lincoln Plaza, New Haven, IN [Member]",
+        "label": "Lincoln Plaza, New Haven, IN [Member]",
+        "terseLabel": "Lincoln Plaza"
+       }
+      }
+     },
+     "localname": "LincolnPlazaNewHavenINMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/FairValueDisclosuresMeasurementsDetails",
+      "http://www.brixmor.com/role/ImpairmentsDetails",
+      "http://www.brixmor.com/role/ScheduleIIIRealEstateandAccumulatedDepreciationDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_MarwoodPlazaIndianapolisINMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Marwood Plaza, Indianapolis, IN [Member]",
+        "label": "Marwood Plaza, Indianapolis, IN [Member]",
+        "terseLabel": "Marwood Plaza"
+       }
+      }
+     },
+     "localname": "MarwoodPlazaIndianapolisINMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_MohawkAcresRomeNyMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Mohawk Acres, Rome, NY [Member]",
+        "label": "Mohawk Acres, Rome, NY [Member]",
+        "terseLabel": "Mohawk Acres Plaza"
+       }
+      }
+     },
+     "localname": "MohawkAcresRomeNyMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/FairValueDisclosuresMeasurementsDetails",
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_MountCarmelPlazaGlensidePAMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Mount Carmel Plaza, Glenside, PA [Member]",
+        "label": "Mount Carmel Plaza, Glenside, PA [Member]",
+        "terseLabel": "Mount Carmel Plaza"
+       }
+      }
+     },
+     "localname": "MountCarmelPlazaGlensidePAMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_NorthHillsVillageHaltomCityTxMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "North Hills Village, Haltom City, TX [Member]",
+        "label": "North Hills Village, Haltom City, TX [Member]",
+        "terseLabel": "North Hills Village"
+       }
+      }
+     },
+     "localname": "NorthHillsVillageHaltomCityTxMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_NorthmallCentreTucsonAZMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Northmall Centre, Tucson, AZ [Member]",
+        "label": "Northmall Centre, Tucson, AZ [Member]",
+        "terseLabel": "Northmall Centre"
+       }
+      }
+     },
+     "localname": "NorthmallCentreTucsonAZMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/FairValueDisclosuresMeasurementsDetails",
+      "http://www.brixmor.com/role/ImpairmentsDetails",
+      "http://www.brixmor.com/role/ScheduleIIIRealEstateandAccumulatedDepreciationDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_ParcelAtLakesCrossingMuskegonMIMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Parcel at Lakes Crossing, Muskegon, MI",
+        "label": "Parcel at Lakes Crossing, Muskegon, MI [Member]",
+        "terseLabel": "Parcel at Lakes Crossing"
+       }
+      }
+     },
+     "localname": "ParcelAtLakesCrossingMuskegonMIMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_ParcelatMansellCrossingAlpharettaGAMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Parcel at Mansell Crossing, Alpharetta, GA [Member]",
+        "label": "Parcel at Mansell Crossing, Alpharetta, GA [Member]",
+        "terseLabel": "Parcel at Mansell Crossing"
+       }
+      }
+     },
+     "localname": "ParcelatMansellCrossingAlpharettaGAMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_Partnersdistributions": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 10.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Partners distributions",
+        "label": "Partners distributions",
+        "negatedTerseLabel": "Partner distributions and repurchases of OP Units"
+       }
+      }
+     },
+     "localname": "Partnersdistributions",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "brx_PensacolaSquarePensacolaFlMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Pensacola Square, Pensacola, FL [Member]",
+        "label": "Pensacola Square, Pensacola, FL [Member]",
+        "terseLabel": "Pensacola Square"
+       }
+      }
+     },
+     "localname": "PensacolaSquarePensacolaFlMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_PlantationPlazaCluteTXMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Plantation Plaza, Clute, TX [Member]",
+        "label": "Plantation Plaza, Clute, TX [Member]",
+        "terseLabel": "Plantation Plaza"
+       }
+      }
+     },
+     "localname": "PlantationPlazaCluteTXMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_PreviouslyDisposedAssetsMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Previously Disposed Assets [Member]",
+        "label": "Previously Disposed Assets [Member]",
+        "terseLabel": "Previously Disposed Assets"
+       }
+      }
+     },
+     "localname": "PreviouslyDisposedAssetsMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/DispositionsandAssetsHeldforSaleNarrativeDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_PrincipalPaymentsOfMortgagesCapitalLeasesAndNotesPayable": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 1.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Principal Payments of Mortgages Capital Leases and Notes Payable",
+        "label": "Principal Payments of Mortgages Capital Leases and Notes Payable",
+        "negatedLabel": "Repayment of secured debt obligations"
+       }
+      }
+     },
+     "localname": "PrincipalPaymentsOfMortgagesCapitalLeasesAndNotesPayable",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "brx_ProceedsFromSalesOfRealEstateAssets": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 3.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Proceeds from sales of real estate assets",
+        "label": "Proceeds from sales of real estate assets",
+        "terseLabel": "Proceeds from sales of real estate assets"
+       }
+      }
+     },
+     "localname": "ProceedsFromSalesOfRealEstateAssets",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "brx_ProceedsFromUnsecuredDebt": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 4.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Proceeds from Unsecured Debt",
+        "label": "Proceeds from Unsecured Debt",
+        "terseLabel": "Proceeds from unsecured notes"
+       }
+      }
+     },
+     "localname": "ProceedsFromUnsecuredDebt",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "brx_ReconciliationtoconsolidatedbalancesheetsAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Reconciliation to consolidated balance sheets [Abstract]",
+        "label": "Reconciliation to consolidated balance sheets [Abstract]",
+        "terseLabel": "Reconciliation to consolidated balance sheets:"
+       }
+      }
+     },
+     "localname": "ReconciliationtoconsolidatedbalancesheetsAbstract",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "brx_RoundtreePlaceYpsilantiMIMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Roundtree Place, Ypsilanti, MI [Member]",
+        "label": "Roundtree Place, Ypsilanti, MI [Member]",
+        "terseLabel": "Roundtree Place"
+       }
+      }
+     },
+     "localname": "RoundtreePlaceYpsilantiMIMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_ShopsofRiverdaleRiverdaleGAMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Shops of Riverdale, Riverdale, GA [Member]",
+        "label": "Shops of Riverdale, Riverdale, GA [Member]",
+        "terseLabel": "Shops of Riverdale"
+       }
+      }
+     },
+     "localname": "ShopsofRiverdaleRiverdaleGAMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_SkywayPlazaSt.PetersburgFLMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Skyway Plaza, St. Petersburg, FL [Member]",
+        "label": "Skyway Plaza, St. Petersburg, FL [Member]",
+        "terseLabel": "Skyway Plaza"
+       }
+      }
+     },
+     "localname": "SkywayPlazaSt.PetersburgFLMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_SmithsSocorroNmMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Smith's, Socorro, NM [Member]",
+        "label": "Smith's, Socorro, NM [Member]",
+        "terseLabel": "Smith's"
+       }
+      }
+     },
+     "localname": "SmithsSocorroNmMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_SouthlandShoppingPlazaToledoOHMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Southland Shopping Plaza, Toledo, OH [Member]",
+        "label": "Southland Shopping Plaza, Toledo, OH [Member]",
+        "terseLabel": "Southland Shopping Plaza"
+       }
+      }
+     },
+     "localname": "SouthlandShoppingPlazaToledoOHMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_SpringMallGreenfieldWIMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Spring Mall, Greenfield, WI [Member]",
+        "label": "Spring Mall, Greenfield, WI [Member]",
+        "terseLabel": "Spring Mall"
+       }
+      }
+     },
+     "localname": "SpringMallGreenfieldWIMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/FairValueDisclosuresMeasurementsDetails",
+      "http://www.brixmor.com/role/ImpairmentsDetails",
+      "http://www.brixmor.com/role/ScheduleIIIRealEstateandAccumulatedDepreciationDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_SterlingBazaarPeoriaILMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Sterling Bazaar, Peoria, IL [Member]",
+        "label": "Sterling Bazaar, Peoria, IL [Member]",
+        "terseLabel": "Sterling Bazaar"
+       }
+      }
+     },
+     "localname": "SterlingBazaarPeoriaILMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_ThePinesShoppingCenterPinevilleLAMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The Pines Shopping Center, Pineville, LA",
+        "label": "The Pines Shopping Center, Pineville, LA [Member]",
+        "terseLabel": "The Pines Shopping Center"
+       }
+      }
+     },
+     "localname": "ThePinesShoppingCenterPinevilleLAMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/FairValueDisclosuresMeasurementsDetails",
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_TowneSquareNorthOwensboroKyMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Towne Square North, Owensboro, KY [Member]",
+        "label": "Towne Square North, Owensboro, KY [Member]",
+        "terseLabel": "Towne Square North"
+       }
+      }
+     },
+     "localname": "TowneSquareNorthOwensboroKyMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_ValleyCommonsSalemVAMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Valley Commons, Salem, VA [Member]",
+        "label": "Valley Commons, Salem, VA [Member]",
+        "terseLabel": "Valley Commons"
+       }
+      }
+     },
+     "localname": "ValleyCommonsSalemVAMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_WadsworthCrossingWadsworthOHMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Wadsworth Crossing, Wadsworth, OH [Member]",
+        "label": "Wadsworth Crossing, Wadsworth, OH [Member]",
+        "terseLabel": "Wadsworth Crossing"
+       }
+      }
+     },
+     "localname": "WadsworthCrossingWadsworthOHMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "brx_WestviewCenterHanoverParkILMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Westview Center, Hanover Park, IL [Member]",
+        "label": "Westview Center, Hanover Park, IL [Member]",
+        "terseLabel": "Westview Center"
+       }
+      }
+     },
+     "localname": "WestviewCenterHanoverParkILMember",
+     "nsuri": "http://www.brixmor.com/20201231",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "dei_LegalEntityAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The set of legal entities associated with a report.",
+        "label": "Legal Entity [Axis]",
+        "terseLabel": "Legal Entity [Axis]"
+       }
+      }
+     },
+     "localname": "LegalEntityAxis",
+     "nsuri": "http://xbrl.sec.gov/dei/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CoverPage"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "srt_ConsolidatedEntitiesAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by consolidated entity or group of entities.",
+        "label": "Consolidated Entities [Axis]",
+        "terseLabel": "Consolidated Entities [Axis]"
+       }
+      }
+     },
+     "localname": "ConsolidatedEntitiesAxis",
+     "nsuri": "http://fasb.org/srt/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+      "http://www.brixmor.com/role/DebtObligationsNarrativeDetails",
+      "http://www.brixmor.com/role/DebtObligationsSheduleofDebtDetails",
+      "http://www.brixmor.com/role/EarningsperUnit",
+      "http://www.brixmor.com/role/EarningsperUnitDetails",
+      "http://www.brixmor.com/role/EarningsperUnitTables",
+      "http://www.brixmor.com/role/NatureofBusinessandFinancialStatementPresentationNarrativeDetails",
+      "http://www.brixmor.com/role/SupplementalFinancialInformationDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "srt_ConsolidatedEntitiesDomain": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Entity or group of entities consolidated into reporting entity.",
+        "label": "Consolidated Entities [Domain]",
+        "terseLabel": "Consolidated Entities [Domain]"
+       }
+      }
+     },
+     "localname": "ConsolidatedEntitiesDomain",
+     "nsuri": "http://fasb.org/srt/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+      "http://www.brixmor.com/role/DebtObligationsNarrativeDetails",
+      "http://www.brixmor.com/role/DebtObligationsSheduleofDebtDetails",
+      "http://www.brixmor.com/role/EarningsperUnit",
+      "http://www.brixmor.com/role/EarningsperUnitDetails",
+      "http://www.brixmor.com/role/EarningsperUnitTables",
+      "http://www.brixmor.com/role/NatureofBusinessandFinancialStatementPresentationNarrativeDetails",
+      "http://www.brixmor.com/role/SupplementalFinancialInformationDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "srt_SubsidiariesMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Entity owned or controlled by another entity.",
+        "label": "Subsidiaries [Member]",
+        "terseLabel": "Brixmor Operating Partnership LP"
+       }
+      }
+     },
+     "localname": "SubsidiariesMember",
+     "nsuri": "http://fasb.org/srt/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+      "http://www.brixmor.com/role/DebtObligationsNarrativeDetails",
+      "http://www.brixmor.com/role/DebtObligationsSheduleofDebtDetails",
+      "http://www.brixmor.com/role/EarningsperUnit",
+      "http://www.brixmor.com/role/EarningsperUnitDetails",
+      "http://www.brixmor.com/role/EarningsperUnitTables",
+      "http://www.brixmor.com/role/SupplementalFinancialInformationDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_AccumulatedDistributionsInExcessOfNetIncomeMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Cumulative distributions to shareholders (or partners) in excess of retained earnings (or accumulated earnings).",
+        "label": "Accumulated Distributions in Excess of Net Income [Member]",
+        "verboseLabel": "Distributions in Excess of Net Income"
+       }
+      }
+     },
+     "localname": "AccumulatedDistributionsInExcessOfNetIncomeMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Adjustments to Reconcile Net Income (Loss) to Cash Provided by (Used in) Operating Activities [Abstract]",
+        "verboseLabel": "Adjustments to reconcile net income to net cash provided by operating activities:"
+       }
+      }
+     },
+     "localname": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_AmortizationOfAboveAndBelowMarketLeases": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 5.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of non-cash amortization of intangible asset (liability) for above and below market leases.",
+        "label": "Amortization of above and below Market Leases",
+        "terseLabel": "Accretion of above- and below-market leases, net"
+       }
+      }
+     },
+     "localname": "AmortizationOfAboveAndBelowMarketLeases",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AmortizationOfDebtDiscountPremium": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 3.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of noncash expense included in interest expense to amortize debt discount and premium associated with the related debt instruments. Excludes amortization of financing costs. Alternate captions include noncash interest expense.",
+        "label": "Amortization of Debt Discount (Premium)",
+        "verboseLabel": "(Accretion) amortization of debt premium and discount, net"
+       }
+      }
+     },
+     "localname": "AmortizationOfDebtDiscountPremium",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AmortizationOfFinancingCosts": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 4.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of amortization expense attributable to debt issuance costs.",
+        "label": "Amortization of Debt Issuance Costs",
+        "terseLabel": "Deferred financing cost amortization"
+       }
+      }
+     },
+     "localname": "AmortizationOfFinancingCosts",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_CashAndCashEquivalentsAtCarryingValue": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "order": 1.0,
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0
+      },
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 1.0,
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of currency on hand as well as demand deposits with banks or financial institutions. Includes other kinds of accounts that have the general characteristics of demand deposits. Also includes short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates. Excludes cash and cash equivalents within disposal group and discontinued operation.",
+        "label": "Cash and Cash Equivalents, at Carrying Value",
+        "periodEndLabel": "Cash and cash equivalents",
+        "terseLabel": "Cash and cash equivalents"
+       }
+      }
+     },
+     "localname": "CashAndCashEquivalentsAtCarryingValue",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash and cash equivalents, and cash and cash equivalents restricted to withdrawal or usage. Excludes amount for disposal group and discontinued operations. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates.",
+        "label": "Cash, Cash Equivalents, Restricted Cash and Restricted Cash Equivalents",
+        "periodEndLabel": "Cash, cash equivalents and restricted cash at end of period",
+        "periodStartLabel": "Cash, cash equivalents and restricted cash at beginning of period",
+        "totalLabel": "Cash, cash equivalents and restricted cash at end of period"
+       }
+      }
+     },
+     "localname": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of increase (decrease) in cash and cash equivalents, and cash and cash equivalents restricted to withdrawal or usage; excluding effect from exchange rate change. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates.",
+        "label": "Cash, Cash Equivalents, Restricted Cash and Restricted Cash Equivalents, Period Increase (Decrease), Excluding Exchange Rate Effect",
+        "totalLabel": "Net change in cash, cash equivalents and restricted cash"
+       }
+      }
+     },
+     "localname": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_DeferredSalesInducementsAmortizationExpense": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 6.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of amortization expense (reversal of expense) for deferred sales inducement cost.",
+        "label": "Deferred Sales Inducement Cost, Amortization Expense",
+        "terseLabel": "Tenant inducement amortization and other"
+       }
+      }
+     },
+     "localname": "DeferredSalesInducementsAmortizationExpense",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_DepreciationDepletionAndAmortization": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 2.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The aggregate expense recognized in the current period that allocates the cost of tangible assets, intangible assets, or depleting assets to periods that benefit from use of the assets.",
+        "label": "Depreciation, Depletion and Amortization",
+        "verboseLabel": "Depreciation and amortization"
+       }
+      }
+     },
+     "localname": "DepreciationDepletionAndAmortization",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_DerivativeInstrumentRiskAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by type of derivative contract.",
+        "label": "Derivative Instrument [Axis]",
+        "terseLabel": "Derivative Instrument Risk [Axis]"
+       }
+      }
+     },
+     "localname": "DerivativeInstrumentRiskAxis",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/DebtObligationsSheduleofDebtDetails",
+      "http://www.brixmor.com/role/FairValueDisclosuresMeasurementsDetails",
+      "http://www.brixmor.com/role/FinancialInstrumentsDerivativesandHedgingFairValueDetails",
+      "http://www.brixmor.com/role/FinancialInstrumentsDerivativesandHedgingNarrativeDetails",
+      "http://www.brixmor.com/role/FinancialInstrumentsDerivativesandHedgingNotionalAmountDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_DiscontinuedOperationsDisposedOfBySaleMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Component or group of components disposed of by sale and representing a strategic shift that has or will have a major effect on operations and financial results.",
+        "label": "Discontinued Operations, Disposed of by Sale [Member]",
+        "terseLabel": "Disposed of by Sale"
+       }
+      }
+     },
+     "localname": "DiscontinuedOperationsDisposedOfBySaleMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/DispositionsandAssetsHeldforSaleNarrativeDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_DisposalGroupClassificationAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by disposal group classification.",
+        "label": "Disposal Group Classification [Axis]",
+        "terseLabel": "Disposal Group Classification [Axis]"
+       }
+      }
+     },
+     "localname": "DisposalGroupClassificationAxis",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/DispositionsandAssetsHeldforSaleHeldforSaleDetails",
+      "http://www.brixmor.com/role/DispositionsandAssetsHeldforSaleNarrativeDetails",
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_DisposalGroupHeldforsaleNotDiscontinuedOperationsMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Disposal group that is classified as held-for-sale. Excludes disposals classified as discontinued operations.",
+        "label": "Disposal Group, Held-for-sale, Not Discontinued Operations [Member]",
+        "terseLabel": "Held-for-sale"
+       }
+      }
+     },
+     "localname": "DisposalGroupHeldforsaleNotDiscontinuedOperationsMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/DispositionsandAssetsHeldforSaleHeldforSaleDetails",
+      "http://www.brixmor.com/role/DispositionsandAssetsHeldforSaleNarrativeDetails",
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_FairValueByAssetClassAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by class of asset.",
+        "label": "Asset Class [Axis]",
+        "terseLabel": "Asset Class [Axis]"
+       }
+      }
+     },
+     "localname": "FairValueByAssetClassAxis",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/DispositionsandAssetsHeldforSaleNarrativeDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_FairValueByMeasurementFrequencyAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by measurement frequency.",
+        "label": "Measurement Frequency [Axis]",
+        "terseLabel": "Measurement Frequency [Axis]"
+       }
+      }
+     },
+     "localname": "FairValueByMeasurementFrequencyAxis",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/FairValueDisclosuresMeasurementsDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_FairValueMeasurementsNonrecurringMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Infrequent fair value measurement. Includes, but is not limited to, fair value adjustment for impairment of asset, liability or equity, not frequently measured at fair value.",
+        "label": "Fair Value, Nonrecurring [Member]",
+        "terseLabel": "Fair Value, Measurements, Nonrecurring"
+       }
+      }
+     },
+     "localname": "FairValueMeasurementsNonrecurringMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/FairValueDisclosuresMeasurementsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_GainLossOnDispositionOfRealEstateDiscontinuedOperations": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 8.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of difference between the carrying amount and the sales price of real estate properties sold as part of discontinued operations.",
+        "label": "Gain (Loss) on Disposition of Real Estate, Discontinued Operations",
+        "negatedLabel": "Gain on sale of real estate assets",
+        "terseLabel": "Gain on sale"
+       }
+      }
+     },
+     "localname": "GainLossOnDispositionOfRealEstateDiscontinuedOperations",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "http://www.brixmor.com/role/DispositionsandAssetsHeldforSaleNarrativeDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ImpairmentOfRealEstate": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 7.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The charge against earnings in the period to reduce the carrying amount of real property to fair value.",
+        "label": "Impairment of Real Estate",
+        "netLabel": "Impairment of real estate",
+        "terseLabel": "Impairment Charge",
+        "verboseLabel": "Impairment of real estate assets"
+       }
+      }
+     },
+     "localname": "ImpairmentOfRealEstate",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "http://www.brixmor.com/role/FairValueDisclosuresMeasurementsDetails",
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IncomeTaxesPaid": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The amount of cash paid during the current period to foreign, federal, state, and local authorities as taxes on income.",
+        "label": "Income Taxes Paid",
+        "terseLabel": "State and local taxes paid"
+       }
+      }
+     },
+     "localname": "IncomeTaxesPaid",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IncreaseDecreaseInAccountsAndOtherReceivables": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 11.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The increase (decrease) during the reporting period in the amount due from customers for the credit sale of goods and services; includes accounts receivable and other types of receivables.",
+        "label": "Increase (Decrease) in Accounts and Other Receivables",
+        "negatedLabel": "Receivables, net"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInAccountsAndOtherReceivables",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IncreaseDecreaseInOtherOperatingAssets": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 13.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of increase (decrease) in operating assets classified as other.",
+        "label": "Increase (Decrease) in Other Operating Assets",
+        "negatedTerseLabel": "Other assets"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInOtherOperatingAssets",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IncreaseDecreaseInOtherOperatingAssetsAndLiabilitiesNetAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Increase (Decrease) in Other Operating Assets and Liabilities, Net [Abstract]",
+        "terseLabel": "Changes in operating assets and liabilities:"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInOtherOperatingAssetsAndLiabilitiesNetAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_InterestPaid": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash paid for interest, including, but not limited to, capitalized interest and payment to settle zero-coupon bond attributable to accreted interest of debt discount and debt instrument with insignificant coupon interest rate in relation to effective interest rate of borrowing attributable to accreted interest of debt discount; classified as operating and investing activities.",
+        "label": "Interest Paid, Including Capitalized Interest, Operating and Investing Activities",
+        "terseLabel": "Cash paid for interest, net of amount capitalized of $4,231, $3,480 and $2,478"
+       }
+      }
+     },
+     "localname": "InterestPaid",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInFinancingActivities": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 3.0,
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash inflow (outflow) from financing activities, including discontinued operations. Financing activity cash flows include obtaining resources from owners and providing them with a return on, and a return of, their investment; borrowing money and repaying amounts borrowed, or settling the obligation; and obtaining and paying for other resources obtained from creditors on long-term credit.",
+        "label": "Net Cash Provided by (Used in) Financing Activities",
+        "totalLabel": "Net cash provided by (used in) financing activities"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInFinancingActivities",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Net Cash Provided by (Used in) Financing Activities [Abstract]",
+        "verboseLabel": "Financing activities:"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInInvestingActivities": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 2.0,
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash inflow (outflow) from investing activities, including discontinued operations. Investing activity cash flows include making and collecting loans and acquiring and disposing of debt or equity instruments and property, plant, and equipment and other productive assets.",
+        "label": "Net Cash Provided by (Used in) Investing Activities",
+        "totalLabel": "Net cash provided by (used in) investing activities"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInInvestingActivities",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Net Cash Provided by (Used in) Investing Activities [Abstract]",
+        "verboseLabel": "Investing activities:"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInOperatingActivities": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 1.0,
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+       "weight": 1.0
+      }
+     },
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash inflow (outflow) from operating activities, including discontinued operations. Operating activity cash flows include transactions, adjustments, and changes in value not defined as investing or financing activities.",
+        "label": "Net Cash Provided by (Used in) Operating Activities",
+        "totalLabel": "Net cash provided by operating activities"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInOperatingActivities",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Net Cash Provided by (Used in) Operating Activities [Abstract]",
+        "verboseLabel": "Operating activities:"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_NoncashInvestingAndFinancingItemsAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Noncash Investing and Financing Items [Abstract]",
+        "terseLabel": "Supplemental disclosure of cash flow information:"
+       }
+      }
+     },
+     "localname": "NoncashInvestingAndFinancingItemsAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_PaymentsForRepurchaseOfCommonStock": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 8.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cash outflow to reacquire common stock during the period.",
+        "label": "Payments for Repurchase of Common Stock",
+        "negatedTerseLabel": "Repurchases of common shares"
+       }
+      }
+     },
+     "localname": "PaymentsForRepurchaseOfCommonStock",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PaymentsOfCapitalDistribution": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 7.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Cash outflow to owners or shareholders, excluding ordinary dividends. Includes special dividends.",
+        "label": "Payments of Capital Distribution",
+        "negatedLabel": "Distributions to common stockholders"
+       }
+      }
+     },
+     "localname": "PaymentsOfCapitalDistribution",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PaymentsOfFinancingCosts": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 6.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cash outflow for loan and debt issuance costs.",
+        "label": "Payments of Financing Costs",
+        "negatedLabel": "Deferred financing and debt extinguishment costs"
+       }
+      }
+     },
+     "localname": "PaymentsOfFinancingCosts",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PaymentsRelatedToTaxWithholdingForShareBasedCompensation": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 9.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash outflow to satisfy grantee's tax withholding obligation for award under share-based payment arrangement.",
+        "label": "Payment, Tax Withholding, Share-based Payment Arrangement",
+        "negatedLabel": "Repurchases of common shares in conjunction with equity award plans"
+       }
+      }
+     },
+     "localname": "PaymentsRelatedToTaxWithholdingForShareBasedCompensation",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PaymentsToAcquireMarketableSecurities": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 4.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash outflow for purchase of marketable security.",
+        "label": "Payments to Acquire Marketable Securities",
+        "negatedLabel": "Purchase of marketable securities"
+       }
+      }
+     },
+     "localname": "PaymentsToAcquireMarketableSecurities",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PaymentsToAcquireRealEstate": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 2.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cash outflow from the acquisition of a piece of land, anything permanently fixed to it, including buildings, structures on it and so forth; includes real estate intended to generate income for the owner; excludes real estate acquired for use by the owner.",
+        "label": "Payments to Acquire Real Estate",
+        "negatedTerseLabel": "Acquisitions of real estate assets"
+       }
+      }
+     },
+     "localname": "PaymentsToAcquireRealEstate",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PaymentsToDevelopRealEstateAssets": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 1.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Payments to develop real estate assets is the process of adding improvements on or to a parcel of land. Such improvements may include drainage, utilities, subdividing, access, buildings, and any combination of these elements; and are generally classified as cash flow from investing activities.",
+        "label": "Payments to Develop Real Estate Assets",
+        "negatedLabel": "Improvements to and investments in real estate assets"
+       }
+      }
+     },
+     "localname": "PaymentsToDevelopRealEstateAssets",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ProceedsFromLinesOfCredit": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 3.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash inflow from contractual arrangement with the lender, including but not limited to, letter of credit, standby letter of credit and revolving credit arrangements.",
+        "label": "Proceeds from Lines of Credit",
+        "terseLabel": "Proceeds from borrowings under unsecured revolving credit facility"
+       }
+      }
+     },
+     "localname": "ProceedsFromLinesOfCredit",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ProceedsFromSaleAndMaturityOfMarketableSecurities": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 5.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cash inflow associated with the aggregate amount received by the entity through sale or maturity of marketable securities  (held-to-maturity or available-for-sale) during the period.",
+        "label": "Proceeds from Sale and Maturity of Marketable Securities",
+        "terseLabel": "Proceeds from sale of marketable securities"
+       }
+      }
+     },
+     "localname": "ProceedsFromSaleAndMaturityOfMarketableSecurities",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ProfitLoss": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 1.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      },
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME": {
+       "order": 2.0,
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTax",
+       "weight": 1.0
+      },
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.brixmor.com/role/EarningsPerShareDetails": {
+       "order": 1.0,
+       "parentTag": "brx_NetIncomeLossAvailabletoCommonStockholdersforBasicEarnings",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The consolidated profit or loss for the period, net of income taxes, including the portion attributable to the noncontrolling interest.",
+        "label": "Net Income (Loss), Including Portion Attributable to Noncontrolling Interest",
+        "terseLabel": "Net income",
+        "totalLabel": "Net income"
+       }
+      }
+     },
+     "localname": "ProfitLoss",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+      "http://www.brixmor.com/role/EarningsPerShareDetails",
+      "http://www.brixmor.com/role/EarningsperUnitDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_RealEstateInvestmentMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "This element represents direct equity investments in real estate projects (Land, buildings and improvements owned for income production and capital accretion potential) and certain loans accounted for as real estate investments. For loans accounted for as real estate investments, the entity (lender) has virtually the same risks and rewards as those of owners or joint venture participants. Such arrangements are treated as if the entity actually has an ownership interest in the property. In such arrangements, the entity (lender) participates in expected residual profits, which may be in the form of an equity kicker or a higher than usual effective interest rate. At the outset and during the construction and development of the property, the borrower generally has little or no equity in the property and the entity's (lender's) only source of repayment is the property. The entity (lender) generally (a) agrees to provide substantially all funds to acquire, develop, and construct the property, (b) funds the commitment or origination fees or both, and (c) funds interest during the development and construction of the property.",
+        "label": "Real Estate Investment [Member]",
+        "verboseLabel": "Properties"
+       }
+      }
+     },
+     "localname": "RealEstateInvestmentMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/FairValueDisclosuresMeasurementsDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_RealEstatePropertiesAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by ownership of the property.",
+        "label": "Real Estate Property Ownership [Axis]",
+        "terseLabel": "Real Estate Property Ownership [Axis]"
+       }
+      }
+     },
+     "localname": "RealEstatePropertiesAxis",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/ImpairmentsDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_RepaymentsOfLinesOfCredit": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 2.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash outflow for payment of an obligation from a lender, including but not limited to, letter of credit, standby letter of credit and revolving credit arrangements.",
+        "label": "Repayments of Lines of Credit",
+        "negatedTerseLabel": "Repayment of borrowings under unsecured revolving credit facility"
+       }
+      }
+     },
+     "localname": "RepaymentsOfLinesOfCredit",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_RepaymentsOfUnsecuredDebt": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 5.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cash outflow to repay long-term debt that is not secured by collateral. Excludes repayments of tax exempt unsecured debt.",
+        "label": "Repayments of Unsecured Debt",
+        "negatedTerseLabel": "Repayment of borrowings under unsecured term loans and notes"
+       }
+      }
+     },
+     "localname": "RepaymentsOfUnsecuredDebt",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_RestrictedCashAndCashEquivalents": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "order": 2.0,
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0
+      },
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 2.0,
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash and cash equivalents restricted as to withdrawal or usage. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates.",
+        "label": "Restricted Cash and Cash Equivalents",
+        "terseLabel": "Restricted cash"
+       }
+      }
+     },
+     "localname": "RestrictedCashAndCashEquivalents",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ShareBasedCompensation": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 9.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of noncash expense for share-based payment arrangement.",
+        "label": "Share-based Payment Arrangement, Noncash Expense",
+        "terseLabel": "Equity compensation expense, net"
+       }
+      }
+     },
+     "localname": "ShareBasedCompensation",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by component of equity.",
+        "label": "Equity Components [Axis]",
+        "terseLabel": "Equity Components [Axis]"
+       }
+      }
+     },
+     "localname": "StatementEquityComponentsAxis",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY",
+      "http://www.brixmor.com/role/EquityandCapitalDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementLineItems": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Line items represent financial concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes to the table.",
+        "label": "Statement [Line Items]",
+        "terseLabel": "Statement [Line Items]"
+       }
+      }
+     },
+     "localname": "StatementLineItems",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementOfCashFlowsAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of Cash Flows [Abstract]",
+        "terseLabel": "Statement of Cash Flows [Abstract]"
+       }
+      }
+     },
+     "localname": "StatementOfCashFlowsAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementTable": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Schedule reflecting a Statement of Income, Statement of Cash Flows, Statement of Financial Position, Statement of Shareholders' Equity and Other Comprehensive Income, or other statement as needed.",
+        "label": "Statement [Table]",
+        "terseLabel": "Statement [Table]"
+       }
+      }
+     },
+     "localname": "StatementTable",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS"
+     ],
+     "xbrltype": "stringItemType"
+    }
+   },
+   "report": {
+    "R8": {
+     "firstAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "brx-20201231.htm",
+      "contextRef": "i649d8343095f438387c3f6db5bf51e5a_D20200101-20201231",
+      "decimals": "-3",
+      "first": true,
+      "lang": "en-US",
+      "name": "us-gaap:ProfitLoss",
+      "reportCount": 1,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "1007008 - Statement - CONSOLIDATED STATEMENTS OF CASH FLOWS",
+     "role": "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+     "shortName": "CONSOLIDATED STATEMENTS OF CASH FLOWS",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "brx-20201231.htm",
+      "contextRef": "i649d8343095f438387c3f6db5bf51e5a_D20200101-20201231",
+      "decimals": "-3",
+      "lang": "en-US",
+      "name": "us-gaap:DepreciationDepletionAndAmortization",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

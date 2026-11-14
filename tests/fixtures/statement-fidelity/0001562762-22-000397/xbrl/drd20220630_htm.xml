@@ -1,0 +1,532 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:dei="http://xbrl.sec.gov/dei/2021q4" xmlns:drd="http://www.DRDGold.com/20220630" xmlns:ifrs-full="http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:srt="http://fasb.org/srt/2021-01-31" xmlns:utr="http://www.xbrl.org/2009/utr" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en-US">
+    <link:schemaRef xlink:href="drd-20220630.xsd" xlink:type="simple"/>
+    <context id="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+        </entity>
+        <period>
+            <startDate>2021-07-01</startDate>
+            <endDate>2022-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+        </entity>
+        <period>
+            <startDate>2019-07-01</startDate>
+            <endDate>2020-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2019-07-01</startDate>
+            <endDate>2020-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+        </entity>
+        <period>
+            <startDate>2020-07-01</startDate>
+            <endDate>2021-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentConsolidationItemsAxis">ifrs-full:MaterialReconcilingItemsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2019-07-01</startDate>
+            <endDate>2020-06-30</endDate>
+        </period>
+    </context>
+    <context id="AS_OF_Jun30_2022_Entity_0001023512">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+        </entity>
+        <period>
+            <instant>2022-06-30</instant>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2020-07-01</startDate>
+            <endDate>2021-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentConsolidationItemsAxis">ifrs-full:MaterialReconcilingItemsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2020-07-01</startDate>
+            <endDate>2021-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentConsolidationItemsAxis">ifrs-full:OperatingSegmentsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentsAxis">drd:ErgoOperationsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-07-01</startDate>
+            <endDate>2022-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentConsolidationItemsAxis">ifrs-full:OperatingSegmentsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentsAxis">drd:FwgrMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-07-01</startDate>
+            <endDate>2022-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentConsolidationItemsAxis">ifrs-full:MaterialReconcilingItemsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-07-01</startDate>
+            <endDate>2022-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentConsolidationItemsAxis">ifrs-full:OperatingSegmentsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentsAxis">drd:ErgoOperationsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2020-07-01</startDate>
+            <endDate>2021-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentConsolidationItemsAxis">ifrs-full:OperatingSegmentsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentsAxis">drd:FwgrMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2020-07-01</startDate>
+            <endDate>2021-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_RandRefineryProprietaryLimitedMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:CounterpartiesAxis">drd:RandRefineryProprietaryLimitedMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-07-01</startDate>
+            <endDate>2022-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_RandRefineryProprietaryLimitedMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:CounterpartiesAxis">drd:RandRefineryProprietaryLimitedMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2020-07-01</startDate>
+            <endDate>2021-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_RandmutualassurancecompanylimitedMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:CounterpartiesAxis">drd:RandmutualassurancecompanylimitedMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-07-01</startDate>
+            <endDate>2022-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_RandmutualassurancecompanylimitedMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:CounterpartiesAxis">drd:RandmutualassurancecompanylimitedMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2020-07-01</startDate>
+            <endDate>2021-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_dei_EntityAddressesAddressTypeAxis_dei_BusinessContactMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:EntityAddressesAddressTypeAxis">dei:BusinessContactMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-07-01</startDate>
+            <endDate>2022-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentConsolidationItemsAxis">ifrs-full:OperatingSegmentsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentsAxis">drd:ErgoOperationsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2019-07-01</startDate>
+            <endDate>2020-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentConsolidationItemsAxis">ifrs-full:OperatingSegmentsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="ifrs-full:SegmentsAxis">drd:FwgrMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2019-07-01</startDate>
+            <endDate>2020-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:ComponentsOfEquityAxis">ifrs-full:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-07-01</startDate>
+            <endDate>2022-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_WestwitsmininglimitedwwmMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:CounterpartiesAxis">drd:WestwitsmininglimitedwwmMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-07-01</startDate>
+            <endDate>2022-06-30</endDate>
+        </period>
+    </context>
+    <context id="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_WestwitsmininglimitedwwmMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001023512</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="ifrs-full:CounterpartiesAxis">drd:WestwitsmininglimitedwwmMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2020-07-01</startDate>
+            <endDate>2021-06-30</endDate>
+        </period>
+    </context>
+    <unit id="Earnings_per_share">
+        <divide>
+            <unitNumerator>
+                <measure>iso4217:ZAR</measure>
+            </unitNumerator>
+            <unitDenominator>
+                <measure>shares</measure>
+            </unitDenominator>
+        </divide>
+    </unit>
+    <unit id="shares">
+        <measure>shares</measure>
+    </unit>
+    <unit id="ZAR">
+        <measure>iso4217:ZAR</measure>
+    </unit>
+    <dei:AmendmentFlag contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_0">false</dei:AmendmentFlag>
+    <dei:DocumentFiscalYearFocus contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_1">2022</dei:DocumentFiscalYearFocus>
+    <dei:CurrentFiscalYearEndDate contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_2">--06-30</dei:CurrentFiscalYearEndDate>
+    <dei:EntityCentralIndexKey contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_611">0001023512</dei:EntityCentralIndexKey>
+    <dei:DocumentFiscalPeriodFocus contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_612">FY</dei:DocumentFiscalPeriodFocus>
+    <dei:EntityIncorporationStateCountryCode contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_997">T3</dei:EntityIncorporationStateCountryCode>
+    <dei:DocumentAccountingStandard contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_996">International Financial Reporting Standards</dei:DocumentAccountingStandard>
+    <dei:EntityShellCompany contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_995">false</dei:EntityShellCompany>
+    <dei:DocumentType contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_847">20-F</dei:DocumentType>
+    <dei:DocumentRegistrationStatement contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_993">false</dei:DocumentRegistrationStatement>
+    <dei:DocumentAnnualReport contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_848">true</dei:DocumentAnnualReport>
+    <dei:DocumentPeriodEndDate contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_849">2022-06-30</dei:DocumentPeriodEndDate>
+    <dei:DocumentTransitionReport contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_850">false</dei:DocumentTransitionReport>
+    <dei:DocumentShellCompanyReport contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_994">false</dei:DocumentShellCompanyReport>
+    <dei:EntityFileNumber contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_851">0-28800</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_852">DRDGOLD LIMITED</dei:EntityRegistrantName>
+    <dei:EntityAddressAddressLine1 contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_998">Constantia Office Park Cnr 14th Avenue and Hendrik Potgieter Road Cycad House, Building 17, Ground Floor</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressAddressLine1 contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_dei_EntityAddressesAddressTypeAxis_dei_BusinessContactMember" id="ID_1007">Constantia Office Park Cnr 14th Avenue and Hendrik Potgieter Road Cycad House, Building 17, Ground Floor</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_999">Weltevreden Park</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressCityOrTown contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_dei_EntityAddressesAddressTypeAxis_dei_BusinessContactMember" id="ID_1008">Weltevreden Park</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressPostalZipCode contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_1000">1709</dei:EntityAddressPostalZipCode>
+    <dei:EntityAddressPostalZipCode contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_dei_EntityAddressesAddressTypeAxis_dei_BusinessContactMember" id="ID_1009">1709</dei:EntityAddressPostalZipCode>
+    <dei:EntityAddressCountry contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_1001">ZA</dei:EntityAddressCountry>
+    <dei:EntityAddressCountry contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_dei_EntityAddressesAddressTypeAxis_dei_BusinessContactMember" id="ID_1010">ZA</dei:EntityAddressCountry>
+    <dei:ContactPersonnelName contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_dei_EntityAddressesAddressTypeAxis_dei_BusinessContactMember" id="ID_1002">Riaan Davel</dei:ContactPersonnelName>
+    <dei:CountryRegion contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_dei_EntityAddressesAddressTypeAxis_dei_BusinessContactMember" id="ID_1004">27</dei:CountryRegion>
+    <dei:CityAreaCode contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_dei_EntityAddressesAddressTypeAxis_dei_BusinessContactMember" id="ID_1005">11</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_dei_EntityAddressesAddressTypeAxis_dei_BusinessContactMember" id="ID_1006">470 2600</dei:LocalPhoneNumber>
+    <dei:ContactPersonnelEmailAddress contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_dei_EntityAddressesAddressTypeAxis_dei_BusinessContactMember" id="ID_1003">riaan.davel@drdgold.com</dei:ContactPersonnelEmailAddress>
+    <dei:Security12bTitle contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_853">Ordinary shares (traded in the form of American Depositary Shares, each American Depositary Share representing ten underlying ordinary shares.)</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_854">DRD</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_855">NYSE</dei:SecurityExchangeName>
+    <dei:EntityCommonStockSharesOutstanding contextRef="AS_OF_Jun30_2022_Entity_0001023512" decimals="INF" id="ID_684" unitRef="shares">864588711</dei:EntityCommonStockSharesOutstanding>
+    <dei:EntityWellKnownSeasonedIssuer contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_856">No</dei:EntityWellKnownSeasonedIssuer>
+    <dei:EntityVoluntaryFilers contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_857">No</dei:EntityVoluntaryFilers>
+    <dei:EntityCurrentReportingStatus contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_858">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityInteractiveDataCurrent contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_859">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityFilerCategory contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_860">Accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntityEmergingGrowthCompany contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_861">false</dei:EntityEmergingGrowthCompany>
+    <dei:IcfrAuditorAttestationFlag contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_1504">true</dei:IcfrAuditorAttestationFlag>
+    <dei:AuditorFirmId contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_1505">1025</dei:AuditorFirmId>
+    <dei:AuditorName contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_1317">KPMG Inc.</dei:AuditorName>
+    <dei:AuditorLocation contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" id="ID_1318">Johannesburg, Republic of South Africa</dei:AuditorLocation>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1087" unitRef="ZAR">5118500000</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_468" unitRef="ZAR">5269000000.0</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_204" unitRef="ZAR">4185000000.0</ifrs-full:Revenue>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1078" unitRef="ZAR">3741500000</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_453" unitRef="ZAR">3388200000</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_223" unitRef="ZAR">2937900000</ifrs-full:CostOfSales>
+    <ifrs-full:GrossProfit contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_469" unitRef="ZAR">1377000000.0</ifrs-full:GrossProfit>
+    <ifrs-full:GrossProfit contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_224" unitRef="ZAR">1880800000</ifrs-full:GrossProfit>
+    <ifrs-full:GrossProfit contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_3" unitRef="ZAR">1247100000</ifrs-full:GrossProfit>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1079" unitRef="ZAR">91300000</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_454" unitRef="ZAR">100000</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_225" unitRef="ZAR">700000</ifrs-full:OtherIncome>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1088" unitRef="ZAR">161200000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_470" unitRef="ZAR">64000000.0</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_266" unitRef="ZAR">309900000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:ProfitLossFromOperatingActivities contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1083" unitRef="ZAR">1307100000</ifrs-full:ProfitLossFromOperatingActivities>
+    <ifrs-full:ProfitLossFromOperatingActivities contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_458" unitRef="ZAR">1816900000</ifrs-full:ProfitLossFromOperatingActivities>
+    <ifrs-full:ProfitLossFromOperatingActivities contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_4" unitRef="ZAR">937900000</ifrs-full:ProfitLossFromOperatingActivities>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1080" unitRef="ZAR">225800000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_455" unitRef="ZAR">216200000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_226" unitRef="ZAR">109800000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1084" unitRef="ZAR">74800000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_459" unitRef="ZAR">69500000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_5" unitRef="ZAR">68800000</ifrs-full:FinanceCosts>
+    <ifrs-full:ProfitLossBeforeTax contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1085" unitRef="ZAR">1458100000</ifrs-full:ProfitLossBeforeTax>
+    <ifrs-full:ProfitLossBeforeTax contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_460" unitRef="ZAR">1963600000</ifrs-full:ProfitLossBeforeTax>
+    <ifrs-full:ProfitLossBeforeTax contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_6" unitRef="ZAR">978900000</ifrs-full:ProfitLossBeforeTax>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1081" unitRef="ZAR">334300000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_456" unitRef="ZAR">523700000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_227" unitRef="ZAR">343900000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1082" unitRef="ZAR">1123800000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_457" unitRef="ZAR">1439900000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-6" id="ID_228" unitRef="ZAR">635000000.0</ifrs-full:ProfitLoss>
+    <ifrs-full:OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_591" unitRef="ZAR">-9100000</ifrs-full:OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_592" unitRef="ZAR">-34400000</ifrs-full:OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_593" unitRef="ZAR">190600000</ifrs-full:OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_594" unitRef="ZAR">-15700000</ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_691" unitRef="ZAR">-28200000</ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_692" unitRef="ZAR">191800000</ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_586" unitRef="ZAR">-6600000</ifrs-full:IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome>
+    <ifrs-full:IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_708" unitRef="ZAR">6200000</ifrs-full:IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome>
+    <ifrs-full:IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_709" unitRef="ZAR">1200000</ifrs-full:IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome>
+    <ifrs-full:OtherComprehensiveIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1089" unitRef="ZAR">-9100000</ifrs-full:OtherComprehensiveIncome>
+    <ifrs-full:OtherComprehensiveIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_471" unitRef="ZAR">-34400000</ifrs-full:OtherComprehensiveIncome>
+    <ifrs-full:OtherComprehensiveIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_7" unitRef="ZAR">190600000</ifrs-full:OtherComprehensiveIncome>
+    <ifrs-full:ComprehensiveIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1086" unitRef="ZAR">1114700000</ifrs-full:ComprehensiveIncome>
+    <ifrs-full:ComprehensiveIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_461" unitRef="ZAR">1405500000</ifrs-full:ComprehensiveIncome>
+    <ifrs-full:ComprehensiveIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_473" unitRef="ZAR">825600000</ifrs-full:ComprehensiveIncome>
+    <ifrs-full:BasicEarningsLossPerShare contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="5" id="ID_1378" unitRef="Earnings_per_share">1.312</ifrs-full:BasicEarningsLossPerShare>
+    <ifrs-full:BasicEarningsLossPerShare contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="5" id="ID_1374" unitRef="Earnings_per_share">1.684</ifrs-full:BasicEarningsLossPerShare>
+    <ifrs-full:BasicEarningsLossPerShare contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="5" id="ID_1375" unitRef="Earnings_per_share">0.825</ifrs-full:BasicEarningsLossPerShare>
+    <ifrs-full:DilutedEarningsLossPerShare contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="5" id="ID_1379" unitRef="Earnings_per_share">1.306</ifrs-full:DilutedEarningsLossPerShare>
+    <ifrs-full:DilutedEarningsLossPerShare contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="5" id="ID_1376" unitRef="Earnings_per_share">1.672</ifrs-full:DilutedEarningsLossPerShare>
+    <ifrs-full:DilutedEarningsLossPerShare contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="4" id="ID_1377" unitRef="Earnings_per_share">0.810</ifrs-full:DilutedEarningsLossPerShare>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember" decimals="-5" id="ID_27" unitRef="ZAR">635000000.0</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-6" id="ID_228A" unitRef="ZAR">635000000.0</ifrs-full:ProfitLoss>
+    <ifrs-full:OtherComprehensiveIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember" decimals="-5" id="ID_425" unitRef="ZAR">190600000</ifrs-full:OtherComprehensiveIncome>
+    <ifrs-full:OtherComprehensiveIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_7A" unitRef="ZAR">190600000</ifrs-full:OtherComprehensiveIncome>
+    <ifrs-full:ComprehensiveIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember" decimals="-5" id="ID_566" unitRef="ZAR">825600000</ifrs-full:ComprehensiveIncome>
+    <ifrs-full:ComprehensiveIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_473A" unitRef="ZAR">825600000</ifrs-full:ComprehensiveIncome>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember" decimals="-5" id="ID_244" unitRef="ZAR">1439900000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_457A" unitRef="ZAR">1439900000</ifrs-full:ProfitLoss>
+    <ifrs-full:OtherComprehensiveIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember" decimals="-5" id="ID_245" unitRef="ZAR">-34400000</ifrs-full:OtherComprehensiveIncome>
+    <ifrs-full:OtherComprehensiveIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_471A" unitRef="ZAR">-34400000</ifrs-full:OtherComprehensiveIncome>
+    <ifrs-full:ComprehensiveIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember" decimals="-5" id="ID_474" unitRef="ZAR">1405500000</ifrs-full:ComprehensiveIncome>
+    <ifrs-full:ComprehensiveIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_461A" unitRef="ZAR">1405500000</ifrs-full:ComprehensiveIncome>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember" decimals="-5" id="ID_1108" unitRef="ZAR">1123800000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1082A" unitRef="ZAR">1123800000</ifrs-full:ProfitLoss>
+    <ifrs-full:OtherComprehensiveIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember" decimals="-5" id="ID_1109" unitRef="ZAR">-9100000</ifrs-full:OtherComprehensiveIncome>
+    <ifrs-full:OtherComprehensiveIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1089A" unitRef="ZAR">-9100000</ifrs-full:OtherComprehensiveIncome>
+    <ifrs-full:ComprehensiveIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember" decimals="-5" id="ID_1112" unitRef="ZAR">1114700000</ifrs-full:ComprehensiveIncome>
+    <ifrs-full:ComprehensiveIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1086AA" unitRef="ZAR">1114700000</ifrs-full:ComprehensiveIncome>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1087A" unitRef="ZAR">5118500000</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_468A" unitRef="ZAR">5269000000.0</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_204A" unitRef="ZAR">4185000000.0</ifrs-full:Revenue>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1078A" unitRef="ZAR">3741500000</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_453A" unitRef="ZAR">3388200000</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_223A" unitRef="ZAR">2937900000</ifrs-full:CostOfSales>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1079A" unitRef="ZAR">91300000</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_454A" unitRef="ZAR">100000</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_225A" unitRef="ZAR">700000</ifrs-full:OtherIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1080A" unitRef="ZAR">225800000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_455A" unitRef="ZAR">216200000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_226A" unitRef="ZAR">109800000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1084A" unitRef="ZAR">74800000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_459A" unitRef="ZAR">69500000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_5A" unitRef="ZAR">68800000</ifrs-full:FinanceCosts>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1082AA" unitRef="ZAR">1123800000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_457AA" unitRef="ZAR">1439900000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-6" id="ID_228AA" unitRef="ZAR">635000000.0</ifrs-full:ProfitLoss>
+    <ifrs-full:BasicEarningsLossPerShare contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="5" id="ID_1378A" unitRef="Earnings_per_share">1.312</ifrs-full:BasicEarningsLossPerShare>
+    <ifrs-full:BasicEarningsLossPerShare contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="5" id="ID_1374A" unitRef="Earnings_per_share">1.684</ifrs-full:BasicEarningsLossPerShare>
+    <ifrs-full:BasicEarningsLossPerShare contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="5" id="ID_1375A" unitRef="Earnings_per_share">0.825</ifrs-full:BasicEarningsLossPerShare>
+    <ifrs-full:DilutedEarningsLossPerShare contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="5" id="ID_1379A" unitRef="Earnings_per_share">1.306</ifrs-full:DilutedEarningsLossPerShare>
+    <ifrs-full:DilutedEarningsLossPerShare contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="5" id="ID_1376A" unitRef="Earnings_per_share">1.672</ifrs-full:DilutedEarningsLossPerShare>
+    <ifrs-full:DilutedEarningsLossPerShare contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="2" id="ID_1377A" unitRef="Earnings_per_share">0.810</ifrs-full:DilutedEarningsLossPerShare>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1082AAA" unitRef="ZAR">1123800000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_457AAA" unitRef="ZAR">1439900000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-6" id="ID_228AAA" unitRef="ZAR">635000000.0</ifrs-full:ProfitLoss>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1081AA" unitRef="ZAR">334300000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_456A" unitRef="ZAR">523700000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_227A" unitRef="ZAR">343900000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1081AAA" unitRef="ZAR">334300000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_456AA" unitRef="ZAR">523700000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_227AA" unitRef="ZAR">343900000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1081AAAA" unitRef="ZAR">334300000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_456AAA" unitRef="ZAR">523700000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:IncomeTaxExpenseContinuingOperations contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_227AAA" unitRef="ZAR">343900000</ifrs-full:IncomeTaxExpenseContinuingOperations>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_786" unitRef="ZAR">3704900000</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_787" unitRef="ZAR">1413600000</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_810" unitRef="ZAR">0</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1087AA" unitRef="ZAR">5118500000</ifrs-full:Revenue>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1392" unitRef="ZAR">70100000</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1393" unitRef="ZAR">21200000</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1394" unitRef="ZAR">0</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1079AA" unitRef="ZAR">91300000</ifrs-full:OtherIncome>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_794" unitRef="ZAR">7700000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_795" unitRef="ZAR">13800000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_814" unitRef="ZAR">139700000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1088A" unitRef="ZAR">161200000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1395" unitRef="ZAR">22400000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1396" unitRef="ZAR">19000000.0</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1397" unitRef="ZAR">184400000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1080AA" unitRef="ZAR">225800000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1398" unitRef="ZAR">58800000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1399" unitRef="ZAR">10800000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1400" unitRef="ZAR">5200000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1084AA" unitRef="ZAR">74800000</ifrs-full:FinanceCosts>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1407" unitRef="ZAR">530900000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1408" unitRef="ZAR">570200000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1409" unitRef="ZAR">22700000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1082AAAA" unitRef="ZAR">1123800000</ifrs-full:ProfitLoss>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1019" unitRef="ZAR">3141800000</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1020" unitRef="ZAR">592100000</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1025" unitRef="ZAR">7600000</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_1078AA" unitRef="ZAR">3741500000</ifrs-full:CostOfSales>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_820" unitRef="ZAR">3943000000.0</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_821" unitRef="ZAR">1326000000.0</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_712" unitRef="ZAR">0</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_468AA" unitRef="ZAR">5269000000.0</ifrs-full:Revenue>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1414" unitRef="ZAR">100000</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1415" unitRef="ZAR">0</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1416" unitRef="ZAR">0</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_454AA" unitRef="ZAR">100000</ifrs-full:OtherIncome>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1417" unitRef="ZAR">-15000000.0</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1418" unitRef="ZAR">-1800000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1419" unitRef="ZAR">80800000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_470A" unitRef="ZAR">64000000.0</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1420" unitRef="ZAR">21000000.0</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1421" unitRef="ZAR">17200000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1422" unitRef="ZAR">178000000.0</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_455AA" unitRef="ZAR">216200000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1423" unitRef="ZAR">45800000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1424" unitRef="ZAR">9800000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1425" unitRef="ZAR">13900000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_459AA" unitRef="ZAR">69500000</ifrs-full:FinanceCosts>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1432" unitRef="ZAR">799600000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1433" unitRef="ZAR">553000000.0</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1434" unitRef="ZAR">87300000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_457AAAA" unitRef="ZAR">1439900000</ifrs-full:ProfitLoss>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1027" unitRef="ZAR">2871000000.0</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1028" unitRef="ZAR">517200000</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1035" unitRef="ZAR">0</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_453AA" unitRef="ZAR">3388200000</ifrs-full:CostOfSales>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1235" unitRef="ZAR">3064300000</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1236" unitRef="ZAR">1120700000</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_717" unitRef="ZAR">0</ifrs-full:Revenue>
+    <ifrs-full:Revenue contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_204AA" unitRef="ZAR">4185000000.0</ifrs-full:Revenue>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1435" unitRef="ZAR">700000</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1436" unitRef="ZAR">0</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1437" unitRef="ZAR">0</ifrs-full:OtherIncome>
+    <ifrs-full:OtherIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_225AA" unitRef="ZAR">700000</ifrs-full:OtherIncome>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1438" unitRef="ZAR">131600000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1439" unitRef="ZAR">20700000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1440" unitRef="ZAR">157600000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:OperatingExpenseExcludingCostOfSales contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_266A" unitRef="ZAR">309900000</ifrs-full:OperatingExpenseExcludingCostOfSales>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1441" unitRef="ZAR">28900000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1442" unitRef="ZAR">28100000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1443" unitRef="ZAR">52800000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceIncome contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_226AA" unitRef="ZAR">109800000</ifrs-full:FinanceIncome>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1444" unitRef="ZAR">48800000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1445" unitRef="ZAR">14300000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1446" unitRef="ZAR">5700000</ifrs-full:FinanceCosts>
+    <ifrs-full:FinanceCosts contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_5AA" unitRef="ZAR">68800000</ifrs-full:FinanceCosts>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1491" unitRef="ZAR">320900000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1492" unitRef="ZAR">436600000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1493" unitRef="ZAR">-122500000</ifrs-full:ProfitLoss>
+    <ifrs-full:ProfitLoss contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-6" id="ID_228AAAA" unitRef="ZAR">635000000.0</ifrs-full:ProfitLoss>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember" decimals="-5" id="ID_1038" unitRef="ZAR">2453400000</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember" decimals="-5" id="ID_1039" unitRef="ZAR">473300000</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember" decimals="-5" id="ID_1052" unitRef="ZAR">11200000</ifrs-full:CostOfSales>
+    <ifrs-full:CostOfSales contextRef="FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512" decimals="-5" id="ID_223AA" unitRef="ZAR">2937900000</ifrs-full:CostOfSales>
+    <ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512" decimals="-5" id="ID_594A" unitRef="ZAR">-15700000</ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512" decimals="-5" id="ID_691A" unitRef="ZAR">-28200000</ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_WestwitsmininglimitedwwmMember" decimals="-5" id="ID_1246" unitRef="ZAR">-32800000</ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_WestwitsmininglimitedwwmMember" decimals="-5" id="ID_1247" unitRef="ZAR">31500000</ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_RandRefineryProprietaryLimitedMember" decimals="-5" id="ID_1248" unitRef="ZAR">16800000</ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_RandRefineryProprietaryLimitedMember" decimals="-5" id="ID_1249" unitRef="ZAR">-59100000</ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_RandmutualassurancecompanylimitedMember" decimals="-5" id="ID_1250" unitRef="ZAR">300000</ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments>
+    <ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments contextRef="FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_CounterpartiesAxis_drd_RandmutualassurancecompanylimitedMember" decimals="-5" id="ID_1251" unitRef="ZAR">-600000</ifrs-full:OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments>
+    </xbrl>

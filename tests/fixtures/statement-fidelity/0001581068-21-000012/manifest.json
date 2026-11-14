@@ -1,0 +1,15 @@
+{
+ "accession": "0001581068-21-000012",
+ "filer": "Brixmor Property Group Inc.",
+ "form": "10-K",
+ "filing_date": "2021-02-11",
+ "role": "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+ "page": "R8.htm",
+ "short_name": "CONSOLIDATED STATEMENTS OF CASH FLOWS",
+ "sic": "6798",
+ "period_of_report": "2020-12-31",
+ "menu_categories": {
+  "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": "Statements"
+ },
+ "access": "cash_flow_statement()"
+}

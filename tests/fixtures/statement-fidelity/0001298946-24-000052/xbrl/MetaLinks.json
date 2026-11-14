@@ -1,0 +1,1223 @@
+{
+ "version": "2.2",
+ "instance": {
+  "drh-20240331.htm": {
+   "tag": {
+    "us-gaap_AccountsPayableAndAccruedLiabilitiesCurrentAndNoncurrent": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AccountsPayableAndAccruedLiabilitiesCurrentAndNoncurrent",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0,
+       "order": 8.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Accounts payable and accrued expenses",
+        "label": "Accounts Payable and Accrued Liabilities",
+        "documentation": "Sum of the carrying values as of the balance sheet date of obligations incurred through that date, including liabilities incurred and payable to vendors for goods and services received, taxes, interest, rent and utilities, compensation costs, payroll taxes and fringe benefits (other than pension and postretirement obligations), contractual rights and obligations, and statutory obligations."
+       }
+      }
+     }
+    },
+    "us-gaap_AccruedRentCurrentAndNoncurrent": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AccruedRentCurrentAndNoncurrent",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0,
+       "order": 5.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Deferred rent",
+        "label": "Accrued Rent",
+        "documentation": "Carrying value as of the balance sheet date of obligations incurred through that date and payable for contractual rent under lease arrangements."
+       }
+      }
+     }
+    },
+    "us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Accumulated other comprehensive loss",
+        "label": "Accumulated Other Comprehensive Income (Loss), Net of Tax",
+        "documentation": "Amount, after tax, of accumulated increase (decrease) in equity from transaction and other event and circumstance from nonowner source."
+       }
+      }
+     }
+    },
+    "us-gaap_AccumulatedOtherComprehensiveIncomeMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AccumulatedOtherComprehensiveIncomeMember",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFEQUITY"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Accumulated Other Comprehensive Income (Loss)",
+        "label": "AOCI Attributable to Parent [Member]",
+        "documentation": "Accumulated increase (decrease) in equity from transactions and other events and circumstances from non-owner sources, attributable to the parent. Excludes net income (loss), and accumulated changes in equity from transactions resulting from investments by owners and distributions to owners."
+       }
+      }
+     }
+    },
+    "us-gaap_AdditionalPaidInCapital": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AdditionalPaidInCapital",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0,
+       "order": 5.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Additional paid-in capital",
+        "label": "Additional Paid in Capital",
+        "documentation": "Amount of excess of issue price over par or stated value of stock and from other transaction involving stock or stockholder. Includes, but is not limited to, additional paid-in capital (APIC) for common and preferred stock."
+       }
+      }
+     }
+    },
+    "us-gaap_AdditionalPaidInCapitalMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AdditionalPaidInCapitalMember",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFEQUITY"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Additional Paid-In Capital",
+        "label": "Additional Paid-in Capital [Member]",
+        "documentation": "Excess of issue price over par or stated value of the entity's capital stock and amounts received from other transactions involving the entity's stock or stockholders."
+       }
+      }
+     }
+    },
+    "us-gaap_Assets": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "Assets",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total assets",
+        "label": "Assets",
+        "documentation": "Sum of the carrying amounts as of the balance sheet date of all assets that are recognized. Assets are probable future economic benefits obtained or controlled by an entity as a result of past transactions or events."
+       }
+      }
+     }
+    },
+    "us-gaap_AssetsAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AssetsAbstract",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "ASSETS",
+        "label": "Assets [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_CarryingReportedAmountFairValueDisclosureMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CarryingReportedAmountFairValueDisclosureMember",
+     "presentation": [
+      "http://www.drhc.com/role/FairValueMeasurementsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Carrying Amount",
+        "label": "Reported Value Measurement [Member]",
+        "documentation": "Measured as reported on the statement of financial position (balance sheet)."
+       }
+      }
+     }
+    },
+    "us-gaap_CashAndCashEquivalentsAtCarryingValue": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CashAndCashEquivalentsAtCarryingValue",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+       "weight": 1.0,
+       "order": 1.0
+      },
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0,
+       "order": 6.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Cash and cash equivalents",
+        "terseLabel": "Cash and cash equivalents",
+        "label": "Cash and Cash Equivalents, at Carrying Value",
+        "documentation": "Amount of currency on hand as well as demand deposits with banks or financial institutions. Includes other kinds of accounts that have the general characteristics of demand deposits. Also includes short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates. Excludes cash and cash equivalents within disposal group and discontinued operation."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonStockMember",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFEQUITY",
+      "http://www.drhc.com/role/Cover",
+      "http://www.drhc.com/role/EquityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Common Stock",
+        "label": "Common Stock [Member]",
+        "documentation": "Stock that is subordinate to all other stock of the issuer."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockParOrStatedValuePerShare": {
+     "xbrltype": "perShareItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonStockParOrStatedValuePerShare",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.drhc.com/role/EquityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Common stock, par value (in dollars per share)",
+        "label": "Common Stock, Par or Stated Value Per Share",
+        "documentation": "Face amount or stated value per share of common stock."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockSharesAuthorized": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonStockSharesAuthorized",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.drhc.com/role/EquityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Common stock, shares authorized (in shares)",
+        "terseLabel": "Common stock, shares authorized (in shares)",
+        "label": "Common Stock, Shares Authorized",
+        "documentation": "The maximum number of common shares permitted to be issued by an entity's charter and bylaws."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockSharesIssued": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonStockSharesIssued",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Common stock, shares issued (in shares)",
+        "label": "Common Stock, Shares, Issued",
+        "documentation": "Total number of common shares of an entity that have been sold or granted to shareholders (includes common shares that were issued, repurchased and remain in the treasury). These shares represent capital invested by the firm's shareholders and owners, and may be all or only a portion of the number of shares authorized. Shares issued include shares outstanding and shares held in the treasury."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockSharesOutstanding": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonStockSharesOutstanding",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Common stock, shares outstanding (in shares)",
+        "label": "Common Stock, Shares, Outstanding",
+        "documentation": "Number of shares of common stock outstanding. Common stock represent the ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockValue": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonStockValue",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Common stock, $0.01 par value; 400,000,000 shares authorized; 210,064,433 and 209,627,197 shares issued and outstanding at March 31, 2024 and December 31, 2023, respectively",
+        "label": "Common Stock, Value, Issued",
+        "documentation": "Aggregate par or stated value of issued nonredeemable common stock (or common stock redeemable solely at the option of the issuer). This item includes treasury stock repurchased by the entity. Note: elements for number of nonredeemable common shares, par value and other disclosure concepts are in another section within stockholders' equity."
+       }
+      }
+     }
+    },
+    "us-gaap_ContractWithCustomerLiability": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "ContractWithCustomerLiability",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Deferred income related to key money, net",
+        "label": "Contract with Customer, Liability",
+        "documentation": "Amount of obligation to transfer good or service to customer for which consideration has been received or is receivable."
+       }
+      }
+     }
+    },
+    "us-gaap_DividendsPayableCurrentAndNoncurrent": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "DividendsPayableCurrentAndNoncurrent",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Distributions declared and unpaid",
+        "label": "Dividends Payable",
+        "documentation": "Carrying value as of the balance sheet date of dividends declared but unpaid on equity securities issued by the entity and outstanding."
+       }
+      }
+     }
+    },
+    "drh_DueFromManagers": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.drhc.com/20240331",
+     "localname": "DueFromManagers",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0,
+       "order": 4.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Due from hotel managers",
+        "label": "Due From Managers",
+        "documentation": "Amount due from hotel managers consists of hotel level accounts receivable, periodic hotel operating distributions due to owner and prepaid and other assets held by the hotel managers on behalf of the reporting entity."
+       }
+      }
+     }
+    },
+    "drh_DueToManagers": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.drhc.com/20240331",
+     "localname": "DueToManagers",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0,
+       "order": 6.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Due to hotel managers",
+        "label": "Due To Managers",
+        "documentation": "Amount due to hotel managers represents liabilities incurred by the hotel on behalf of the reporting entity in conjunction with the operation of the hotels which are the legal obligations of the reporting entity."
+       }
+      }
+     }
+    },
+    "us-gaap_FairValueByMeasurementBasisAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "FairValueByMeasurementBasisAxis",
+     "presentation": [
+      "http://www.drhc.com/role/FairValueMeasurementsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Measurement Basis [Axis]",
+        "label": "Measurement Basis [Axis]",
+        "documentation": "Information by measurement basis."
+       }
+      }
+     }
+    },
+    "us-gaap_Liabilities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "Liabilities",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total liabilities",
+        "label": "Liabilities",
+        "documentation": "Sum of the carrying amounts as of the balance sheet date of all liabilities that are recognized. Liabilities are probable future sacrifices of economic benefits arising from present obligations of an entity to transfer assets or provide services to other entities in the future."
+       }
+      }
+     }
+    },
+    "us-gaap_LiabilitiesAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "LiabilitiesAbstract",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Liabilities:",
+        "label": "Liabilities [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_LiabilitiesAndStockholdersEquity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "LiabilitiesAndStockholdersEquity",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total liabilities and equity",
+        "label": "Liabilities and Equity",
+        "documentation": "Amount of liabilities and equity items, including the portion of equity attributable to noncontrolling interests, if any."
+       }
+      }
+     }
+    },
+    "us-gaap_LiabilitiesAndStockholdersEquityAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "LiabilitiesAndStockholdersEquityAbstract",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "LIABILITIES AND EQUITY",
+        "label": "Liabilities and Equity [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_LongTermDebt": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "LongTermDebt",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0,
+       "order": 1.0
+      },
+      "http://www.drhc.com/role/DebtScheduleofLongTermDebtDetails": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.drhc.com/role/DebtScheduleofLongTermDebtDetails",
+      "http://www.drhc.com/role/FairValueMeasurementsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Debt, net of unamortized debt issuance costs",
+        "totalLabel": "Debt, net of unamortized debt issuance costs",
+        "verboseLabel": "Carrying Amount",
+        "label": "Long-Term Debt",
+        "documentation": "Amount, after deduction of unamortized premium (discount) and debt issuance cost, of long-term debt. Excludes lease obligation."
+       }
+      }
+     }
+    },
+    "us-gaap_MinorityInterest": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "MinorityInterest",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Noncontrolling interests",
+        "label": "Equity, Attributable to Noncontrolling Interest",
+        "documentation": "Amount of equity (deficit) attributable to noncontrolling interest. Excludes temporary equity."
+       }
+      }
+     }
+    },
+    "us-gaap_NoncontrollingInterestMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "NoncontrollingInterestMember",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFEQUITY"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Noncontrolling Interests",
+        "label": "Noncontrolling Interest [Member]",
+        "documentation": "This element represents that portion of equity (net assets) in a subsidiary not attributable, directly or indirectly, to the parent. A noncontrolling interest is sometimes called a minority interest."
+       }
+      }
+     }
+    },
+    "us-gaap_OffMarketLeaseUnfavorable": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "OffMarketLeaseUnfavorable",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0,
+       "order": 4.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Unfavorable contract liabilities, net",
+        "label": "Off-Market Lease, Unfavorable",
+        "documentation": "This element represents a liability associated with the acquisition of an off-market lease when the terms of the lease are unfavorable to the market terms for the lease at the date of acquisition."
+       }
+      }
+     }
+    },
+    "us-gaap_OperatingLeaseLiability": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "OperatingLeaseLiability",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0,
+       "order": 7.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Lease liabilities",
+        "label": "Operating Lease, Liability",
+        "documentation": "Present value of lessee's discounted obligation for lease payments from operating lease."
+       }
+      }
+     }
+    },
+    "us-gaap_OperatingLeaseRightOfUseAsset": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "OperatingLeaseRightOfUseAsset",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Right-of-use assets",
+        "label": "Operating Lease, Right-of-Use Asset",
+        "documentation": "Amount of lessee's right to use underlying asset under operating lease."
+       }
+      }
+     }
+    },
+    "us-gaap_ParentMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "ParentMember",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFEQUITY"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Total Stockholders' Equity",
+        "label": "Parent [Member]",
+        "documentation": "Portion of equity, or net assets, in the consolidated entity attributable, directly or indirectly, to the parent. Excludes noncontrolling interests."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredStockDividendRatePercentage": {
+     "xbrltype": "percentItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "PreferredStockDividendRatePercentage",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.drhc.com/role/EquityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Preferred stock, dividend rate (as a percent)",
+        "label": "Preferred Stock, Dividend Rate, Percentage",
+        "documentation": "The percentage rate used to calculate dividend payments on preferred stock."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredStockLiquidationPreference": {
+     "xbrltype": "perShareItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "PreferredStockLiquidationPreference",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.drhc.com/role/EquityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Liquidation preference per share (in dollars per share)",
+        "label": "Preferred Stock, Liquidation Preference Per Share",
+        "documentation": "The per share liquidation preference (or restrictions) of nonredeemable preferred stock (or preferred stock redeemable solely at the option of the issuer) that has a preference in involuntary liquidation considerably in excess of the par or stated value of the shares. The liquidation preference is the difference between the preference in liquidation and the par or stated values of the share."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredStockMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "PreferredStockMember",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFEQUITY"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Preferred Stock",
+        "label": "Preferred Stock [Member]",
+        "documentation": "Preferred shares may provide a preferential dividend to the dividend on common stock and may take precedence over common stock in the event of a liquidation. Preferred shares typically represent an ownership interest in the company."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredStockParOrStatedValuePerShare": {
+     "xbrltype": "perShareItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "PreferredStockParOrStatedValuePerShare",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.drhc.com/role/EquityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Preferred stock, par value (in dollars per share)",
+        "label": "Preferred Stock, Par or Stated Value Per Share",
+        "documentation": "Face amount or stated value per share of preferred stock nonredeemable or redeemable solely at the option of the issuer."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredStockSharesAuthorized": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "PreferredStockSharesAuthorized",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.drhc.com/role/EquityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Preferred stock, shares authorized (in shares)",
+        "verboseLabel": "Preferred stock, shares authorized (up to) (in shares)",
+        "label": "Preferred Stock, Shares Authorized",
+        "documentation": "The maximum number of nonredeemable preferred shares (or preferred stock redeemable solely at the option of the issuer) permitted to be issued by an entity's charter and bylaws."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredStockSharesIssued": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "PreferredStockSharesIssued",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Preferred stock, shares issued (in shares)",
+        "label": "Preferred Stock, Shares Issued",
+        "documentation": "Total number of nonredeemable preferred shares (or preferred stock redeemable solely at the option of the issuer) issued to shareholders (includes related preferred shares that were issued, repurchased, and remain in the treasury). May be all or portion of the number of preferred shares authorized. Excludes preferred shares that are classified as debt."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredStockSharesOutstanding": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "PreferredStockSharesOutstanding",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Preferred stock, shares outstanding (in shares)",
+        "label": "Preferred Stock, Shares Outstanding",
+        "documentation": "Aggregate share number for all nonredeemable preferred stock (or preferred stock redeemable solely at the option of the issuer) held by stockholders. Does not include preferred shares that have been repurchased."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredStockValue": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "PreferredStockValue",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Preferred stock, $0.01 par value; 10,000,000 shares authorized: 8.250% Series A Cumulative Redeemable Preferred Stock (liquidation preference $25.00 per share), 4,760,000 shares issued and outstanding at March 31, 2024 and December 31, 2023",
+        "label": "Preferred Stock, Value, Issued",
+        "documentation": "Aggregate par or stated value of issued nonredeemable preferred stock (or preferred stock redeemable solely at the option of the issuer). This item includes treasury stock repurchased by the entity. Note: elements for number of nonredeemable preferred shares, par value and other disclosure concepts are in another section within stockholders' equity."
+       }
+      }
+     }
+    },
+    "us-gaap_PrepaidExpenseAndOtherAssets": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "PrepaidExpenseAndOtherAssets",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0,
+       "order": 5.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Prepaid and other assets",
+        "label": "Prepaid Expense and Other Assets",
+        "documentation": "Amount of asset related to consideration paid in advance for costs that provide economic benefits in future periods, and amount of other assets."
+       }
+      }
+     }
+    },
+    "us-gaap_PropertyPlantAndEquipmentNet": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "PropertyPlantAndEquipmentNet",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0,
+       "order": 1.0
+      },
+      "http://www.drhc.com/role/PropertyandEquipmentScheduleofPropertyandEquipmentDetails": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.drhc.com/role/PropertyandEquipmentScheduleofPropertyandEquipmentDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Property and equipment, net",
+        "totalLabel": "Property and equipment, net",
+        "label": "Property, Plant and Equipment, Net",
+        "documentation": "Amount after accumulated depreciation, depletion and amortization of physical assets used in the normal conduct of business to produce goods and services and not intended for resale. Examples include, but are not limited to, land, buildings, machinery and equipment, office equipment, and furniture and fixtures."
+       }
+      }
+     }
+    },
+    "us-gaap_RedeemablePreferredStockMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "RedeemablePreferredStockMember",
+     "presentation": [
+      "http://www.drhc.com/role/Cover"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "8.250% Series A Cumulative Redeemable Preferred Stock, $0.01 par value per share",
+        "label": "Redeemable Preferred Stock [Member]",
+        "documentation": "Description of type or class of redeemable preferred stock. For instance, cumulative preferred stock, noncumulative preferred stock, convertible or series."
+       }
+      }
+     }
+    },
+    "us-gaap_RestrictedCashAndCashEquivalents": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "RestrictedCashAndCashEquivalents",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+       "weight": 1.0,
+       "order": 2.0
+      },
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Restricted cash",
+        "terseLabel": "Restricted cash",
+        "label": "Restricted Cash and Cash Equivalents",
+        "documentation": "Amount of cash and cash equivalents restricted as to withdrawal or usage. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates."
+       }
+      }
+     }
+    },
+    "us-gaap_RetainedEarningsAccumulatedDeficit": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "RetainedEarningsAccumulatedDeficit",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0,
+       "order": 4.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Distributions in excess of earnings",
+        "label": "Retained Earnings (Accumulated Deficit)",
+        "documentation": "Amount of accumulated undistributed earnings (deficit)."
+       }
+      }
+     }
+    },
+    "us-gaap_RetainedEarningsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "RetainedEarningsMember",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFEQUITY"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Distributions in Excess of Earnings",
+        "label": "Retained Earnings [Member]",
+        "documentation": "Accumulated undistributed earnings (deficit)."
+       }
+      }
+     }
+    },
+    "us-gaap_SeriesAPreferredStockMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "SeriesAPreferredStockMember",
+     "presentation": [
+      "http://www.drhc.com/role/EquityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Series A Preferred Stock",
+        "label": "Series A Preferred Stock [Member]",
+        "documentation": "Series A preferred stock."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementClassOfStockAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StatementClassOfStockAxis",
+     "presentation": [
+      "http://www.drhc.com/role/Cover",
+      "http://www.drhc.com/role/EquityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class of Stock [Axis]",
+        "label": "Class of Stock [Axis]",
+        "documentation": "Information by the different classes of stock of the entity."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StatementEquityComponentsAxis",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFEQUITY"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Equity Components [Axis]",
+        "label": "Equity Components [Axis]",
+        "documentation": "Information by component of equity."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementOfFinancialPositionAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StatementOfFinancialPositionAbstract",
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Statement of Financial Position [Abstract]",
+        "label": "Statement of Financial Position [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_StockholdersEquity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StockholdersEquity",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total stockholders’ equity",
+        "label": "Equity, Attributable to Parent",
+        "documentation": "Amount of equity (deficit) attributable to parent. Excludes temporary equity and equity attributable to noncontrolling interest."
+       }
+      }
+     }
+    },
+    "us-gaap_StockholdersEquityAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StockholdersEquityAbstract",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Equity:",
+        "label": "Equity, Attributable to Parent [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.drhc.com/role/CONSOLIDATEDSTATEMENTSOFEQUITY"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total equity",
+        "periodStartLabel": "Beginning Balance",
+        "periodEndLabel": "Ending Balance",
+        "label": "Equity, Including Portion Attributable to Noncontrolling Interest",
+        "documentation": "Amount of equity (deficit) attributable to parent and noncontrolling interest. Excludes temporary equity."
+       }
+      }
+     }
+    },
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Stockholders' Equity:",
+        "label": "Equity, Including Portion Attributable to Noncontrolling Interest [Abstract]"
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R3": {
+     "role": "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+     "longName": "0000003 - Statement - CONSOLIDATED BALANCE SHEETS (Parenthetical)",
+     "shortName": "CONSOLIDATED BALANCE SHEETS (Parenthetical)",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "parenthetical",
+     "menuCat": "Statements",
+     "order": "3",
+     "firstAnchor": {
+      "contextRef": "c-5",
+      "name": "us-gaap:PreferredStockParOrStatedValuePerShare",
+      "unitRef": "usdPerShare",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "INF",
+      "ancestors": [
+       "us-gaap:PreferredStockParOrStatedValuePerShare",
+       "span",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "drh-20240331.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-5",
+      "name": "us-gaap:PreferredStockSharesIssued",
+      "unitRef": "shares",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "INF",
+      "ancestors": [
+       "us-gaap:PreferredStockSharesIssued",
+       "us-gaap:PreferredStockSharesOutstanding",
+       "span",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "drh-20240331.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

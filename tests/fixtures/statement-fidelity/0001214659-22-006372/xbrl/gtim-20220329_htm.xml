@@ -1,0 +1,187 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:dei="http://xbrl.sec.gov/dei/2022" xmlns:gtim="http://goodtimesburgers.com/20220329" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:pf0="http://fasb.org/srt/2022" xmlns:us-gaap="http://fasb.org/us-gaap/2022" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <link:schemaRef xlink:href="gtim-20220329.xsd" xlink:type="simple"/>
+    <context id="c0">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000825324</identifier>
+        </entity>
+        <period>
+            <startDate>2021-09-29</startDate>
+            <endDate>2022-03-29</endDate>
+        </period>
+    </context>
+    <context id="c1">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000825324</identifier>
+        </entity>
+        <period>
+            <instant>2022-05-05</instant>
+        </period>
+    </context>
+    <context id="c2">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000825324</identifier>
+        </entity>
+        <period>
+            <instant>2022-03-29</instant>
+        </period>
+    </context>
+    <context id="c3">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000825324</identifier>
+        </entity>
+        <period>
+            <instant>2021-09-28</instant>
+        </period>
+    </context>
+    <context id="c12">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000825324</identifier>
+        </entity>
+        <period>
+            <startDate>2021-12-29</startDate>
+            <endDate>2022-03-29</endDate>
+        </period>
+    </context>
+    <context id="c13">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000825324</identifier>
+        </entity>
+        <period>
+            <startDate>2020-12-30</startDate>
+            <endDate>2021-03-30</endDate>
+        </period>
+    </context>
+    <context id="c14">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000825324</identifier>
+        </entity>
+        <period>
+            <startDate>2020-09-30</startDate>
+            <endDate>2021-03-30</endDate>
+        </period>
+    </context>
+    <context id="c47">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000825324</identifier>
+        </entity>
+        <period>
+            <instant>2020-09-29</instant>
+        </period>
+    </context>
+    <context id="c70">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0000825324</identifier>
+        </entity>
+        <period>
+            <instant>2021-03-30</instant>
+        </period>
+    </context>
+    <unit id="shares">
+        <measure>shares</measure>
+    </unit>
+    <unit id="usd">
+        <measure>iso4217:USD</measure>
+    </unit>
+    <dei:DocumentType contextRef="c0">10-Q</dei:DocumentType>
+    <dei:DocumentQuarterlyReport contextRef="c0">true</dei:DocumentQuarterlyReport>
+    <dei:DocumentPeriodEndDate contextRef="c0">2022-03-29</dei:DocumentPeriodEndDate>
+    <dei:DocumentFiscalYearFocus contextRef="c0">2022</dei:DocumentFiscalYearFocus>
+    <dei:DocumentTransitionReport contextRef="c0">false</dei:DocumentTransitionReport>
+    <dei:EntityFileNumber contextRef="c0">0-18590</dei:EntityFileNumber>
+    <dei:EntityTaxIdentificationNumber contextRef="c0">84-1133368</dei:EntityTaxIdentificationNumber>
+    <dei:EntityAddressAddressLine1 contextRef="c0">651 CORPORATE CIRCLE</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="c0">GOLDEN</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c0">CO</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c0">80401</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="c0">(303)</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="c0">384-1400</dei:LocalPhoneNumber>
+    <dei:Security12bTitle contextRef="c0">Common Stock $.001 par value</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="c0">GTIM</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="c0">NASDAQ</dei:SecurityExchangeName>
+    <dei:EntityCurrentReportingStatus contextRef="c0">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityInteractiveDataCurrent contextRef="c0">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityFilerCategory contextRef="c0">Non-accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntitySmallBusiness contextRef="c0">true</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="c0">false</dei:EntityEmergingGrowthCompany>
+    <dei:EntityShellCompany contextRef="c0">false</dei:EntityShellCompany>
+    <dei:EntityCommonStockSharesOutstanding contextRef="c1" decimals="INF" unitRef="shares">12487591</dei:EntityCommonStockSharesOutstanding>
+    <us-gaap:ImpairmentOfLongLivedAssetsHeldForUse contextRef="c12" decimals="-3" unitRef="usd">1753000</us-gaap:ImpairmentOfLongLivedAssetsHeldForUse>
+    <us-gaap:ImpairmentOfLongLivedAssetsHeldForUse contextRef="c0" decimals="-3" unitRef="usd">1753000</us-gaap:ImpairmentOfLongLivedAssetsHeldForUse>
+    <us-gaap:ProfitLoss contextRef="c12" decimals="-3" unitRef="usd">-1920000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c13" decimals="-3" unitRef="usd">1523000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c0" decimals="-3" unitRef="usd">-670000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c14" decimals="-3" unitRef="usd">2688000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c0" decimals="-3" unitRef="usd">-670000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c14" decimals="-3" unitRef="usd">2688000</us-gaap:ProfitLoss>
+    <us-gaap:DepreciationAndAmortization contextRef="c0" decimals="-3" unitRef="usd">2114000</us-gaap:DepreciationAndAmortization>
+    <us-gaap:DepreciationAndAmortization contextRef="c14" decimals="-3" unitRef="usd">1938000</us-gaap:DepreciationAndAmortization>
+    <us-gaap:OperatingLeaseRightOfUseAssetAmortizationExpense contextRef="c0" decimals="-3" unitRef="usd">1751000</us-gaap:OperatingLeaseRightOfUseAssetAmortizationExpense>
+    <us-gaap:OperatingLeaseRightOfUseAssetAmortizationExpense contextRef="c14" decimals="-3" unitRef="usd">1660000</us-gaap:OperatingLeaseRightOfUseAssetAmortizationExpense>
+    <gtim:DecreaseInROUAssets contextRef="c0" decimals="-3" unitRef="usd">39000</gtim:DecreaseInROUAssets>
+    <us-gaap:ImpairmentOfLongLivedAssetsHeldForUse contextRef="c0" decimals="-3" unitRef="usd">1753000</us-gaap:ImpairmentOfLongLivedAssetsHeldForUse>
+    <us-gaap:GainsLossesOnExtinguishmentOfDebt contextRef="c0" decimals="-3" unitRef="usd">642000</us-gaap:GainsLossesOnExtinguishmentOfDebt>
+    <us-gaap:ShareBasedCompensation contextRef="c0" decimals="-3" unitRef="usd">147000</us-gaap:ShareBasedCompensation>
+    <us-gaap:ShareBasedCompensation contextRef="c14" decimals="-3" unitRef="usd">276000</us-gaap:ShareBasedCompensation>
+    <gtim:RecognitionOfDeferredGainOnSaleOfRestaurantBuilding contextRef="c0" decimals="-3" unitRef="usd">15000</gtim:RecognitionOfDeferredGainOnSaleOfRestaurantBuilding>
+    <gtim:RecognitionOfDeferredGainOnSaleOfRestaurantBuilding contextRef="c14" decimals="-3" unitRef="usd">19000</gtim:RecognitionOfDeferredGainOnSaleOfRestaurantBuilding>
+    <us-gaap:IncreaseDecreaseInAccruedIncomeTaxesPayable contextRef="c0" decimals="-3" unitRef="usd">8000</us-gaap:IncreaseDecreaseInAccruedIncomeTaxesPayable>
+    <us-gaap:IncreaseDecreaseInAccountsReceivableAndOtherOperatingAssets contextRef="c0" decimals="-3" unitRef="usd">26000</us-gaap:IncreaseDecreaseInAccountsReceivableAndOtherOperatingAssets>
+    <us-gaap:IncreaseDecreaseInAccountsReceivableAndOtherOperatingAssets contextRef="c14" decimals="-3" unitRef="usd">-221000</us-gaap:IncreaseDecreaseInAccountsReceivableAndOtherOperatingAssets>
+    <us-gaap:IncreaseDecreaseInPrepaidExpense contextRef="c0" decimals="-3" unitRef="usd">1172000</us-gaap:IncreaseDecreaseInPrepaidExpense>
+    <us-gaap:IncreaseDecreaseInInventories contextRef="c0" decimals="-3" unitRef="usd">57000</us-gaap:IncreaseDecreaseInInventories>
+    <us-gaap:IncreaseDecreaseInInventories contextRef="c14" decimals="-3" unitRef="usd">9000</us-gaap:IncreaseDecreaseInInventories>
+    <gtim:IncreaseDecreaseInIntangibleAssetsDepositsAndOther contextRef="c0" decimals="-3" unitRef="usd">-33000</gtim:IncreaseDecreaseInIntangibleAssetsDepositsAndOther>
+    <gtim:IncreaseDecreaseInIntangibleAssetsDepositsAndOther contextRef="c14" decimals="-3" unitRef="usd">605000</gtim:IncreaseDecreaseInIntangibleAssetsDepositsAndOther>
+    <us-gaap:IncreaseDecreaseInAccountsPayable contextRef="c0" decimals="-3" unitRef="usd">-370000</us-gaap:IncreaseDecreaseInAccountsPayable>
+    <us-gaap:IncreaseDecreaseInAccountsPayable contextRef="c14" decimals="-3" unitRef="usd">-860000</us-gaap:IncreaseDecreaseInAccountsPayable>
+    <gtim:IncreaseDecreaseInOperatingLeaseLiabilities contextRef="c0" decimals="-3" unitRef="usd">-1976000</gtim:IncreaseDecreaseInOperatingLeaseLiabilities>
+    <gtim:IncreaseDecreaseInOperatingLeaseLiabilities contextRef="c14" decimals="-3" unitRef="usd">-1821000</gtim:IncreaseDecreaseInOperatingLeaseLiabilities>
+    <us-gaap:IncreaseDecreaseInDeferredLiabilities contextRef="c14" decimals="-3" unitRef="usd">-12000</us-gaap:IncreaseDecreaseInDeferredLiabilities>
+    <us-gaap:IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities contextRef="c0" decimals="-3" unitRef="usd">395000</us-gaap:IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities>
+    <us-gaap:IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities contextRef="c14" decimals="-3" unitRef="usd">-225000</us-gaap:IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities>
+    <us-gaap:NetCashProvidedByUsedInOperatingActivities contextRef="c0" decimals="-3" unitRef="usd">1312000</us-gaap:NetCashProvidedByUsedInOperatingActivities>
+    <us-gaap:NetCashProvidedByUsedInOperatingActivities contextRef="c14" decimals="-3" unitRef="usd">3232000</us-gaap:NetCashProvidedByUsedInOperatingActivities>
+    <us-gaap:PaymentsToAcquirePropertyPlantAndEquipment contextRef="c0" decimals="-3" unitRef="usd">1177000</us-gaap:PaymentsToAcquirePropertyPlantAndEquipment>
+    <us-gaap:PaymentsToAcquirePropertyPlantAndEquipment contextRef="c14" decimals="-3" unitRef="usd">1184000</us-gaap:PaymentsToAcquirePropertyPlantAndEquipment>
+    <us-gaap:PaymentsToAcquireBusinessesNetOfCashAcquired contextRef="c0" decimals="-3" unitRef="usd">728000</us-gaap:PaymentsToAcquireBusinessesNetOfCashAcquired>
+    <us-gaap:ProceedsFromCollectionOfAdvanceToAffiliate contextRef="c14" decimals="-3" unitRef="usd">13000</us-gaap:ProceedsFromCollectionOfAdvanceToAffiliate>
+    <us-gaap:NetCashProvidedByUsedInInvestingActivities contextRef="c0" decimals="-3" unitRef="usd">-1905000</us-gaap:NetCashProvidedByUsedInInvestingActivities>
+    <us-gaap:NetCashProvidedByUsedInInvestingActivities contextRef="c14" decimals="-3" unitRef="usd">-1171000</us-gaap:NetCashProvidedByUsedInInvestingActivities>
+    <gtim:PaymentForPurchaseOfTreasuryStock contextRef="c0" decimals="-3" unitRef="usd">331000</gtim:PaymentForPurchaseOfTreasuryStock>
+    <us-gaap:RepaymentsOfLongTermDebt contextRef="c14" decimals="-3" unitRef="usd">2000000</us-gaap:RepaymentsOfLongTermDebt>
+    <us-gaap:ProceedsFromStockOptionsExercised contextRef="c0" decimals="-3" unitRef="usd">90000</us-gaap:ProceedsFromStockOptionsExercised>
+    <us-gaap:ProceedsFromStockOptionsExercised contextRef="c14" decimals="-3" unitRef="usd">96000</us-gaap:ProceedsFromStockOptionsExercised>
+    <us-gaap:PaymentsOfDividendsMinorityInterest contextRef="c0" decimals="-3" unitRef="usd">956000</us-gaap:PaymentsOfDividendsMinorityInterest>
+    <us-gaap:PaymentsOfDividendsMinorityInterest contextRef="c14" decimals="-3" unitRef="usd">407000</us-gaap:PaymentsOfDividendsMinorityInterest>
+    <us-gaap:NetCashProvidedByUsedInFinancingActivities contextRef="c0" decimals="-3" unitRef="usd">-1197000</us-gaap:NetCashProvidedByUsedInFinancingActivities>
+    <us-gaap:NetCashProvidedByUsedInFinancingActivities contextRef="c14" decimals="-3" unitRef="usd">-2311000</us-gaap:NetCashProvidedByUsedInFinancingActivities>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect contextRef="c0" decimals="-3" unitRef="usd">-1790000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect contextRef="c14" decimals="-3" unitRef="usd">-250000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents contextRef="c3" decimals="-3" unitRef="usd">8856000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents contextRef="c47" decimals="-3" unitRef="usd">11454000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents contextRef="c2" decimals="-3" unitRef="usd">7066000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents>
+    <us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents contextRef="c70" decimals="-3" unitRef="usd">11204000</us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents>
+    <us-gaap:InterestPaidNet contextRef="c0" decimals="-3" unitRef="usd">9000</us-gaap:InterestPaidNet>
+    <us-gaap:InterestPaidNet contextRef="c14" decimals="-3" unitRef="usd">106000</us-gaap:InterestPaidNet>
+    <gtim:CapitalExpendituresIncurredButNotPaid contextRef="c0" decimals="-3" unitRef="usd">-421000</gtim:CapitalExpendituresIncurredButNotPaid>
+    <gtim:CapitalExpendituresIncurredButNotPaid contextRef="c14" decimals="-3" unitRef="usd">170000</gtim:CapitalExpendituresIncurredButNotPaid>
+    <dei:CurrentFiscalYearEndDate contextRef="c0" id="hidden-fact-0">--09-27</dei:CurrentFiscalYearEndDate>
+    <dei:EntityIncorporationStateCountryCode contextRef="c0" id="hidden-fact-1">NV</dei:EntityIncorporationStateCountryCode>
+    <us-gaap:ImpairmentOfLongLivedAssetsHeldForUse contextRef="c13" id="hidden-fact-9" unitRef="usd" xsi:nil="true"/>
+    <us-gaap:ImpairmentOfLongLivedAssetsHeldForUse contextRef="c14" id="hidden-fact-10" unitRef="usd" xsi:nil="true"/>
+    <gtim:DecreaseInROUAssets contextRef="c14" id="hidden-fact-134" unitRef="usd" xsi:nil="true"/>
+    <us-gaap:ImpairmentOfLongLivedAssetsHeldForUse contextRef="c14" id="hidden-fact-135" unitRef="usd" xsi:nil="true"/>
+    <us-gaap:GainsLossesOnExtinguishmentOfDebt contextRef="c14" id="hidden-fact-136" unitRef="usd" xsi:nil="true"/>
+    <us-gaap:IncreaseDecreaseInAccruedIncomeTaxesPayable contextRef="c14" id="hidden-fact-137" unitRef="usd" xsi:nil="true"/>
+    <us-gaap:IncreaseDecreaseInPrepaidExpense contextRef="c14" id="hidden-fact-138" unitRef="usd" xsi:nil="true"/>
+    <us-gaap:IncreaseDecreaseInDeferredLiabilities contextRef="c0" id="hidden-fact-139" unitRef="usd" xsi:nil="true"/>
+    <us-gaap:PaymentsToAcquireBusinessesNetOfCashAcquired contextRef="c14" id="hidden-fact-140" unitRef="usd" xsi:nil="true"/>
+    <us-gaap:ProceedsFromCollectionOfAdvanceToAffiliate contextRef="c0" id="hidden-fact-141" unitRef="usd" xsi:nil="true"/>
+    <gtim:PaymentForPurchaseOfTreasuryStock contextRef="c14" id="hidden-fact-142" unitRef="usd" xsi:nil="true"/>
+    <us-gaap:RepaymentsOfLongTermDebt contextRef="c0" id="hidden-fact-143" unitRef="usd" xsi:nil="true"/>
+    <dei:AmendmentFlag contextRef="c0">false</dei:AmendmentFlag>
+    <dei:DocumentFiscalPeriodFocus contextRef="c0">Q2</dei:DocumentFiscalPeriodFocus>
+    <dei:EntityCentralIndexKey contextRef="c0">0000825324</dei:EntityCentralIndexKey>
+    <dei:EntityRegistrantName contextRef="c0">Good Times Restaurants Inc. </dei:EntityRegistrantName>
+</xbrl>

@@ -1,0 +1,978 @@
+{
+ "version": "2.1",
+ "instance": {
+  "drd20220630.htm": {
+   "tag": {
+    "dei_BusinessContactMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Business contact for the entity",
+        "label": "Business Contact [member]"
+       }
+      }
+     },
+     "localname": "BusinessContactMember",
+     "nsuri": "http://xbrl.sec.gov/dei/2021q4",
+     "presentation": [
+      "http://www.DRDGold.com/role/DocumentDocumentAndEntityInformation"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "dei_EntityAddressesAddressTypeAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the domain members or categories in the table and the line items or concepts that complete the table.",
+        "label": "Entity Addresses, Address Type [Axis]"
+       }
+      }
+     },
+     "localname": "EntityAddressesAddressTypeAxis",
+     "nsuri": "http://xbrl.sec.gov/dei/2021q4",
+     "presentation": [
+      "http://www.DRDGold.com/role/DocumentDocumentAndEntityInformation"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "drd_ErgoOperationsMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The Ergo plant is currently our major processing plant. It is one of the cash generating units of the entity.",
+        "label": "Ergo operations [Member]",
+        "terseLabel": "Ergo [member]"
+       }
+      }
+     },
+     "localname": "ErgoOperationsMember",
+     "nsuri": "http://www.DRDGold.com/20220630",
+     "presentation": [
+      "http://www.DRDGold.com/role/INCOMETAXEXPENSENarrativeDetails",
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails",
+      "http://www.DRDGold.com/role/PROPERTYPLANTANDEQUIPMENTNarrativeDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "drd_FwgrMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "This member stands for FWGR segment. FWGR is a surface gold retreatment operation and treats old slime dams in the West Rand goldfields.",
+        "label": "FWGR [member]"
+       }
+      }
+     },
+     "localname": "FwgrMember",
+     "nsuri": "http://www.DRDGold.com/20220630",
+     "presentation": [
+      "http://www.DRDGold.com/role/INCOMETAXEXPENSENarrativeDetails",
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "drd_RandRefineryProprietaryLimitedMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "This member stands for Rand Refinery Proprietary Limited (\"Rand Refinery\") entity in which the entity holds ownership interest.",
+        "label": "Rand Refinery Proprietary Limited (\"Rand Refinery\") [member]",
+        "terseLabel": "Rand Refinery Operation [member]"
+       }
+      }
+     },
+     "localname": "RandRefineryProprietaryLimitedMember",
+     "nsuri": "http://www.DRDGold.com/20220630",
+     "presentation": [
+      "http://www.DRDGold.com/role/OTHERINVESTMENTSFairValueOfInvestmentsDetails",
+      "http://www.DRDGold.com/role/OTHERINVESTMENTSInvestmentsInOtherEntitiesDetails",
+      "http://www.DRDGold.com/role/OTHERINVESTMENTSKeyObservableunobservableInputsDetails",
+      "http://www.DRDGold.com/role/OTHERINVESTMENTSNarrativesDetails",
+      "http://www.DRDGold.com/role/OTHERINVESTMENTSSensitivityAnalysisDetails",
+      "http://www.DRDGold.com/role/RESULTSFROMOPERATINGACTIVITIESRelatedPartyTransactionsDetails",
+      "http://www.DRDGold.com/role/TRADEANDOTHERPAYABLESDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "drd_RandmutualassurancecompanylimitedMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "This member stands for Rand Mutual Assurance Company Limitedentity in which the entity holds ownership interest.",
+        "label": "Rand Mutual Assurance Company Limited [member]",
+        "verboseLabel": "Rand Mutual Assurance Company Limited B Share Business Fund (RMA)"
+       }
+      }
+     },
+     "localname": "RandmutualassurancecompanylimitedMember",
+     "nsuri": "http://www.DRDGold.com/20220630",
+     "presentation": [
+      "http://www.DRDGold.com/role/OTHERINVESTMENTSInvestmentsInOtherEntitiesDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "drd_WestwitsmininglimitedwwmMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "This member stands for West Wits Mining Limited (\"WWM\") entity in which the entity holds ownership interest.'",
+        "label": "West Wits Mining Limited (\"WWM\") [member][Member]"
+       }
+      }
+     },
+     "localname": "WestwitsmininglimitedwwmMember",
+     "nsuri": "http://www.DRDGold.com/20220630",
+     "presentation": [
+      "http://www.DRDGold.com/role/OTHERINVESTMENTSInvestmentsInOtherEntitiesDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_BasicEarningsLossPerShare": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of profit (loss) attributable to ordinary equity holders of the parent entity (the numerator) divided by the weighted average number of ordinary shares outstanding during the period (the denominator)."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Basic earnings (loss) per share",
+        "terseLabel": "Basic earnings per share (SA cents per share)",
+        "zeroTerseLabel": "Basic earnings per share"
+       }
+      }
+     },
+     "localname": "BasicEarningsLossPerShare",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/EARNINGSPERSHAREDetails"
+     ],
+     "xbrltype": "perShareItemType"
+    },
+    "ifrs-full_ComponentsOfEquityAxis": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Components of equity [axis]"
+       }
+      }
+     },
+     "localname": "ComponentsOfEquityAxis",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLossNetOfTaxAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Components of other comprehensive income that will not be reclassified to profit or loss, net of tax [abstract]",
+        "terseLabel": "Items that will not be reclassified to profit or loss, net of tax"
+       }
+      }
+     },
+     "localname": "ComponentsOfOtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLossNetOfTaxAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_ComprehensiveIncome": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of change in equity resulting from transactions and other events, other than those changes resulting from transactions with owners in their capacity as owners."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Comprehensive income",
+        "terseLabel": "Total comprehensive income",
+        "totalLabel": "Total comprehensive income for the year"
+       }
+      }
+     },
+     "localname": "ComprehensiveIncome",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY",
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_CostOfSales": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 2.0,
+       "parentTag": "ifrs-full_GrossProfit",
+       "weight": -1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of all expenses directly or indirectly attributed to the goods or services sold. Attributed expenses include, but are not limited to, costs previously included in the measurement of inventory that has now been sold, such as depreciation and maintenance of factory buildings and equipment used in the production process, unallocated production overheads, and abnormal amounts of production costs of inventories."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Cost of sales",
+        "negatedTerseLabel": "Cost of sales"
+       }
+      }
+     },
+     "localname": "CostOfSales",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails",
+      "http://www.DRDGold.com/role/RESULTSFROMOPERATINGACTIVITIESCostOfSalesDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_CounterpartiesAxis": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Counterparties [axis]"
+       }
+      }
+     },
+     "localname": "CounterpartiesAxis",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/OTHERINVESTMENTSFairValueOfInvestmentsDetails",
+      "http://www.DRDGold.com/role/OTHERINVESTMENTSInvestmentsInOtherEntitiesDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_DilutedEarningsLossPerShare": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of profit (loss) attributable to ordinary equity holders of the parent entity (the numerator), divided by the weighted average number of ordinary shares outstanding during the period (the denominator), both adjusted for the effects of all dilutive potential ordinary shares. [Refer: Ordinary shares [member]; Weighted average [member]]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Diluted earnings (loss) per share",
+        "terseLabel": "Diluted earnings per share (SA cents per share)",
+        "zeroTerseLabel": "Diluted earnings per share"
+       }
+      }
+     },
+     "localname": "DilutedEarningsLossPerShare",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/EARNINGSPERSHAREDetails"
+     ],
+     "xbrltype": "perShareItemType"
+    },
+    "ifrs-full_EarningsPerShareAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Earnings per share [abstract]",
+        "terseLabel": "Earnings per share"
+       }
+      }
+     },
+     "localname": "EarningsPerShareAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_FinanceCosts": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 8.0,
+       "parentTag": "ifrs-full_ProfitLossBeforeTax",
+       "weight": -1.0
+      },
+      "http://www.DRDGold.com/role/FINANCEEXPENSEDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of costs associated with financing activities of the entity."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Finance Cost",
+        "negatedLabel": "Finance Cost",
+        "negatedTerseLabel": "Finance expense",
+        "negatedTotalLabel": "Finance expense",
+        "terseLabel": "Finance cost incrurred",
+        "verboseLabel": "Finance expense"
+       }
+      }
+     },
+     "localname": "FinanceCosts",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/FINANCEEXPENSEDetails",
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_FinanceIncome": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 7.0,
+       "parentTag": "ifrs-full_ProfitLossBeforeTax",
+       "weight": 1.0
+      },
+      "http://www.DRDGold.com/role/FINANCEINCOMEDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of income associated with interest and other financing activities of the entity."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Finance income",
+        "negatedLabel": "Finance income",
+        "terseLabel": "Finance income",
+        "totalLabel": "Finance income"
+       }
+      }
+     },
+     "localname": "FinanceIncome",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/FINANCEINCOMEDetails",
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_GrossProfit": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 3.0,
+       "parentTag": "ifrs-full_ProfitLossFromOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of revenue less cost of sales. [Refer: Cost of sales; Revenue]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Gross profit",
+        "totalLabel": "Gross profit from operating activities"
+       }
+      }
+     },
+     "localname": "GrossProfit",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_IncomeTaxExpenseContinuingOperations": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CASHGENERATEDFROMOPERATIONSDetails": {
+       "order": 3.0,
+       "parentTag": "ifrs-full_CashFlowsFromUsedInOperationsBeforeChangesInWorkingCapital",
+       "weight": 1.0
+      },
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 10.0,
+       "parentTag": "ifrs-full_ProfitLoss",
+       "weight": -1.0
+      },
+      "http://www.DRDGold.com/role/INCOMETAXEXPENSEDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The aggregate amount included in the determination of profit (loss) for the period in respect of current tax and deferred tax. [Refer: Current tax expense (income); Deferred tax expense (income)]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Tax expense (income), continuing operations",
+        "negatedTerseLabel": "Income tax",
+        "negatedTotalLabel": "Total income tax",
+        "terseLabel": "Income tax",
+        "totalLabel": "Income tax expense or (income)"
+       }
+      }
+     },
+     "localname": "IncomeTaxExpenseContinuingOperations",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CASHGENERATEDFROMOPERATIONSDetails",
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/INCOMETAXEXPENSEDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 16.0,
+       "parentTag": "ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments",
+       "weight": -1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of income tax relating to amounts recognised in other comprehensive income in relation to investments in equity instruments that the entity has designated at fair value through other comprehensive income applying paragraph 5.7.5 of IFRS 9. [Refer: Other comprehensive income; Reserve of gains and losses from investments in equity instruments]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive income, gains (losses) from investments in equity instruments deferred tax expense",
+        "negatedLabel": "Deferred tax thereon",
+        "terseLabel": "Deferred taxation thereon"
+       }
+      }
+     },
+     "localname": "IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_MaterialReconcilingItemsMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for material adjustments used to reconcile items in the entity's financial statements."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Material reconciling items [member]",
+        "terseLabel": "Other reconciling items [member]"
+       }
+      }
+     },
+     "localname": "MaterialReconcilingItemsMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_OperatingExpenseExcludingCostOfSales": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 5.0,
+       "parentTag": "ifrs-full_ProfitLossFromOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of operating expense excluding the cost of sales. [Refer: Cost of sales]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Administration expenses and other costs",
+        "negatedTerseLabel": "Administration expenses and other costs"
+       }
+      }
+     },
+     "localname": "OperatingExpenseExcludingCostOfSales",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_OperatingSegmentsMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for operating segments. An operating segment is a component of an entity: (a) that engages in business activities from which it may earn revenues and incur expenses (including revenues and expenses relating to transactions with other components of the same entity); (b) whose operating results are regularly reviewed by the entity’s chief operating decision maker to make decisions about resources to be allocated to the segment and assess its performance; and (c) for which discrete financial information is available. [Refer: Revenue]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Operating Segments [Member]"
+       }
+      }
+     },
+     "localname": "OperatingSegmentsMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_OtherComprehensiveIncome": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 17.0,
+       "parentTag": "ifrs-full_ComprehensiveIncome",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of income and expense (including reclassification adjustments) that is not recognised in profit or loss as required or permitted by IFRSs. [Refer: IFRSs [member]]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive income",
+        "terseLabel": "Other comprehensive income",
+        "totalLabel": "Total other comprehensive income for the year"
+       }
+      }
+     },
+     "localname": "OtherComprehensiveIncome",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY",
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_OtherComprehensiveIncomeAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive income [abstract]",
+        "terseLabel": "Other comprehensive income"
+       }
+      }
+     },
+     "localname": "OtherComprehensiveIncomeAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 15.0,
+       "parentTag": "ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of other comprehensive income, before tax, related to gains (losses) from changes in the fair value of investments in equity instruments that the entity has designated at fair value through other comprehensive income applying paragraph 5.7.5 of IFRS 9. [Refer: Other comprehensive income, before tax]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive income, before tax, gains (losses) from investments in equity instruments",
+        "terseLabel": "Fair value adjustment on equity instruments at fair value through OCI",
+        "verboseLabel": "Fair value adjustment on equity investments at fair value through other comprehensive income"
+       }
+      }
+     },
+     "localname": "OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/OTHERINVESTMENTSInvestmentsInOtherEntitiesDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of other comprehensive income, net of tax, related to gains (losses) from changes in the fair value of investments in equity instruments that the entity has designated at fair value through other comprehensive income applying paragraph 5.7.5 of IFRS 9. [Refer: Other comprehensive income]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive income, net of tax, gains (losses) from investments in equity instruments",
+        "terseLabel": "Net fair value adjustment on equity investments at fair value through other comprehensive income",
+        "totalLabel": "Net fair value adjustment on equity investments at fair value through other comprehensive income"
+       }
+      }
+     },
+     "localname": "OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_OtherIncome": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 4.0,
+       "parentTag": "ifrs-full_ProfitLossFromOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of operating income that the entity does not separately disclose in the same statement or note."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Other income",
+        "negatedLabel": "Other income",
+        "terseLabel": "Other income",
+        "totalLabel": "Other income"
+       }
+      }
+     },
+     "localname": "OtherIncome",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails",
+      "http://www.DRDGold.com/role/RESULTSFROMOPERATINGACTIVITIESOtherIncomeDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_ProfitLoss": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CASHGENERATEDFROMOPERATIONSDetails": {
+       "order": 1.0,
+       "parentTag": "ifrs-full_CashFlowsFromUsedInOperationsBeforeChangesInWorkingCapital",
+       "weight": 1.0
+      },
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 11.0,
+       "parentTag": "ifrs-full_ComprehensiveIncome",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The total of income less expenses from continuing and discontinued operations, excluding the components of other comprehensive income. [Refer: Other comprehensive income]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Profit (loss)",
+        "terseLabel": "Profit for the year",
+        "totalLabel": "Profit for the year",
+        "verboseLabel": "Basic Earnings",
+        "zeroTerseLabel": "Profit (loss) after tax"
+       }
+      }
+     },
+     "localname": "ProfitLoss",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CASHGENERATEDFROMOPERATIONSDetails",
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY",
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/EARNINGSPERSHAREDetails",
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_ProfitLossAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Profit (loss) [abstract]",
+        "terseLabel": "Profit (loss) for the period"
+       }
+      }
+     },
+     "localname": "ProfitLossAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_ProfitLossBeforeTax": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 9.0,
+       "parentTag": "ifrs-full_ProfitLoss",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The profit (loss) before tax expense or income. [Refer: Profit (loss)]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Profit/(loss) before tax",
+        "totalLabel": "Profit before tax"
+       }
+      }
+     },
+     "localname": "ProfitLossBeforeTax",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_ProfitLossFromOperatingActivities": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 6.0,
+       "parentTag": "ifrs-full_ProfitLossBeforeTax",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The profit (loss) from operating activities of the entity. [Refer: Profit (loss)]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Profit (loss) from operating activities",
+        "terseLabel": "Results from operating activities",
+        "totalLabel": "Results from operating activities"
+       }
+      }
+     },
+     "localname": "ProfitLossFromOperatingActivities",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_RetainedEarningsMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing an entity's cumulative undistributed earnings or deficit."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Retained earnings [member]",
+        "terseLabel": "Retained earnings [member]"
+       }
+      }
+     },
+     "localname": "RetainedEarningsMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_Revenue": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 1.0,
+       "parentTag": "ifrs-full_GrossProfit",
+       "weight": 1.0
+      },
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails": {
+       "order": 2.0,
+       "parentTag": "drd_ProfitBeforeAdiministrationInterestDepreciationAndTaxesExpenses",
+       "weight": 1.0
+      },
+      "http://www.DRDGold.com/role/REVENUERevenueTableDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The income arising in the course of an entity's ordinary activities. Income is increases in assets, or decreases in liabilities, that result in increases in equity, other than those relating to contributions from holders of equity claims."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Revenue",
+        "terseLabel": "Revenue (External)",
+        "totalLabel": "Total Revenue"
+       }
+      }
+     },
+     "localname": "Revenue",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails",
+      "http://www.DRDGold.com/role/REVENUERevenueTableDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_SegmentConsolidationItemsAxis": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Segment consolidation items [axis]"
+       }
+      }
+     },
+     "localname": "SegmentConsolidationItemsAxis",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_SegmentsAxis": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Segments [axis]"
+       }
+      }
+     },
+     "localname": "SegmentsAxis",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/INCOMETAXEXPENSENarrativeDetails",
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails"
+     ],
+     "xbrltype": "stringItemType"
+    }
+   },
+   "report": {
+    "R2": {
+     "firstAnchor": {
+      "ancestors": [
+       "div",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "drd20220630.htm",
+      "contextRef": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512",
+      "decimals": "-5",
+      "first": true,
+      "lang": "en-US",
+      "name": "ifrs-full:Revenue",
+      "reportCount": 1,
+      "unitRef": "ZAR",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "000200 - Statement - CONSOLIDATED STATEMENT OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
+     "role": "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+     "shortName": "CONSOLIDATED STATEMENT OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "div",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "drd20220630.htm",
+      "contextRef": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512",
+      "decimals": "-5",
+      "lang": "en-US",
+      "name": "ifrs-full:GrossProfit",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "ZAR",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

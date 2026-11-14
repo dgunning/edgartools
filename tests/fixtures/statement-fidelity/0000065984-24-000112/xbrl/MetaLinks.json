@@ -1,0 +1,2720 @@
+{
+ "version": "2.2",
+ "instance": {
+  "etr-20240930.htm": {
+   "tag": {
+    "etr_A5.375SeriesAPreferredStockCumulativeNoParValueMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "A5.375SeriesAPreferredStockCumulativeNoParValueMember",
+     "presentation": [
+      "http://www.entergy.com/role/DocumentandEntityInformation"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "5.375% Series A Preferred Stock, Cumulative, No Par Value [Member]",
+        "label": "5.375% Series A Preferred Stock, Cumulative, No Par Value [Member]",
+        "documentation": "5.375% Series A Preferred Stock, Cumulative, No Par Value"
+       }
+      }
+     }
+    },
+    "us-gaap_AllowanceForFundsUsedDuringConstructionInvestingActivities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "AllowanceForFundsUsedDuringConstructionInvestingActivities",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Allowance for Funds Used During Construction, Investing Activities",
+        "label": "Allowance for Funds Used During Construction, Investing Activities",
+        "documentation": "Cash inflow due to change during the period in the allowance for other funds used during construction classified as an investing activity."
+       }
+      }
+     }
+    },
+    "us-gaap_AssetImpairmentCharges": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "AssetImpairmentCharges",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome": {
+       "parentTag": "us-gaap_CostsAndExpenses",
+       "weight": 1.0,
+       "order": 2.0
+      },
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 4.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Asset Impairment Charges",
+        "label": "Asset Impairment Charges",
+        "documentation": "Amount of write-down of assets recognized in the income statement. Includes, but is not limited to, losses from tangible assets, intangible assets and goodwill."
+       }
+      }
+     }
+    },
+    "us-gaap_CapitalExpendituresIncurredButNotYetPaid": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "CapitalExpendituresIncurredButNotYetPaid",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Capital Expenditures Incurred but Not yet Paid",
+        "label": "Capital Expenditures Incurred but Not yet Paid",
+        "documentation": "Future cash outflow to pay for purchases of fixed assets that have occurred."
+       }
+      }
+     }
+    },
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents",
+        "label": "Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents",
+        "documentation": "Amount of cash and cash equivalents, and cash and cash equivalents restricted to withdrawal or usage. Excludes amount for disposal group and discontinued operations. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates."
+       }
+      }
+     }
+    },
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents, Period Increase (Decrease), Including Exchange Rate Effect, Total",
+        "label": "Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents, Period Increase (Decrease), Including Exchange Rate Effect",
+        "documentation": "Amount of increase (decrease) in cash, cash equivalents, and cash and cash equivalents restricted to withdrawal or usage; including effect from exchange rate change. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates."
+       }
+      }
+     }
+    },
+    "us-gaap_CashFlowNoncashInvestingAndFinancingActivitiesDisclosureAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "CashFlowNoncashInvestingAndFinancingActivitiesDisclosureAbstract",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Cash Flow, Noncash Investing and Financing Activities Disclosure [Abstract]",
+        "label": "Cash Flow, Noncash Investing and Financing Activities Disclosure [Abstract]"
+       }
+      }
+     }
+    },
+    "etr_CashPaidReceivedDuringPeriodForAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "CashPaidReceivedDuringPeriodForAbstract",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Cash Paid Received During Period For [Abstract]",
+        "label": "Cash Paid Received During Period For [Abstract]",
+        "documentation": "Cash Paid Received During Period For."
+       }
+      }
+     }
+    },
+    "etr_ChangeInMoneyPoolPayableNet": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "ChangeInMoneyPoolPayableNet",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0,
+       "order": 5.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Change in money pool payable - net",
+        "label": "Change in money pool payable - net",
+        "documentation": "Change in money pool payable - net"
+       }
+      }
+     }
+    },
+    "etr_ChangeInMoneyPoolReceivableNet": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "ChangeInMoneyPoolReceivableNet",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0,
+       "order": 8.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Change in money pool receivable - net",
+        "label": "Change in money pool receivable - net",
+        "documentation": "Change in money pool receivable - net."
+       }
+      }
+     }
+    },
+    "etr_ChangesInWorkingCapitalAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "ChangesInWorkingCapitalAbstract",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Changes In Working Capital [Abstract]",
+        "label": "Changes In Working Capital [Abstract]",
+        "documentation": "Changes In Working Capital."
+       }
+      }
+     }
+    },
+    "etr_Changesinsecuritizationaccount": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "Changesinsecuritizationaccount",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0,
+       "order": 5.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Changes in securitization account",
+        "label": "Changes in securitization account",
+        "documentation": "Changes in the account in which recoveries from customers through a transition charge are deposited and from which payments are made to service the securitization bonds issued by the entity's securitization company"
+       }
+      }
+     }
+    },
+    "etr_ConsolidatedNetIncomeAdjustmentsToReconcileConsolidatedNetIncomeToNetCashFlowAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "ConsolidatedNetIncomeAdjustmentsToReconcileConsolidatedNetIncomeToNetCashFlowAbstract",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Consolidated Net Income Adjustments To Reconcile Consolidated Net Income To Net Cash Flow [Abstract]",
+        "label": "Consolidated Net Income Adjustments To Reconcile Consolidated Net Income To Net Cash Flow [Abstract]",
+        "documentation": "Consolidated Net Income Adjustments To Reconcile Consolidated Net Income To Net Cash Flow."
+       }
+      }
+     }
+    },
+    "srt_ConsolidationItemsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/srt/2024",
+     "localname": "ConsolidationItemsAxis",
+     "presentation": [
+      "http://www.entergy.com/role/BusinessSegmentInformationScheduleofSegmentReportingInformationbySegmentDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Consolidation Items [Axis]",
+        "label": "Consolidation Items [Axis]"
+       }
+      }
+     }
+    },
+    "us-gaap_CorporateAndOtherMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "CorporateAndOtherMember",
+     "presentation": [
+      "http://www.entergy.com/role/BusinessSegmentInformationScheduleofSegmentReportingInformationbySegmentDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Corporate Segment and Other Operating Segment [Member]",
+        "label": "Corporate Segment and Other Operating Segment [Member]",
+        "documentation": "Component of entity providing financial and operational oversight and administrative support considered to be operating segment and operating segment, classified as other. Excludes intersegment elimination and reconciling item."
+       }
+      }
+     }
+    },
+    "etr_CreditsExpectedToBeSharedWithCustomersFromResolutionOfThe20162018IRSAuditMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "CreditsExpectedToBeSharedWithCustomersFromResolutionOfThe20162018IRSAuditMember",
+     "presentation": [
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Credits expected to be shared with customers from resolution of the 2016-2018 IRS audit [Member]",
+        "label": "Credits expected to be shared with customers from resolution of the 2016-2018 IRS audit [Member]",
+        "documentation": "Credits expected to be shared with customers from resolution of the 2016-2018 IRS audit"
+       }
+      }
+     }
+    },
+    "us-gaap_DeferredIncomeTaxesAndTaxCredits": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "DeferredIncomeTaxesAndTaxCredits",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Deferred Income Taxes and Tax Credits",
+        "label": "Deferred Income Taxes and Tax Credits",
+        "documentation": "Amount of deferred income tax expense (benefit) and income tax credits."
+       }
+      }
+     }
+    },
+    "us-gaap_DepreciationAmortizationAndAccretionNet": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "DepreciationAmortizationAndAccretionNet",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Depreciation, Amortization and Accretion, Net",
+        "label": "Depreciation, Amortization and Accretion, Net",
+        "documentation": "The aggregate net amount of depreciation, amortization, and accretion recognized during an accounting period. As a noncash item, the net amount is added back to net income when calculating cash provided by or used in operations using the indirect method."
+       }
+      }
+     }
+    },
+    "us-gaap_DistributionMadeToLimitedLiabilityCompanyLLCMemberCashDistributionsPaid": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "DistributionMadeToLimitedLiabilityCompanyLLCMemberCashDistributionsPaid",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0,
+       "order": 13.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedTerseLabel": "Distribution Made to Limited Liability Company (LLC) Member, Cash Distributions Paid",
+        "label": "Distribution Made to Limited Liability Company (LLC) Member, Cash Distributions Paid",
+        "documentation": "Amount of cash distribution paid to unit-holder of limited liability company (LLC)."
+       }
+      }
+     }
+    },
+    "etr_DividendsPaidAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "DividendsPaidAbstract",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Dividends Paid [Abstract]",
+        "label": "Dividends Paid [Abstract]",
+        "documentation": "Dividends Paid."
+       }
+      }
+     }
+    },
+    "etr_EffectOfSecuritizationOnRegulatoryAsset": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "EffectOfSecuritizationOnRegulatoryAsset",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0,
+       "order": 17.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedTerseLabel": "Effect of securitization on regulatory asset",
+        "label": "Effect of securitization on regulatory asset",
+        "documentation": "Effect of securitization on regulatory asset"
+       }
+      }
+     }
+    },
+    "etr_EntergyArkansasMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "EntergyArkansasMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/AssetRetirementObligationsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessCombinationsandAssetAcquisitions",
+      "http://www.entergy.com/role/BusinessCombinationsandAssetAcquisitionsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/CommitmentsandContingenciesNarrativeDetails",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/DecommissioningTrustFunds",
+      "http://www.entergy.com/role/DecommissioningTrustFundsNarrativeDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofAvailableforSaleSecuritiesReconciliationDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofDebtSecuritiesAvailableforSaleUnrealizedLossPositionFairValueDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofInvestmentsClassifiedbyContractualMaturityDateDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsTables",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofnuclearfuelcompanyVIEnotespayableDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entergy Arkansas [Member]",
+        "label": "Entergy Arkansas [Member]",
+        "documentation": "Entergy Arkansas."
+       }
+      }
+     }
+    },
+    "etr_EntergyLouisianaMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "EntergyLouisianaMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/AssetRetirementObligationsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/CommitmentsandContingenciesNarrativeDetails",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsofComprehensiveIncomeParentheticals",
+      "http://www.entergy.com/role/DecommissioningTrustFunds",
+      "http://www.entergy.com/role/DecommissioningTrustFundsNarrativeDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofAvailableforSaleSecuritiesReconciliationDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofDebtSecuritiesAvailableforSaleUnrealizedLossPositionFairValueDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofInvestmentsClassifiedbyContractualMaturityDateDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsTables",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/Equity",
+      "http://www.entergy.com/role/EquityNarrativeDetails",
+      "http://www.entergy.com/role/EquityScheduleofAccumulatedOtherComprehensiveIncomeLossDetails",
+      "http://www.entergy.com/role/EquityScheduleofReclassificationoutofAccumulatedOtherComprehensiveIncomeDetails",
+      "http://www.entergy.com/role/EquityTables",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofreclassificationsoutofaccumulatedothercomprehensiveincomeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entergy Louisiana [Member]",
+        "label": "Entergy Louisiana [Member]",
+        "documentation": "Entergy Louisiana."
+       }
+      }
+     }
+    },
+    "etr_EntergyMississippiMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "EntergyMississippiMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/AssetRetirementObligationsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/CommitmentsandContingenciesNarrativeDetails",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entergy Mississippi [Member]",
+        "label": "Entergy Mississippi [Member]",
+        "documentation": "Entergy Mississippi."
+       }
+      }
+     }
+    },
+    "etr_EntergyNewOrleansMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "EntergyNewOrleansMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/CommitmentsandContingenciesNarrativeDetails",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entergy New Orleans [Member]",
+        "label": "Entergy New Orleans [Member]",
+        "documentation": "Entergy New Orleans."
+       }
+      }
+     }
+    },
+    "etr_EntergyTexasMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "EntergyTexasMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entergy Texas [Member]",
+        "label": "Entergy Texas [Member]",
+        "documentation": "Entergy Texas."
+       }
+      }
+     }
+    },
+    "dei_EntityDomain": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://xbrl.sec.gov/dei/2024",
+     "localname": "EntityDomain",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/AssetRetirementObligationsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessCombinationsandAssetAcquisitions",
+      "http://www.entergy.com/role/BusinessCombinationsandAssetAcquisitionsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/BusinessSegmentInformationTables",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/CommitmentsandContingenciesNarrativeDetails",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsofComprehensiveIncomeParentheticals",
+      "http://www.entergy.com/role/DecommissioningTrustFunds",
+      "http://www.entergy.com/role/DecommissioningTrustFundsNarrativeDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofAvailableforSaleSecuritiesReconciliationDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofDebtSecuritiesAvailableforSaleUnrealizedLossPositionFairValueDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofInvestmentsClassifiedbyContractualMaturityDateDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsTables",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/Equity",
+      "http://www.entergy.com/role/EquityNarrativeDetails",
+      "http://www.entergy.com/role/EquityScheduleofAccumulatedOtherComprehensiveIncomeLossDetails",
+      "http://www.entergy.com/role/EquityScheduleofReclassificationoutofAccumulatedOtherComprehensiveIncomeDetails",
+      "http://www.entergy.com/role/EquityTables",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofreclassificationsoutofaccumulatedothercomprehensiveincomeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofnuclearfuelcompanyVIEcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofnuclearfuelcompanyVIEnotespayableDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/StockBasedCompensation",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entity [Domain]",
+        "label": "Entity [Domain]",
+        "documentation": "All the names of the entities being reported upon in a document. Any legal structure used to conduct activities or to hold assets. Some examples of such structures are corporations, partnerships, limited liability companies, grantor trusts, and other trusts. This item does not include business and geographical segments which are included in the geographical or business segments domains."
+       }
+      }
+     }
+    },
+    "dei_EntityListingsExchangeAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://xbrl.sec.gov/dei/2024",
+     "localname": "EntityListingsExchangeAxis",
+     "presentation": [
+      "http://www.entergy.com/role/DocumentandEntityInformation"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entity Listings, Exchange [Axis]",
+        "label": "Entity Listings, Exchange [Axis]",
+        "documentation": "The axis of a table defines the relationship between the domain members or categories in the table and the line items or concepts that complete the table."
+       }
+      }
+     }
+    },
+    "etr_FuelReconciliationMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "FuelReconciliationMember",
+     "presentation": [
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Fuel Reconciliation",
+        "label": "Fuel Reconciliation [Member]",
+        "documentation": "Fuel Reconciliation"
+       }
+      }
+     }
+    },
+    "us-gaap_IncomeTaxesPaidNet": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncomeTaxesPaidNet",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Income Taxes Paid, Net",
+        "label": "Income Taxes Paid, Net",
+        "documentation": "Amount, after refund, of cash paid to foreign, federal, state, and local jurisdictions as income tax."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInAccountsPayable": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncreaseDecreaseInAccountsPayable",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 8.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Increase (Decrease) in Accounts Payable",
+        "label": "Increase (Decrease) in Accounts Payable",
+        "documentation": "The increase (decrease) during the reporting period in the aggregate amount of liabilities incurred (and for which invoices have typically been received) and payable to vendors for goods and services received that are used in an entity's business."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInAccruedTaxesPayable": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncreaseDecreaseInAccruedTaxesPayable",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 9.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Increase (Decrease) in Accrued Taxes Payable",
+        "label": "Increase (Decrease) in Accrued Taxes Payable",
+        "documentation": "The increase (decrease) during the reporting period of all taxes owed but not paid, including income, property and other taxes."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInDeferredFuelCosts": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncreaseDecreaseInDeferredFuelCosts",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0,
+       "order": 11.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Increase (Decrease) in Deferred Fuel Costs",
+        "terseLabel": "Increase (Decrease) in Deferred Fuel Costs",
+        "label": "Increase (Decrease) in Deferred Fuel Costs",
+        "documentation": "The increase (decrease) during the reporting period in carrying amount of capitalized fuel costs of a regulated entity that are expected to be recoverable through rate adjustments within one year or the normal operating cycle, if longer."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInFuelInventories": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncreaseDecreaseInFuelInventories",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0,
+       "order": 7.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Increase (Decrease) in Fuel Inventories",
+        "label": "Increase (Decrease) in Fuel Inventories",
+        "documentation": "The increase (decrease) during the reporting period in the value of fuel held in inventory."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInInterestPayableNet": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncreaseDecreaseInInterestPayableNet",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 10.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Increase (Decrease) in Interest Payable, Net",
+        "label": "Increase (Decrease) in Interest Payable, Net",
+        "documentation": "The increase (decrease) during the reporting period in interest payable, which represents the amount owed to note holders, bond holders, and other parties for interest earned on loans or credit extended to the reporting entity."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInOtherOperatingCapitalNet": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncreaseDecreaseInOtherOperatingCapitalNet",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0,
+       "order": 12.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Increase (Decrease) in Other Operating Assets and Liabilities, Net",
+        "label": "Increase (Decrease) in Other Operating Assets and Liabilities, Net",
+        "documentation": "Amount of increase (decrease) in operating assets after deduction of operating liabilities classified as other."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInOtherRegulatoryAssets": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncreaseDecreaseInOtherRegulatoryAssets",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0,
+       "order": 14.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Increase (Decrease) in Other Regulatory Assets",
+        "label": "Increase (Decrease) in Other Regulatory Assets",
+        "documentation": "The increase (decrease) during the reporting period in the value of other assets that are created when regulatory agencies permits public utilities to defer costs to the balance sheet."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInPensionAndPostretirementObligations": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncreaseDecreaseInPensionAndPostretirementObligations",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 16.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Increase (Decrease) in Obligation, Pension and Other Postretirement Benefits",
+        "label": "Increase (Decrease) in Obligation, Pension and Other Postretirement Benefits",
+        "documentation": "Amount of increase (decrease) in obligation for pension and other postretirement benefits. Includes, but is not limited to, defined benefit and defined contribution plans."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInReceivables": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncreaseDecreaseInReceivables",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0,
+       "order": 6.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Increase (Decrease) in Receivables",
+        "label": "Increase (Decrease) in Receivables",
+        "documentation": "The increase (decrease) during the reporting period in the total amount due within one year (or one operating cycle) from all parties, associated with underlying transactions that are classified as operating activities."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInRegulatoryLiabilities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncreaseDecreaseInRegulatoryLiabilities",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 15.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Increase (Decrease) in Regulatory Liabilities",
+        "label": "Increase (Decrease) in Regulatory Liabilities",
+        "documentation": "The increase (decrease) during the reporting period in regulated liabilities. Regulated liabilities are created when regulatory agency permits an entity to defer revenues to the balance sheet."
+       }
+      }
+     }
+    },
+    "us-gaap_InterestPaidNet": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "InterestPaidNet",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Interest Paid, Excluding Capitalized Interest, Operating Activities",
+        "label": "Interest Paid, Excluding Capitalized Interest, Operating Activities",
+        "documentation": "Amount of cash paid for interest, excluding capitalized interest, classified as operating activity. Includes, but is not limited to, payment to settle zero-coupon bond for accreted interest of debt discount and debt instrument with insignificant coupon interest rate in relation to effective interest rate of borrowing attributable to accreted interest of debt discount."
+       }
+      }
+     }
+    },
+    "us-gaap_IntersegmentEliminationMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IntersegmentEliminationMember",
+     "presentation": [
+      "http://www.entergy.com/role/BusinessSegmentInformationScheduleofSegmentReportingInformationbySegmentDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Intersegment Eliminations [Member]",
+        "label": "Intersegment Eliminations [Member]",
+        "documentation": "Eliminating entries used in operating segment consolidation."
+       }
+      }
+     }
+    },
+    "dei_LegalEntityAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://xbrl.sec.gov/dei/2024",
+     "localname": "LegalEntityAxis",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/AssetRetirementObligationsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessCombinationsandAssetAcquisitions",
+      "http://www.entergy.com/role/BusinessCombinationsandAssetAcquisitionsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/BusinessSegmentInformationTables",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/CommitmentsandContingenciesNarrativeDetails",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsofComprehensiveIncomeParentheticals",
+      "http://www.entergy.com/role/DecommissioningTrustFunds",
+      "http://www.entergy.com/role/DecommissioningTrustFundsNarrativeDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofAvailableforSaleSecuritiesReconciliationDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofDebtSecuritiesAvailableforSaleUnrealizedLossPositionFairValueDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofInvestmentsClassifiedbyContractualMaturityDateDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsTables",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/Equity",
+      "http://www.entergy.com/role/EquityNarrativeDetails",
+      "http://www.entergy.com/role/EquityScheduleofAccumulatedOtherComprehensiveIncomeLossDetails",
+      "http://www.entergy.com/role/EquityScheduleofReclassificationoutofAccumulatedOtherComprehensiveIncomeDetails",
+      "http://www.entergy.com/role/EquityTables",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofreclassificationsoutofaccumulatedothercomprehensiveincomeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofnuclearfuelcompanyVIEcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofnuclearfuelcompanyVIEnotespayableDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/StockBasedCompensation",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Legal Entity [Axis]",
+        "label": "Legal Entity [Axis]",
+        "documentation": "The set of legal entities associated with a report."
+       }
+      }
+     }
+    },
+    "etr_LitigationProceedsForReimbursementOfSpentNuclearFuelStorageCosts": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "LitigationProceedsForReimbursementOfSpentNuclearFuelStorageCosts",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0,
+       "order": 15.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Litigation proceeds for reimbursement of spent nuclear fuel storage costs",
+        "label": "Litigation proceeds for reimbursement of spent nuclear fuel storage costs",
+        "documentation": "Litigation proceeds for reimbursement of spent nuclear fuel storage costs."
+       }
+      }
+     }
+    },
+    "etr_MembersEquityMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "MembersEquityMember",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Member's Equity [Member]",
+        "label": "Member's Equity [Member]",
+        "documentation": "Member's Equity"
+       }
+      }
+     }
+    },
+    "etr_MortgageBonds4.875SeriesDueSeptember2066Member": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "MortgageBonds4.875SeriesDueSeptember2066Member",
+     "presentation": [
+      "http://www.entergy.com/role/DocumentandEntityInformation"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Mortgage Bonds 4.875% Series Due September 2066 [Member]",
+        "label": "Mortgage Bonds 4.875% Series Due September 2066 [Member]",
+        "documentation": "Mortgage Bonds 4.875% Series Due September 2066"
+       }
+      }
+     }
+    },
+    "etr_MortgageBonds4.90SeriesDueOctober2066Member": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "MortgageBonds4.90SeriesDueOctober2066Member",
+     "presentation": [
+      "http://www.entergy.com/role/DocumentandEntityInformation"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Mortgage Bonds 4.90% Series Due October 2066 [Member]",
+        "label": "Mortgage Bonds 4.90% Series Due October 2066 [Member]",
+        "documentation": "Mortgage Bonds 4.90% Series Due October 2066"
+       }
+      }
+     }
+    },
+    "etr_MortgageBonds5.0SeriesDueDecember2052Member": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "MortgageBonds5.0SeriesDueDecember2052Member",
+     "presentation": [
+      "http://www.entergy.com/role/DocumentandEntityInformation"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Mortgage Bonds 5.0% Series Due December 2052 [Member]",
+        "label": "Mortgage Bonds 5.0% Series Due December 2052 [Member]",
+        "documentation": "Mortgage Bonds 5.0% Series Due December 2052"
+       }
+      }
+     }
+    },
+    "etr_MortgageBonds5.50SeriesDueApril2066Member": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "MortgageBonds5.50SeriesDueApril2066Member",
+     "presentation": [
+      "http://www.entergy.com/role/DocumentandEntityInformation"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Mortgage Bonds5.50% Series Due April 2066 [Member]",
+        "label": "Mortgage Bonds5.50% Series Due April 2066 [Member]",
+        "documentation": "Mortgage Bonds5.50% Series Due April 2066"
+       }
+      }
+     }
+    },
+    "us-gaap_NetCashProvidedByUsedInFinancingActivities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "NetCashProvidedByUsedInFinancingActivities",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net Cash Provided by (Used in) Financing Activities, Total",
+        "label": "Net Cash Provided by (Used in) Financing Activities",
+        "documentation": "Amount of cash inflow (outflow) from financing activities, including discontinued operations. Financing activity cash flows include obtaining resources from owners and providing them with a return on, and a return of, their investment; borrowing money and repaying amounts borrowed, or settling the obligation; and obtaining and paying for other resources obtained from creditors on long-term credit."
+       }
+      }
+     }
+    },
+    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Net Cash Provided by (Used in) Financing Activities [Abstract]",
+        "label": "Net Cash Provided by (Used in) Financing Activities [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_NetCashProvidedByUsedInInvestingActivities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "NetCashProvidedByUsedInInvestingActivities",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net Cash Provided by (Used in) Investing Activities, Total",
+        "label": "Net Cash Provided by (Used in) Investing Activities",
+        "documentation": "Amount of cash inflow (outflow) from investing activities, including discontinued operations. Investing activity cash flows include making and collecting loans and acquiring and disposing of debt or equity instruments and property, plant, and equipment and other productive assets."
+       }
+      }
+     }
+    },
+    "us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Net Cash Provided by (Used in) Investing Activities [Abstract]",
+        "label": "Net Cash Provided by (Used in) Investing Activities [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_NetCashProvidedByUsedInOperatingActivities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "NetCashProvidedByUsedInOperatingActivities",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net Cash Provided by (Used in) Operating Activities, Total",
+        "label": "Net Cash Provided by (Used in) Operating Activities",
+        "documentation": "Amount of cash inflow (outflow) from operating activities, including discontinued operations. Operating activity cash flows include transactions, adjustments, and changes in value not defined as investing or financing activities."
+       }
+      }
+     }
+    },
+    "us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Net Cash Provided by (Used in) Operating Activities [Abstract]",
+        "label": "Net Cash Provided by (Used in) Operating Activities [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_NoncontrollingInterestMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "NoncontrollingInterestMember",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Noncontrolling Interest [Member]",
+        "label": "Noncontrolling Interest [Member]",
+        "documentation": "This element represents that portion of equity (net assets) in a subsidiary not attributable, directly or indirectly, to the parent. A noncontrolling interest is sometimes called a minority interest."
+       }
+      }
+     }
+    },
+    "us-gaap_OperatingSegmentsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "OperatingSegmentsMember",
+     "presentation": [
+      "http://www.entergy.com/role/BusinessSegmentInformationScheduleofSegmentReportingInformationbySegmentDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Operating Segments [Member]",
+        "label": "Operating Segments [Member]",
+        "documentation": "Identifies components of an entity that engage in business activities from which they may earn revenue and incur expenses, including transactions with other components of the same entity."
+       }
+      }
+     }
+    },
+    "etr_OpportunitySalesMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "OpportunitySalesMember",
+     "presentation": [
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Opportunity Sales [Member]",
+        "label": "Opportunity Sales [Member]",
+        "documentation": "Opportunity Sales [Member]"
+       }
+      }
+     }
+    },
+    "us-gaap_OtherOperatingActivitiesCashFlowStatement": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "OtherOperatingActivitiesCashFlowStatement",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 18.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Other Operating Activities, Cash Flow Statement",
+        "label": "Other Operating Activities, Cash Flow Statement",
+        "documentation": "Other cash or noncash adjustments to reconcile net income to cash provided by (used in) operating activities that are not separately disclosed in the statement of cash flows (for example, cash received or cash paid during the current period for miscellaneous operating activities, net change during the reporting period in other assets or other liabilities)."
+       }
+      }
+     }
+    },
+    "us-gaap_PaymentsForNuclearFuel": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PaymentsForNuclearFuel",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0,
+       "order": 7.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Payments for Nuclear Fuel",
+        "label": "Payments for Nuclear Fuel",
+        "documentation": "Cash outflow associated with the purchase of any material that is commonly used in the generation of nuclear energy."
+       }
+      }
+     }
+    },
+    "us-gaap_PaymentsForProceedsFromOtherInvestingActivities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PaymentsForProceedsFromOtherInvestingActivities",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0,
+       "order": 6.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Payments for (Proceeds from) Other Investing Activities",
+        "terseLabel": "Payments for (Proceeds from) Other Investing Activities",
+        "label": "Payments for (Proceeds from) Other Investing Activities",
+        "documentation": "Amount of cash (inflow) outflow from investing activities classified as other."
+       }
+      }
+     }
+    },
+    "us-gaap_PaymentsOfDividendsCommonStock": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PaymentsOfDividendsCommonStock",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0,
+       "order": 6.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Payments of Ordinary Dividends, Common Stock",
+        "label": "Payments of Ordinary Dividends, Common Stock",
+        "documentation": "Amount of cash outflow in the form of ordinary dividends to common shareholders of the parent entity."
+       }
+      }
+     }
+    },
+    "us-gaap_PaymentsOfDividendsPreferredStockAndPreferenceStock": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PaymentsOfDividendsPreferredStockAndPreferenceStock",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Payments of Ordinary Dividends, Preferred Stock and Preference Stock",
+        "negatedTerseLabel": "Payments of Ordinary Dividends, Preferred Stock and Preference Stock",
+        "label": "Payments of Ordinary Dividends, Preferred Stock and Preference Stock",
+        "documentation": "Amount of cash outflow in the form of ordinary dividends to preferred shareholders of the parent entity."
+       }
+      }
+     }
+    },
+    "us-gaap_PaymentsToAcquireInterestInSubsidiariesAndAffiliates": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PaymentsToAcquireInterestInSubsidiariesAndAffiliates",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0,
+       "order": 9.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Payments to Acquire Interest in Subsidiaries and Affiliates",
+        "label": "Payments to Acquire Interest in Subsidiaries and Affiliates",
+        "documentation": "The cash outflow associated with the acquisition of or advances to an entity that is related to it but not strictly controlled (for example, an unconsolidated subsidiary, affiliate, and joint venture or equity method investment) or the acquisition of an additional interest in a subsidiary (controlled entity)."
+       }
+      }
+     }
+    },
+    "us-gaap_PaymentsToAcquireOtherProductiveAssets": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PaymentsToAcquireOtherProductiveAssets",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0,
+       "order": 16.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Payments for (Proceeds from) Productive Assets",
+        "label": "Payments to Acquire Other Productive Assets",
+        "documentation": "Amount of cash outflow for the purchase of or improvements to tangible or intangible assets, used to produce goods or deliver services, classified as other."
+       }
+      }
+     }
+    },
+    "us-gaap_PaymentsToAcquirePropertyPlantAndEquipment": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PaymentsToAcquirePropertyPlantAndEquipment",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0,
+       "order": 11.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Payments to Acquire Property, Plant, and Equipment",
+        "label": "Payments to Acquire Property, Plant, and Equipment",
+        "documentation": "The cash outflow associated with the acquisition of long-lived, physical assets that are used in the normal conduct of business to produce goods and services and not intended for resale; includes cash outflows to pay for construction of self-constructed assets."
+       }
+      }
+     }
+    },
+    "us-gaap_PaymentsToAcquireRestrictedInvestments": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PaymentsToAcquireRestrictedInvestments",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0,
+       "order": 4.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Payments to Acquire Restricted Investments",
+        "label": "Payments to Acquire Restricted Investments",
+        "documentation": "The cash outflow to acquire investments (not to include restricted cash) that are pledged or subject to withdrawal restrictions."
+       }
+      }
+     }
+    },
+    "us-gaap_PaymentsToInvestInDecommissioningFund": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PaymentsToInvestInDecommissioningFund",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Payments to Acquire Investments to be Held in Decommissioning Trust Fund",
+        "label": "Payments to Acquire Investments to be Held in Decommissioning Trust Fund",
+        "documentation": "The cash outflow for the purchase of investments that will be held in a decommissioning trust fund."
+       }
+      }
+     }
+    },
+    "us-gaap_PensionExpenseReversalOfExpenseNoncash": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PensionExpenseReversalOfExpenseNoncash",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 5.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Pension Expense (Reversal of Expense), Noncash",
+        "label": "Pension Expense (Reversal of Expense), Noncash",
+        "documentation": "Amount of noncash expense (reversal of expense) for pension benefits. Excludes other postretirement benefits."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromAdvanceForAndContributionInAidOfConstructionFinancingActivity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromAdvanceForAndContributionInAidOfConstructionFinancingActivity",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0,
+       "order": 10.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Proceeds from Advance for and Contribution in Aid of Construction, Financing Activity",
+        "label": "Proceeds from Advance for and Contribution in Aid of Construction, Financing Activity",
+        "documentation": "Amount of cash inflow from advance for and contribution in aid of construction, classified as financing activity."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromContributionsFromParent": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromContributionsFromParent",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0,
+       "order": 11.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Proceeds from Contributions from Parent",
+        "label": "Proceeds from Contributions from Parent",
+        "documentation": "The cash inflow from parent as a source of financing that is recorded as additional paid in capital."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromDecommissioningFund": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromDecommissioningFund",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Proceeds from Decommissioning Trust Fund Assets",
+        "label": "Proceeds from Decommissioning Trust Fund Assets",
+        "documentation": "The cash inflow from the sale of assets held in a decommissioning trust fund."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromInsuranceSettlementInvestingActivities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromInsuranceSettlementInvestingActivities",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0,
+       "order": 14.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Proceeds from Insurance Settlement, Investing Activities",
+        "label": "Proceeds from Insurance Settlement, Investing Activities",
+        "documentation": "Amount of cash inflow for proceeds from settlement of insurance claim, classified as investing activities. Excludes insurance settlement classified as operating activities."
+       }
+      }
+     }
+    },
+    "etr_ProceedsFromIssuanceOfAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "ProceedsFromIssuanceOfAbstract",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Proceeds From Issuance Of [Abstract]",
+        "label": "Proceeds From Issuance Of [Abstract]",
+        "documentation": "Proceeds From Issuance Of."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromIssuanceOfLongTermDebt": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromIssuanceOfLongTermDebt",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedTerseLabel": "Proceeds from Issuance of Long-Term Debt",
+        "label": "Proceeds from Issuance of Long-Term Debt",
+        "documentation": "The cash inflow from a debt initially having maturity due after one year or beyond the operating cycle, if longer."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromMinorityShareholders": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromMinorityShareholders",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0,
+       "order": 12.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Proceeds from Noncontrolling Interests",
+        "label": "Proceeds from Noncontrolling Interests",
+        "documentation": "Amount of cash inflow from a noncontrolling interest. Includes, but is not limited to, purchase of additional shares or other increase in noncontrolling interest ownership."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromNuclearFuel": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromNuclearFuel",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0,
+       "order": 12.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Proceeds from Nuclear Fuel",
+        "label": "Proceeds from Nuclear Fuel",
+        "documentation": "Cash inflow resulting from the sale of any material that is commonly used in the generation of nuclear energy."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromPaymentsForOtherFinancingActivities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromPaymentsForOtherFinancingActivities",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Proceeds from (Payments for) Other Financing Activities",
+        "label": "Proceeds from (Payments for) Other Financing Activities",
+        "documentation": "Amount of cash inflow (outflow) from financing activities classified as other."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromRepaymentsOfShortTermDebt": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromRepaymentsOfShortTermDebt",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0,
+       "order": 9.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Proceeds from (Repayments of) Short-Term Debt",
+        "label": "Proceeds from (Repayments of) Short-Term Debt",
+        "documentation": "The net cash inflow or outflow for borrowing having initial term of repayment within one year or the normal operating cycle, if longer."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromSaleOfProductiveAssets": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromSaleOfProductiveAssets",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0,
+       "order": 13.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Proceeds from Sale of Productive Assets",
+        "label": "Proceeds from Sale of Productive Assets",
+        "documentation": "The cash inflow from the sale of property, plant and equipment (capital expenditures), software, and other intangible assets."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromSaleOfRestrictedInvestments": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromSaleOfRestrictedInvestments",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0,
+       "order": 17.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Proceeds from Sale of Restricted Investments",
+        "label": "Proceeds from Sale of Restricted Investments",
+        "documentation": "The cash inflow associated with the sale of investments that are pledged or subject to withdrawal restrictions during the period."
+       }
+      }
+     }
+    },
+    "us-gaap_ProceedsFromSaleOfTreasuryStock": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProceedsFromSaleOfTreasuryStock",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0,
+       "order": 7.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Proceeds from Sale of Treasury Stock",
+        "label": "Proceeds from Sale of Treasury Stock",
+        "documentation": "The cash inflow from the issuance of an equity stock that has been previously reacquired by the entity."
+       }
+      }
+     }
+    },
+    "etr_ProceedsReceivedByStormTrustsRelatedToSecuritization": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "ProceedsReceivedByStormTrustsRelatedToSecuritization",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0,
+       "order": 8.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Proceeds received by storm trusts related to securitization",
+        "label": "Proceeds received by storm trusts related to securitization",
+        "documentation": "Proceeds received by storm trusts related to securitization"
+       }
+      }
+     }
+    },
+    "us-gaap_ProfitLoss": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProfitLoss",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome": {
+       "parentTag": "us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic",
+       "weight": 1.0,
+       "order": 3.0
+      },
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 1.0
+      },
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome": {
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/BusinessSegmentInformationScheduleofSegmentReportingInformationbySegmentDetails",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/EquityScheduleOfEarningsPerShareBasicAndDilutedDetails",
+      "http://www.entergy.com/role/EquityScheduleofReclassificationoutofAccumulatedOtherComprehensiveIncomeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net Income (Loss), Including Portion Attributable to Noncontrolling Interest, Total",
+        "verboseLabel": "Net Income (Loss), Including Portion Attributable to Noncontrolling Interest",
+        "terseLabel": "Net Income (Loss), Including Portion Attributable to Noncontrolling Interest",
+        "label": "Net Income (Loss), Including Portion Attributable to Noncontrolling Interest",
+        "documentation": "The consolidated profit or loss for the period, net of income taxes, including the portion attributable to the noncontrolling interest."
+       }
+      }
+     }
+    },
+    "us-gaap_ProvisionForOtherLosses": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProvisionForOtherLosses",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 13.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Provision for Other Losses",
+        "label": "Provision for Other Losses",
+        "documentation": "Amount of expense related to other loss."
+       }
+      }
+     }
+    },
+    "us-gaap_PublicUtilitiesRegulatoryProceedingAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PublicUtilitiesRegulatoryProceedingAxis",
+     "presentation": [
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Public Utilities, Regulatory Proceeding [Axis]",
+        "label": "Public Utilities, Regulatory Proceeding [Axis]",
+        "documentation": "Information by name of regulatory proceeding."
+       }
+      }
+     }
+    },
+    "etr_RedemptionOfPreferredMembershipInterestsOfAffiliate": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "RedemptionOfPreferredMembershipInterestsOfAffiliate",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0,
+       "order": 10.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Redemption of preferred membership interests of affiliate",
+        "label": "Redemption of preferred membership interests of affiliate",
+        "documentation": "Redemption of preferred membership interests of affiliate"
+       }
+      }
+     }
+    },
+    "us-gaap_RegulatoryAssetAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "RegulatoryAssetAxis",
+     "presentation": [
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Regulatory Asset [Axis]",
+        "label": "Regulatory Asset [Axis]",
+        "documentation": "Information by type of regulatory asset."
+       }
+      }
+     }
+    },
+    "us-gaap_RegulatoryLiabilityAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "RegulatoryLiabilityAxis",
+     "presentation": [
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Regulatory Liability [Axis]",
+        "label": "Regulatory Liability [Axis]",
+        "documentation": "Information by type of regulatory liability."
+       }
+      }
+     }
+    },
+    "us-gaap_RepaymentsOfLongTermDebt": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "RepaymentsOfLongTermDebt",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0,
+       "order": 4.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Repayments of Long-Term Debt",
+        "label": "Repayments of Long-Term Debt",
+        "documentation": "The cash outflow for debt initially having maturity due after one year or beyond the normal operating cycle, if longer."
+       }
+      }
+     }
+    },
+    "us-gaap_RetainedEarningsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "RetainedEarningsMember",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Retained Earnings [Member]",
+        "label": "Retained Earnings [Member]",
+        "documentation": "Accumulated undistributed earnings (deficit)."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementBusinessSegmentsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementBusinessSegmentsAxis",
+     "presentation": [
+      "http://www.entergy.com/role/BusinessSegmentInformationScheduleofSegmentReportingInformationbySegmentDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Segments [Axis]",
+        "label": "Segments [Axis]",
+        "documentation": "Information by business segments."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementClassOfStockAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementClassOfStockAxis",
+     "presentation": [
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/EquityNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class of Stock [Axis]",
+        "label": "Class of Stock [Axis]",
+        "documentation": "Information by the different classes of stock of the entity."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementEquityComponentsAxis",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/EquityScheduleofAccumulatedOtherComprehensiveIncomeLossDetails",
+      "http://www.entergy.com/role/EquityScheduleofReclassificationoutofAccumulatedOtherComprehensiveIncomeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Equity Components [Axis]",
+        "label": "Equity Components [Axis]",
+        "documentation": "Information by component of equity."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementLineItems": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementLineItems",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/AssetRetirementObligationsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/BusinessSegmentInformationTables",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsofComprehensiveIncomeParentheticals",
+      "http://www.entergy.com/role/DecommissioningTrustFunds",
+      "http://www.entergy.com/role/DecommissioningTrustFundsNarrativeDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofInvestmentsClassifiedbyContractualMaturityDateDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsTables",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/Equity",
+      "http://www.entergy.com/role/EquityNarrativeDetails",
+      "http://www.entergy.com/role/EquityScheduleOfEarningsPerShareBasicAndDilutedDetails",
+      "http://www.entergy.com/role/EquityTables",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/StockBasedCompensation",
+      "http://www.entergy.com/role/VariableInterestEntities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Statement [Line Items]",
+        "label": "Statement [Line Items]",
+        "documentation": "Line items represent financial concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes to the table."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementOfCashFlowsAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementOfCashFlowsAbstract",
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Statement of Cash Flows [Abstract]",
+        "label": "Statement of Cash Flows [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_StatementTable": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementTable",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/AssetRetirementObligationsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/BusinessSegmentInformationTables",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsofComprehensiveIncomeParentheticals",
+      "http://www.entergy.com/role/DecommissioningTrustFunds",
+      "http://www.entergy.com/role/DecommissioningTrustFundsNarrativeDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofAvailableforSaleSecuritiesReconciliationDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofDebtSecuritiesAvailableforSaleUnrealizedLossPositionFairValueDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofInvestmentsClassifiedbyContractualMaturityDateDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsTables",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/Equity",
+      "http://www.entergy.com/role/EquityNarrativeDetails",
+      "http://www.entergy.com/role/EquityScheduleOfEarningsPerShareBasicAndDilutedDetails",
+      "http://www.entergy.com/role/EquityTables",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/StockBasedCompensation",
+      "http://www.entergy.com/role/VariableInterestEntities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Statement [Table]",
+        "label": "Statement [Table]",
+        "documentation": "Disclosure of information about statement of comprehensive income, income, other comprehensive income, financial position, cash flows, and shareholders' equity."
+       }
+      }
+     }
+    },
+    "etr_SubsidiariesPreferredStockAndNoncontrollingInterestsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "SubsidiariesPreferredStockAndNoncontrollingInterestsMember",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Subsidiaries Preferred Stock and Noncontrolling Interests [Member]",
+        "label": "Subsidiaries Preferred Stock and Noncontrolling Interests [Member]",
+        "documentation": "Subsidiaries Preferred Stock and Noncontrolling Interests"
+       }
+      }
+     }
+    },
+    "us-gaap_SupplementalCashFlowInformationAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "SupplementalCashFlowInformationAbstract",
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Supplemental Cash Flow Information [Abstract]",
+        "label": "Supplemental Cash Flow Information [Abstract]"
+       }
+      }
+     }
+    },
+    "etr_SystemEnergyMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "SystemEnergyMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/DecommissioningTrustFunds",
+      "http://www.entergy.com/role/DecommissioningTrustFundsNarrativeDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofAvailableforSaleSecuritiesReconciliationDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofDebtSecuritiesAvailableforSaleUnrealizedLossPositionFairValueDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofInvestmentsClassifiedbyContractualMaturityDateDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsTables",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "System Energy [Member]",
+        "label": "System Energy [Member]",
+        "documentation": "System Energy."
+       }
+      }
+     }
+    },
+    "etr_UtilityMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "UtilityMember",
+     "presentation": [
+      "http://www.entergy.com/role/BusinessSegmentInformationScheduleofSegmentReportingInformationbySegmentDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Utility [Member]",
+        "label": "Utility [Member]",
+        "documentation": "Utility Member."
+       }
+      }
+     }
+    },
+    "exch_XCHI": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://xbrl.sec.gov/exch/2024",
+     "localname": "XCHI",
+     "presentation": [
+      "http://www.entergy.com/role/DocumentandEntityInformation"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "NYSE CHICAGO, INC. [Member]",
+        "label": "NYSE CHICAGO, INC. [Member]"
+       }
+      }
+     }
+    },
+    "exch_XNYS": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://xbrl.sec.gov/exch/2024",
+     "localname": "XNYS",
+     "presentation": [
+      "http://www.entergy.com/role/DocumentandEntityInformation"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "NEW YORK STOCK EXCHANGE, INC. [Member]",
+        "label": "NEW YORK STOCK EXCHANGE, INC. [Member]"
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R3": {
+     "role": "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+     "longName": "9952152 - Statement - Consolidated Statements Of Cash Flows",
+     "shortName": "Consolidated Statements Of Cash Flows",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "3",
+     "firstAnchor": {
+      "contextRef": "c-1",
+      "name": "us-gaap:ProfitLoss",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "etr-20240930.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-1",
+      "name": "us-gaap:DepreciationAmortizationAndAccretionNet",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "etr-20240930.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}
