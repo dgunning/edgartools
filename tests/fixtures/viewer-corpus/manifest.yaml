@@ -251,3 +251,80 @@ entries:
         expected_value_min: 5_900_000      # $5.9B floor
         expected_value_max: 6_100_000      # $6.1B ceiling
         tolerance_pct: 1.0
+
+  # -------------------------------------------------------------------
+  # Display scale is what the R*.htm page declares, not XBRL decimals
+  # (viewer-harness fidelity fixes). Each was off by exactly 1000x when
+  # currency_scaling was inferred from decimals.
+  # -------------------------------------------------------------------
+  - id: viewer-scale-spirit-2019
+    company: Spirit AeroSystems Holdings, Inc.
+    ticker: SPR
+    cik: 1364885
+    accession: "0001628280-20-002543"
+    form: 10-K
+    filing_date: "2020-02-28"
+    dimensions:
+      header_shape: multi_period_3m_plus_12m
+      footnote_style: none
+      scaling: usd_millions
+      filer_type: large_us
+      fiscal_year_end: dec
+    bug_references: [viewer-harness-scale]
+    notes: >
+      R2.htm is titled "USD ($) $ in Millions" and shows net revenues of
+      "$ 1,959.3" for the quarter ended Dec. 31, 2019, but the facts carry
+      decimals=-5 (us-gaap:Revenues = 1,959,300,000). Inferring the scale
+      from decimals gave 1_000; the page says millions.
+    assertions:
+      currency_scaling:
+        statement_short_name_contains: "Statements of Operations"
+        expected: 1000000
+
+  - id: viewer-scale-iren-2025
+    company: IREN Ltd
+    ticker: IREN
+    cik: 1878848
+    accession: "0001878848-25-000063"
+    form: 10-K
+    filing_date: "2025-08-28"
+    dimensions:
+      header_shape: comparative_12m
+      footnote_style: none
+      scaling: mixed
+      filer_type: large_us
+      fiscal_year_end: jun
+    bug_references: [viewer-harness-scale]
+    notes: >
+      Mixed scales in one filing. R3.htm (balance sheet) is "$ in
+      Thousands"; R5.htm (operations) is titled "USD ($)" with no scale
+      statement and shows total revenue of "$ 501,023,000" in whole
+      dollars, though its facts carry decimals=-3. Decimals inference
+      gave 1_000 for R5; the page shows units.
+    assertions:
+      currency_scaling:
+        statement_short_name_contains: "Statements of Operations"
+        expected: 1
+
+  - id: viewer-scale-quoin-2023
+    company: Quoin Pharmaceuticals, Ltd.
+    ticker: QNRX
+    cik: 1671502
+    accession: "0001410578-23-001531"
+    form: 10-Q
+    filing_date: "2023-08-03"
+    dimensions:
+      header_shape: comparative_instant
+      footnote_style: none
+      scaling: usd_raw
+      filer_type: smaller_us
+      fiscal_year_end: dec
+    bug_references: [viewer-harness-scale]
+    notes: >
+      R2.htm is titled "USD ($)" with no scale statement and shows cash
+      of "$ 4,759,129" at Jun. 30, 2023 in whole dollars; decimals
+      inference gave 1_000.
+    assertions:
+      currency_scaling:
+        statement_short_name_contains: "Balance Sheets"
+        expected: 1

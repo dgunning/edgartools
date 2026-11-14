@@ -9,15 +9,21 @@ producing inconsistent scaling across same-filing statements (e.g. ALGN
 balance sheet vs income statement) and wrong values for whole multi-year
 ranges (ABNB showing 1 for 2023/2024 when the actual scale is millions).
 
-The fix resolves ``ViewerReport.currency_scaling`` from the XBRL ``decimals``
-attribute on monetary facts mapped to the report's role in the presentation
-linkbase (filer-mandated, uniform). Falls back to the text-match value when
-XBRL is unavailable.
+The first fix resolved ``ViewerReport.currency_scaling`` from the XBRL
+``decimals`` attribute, on the issue's assumption that every statement in a
+filing shares one scale. The SEC pages contradict that assumption (ABNB
+0001559720-25-000010 shows its balance sheet in millions and its statement of
+operations in whole dollars; AMGN 0000318154-26-000010 shows its income
+statement in thousands and its balance sheet in millions), and the decimals
+value was wrong by a factor of a million on such pages. ``currency_scaling``
+now returns the scale each page declares, parsed from any
+``<symbol> in <Scale>`` statement, and falls back to ``decimals`` only when a
+report has no title cell.
 
-Acceptance criteria from the issue:
-1. ALGN balance sheet and income statement scaling agree
-2. ABNB scaling consistent across years
-3. Canary 5-ticker subset shows only ``{1, 1_000, 1_000_000}``
+What these tests pin:
+1. ALGN balance sheet and income statement scaling agree (both in thousands)
+2. ABNB scaling is the page-declared scale for each of four fiscal years
+3. Canary 5-ticker subset reports the scale each page declares
 
 GitHub Issue: https://github.com/dgunning/edgartools/issues/807
 """
@@ -25,7 +31,7 @@ from __future__ import annotations
 
 import pytest
 
-from edgar import Company
+from edgar import Company, find
 
 
 VALID_MONETARY_SCALES = {1, 1_000, 1_000_000, 1_000_000_000}
@@ -61,61 +67,81 @@ def test_algn_balance_sheet_and_income_statement_scaling_agree():
     assert bs.currency_scaling in VALID_MONETARY_SCALES
 
 
+def _income_statement(viewer):
+    return (
+        _primary_statement(viewer, 'statements', 'of', 'operations')
+        or _primary_statement(viewer, 'statements', 'of', 'income')
+        or _primary_statement(viewer, 'income', 'statements')
+    )
+
+
+# (accession, balance-sheet scale, income-statement scale), each read from the
+# "<symbol> in <Scale>" statement in the title cell of the filing's R pages.
+# A page with no currency statement shows whole dollars, so its scale is 1.
+ABNB_PAGE_SCALES = [
+    # FY2025: R3 "$ in Millions"; R5 "shares in Millions, $ in Millions" (revenue "$ 12,241")
+    ('0001559720-26-000004', 1_000_000, 1_000_000),
+    # FY2024: R3 "$ in Millions" (cash "$ 6,864"); R5 "shares in Millions" only (revenue "$ 11,102,000,000")
+    ('0001559720-25-000010', 1_000_000, 1),
+    # FY2023: R3 "$ in Millions"; R5 "shares in Millions" only (revenue "$ 9,917,000,000")
+    ('0001559720-24-000006', 1_000_000, 1),
+    # FY2022: R3 "$ in Millions"; R5 "shares in Millions, $ in Millions" (revenue "$ 8,399.0")
+    ('0001559720-23-000003', 1_000_000, 1_000_000),
+]
+
+CANARY_PAGE_SCALES = [
+    # AAPL FY2026: R5 and R3 both "$ in Millions"
+    ('AAPL', '0000320193-26-000026', 1_000_000, 1_000_000),
+    # ABNB FY2025: R3 and R5 both "$ in Millions"
+    ('ABNB', '0001559720-26-000004', 1_000_000, 1_000_000),
+    # ALGN FY2025: R5 and R3 both "$ in Thousands"
+    ('ALGN', '0001097149-26-000014', 1_000, 1_000),
+    # ACN FY2026: R3 and R5 both "$ in Thousands"
+    ('ACN', '0001467373-26-000049', 1_000, 1_000),
+    # AMGN FY2025: R5 balance sheet "$ in Millions" (cash "$ 9,129");
+    # R3 income statement "$ in Thousands" (revenues "$ 36,751,000")
+    ('AMGN', '0000318154-26-000010', 1_000_000, 1_000),
+]
+
+
 @pytest.mark.network
-def test_abnb_scaling_consistent_across_years():
-    """ABNB was the reporter's multi-year inconsistency case. The text-match
-    parser produced different values across years (1, 1_000, 1_000_000) for
-    the same logical scale. Post-fix, the BS and IS of each year should
-    agree, and the values should all be valid monetary scales."""
-    filings = Company('ABNB').get_filings(form='10-K').head(4)
-    results = []
-    for f in filings:
-        viewer = f.viewer
-        bs = _primary_statement(viewer, 'balance', 'sheet')
-        is_ = _primary_statement(viewer, 'statements', 'of', 'operations')
-        if bs is None or is_ is None:
-            continue
-        results.append((f.filing_date, bs.currency_scaling, is_.currency_scaling))
-
-    assert len(results) >= 3, f"Need >=3 ABNB filings; got {len(results)}"
-
-    for fdate, bs_scale, is_scale in results:
-        assert bs_scale == is_scale, (
-            f"ABNB {fdate}: BS={bs_scale} but IS={is_scale} (must match)"
-        )
-        assert bs_scale in VALID_MONETARY_SCALES, (
-            f"ABNB {fdate}: scale {bs_scale} is not a valid monetary scale"
-        )
+@pytest.mark.parametrize('accession, bs_scale, is_scale', ABNB_PAGE_SCALES)
+def test_abnb_scaling_is_the_page_declared_scale_each_year(accession, bs_scale, is_scale):
+    """ABNB was the reporter's multi-year case. The issue assumed one filing
+    never mixes scales, but ABNB's FY2023 and FY2024 statements of operations
+    are rendered in whole dollars beside a balance sheet in millions, so the
+    two pages legitimately differ. ``currency_scaling`` is the factor that
+    turns a displayed value into the raw amount, which makes the page's own
+    declaration the only correct answer: 11,102,000,000 x 1, not x 1,000,000."""
+    viewer = find(accession).viewer
+    bs = _primary_statement(viewer, 'balance', 'sheet')
+    is_ = _income_statement(viewer)
+    assert bs is not None and is_ is not None, f"ABNB {accession}: primary statements not found"
+    assert bs.currency_scaling == bs_scale, (
+        f"ABNB {accession}: BS scale {bs.currency_scaling}, page declares {bs_scale}"
+    )
+    assert is_.currency_scaling == is_scale, (
+        f"ABNB {accession}: IS scale {is_.currency_scaling}, page declares {is_scale}"
+    )
 
 
 @pytest.mark.network
-def test_canary_tickers_show_only_valid_monetary_scales():
-    """5-ticker subset from the reporter's table. Acceptance: every primary
-    statement on the most recent 10-K shows a scale in {1, 1_000, 1_000_000}
-    (the reporter's stated valid set) and BS/IS agree within each filing."""
-    tickers = ['AAPL', 'ABNB', 'ALGN', 'ACN', 'AMGN']
-    for ticker in tickers:
-        f = Company(ticker).get_filings(form='10-K').latest()
-        viewer = f.viewer
-        bs = _primary_statement(viewer, 'balance', 'sheet')
-        is_ = _primary_statement(
-            viewer, 'statements', 'of', 'operations'
-        ) or _primary_statement(
-            viewer, 'statements', 'of', 'income'
-        ) or _primary_statement(
-            viewer, 'income', 'statements'
-        )
-        if bs is None or is_ is None:
-            continue
-        assert bs.currency_scaling in VALID_MONETARY_SCALES, (
-            f"{ticker} BS scale {bs.currency_scaling} not in valid set"
-        )
-        assert is_.currency_scaling in VALID_MONETARY_SCALES, (
-            f"{ticker} IS scale {is_.currency_scaling} not in valid set"
-        )
-        assert bs.currency_scaling == is_.currency_scaling, (
-            f"{ticker}: BS={bs.currency_scaling} != IS={is_.currency_scaling}"
-        )
+@pytest.mark.parametrize('ticker, accession, bs_scale, is_scale', CANARY_PAGE_SCALES)
+def test_canary_tickers_report_page_declared_scales(ticker, accession, bs_scale, is_scale):
+    """5-ticker subset from the reporter's table, pinned to the filing each
+    value was read from. Every primary statement reports the scale its own
+    page declares; AMGN shows that the balance sheet and income statement of
+    one filing can differ (millions and thousands)."""
+    viewer = find(accession).viewer
+    bs = _primary_statement(viewer, 'balance', 'sheet')
+    is_ = _income_statement(viewer)
+    assert bs is not None and is_ is not None, f"{ticker} {accession}: primary statements not found"
+    assert bs.currency_scaling == bs_scale, (
+        f"{ticker} {accession}: BS scale {bs.currency_scaling}, page declares {bs_scale}"
+    )
+    assert is_.currency_scaling == is_scale, (
+        f"{ticker} {accession}: IS scale {is_.currency_scaling}, page declares {is_scale}"
+    )
 
 
 @pytest.mark.network

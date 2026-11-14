@@ -138,15 +138,17 @@ c.report_names   # All report names across every category
 
 ### Currency scaling
 
-The R*.htm viewer files display monetary values in the units specified in the filing (often millions or thousands). To get the raw XBRL value:
+The R*.htm pages display amounts at the scale each page declares under its title (`$ in Millions`, `₨ in Thousands`); a page with no such statement is in whole units. `currency_scaling` returns that scale, so multiplying a displayed value by it gives the amount as filed:
 
 ```python
-report = viewer.financial_statements[0]
-scaling = report.concept_report.currency_scaling  # e.g., 1_000_000
+report = viewer.financial_statements[0]           # INCOME STATEMENTS, "$ in Millions"
+scaling = report.currency_scaling                 # 1_000_000
 
 c = viewer['us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax']
-raw_value = c.numeric_value * scaling             # 281_724_000_000
+raw_value = c.numeric_value * scaling             # 331_839_000_000 (Microsoft FY2026 10-K)
 ```
+
+Statements in one filing can use different scales. Airbnb's FY2024 10-K (0001559720-25-000010) shows its balance sheet in millions and its statement of operations in whole dollars, so use the scale of the report the value came from.
 
 ## Navigate Calculation Trees
 
