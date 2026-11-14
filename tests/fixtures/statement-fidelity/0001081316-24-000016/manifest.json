@@ -1,0 +1,16 @@
+{
+ "accession": "0001081316-24-000016",
+ "filer": "BERKSHIRE HATHAWAY ENERGY CO",
+ "form": "10-Q",
+ "filing_date": "2024-08-05",
+ "role": "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedParenthetical",
+ "page": "R25.htm",
+ "short_name": "Consolidated Statements of Comprehensive Income (Unaudited) (Parenthetical)",
+ "sic": "4900",
+ "period_of_report": "2024-06-30",
+ "menu_categories": {
+  "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited": "Statements",
+  "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedParenthetical": "Statements"
+ },
+ "access": "comprehensive_income(parenthetical=True)"
+}

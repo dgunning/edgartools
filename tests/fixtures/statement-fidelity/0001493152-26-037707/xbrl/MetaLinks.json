@@ -1,0 +1,450 @@
+{
+ "version": "2.2",
+ "instance": {
+  "form10-k.htm": {
+   "tag": {
+    "us-gaap_AccountsPayableCurrentAndNoncurrent": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "AccountsPayableCurrentAndNoncurrent",
+     "crdr": "credit",
+     "calculation": {
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities": {
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Fees payable to Sponsor",
+        "documentation": "Carrying value as of the balance sheet date of liabilities incurred (and for which invoices have typically been received) and payable to vendors for goods and services received that are used in an entity's business."
+       }
+      }
+     }
+    },
+    "us-gaap_Assets": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "Assets",
+     "crdr": "debit",
+     "calculation": {
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities": {
+       "parentTag": "us-gaap_AssetsNet",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total Assets",
+        "label": "Assets [Default Label]",
+        "documentation": "Amount of asset recognized for present right to economic benefit."
+       }
+      }
+     }
+    },
+    "us-gaap_AssetsAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "AssetsAbstract",
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Assets"
+       }
+      }
+     }
+    },
+    "us-gaap_AssetsNet": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "AssetsNet",
+     "crdr": "debit",
+     "calculation": {
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://graniteshares.com/role/FinancialHighlights",
+      "http://graniteshares.com/role/SchedulesOfInvestments",
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities",
+      "http://graniteshares.com/role/StatementsOfChangesInNetAssets"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net Assets",
+        "verboseLabel": "Fair Value",
+        "periodStartLabel": "Net Assets – beginning of year",
+        "periodEndLabel": "Net Assets – end of year",
+        "label": "Net Assets",
+        "documentation": "Amount of net assets (liabilities)."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockSharesIssued": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "CommonStockSharesIssued",
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Shares issued",
+        "documentation": "Total number of common shares of an entity that have been sold or granted to shareholders (includes common shares that were issued, repurchased and remain in the treasury). These shares represent capital invested by the firm's shareholders and owners, and may be all or only a portion of the number of shares authorized. Shares issued include shares outstanding and shares held in the treasury."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockSharesOutstanding": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "CommonStockSharesOutstanding",
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Shares outstanding",
+        "documentation": "Number of shares of common stock outstanding. Common stock represent the ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_DefinedBenefitPlanDisclosureLineItems": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "DefinedBenefitPlanDisclosureLineItems",
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Defined Benefit Plan Disclosure [Line Items]",
+        "documentation": "Line items represent financial concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes to the table."
+       }
+      }
+     }
+    },
+    "us-gaap_FairValueByFairValueHierarchyLevelAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "FairValueByFairValueHierarchyLevelAxis",
+     "presentation": [
+      "http://graniteshares.com/role/ScheduleOfTrustsInvestmentsAtFairValueDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Fair Value Hierarchy and NAV [Axis]",
+        "documentation": "Information by level within fair value hierarchy and fair value measured at net asset value per share as practical expedient."
+       }
+      }
+     }
+    },
+    "us-gaap_FairValueInputsLevel1Member": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "FairValueInputsLevel1Member",
+     "presentation": [
+      "http://graniteshares.com/role/ScheduleOfTrustsInvestmentsAtFairValueDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Fair Value, Inputs, Level 1 [Member]",
+        "documentation": "Quoted prices in active markets for identical assets or liabilities that the reporting entity can access at the measurement date."
+       }
+      }
+     }
+    },
+    "us-gaap_FairValueInputsLevel2Member": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "FairValueInputsLevel2Member",
+     "presentation": [
+      "http://graniteshares.com/role/ScheduleOfTrustsInvestmentsAtFairValueDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Fair Value, Inputs, Level 2 [Member]",
+        "documentation": "Inputs other than quoted prices included within level 1 that are observable for an asset or liability, either directly or indirectly, including, but not limited to, quoted prices for similar assets or liabilities in active markets, or quoted prices for identical or similar assets or liabilities in inactive markets."
+       }
+      }
+     }
+    },
+    "us-gaap_FairValueInputsLevel3Member": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "FairValueInputsLevel3Member",
+     "presentation": [
+      "http://graniteshares.com/role/ScheduleOfTrustsInvestmentsAtFairValueDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Fair Value, Inputs, Level 3 [Member]",
+        "documentation": "Unobservable inputs that reflect the entity's own assumption about the assumptions market participants would use in pricing."
+       }
+      }
+     }
+    },
+    "us-gaap_FinancialInstrumentAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "FinancialInstrumentAxis",
+     "presentation": [
+      "http://graniteshares.com/role/ScheduleOfTrustsInvestmentsAtFairValueDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Financial Instrument [Axis]",
+        "documentation": "Information by type of financial instrument."
+       }
+      }
+     }
+    },
+    "us-gaap_GoldMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "GoldMember",
+     "presentation": [
+      "http://graniteshares.com/role/ScheduleOfTrustsInvestmentsAtFairValueDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Gold [Member]",
+        "documentation": "Yellow metallic chemical element that is highly ductile and malleable and not subject to oxidation or corrosion."
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentInPhysicalCommodities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "InvestmentInPhysicalCommodities",
+     "crdr": "debit",
+     "calculation": {
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities": {
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://graniteshares.com/role/ScheduleOfInvestmentInGoldDetails",
+      "http://graniteshares.com/role/ScheduleOfTrustsInvestmentsAtFairValueDetails",
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Investment in gold bullion, at fair value",
+        "verboseLabel": "Total",
+        "periodStartLabel": "Investment in gold, fair value, opening balance",
+        "periodEndLabel": "Investment in gold, fair value, ending balance",
+        "documentation": "Investments held in physical commodities, such as gold, silver, platinum, crude oil, coal, sugar, rice, wheat."
+       }
+      }
+     }
+    },
+    "us-gaap_Liabilities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "Liabilities",
+     "crdr": "credit",
+     "calculation": {
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities": {
+       "parentTag": "us-gaap_AssetsNet",
+       "weight": -1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total Liabilities",
+        "label": "Liabilities [Default Label]",
+        "documentation": "Amount of liability recognized for present obligation requiring transfer or otherwise providing economic benefit to others."
+       }
+      }
+     }
+    },
+    "us-gaap_LiabilitiesAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "LiabilitiesAbstract",
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Liabilities"
+       }
+      }
+     }
+    },
+    "BAR_NetAssetsPerCommonShare": {
+     "xbrltype": "perShareItemType",
+     "nsuri": "http://graniteshares.com/20260630",
+     "localname": "NetAssetsPerCommonShare",
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Net asset value per Share",
+        "documentation": "Net assets per common share."
+       }
+      }
+     }
+    },
+    "us-gaap_RelatedPartyDomain": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "RelatedPartyDomain",
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Related and nonrelated parties. Related party includes, but is not limited to, affiliate, other entity for which investment is accounted for under equity method, trust for benefit of employee, principal owner, management, and member of immediate family, and other party that may be prevented from pursuing separate interests because of control, significant influence, or ownership interest."
+       }
+      }
+     }
+    },
+    "us-gaap_RelatedPartyMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "RelatedPartyMember",
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Related Party [Member]",
+        "documentation": "Party related to reporting entity. Includes, but is not limited to, affiliate, entity for which investment is accounted for by equity method, trust for benefit of employees, and principal owner, management, and members of immediate family."
+       }
+      }
+     }
+    },
+    "us-gaap_RelatedPartyTransactionsByRelatedPartyAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "RelatedPartyTransactionsByRelatedPartyAxis",
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Related and Nonrelated Parties [Axis]",
+        "documentation": "Information by related and nonrelated parties. Related party includes, but is not limited to, affiliate, other entity for which investment is accounted for under equity method, trust for benefit of employee, principal owner, management, and member of immediate family, and other party that may be prevented from pursuing separate interests because of control, significant influence, or ownership interest."
+       }
+      }
+     }
+    },
+    "us-gaap_ScheduleOfDefinedBenefitPlansDisclosuresTable": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "ScheduleOfDefinedBenefitPlansDisclosuresTable",
+     "presentation": [
+      "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Defined Benefit Plan [Table]",
+        "documentation": "Disclosure of information about individual defined benefit pension plan or other postretirement defined benefit plan. It may be appropriate to group certain similar plans. Also includes schedule for fair value of plan assets by major categories of plan assets by the level within the fair value hierarchy in which the fair value measurements in their entirety fall, segregating fair value measurements using quoted prices in active markets for identical assets or liabilities (Level 1), Significant other observable inputs (Level 2), and significant unobservable inputs (Level 3)."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementOfFinancialPositionAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "StatementOfFinancialPositionAbstract"
+    }
+   },
+   "report": {
+    "R2": {
+     "role": "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities",
+     "longName": "00000002 - Statement - Statements of Assets and Liabilities",
+     "shortName": "Statements of Assets and Liabilities",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "2",
+     "firstAnchor": {
+      "contextRef": "AsOf2026-06-30",
+      "name": "us-gaap:InvestmentInPhysicalCommodities",
+      "unitRef": "USD",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-3",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "form10-k.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "AsOf2026-06-30",
+      "name": "us-gaap:Assets",
+      "unitRef": "USD",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-3",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "form10-k.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

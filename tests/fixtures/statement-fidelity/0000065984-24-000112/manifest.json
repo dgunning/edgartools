@@ -1,0 +1,15 @@
+{
+ "accession": "0000065984-24-000112",
+ "filer": "ENTERGY CORP /DE/",
+ "form": "10-Q",
+ "filing_date": "2024-11-01",
+ "role": "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+ "page": "R3.htm",
+ "short_name": "Consolidated Statements Of Cash Flows",
+ "sic": "4911",
+ "period_of_report": "2024-09-30",
+ "menu_categories": {
+  "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": "Statements"
+ },
+ "access": "cash_flow_statement()"
+}

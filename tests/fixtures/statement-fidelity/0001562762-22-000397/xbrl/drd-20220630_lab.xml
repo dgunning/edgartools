@@ -1,0 +1,283 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--XBRL document created by Certent CDM version: 22.2.0 using Fujitsu Interstage XWand --><linkbase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.xbrl.org/2003/linkbase" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.xbrl.org/2003/instance http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd">
+    <roleRef roleURI="http://www.xbrl.org/2009/role/negatedLabel" xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedLabel"/>
+    <roleRef roleURI="http://www.xbrl.org/2009/role/negatedTerseLabel" xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedTerseLabel"/>
+    <roleRef roleURI="http://www.xbrl.org/2009/role/negatedPeriodStartLabel" xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedPeriodStartLabel"/>
+    <roleRef roleURI="http://www.xbrl.org/2009/role/negatedPeriodEndLabel" xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedPeriodEndLabel"/>
+    <roleRef roleURI="http://www.xbrl.org/2009/role/negatedTotalLabel" xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedTotalLabel"/>
+    <labelLink xlink:type="extended" xlink:role="http://www.xbrl.org/2003/role/link">
+        <loc xlink:type="locator" xlink:href="https://xbrl.sec.gov/dei/2021q4/dei-2021q4.xsd#dei_EntityAddressesAddressTypeAxis" xlink:label="element27"/>
+        <label xlink:type="resource" xlink:label="label27" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_dei_EntityAddressesAddressTypeAxis_en-US">Entity Addresses, Address Type [Axis]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element27" xlink:to="label27"/>
+        <loc xlink:type="locator" xlink:href="https://xbrl.sec.gov/dei/2021q4/dei-2021q4.xsd#dei_BusinessContactMember" xlink:label="element29"/>
+        <label xlink:type="resource" xlink:label="label29" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_dei_BusinessContactMember_en-US">Business Contact [member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element29" xlink:to="label29"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_BasicEarningsLossPerShare" xlink:label="element105"/>
+        <label xlink:type="resource" xlink:label="label105" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_BasicEarningsLossPerShare_en-US">Basic earnings (loss) per share</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element105" xlink:to="label105"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_BasicEarningsLossPerShare" xlink:label="element106"/>
+        <label xlink:type="resource" xlink:label="label106" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_BasicEarningsLossPerShare_en-US">Basic earnings per share (SA cents per share)</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element106" xlink:to="label106"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_BasicEarningsLossPerShare" xlink:label="element107"/>
+        <label xlink:type="resource" xlink:label="label107" xlink:role="http://www.xbrl.org/2003/role/zeroTerseLabel" xml:lang="en-US" id="zeroTerse_ifrs-full_BasicEarningsLossPerShare_en-US">Basic earnings per share</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element107" xlink:to="label107"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ComponentsOfEquityAxis" xlink:label="element177"/>
+        <label xlink:type="resource" xlink:label="label177" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_ComponentsOfEquityAxis_en-US">Components of equity [axis]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element177" xlink:to="label177"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLossNetOfTaxAbstract" xlink:label="element178"/>
+        <label xlink:type="resource" xlink:label="label178" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLossNetOfTaxAbstract_en-US">Components of other comprehensive income that will not be reclassified to profit or loss, net of tax [abstract]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element178" xlink:to="label178"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLossNetOfTaxAbstract" xlink:label="element179"/>
+        <label xlink:type="resource" xlink:label="label179" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLossNetOfTaxAbstract_en-US">Items that will not be reclassified to profit or loss, net of tax</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element179" xlink:to="label179"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ComprehensiveIncome" xlink:label="element180"/>
+        <label xlink:type="resource" xlink:label="label180" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_ComprehensiveIncome_en-US">Comprehensive income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element180" xlink:to="label180"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ComprehensiveIncome" xlink:label="element181"/>
+        <label xlink:type="resource" xlink:label="label181" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US" id="total_ifrs-full_ComprehensiveIncome_en-US">Total comprehensive income for the year</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element181" xlink:to="label181"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ComprehensiveIncome" xlink:label="element182"/>
+        <label xlink:type="resource" xlink:label="label182" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_ComprehensiveIncome_en-US">Total comprehensive income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element182" xlink:to="label182"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_CostOfSales" xlink:label="element189"/>
+        <label xlink:type="resource" xlink:label="label189" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_CostOfSales_en-US">Cost of sales</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element189" xlink:to="label189"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_CostOfSales" xlink:label="element190"/>
+        <label xlink:type="resource" xlink:label="label190" xlink:role="http://www.xbrl.org/2009/role/negatedTerseLabel" xml:lang="en-US" id="NegatedTerse_ifrs-full_CostOfSales_en-US">Cost of sales</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element190" xlink:to="label190"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_CounterpartiesAxis" xlink:label="element191"/>
+        <label xlink:type="resource" xlink:label="label191" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_CounterpartiesAxis_en-US">Counterparties [axis]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element191" xlink:to="label191"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_DilutedEarningsLossPerShare" xlink:label="element317"/>
+        <label xlink:type="resource" xlink:label="label317" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_DilutedEarningsLossPerShare_en-US">Diluted earnings (loss) per share</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element317" xlink:to="label317"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_DilutedEarningsLossPerShare" xlink:label="element318"/>
+        <label xlink:type="resource" xlink:label="label318" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_DilutedEarningsLossPerShare_en-US">Diluted earnings per share (SA cents per share)</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element318" xlink:to="label318"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_DilutedEarningsLossPerShare" xlink:label="element319"/>
+        <label xlink:type="resource" xlink:label="label319" xlink:role="http://www.xbrl.org/2003/role/zeroTerseLabel" xml:lang="en-US" id="zeroTerse_ifrs-full_DilutedEarningsLossPerShare_en-US">Diluted earnings per share</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element319" xlink:to="label319"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_EarningsPerShareAbstract" xlink:label="element500"/>
+        <label xlink:type="resource" xlink:label="label500" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_EarningsPerShareAbstract_en-US">Earnings per share [abstract]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element500" xlink:to="label500"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_EarningsPerShareAbstract" xlink:label="element501"/>
+        <label xlink:type="resource" xlink:label="label501" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_EarningsPerShareAbstract_en-US">Earnings per share</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element501" xlink:to="label501"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_FinanceCosts" xlink:label="element557"/>
+        <label xlink:type="resource" xlink:label="label557" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_FinanceCosts_en-US">Finance Cost</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element557" xlink:to="label557"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_FinanceCosts" xlink:label="element558"/>
+        <label xlink:type="resource" xlink:label="label558" xlink:role="http://www.xbrl.org/2009/role/negatedTerseLabel" xml:lang="en-US" id="NegatedTerse_ifrs-full_FinanceCosts_en-US">Finance expense</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element558" xlink:to="label558"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_FinanceCosts" xlink:label="element559"/>
+        <label xlink:type="resource" xlink:label="label559" xlink:role="http://www.xbrl.org/2009/role/negatedTotalLabel" xml:lang="en-US" id="NegatedTotal_ifrs-full_FinanceCosts_en-US">Finance expense</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element559" xlink:to="label559"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_FinanceCosts" xlink:label="element560"/>
+        <label xlink:type="resource" xlink:label="label560" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_FinanceCosts_en-US">Finance cost incrurred</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element560" xlink:to="label560"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_FinanceCosts" xlink:label="element561"/>
+        <label xlink:type="resource" xlink:label="label561" xlink:role="http://www.xbrl.org/2003/role/verboseLabel" xml:lang="en-US" id="verbose_ifrs-full_FinanceCosts_en-US">Finance expense</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element561" xlink:to="label561"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_FinanceCosts" xlink:label="element562"/>
+        <label xlink:type="resource" xlink:label="label562" xlink:role="http://www.xbrl.org/2009/role/negatedLabel" xml:lang="en-US" id="Negated_ifrs-full_FinanceCosts_en-US">Finance Cost</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element562" xlink:to="label562"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_FinanceIncome" xlink:label="element566"/>
+        <label xlink:type="resource" xlink:label="label566" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_FinanceIncome_en-US">Finance income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element566" xlink:to="label566"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_FinanceIncome" xlink:label="element567"/>
+        <label xlink:type="resource" xlink:label="label567" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_FinanceIncome_en-US">Finance income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element567" xlink:to="label567"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_FinanceIncome" xlink:label="element568"/>
+        <label xlink:type="resource" xlink:label="label568" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US" id="total_ifrs-full_FinanceIncome_en-US">Finance income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element568" xlink:to="label568"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_FinanceIncome" xlink:label="element569"/>
+        <label xlink:type="resource" xlink:label="label569" xlink:role="http://www.xbrl.org/2009/role/negatedLabel" xml:lang="en-US" id="Negated_ifrs-full_FinanceIncome_en-US">Finance income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element569" xlink:to="label569"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_GrossProfit" xlink:label="element604"/>
+        <label xlink:type="resource" xlink:label="label604" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_GrossProfit_en-US">Gross profit</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element604" xlink:to="label604"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_GrossProfit" xlink:label="element605"/>
+        <label xlink:type="resource" xlink:label="label605" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US" id="total_ifrs-full_GrossProfit_en-US">Gross profit from operating activities</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element605" xlink:to="label605"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_IncomeTaxExpenseContinuingOperations" xlink:label="element612"/>
+        <label xlink:type="resource" xlink:label="label612" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_IncomeTaxExpenseContinuingOperations_en-US">Tax expense (income), continuing operations</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element612" xlink:to="label612"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_IncomeTaxExpenseContinuingOperations" xlink:label="element613"/>
+        <label xlink:type="resource" xlink:label="label613" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_IncomeTaxExpenseContinuingOperations_en-US">Income tax</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element613" xlink:to="label613"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_IncomeTaxExpenseContinuingOperations" xlink:label="element614"/>
+        <label xlink:type="resource" xlink:label="label614" xlink:role="http://www.xbrl.org/2009/role/negatedTerseLabel" xml:lang="en-US" id="NegatedTerse_ifrs-full_IncomeTaxExpenseContinuingOperations_en-US">Income tax</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element614" xlink:to="label614"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_IncomeTaxExpenseContinuingOperations" xlink:label="element615"/>
+        <label xlink:type="resource" xlink:label="label615" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US" id="total_ifrs-full_IncomeTaxExpenseContinuingOperations_en-US">Income tax expense or (income)</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element615" xlink:to="label615"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_IncomeTaxExpenseContinuingOperations" xlink:label="element616"/>
+        <label xlink:type="resource" xlink:label="label616" xlink:role="http://www.xbrl.org/2009/role/negatedTotalLabel" xml:lang="en-US" id="NegatedTotal_ifrs-full_IncomeTaxExpenseContinuingOperations_en-US">Total income tax</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element616" xlink:to="label616"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome" xlink:label="element619"/>
+        <label xlink:type="resource" xlink:label="label619" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome_en-US">Other comprehensive income, gains (losses) from investments in equity instruments deferred tax expense</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element619" xlink:to="label619"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome" xlink:label="element620"/>
+        <label xlink:type="resource" xlink:label="label620" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome_en-US">Deferred taxation thereon</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element620" xlink:to="label620"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome" xlink:label="element621"/>
+        <label xlink:type="resource" xlink:label="label621" xlink:role="http://www.xbrl.org/2009/role/negatedLabel" xml:lang="en-US" id="Negated_ifrs-full_IncomeTaxRelatingToInvestmentsInEquityInstrumentsOfOtherComprehensiveIncome_en-US">Deferred tax thereon</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element621" xlink:to="label621"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_MaterialReconcilingItemsMember" xlink:label="element727"/>
+        <label xlink:type="resource" xlink:label="label727" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_MaterialReconcilingItemsMember_en-US">Material reconciling items [member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element727" xlink:to="label727"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_MaterialReconcilingItemsMember" xlink:label="element728"/>
+        <label xlink:type="resource" xlink:label="label728" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_MaterialReconcilingItemsMember_en-US">Other reconciling items [member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element728" xlink:to="label728"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OperatingExpenseExcludingCostOfSales" xlink:label="element800"/>
+        <label xlink:type="resource" xlink:label="label800" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_OperatingExpenseExcludingCostOfSales_en-US">Administration expenses and other costs</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element800" xlink:to="label800"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OperatingExpenseExcludingCostOfSales" xlink:label="element801"/>
+        <label xlink:type="resource" xlink:label="label801" xlink:role="http://www.xbrl.org/2009/role/negatedTerseLabel" xml:lang="en-US" id="NegatedTerse_ifrs-full_OperatingExpenseExcludingCostOfSales_en-US">Administration expenses and other costs</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element801" xlink:to="label801"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OperatingSegmentsMember" xlink:label="element802"/>
+        <label xlink:type="resource" xlink:label="label802" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_OperatingSegmentsMember_en-US">Operating Segments [Member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element802" xlink:to="label802"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherComprehensiveIncome" xlink:label="element807"/>
+        <label xlink:type="resource" xlink:label="label807" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_OtherComprehensiveIncome_en-US">Other comprehensive income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element807" xlink:to="label807"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherComprehensiveIncome" xlink:label="element808"/>
+        <label xlink:type="resource" xlink:label="label808" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US" id="total_ifrs-full_OtherComprehensiveIncome_en-US">Total other comprehensive income for the year</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element808" xlink:to="label808"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherComprehensiveIncome" xlink:label="element809"/>
+        <label xlink:type="resource" xlink:label="label809" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_OtherComprehensiveIncome_en-US">Other comprehensive income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element809" xlink:to="label809"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherComprehensiveIncomeAbstract" xlink:label="element810"/>
+        <label xlink:type="resource" xlink:label="label810" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_OtherComprehensiveIncomeAbstract_en-US">Other comprehensive income [abstract]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element810" xlink:to="label810"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherComprehensiveIncomeAbstract" xlink:label="element811"/>
+        <label xlink:type="resource" xlink:label="label811" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_OtherComprehensiveIncomeAbstract_en-US">Other comprehensive income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element811" xlink:to="label811"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments" xlink:label="element812"/>
+        <label xlink:type="resource" xlink:label="label812" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments_en-US">Other comprehensive income, before tax, gains (losses) from investments in equity instruments</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element812" xlink:to="label812"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments" xlink:label="element813"/>
+        <label xlink:type="resource" xlink:label="label813" xlink:role="http://www.xbrl.org/2003/role/verboseLabel" xml:lang="en-US" id="verbose_ifrs-full_OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments_en-US">Fair value adjustment on equity investments at fair value through other comprehensive income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element813" xlink:to="label813"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments" xlink:label="element814"/>
+        <label xlink:type="resource" xlink:label="label814" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_OtherComprehensiveIncomeBeforeTaxGainsLossesFromInvestmentsInEquityInstruments_en-US">Fair value adjustment on equity instruments at fair value through OCI</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element814" xlink:to="label814"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments" xlink:label="element815"/>
+        <label xlink:type="resource" xlink:label="label815" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments_en-US">Other comprehensive income, net of tax, gains (losses) from investments in equity instruments</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element815" xlink:to="label815"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments" xlink:label="element816"/>
+        <label xlink:type="resource" xlink:label="label816" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments_en-US">Net fair value adjustment on equity investments at fair value through other comprehensive income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element816" xlink:to="label816"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments" xlink:label="element817"/>
+        <label xlink:type="resource" xlink:label="label817" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US" id="total_ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesFromInvestmentsInEquityInstruments_en-US">Net fair value adjustment on equity investments at fair value through other comprehensive income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element817" xlink:to="label817"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherIncome" xlink:label="element827"/>
+        <label xlink:type="resource" xlink:label="label827" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_OtherIncome_en-US">Other income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element827" xlink:to="label827"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherIncome" xlink:label="element828"/>
+        <label xlink:type="resource" xlink:label="label828" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_OtherIncome_en-US">Other income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element828" xlink:to="label828"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherIncome" xlink:label="element829"/>
+        <label xlink:type="resource" xlink:label="label829" xlink:role="http://www.xbrl.org/2009/role/negatedLabel" xml:lang="en-US" id="Negated_ifrs-full_OtherIncome_en-US">Other income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element829" xlink:to="label829"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_OtherIncome" xlink:label="element830"/>
+        <label xlink:type="resource" xlink:label="label830" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US" id="total_ifrs-full_OtherIncome_en-US">Other income</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element830" xlink:to="label830"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLoss" xlink:label="element871"/>
+        <label xlink:type="resource" xlink:label="label871" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_ProfitLoss_en-US">Profit (loss)</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element871" xlink:to="label871"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLoss" xlink:label="element872"/>
+        <label xlink:type="resource" xlink:label="label872" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US" id="total_ifrs-full_ProfitLoss_en-US">Profit for the year</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element872" xlink:to="label872"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLoss" xlink:label="element873"/>
+        <label xlink:type="resource" xlink:label="label873" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_ProfitLoss_en-US">Profit for the year</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element873" xlink:to="label873"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLoss" xlink:label="element874"/>
+        <label xlink:type="resource" xlink:label="label874" xlink:role="http://www.xbrl.org/2003/role/verboseLabel" xml:lang="en-US" id="verbose_ifrs-full_ProfitLoss_en-US">Basic Earnings</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element874" xlink:to="label874"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLoss" xlink:label="element875"/>
+        <label xlink:type="resource" xlink:label="label875" xlink:role="http://www.xbrl.org/2003/role/zeroTerseLabel" xml:lang="en-US" id="zeroTerse_ifrs-full_ProfitLoss_en-US">Profit (loss) after tax</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element875" xlink:to="label875"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLossAbstract" xlink:label="element876"/>
+        <label xlink:type="resource" xlink:label="label876" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_ProfitLossAbstract_en-US">Profit (loss) [abstract]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element876" xlink:to="label876"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLossAbstract" xlink:label="element877"/>
+        <label xlink:type="resource" xlink:label="label877" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_ProfitLossAbstract_en-US">Profit (loss) for the period</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element877" xlink:to="label877"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLossBeforeTax" xlink:label="element878"/>
+        <label xlink:type="resource" xlink:label="label878" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_ProfitLossBeforeTax_en-US">Profit/(loss) before tax</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element878" xlink:to="label878"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLossBeforeTax" xlink:label="element879"/>
+        <label xlink:type="resource" xlink:label="label879" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US" id="total_ifrs-full_ProfitLossBeforeTax_en-US">Profit before tax</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element879" xlink:to="label879"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLossFromOperatingActivities" xlink:label="element880"/>
+        <label xlink:type="resource" xlink:label="label880" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_ProfitLossFromOperatingActivities_en-US">Profit (loss) from operating activities</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element880" xlink:to="label880"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLossFromOperatingActivities" xlink:label="element881"/>
+        <label xlink:type="resource" xlink:label="label881" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US" id="total_ifrs-full_ProfitLossFromOperatingActivities_en-US">Results from operating activities</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element881" xlink:to="label881"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_ProfitLossFromOperatingActivities" xlink:label="element882"/>
+        <label xlink:type="resource" xlink:label="label882" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_ProfitLossFromOperatingActivities_en-US">Results from operating activities</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element882" xlink:to="label882"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_RetainedEarningsMember" xlink:label="element930"/>
+        <label xlink:type="resource" xlink:label="label930" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_RetainedEarningsMember_en-US">Retained earnings [member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element930" xlink:to="label930"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_RetainedEarningsMember" xlink:label="element931"/>
+        <label xlink:type="resource" xlink:label="label931" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_RetainedEarningsMember_en-US">Retained earnings [member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element931" xlink:to="label931"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_Revenue" xlink:label="element935"/>
+        <label xlink:type="resource" xlink:label="label935" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_Revenue_en-US">Revenue</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element935" xlink:to="label935"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_Revenue" xlink:label="element936"/>
+        <label xlink:type="resource" xlink:label="label936" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xml:lang="en-US" id="total_ifrs-full_Revenue_en-US">Total Revenue</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element936" xlink:to="label936"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_Revenue" xlink:label="element937"/>
+        <label xlink:type="resource" xlink:label="label937" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_ifrs-full_Revenue_en-US">Revenue (External)</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element937" xlink:to="label937"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_SegmentConsolidationItemsAxis" xlink:label="element948"/>
+        <label xlink:type="resource" xlink:label="label948" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_SegmentConsolidationItemsAxis_en-US">Segment consolidation items [axis]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element948" xlink:to="label948"/>
+        <loc xlink:type="locator" xlink:href="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd#ifrs-full_SegmentsAxis" xlink:label="element949"/>
+        <label xlink:type="resource" xlink:label="label949" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_ifrs-full_SegmentsAxis_en-US">Segments [axis]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element949" xlink:to="label949"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_WestwitsmininglimitedwwmMember" xlink:label="element1159"/>
+        <label xlink:type="resource" xlink:label="label1159" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_drd_WestwitsmininglimitedwwmMember_en-US">West Wits Mining Limited ("WWM") [member][Member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1159" xlink:to="label1159"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_WestwitsmininglimitedwwmMember" xlink:label="element1160"/>
+        <label xlink:type="resource" xlink:label="label1160" xlink:role="http://www.xbrl.org/2003/role/documentation" xml:lang="en-US" id="documentation_drd_WestwitsmininglimitedwwmMember_en-US">This member stands for West Wits Mining Limited ("WWM") entity in which the entity holds ownership interest.'</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1160" xlink:to="label1160"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_RandmutualassurancecompanylimitedMember" xlink:label="element1165"/>
+        <label xlink:type="resource" xlink:label="label1165" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_drd_RandmutualassurancecompanylimitedMember_en-US">Rand Mutual Assurance Company Limited [member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1165" xlink:to="label1165"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_RandmutualassurancecompanylimitedMember" xlink:label="element1166"/>
+        <label xlink:type="resource" xlink:label="label1166" xlink:role="http://www.xbrl.org/2003/role/documentation" xml:lang="en-US" id="documentation_drd_RandmutualassurancecompanylimitedMember_en-US">This member stands for Rand Mutual Assurance Company Limitedentity in which the entity holds ownership interest.</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1166" xlink:to="label1166"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_RandmutualassurancecompanylimitedMember" xlink:label="element1167"/>
+        <label xlink:type="resource" xlink:label="label1167" xlink:role="http://www.xbrl.org/2003/role/verboseLabel" xml:lang="en-US" id="verbose_drd_RandmutualassurancecompanylimitedMember_en-US">Rand Mutual Assurance Company Limited B Share Business Fund (RMA)</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1167" xlink:to="label1167"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_FwgrMember" xlink:label="element1243"/>
+        <label xlink:type="resource" xlink:label="label1243" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_drd_FwgrMember_en-US">FWGR [member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1243" xlink:to="label1243"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_FwgrMember" xlink:label="element1244"/>
+        <label xlink:type="resource" xlink:label="label1244" xlink:role="http://www.xbrl.org/2003/role/documentation" xml:lang="en-US" id="documentation_drd_FwgrMember_en-US">This member stands for FWGR segment. FWGR is a surface gold retreatment operation and treats old slime dams in the West Rand goldfields.</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1244" xlink:to="label1244"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_ErgoOperationsMember" xlink:label="element1272"/>
+        <label xlink:type="resource" xlink:label="label1272" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_drd_ErgoOperationsMember_en-US">Ergo operations [Member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1272" xlink:to="label1272"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_ErgoOperationsMember" xlink:label="element1273"/>
+        <label xlink:type="resource" xlink:label="label1273" xlink:role="http://www.xbrl.org/2003/role/documentation" xml:lang="en-US" id="documentation_drd_ErgoOperationsMember_en-US">The Ergo plant is currently our major processing plant. It is one of the cash generating units of the entity.</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1273" xlink:to="label1273"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_ErgoOperationsMember" xlink:label="element1274"/>
+        <label xlink:type="resource" xlink:label="label1274" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_drd_ErgoOperationsMember_en-US">Ergo [member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1274" xlink:to="label1274"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_RandRefineryProprietaryLimitedMember" xlink:label="element1285"/>
+        <label xlink:type="resource" xlink:label="label1285" xlink:role="http://www.xbrl.org/2003/role/label" xml:lang="en-US" id="label_drd_RandRefineryProprietaryLimitedMember_en-US">Rand Refinery Proprietary Limited ("Rand Refinery") [member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1285" xlink:to="label1285"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_RandRefineryProprietaryLimitedMember" xlink:label="element1286"/>
+        <label xlink:type="resource" xlink:label="label1286" xlink:role="http://www.xbrl.org/2003/role/documentation" xml:lang="en-US" id="documentation_drd_RandRefineryProprietaryLimitedMember_en-US">This member stands for Rand Refinery Proprietary Limited ("Rand Refinery") entity in which the entity holds ownership interest.</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1286" xlink:to="label1286"/>
+        <loc xlink:type="locator" xlink:href="drd-20220630.xsd#drd_RandRefineryProprietaryLimitedMember" xlink:label="element1287"/>
+        <label xlink:type="resource" xlink:label="label1287" xlink:role="http://www.xbrl.org/2003/role/terseLabel" xml:lang="en-US" id="terse_drd_RandRefineryProprietaryLimitedMember_en-US">Rand Refinery Operation [member]</label>
+        <labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="element1287" xlink:to="label1287"/>
+        </labelLink>
+</linkbase>

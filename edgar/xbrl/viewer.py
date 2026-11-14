@@ -367,6 +367,27 @@ class FilingViewer:
         from edgar.xbrl.viewer_validation import compare_viewer_to_xbrl
         return compare_viewer_to_xbrl(self, xbrl, tolerance=tolerance)
 
+    def compare_statements(self, xbrl, tolerance: Optional[float] = None):
+        """
+        Compare the library's statements with these statement pages, row by row and cell by cell.
+
+        Runs ``compare()`` once (available as ``.facts`` on the result) and
+        compares the statements a user gets (``xbrl.statements.balance_sheet()``
+        and the other typed getters, else the statement by role) with each
+        page: rows, labels, order, and each cell's value and sign in
+        ``Statement.to_dataframe()`` and in the rendered table.
+
+        Args:
+            xbrl: XBRL object from filing.xbrl()
+            tolerance: passed to ``compare()``
+
+        Returns:
+            StatementFidelityResults with ``value_rate(surface)``,
+            ``coverage(surface)``, ``counts()`` and ``to_dataframe()``
+        """
+        from edgar.xbrl.statement_fidelity import compare_statements_to_viewer
+        return compare_statements_to_viewer(self, xbrl, tolerance=tolerance)
+
     def compare_context(self, xbrl, statement: str = 'balance_sheet') -> str:
         """
         Generate an LLM-ready comparison prompt between viewer and XBRL.

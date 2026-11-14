@@ -279,6 +279,42 @@ A cell the page does not identify is `not_comparable` rather than a match or a m
 - A cell matches within half a unit of its last displayed digit, so a page in millions cannot show an error under $0.5 million.
 - It checks the XBRL parse against the SEC's rendering of the same filing. It does not check the filer's numbers, calculation arithmetic (see `viewer.validate()`), or the statements edgartools builds from the facts.
 
+### Compare the statements edgartools builds
+
+`compare()` checks the facts. `compare_statements()` checks what a user reads: the statement each typed getter returns (`balance_sheet()`, `income_statement(parenthetical=True)` and the others, or the statement by role when no getter reaches the page), as a DataFrame (`to_dataframe()`) and as the rendered table (`render()`). It runs `compare()` once, available as `.facts`, and compares each statement page row by row and cell by cell.
+
+```python
+from edgar import find
+
+filing = find("0001581068-21-000012")          # Brixmor Property Group 10-K for 2020
+viewer = filing.viewer
+results = viewer.compare_statements(filing.xbrl())
+
+print(f"{results.value_rate('dataframe'):.1%} of {results.compared_cells('dataframe')} cells, "
+      f"coverage {results.coverage('dataframe'):.1%}")
+print(results.family_counts('dataframe'))
+
+for r in results.of_kind('value_differs', 'dataframe')[:1]:
+    print(r.page, '|', r.page_label, '|', r.library_label)
+    print(r.column, r.page_value, r.fact_value, r.library_value)
+```
+
+```text
+99.0% of 480 cells, coverage 77.2%
+{'not_comparable': 36, 'matched': 668, 'presentation': 92, 'disagreement': 62}
+CONSOLIDATED STATEMENTS OF CASH FLOWS | Cash, cash equivalents and restricted cash at beginning of period | Brixmor Operating Partnership LP
+12 Months Ended Dec. 31, 2020 21507.0 21507000.0 360073000.0
+```
+
+The headline is a pair per surface (`'dataframe'` or `'rendered'`). `value_rate` is the share of compared cells the library shows, under the page column's own period (requested when the default view leaves it out), with the page's value and sign. A cell is compared when `compare()` matched it to a fact, its row has a library row and its column's period is known, unless the library row shows that period in another currency or unit (`unit_column_not_shown`) or the page prints a less precise duplicate fact (`less_precise_duplicate`); those two are reported beside. A library call that raises counts against `value_rate`: when `to_dataframe()` or `render()` raises on a page's statement, the page gets a `statement_raised` outcome and each cell that would have been looked up (matched by `compare()`, in a row whose context `compare()` established, under a column whose period is known) is `library_raised`; when requesting a period the default view leaves out raises, that cell is `library_raised`. Both carry the exception in `reason`. `coverage` is the share of all the pages' numeric cells that were compared. Every other outcome is reported beside the pair: each has a `kind` named for what was observed (`row_dropped`, `sign_differs`, `negative_zero`, `zero_rendered_blank`, `period_not_in_default_view` and so on; see `KINDS` in `edgar.xbrl.statement_fidelity`), and each kind belongs to one family, `disagreement`, `presentation` or `not_comparable`. `results.to_dataframe()` has one row per outcome.
+
+Limits:
+
+- Statement-of-equity pages are not compared yet; their cells count in the `coverage` denominator.
+- A page row is aligned only when `compare()` matched at least one of its cells, so a row whose cells are all `missing` or `not_comparable` is `row_not_comparable`.
+- Heading rows under a member header are not compared, and `to_dataframe()` names only the first axis of a row with several, so such library rows are `library_row_not_identifiable`.
+- It reports what each side shows. Whether a disagreement is a library defect is for the reader to decide.
+
 ### LLM-based comparison
 
 For qualitative differences that numeric comparison misses (labels, ordering, missing items), generate a side-by-side text prompt:
@@ -444,6 +480,7 @@ The viewer reflects what the SEC displays, so it's the definitive reference for 
 | `viewer.search(query)` | `List[Concept]` | Search by keyword |
 | `viewer.validate()` | `List[dict]` | Check calculation trees |
 | `viewer.compare(xbrl)` | `ComparisonResults` | Cross-validate against XBRL parser |
+| `viewer.compare_statements(xbrl)` | `StatementFidelityResults` | Compare the library's statements with the statement pages |
 | `viewer.compare_context(xbrl, stmt)` | `str` | LLM-ready side-by-side comparison |
 | `viewer.view(name)` | — | Display a report in the terminal |
 | `viewer.to_context()` | `str` | AI-optimized summary |

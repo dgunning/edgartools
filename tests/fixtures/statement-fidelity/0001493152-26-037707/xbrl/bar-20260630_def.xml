@@ -1,0 +1,43 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- Field: Doc-Info; Name: Generator; Value: GoFiler Complete; Version: 6.4b --><!-- Field: Doc-Info; Name: VendorURI; Value: https://www.novaworks.com --><!-- Field: Doc-Info; Name: Status; Value: 0x00000000 --><link:linkbase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:xbrli="http://www.xbrl.org/2003/instance" xsi:schemaLocation="http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd">
+    <link:roleRef xlink:type="simple" xlink:href="bar-20260630.xsd#StatementsOfAssetsAndLiabilities" roleURI="http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"/>
+    <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#hypercube-dimension" arcroleURI="http://xbrl.org/int/dim/arcrole/hypercube-dimension"/>
+    <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-domain" arcroleURI="http://xbrl.org/int/dim/arcrole/dimension-domain"/>
+    <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#domain-member" arcroleURI="http://xbrl.org/int/dim/arcrole/domain-member"/>
+    <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#all" arcroleURI="http://xbrl.org/int/dim/arcrole/all"/>
+    <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#notAll" arcroleURI="http://xbrl.org/int/dim/arcrole/notAll"/>
+    <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-default" arcroleURI="http://xbrl.org/int/dim/arcrole/dimension-default"/>
+    <link:definitionLink xlink:type="extended" xlink:role="http://graniteshares.com/role/StatementsOfAssetsAndLiabilities" xlink:title="00000002 - Statement - Statements of Assets and Liabilities">
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_DefinedBenefitPlanDisclosureLineItems" xlink:label="loc_us-gaapDefinedBenefitPlanDisclosureLineItems"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ScheduleOfDefinedBenefitPlansDisclosuresTable" xlink:label="loc_us-gaapScheduleOfDefinedBenefitPlansDisclosuresTable"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/all" xbrldt:contextElement="segment" xlink:from="loc_us-gaapDefinedBenefitPlanDisclosureLineItems" xlink:to="loc_us-gaapScheduleOfDefinedBenefitPlansDisclosuresTable" xlink:type="arc" order="10" xbrldt:closed="true"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_RelatedPartyTransactionsByRelatedPartyAxis" xlink:label="loc_us-gaapRelatedPartyTransactionsByRelatedPartyAxis"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/hypercube-dimension" xlink:from="loc_us-gaapScheduleOfDefinedBenefitPlansDisclosuresTable" xlink:to="loc_us-gaapRelatedPartyTransactionsByRelatedPartyAxis" xlink:type="arc" order="1"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_RelatedPartyDomain" xlink:label="loc_us-gaapRelatedPartyDomain"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/dimension-domain" xlink:from="loc_us-gaapRelatedPartyTransactionsByRelatedPartyAxis" xlink:to="loc_us-gaapRelatedPartyDomain" xlink:type="arc" order="20"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_RelatedPartyDomain" xlink:label="loc_us-gaapRelatedPartyDomain_10"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/dimension-default" xbrldt:contextElement="segment" xlink:from="loc_us-gaapRelatedPartyTransactionsByRelatedPartyAxis" xlink:to="loc_us-gaapRelatedPartyDomain_10" xlink:type="arc" order="30"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_RelatedPartyMember" xlink:label="loc_us-gaapRelatedPartyMember_20"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapRelatedPartyDomain" xlink:to="loc_us-gaapRelatedPartyMember_20" xlink:type="arc" order="21"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_AssetsAbstract" xlink:label="loc_us-gaapAssetsAbstract_50"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapDefinedBenefitPlanDisclosureLineItems" xlink:to="loc_us-gaapAssetsAbstract_50" xlink:type="arc" order="0"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_InvestmentInPhysicalCommodities" xlink:label="loc_us-gaapInvestmentInPhysicalCommodities_50"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapAssetsAbstract_50" xlink:to="loc_us-gaapInvestmentInPhysicalCommodities_50" xlink:type="arc" order="1"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_Assets" xlink:label="loc_us-gaapAssets_50"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapAssetsAbstract_50" xlink:to="loc_us-gaapAssets_50" xlink:type="arc" order="2"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_LiabilitiesAbstract" xlink:label="loc_us-gaapLiabilitiesAbstract_50"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapDefinedBenefitPlanDisclosureLineItems" xlink:to="loc_us-gaapLiabilitiesAbstract_50" xlink:type="arc" order="3"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_AccountsPayableCurrentAndNoncurrent" xlink:label="loc_us-gaapAccountsPayableCurrentAndNoncurrent_50"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapLiabilitiesAbstract_50" xlink:to="loc_us-gaapAccountsPayableCurrentAndNoncurrent_50" xlink:type="arc" order="4"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_Liabilities" xlink:label="loc_us-gaapLiabilities_50"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapLiabilitiesAbstract_50" xlink:to="loc_us-gaapLiabilities_50" xlink:type="arc" order="5"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_AssetsNet" xlink:label="loc_us-gaapAssetsNet_50"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapDefinedBenefitPlanDisclosureLineItems" xlink:to="loc_us-gaapAssetsNet_50" xlink:type="arc" order="6"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_CommonStockSharesIssued" xlink:label="loc_us-gaapCommonStockSharesIssued_50"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapDefinedBenefitPlanDisclosureLineItems" xlink:to="loc_us-gaapCommonStockSharesIssued_50" xlink:type="arc" order="7"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_CommonStockSharesOutstanding" xlink:label="loc_us-gaapCommonStockSharesOutstanding_50"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapDefinedBenefitPlanDisclosureLineItems" xlink:to="loc_us-gaapCommonStockSharesOutstanding_50" xlink:type="arc" order="8"/>
+      <link:loc xlink:type="locator" xlink:href="bar-20260630.xsd#BAR_NetAssetsPerCommonShare" xlink:label="loc_BARNetAssetsPerCommonShare_50"/>
+      <link:definitionArc xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapDefinedBenefitPlanDisclosureLineItems" xlink:to="loc_BARNetAssetsPerCommonShare_50" xlink:type="arc" order="9"/>
+    </link:definitionLink>
+    </link:linkbase>
