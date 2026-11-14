@@ -18,7 +18,9 @@ Period roles are now recognised by local name, negated or not, in the parser,
 Ground truth is Lesaka Technologies' 10-Q for the quarter ended 2023-09-30
 (0001562762-23-000403), notes 6 and 7, in thousands: accumulated goodwill
 impairment 18,876 opening and 18,816 closing; investment contracts 241 and 243;
-insurance contracts 1,600 and 1,871.
+insurance contracts 1,600 and 1,871. Every one of these rows is on a negated
+period role and the SEC pages show them in parentheses, e.g. "Accumulated
+impairment, Ending Balance (18,816)"; the sign applies since edgartools-auvk1.13.
 """
 
 import pytest
@@ -91,13 +93,13 @@ LSAK_FILES = ("lsak-20230930.xsd", "form10q_htm.xml", "lsak-20230930_pre.xml", "
 BASE = "http://www.net1.com/role/"
 ROLL_FORWARDS = {
     "GoodwillAndIntangibleAssetsNetSummaryOfMovementInCarryingValueOfGoodwillDetails":
-        ("Accumulated impairment", 18_876_000, 18_816_000),
+        ("Accumulated impairment", -18_876_000, -18_816_000),
     "AssetsAndPolicyholderLiabilitiesUnderInsuranceAndInvestmentContractsSummaryOfMovementIn"
     "AssetsAndPolicyholderLiabilitiesUnderInvestmentContractsDetails":
-        ("Investment contracts", 241_000, 243_000),
+        ("Investment contracts", -241_000, -243_000),
     "AssetsAndPolicyholderLiabilitiesUnderInsuranceAndInvestmentContractsSummaryOfTheMovementIn"
     "ReinsuranceAssetsAndPolicyholderLiabilitiesUnderInsuranceContractsDetails":
-        ("Insurance contracts", 1_600_000, 1_871_000),
+        ("Insurance contracts", -1_600_000, -1_871_000),
 }
 
 
@@ -116,5 +118,5 @@ def test_lesaka_negated_roll_forwards_show_opening_and_closing_balances(tmp_path
         assert balances[f"{line}, Ending Balance"] == closing
 
         rows = {text.strip().split("  ")[0]: text for text in str(statement).splitlines()}
-        assert rows[f"{line}, Beginning Balance"].split()[-1] == f"{opening // 1000:,}"
-        assert rows[f"{line}, Ending Balance"].split()[-1] == f"{closing // 1000:,}"
+        assert rows[f"{line}, Beginning Balance"].split()[-1] == f"({-opening // 1000:,})"
+        assert rows[f"{line}, Ending Balance"].split()[-1] == f"({-closing // 1000:,})"

@@ -704,9 +704,7 @@ class RenderedStatement:
                                 row, self.header.period_keys[i]
                                 if i < len(self.header.period_keys) else None
                             )
-                            value = apply_presentation_sign(
-                                value, self.statement_type, signs, sign_key
-                            )
+                            value = apply_presentation_sign(value, signs, sign_key)
                         df_row[column_name] = value
 
                 df_row['level'] = row.level
@@ -1380,18 +1378,8 @@ def _create_units_note(
     return f"[italic](In {monetary_scale_text}, except shares in {shares_scale_text} and per share data)[/italic]"
 
 
-# The statements whose SEC-displayed sign differs from the filed sign.
-# Originally the Income Statement and Cash Flow Statement (Issue #463); extended
-# to the Balance Sheet for contra accounts such as Treasury Stock (Issue #568) --
-# APD, JPM and XOM negate Treasury Stock, JPM also Allowance for Loan Losses.
-# The comprehensive income statement too: AAL presents its pension OCI with a
-# negated label, and without the sign the components did not foot (GH #1676).
-PRESENTATION_SIGN_STATEMENTS = ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet', 'ComprehensiveIncome')
-
-
 def apply_presentation_sign(
     value: Any,
-    statement_type: Optional[str],
     preferred_signs: Optional[Dict[str, Any]],
     period_key: Optional[str],
 ) -> Any:
@@ -1407,10 +1395,16 @@ def apply_presentation_sign(
     so ``Statements.to_dataframe()`` -- which reads the cell values, not their
     formatted strings -- returned a capex outflow positive where
     ``Statement.to_dataframe()`` returned it negative (edgartools-5ztr).
+
+    The sign applies on every statement, as the SEC renderer applies it
+    wherever the arc carries a negated role. It used to apply only to four
+    statement types, so a statement reached by its role (typed None) or a
+    parenthetical kept the filed sign (edgartools-auvk1.13: DRDGOLD
+    0001562762-22-000397 cost of sales, BHE 0001081316-24-000016 pension OCI tax).
     """
     if not isinstance(value, (int, float)) or isinstance(value, bool):
         return value
-    if not period_key or statement_type not in PRESENTATION_SIGN_STATEMENTS:
+    if not period_key:
         return value
     preferred_sign = (preferred_signs or {}).get(period_key)
     if preferred_sign is None or preferred_sign == 0:
@@ -1697,9 +1691,7 @@ def _format_value_for_display_as_string(
     filed_decimals = (item.get('decimals') or {}).get(period_key) if period_key else None
 
     # Apply presentation logic for display (Issue #463)
-    value = apply_presentation_sign(
-        value, item.get('statement_type'), item.get('preferred_signs'), period_key
-    )
+    value = apply_presentation_sign(value, item.get('preferred_signs'), period_key)
 
     if unit_class is not None:
         return _format_by_unit(value, unit_class, is_monetary_statement,
