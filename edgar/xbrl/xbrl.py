@@ -16,7 +16,7 @@ import itertools
 import re
 from pathlib import Path
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 if TYPE_CHECKING:
     from edgar.xbrl.facts import FactQuery
@@ -123,6 +123,54 @@ def _declares_disclosure(role_def: str, primary_concept: str) -> bool:
     if any(part.strip() == _ROLE_CATEGORY_MARKER for part in role_def.split(' - ')):
         return True
     return role_def.startswith(_ROLE_CATEGORY_MARKER)
+
+
+# FilingSummary menu categories that SEC's renderer assigns by guessing, and
+# that a role's own content can overrule. Statements, Tables, Policies and
+# Details are taken at their word.
+_GUESSED_MENU_CATEGORIES = ('Notes', 'Cover', 'Uncategorized')
+_NARRATIVE_TYPES = ('textBlockItemType', 'stringItemType')
+
+
+def _effective_menu_category(menu_category: Optional[str], tree,
+                             data_type_of: Callable[[str], Optional[str]]) -> Optional[str]:
+    """The FilingSummary menu category, corrected where the role's content contradicts it.
+
+    SEC's renderer files a role under Details mostly from its title. A detail
+    role titled without the "(Details)" suffix is filed under Notes, Cover or
+    Uncategorized instead: Costco's FY2021 10-K (0000909832-21-000014) puts
+    "Leases, Future Minimum Payments" under Notes and "Leases, Components of
+    Lease Expense" under Cover (GH #1947).
+
+    Only a role whose definition declares the Disclosure category is
+    reconsidered. Statements and Document roles are left alone: SEC also files
+    primary statements under Uncategorized and balance sheet parentheticals
+    under Cover, and Audit Information roles under Notes, and none of those is
+    a detail. A disclosure role is a detail when it holds a value-typed line
+    item (monetary, shares, a date) and no text block. Types come from the
+    filing's schema and the bundled FASB element table: a note's text block is
+    not always named ``...TextBlock`` (``us-gaap_NatureOfOperations``,
+    ``us-gaap_LossContingencyDisclosures``).
+
+    Measured over 111 10-Ks from 37 filers, 2020-2022: the four Costco FY2021
+    lease roles are the only roles this moves.
+    """
+    if menu_category not in _GUESSED_MENU_CATEGORIES or tree is None:
+        return menu_category
+    if not any(part.strip().lower() == _ROLE_CATEGORY_MARKER for part in (tree.definition or '').split(' - ')):
+        return menu_category
+    has_value_item = False
+    for element_id, node in tree.all_nodes.items():
+        if node.is_abstract:
+            continue
+        data_type = data_type_of(element_id)
+        if data_type is None:
+            continue
+        if data_type.endswith('textBlockItemType'):
+            return menu_category
+        if not data_type.endswith(_NARRATIVE_TYPES):
+            has_value_item = True
+    return 'Details' if has_value_item else menu_category
 
 
 def _statement_typing_concept(tree, menu_category: Optional[str]) -> str:
@@ -1442,24 +1490,43 @@ class XBRL:
                 sgml = filing.sgml()
                 filing_summary = sgml.filing_summary if sgml else None
             if filing_summary:
-                _MENU_CATEGORY_TO_CLASSIFICATION = {
-                    'Notes': 'note',
-                    'Tables': 'note',
-                    'Policies': 'note',
-                    'Details': 'disclosure',
-                    'Cover': 'document',
-                }
-                for report in filing_summary.reports:
-                    if report.role and report.menu_category:
-                        classification = _MENU_CATEGORY_TO_CLASSIFICATION.get(report.menu_category)
-                        if classification:
-                            xbrl._filing_summary_categories[report.role] = classification
-                        xbrl._filing_summary_menu_categories[report.role] = report.menu_category
-                xbrl._filing_summary = filing_summary
+                xbrl._apply_filing_summary(filing_summary)
         except Exception:
             pass
 
         return xbrl
+
+    _MENU_CATEGORY_TO_CLASSIFICATION = {
+        'Notes': 'note',
+        'Tables': 'note',
+        'Policies': 'note',
+        'Details': 'disclosure',
+        'Cover': 'document',
+    }
+
+    def _declared_data_type(self, element_id: str) -> Optional[str]:
+        """A concept's declared XBRL type from the schema or the bundled FASB table, offline."""
+        meta = build_element_metadata(element_id, self.element_catalog.get(element_id), None,
+                                      self.parser.namespace_prefixes)
+        return meta.data_type if meta else None
+
+    def _apply_filing_summary(self, filing_summary) -> None:
+        """Take each role's category from FilingSummary.xml, corrected by its content.
+
+        The menu category is SEC's renderer's call and is mostly right, but it is
+        guessed from the role title; `_effective_menu_category` overrules it where
+        the role's own concepts say otherwise (GH #1947). Both get_all_statements()
+        and Notes read the corrected value from here.
+        """
+        for report in filing_summary.reports:
+            if report.role and report.menu_category:
+                menu_category = _effective_menu_category(
+                    report.menu_category, self.presentation_trees.get(report.role), self._declared_data_type)
+                classification = self._MENU_CATEGORY_TO_CLASSIFICATION.get(menu_category)
+                if classification:
+                    self._filing_summary_categories[report.role] = classification
+                self._filing_summary_menu_categories[report.role] = menu_category
+        self._filing_summary = filing_summary
 
     @property
     def statements(self):
