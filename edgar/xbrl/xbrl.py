@@ -2620,7 +2620,10 @@ class XBRL:
                     'period_types': dim_period_types,  # Include period_type for each period
                     'preferred_signs': dim_preferred_signs,  # Include preferred_sign for display (Issue #463)
                     'level': occurrence_depth + 1,  # Increase depth by 1
-                    'preferred_label': node.preferred_label,
+                    # edgartools-auvk1.14: this reference's own arc role, not the
+                    # node's last one, so a member row under a beginning balance
+                    # is read as the opening balance
+                    'preferred_label': effective_preferred_label,
                     'is_abstract': False,
                     'children': [],
                     'has_values': len(dim_values) > 0,

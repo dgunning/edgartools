@@ -6,7 +6,7 @@ This module provides functions for formatting and displaying XBRL data.
 
 import math
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import datetime
 from decimal import Decimal
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
@@ -28,6 +28,7 @@ from edgar.xbrl.core import (
     UNIT_UNAVAILABLE,
     SourceKeyLookup,
     UnitClass,
+    balance_cell_key,
     classify_unit_definition,
     currency_display_symbol,
     decimals_for_scaling,
@@ -36,8 +37,6 @@ from edgar.xbrl.core import (
     format_value,
     is_numeric_cell,
     is_period_boundary_label_role,
-    is_period_end_label_role,
-    is_period_start_label_role,
     iso4217_code,
     parse_date,
     record_cell_unit,
@@ -1386,6 +1385,11 @@ def _create_units_note(
 # APD, JPM and XOM negate Treasury Stock, JPM also Allowance for Loan Losses.
 # The comprehensive income statement too: AAL presents its pension OCI with a
 # negated label, and without the sign the components did not foot (GH #1676).
+# Statements whose repeated balance rows fall back to position (first is the
+# opening balance) when their arc has no period-boundary role (Issues #450, #572, #583).
+EQUITY_POSITION_STATEMENTS = ('StatementOfEquity', 'StatementOfStockholdersEquity', 'StatementOfChangesInEquity',
+                              'ComprehensiveIncome', 'StatementOfComprehensiveIncome')
+
 PRESENTATION_SIGN_STATEMENTS = ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet', 'ComprehensiveIncome')
 
 
@@ -1452,33 +1456,6 @@ _UNIT_CURRENCY = 'currency'
 _UNIT_NON_CURRENCY = 'non_currency'
 _UNIT_UNAVAILABLE = 'unavailable'
 UNIT_UNAVAILABLE_NOTE = '(unit unavailable)'
-
-
-def _select_period_boundary_cell(values: Dict[str, Any], period_key: str, period: Any,
-                                 preferred_label: Optional[str]) -> Tuple[Any, Optional[str]]:
-    """Pick a period-start/period-end balance for a duration column.
-
-    Returns the value and the key it was filed under, or ``("", None)``. A key
-    that is present ends the search even when its value is empty -- only an
-    absent key lets the next candidate in: the column's own entry, then for an
-    opening balance the instant the day before the period starts and then the
-    start date itself, and for a closing balance the period-end instant
-    (edgartools-0609, GH #1655).
-    """
-    candidates = [period_key]
-    start_date = getattr(period, 'start_date', None)
-    if is_period_start_label_role(preferred_label) and start_date:
-        try:
-            prior_day = datetime.strptime(start_date, '%Y-%m-%d') - timedelta(days=1)
-            candidates += [f"instant_{prior_day.strftime('%Y-%m-%d')}", f"instant_{start_date}"]
-        except (ValueError, TypeError):
-            pass
-    if is_period_end_label_role(preferred_label):
-        candidates.append(f"instant_{period.end_date}")
-    for key in candidates:
-        if key in values:
-            return values[key], key
-    return "", None
 
 
 def _selected_cell(item: Dict[str, Any], source_key: str, value: Any) -> Dict[str, Any]:
@@ -2134,6 +2111,17 @@ def render_statement(
                 concept_occurrence_count[concept] = concept_occurrence_count.get(concept, 0) + 1
 
     concept_current_index = {}
+    # edgartools-auvk1.14: the statement-of-equity position fallback, counted as
+    # Statement.to_dataframe() counts it -- by (concept, label), over the same
+    # statement types -- so both surfaces read a row the same way.
+    is_equity_like = statement_type in EQUITY_POSITION_STATEMENTS
+    item_occurrence_count: Dict[Tuple[str, str], int] = {}
+    if is_equity_like:
+        for item in statement_data:
+            if item.get('concept'):
+                key = (item['concept'], item.get('label', ''))
+                item_occurrence_count[key] = item_occurrence_count.get(key, 0) + 1
+    item_current_index: Dict[Tuple[str, str], int] = {}
     unit_defs = getattr(xbrl_instance, 'units', None) or {}
 
     # Detect if this statement has dimensional display (for Member filtering logic)
@@ -2164,6 +2152,11 @@ def render_statement(
         # Track which occurrence of this concept we're on
         if concept:
             concept_current_index[concept] = concept_current_index.get(concept, 0) + 1
+        opening_by_position = False
+        if is_equity_like and concept:
+            key = (concept, item.get('label', ''))
+            item_current_index[key] = item_current_index.get(key, 0) + 1
+            opening_by_position = item_current_index[key] == 1 and item_occurrence_count.get(key, 1) > 1
 
         # Remove [Abstract] from label if present
         label = item['label'].replace(' [Abstract]', '')
@@ -2231,44 +2224,17 @@ def render_statement(
             row_values.source_key = None
             value = row_values.get(period_key, "")
 
-            # Issue #450: For Statement of Equity with duration periods, match instant facts
-            # at the appropriate date based on position in roll-forward structure
-            if value == "" and period.end_date and statement_type == 'StatementOfEquity':
-                # Determine if this is beginning balance (first occurrence) or ending balance (later occurrences)
-                is_first_occurrence = concept_current_index.get(concept, 1) == 1
-
-                if is_first_occurrence and hasattr(period, 'start_date') and period.start_date:
-                    # Beginning balance: Try instant at day before start_date
-                    from datetime import datetime, timedelta
-                    try:
-                        start_dt = datetime.strptime(period.start_date, '%Y-%m-%d')
-                        beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
-                        instant_key = f"instant_{beginning_date}"
-                        value = row_values.get(instant_key, "")
-                    except (ValueError, AttributeError):
-                        pass  # Fall through to try end_date
-
-                # If still no value, try instant at end_date (ending balance)
-                if value == "":
-                    instant_key = f"instant_{period.end_date}"
-                    value = row_values.get(instant_key, "")
-
-            # edgartools-0609: General roll-forward mapping for periodStart/periodEnd
-            # balances (e.g. cash flow's "Cash, beginning/ending balances").
-            # These are instant facts shown against duration columns: the
-            # beginning balance is the instant at the day before the period start,
-            # the ending balance is the instant at the period end.
-            # Only non-dimensional rows carry a reliable per-reference label;
-            # dimensional rows share the node label and use the equity logic above.
-            # GH #1655: the selected cell keeps its own source key, unit, accuracy
-            # and sign, so its currency is not looked up under the duration key.
-            item_preferred_label = None if item.get('is_dimension') else item.get('preferred_label')
+            # edgartools-auvk1.14: the same rule as Statement.to_dataframe() for
+            # which value this row shows in this column (an instant balance under
+            # a duration column included). GH #1655: a cell filed under another
+            # key keeps its own source key, unit, accuracy and sign, so its
+            # currency is not looked up under the column's key.
             selected = None
-            if value == "" and period.end_date and is_period_boundary_label_role(item_preferred_label):
-                value, source_key = _select_period_boundary_cell(
-                    item['values'], period_key, period, item_preferred_label)
+            if value == "":
+                source_key = balance_cell_key(item['values'], period_key, item.get('preferred_label'),
+                                              opening_by_position)
                 if source_key is not None:
-                    row_values.source_key = source_key
+                    value = row_values.get(source_key, "")
                     selected = _selected_cell(item, source_key, value)
                     row.metadata.setdefault('selected_cells', {})[period_key] = selected
                     selected = _selected_balance_formatter_fields(
