@@ -1,0 +1,1 @@
+**Markdown and heading text split words a filer wrote across two inline elements.** A 2010 10-K's `PROPERT<a>IES</a>` heading read as `PROPERT IES`, and markdown space-joined every inline run: 2,519 of 17,394 multi-child paragraphs across the HTML fixtures had extra word breaks, now 139. Markdown now places gaps where `text()` does. (bead edgartools-8n9an)
