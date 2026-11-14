@@ -21,6 +21,11 @@ from edgar.documents.table_nodes import TableNode
 from edgar.documents.utils.table_matrix import TableMatrix
 
 
+def _one_line(text: str) -> str:
+    """Collapse a cell's whitespace, line breaks included, so it stays on its row."""
+    return ' '.join(text.split())
+
+
 def _escape_pipe_cell(text: str) -> str:
     """Escape a pipe-table cell so its text cannot change the table's shape.
 
@@ -358,12 +363,12 @@ class MarkdownRenderer:
         # Add headers
         if node.headers:
             for header_row in node.headers:
-                cells = [cell.text() for cell in header_row]
+                cells = [_one_line(cell.text()) for cell in header_row]
                 all_rows.append(" | ".join(cells))
 
         # Add data rows
-        for row in node.rows:
-            cells = [cell.text() for cell in row.cells]
+        for row in [*node.rows, *node.footer]:
+            cells = [_one_line(cell.text()) for cell in row.cells]
             all_rows.append(" | ".join(cells))
 
         if all_rows:
@@ -385,16 +390,16 @@ class MarkdownRenderer:
         # Add headers
         if node.headers:
             for header_row in node.headers:
-                cells = [cell.text() for cell in header_row]
+                cells = [_one_line(cell.text()) for cell in header_row]
                 rows.append("  ".join(cells))
 
         # Add separator if we have headers
-        if node.headers and node.rows:
+        if node.headers and (node.rows or node.footer):
             rows.append("")
 
         # Add data rows
-        for row in node.rows:
-            cells = [cell.text() for cell in row.cells]
+        for row in [*node.rows, *node.footer]:
+            cells = [_one_line(cell.text()) for cell in row.cells]
             rows.append("  ".join(cells))
 
         return "\n".join(rows)
@@ -587,13 +592,15 @@ class MarkdownRenderer:
         Align header cells using their spans and preserve body expansion.
         Returns (expanded_headers, expanded_data_rows).
         """
+        # tfoot rows are body rows to every text output (edgartools-niru).
+        body_rows = [*node.rows, *node.footer]
         # Flat/headerless tables retain their original column and whitespace policy.
         if len(node.headers) < 2:
-            all_rows = [*node.headers, *(row.cells for row in node.rows)]
+            all_rows = [*node.headers, *(row.cells for row in body_rows)]
             max_columns = max((sum(cell.colspan for cell in row) for row in all_rows), default=0)
             return (
                 [self._expand_row_to_columns(row, max_columns) for row in node.headers],
-                [self._expand_row_to_columns(row.cells, max_columns) for row in node.rows],
+                [self._expand_row_to_columns(row.cells, max_columns) for row in body_rows],
             )
 
         # Parsed headers can omit blank physical rows crossed by a rowspan.
@@ -611,7 +618,7 @@ class MarkdownRenderer:
         # Use the matrix only for headers; retain the body expansion below.
         matrix = TableMatrix().build_from_rows(header_rows, [])
         max_columns = max(matrix.col_count, max((sum(cell.colspan for cell in row.cells)
-                                               for row in node.rows), default=0))
+                                               for row in body_rows), default=0))
 
         # Find content columns before copying group labels across their spans,
         # so a header over empty SEC spacing columns does not keep those columns.
@@ -620,7 +627,7 @@ class MarkdownRenderer:
             expanded = [cell.text().strip() if cell else "" for cell in matrix.get_expanded_row(row_index)]
             expanded.extend([""] * (max_columns - len(expanded)))
             expanded_headers.append(expanded)
-        expanded_data_rows = [self._expand_row_to_columns(row.cells, max_columns) for row in node.rows]
+        expanded_data_rows = [self._expand_row_to_columns(row.cells, max_columns) for row in body_rows]
         content_columns = self._identify_content_columns(expanded_headers, expanded_data_rows)
 
         for row_index, expanded in enumerate(expanded_headers):
