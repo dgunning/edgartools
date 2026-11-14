@@ -45,6 +45,57 @@ def is_period_boundary_label_role(role: Optional[str]) -> bool:
     return is_period_start_label_role(role) or is_period_end_label_role(role)
 
 
+def balance_cell_key(values: Mapping[str, Any], column_key: str, preferred_label: Optional[str],
+                     opening_by_position: bool = False) -> Optional[str]:
+    """The key of the value a statement row shows in a column, or None when it shows nothing.
+
+    This is the one rule for which instant a balance row shows under a duration
+    column; the DataFrame and the rendered table both use it (edgartools-auvk1.14).
+    The column's own key wins when the row has a value under it. Otherwise, under
+    a duration column, an instant concept shows:
+
+    - the opening balance (the instant the day before the period starts, else
+      the start date itself) when its presentation arc carries a period-start
+      label role;
+    - the closing balance (the instant at the period end) otherwise. This is
+      the SEC renderer's rule: a balance row with any other role (terse, total,
+      standard) shows the period-end instant (Entergy 0000065984-24-000112, cash
+      total on a terseLabel arc).
+
+    ``opening_by_position`` is the statement-of-equity fallback for a row whose
+    arc has no period-boundary role at all: the first of a repeated
+    (concept, label) pair is read as the opening balance, falling back to the
+    closing one (Issues #450, #572, #583).
+
+    ``preferred_label`` must be the role of this row's own arc; a dimension row
+    has its parent reference's role (Brixmor 0001581068-21-000012). A key
+    present with a None value does not count as present.
+    """
+    candidates = [column_key]
+    if column_key.startswith('duration_'):
+        parts = column_key.split('_')
+        start_date, end_date = (parts[1], parts[2]) if len(parts) >= 3 else (None, None)
+        if end_date:
+            opening = is_period_start_label_role(preferred_label) or (
+                opening_by_position and not is_period_end_label_role(preferred_label))
+            if opening and start_date:
+                try:
+                    prior_day = (datetime.strptime(start_date, '%Y-%m-%d').toordinal() - 1)
+                    candidates.append(f"instant_{date.fromordinal(prior_day).isoformat()}")
+                except ValueError:
+                    pass
+                if is_period_start_label_role(preferred_label):
+                    candidates.append(f"instant_{start_date}")
+                else:
+                    candidates.append(f"instant_{end_date}")
+            else:
+                candidates.append(f"instant_{end_date}")
+    for key in candidates:
+        if values.get(key) is not None:
+            return key
+    return None
+
+
 def iso4217_code(measure: Optional[str]) -> Optional[str]:
     """Return the ISO 4217 code of an ``iso4217:`` unit measure, else ``None``."""
     if measure and measure.startswith('iso4217:'):

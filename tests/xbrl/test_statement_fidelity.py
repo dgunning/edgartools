@@ -158,7 +158,22 @@ def test_entergy_headline():
     assert res.facts.total == 560
     assert res.compared_cells('dataframe') == 546
     assert len(res.of_kind('cell_matched', 'dataframe')) == 542
-    assert len(res.of_kind('cell_matched', 'rendered')) == 528
+    # 528 before edgartools-auvk1.14: the rendered table blanked 14 cash-total cells
+    assert len(res.of_kind('cell_matched', 'rendered')) == 542
+
+
+def test_entergy_cash_total_on_a_terse_arc_is_rendered():
+    """Entergy 10-Q, cash flows: the cash total sits on a terseLabel arc, an instant
+    under a duration column. The page shows the period-end 1,411,812 for 2024
+    year-to-date; the rendered table used to print nothing while the DataFrame had it.
+    Bead: edgartools-auvk1.14 (fixed)."""
+    res = results(ENTERGY)
+    kw = dict(concept='us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents',
+              period_key='duration_2024-01-01_2024-09-30', dimensions={})
+    assert not find(res, 'value_not_shown', 'rendered', **kw)
+    for surface in ('dataframe', 'rendered'):
+        [cell] = find(res, 'cell_matched', surface, **kw)
+        assert (cell.page_value, cell.library_value) == (1411812.0, 1411812000.0)
 
 
 def test_finding_bhe_parenthetical_sign():
@@ -199,19 +214,24 @@ def test_finding_graniteshares_label():
         assert row.library_label == 'Long-Term Investments'
 
 
-def test_finding_brixmor_beginning_balance_shows_closing_balance():
+def test_brixmor_member_row_under_beginning_balance_shows_the_opening_balance():
     """Brixmor 10-K (0001581068-21-000012), cash flows: under the beginning-of-period row,
-    the Brixmor Operating Partnership row shows 360,073,000 for 2020 where the page
-    shows the opening 21,507; for 2019 it shows 21,507,000, the page's 2020 opening
-    balance (the 2019 closing balance). Bead: edgartools-auvk1.14."""
+    the Brixmor Operating Partnership row shows the opening 21,507 for 2020, as the
+    page does. It used to show the closing 360,073,000 in the DataFrame and nothing
+    in the rendered table: a member row took the role of the concept's last arc
+    (totalLabel), not of its own parent reference (periodStartLabel).
+    Bead: edgartools-auvk1.14 (fixed)."""
     res = results(BRIXMOR)
     kw = dict(concept='us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents',
               dimensions={'srt:ConsolidatedEntitiesAxis': 'srt:SubsidiariesMember'})
-    [y2020] = find(res, 'value_differs', 'dataframe', period_key='duration_2020-01-01_2020-12-31', **kw)
-    assert (y2020.page_value, y2020.fact_value, y2020.library_value) == (21507.0, 21507000.0, 360073000.0)
-    assert y2020.page_label == 'Cash, cash equivalents and restricted cash at beginning of period'
-    [y2019] = find(res, 'value_differs', 'dataframe', period_key='duration_2019-01-01_2019-12-31', **kw)
-    assert (y2019.page_value, y2019.library_value) == (50639.0, 21507000.0)
+    for surface in ('dataframe', 'rendered'):
+        assert not find(res, 'value_differs', surface, **kw)
+        assert not find(res, 'value_not_shown', surface, **kw)
+        opening = {r.period_key: r.library_value for r in find(res, 'cell_matched', surface, **kw)
+                   if r.page_label == 'Cash, cash equivalents and restricted cash at beginning of period'}
+        assert opening == {'duration_2020-01-01_2020-12-31': 21507000.0,
+                           'duration_2019-01-01_2019-12-31': 50639000.0,
+                           'duration_2018-01-01_2018-12-31': 110747000.0}
 
 
 def test_finding_chindata_unit_column():
@@ -352,7 +372,8 @@ def test_mutation_swapped_rows_of_a_repeated_concept(monkeypatch):
         i, j = rows.index(first), rows.index(second)
         rows[i], rows[j] = second, first
     res, _ = mutated(monkeypatch, BRIXMOR, mutate)
-    assert disagreements(res, concept=CASH) == Counter(value_differs=9, label_differs=2)
+    # 6 swapped cells; 9 before edgartools-auvk1.14 fixed the member row under the opening balance
+    assert disagreements(res, concept=CASH) == Counter(value_differs=6, label_differs=2)
 
 
 def test_mutation_same_currency_other_unit_id_1000x(monkeypatch):
@@ -415,17 +436,19 @@ def test_mutation_unaligned_first_row_does_not_shift_the_rows_after_it(monkeypat
                 and r.kind in ('extra_row_in_role', 'duplicate_library_row')]
 
 
-def test_guide_example_value_differs_offline():
+def test_guide_example_negative_zero_offline():
     """The guide's Brixmor example (docs/guides/sec-viewer-guide.md). The fixture holds only the cash
     flow page, so the rate and coverage lines (all pages) are not reproducible offline; its first
-    value_differs, which is on that page, is."""
+    negative_zero, which is on that page, is. (Until edgartools-auvk1.14 the example was a
+    value_differs, the member row under the opening balance.)"""
     res = results(BRIXMOR)
-    r = res.of_kind('value_differs', 'dataframe')[0]
+    r = res.of_kind('negative_zero', 'dataframe')[0]
     assert (r.page, r.page_label, r.library_label) == (
-        'CONSOLIDATED STATEMENTS OF CASH FLOWS', 'Cash, cash equivalents and restricted cash at beginning of period',
-        'Brixmor Operating Partnership LP')
+        'CONSOLIDATED STATEMENTS OF CASH FLOWS', 'Repayment of secured debt obligations',
+        'Repayment of secured debt obligations')
     assert (r.column, r.page_value, r.fact_value, r.library_value) == (
-        '12 Months Ended Dec. 31, 2020', 21507.0, 21507000.0, 360073000.0)
+        '12 Months Ended Dec. 31, 2019', 0.0, 0.0, -0.0)
+    assert not res.of_kind('value_differs', 'dataframe')
 
 
 def test_merged_rows_names_the_row_the_library_kept():

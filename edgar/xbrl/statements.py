@@ -7,7 +7,7 @@ This module provides functions for working with financial statements.
 import re
 import warnings
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Sequence, Union
 
 import pandas as pd
@@ -1287,15 +1287,14 @@ class Statement:
         """
         from edgar.xbrl.core import (
             SourceKeyLookup,
-            is_period_end_label_role,
-            is_period_start_label_role,
+            balance_cell_key,
             record_cell_unit,
             row_metadata_value,
             summarize_unit_definitions,
         )
         from edgar.xbrl.core import is_point_in_time as get_is_point_in_time
         from edgar.xbrl.periods import determine_periods_to_display
-        from edgar.xbrl.rendering import _is_html, html_to_text
+        from edgar.xbrl.rendering import EQUITY_POSITION_STATEMENTS, _is_html, html_to_text
 
         # Get raw statement data with view-based filtering
         raw_data = self.get_raw_data(period_filter=period_filter, view=view)
@@ -1377,11 +1376,7 @@ class Statement:
 
         # Issue #572: Track concept occurrences for Statement of Equity roll-forward logic
         # First occurrence = beginning balance, later occurrences = ending balance
-        is_equity_statement = statement_type in (
-            'StatementOfEquity', 'StatementOfStockholdersEquity',
-            'StatementOfChangesInEquity', 'ComprehensiveIncome',
-            'StatementOfComprehensiveIncome'
-        )
+        is_equity_statement = statement_type in EQUITY_POSITION_STATEMENTS
         # Issue #583: Track by (concept, label) tuple to handle dimensional items correctly
         # Different dimensional items have same concept but different labels
         item_occurrence_count = {}  # Tracks total occurrences of each (concept, label) pair
@@ -1468,85 +1463,18 @@ class Statement:
             for period_key, period_label in periods_to_display:
                 values_dict.source_key = None
                 column_name = _period_column_names.get(period_key, period_label)
-                # Extract start/end dates for equity statement logic
-                start_date = None
-                end_date = None
-                if '_' in period_key:
-                    parts = period_key.split('_')
-                    if len(parts) >= 3:
-                        start_date = parts[1]
-                        end_date = parts[2]
-                    elif len(parts) == 2:
-                        end_date = parts[1]
-
-                # Use raw value from instance document
-                value = values_dict.get(period_key)
-
-                # edgartools-0609: Roll-forward mapping for periodStart/periodEnd
-                # balances (e.g. cash flow / equity "beginning/ending balances").
-                # These are instant facts shown against duration columns: the
-                # beginning balance is the instant at the day before the period
-                # start, the ending balance is the instant at the period end.
-                # Driven by the per-reference preferred label so it works
-                # regardless of statement type and keeps the DataFrame consistent
-                # with the rich view.
-                # Only non-dimensional rows carry a reliable per-reference label;
-                # dimensional rows share the node's label and use the occurrence-
-                # based equity logic below instead.
-                item_preferred_label = None if item.get('is_dimension') else item.get('preferred_label')
-                # Negated period roles count too (GH #1700).
-                is_period_start = is_period_start_label_role(item_preferred_label)
-                is_period_end = is_period_end_label_role(item_preferred_label)
-                if value is None and (is_period_start or is_period_end):
-                    if is_period_start and start_date:
-                        # Beginning balance: instant at the day before period start
-                        try:
-                            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-                            beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
-                            value = values_dict.get(f"instant_{beginning_date}")
-                            if value is None:
-                                value = values_dict.get(f"instant_{start_date}")
-                        except (ValueError, AttributeError):
-                            pass
-                    if value is None and is_period_end and end_date:
-                        value = values_dict.get(f"instant_{end_date}")
-
-                # Issue #572/#583: For Statement of Equity, match instant facts when duration key is empty
-                # This mirrors the logic in rendering.py (Issue #450) for consistent DataFrame output
-                # Roll-forward structure: first occurrence = beginning balance, later = ending balance
-                # Issue #583: Use (concept, label) tracking for proper beginning/ending logic with dimensions
-                if value is None and is_equity_statement:
+                # edgartools-auvk1.14: one rule, shared with the rendered table,
+                # for which value (an instant balance under a duration column
+                # included) this row shows in this column. The row's own arc role
+                # decides; dimension rows carry their parent reference's role.
+                opening_by_position = False
+                if is_equity_statement:
                     item_key = (concept, base_label)
-                    total_occurrences = item_occurrence_count.get(item_key, 1)
-                    current_occurrence = item_current_index.get(item_key, 1)
-                    is_first_occurrence = current_occurrence == 1
-
-                    if is_first_occurrence and total_occurrences > 1 and start_date:
-                        # Beginning balance: try instant at day before start_date
-                        try:
-                            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-                            beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
-                            instant_key = f"instant_{beginning_date}"
-                            value = values_dict.get(instant_key)
-                        except (ValueError, AttributeError):
-                            pass  # Fall through to try end_date
-
-                    # If still no value, try instant at end_date (ending balances and most facts).
-                    # edgartools-0609: never apply the period-end instant to a beginning row.
-                    if value is None and end_date and not is_period_start:
-                        instant_key = f"instant_{end_date}"
-                        value = values_dict.get(instant_key)
-
-                # General fallback: handle period type mismatch for disclosure notes (#635)
-                # Notes/disclosures default to duration period selection, but balance-sheet-type
-                # notes (PPE, Accrued Liabilities) have instant facts.
-                # Try the instant key at the duration's end date.
-                # edgartools-0609: skip beginning-balance rows -- the period end instant
-                # is the *ending* balance and would mislabel the beginning row.
-                if (value is None and period_key.startswith('duration_') and end_date
-                        and not is_period_start):
-                    instant_key = f"instant_{end_date}"
-                    value = values_dict.get(instant_key)
+                    opening_by_position = (item_current_index.get(item_key, 1) == 1
+                                           and item_occurrence_count.get(item_key, 1) > 1)
+                source_key = balance_cell_key(item.get('values') or {}, period_key,
+                                              item.get('preferred_label'), opening_by_position)
+                value = values_dict.get(source_key) if source_key else None
 
                 # Issue #762: Sanitize HTML strings from TextBlock XBRL concepts
                 # Disclosure tables contain facts whose values are full HTML markup.
