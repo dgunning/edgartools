@@ -1,0 +1,31 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--XBRL document created by Certent CDM version: 22.2.0 using Fujitsu Interstage XWand --><schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:drd="http://www.DRDGold.com/20220630" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:nonnum="http://www.xbrl.org/dtr/type/non-numeric" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:srt-types="http://fasb.org/srt-types/2021-01-31" targetNamespace="http://www.DRDGold.com/20220630" elementFormDefault="qualified">
+    <annotation>
+        <appinfo>
+            <link:linkbaseRef xlink:type="simple" xlink:href="drd-20220630_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase"/>
+            <link:linkbaseRef xlink:type="simple" xlink:href="drd-20220630_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase"/>
+            <link:linkbaseRef xlink:type="simple" xlink:href="drd-20220630_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase"/>
+            <link:linkbaseRef xlink:type="simple" xlink:href="drd-20220630_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase"/>
+            <link:roleType roleURI="http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME" id="ELRID_CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME">
+                <link:definition>000200 - Statement - CONSOLIDATED STATEMENT OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME</link:definition>
+                <link:usedOn>link:presentationLink</link:usedOn>
+                <link:usedOn>link:definitionLink</link:usedOn>
+                <link:usedOn>link:calculationLink</link:usedOn>
+            </link:roleType>
+            </appinfo>
+    </annotation>
+    <import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+    <import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+    <import namespace="http://www.xbrl.org/2009/role/negated" schemaLocation="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd"/>
+    <import namespace="http://www.xbrl.org/dtr/type/non-numeric" schemaLocation="http://www.xbrl.org/dtr/type/nonNumeric-2009-12-16.xsd"/>
+    <import namespace="http://www.xbrl.org/dtr/type/numeric" schemaLocation="http://www.xbrl.org/dtr/type/numeric-2009-12-16.xsd"/>
+    <import namespace="http://xbrl.sec.gov/dei/2021q4" schemaLocation="https://xbrl.sec.gov/dei/2021q4/dei-2021q4.xsd"/>
+    <import namespace="http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full" schemaLocation="http://xbrl.ifrs.org/taxonomy/2021-03-24/full_ifrs/full_ifrs-cor_2021-03-24.xsd"/>
+    <import namespace="http://fasb.org/srt/2021-01-31" schemaLocation="https://xbrl.fasb.org/srt/2021/elts/srt-2021-01-31.xsd"/>
+    <import namespace="http://fasb.org/srt-types/2021-01-31" schemaLocation="https://xbrl.fasb.org/srt/2021/elts/srt-types-2021-01-31.xsd"/>
+    <element name="WestwitsmininglimitedwwmMember" id="drd_WestwitsmininglimitedwwmMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration"/>
+    <element name="RandmutualassurancecompanylimitedMember" id="drd_RandmutualassurancecompanylimitedMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration"/>
+    <element name="FwgrMember" id="drd_FwgrMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration"/>
+    <element name="ErgoOperationsMember" id="drd_ErgoOperationsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration"/>
+    <element name="RandRefineryProprietaryLimitedMember" id="drd_RandRefineryProprietaryLimitedMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" abstract="true" nillable="true" xbrli:periodType="duration"/>
+    </schema>

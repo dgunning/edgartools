@@ -18,7 +18,8 @@ separate contamination of its plain totals is outside these assertions.
 The fixture manifests pin the original SEC XBRL files and byte-preserved subsets. Apple's
 FY2023 10-K 0000320193-23-000106 supplies parenthetical shares/par-value,
 signs, equity and analysis controls. Parenthetical selection must retain its
-own role and instant comparison, without primary-statement sign processing.
+own role and instant comparison; a negated label signs it like any statement
+(edgartools-auvk1.13).
 """
 
 from copy import deepcopy
@@ -607,8 +608,13 @@ def test_direct_missing_parenthetical_does_not_retrieve_primary_rows(fresh_apple
     assert apple.render_statement("BalanceSheet", parenthetical=True) is None
 
 
-def test_parenthetical_processing_keeps_primary_presentation_signs_inactive(fresh_apple, monkeypatch):
-    """A single synthetic sign isolates the gate; original Apple values are positive."""
+def test_parenthetical_applies_a_negated_label_sign(fresh_apple, monkeypatch):
+    """A single synthetic sign; original Apple values are positive.
+
+    A parenthetical used to keep the filed sign (the sign was gated on four
+    statement types). The SEC page applies a negated label on a parenthetical too
+    (BHE 0001081316-24-000016, pension OCI tax), so presentation mode now does,
+    while the rendered cell keeps the filed value (edgartools-auvk1.13)."""
     apple = fresh_apple
     concept = "us-gaap_CommonStockSharesIssued"
     raw = deepcopy(next(row for row in apple.statements[APPLE_PARENTHETICAL].get_raw_data(view=StatementView.SUMMARY) if row["concept"] == concept))
@@ -617,9 +623,12 @@ def test_parenthetical_processing_keeps_primary_presentation_signs_inactive(fres
     statement = apple.statements[APPLE_PARENTHETICAL]
     for standard in (False, True):
         frame = statement.to_dataframe(standard=standard, presentation=True, view="summary")
-        assert _plain_row(frame, concept)[["2023-09-30", "2022-09-24"]].tolist() == [15_550_061_000, 15_943_425_000]
+        assert _plain_row(frame, concept)[["2023-09-30", "2022-09-24"]].tolist() == [-15_550_061_000, -15_943_425_000]
+        raw_frame = statement.to_dataframe(standard=standard, presentation=False, view="summary")
+        assert _plain_row(raw_frame, concept)[["2023-09-30", "2022-09-24"]].tolist() == [15_550_061_000, 15_943_425_000]
         rendered = statement.render(standard=standard, view="summary")
         assert [cell.value for cell in rendered.rows[0].cells] == [15_550_061_000, 15_943_425_000]
+        assert [cell.get_formatted_value() for cell in rendered.rows[0].cells] == ['-15,550,061', '-15,943,425']
 
 
 def test_untyped_ibm_note_keeps_filed_facts_without_an_inferred_primary_kind():

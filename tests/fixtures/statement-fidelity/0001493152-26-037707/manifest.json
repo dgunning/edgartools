@@ -1,0 +1,15 @@
+{
+ "accession": "0001493152-26-037707",
+ "filer": "GraniteShares Gold Trust",
+ "form": "10-K",
+ "filing_date": "2026-08-13",
+ "role": "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities",
+ "page": "R2.htm",
+ "short_name": "Statements of Assets and Liabilities",
+ "sic": "6221",
+ "period_of_report": "2026-06-30",
+ "menu_categories": {
+  "http://graniteshares.com/role/StatementsOfAssetsAndLiabilities": "Statements"
+ },
+ "access": "balance_sheet()"
+}

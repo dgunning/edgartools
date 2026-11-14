@@ -1,0 +1,933 @@
+{
+ "version": "2.1",
+ "instance": {
+  "gtim-20220329.htm": {
+   "tag": {
+    "gtim_CapitalExpendituresIncurredButNotPaid": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Future cash outflow to pay for purchases of fixed assets that have occurred.",
+        "label": "CapitalExpendituresIncurredButNotPaid",
+        "terseLabel": "Change in accounts payable attributable to the purchase of property and equipment"
+       }
+      }
+     },
+     "localname": "CapitalExpendituresIncurredButNotPaid",
+     "nsuri": "http://goodtimesburgers.com/20220329",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "gtim_DecreaseInROUAssets": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 4.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Decrease in ROU assets.",
+        "label": "DecreaseInROUAssets",
+        "terseLabel": "Decrease in ROU assets"
+       }
+      }
+     },
+     "localname": "DecreaseInROUAssets",
+     "nsuri": "http://goodtimesburgers.com/20220329",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "gtim_IncreaseDecreaseInIntangibleAssetsDepositsAndOther": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 17.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Increase (Decrease) In Intangible Assets, Deposits And Other",
+        "label": "IncreaseDecreaseInIntangibleAssetsDepositsAndOther",
+        "negatedLabel": "Deposits and other"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInIntangibleAssetsDepositsAndOther",
+     "nsuri": "http://goodtimesburgers.com/20220329",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "gtim_IncreaseDecreaseInOperatingLeaseLiabilities": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 9.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Increase Decrease In Operating Lease Liabilities.",
+        "label": "IncreaseDecreaseInOperatingLeaseLiabilities",
+        "terseLabel": "Operating lease liabilities"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInOperatingLeaseLiabilities",
+     "nsuri": "http://goodtimesburgers.com/20220329",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "gtim_PaymentForPurchaseOfTreasuryStock": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 2.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Payment For Purchase Of Treasury Stock.",
+        "label": "PaymentForPurchaseOfTreasuryStock",
+        "negatedLabel": "Payments for the purchase of treasury stock"
+       }
+      }
+     },
+     "localname": "PaymentForPurchaseOfTreasuryStock",
+     "nsuri": "http://goodtimesburgers.com/20220329",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "gtim_RecognitionOfDeferredGainOnSaleOfRestaurantBuilding": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 13.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Recognition of deferred gain on sale of restaurant building.",
+        "label": "RecognitionOfDeferredGainOnSaleOfRestaurantBuilding",
+        "negatedLabel": "Recognition of deferred gain on sale of restaurant building"
+       }
+      }
+     },
+     "localname": "RecognitionOfDeferredGainOnSaleOfRestaurantBuilding",
+     "nsuri": "http://goodtimesburgers.com/20220329",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Adjustments to Reconcile Net Income (Loss) to Cash Provided by (Used in) Operating Activities [Abstract]",
+        "terseLabel": "Adjustments to reconcile net income (loss) to net cash provided by (used in) operating activities:"
+       }
+      }
+     },
+     "localname": "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash and cash equivalents, and cash and cash equivalents restricted to withdrawal or usage. Excludes amount for disposal group and discontinued operations. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates.",
+        "label": "Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents",
+        "periodEndLabel": "CASH AND CASH EQUIVALENTS, end of period",
+        "periodStartLabel": "CASH AND CASH EQUIVALENTS, beginning of period"
+       }
+      }
+     },
+     "localname": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of increase (decrease) in cash and cash equivalents, and cash and cash equivalents restricted to withdrawal or usage; excluding effect from exchange rate change. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates.",
+        "label": "Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents, Period Increase (Decrease), Excluding Exchange Rate Effect",
+        "totalLabel": "NET CHANGE IN CASH AND CASH EQUIVALENTS"
+       }
+      }
+     },
+     "localname": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_DepreciationAndAmortization": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 2.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The current period expense charged against earnings on long-lived, physical assets not used in production, and which are not intended for resale, to allocate or recognize the cost of such assets over their useful lives; or to record the reduction in book value of an intangible asset over the benefit period of such asset; or to reflect consumption during the period of an asset that is not used in production.",
+        "label": "Depreciation, Depletion and Amortization, Nonproduction",
+        "terseLabel": "Depreciation and amortization"
+       }
+      }
+     },
+     "localname": "DepreciationAndAmortization",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_GainsLossesOnExtinguishmentOfDebt": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 12.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Difference between the fair value of payments made and the carrying amount of debt which is extinguished prior to maturity.",
+        "label": "Gain (Loss) on Extinguishment of Debt",
+        "negatedLabel": "Gain on lease termination"
+       }
+      }
+     },
+     "localname": "GainsLossesOnExtinguishmentOfDebt",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ImpairmentOfLongLivedAssetsHeldForUse": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 5.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      },
+      "http://goodtimesburgers.com/role/ConsolidatedIncomeStatement": {
+       "order": 8.0,
+       "parentTag": "us-gaap_OperatingIncomeLoss",
+       "weight": -1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The aggregate amount of write-downs for impairments recognized during the period for long lived assets held for use (including those held for disposal by means other than sale).",
+        "label": "Impairment, Long-Lived Asset, Held-for-Use",
+        "terseLabel": "Impairment of long-lived assets"
+       }
+      }
+     },
+     "localname": "ImpairmentOfLongLivedAssetsHeldForUse",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow",
+      "http://goodtimesburgers.com/role/ConsolidatedIncomeStatement"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IncreaseDecreaseInAccountsPayable": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 8.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The increase (decrease) during the reporting period in the aggregate amount of liabilities incurred (and for which invoices have typically been received) and payable to vendors for goods and services received that are used in an entity's business.",
+        "label": "Increase (Decrease) in Accounts Payable",
+        "terseLabel": "Accounts payable"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInAccountsPayable",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IncreaseDecreaseInAccountsReceivableAndOtherOperatingAssets": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 14.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of increase (decrease) in receivables, and operating assets classified as other.",
+        "label": "Increase (Decrease) in Accounts Receivable and Other Operating Assets",
+        "negatedLabel": "Receivables and other"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInAccountsReceivableAndOtherOperatingAssets",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 7.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The increase (decrease) during the period in the amount due for taxes based on the reporting entity's earnings or attributable to the entity's income earning process (business presence) within a given jurisdiction.",
+        "label": "Increase (Decrease) in Income Taxes Payable",
+        "terseLabel": "Income tax provision"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInAccruedIncomeTaxesPayable",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 11.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of increase (decrease) in accrued expenses, and obligations classified as other.",
+        "label": "Increase (Decrease) in Accrued Liabilities and Other Operating Liabilities",
+        "terseLabel": "Accrued and other liabilities"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInAccruedLiabilitiesAndOtherOperatingLiabilities",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IncreaseDecreaseInDeferredLiabilities": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 10.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Change during the period in carrying value for all deferred liabilities due within one year or operating cycle.",
+        "label": "Increase (Decrease) in Deferred Liabilities",
+        "terseLabel": "Deferred liabilities"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInDeferredLiabilities",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IncreaseDecreaseInInventories": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 16.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The increase (decrease) during the reporting period in the aggregate value of all inventory held by the reporting entity, associated with underlying transactions that are classified as operating activities.",
+        "label": "Increase (Decrease) in Inventories",
+        "negatedLabel": "Inventories"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInInventories",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Increase (Decrease) in Operating Capital [Abstract]",
+        "terseLabel": "Changes in operating assets and liabilities:"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInOperatingCapitalAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_IncreaseDecreaseInPrepaidExpense": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 15.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The increase (decrease) during the reporting period in the amount of outstanding money paid in advance for goods or services that bring economic benefits for future periods.",
+        "label": "Increase (Decrease) in Prepaid Expense",
+        "negatedLabel": "Prepaid expense"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInPrepaidExpense",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_InterestPaidNet": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash paid for interest, excluding capitalized interest, classified as operating activity. Includes, but is not limited to, payment to settle zero-coupon bond for accreted interest of debt discount and debt instrument with insignificant coupon interest rate in relation to effective interest rate of borrowing attributable to accreted interest of debt discount.",
+        "label": "Interest Paid, Excluding Capitalized Interest, Operating Activities",
+        "terseLabel": "Cash paid for interest"
+       }
+      }
+     },
+     "localname": "InterestPaidNet",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInFinancingActivities": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 3.0,
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash inflow (outflow) from financing activities, including discontinued operations. Financing activity cash flows include obtaining resources from owners and providing them with a return on, and a return of, their investment; borrowing money and repaying amounts borrowed, or settling the obligation; and obtaining and paying for other resources obtained from creditors on long-term credit.",
+        "label": "Net Cash Provided by (Used in) Financing Activities",
+        "totalLabel": "Net cash (used in) provided by financing activities"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInFinancingActivities",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Net Cash Provided by (Used in) Financing Activities [Abstract]",
+        "terseLabel": "CASH FLOWS FROM FINANCING ACTIVITIES:"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInFinancingActivitiesAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInInvestingActivities": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 2.0,
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash inflow (outflow) from investing activities, including discontinued operations. Investing activity cash flows include making and collecting loans and acquiring and disposing of debt or equity instruments and property, plant, and equipment and other productive assets.",
+        "label": "Net Cash Provided by (Used in) Investing Activities",
+        "totalLabel": "Net cash used in investing activities"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInInvestingActivities",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Net Cash Provided by (Used in) Investing Activities [Abstract]",
+        "terseLabel": "CASH FLOWS FROM INVESTING ACTIVITIES:"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInOperatingActivities": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 1.0,
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+       "weight": 1.0
+      }
+     },
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash inflow (outflow) from operating activities, including discontinued operations. Operating activity cash flows include transactions, adjustments, and changes in value not defined as investing or financing activities.",
+        "label": "Net Cash Provided by (Used in) Operating Activities",
+        "totalLabel": "Net cash provided by operating activities"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInOperatingActivities",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Net Cash Provided by (Used in) Operating Activities [Abstract]",
+        "terseLabel": "CASH FLOWS FROM OPERATING ACTIVITIES:"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_OperatingLeaseRightOfUseAssetAmortizationExpense": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 3.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of amortization expense for right-of-use asset from operating lease.",
+        "label": "Operating Lease, Right-of-Use Asset, Amortization Expense",
+        "terseLabel": "Amortization of operating lease assets"
+       }
+      }
+     },
+     "localname": "OperatingLeaseRightOfUseAssetAmortizationExpense",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PaymentsOfDividendsMinorityInterest": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 4.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash outflow in the form of ordinary dividends provided by the non-wholly owned subsidiary to noncontrolling interests.",
+        "label": "Payments of Ordinary Dividends, Noncontrolling Interest",
+        "negatedLabel": "Distributions to non-controlling interests"
+       }
+      }
+     },
+     "localname": "PaymentsOfDividendsMinorityInterest",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PaymentsToAcquireBusinessesNetOfCashAcquired": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 3.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cash outflow associated with the acquisition of a business, net of the cash acquired from the purchase.",
+        "label": "Payments to Acquire Businesses, Net of Cash Acquired",
+        "negatedLabel": "Acquisition of restaurant from franchisee, net of cash acquired"
+       }
+      }
+     },
+     "localname": "PaymentsToAcquireBusinessesNetOfCashAcquired",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PaymentsToAcquirePropertyPlantAndEquipment": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 2.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cash outflow associated with the acquisition of long-lived, physical assets that are used in the normal conduct of business to produce goods and services and not intended for resale; includes cash outflows to pay for construction of self-constructed assets.",
+        "label": "Payments to Acquire Property, Plant, and Equipment",
+        "negatedLabel": "Payments for the purchase of property and equipment"
+       }
+      }
+     },
+     "localname": "PaymentsToAcquirePropertyPlantAndEquipment",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ProceedsFromCollectionOfAdvanceToAffiliate": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 1.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cash inflow from the collection of money previously advanced to an entity that is related to it but not strictly controlled.",
+        "label": "Proceeds from Collection of Advance to Affiliate",
+        "terseLabel": "Payments received from franchisees and others"
+       }
+      }
+     },
+     "localname": "ProceedsFromCollectionOfAdvanceToAffiliate",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ProceedsFromStockOptionsExercised": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 1.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash inflow from exercise of option under share-based payment arrangement.",
+        "label": "Proceeds from Stock Options Exercised",
+        "terseLabel": "Proceeds from stock option exercise"
+       }
+      }
+     },
+     "localname": "ProceedsFromStockOptionsExercised",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ProfitLoss": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 1.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      },
+      "http://goodtimesburgers.com/role/ConsolidatedIncomeStatement": {
+       "order": 1.0,
+       "parentTag": "us-gaap_NetIncomeLoss",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The consolidated profit or loss for the period, net of income taxes, including the portion attributable to the noncontrolling interest.",
+        "label": "Net Income (Loss), Including Portion Attributable to Noncontrolling Interest",
+        "terseLabel": "Net income (loss)",
+        "totalLabel": "NET (LOSS) INCOME:"
+       }
+      }
+     },
+     "localname": "ProfitLoss",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow",
+      "http://goodtimesburgers.com/role/ConsolidatedIncomeStatement"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_RepaymentsOfLongTermDebt": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 3.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cash outflow for debt initially having maturity due after one year or beyond the normal operating cycle, if longer.",
+        "label": "Repayments of Long-Term Debt",
+        "negatedLabel": "Principal payments on notes payable and long-term debt"
+       }
+      }
+     },
+     "localname": "RepaymentsOfLongTermDebt",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ShareBasedCompensation": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow": {
+       "order": 6.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of noncash expense for share-based payment arrangement.",
+        "label": "Share-Based Payment Arrangement, Noncash Expense",
+        "terseLabel": "Stock-based compensation expense"
+       }
+      }
+     },
+     "localname": "ShareBasedCompensation",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StatementOfCashFlowsAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of Cash Flows [Abstract]"
+       }
+      }
+     },
+     "localname": "StatementOfCashFlowsAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_SupplementalCashFlowInformationAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Supplemental Cash Flow Information [Abstract]",
+        "terseLabel": "SUPPLEMENTAL DISCLOSURES OF CASH FLOW INFORMATION:"
+       }
+      }
+     },
+     "localname": "SupplementalCashFlowInformationAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedCashFlow"
+     ],
+     "xbrltype": "stringItemType"
+    }
+   },
+   "report": {
+    "R6": {
+     "firstAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "gtim-20220329.htm",
+      "contextRef": "c0",
+      "decimals": "-3",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:ProfitLoss",
+      "reportCount": 1,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "005 - Statement - Condensed Consolidated Statements of Cash Flows (Unaudited)",
+     "role": "http://goodtimesburgers.com/role/ConsolidatedCashFlow",
+     "shortName": "Condensed Consolidated Statements of Cash Flows (Unaudited)",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "gtim-20220329.htm",
+      "contextRef": "c0",
+      "decimals": "-3",
+      "lang": null,
+      "name": "us-gaap:DepreciationAndAmortization",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

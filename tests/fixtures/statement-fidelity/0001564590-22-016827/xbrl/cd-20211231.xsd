@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- DFIN ActiveDisclosure(SM) XBRL Schema Document - http://www.dfinsolutions.com/ --><!-- Creation Date      : 2022-04-28T14:16:56.8847899+00:00 --><!-- Version            : 5.0.1.747 --><!-- Package ID         : 08798e2982b640609033e50e7ffbac67 --><!-- Copyright (c) 2022 Donnelley Financial Solutions, Inc. All Rights Reserved. --><xsd:schema xmlns:cd="http://www.chindatagroup.com/20211231" xmlns:dei="http://xbrl.sec.gov/dei/2021q4" xmlns:us-types="http://fasb.org/us-types/2021-01-31" xmlns:stpr="http://xbrl.sec.gov/stpr/2021" xmlns:srt-types="http://fasb.org/srt-types/2021-01-31" xmlns:exch="http://xbrl.sec.gov/exch/2021" xmlns:sic="http://xbrl.sec.gov/sic/2021" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:srt="http://fasb.org/srt/2021-01-31" xmlns:enum2="http://xbrl.org/2020/extensible-enumerations-2.0" xmlns:us-gaap="http://fasb.org/us-gaap/2021-01-31" xmlns:naics="http://xbrl.sec.gov/naics/2021" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:country="http://xbrl.sec.gov/country/2021" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:currency="http://xbrl.sec.gov/currency/2021" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2020-01-21" xmlns:xsd="http://www.w3.org/2001/XMLSchema" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.chindatagroup.com/20211231">
+  <xsd:import schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd" namespace="http://www.xbrl.org/2003/instance"/>
+  <xsd:import schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd" namespace="http://www.xbrl.org/2003/linkbase"/>
+  <xsd:import schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd" namespace="http://xbrl.org/2005/xbrldt"/>
+  <xsd:import schemaLocation="https://www.xbrl.org/2020/extensible-enumerations-2.0.xsd" namespace="http://xbrl.org/2020/extensible-enumerations-2.0"/>
+  <xsd:import schemaLocation="https://xbrl.sec.gov/country/2021/country-2021.xsd" namespace="http://xbrl.sec.gov/country/2021"/>
+  <xsd:import schemaLocation="https://xbrl.sec.gov/currency/2021/currency-2021.xsd" namespace="http://xbrl.sec.gov/currency/2021"/>
+  <xsd:import schemaLocation="https://xbrl.sec.gov/dei/2021q4/dei-2021q4.xsd" namespace="http://xbrl.sec.gov/dei/2021q4"/>
+  <xsd:import schemaLocation="https://www.xbrl.org/dtr/type/2020-01-21/types.xsd" namespace="http://www.xbrl.org/dtr/type/2020-01-21"/>
+  <xsd:import schemaLocation="https://xbrl.sec.gov/exch/2021/exch-2021.xsd" namespace="http://xbrl.sec.gov/exch/2021"/>
+  <xsd:import schemaLocation="http://www.xbrl.org/lrr/arcrole/factExplanatory-2009-12-16.xsd" namespace="http://www.xbrl.org/2009/arcrole/fact-explanatoryFact"/>
+  <xsd:import schemaLocation="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd" namespace="http://www.xbrl.org/2009/role/negated"/>
+  <xsd:import schemaLocation="http://www.xbrl.org/lrr/role/net-2009-12-16.xsd" namespace="http://www.xbrl.org/2009/role/net"/>
+  <xsd:import schemaLocation="https://xbrl.sec.gov/naics/2021/naics-2021.xsd" namespace="http://xbrl.sec.gov/naics/2021"/>
+  <xsd:import schemaLocation="https://xbrl.sec.gov/sic/2021/sic-2021.xsd" namespace="http://xbrl.sec.gov/sic/2021"/>
+  <xsd:import schemaLocation="https://xbrl.fasb.org/srt/2021/elts/srt-2021-01-31.xsd" namespace="http://fasb.org/srt/2021-01-31"/>
+  <xsd:import schemaLocation="https://xbrl.fasb.org/srt/2021/elts/srt-roles-2021-01-31.xsd" namespace="http://fasb.org/srt-roles/2021-01-31"/>
+  <xsd:import schemaLocation="https://xbrl.fasb.org/srt/2021/elts/srt-types-2021-01-31.xsd" namespace="http://fasb.org/srt-types/2021-01-31"/>
+  <xsd:import schemaLocation="https://xbrl.sec.gov/stpr/2021/stpr-2021.xsd" namespace="http://xbrl.sec.gov/stpr/2021"/>
+  <xsd:import schemaLocation="https://xbrl.fasb.org/us-gaap/2021/elts/us-gaap-2021-01-31.xsd" namespace="http://fasb.org/us-gaap/2021-01-31"/>
+  <xsd:import schemaLocation="https://xbrl.fasb.org/us-gaap/2021/elts/us-roles-2021-01-31.xsd" namespace="http://fasb.org/us-roles/2021-01-31"/>
+  <xsd:import schemaLocation="https://xbrl.fasb.org/us-gaap/2021/elts/us-types-2021-01-31.xsd" namespace="http://fasb.org/us-types/2021-01-31"/>
+  <xsd:annotation>
+    <xsd:appinfo>
+      <link:linkbaseRef xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="cd-20211231_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:title="Calculation Links, all" xlink:type="simple"/>
+      <link:linkbaseRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="cd-20211231_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:title="Definition Links, all" xlink:type="simple"/>
+      <link:linkbaseRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="cd-20211231_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:title="Label Links, all" xlink:type="simple"/>
+      <link:linkbaseRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="cd-20211231_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:title="Presentation Links, all" xlink:type="simple"/>
+      <link:roleType roleURI="http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets" id="Role_StatementConsolidatedBalanceSheets">
+        <link:definition>100010 - Statement - Consolidated Balance Sheets</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      </xsd:appinfo>
+  </xsd:annotation>
+  <xsd:element id="cd_StatutoryReserves" name="StatutoryReserves" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit"/>
+  <xsd:element id="cd_AmericanDepositarySharesCommonClassAOneMember" name="AmericanDepositarySharesCommonClassAOneMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="cd_AmericanDepositarySharesCommonClassATwoMember" name="AmericanDepositarySharesCommonClassATwoMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="cd_PRCSubsidiaryMember" name="PRCSubsidiaryMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="cd_HuailaiHuizhiConstructionCoLtdMember" name="HuailaiHuizhiConstructionCoLtdMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="cd_StackGroupMember" name="StackGroupMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  </xsd:schema>

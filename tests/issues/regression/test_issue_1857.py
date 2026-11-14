@@ -136,11 +136,12 @@ def test_apple_rate_reconciliation_has_one_income_tax_expense_row():
         "us-gaap_IncomeTaxReconciliationIncomeTaxExpenseBenefitAtFederalStatutoryIncomeTaxRate": 23_885_000_000,
         "us-gaap_IncomeTaxReconciliationStateAndLocalIncomeTaxes": 1_124_000_000,
         "us-gaap_IncomeTaxReconciliationForeignIncomeTaxRateDifferential": -5_744_000_000,
-        "us-gaap_IncomeTaxReconciliationTaxCreditsResearch": 1_212_000_000,
+        # negated labels, signed as the SEC page shows them (edgartools-auvk1.13): (1,212), (296)
+        "us-gaap_IncomeTaxReconciliationTaxCreditsResearch": -1_212_000_000,
         "us-gaap_IncomeTaxReconciliationOtherAdjustments": -192_000_000,
         "us-gaap_EffectiveIncomeTaxRateReconciliationFdiiAmount": 0,
     }
     for concept, value in reconciliation.items():
         assert frame.loc[concept, "2023-09-30"] == value, concept
         assert pd.isna(frame.loc[concept, "standard_concept"]), concept
-    assert frame.loc["us-gaap_EffectiveIncomeTaxRateReconciliationFdiiAmount", "2022-09-24"] == 296_000_000
+    assert frame.loc["us-gaap_EffectiveIncomeTaxRateReconciliationFdiiAmount", "2022-09-24"] == -296_000_000

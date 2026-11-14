@@ -926,6 +926,20 @@ class ComparisonResult:
     #: when not known).
     label_role: Optional[str] = None
     negated: Optional[bool] = None
+    #: Where the cell sits on its page, for checks that compare the page with
+    #: something else row by row (``statement_fidelity``): the index of its
+    #: row in ``ViewerReport.concept_report.rows`` and which of the page's
+    #: rows of the same concept in the same member context it is (0 for the
+    #: first). None for a cell in no row and on statement-of-equity pages.
+    row_index: Optional[int] = None
+    row_occurrence: Optional[int] = None
+    #: The column's own period: ``instant_<date>`` under a date column; under
+    #: an "N Months Ended" column, the duration the cell's own fact covers,
+    #: or, for an opening or closing balance, the one duration that renders
+    #: with that heading (None when the filing has several).
+    column_period_key: Optional[str] = None
+    #: The paired fact's value as filed (matched or mismatched cells).
+    xbrl_fact_value: Optional[float] = None
 
     def __post_init__(self):
         if not self.status:
@@ -1041,6 +1055,10 @@ class ComparisonResults:
                 'xbrl_unit': r.xbrl_unit,
                 'label_role': r.label_role,
                 'negated': r.negated,
+                'row_index': r.row_index,
+                'row_occurrence': r.row_occurrence,
+                'column_period_key': r.column_period_key,
+                'xbrl_fact_value': r.xbrl_fact_value,
             }
             for r in self.results
         ])
@@ -2270,7 +2288,8 @@ def _judge_cell(emit, index: '_FactIndex', names: _Names, xbrl_concept: str, per
     def paired(fact) -> dict:
         return dict(xbrl_period_key=used_key,
                     xbrl_dimensions={names.show(axis): names.show(member) for axis, member in sorted(dims)},
-                    xbrl_unit=fact.unit_ref, label_role=sign[1], negated=sign[0])
+                    xbrl_unit=fact.unit_ref, label_role=sign[1], negated=sign[0],
+                    xbrl_fact_value=fact.numeric_value)
 
     def sign_reason(unverified: bool) -> Optional[str]:
         return f"sign not verified: {sign[2]}" if unverified else None
@@ -2515,17 +2534,31 @@ def compare_viewer_to_xbrl(viewer: 'FilingViewer', xbrl: 'XBRL',
     Returns:
         ComparisonResults with per-cell outcomes
     """
+    return _facts_check(viewer, xbrl, tolerance).results
+
+
+def _facts_check(viewer: 'FilingViewer', xbrl: 'XBRL', tolerance: Optional[float] = None) -> SimpleNamespace:
+    """Run ``compare_viewer_to_xbrl`` and keep what a caller comparing pages further needs.
+
+    Returns ``results`` (the ``ComparisonResults``), the ``names`` and
+    ``index`` it paired cells with, and ``pages``: for each statement page,
+    ``(ViewerReport, start, end)``, the slice of ``results.results`` that
+    holds its cells.
+    """
     results = ComparisonResults()
     metalinks = viewer._metalinks
     names = _Names(xbrl, metalinks)
     index = _FactIndex(xbrl, names)
+    pages = []
 
     for vr in viewer.financial_statements:
+        start = len(results.results)
         _compare_statement(results, vr, xbrl, index, names, metalinks, tolerance)
+        pages.append((vr, start, len(results.results)))
 
     scales = set(results.scaling_factors.values())
     results.scaling_factor = scales.pop() if len(scales) == 1 else (None if scales else 1)
-    return results
+    return SimpleNamespace(results=results, names=names, index=index, pages=pages)
 
 
 def _compare_statement(results: ComparisonResults, vr, xbrl, index: '_FactIndex', names: _Names,
@@ -2634,9 +2667,10 @@ def _compare_row_cell(page: SimpleNamespace, row: SimpleNamespace, value_key: st
     if viewer_num is None and (_is_footnote_marker(display_val)
                                or not (_is_numeric_type(xbrltype) and (display_val or '').strip())):
         return  # not a numeric cell
-    emit = partial(_emit, page.results, dict(
-        concept_id=xbrl_concept, label=crow.label, period=value_key,
-        viewer_value=viewer_num, report=page.vr.short_name))
+    cell = dict(concept_id=xbrl_concept, label=crow.label, period=value_key,
+                viewer_value=viewer_num, report=page.vr.short_name,
+                row_index=row.i, row_occurrence=row.occurrence)
+    emit = partial(_emit, page.results, cell)
     if viewer_num is None:
         emit(NOT_COMPARABLE, reason=f"value {display_val!r} cannot be read as a number")
         return
@@ -2645,6 +2679,8 @@ def _compare_row_cell(page: SimpleNamespace, row: SimpleNamespace, value_key: st
     if period_info is None:
         return
     period_keys = _cell_period_keys(emit, page, row, period_info)
+    cell['column_period_key'] = _column_period_key(page.index, period_info, period_keys,
+                                                   page.index.period_types.get(xbrl_concept))
     if period_keys is None:
         return
 
@@ -2653,6 +2689,24 @@ def _compare_row_cell(page: SimpleNamespace, row: SimpleNamespace, value_key: st
                 sign=_row_sign(page.xbrl, row.tag, crow, page.references, row.occurrence,
                                row.occurrence_count),
                 unit_scales=page.unit_scales)
+
+
+def _column_period_key(index: '_FactIndex', period_info: dict, period_keys: Optional[List[str]],
+                       period_type: Optional[str]) -> Optional[str]:
+    """The column's own period key (``ComparisonResult.column_period_key``), or None when it cannot be told.
+
+    An instant column is its date. Under a duration column a duration
+    concept's cell is its own duration; an instant concept's cell (an
+    opening or closing balance) belongs to the one duration in the filing
+    that renders with the heading, and to none when several do.
+    """
+    end_date, months = period_info['end'], period_info['months']
+    if months is None:
+        return f'instant_{end_date}'
+    if period_type == 'instant':
+        starts = index.column_starts(end_date, months)
+        return f'duration_{starts[0]}_{end_date}' if len(starts) == 1 else None
+    return period_keys[0] if period_keys else None
 
 
 def _column_period(emit, period_header: str) -> Optional[dict]:

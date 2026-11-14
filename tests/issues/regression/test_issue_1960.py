@@ -30,9 +30,10 @@ from edgar.xbrl.statements import Statement
 LAND_SALE = "http://www.keysight.com/role/PropertyPlantAndEquipmentNetLandSaleDetails"
 
 
-def _present(df, statement_type="BalanceSheet"):
-    owner = SimpleNamespace(_presentation_sign_type=lambda: statement_type)
-    return Statement._apply_presentation(owner, df)
+def _present(df):
+    # The sign applies on every statement type (edgartools-auvk1.13), so
+    # _apply_presentation needs nothing from its statement.
+    return Statement._apply_presentation(SimpleNamespace(), df)
 
 
 @pytest.mark.fast
@@ -56,7 +57,7 @@ def test_signs_still_apply_when_the_column_is_object_dtype():
         "2020-10-31 (FY)": pd.Series([32_000_000, -75_000_000, 5.0], dtype=object),
         "preferred_sign": pd.Series([-1, -1, None], dtype=object),
     })
-    out = _present(df, "CashFlowStatement")
+    out = _present(df)
     assert list(out["2020-10-31 (FY)"]) == [-32_000_000.0, 75_000_000.0, 5.0]
 
 

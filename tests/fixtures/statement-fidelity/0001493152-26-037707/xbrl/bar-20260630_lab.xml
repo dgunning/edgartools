@@ -1,0 +1,92 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- Field: Doc-Info; Name: Generator; Value: GoFiler Complete; Version: 6.4b --><!-- Field: Doc-Info; Name: VendorURI; Value: https://www.novaworks.com --><!-- Field: Doc-Info; Name: Status; Value: 0x00000000 --><link:linkbase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xbrli="http://www.xbrl.org/2003/instance" xsi:schemaLocation="http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd">
+    <link:roleRef xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedLabel" roleURI="http://www.xbrl.org/2009/role/negatedLabel"/>
+    <link:roleRef xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedPeriodEndLabel" roleURI="http://www.xbrl.org/2009/role/negatedPeriodEndLabel"/>
+    <link:roleRef xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedPeriodStartLabel" roleURI="http://www.xbrl.org/2009/role/negatedPeriodStartLabel"/>
+    <link:roleRef xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedTotalLabel" roleURI="http://www.xbrl.org/2009/role/negatedTotalLabel"/>
+    <link:roleRef xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedNetLabel" roleURI="http://www.xbrl.org/2009/role/negatedNetLabel"/>
+    <link:roleRef xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedTerseLabel" roleURI="http://www.xbrl.org/2009/role/negatedTerseLabel"/>
+    <link:roleRef xlink:type="simple" xlink:href="http://www.xbrl.org/lrr/role/net-2009-12-16.xsd#netLabel" roleURI="http://www.xbrl.org/2009/role/netLabel"/>
+    <link:labelLink xlink:type="extended" xlink:role="http://www.xbrl.org/2003/role/link">
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_RelatedPartyTransactionsByRelatedPartyAxis" xlink:label="us-gaap_RelatedPartyTransactionsByRelatedPartyAxis"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_RelatedPartyTransactionsByRelatedPartyAxis" xlink:to="us-gaap_RelatedPartyTransactionsByRelatedPartyAxis_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_RelatedPartyTransactionsByRelatedPartyAxis_lbl" xml:lang="en-US">Related and Nonrelated Parties [Axis]</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_RelatedPartyMember" xlink:label="us-gaap_RelatedPartyMember"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_RelatedPartyMember" xlink:to="us-gaap_RelatedPartyMember_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_RelatedPartyMember_lbl" xml:lang="en-US">Related Party [Member]</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_FinancialInstrumentAxis" xlink:label="us-gaap_FinancialInstrumentAxis"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_FinancialInstrumentAxis" xlink:to="us-gaap_FinancialInstrumentAxis_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_FinancialInstrumentAxis_lbl" xml:lang="en-US">Financial Instrument [Axis]</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_GoldMember" xlink:label="us-gaap_GoldMember"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_GoldMember" xlink:to="us-gaap_GoldMember_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_GoldMember_lbl" xml:lang="en-US">Gold [Member]</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_FairValueByFairValueHierarchyLevelAxis" xlink:label="us-gaap_FairValueByFairValueHierarchyLevelAxis"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_FairValueByFairValueHierarchyLevelAxis" xlink:to="us-gaap_FairValueByFairValueHierarchyLevelAxis_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_FairValueByFairValueHierarchyLevelAxis_lbl" xml:lang="en-US">Fair Value Hierarchy and NAV [Axis]</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_FairValueInputsLevel1Member" xlink:label="us-gaap_FairValueInputsLevel1Member"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_FairValueInputsLevel1Member" xlink:to="us-gaap_FairValueInputsLevel1Member_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_FairValueInputsLevel1Member_lbl" xml:lang="en-US">Fair Value, Inputs, Level 1 [Member]</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_FairValueInputsLevel2Member" xlink:label="us-gaap_FairValueInputsLevel2Member"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_FairValueInputsLevel2Member" xlink:to="us-gaap_FairValueInputsLevel2Member_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_FairValueInputsLevel2Member_lbl" xml:lang="en-US">Fair Value, Inputs, Level 2 [Member]</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_FairValueInputsLevel3Member" xlink:label="us-gaap_FairValueInputsLevel3Member"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_FairValueInputsLevel3Member" xlink:to="us-gaap_FairValueInputsLevel3Member_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_FairValueInputsLevel3Member_lbl" xml:lang="en-US">Fair Value, Inputs, Level 3 [Member]</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ScheduleOfDefinedBenefitPlansDisclosuresTable" xlink:label="us-gaap_ScheduleOfDefinedBenefitPlansDisclosuresTable"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_ScheduleOfDefinedBenefitPlansDisclosuresTable" xlink:to="us-gaap_ScheduleOfDefinedBenefitPlansDisclosuresTable_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_ScheduleOfDefinedBenefitPlansDisclosuresTable_lbl" xml:lang="en-US">Defined Benefit Plan [Table]</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_DefinedBenefitPlanDisclosureLineItems" xlink:label="us-gaap_DefinedBenefitPlanDisclosureLineItems"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_DefinedBenefitPlanDisclosureLineItems" xlink:to="us-gaap_DefinedBenefitPlanDisclosureLineItems_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_DefinedBenefitPlanDisclosureLineItems_lbl" xml:lang="en-US">Defined Benefit Plan Disclosure [Line Items]</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_AssetsAbstract" xlink:label="us-gaap_AssetsAbstract"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_AssetsAbstract" xlink:to="us-gaap_AssetsAbstract_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_AssetsAbstract_lbl" xml:lang="en-US">Assets</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_InvestmentInPhysicalCommodities" xlink:label="us-gaap_InvestmentInPhysicalCommodities"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_InvestmentInPhysicalCommodities" xlink:to="us-gaap_InvestmentInPhysicalCommodities_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_InvestmentInPhysicalCommodities_lbl" xml:lang="en-US">Investment in gold bullion, at fair value</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_Assets" xlink:label="us-gaap_Assets"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_Assets" xlink:to="us-gaap_Assets_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xlink:label="us-gaap_Assets_lbl" xml:lang="en-US">Total Assets</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_LiabilitiesAbstract" xlink:label="us-gaap_LiabilitiesAbstract"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_LiabilitiesAbstract" xlink:to="us-gaap_LiabilitiesAbstract_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_LiabilitiesAbstract_lbl" xml:lang="en-US">Liabilities</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_AccountsPayableCurrentAndNoncurrent" xlink:label="us-gaap_AccountsPayableCurrentAndNoncurrent"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_AccountsPayableCurrentAndNoncurrent" xlink:to="us-gaap_AccountsPayableCurrentAndNoncurrent_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_AccountsPayableCurrentAndNoncurrent_lbl" xml:lang="en-US">Fees payable to Sponsor</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_Liabilities" xlink:label="us-gaap_Liabilities"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_Liabilities" xlink:to="us-gaap_Liabilities_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xlink:label="us-gaap_Liabilities_lbl" xml:lang="en-US">Total Liabilities</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_AssetsNet" xlink:label="us-gaap_AssetsNet"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_AssetsNet" xlink:to="us-gaap_AssetsNet_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/totalLabel" xlink:label="us-gaap_AssetsNet_lbl" xml:lang="en-US">Net Assets</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_CommonStockSharesIssued" xlink:label="us-gaap_CommonStockSharesIssued"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_CommonStockSharesIssued" xlink:to="us-gaap_CommonStockSharesIssued_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_CommonStockSharesIssued_lbl" xml:lang="en-US">Shares issued</link:label>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_CommonStockSharesOutstanding" xlink:label="us-gaap_CommonStockSharesOutstanding"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_CommonStockSharesOutstanding" xlink:to="us-gaap_CommonStockSharesOutstanding_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_CommonStockSharesOutstanding_lbl" xml:lang="en-US">Shares outstanding</link:label>
+      <link:loc xlink:type="locator" xlink:href="bar-20260630.xsd#BAR_NetAssetsPerCommonShare" xlink:label="BAR_NetAssetsPerCommonShare"/>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="BAR_NetAssetsPerCommonShare" xlink:to="BAR_NetAssetsPerCommonShare_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="BAR_NetAssetsPerCommonShare_lbl" xml:lang="en-US">Net asset value per Share</link:label>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_AssetsNet" xlink:to="us-gaap_AssetsNet_2_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/verboseLabel" xlink:label="us-gaap_AssetsNet_2_lbl" xml:lang="en-US">Fair Value</link:label>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_AssetsNet" xlink:to="us-gaap_AssetsNet_3_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/periodStartLabel" xlink:label="us-gaap_AssetsNet_3_lbl" xml:lang="en-US">Net Assets – beginning of year</link:label>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_AssetsNet" xlink:to="us-gaap_AssetsNet_4_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/periodEndLabel" xlink:label="us-gaap_AssetsNet_4_lbl" xml:lang="en-US">Net Assets – end of year</link:label>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_InvestmentInPhysicalCommodities" xlink:to="us-gaap_InvestmentInPhysicalCommodities_2_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/verboseLabel" xlink:label="us-gaap_InvestmentInPhysicalCommodities_2_lbl" xml:lang="en-US">Total</link:label>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_InvestmentInPhysicalCommodities" xlink:to="us-gaap_InvestmentInPhysicalCommodities_3_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/periodStartLabel" xlink:label="us-gaap_InvestmentInPhysicalCommodities_3_lbl" xml:lang="en-US">Investment in gold, fair value, opening balance</link:label>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_InvestmentInPhysicalCommodities" xlink:to="us-gaap_InvestmentInPhysicalCommodities_4_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/periodEndLabel" xlink:label="us-gaap_InvestmentInPhysicalCommodities_4_lbl" xml:lang="en-US">Investment in gold, fair value, ending balance</link:label>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="BAR_NetAssetsPerCommonShare" xlink:to="BAR_NetAssetsPerCommonShare_doc" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/documentation" xlink:label="BAR_NetAssetsPerCommonShare_doc" xml:lang="en-US">Net assets per common share.</link:label>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_Assets" xlink:to="us-gaap_Assets_2_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_Assets_2_lbl" xml:lang="en-US">Assets [Default Label]</link:label>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_Liabilities" xlink:to="us-gaap_Liabilities_2_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_Liabilities_2_lbl" xml:lang="en-US">Liabilities [Default Label]</link:label>
+      <link:labelArc xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_AssetsNet" xlink:to="us-gaap_AssetsNet_5_lbl" xlink:type="arc"/>
+      <link:label xlink:type="resource" xlink:role="http://www.xbrl.org/2003/role/label" xlink:label="us-gaap_AssetsNet_5_lbl" xml:lang="en-US">Net Assets</link:label>
+      </link:labelLink>
+</link:linkbase>

@@ -1,0 +1,1991 @@
+{
+ "version": "2.1",
+ "instance": {
+  "cd-20f_20211231.htm": {
+   "tag": {
+    "cd_AmericanDepositarySharesCommonClassAOneMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "American Depositary Shares Common Class A one.",
+        "label": "American Depositary Shares Common Class A One [Member]",
+        "terseLabel": "Class A Ordinary Shares"
+       }
+      }
+     },
+     "localname": "AmericanDepositarySharesCommonClassAOneMember",
+     "nsuri": "http://www.chindatagroup.com/20211231",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DocumentDocumentAndEntityInformation"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "cd_AmericanDepositarySharesCommonClassATwoMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "American Depositary Shares Common Class A two.",
+        "label": "American Depositary Shares Common Class A Two [Member]",
+        "terseLabel": "Class A Ordinary Shares"
+       }
+      }
+     },
+     "localname": "AmericanDepositarySharesCommonClassATwoMember",
+     "nsuri": "http://www.chindatagroup.com/20211231",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DocumentDocumentAndEntityInformation"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "cd_HuailaiHuizhiConstructionCoLtdMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Huailai Huizhi Construction Co., Ltd.",
+        "label": "Huailai Huizhi Construction Co Ltd [Member]",
+        "terseLabel": "Huailai Huizhi Construction Co. Ltd."
+       }
+      }
+     },
+     "localname": "HuailaiHuizhiConstructionCoLtdMember",
+     "nsuri": "http://www.chindatagroup.com/20211231",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationSummaryOfFairValueOfAssetsAcquiredAndLiabilitiesAssumedOnAcquisitionDateDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationTables"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "cd_PRCSubsidiaryMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "PRC subsidiary.",
+        "label": "P R C Subsidiary [Member]",
+        "terseLabel": "PRC Subsidiary"
+       }
+      }
+     },
+     "localname": "PRCSubsidiaryMember",
+     "nsuri": "http://www.chindatagroup.com/20211231",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationSummaryOfFairValueOfAssetsAcquiredAndLiabilitiesAssumedOnAcquisitionDateDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationSummaryOfPurchaseConsiderationOnAcquisitionDateDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationTables"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "cd_StackGroupMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Stack group.",
+        "label": "Stack Group [Member]",
+        "terseLabel": "Stack Group"
+       }
+      }
+     },
+     "localname": "StackGroupMember",
+     "nsuri": "http://www.chindatagroup.com/20211231",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureGoodwillSummaryOfGoodwillDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "cd_StatutoryReserves": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": 10030.0,
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10060.0,
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of funds appropriate from accumulated after-tax profits under PRC laws and regulations.",
+        "label": "Statutory Reserves",
+        "terseLabel": "Statutory reserves"
+       }
+      }
+     },
+     "localname": "StatutoryReserves",
+     "nsuri": "http://www.chindatagroup.com/20211231",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureRestrictedNetAssetsAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "dei_BusinessContactMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Business contact for the entity",
+        "label": "Business Contact [Member]",
+        "terseLabel": "Business Contact"
+       }
+      }
+     },
+     "localname": "BusinessContactMember",
+     "nsuri": "http://xbrl.sec.gov/dei/2021q4",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DocumentDocumentAndEntityInformation"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "dei_EntityAddressesAddressTypeAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the domain members or categories in the table and the line items or concepts that complete the table.",
+        "label": "Entity Addresses Address Type [Axis]",
+        "terseLabel": "Entity Addresses, Address Type"
+       }
+      }
+     },
+     "localname": "EntityAddressesAddressTypeAxis",
+     "nsuri": "http://xbrl.sec.gov/dei/2021q4",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DocumentDocumentAndEntityInformation"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "srt_ConsolidatedEntitiesAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by consolidated entity or group of entities.",
+        "label": "Consolidated Entities [Axis]",
+        "terseLabel": "Consolidated Entities"
+       }
+      }
+     },
+     "localname": "ConsolidatedEntitiesAxis",
+     "nsuri": "http://fasb.org/srt/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyBasisOfPresentationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedStatementsOfCashFlowsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedStatementsOfComprehensiveLossIncomeDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfPrincipalSubsidiariesVariableInterestEntitiesAndSubsidiariesOfVariableInterestEntitiesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureRelatedPartyTransactionsSummaryOfRelatedPartyTransactionsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureRestrictedNetAssetsAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "srt_CumulativeEffectPeriodOfAdoptionAdjustmentMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Increase (decrease) to financial statements for cumulative-effect adjustment in period of adoption of amendment to accounting standards.",
+        "label": "Cumulative Effect Period Of Adoption Adjustment [Member]",
+        "terseLabel": "Cumulative Effect Period of Adoption Adjustment"
+       }
+      }
+     },
+     "localname": "CumulativeEffectPeriodOfAdoptionAdjustmentMember",
+     "nsuri": "http://fasb.org/srt/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureSummaryOfSignificantAccountingPoliciesAdditionalInformationDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "srt_CumulativeEffectPeriodOfAdoptionAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by cumulative-effect adjustment to financial statements in period of adoption of amendment to accounting standards.",
+        "label": "Cumulative Effect Period Of Adoption [Axis]",
+        "terseLabel": "Cumulative Effect, Period of Adoption"
+       }
+      }
+     },
+     "localname": "CumulativeEffectPeriodOfAdoptionAxis",
+     "nsuri": "http://fasb.org/srt/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureSummaryOfSignificantAccountingPoliciesAdditionalInformationDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "srt_OwnershipAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by name of entity in which ownership interest is disclosed. Excludes equity method investee and named security investment.",
+        "label": "Ownership [Axis]",
+        "terseLabel": "Ownership"
+       }
+      }
+     },
+     "localname": "OwnershipAxis",
+     "nsuri": "http://fasb.org/srt/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureGoodwillSummaryOfGoodwillDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfPrincipalSubsidiariesVariableInterestEntitiesAndSubsidiariesOfVariableInterestEntitiesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureShareBasedPaymentsAdditionalInformationDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "srt_ParentCompanyMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The registrant that controls, directly or indirectly, another entity (or entities). The usual condition for control is ownership of a majority (over 50%) of the outstanding voting stock. The power to control may also exist with a lesser percentage of ownership, for example, by contract, lease, agreement with other stockholders or by court decree.",
+        "label": "Parent Company [Member]",
+        "terseLabel": "Parent Company"
+       }
+      }
+     },
+     "localname": "ParentCompanyMember",
+     "nsuri": "http://fasb.org/srt/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyBasisOfPresentationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedStatementsOfCashFlowsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedStatementsOfComprehensiveLossIncomeDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_AccountingStandardsUpdate201613Member": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Accounting Standards Update 2016-13 Financial Instruments-Credit Losses (Topic 326): Measurement of Credit Losses on Financial Instruments.",
+        "label": "Accounting Standards Update201613 [Member]",
+        "terseLabel": "Accounting Standards Update 2016-13",
+        "verboseLabel": "ASU 2016-13"
+       }
+      }
+     },
+     "localname": "AccountingStandardsUpdate201613Member",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureAccountsReceivableSummaryOfMovementsInAllowanceForCreditLossesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureSummaryOfSignificantAccountingPoliciesAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedStatementsOfChangesInShareholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_AccountsPayableCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10050.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10190.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Carrying value as of the balance sheet date of liabilities incurred (and for which invoices have typically been received) and payable to vendors for goods and services received that are used in an entity's business. Used to reflect the current portion of the liabilities (due within one year or within the normal operating cycle if longer).",
+        "label": "Accounts Payable Current",
+        "terseLabel": "Accounts payable"
+       }
+      }
+     },
+     "localname": "AccountsPayableCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AccountsReceivableNetCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureAccountsReceivableSummaryOfAccountsReceivableDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10190.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10400.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount, after allowance for credit loss, of right to consideration from customer for product sold and service rendered in normal course of business, classified as current.",
+        "label": "Accounts Receivable Net Current",
+        "terseLabel": "Accounts receivable, net of allowance of RMB12,496 and RMB924 (US$145) as of December 31, 2020 and 2021, respectively",
+        "totalLabel": "Accounts receivable, net",
+        "verboseLabel": "Accounts receivable, net"
+       }
+      }
+     },
+     "localname": "AccountsReceivableNetCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureAccountsReceivableSummaryOfAccountsReceivableDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AccruedLiabilitiesAndOtherLiabilities": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10250.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of expenses incurred but not yet paid nor invoiced, and liabilities classified as other.",
+        "label": "Accrued Liabilities And Other Liabilities",
+        "terseLabel": "Accrued expenses and other current liabilities"
+       }
+      }
+     },
+     "localname": "AccruedLiabilitiesAndOtherLiabilities",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AccumulatedOtherComprehensiveIncomeLossNetOfTax": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": 10040.0,
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10070.0,
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Accumulated change in equity from transactions and other events and circumstances from non-owner sources, net of tax effect, at period end. Excludes Net Income (Loss), and accumulated changes in equity from transactions resulting from investments by owners and distributions to owners. Includes foreign currency translation items, certain pension adjustments, unrealized gains and losses on certain investments in debt and equity securities, other than temporary impairment (OTTI) losses related to factors other than credit losses on available-for-sale and held-to-maturity debt securities that an entity does not intend to sell and it is not more likely than not that the entity will be required to sell before recovery of the amortized cost basis, as well as changes in the fair value of derivatives related to the effective portion of a designated cash flow hedge.",
+        "label": "Accumulated Other Comprehensive Income Loss Net Of Tax",
+        "periodEndLabel": "Ending balance",
+        "periodStartLabel": "Beginning balance",
+        "terseLabel": "Accumulated other comprehensive loss"
+       }
+      }
+     },
+     "localname": "AccumulatedOtherComprehensiveIncomeLossNetOfTax",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureAccumulatedOtherComprehensiveIncomeLossSummaryOfAccumulatedOtherComprehensiveIncomeLossDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AdditionalPaidInCapitalCommonStock": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10050.0,
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Value received from shareholders in common stock-related transactions that are in excess of par value or stated value and amounts received from other stock-related transactions. Includes only common stock transactions (excludes preferred stock transactions). May be called contributed capital, capital in excess of par, capital surplus, or paid-in capital.",
+        "label": "Additional Paid In Capital Common Stock",
+        "terseLabel": "Additional paid-in capital"
+       }
+      }
+     },
+     "localname": "AdditionalPaidInCapitalCommonStock",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AdjustmentsForNewAccountingPronouncementsAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by amendment to accounting standards.",
+        "label": "Adjustments For New Accounting Pronouncements [Axis]",
+        "terseLabel": "Accounting Standards Update"
+       }
+      }
+     },
+     "localname": "AdjustmentsForNewAccountingPronouncementsAxis",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureAccountsReceivableSummaryOfMovementsInAllowanceForCreditLossesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureSummaryOfSignificantAccountingPoliciesAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedStatementsOfChangesInShareholdersEquity"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_Assets": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Sum of the carrying amounts as of the balance sheet date of all assets that are recognized. Assets are probable future economic benefits obtained or controlled by an entity as a result of past transactions or events.",
+        "label": "Assets",
+        "totalLabel": "Total assets"
+       }
+      }
+     },
+     "localname": "Assets",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AssetsAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Assets [Abstract]",
+        "terseLabel": "ASSETS"
+       }
+      }
+     },
+     "localname": "AssetsAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_AssetsCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10260.0,
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Sum of the carrying amounts as of the balance sheet date of all assets that are expected to be realized in cash, sold, or consumed within one year (or the normal operating cycle, if longer). Assets are probable future economic benefits obtained or controlled by an entity as a result of past transactions or events.",
+        "label": "Assets Current",
+        "totalLabel": "Total current assets"
+       }
+      }
+     },
+     "localname": "AssetsCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AssetsCurrentAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Assets Current [Abstract]",
+        "terseLabel": "Current assets"
+       }
+      }
+     },
+     "localname": "AssetsCurrentAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_AssetsNoncurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10270.0,
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Sum of the carrying amounts as of the balance sheet date of all assets that are expected to be realized in cash, sold or consumed after one year or beyond the normal operating cycle, if longer.",
+        "label": "Assets Noncurrent",
+        "totalLabel": "Total non-current assets"
+       }
+      }
+     },
+     "localname": "AssetsNoncurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AssetsNoncurrentAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Assets Noncurrent [Abstract]",
+        "terseLabel": "Non-current assets"
+       }
+      }
+     },
+     "localname": "AssetsNoncurrentAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_BusinessAcquisitionAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by business combination or series of individually immaterial business combinations.",
+        "label": "Business Acquisition [Axis]",
+        "terseLabel": "Business Acquisition"
+       }
+      }
+     },
+     "localname": "BusinessAcquisitionAxis",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationSummaryOfFairValueOfAssetsAcquiredAndLiabilitiesAssumedOnAcquisitionDateDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationSummaryOfPurchaseConsiderationOnAcquisitionDateDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationTables",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_CashAndCashEquivalentsAtCarryingValue": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": 10100.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10170.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10370.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of currency on hand as well as demand deposits with banks or financial institutions. Includes other kinds of accounts that have the general characteristics of demand deposits. Also includes short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates. Excludes cash and cash equivalents within disposal group and discontinued operation.",
+        "label": "Cash And Cash Equivalents At Carrying Value",
+        "periodEndLabel": "Cash and cash equivalents",
+        "terseLabel": "Cash and cash equivalents"
+       }
+      }
+     },
+     "localname": "CashAndCashEquivalentsAtCarryingValue",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedStatementsOfCashFlows"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_CommitmentsAndContingencies": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10020.0,
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Represents the caption on the face of the balance sheet to indicate that the entity has entered into (1) purchase or supply arrangements that will require expending a portion of its resources to meet the terms thereof, and (2) is exposed to potential losses or, less frequently, gains, arising from (a) possible claims against a company's resources due to future performance under contract terms, and (b) possible losses or likely gains from uncertainties that will ultimately be resolved when one or more future events that are deemed likely to occur do occur or fail to occur.",
+        "label": "Commitments And Contingencies",
+        "terseLabel": "Commitments and contingencies"
+       }
+      }
+     },
+     "localname": "CommitmentsAndContingencies",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_CommonClassAMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Classification of common stock representing ownership interest in a corporation.",
+        "label": "Common Class A [Member]",
+        "terseLabel": "Class A",
+        "verboseLabel": "Class A Ordinary Shares"
+       }
+      }
+     },
+     "localname": "CommonClassAMember",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureLossEarningsPerShareSummaryOfBasicAndDilutedLossEarningsPerShareDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DocumentDocumentAndEntityInformation",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_CommonClassBMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Classification of common stock that has different rights than Common Class A, representing ownership interest in a corporation.",
+        "label": "Common Class B [Member]",
+        "terseLabel": "Class B",
+        "verboseLabel": "Class B Ordinary Shares"
+       }
+      }
+     },
+     "localname": "CommonClassBMember",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureLossEarningsPerShareSummaryOfBasicAndDilutedLossEarningsPerShareDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureShareBasedPaymentsAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DocumentDocumentAndEntityInformation",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_CommonStockValue": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": 10010.0,
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10040.0,
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Aggregate par or stated value of issued nonredeemable common stock (or common stock redeemable solely at the option of the issuer). This item includes treasury stock repurchased by the entity. Note: elements for number of nonredeemable common shares, par value and other disclosure concepts are in another section within stockholders' equity.",
+        "label": "Common Stock Value",
+        "terseLabel": "Ordinary shares"
+       }
+      }
+     },
+     "localname": "CommonStockValue",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_DeferredIncomeTaxAssetsNet": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10150.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10330.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount, after allocation of valuation allowances and deferred tax liability, of deferred tax asset attributable to deductible differences and carryforwards, with jurisdictional netting.",
+        "label": "Deferred Income Tax Assets Net",
+        "terseLabel": "Deferred tax assets"
+       }
+      }
+     },
+     "localname": "DeferredIncomeTaxAssetsNet",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureTaxationScheduleOfSignificantComponentsOfDeferredTaxAssetsAndLiabilitiesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_DeferredIncomeTaxLiabilitiesNet": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10030.0,
+       "parentTag": "us-gaap_LiabilitiesNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10140.0,
+       "parentTag": "us-gaap_LiabilitiesNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount, after deferred tax asset, of deferred tax liability attributable to taxable differences with jurisdictional netting.",
+        "label": "Deferred Income Tax Liabilities Net",
+        "terseLabel": "Deferred tax liabilities"
+       }
+      }
+     },
+     "localname": "DeferredIncomeTaxLiabilitiesNet",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureTaxationScheduleOfSignificantComponentsOfDeferredTaxAssetsAndLiabilitiesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_DerivativeLiabilitiesCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10240.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Fair value, after the effects of master netting arrangements, of a financial liability or contract with one or more underlyings, notional amount or payment provision or both, and the contract can be net settled by means outside the contract or delivery of an asset, expected to be settled within one year or normal operating cycle, if longer. Includes assets not subject to a master netting arrangement and not elected to be offset.",
+        "label": "Derivative Liabilities Current",
+        "terseLabel": "Derivative liabilities"
+       }
+      }
+     },
+     "localname": "DerivativeLiabilitiesCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_DerivativeLiabilitiesNoncurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10150.0,
+       "parentTag": "us-gaap_LiabilitiesNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Fair value, after the effects of master netting arrangements, of a financial liability or contract with one or more underlyings, notional amount or payment provision or both, and the contract can be net settled by means outside the contract or delivery of an asset, expected to be settled after one year or the normal operating cycle, if longer. Includes assets not subject to a master netting arrangement and not elected to be offset.",
+        "label": "Derivative Liabilities Noncurrent",
+        "terseLabel": "Derivative liabilities"
+       }
+      }
+     },
+     "localname": "DerivativeLiabilitiesNoncurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_DueFromRelatedPartiesCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10220.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10420.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The aggregate amount of receivables to be collected from related parties where one party can exercise control or significant influence over another party; including affiliates, owners or officers and their immediate families, pension trusts, and so forth, at the financial statement date. which are usually due within one year (or one business cycle).",
+        "label": "Due From Related Parties Current",
+        "terseLabel": "Amount due from related parties"
+       }
+      }
+     },
+     "localname": "DueFromRelatedPartiesCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_DueToRelatedPartiesCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": 10060.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureRelatedPartyTransactionsSummaryOfRelatedPartyBalancesDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10200.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Carrying amount as of the balance sheet date of obligations due all related parties. For classified balance sheets, represents the current portion of such liabilities (due within one year or within the normal operating cycle if longer).",
+        "label": "Due To Related Parties Current",
+        "terseLabel": "Amounts due to related parties",
+        "totalLabel": "Total"
+       }
+      }
+     },
+     "localname": "DueToRelatedPartiesCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureRelatedPartyTransactionsSummaryOfRelatedPartyBalancesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_FinanceLeaseLiabilityCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10230.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Present value of lessee's discounted obligation for lease payments from finance lease, classified as current.",
+        "label": "Finance Lease Liability Current",
+        "terseLabel": "Current portion of finance lease liabilities"
+       }
+      }
+     },
+     "localname": "FinanceLeaseLiabilityCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_FinanceLeaseLiabilityNoncurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10130.0,
+       "parentTag": "us-gaap_LiabilitiesNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Present value of lessee's discounted obligation for lease payments from finance lease, classified as noncurrent.",
+        "label": "Finance Lease Liability Noncurrent",
+        "terseLabel": "Finance lease liabilities"
+       }
+      }
+     },
+     "localname": "FinanceLeaseLiabilityNoncurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_FinanceLeaseRightOfUseAsset": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10120.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10300.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount, after accumulated amortization, of right-of-use asset from finance lease.",
+        "label": "Finance Lease Right Of Use Asset",
+        "terseLabel": "Finance lease right-of use assets"
+       }
+      }
+     },
+     "localname": "FinanceLeaseRightOfUseAsset",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_Goodwill": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationSummaryOfFairValueOfAssetsAcquiredAndLiabilitiesAssumedOnAcquisitionDateDetails": {
+       "order": 10120.0,
+       "parentTag": "us-gaap_BusinessCombinationRecognizedIdentifiableAssetsAcquiredGoodwillAndLiabilitiesAssumedLessNoncontrollingInterest",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10320.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount after accumulated impairment loss of an asset representing future economic benefits arising from other assets acquired in a business combination that are not individually identified and separately recognized.",
+        "label": "Goodwill",
+        "periodEndLabel": "Ending balance",
+        "periodStartLabel": "Beginning balance",
+        "terseLabel": "Goodwill"
+       }
+      }
+     },
+     "localname": "Goodwill",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureBusinessCombinationSummaryOfFairValueOfAssetsAcquiredAndLiabilitiesAssumedOnAcquisitionDateDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureGoodwillSummaryOfGoodwillDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_IntangibleAssetsNetExcludingGoodwill": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10130.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10310.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Sum of the carrying amounts of all intangible assets, excluding goodwill, as of the balance sheet date, net of accumulated amortization and impairment charges.",
+        "label": "Intangible Assets Net Excluding Goodwill",
+        "terseLabel": "Intangible assets"
+       }
+      }
+     },
+     "localname": "IntangibleAssetsNetExcludingGoodwill",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_Liabilities": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10010.0,
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Sum of the carrying amounts as of the balance sheet date of all liabilities that are recognized. Liabilities are probable future sacrifices of economic benefits arising from present obligations of an entity to transfer assets or provide services to other entities in the future.",
+        "label": "Liabilities",
+        "totalLabel": "Total liabilities"
+       }
+      }
+     },
+     "localname": "Liabilities",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_LiabilitiesAndStockholdersEquity": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of liabilities and equity items, including the portion of equity attributable to noncontrolling interests, if any.",
+        "label": "Liabilities And Stockholders Equity",
+        "totalLabel": "Total liabilities and shareholders’ equity"
+       }
+      }
+     },
+     "localname": "LiabilitiesAndStockholdersEquity",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_LiabilitiesAndStockholdersEquityAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Liabilities And Stockholders Equity [Abstract]",
+        "terseLabel": "LIABILITIES AND SHAREHOLDERS’ EQUITY"
+       }
+      }
+     },
+     "localname": "LiabilitiesAndStockholdersEquityAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_LiabilitiesCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10010.0,
+       "parentTag": "us-gaap_LiabilitiesNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10090.0,
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Total obligations incurred as part of normal operations that are expected to be paid during the following twelve months or within one business cycle, if longer.",
+        "label": "Liabilities Current",
+        "terseLabel": "Current liabilities",
+        "totalLabel": "Total current liabilities"
+       }
+      }
+     },
+     "localname": "LiabilitiesCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_LiabilitiesCurrentAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Liabilities Current [Abstract]",
+        "terseLabel": "Current liabilities (including current liabilities of the consolidated VIEs without recourse to the primary beneficiary of RMB102,267 and RMB114,478 (US$17,965) as of December 31, 2020 and 2021, respectively):",
+        "verboseLabel": "Current liabilities"
+       }
+      }
+     },
+     "localname": "LiabilitiesCurrentAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_LiabilitiesNoncurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10100.0,
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of obligation due after one year or beyond the normal operating cycle, if longer.",
+        "label": "Liabilities Noncurrent",
+        "terseLabel": "Non-current liabilities",
+        "totalLabel": "Total non-current liabilities"
+       }
+      }
+     },
+     "localname": "LiabilitiesNoncurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_LiabilitiesNoncurrentAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Liabilities Noncurrent [Abstract]",
+        "terseLabel": "Non-current liabilities (including non-current liabilities of the consolidated VIEs without recourse to the primary beneficiary of RMB212,413 and RMB196,730 (US$30,871) as of December 31, 2020 and 2021, respectively):",
+        "verboseLabel": "Non-current liabilities"
+       }
+      }
+     },
+     "localname": "LiabilitiesNoncurrentAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_LoansPayableToBankCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10180.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Carrying value as of the balance sheet date of current portion of long-term loans payable to bank due within one year or the operating cycle if longer.",
+        "label": "Loans Payable To Bank Current",
+        "terseLabel": "Current portion of long-term bank loans"
+       }
+      }
+     },
+     "localname": "LoansPayableToBankCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_LongTermLoansPayable": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10110.0,
+       "parentTag": "us-gaap_LiabilitiesNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Carrying value as of the balance sheet date of loans payable (with maturities initially due after one year or beyond the operating cycle if longer), excluding current portion.",
+        "label": "Long Term Loans Payable",
+        "terseLabel": "Long-term bank loans"
+       }
+      }
+     },
+     "localname": "LongTermLoansPayable",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NonrecourseMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Liability for which creditor does not have recourse to debtor but rather has recourse only to property used for collateral in transaction or other specific property.",
+        "label": "Nonrecourse [Member]",
+        "terseLabel": "Nonrecourse"
+       }
+      }
+     },
+     "localname": "NonrecourseMember",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_OperatingLeaseLiabilityCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10080.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10220.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Present value of lessee's discounted obligation for lease payments from operating lease, classified as current.",
+        "label": "Operating Lease Liability Current",
+        "terseLabel": "Current portion of operating lease liabilities"
+       }
+      }
+     },
+     "localname": "OperatingLeaseLiabilityCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_OperatingLeaseLiabilityNoncurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10020.0,
+       "parentTag": "us-gaap_LiabilitiesNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10120.0,
+       "parentTag": "us-gaap_LiabilitiesNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Present value of lessee's discounted obligation for lease payments from operating lease, classified as noncurrent.",
+        "label": "Operating Lease Liability Noncurrent",
+        "terseLabel": "Operating lease liabilities"
+       }
+      }
+     },
+     "localname": "OperatingLeaseLiabilityNoncurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_OperatingLeaseRightOfUseAsset": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10110.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10290.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of lessee's right to use underlying asset under operating lease.",
+        "label": "Operating Lease Right Of Use Asset",
+        "terseLabel": "Operating lease right-of-use assets"
+       }
+      }
+     },
+     "localname": "OperatingLeaseRightOfUseAsset",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_OtherAssetsNoncurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": 10090.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10160.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10360.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of noncurrent assets classified as other.",
+        "label": "Other Assets Noncurrent",
+        "terseLabel": "Other non-current assets"
+       }
+      }
+     },
+     "localname": "OtherAssetsNoncurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_OtherLiabilitiesNoncurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10040.0,
+       "parentTag": "us-gaap_LiabilitiesNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10160.0,
+       "parentTag": "us-gaap_LiabilitiesNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of liabilities classified as other, due after one year or the normal operating cycle, if longer.",
+        "label": "Other Liabilities Noncurrent",
+        "terseLabel": "Other non-current liabilities"
+       }
+      }
+     },
+     "localname": "OtherLiabilitiesNoncurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PrepaidExpenseAndOtherAssetsCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10230.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10430.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of asset related to consideration paid in advance for costs that provide economic benefits in future periods, and amount of other assets that are expected to be realized or consumed within one year or the normal operating cycle, if longer.",
+        "label": "Prepaid Expense And Other Assets Current",
+        "terseLabel": "Prepayments and other current assets"
+       }
+      }
+     },
+     "localname": "PrepaidExpenseAndOtherAssetsCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PropertyPlantAndEquipmentNet": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10100.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosurePropertyAndEquipmentSummaryOfPropertyAndEquipmentDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10280.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount after accumulated depreciation, depletion and amortization of physical assets used in the normal conduct of business to produce goods and services and not intended for resale. Examples include, but are not limited to, land, buildings, machinery and equipment, office equipment, and furniture and fixtures.",
+        "label": "Property Plant And Equipment Net",
+        "terseLabel": "Property and equipment, net",
+        "totalLabel": "Property and equipment, net"
+       }
+      }
+     },
+     "localname": "PropertyPlantAndEquipmentNet",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosurePropertyAndEquipmentSummaryOfPropertyAndEquipmentDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_RecourseStatusAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by recourse or nonrecourse status of liability.",
+        "label": "Recourse Status [Axis]",
+        "terseLabel": "Recourse Status"
+       }
+      }
+     },
+     "localname": "RecourseStatusAxis",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_RestrictedCashCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10380.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash restricted as to withdrawal or usage, classified as current. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits.",
+        "label": "Restricted Cash Current",
+        "terseLabel": "Restricted cash"
+       }
+      }
+     },
+     "localname": "RestrictedCashCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_RestrictedCashNoncurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10340.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash restricted as to withdrawal or usage, classified as noncurrent. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits.",
+        "label": "Restricted Cash Noncurrent",
+        "terseLabel": "Restricted cash"
+       }
+      }
+     },
+     "localname": "RestrictedCashNoncurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_RetainedEarningsAccumulatedDeficit": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": 10050.0,
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10080.0,
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cumulative amount of the reporting entity's undistributed earnings or deficit.",
+        "label": "Retained Earnings Accumulated Deficit",
+        "negatedLabel": "Accumulated deficit",
+        "terseLabel": "Accumulated deficit"
+       }
+      }
+     },
+     "localname": "RetainedEarningsAccumulatedDeficit",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureSummaryOfSignificantAccountingPoliciesAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ShortTermBorrowings": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10170.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Reflects the total carrying amount as of the balance sheet date of debt having initial terms less than one year or the normal operating cycle, if longer.",
+        "label": "Short Term Borrowings",
+        "terseLabel": "Short-term bank loans"
+       }
+      }
+     },
+     "localname": "ShortTermBorrowings",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ShortTermInvestments": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": 10110.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10180.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10390.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of investments including trading securities, available-for-sale securities, held-to-maturity securities, and short-term investments classified as other and current.",
+        "label": "Short Term Investments",
+        "terseLabel": "Short-term investments"
+       }
+      }
+     },
+     "localname": "ShortTermInvestments",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureShortTermInvestmentSummaryOfShortTermInvestmentsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StatementClassOfStockAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by the different classes of stock of the entity.",
+        "label": "Statement Class Of Stock [Axis]",
+        "terseLabel": "Class of Stock"
+       }
+      }
+     },
+     "localname": "StatementClassOfStockAxis",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureLossEarningsPerShareSummaryOfBasicAndDilutedLossEarningsPerShareDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureShareBasedPaymentsAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DocumentDocumentAndEntityInformation",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementOfFinancialPositionAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement Of Financial Position [Abstract]"
+       }
+      }
+     },
+     "localname": "StatementOfFinancialPositionAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StockholdersEquity": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10030.0,
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Total of all stockholders' equity (deficit) items, net of receivables from officers, directors, owners, and affiliates of the entity which are attributable to the parent. The amount of the economic entity's stockholders' equity attributable to the parent excludes the amount of stockholders' equity which is allocable to that ownership interest in subsidiary equity which is not attributable to the parent (noncontrolling interest, minority interest). This excludes temporary equity and is sometimes called permanent equity.",
+        "label": "Stockholders Equity",
+        "totalLabel": "Total shareholders’ equity"
+       }
+      }
+     },
+     "localname": "StockholdersEquity",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Stockholders Equity Including Portion Attributable To Noncontrolling Interest [Abstract]",
+        "terseLabel": "Shareholders’ equity"
+       }
+      }
+     },
+     "localname": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_TaxesPayableCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10210.0,
+       "parentTag": "us-gaap_LiabilitiesCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Carrying value as of the balance sheet date of obligations incurred and payable for statutory income, sales, use, payroll, excise, real, property and other taxes. Used to reflect the current portion of the liabilities (due within one year or within the normal operating cycle if longer).",
+        "label": "Taxes Payable Current",
+        "terseLabel": "Income taxes payable"
+       }
+      }
+     },
+     "localname": "TaxesPayableCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ValueAddedTaxReceivableCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10210.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10410.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Carrying amount as of the balance sheet date of value added taxes due either from customers arising from sales on credit terms, or as previously overpaid to tax authorities. For classified balance sheets, represents the current amount receivable, that is amounts expected to be collected within one year or the normal operating cycle, if longer.",
+        "label": "Value Added Tax Receivable Current",
+        "terseLabel": "Value added taxes recoverable"
+       }
+      }
+     },
+     "localname": "ValueAddedTaxReceivableCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_ValueAddedTaxReceivableNoncurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10350.0,
+       "parentTag": "us-gaap_AssetsNoncurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Carrying amount due after one year of the balance sheet date (or one operating cycle), if longer of value added taxes due either from customers arising from sales on credit terms, or as previously overpaid to tax authorities.",
+        "label": "Value Added Tax Receivable Noncurrent",
+        "terseLabel": "Value added taxes recoverable"
+       }
+      }
+     },
+     "localname": "ValueAddedTaxReceivableNoncurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_VariableInterestEntityPrimaryBeneficiaryMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Variable Interest Entities (VIE) in which the entity has a controlling financial interest (as defined) and of which it is therefore the primary beneficiary. A controlling financial interest is determined based on both: (a) the entity's power to direct activities of the VIE that most significantly impact the VIE's economic performance and (b) the entity's obligation to absorb losses of the VIE that could potentially be significant to the VIE or the right to receive benefits from the VIE that could potentially be significant to the VIE. VIEs of which the entity is the primary beneficiary are included in the consolidated financial statements of the entity.",
+        "label": "Variable Interest Entity Primary Beneficiary [Member]",
+        "terseLabel": "VIEs"
+       }
+      }
+     },
+     "localname": "VariableInterestEntityPrimaryBeneficiaryMember",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfPrincipalSubsidiariesVariableInterestEntitiesAndSubsidiariesOfVariableInterestEntitiesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureRestrictedNetAssetsAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "domainItemType"
+    }
+   },
+   "report": {
+    "R2": {
+     "firstAnchor": {
+      "ancestors": [
+       "p",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "cd-20f_20211231.htm",
+      "contextRef": "C_0001807192_20211231",
+      "decimals": "-3",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "reportCount": 1,
+      "unitRef": "U_iso4217CNY",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "100010 - Statement - Consolidated Balance Sheets",
+     "role": "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets",
+     "shortName": "Consolidated Balance Sheets",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "p",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "cd-20f_20211231.htm",
+      "contextRef": "C_0001807192_20211231",
+      "decimals": "-3",
+      "lang": null,
+      "name": "us-gaap:RestrictedCashCurrent",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "U_iso4217CNY",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

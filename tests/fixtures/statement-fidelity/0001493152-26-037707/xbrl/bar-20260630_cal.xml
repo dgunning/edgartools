@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!-- Field: Doc-Info; Name: Generator; Value: GoFiler Complete; Version: 6.4b --><!-- Field: Doc-Info; Name: VendorURI; Value: https://www.novaworks.com --><!-- Field: Doc-Info; Name: Status; Value: 0x00000000 --><link:linkbase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xbrli="http://www.xbrl.org/2003/instance" xsi:schemaLocation="http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd">
+    <link:roleRef xlink:type="simple" xlink:href="bar-20260630.xsd#StatementsOfAssetsAndLiabilities" roleURI="http://graniteshares.com/role/StatementsOfAssetsAndLiabilities"/>
+    <link:calculationLink xlink:type="extended" xlink:role="http://graniteshares.com/role/StatementsOfAssetsAndLiabilities" xlink:title="00000002 - Statement - Statements of Assets and Liabilities">
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_Assets" xlink:label="loc_us-gaapAssets"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_InvestmentInPhysicalCommodities" xlink:label="loc_us-gaapInvestmentInPhysicalCommodities"/>
+      <link:calculationArc order="1" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaapAssets" xlink:to="loc_us-gaapInvestmentInPhysicalCommodities" xlink:type="arc" weight="1"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_Liabilities" xlink:label="loc_us-gaapLiabilities"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_AccountsPayableCurrentAndNoncurrent" xlink:label="loc_us-gaapAccountsPayableCurrentAndNoncurrent"/>
+      <link:calculationArc order="1" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaapLiabilities" xlink:to="loc_us-gaapAccountsPayableCurrentAndNoncurrent" xlink:type="arc" weight="1"/>
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_AssetsNet" xlink:label="loc_us-gaapAssetsNet"/>
+      <link:calculationArc order="1" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaapAssetsNet" xlink:to="loc_us-gaapAssets" xlink:type="arc" weight="1"/>
+      <link:calculationArc order="2" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaapAssetsNet" xlink:to="loc_us-gaapLiabilities" xlink:type="arc" weight="-1"/>
+    </link:calculationLink>
+    </link:linkbase>

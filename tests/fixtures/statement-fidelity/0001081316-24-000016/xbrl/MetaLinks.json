@@ -1,0 +1,1100 @@
+{
+ "version": "2.2",
+ "instance": {
+  "bhe-20240630.htm": {
+   "tag": {
+    "us-gaap_AccumulatedDefinedBenefitPlansAdjustmentIncludingPortionAttributableToNoncontrollingInterestMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "AccumulatedDefinedBenefitPlansAdjustmentIncludingPortionAttributableToNoncontrollingInterestMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetBHEDetails",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetEEGHDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Unrecognized Amounts on Retirement Benefits",
+        "label": "Accumulated Defined Benefit Plans Adjustment Including Portion Attributable to Noncontrolling Interest [Member]",
+        "documentation": "Accumulated other comprehensive (income) loss related to defined benefit plans including the portion attributable to the noncontrolling interest."
+       }
+      }
+     }
+    },
+    "us-gaap_AccumulatedForeignCurrencyAdjustmentIncludingPortionAttributableToNoncontrollingInterestMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "AccumulatedForeignCurrencyAdjustmentIncludingPortionAttributableToNoncontrollingInterestMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetBHEDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Foreign Currency Translation Adjustment",
+        "label": "Accumulated Foreign Currency Adjustment Including Portion Attributable to Noncontrolling Interest [Member]",
+        "documentation": "Accumulated other comprehensive income (loss) resulting from foreign currency translation adjustments, foreign currency transactions designated and effective as economic hedges of a net investment in a foreign entity and intra-entity foreign currency transactions that are of a long-term-investment nature, including the portion attributable to the noncontrolling interest."
+       }
+      }
+     }
+    },
+    "us-gaap_AccumulatedGainLossCashFlowHedgeIncludingNoncontrollingInterestMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "AccumulatedGainLossCashFlowHedgeIncludingNoncontrollingInterestMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetBHEDetails",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetEEGHDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Unrealized Losses on Cash Flow Hedges",
+        "label": "Accumulated Gain (Loss), Cash Flow Hedge, Including Noncontrolling Interest [Member]",
+        "documentation": "Accumulated other comprehensive income (loss) from gain (loss) of derivative instrument designated and qualifying as cash flow hedge included in assessment of hedge effectiveness, including portion attributable to noncontrolling interest."
+       }
+      }
+     }
+    },
+    "us-gaap_AccumulatedOtherComprehensiveIncomeMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "AccumulatedOtherComprehensiveIncomeMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetBHEDetails",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetEEGHDetails",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedEGTS",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedNPC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedPAC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedSPPC"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Accumulated Other Comprehensive (Loss) Income, Net",
+        "verboseLabel": "Accumulated Other Comprehensive Loss, Net",
+        "label": "AOCI Attributable to Parent [Member]",
+        "documentation": "Accumulated increase (decrease) in equity from transactions and other events and circumstances from non-owner sources, attributable to the parent. Excludes net income (loss), and accumulated changes in equity from transactions resulting from investments by owners and distributions to owners."
+       }
+      }
+     }
+    },
+    "us-gaap_AociAttributableToNoncontrollingInterestMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "AociAttributableToNoncontrollingInterestMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetBHEDetails",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetEEGHDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Noncontrolling Interest",
+        "label": "AOCI Attributable to Noncontrolling Interest [Member]",
+        "documentation": "Accumulated increase (decrease) in equity from transactions and other events and circumstances from non-owner sources, attributable to the noncontrolling interest. Excludes net income (loss), and accumulated changes in equity from transactions resulting from investments by owners and distributions to owners."
+       }
+      }
+     }
+    },
+    "us-gaap_ComprehensiveIncomeNetOfTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ComprehensiveIncomeNetOfTax",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      },
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited_1": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEGTS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Comprehensive income attributable to BHE shareholders",
+        "label": "Comprehensive Income (Loss), Net of Tax, Attributable to Parent",
+        "documentation": "Amount after tax of increase (decrease) in equity from transactions and other events and circumstances from net income and other comprehensive income, attributable to parent entity. Excludes changes in equity resulting from investments by owners and distributions to owners."
+       }
+      }
+     }
+    },
+    "us-gaap_ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited": {
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTax",
+       "weight": -1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGH"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Comprehensive income attributable to noncontrolling interests",
+        "label": "Comprehensive Income (Loss), Net of Tax, Attributable to Noncontrolling Interest",
+        "documentation": "Amount after tax of increase (decrease) in equity from transactions and other events and circumstances from net income (loss) and other comprehensive income (loss), attributable to noncontrolling interests. Excludes changes in equity resulting from investments by owners and distributions to owners."
+       }
+      }
+     }
+    },
+    "us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited": {
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTax",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGH"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Comprehensive income",
+        "label": "Comprehensive Income (Loss), Net of Tax, Including Portion Attributable to Noncontrolling Interest",
+        "documentation": "Amount after tax of increase (decrease) in equity from transactions and other events and circumstances from net income and other comprehensive income. Excludes changes in equity resulting from investments by owners and distributions to owners."
+       }
+      }
+     }
+    },
+    "bhe_EasternEnergyGasHoldingsLLCMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.brkenergy.com/20240630",
+     "localname": "EasternEnergyGasHoldingsLLCMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalents",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsTables",
+      "http://www.brkenergy.com/role/CommitmentsandContingencies",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNet",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetEEGHDetails",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetTables",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGHParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedEEGH",
+      "http://www.brkenergy.com/role/Cover",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlans",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansEEGHDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurements",
+      "http://www.brkenergy.com/role/FairValueMeasurementsEEGHDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsEEGHDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsTables",
+      "http://www.brkenergy.com/role/General",
+      "http://www.brkenergy.com/role/GeneralEEGHDetails",
+      "http://www.brkenergy.com/role/GeneralPolicies",
+      "http://www.brkenergy.com/role/IncomeTaxes",
+      "http://www.brkenergy.com/role/IncomeTaxesEEGHDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesTables",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestments",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsEEGHComponentsDetails",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsEEGHNarrativeDetails",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsEEGHReconciliationofCashDetails",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsTables",
+      "http://www.brkenergy.com/role/NewAccountingPronouncements",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNet",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetEEGHDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetTables",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomers",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersEEGHDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersEEGHRemainingPerformanceObligationDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersTables"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "EEGH",
+        "label": "Eastern Energy Gas Holdings, LLC [Member]",
+        "documentation": "Eastern Energy Gas Holdings, LLC"
+       }
+      }
+     }
+    },
+    "bhe_EasternGasTransmissionAndStorageIncMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.brkenergy.com/20240630",
+     "localname": "EasternGasTransmissionAndStorageIncMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/CommitmentsandContingencies",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedEGTS",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedEGTSParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedEGTS",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedEGTS",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEGTS",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEGTSParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedEGTS",
+      "http://www.brkenergy.com/role/Cover",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlans",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansEGTSDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurements",
+      "http://www.brkenergy.com/role/FairValueMeasurementsEGTSDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsEGTSDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsTables",
+      "http://www.brkenergy.com/role/General",
+      "http://www.brkenergy.com/role/GeneralPolicies",
+      "http://www.brkenergy.com/role/IncomeTaxes",
+      "http://www.brkenergy.com/role/IncomeTaxesEGTSDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesTables",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestments",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsEGTSComponentsDetails",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsEGTSReconciliationofCashDetails",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsTables",
+      "http://www.brkenergy.com/role/NewAccountingPronouncements",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNet",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetEEGHDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetEGTSDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetTables",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomers",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersEGTSDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersEGTSRemainingPerformanceObligationDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersTables"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "EGTS",
+        "label": "Eastern Gas Transmission and Storage, Inc. [Member]",
+        "documentation": "Eastern Gas Transmission and Storage, Inc."
+       }
+      }
+     }
+    },
+    "dei_EntityAddressesAddressTypeAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://xbrl.sec.gov/dei/2024",
+     "localname": "EntityAddressesAddressTypeAxis",
+     "presentation": [
+      "http://www.brkenergy.com/role/Cover"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entity Addresses, Address Type [Axis]",
+        "label": "Entity Addresses, Address Type [Axis]",
+        "documentation": "The axis of a table defines the relationship between the domain members or categories in the table and the line items or concepts that complete the table."
+       }
+      }
+     }
+    },
+    "dei_FormerAddressMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://xbrl.sec.gov/dei/2024",
+     "localname": "FormerAddressMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/Cover"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Former Address",
+        "label": "Former Address [Member]",
+        "documentation": "Former address for entity"
+       }
+      }
+     }
+    },
+    "dei_LegalEntityAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://xbrl.sec.gov/dei/2024",
+     "localname": "LegalEntityAxis",
+     "presentation": [
+      "http://www.brkenergy.com/role/AssetRetirementObligations",
+      "http://www.brkenergy.com/role/BalanceSheetsUnauditedMEC",
+      "http://www.brkenergy.com/role/BalanceSheetsUnauditedMECParenthetical",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalents",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsLLCDetails",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsMECDetails",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsNPCDetails",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsPACDetails",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsSPPCDetails",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsTables",
+      "http://www.brkenergy.com/role/CommitmentandContingenciesTables",
+      "http://www.brkenergy.com/role/CommitmentsandContingencies",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesBHEContingencyAccrualDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesBHENarrativeCommitmentsDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesBHENarrativeEnvironmentalLawsandRegulationsDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesMECDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesNPCDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesPACContingencyAccrualDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesPACNarrativeCommitmentsDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesPACNarrativeEnvironmentalLawsandRegulationsDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesSPPCDetails",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNet",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetEEGHDetails",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetTables",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedEGTS",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedEGTSParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedMidAmericanFundingLLC",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedNPC",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedNPCParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedPAC",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedPACParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedSPPC",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedSPPCParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedEGTS",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedMidAmericanFundingLLC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedNPC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedPAC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedSPPC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinMembersEquityUnauditedMidAmericanFundingLLC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedEGTS",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedNPC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedPAC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedSPPC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGHParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEGTS",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEGTSParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedEGTS",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedMidAmericanFundingLLC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedNPC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedPAC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedSPPC",
+      "http://www.brkenergy.com/role/Cover",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlans",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansEEGHDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansEGTSDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansMECDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansMECEmployerContributionsDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansNPCDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansPACDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansPACEmployerContributionsDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansSPPCDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansTables",
+      "http://www.brkenergy.com/role/FairValueMeasurements",
+      "http://www.brkenergy.com/role/FairValueMeasurementsEEGHDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsEEGHDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsEGTSDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsEGTSDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsLLCDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsMECDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsMECDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsMECLevel3Details",
+      "http://www.brkenergy.com/role/FairValueMeasurementsNPCDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsNPCDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsNPCLevel3Details",
+      "http://www.brkenergy.com/role/FairValueMeasurementsPACDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsPACDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsSPPCDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsSPPCDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsSPPCLevel3Details",
+      "http://www.brkenergy.com/role/FairValueMeasurementsTables",
+      "http://www.brkenergy.com/role/General",
+      "http://www.brkenergy.com/role/GeneralEEGHDetails",
+      "http://www.brkenergy.com/role/GeneralPolicies",
+      "http://www.brkenergy.com/role/IncomeTaxes",
+      "http://www.brkenergy.com/role/IncomeTaxesEEGHDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesEGTSDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesLLCDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesMECDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesNPCDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesPACDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesSPPCDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesTables",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestments",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsEEGHComponentsDetails",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsEEGHNarrativeDetails",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsEEGHReconciliationofCashDetails",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsEGTSComponentsDetails",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsEGTSReconciliationofCashDetails",
+      "http://www.brkenergy.com/role/InvestmentsandRestrictedCashandCashEquivalentsandInvestmentsTables",
+      "http://www.brkenergy.com/role/MembersEquity",
+      "http://www.brkenergy.com/role/MembersEquityMidAmericanFundingDetails",
+      "http://www.brkenergy.com/role/NewAccountingPronouncements",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNet",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetEEGHDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetEGTSDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetMECDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetNPCDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetPACDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetSPPCDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetTables",
+      "http://www.brkenergy.com/role/RecentFinancingTransactions",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsBHEDetails",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsMECDetails",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsNPCDetails",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsPACDetails",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsSPPCDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomers",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersEEGHDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersEEGHRemainingPerformanceObligationDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersEGTSDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersEGTSRemainingPerformanceObligationDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersMECDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersNPCDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersPACDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersSPPCDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersTables",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivities",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesNPCBalanceSheetLocationDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesNPCDerivativeContractVolumesDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesNPCNarrativeDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesPACBalanceSheetLocationDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesPACCollateralandContingentFeaturesDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesPACDerivativeContractVolumesDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesPACNotDesignatedasHedgingContractsDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesSPPCBalanceSheetLocationDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesSPPCDerivativeContractVolumesDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesSPPCNarrativeDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesTables",
+      "http://www.brkenergy.com/role/SegmentInformation",
+      "http://www.brkenergy.com/role/SegmentInformationLLCDetails",
+      "http://www.brkenergy.com/role/SegmentInformationMECDetails",
+      "http://www.brkenergy.com/role/SegmentInformationSPPCDetails",
+      "http://www.brkenergy.com/role/SegmentInformationTables",
+      "http://www.brkenergy.com/role/ShareholdersEquity",
+      "http://www.brkenergy.com/role/ShareholdersEquityMECDetails",
+      "http://www.brkenergy.com/role/StatementsofCashFlowsUnauditedMEC",
+      "http://www.brkenergy.com/role/StatementsofChangesinShareholdersEquityUnauditedMEC",
+      "http://www.brkenergy.com/role/StatementsofOperationsUnauditedMEC"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Legal Entity [Axis]",
+        "label": "Legal Entity [Axis]",
+        "documentation": "The set of legal entities associated with a report."
+       }
+      }
+     }
+    },
+    "us-gaap_MemberUnitsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "MemberUnitsMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnauditedEEGH"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Member Interests",
+        "label": "Member Units [Member]",
+        "documentation": "Ownership interest in limited liability company (LLC)."
+       }
+      }
+     }
+    },
+    "bhe_MidAmericanFundingLLCAndSubsidiariesMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.brkenergy.com/20240630",
+     "localname": "MidAmericanFundingLLCAndSubsidiariesMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/AssetRetirementObligations",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalents",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsLLCDetails",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsTables",
+      "http://www.brkenergy.com/role/CommitmentsandContingencies",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedMidAmericanFundingLLC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedMidAmericanFundingLLC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinMembersEquityUnauditedMidAmericanFundingLLC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedMidAmericanFundingLLC",
+      "http://www.brkenergy.com/role/Cover",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlans",
+      "http://www.brkenergy.com/role/FairValueMeasurements",
+      "http://www.brkenergy.com/role/FairValueMeasurementsLLCDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsTables",
+      "http://www.brkenergy.com/role/General",
+      "http://www.brkenergy.com/role/GeneralPolicies",
+      "http://www.brkenergy.com/role/IncomeTaxes",
+      "http://www.brkenergy.com/role/IncomeTaxesLLCDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesTables",
+      "http://www.brkenergy.com/role/MembersEquity",
+      "http://www.brkenergy.com/role/MembersEquityMidAmericanFundingDetails",
+      "http://www.brkenergy.com/role/NewAccountingPronouncements",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNet",
+      "http://www.brkenergy.com/role/RecentFinancingTransactions",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomers",
+      "http://www.brkenergy.com/role/SegmentInformation",
+      "http://www.brkenergy.com/role/SegmentInformationLLCDetails",
+      "http://www.brkenergy.com/role/SegmentInformationTables"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "MidAmerican Funding, LLC",
+        "label": "MidAmerican Funding, LLC and Subsidiaries [Member]",
+        "documentation": "MidAmerican Funding LLC and Subsidiaries"
+       }
+      }
+     }
+    },
+    "bhe_MidamericanEnergyCompanyAndSubsidiariesMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.brkenergy.com/20240630",
+     "localname": "MidamericanEnergyCompanyAndSubsidiariesMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/AssetRetirementObligations",
+      "http://www.brkenergy.com/role/BalanceSheetsUnauditedMEC",
+      "http://www.brkenergy.com/role/BalanceSheetsUnauditedMECParenthetical",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalents",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsMECDetails",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsTables",
+      "http://www.brkenergy.com/role/CommitmentsandContingencies",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesBHENarrativeCommitmentsDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesMECDetails",
+      "http://www.brkenergy.com/role/Cover",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlans",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansMECDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansMECEmployerContributionsDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansTables",
+      "http://www.brkenergy.com/role/FairValueMeasurements",
+      "http://www.brkenergy.com/role/FairValueMeasurementsMECDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsMECDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsMECLevel3Details",
+      "http://www.brkenergy.com/role/FairValueMeasurementsTables",
+      "http://www.brkenergy.com/role/General",
+      "http://www.brkenergy.com/role/GeneralPolicies",
+      "http://www.brkenergy.com/role/IncomeTaxes",
+      "http://www.brkenergy.com/role/IncomeTaxesMECDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesTables",
+      "http://www.brkenergy.com/role/NewAccountingPronouncements",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNet",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetMECDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetTables",
+      "http://www.brkenergy.com/role/RecentFinancingTransactions",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsBHEDetails",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsMECDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomers",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersMECDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersTables",
+      "http://www.brkenergy.com/role/SegmentInformation",
+      "http://www.brkenergy.com/role/SegmentInformationMECDetails",
+      "http://www.brkenergy.com/role/SegmentInformationTables",
+      "http://www.brkenergy.com/role/ShareholdersEquity",
+      "http://www.brkenergy.com/role/ShareholdersEquityMECDetails",
+      "http://www.brkenergy.com/role/StatementsofCashFlowsUnauditedMEC",
+      "http://www.brkenergy.com/role/StatementsofChangesinShareholdersEquityUnauditedMEC",
+      "http://www.brkenergy.com/role/StatementsofOperationsUnauditedMEC"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "MEC",
+        "label": "MidAmerican Energy Company and Subsidiaries [Member]",
+        "documentation": "MidAmerican Energy Company and Subsidiaries [Member]"
+       }
+      }
+     }
+    },
+    "bhe_NevadaPowerCompanyMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.brkenergy.com/20240630",
+     "localname": "NevadaPowerCompanyMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/AssetRetirementObligations",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalents",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsNPCDetails",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsTables",
+      "http://www.brkenergy.com/role/CommitmentsandContingencies",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesNPCDetails",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedNPC",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedNPCParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedNPC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedNPC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedNPC",
+      "http://www.brkenergy.com/role/Cover",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlans",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansNPCDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansTables",
+      "http://www.brkenergy.com/role/FairValueMeasurements",
+      "http://www.brkenergy.com/role/FairValueMeasurementsNPCDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsNPCDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsNPCLevel3Details",
+      "http://www.brkenergy.com/role/FairValueMeasurementsTables",
+      "http://www.brkenergy.com/role/General",
+      "http://www.brkenergy.com/role/GeneralPolicies",
+      "http://www.brkenergy.com/role/IncomeTaxes",
+      "http://www.brkenergy.com/role/IncomeTaxesNPCDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesTables",
+      "http://www.brkenergy.com/role/NewAccountingPronouncements",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNet",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetNPCDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetTables",
+      "http://www.brkenergy.com/role/RecentFinancingTransactions",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsBHEDetails",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsNPCDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomers",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersNPCDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersTables",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivities",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesNPCBalanceSheetLocationDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesNPCDerivativeContractVolumesDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesNPCNarrativeDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesTables"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "NPC",
+        "label": "Nevada Power Company [Member]",
+        "documentation": "Represents Nevada Power Company."
+       }
+      }
+     }
+    },
+    "us-gaap_NoncontrollingInterestMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "NoncontrollingInterestMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnauditedEEGH"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Noncontrolling Interest",
+        "label": "Noncontrolling Interest [Member]",
+        "documentation": "This element represents that portion of equity (net assets) in a subsidiary not attributable, directly or indirectly, to the parent. A noncontrolling interest is sometimes called a minority interest."
+       }
+      }
+     }
+    },
+    "us-gaap_OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited": {
+       "parentTag": "us-gaap_OtherComprehensiveIncomeLossNetOfTax",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGH"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Unrealized gains (losses) on cash flow hedges, net of tax",
+        "verboseLabel": "Unrealized losses on cash flow hedges, net of tax",
+        "label": "Other Comprehensive Income (Loss), Cash Flow Hedge, Gain (Loss), after Reclassification and Tax",
+        "documentation": "Amount, after tax and reclassification, of gain (loss) from derivative instrument designated and qualifying as cash flow hedge included in assessment of hedge effectiveness."
+       }
+      }
+     }
+    },
+    "us-gaap_OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGHParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEGTSParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Unrealized gains (losses) on cash flow hedges, tax",
+        "label": "Other Comprehensive Income (Loss), Cash Flow Hedge, Gain (Loss), after Reclassification, Tax",
+        "documentation": "Amount, after reclassification, of tax expense (benefit) for gain (loss) from derivative instrument designated and qualifying as cash flow hedge included in assessment of hedge effectiveness."
+       }
+      }
+     }
+    },
+    "us-gaap_OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited": {
+       "parentTag": "us-gaap_OtherComprehensiveIncomeLossNetOfTax",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Foreign currency translation adjustment",
+        "label": "Other Comprehensive Income (Loss), Foreign Currency Transaction and Translation Adjustment, Net of Tax",
+        "documentation": "Amount after tax and reclassification adjustments of gain (loss) on foreign currency translation adjustments, foreign currency transactions designated and effective as economic hedges of a net investment in a foreign entity and intra-entity foreign currency transactions that are of a long-term-investment nature."
+       }
+      }
+     }
+    },
+    "us-gaap_OtherComprehensiveIncomeLossNetOfTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "OtherComprehensiveIncomeLossNetOfTax",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited": {
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetBHEDetails",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetEEGHDetails",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGH"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total other comprehensive (loss) income, net of tax",
+        "terseLabel": "Other comprehensive income (loss)",
+        "verboseLabel": "Other comprehensive (loss) income",
+        "label": "Other Comprehensive Income (Loss), Net of Tax",
+        "documentation": "Amount after tax and reclassification adjustments of other comprehensive income (loss)."
+       }
+      }
+     }
+    },
+    "us-gaap_OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "OtherComprehensiveIncomeLossNetOfTaxPeriodIncreaseDecreaseAbstract",
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEGTS"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Other comprehensive (loss) income, net of tax:",
+        "label": "Other Comprehensive Income (Loss), Net of Tax [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited": {
+       "parentTag": "us-gaap_OtherComprehensiveIncomeLossNetOfTax",
+       "weight": -1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGH"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedTerseLabel": "Unrecognized amounts on retirement benefits, net of tax",
+        "label": "Other Comprehensive (Income) Loss, Defined Benefit Plan, after Reclassification Adjustment, after Tax",
+        "documentation": "Amount, after tax and reclassification adjustment, of (increase) decrease in accumulated other comprehensive income for defined benefit plan."
+       }
+      }
+     }
+    },
+    "us-gaap_OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGHParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedTerseLabel": "Unrecognized amounts on retirement benefits, tax",
+        "label": "Other Comprehensive (Income) Loss, Defined Benefit Plan, after Reclassification Adjustment, Tax",
+        "documentation": "Amount, after reclassification adjustment, of tax (expense) benefit for (increase) decrease in accumulated other comprehensive income of defined benefit plan."
+       }
+      }
+     }
+    },
+    "bhe_PacificorpMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.brkenergy.com/20240630",
+     "localname": "PacificorpMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/AssetRetirementObligations",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalents",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsPACDetails",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsTables",
+      "http://www.brkenergy.com/role/CommitmentandContingenciesTables",
+      "http://www.brkenergy.com/role/CommitmentsandContingencies",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesBHEContingencyAccrualDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesBHENarrativeCommitmentsDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesBHENarrativeEnvironmentalLawsandRegulationsDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesPACContingencyAccrualDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesPACNarrativeCommitmentsDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesPACNarrativeEnvironmentalLawsandRegulationsDetails",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedPAC",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedPACParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedPAC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedPAC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedPAC",
+      "http://www.brkenergy.com/role/Cover",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlans",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansPACDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansPACEmployerContributionsDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansTables",
+      "http://www.brkenergy.com/role/FairValueMeasurements",
+      "http://www.brkenergy.com/role/FairValueMeasurementsPACDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsPACDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsTables",
+      "http://www.brkenergy.com/role/General",
+      "http://www.brkenergy.com/role/GeneralPolicies",
+      "http://www.brkenergy.com/role/IncomeTaxes",
+      "http://www.brkenergy.com/role/IncomeTaxesPACDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesTables",
+      "http://www.brkenergy.com/role/NewAccountingPronouncements",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNet",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetPACDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetTables",
+      "http://www.brkenergy.com/role/RecentFinancingTransactions",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsBHEDetails",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsPACDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomers",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersBHEDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersPACDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersTables",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivities",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesPACBalanceSheetLocationDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesPACCollateralandContingentFeaturesDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesPACDerivativeContractVolumesDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesPACNotDesignatedasHedgingContractsDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesTables",
+      "http://www.brkenergy.com/role/SegmentInformationBHEDetails",
+      "http://www.brkenergy.com/role/SegmentInformationBHEGoodwillDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "PAC",
+        "label": "PacifiCorp [Member]",
+        "documentation": "Represents PacifiCorp and its subsidiaries."
+       }
+      }
+     }
+    },
+    "us-gaap_ProfitLoss": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProfitLoss",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited": {
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
+       "weight": 1.0,
+       "order": 2.0
+      },
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnaudited": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 9.0
+      },
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnaudited": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedEEGH"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net income",
+        "terseLabel": "Net income",
+        "verboseLabel": "Net income",
+        "label": "Net Income (Loss), Including Portion Attributable to Noncontrolling Interest",
+        "documentation": "The consolidated profit or loss for the period, net of income taxes, including the portion attributable to the noncontrolling interest."
+       }
+      }
+     }
+    },
+    "bhe_SierraPacificPowerCompanyMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.brkenergy.com/20240630",
+     "localname": "SierraPacificPowerCompanyMember",
+     "presentation": [
+      "http://www.brkenergy.com/role/AssetRetirementObligations",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalents",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsSPPCDetails",
+      "http://www.brkenergy.com/role/CashandCashEquivalentsandRestrictedCashandCashEquivalentsTables",
+      "http://www.brkenergy.com/role/CommitmentsandContingencies",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesBHENarrativeCommitmentsDetails",
+      "http://www.brkenergy.com/role/CommitmentsandContingenciesSPPCDetails",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedSPPC",
+      "http://www.brkenergy.com/role/ConsolidatedBalanceSheetsUnauditedSPPCParenthetical",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofCashFlowsUnauditedSPPC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedSPPC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofOperationsUnauditedSPPC",
+      "http://www.brkenergy.com/role/Cover",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlans",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansSPPCDetails",
+      "http://www.brkenergy.com/role/EmployeeBenefitPlansTables",
+      "http://www.brkenergy.com/role/FairValueMeasurements",
+      "http://www.brkenergy.com/role/FairValueMeasurementsSPPCDebtDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsSPPCDetails",
+      "http://www.brkenergy.com/role/FairValueMeasurementsSPPCLevel3Details",
+      "http://www.brkenergy.com/role/FairValueMeasurementsTables",
+      "http://www.brkenergy.com/role/General",
+      "http://www.brkenergy.com/role/GeneralPolicies",
+      "http://www.brkenergy.com/role/IncomeTaxes",
+      "http://www.brkenergy.com/role/IncomeTaxesSPPCDetails",
+      "http://www.brkenergy.com/role/IncomeTaxesTables",
+      "http://www.brkenergy.com/role/NewAccountingPronouncements",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNet",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetSPPCDetails",
+      "http://www.brkenergy.com/role/PropertyPlantandEquipmentNetTables",
+      "http://www.brkenergy.com/role/RecentFinancingTransactions",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsBHEDetails",
+      "http://www.brkenergy.com/role/RecentFinancingTransactionsSPPCDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomers",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersSPPCDetails",
+      "http://www.brkenergy.com/role/RevenuefromContractswithCustomersTables",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivities",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesSPPCBalanceSheetLocationDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesSPPCDerivativeContractVolumesDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesSPPCNarrativeDetails",
+      "http://www.brkenergy.com/role/RiskManagementandHedgingActivitiesTables",
+      "http://www.brkenergy.com/role/SegmentInformation",
+      "http://www.brkenergy.com/role/SegmentInformationSPPCDetails",
+      "http://www.brkenergy.com/role/SegmentInformationTables"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "SPPC",
+        "label": "Sierra Pacific Power Company [Member]",
+        "documentation": "Represents Sierra Pacific Power Company."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementEquityComponentsAxis",
+     "presentation": [
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetBHEDetails",
+      "http://www.brkenergy.com/role/ComponentsofAccumulatedOtherComprehensiveLossNetEEGHDetails",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnaudited",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinEquityUnauditedEEGH",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinMembersEquityUnauditedMidAmericanFundingLLC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedEGTS",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedNPC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedPAC",
+      "http://www.brkenergy.com/role/ConsolidatedStatementsofChangesinShareholdersEquityUnauditedSPPC",
+      "http://www.brkenergy.com/role/StatementsofChangesinShareholdersEquityUnauditedMEC"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Equity Components [Axis]",
+        "label": "Equity Components [Axis]",
+        "documentation": "Information by component of equity."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementOfIncomeAndComprehensiveIncomeAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementOfIncomeAndComprehensiveIncomeAbstract",
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Statement of Comprehensive Income [Abstract]",
+        "label": "Statement of Comprehensive Income [Abstract]"
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R25": {
+     "role": "http://www.brkenergy.com/role/ConsolidatedStatementsofComprehensiveIncomeUnauditedParenthetical",
+     "longName": "9952174 - Statement - Consolidated Statements of Comprehensive Income (Unaudited) (Parenthetical)",
+     "shortName": "Consolidated Statements of Comprehensive Income (Unaudited) (Parenthetical)",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "parenthetical",
+     "menuCat": "Statements",
+     "order": "25",
+     "firstAnchor": {
+      "contextRef": "c-30",
+      "name": "us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-6",
+      "ancestors": [
+       "span",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "bhe-20240630.htm",
+      "first": true
+     },
+     "uniqueAnchor": null
+    }
+   }
+  }
+ }
+}
