@@ -737,29 +737,56 @@ def _balance_role(crow, tag, occurrence: int, occurrences: int,
     3. A concept shown exactly twice is then the opening/closing pair in
        that order. Anything else is undecidable.
     """
+    label, start_labels, end_labels, label_says = _balance_row_label(crow, tag)
+    if references and len(references) == occurrences:
+        return _balance_from_arc(references[occurrence], occurrences, label_says)
+    return _balance_from_label(tag, label, start_labels, end_labels, label_says, occurrence, occurrences)
+
+
+def _balance_row_label(crow, tag) -> Tuple[str, set, set, Optional[str]]:
+    """The row's label, the concept's period-start and period-end label texts, and what the label says.
+
+    What the label says (``'opening'`` or ``'closing'``, else None) is known
+    only when the concept's period-start text is its own (no other role
+    uses it). Part of ``_balance_role``.
+    """
     labels = tag.role_labels if tag is not None else {}
     label = (crow.label or '').strip()
-    start_labels = {(t or '').strip() for r, t in labels.items() if is_period_start_label_role(r)} - {''}
-    end_labels = {(t or '').strip() for r, t in labels.items() if is_period_end_label_role(r)} - {''}
-    other_labels = {(t or '').strip() for r, t in labels.items() if not is_period_start_label_role(r)}
+    start_labels, end_labels, other_labels = _period_label_texts(labels)
     # What the row's own label says, when its period-start text is unique.
     label_says = None
     if label and start_labels and start_labels.isdisjoint(other_labels):
         label_says = 'opening' if label in start_labels else 'closing'
+    return label, start_labels, end_labels, label_says
 
-    if references and len(references) == occurrences:
-        preferred = references[occurrence]
-        is_start = is_period_start_label_role(preferred)
-        if occurrences > 2 and not (is_start or is_period_end_label_role(preferred)):
-            short = preferred.rsplit('/', 1)[-1] if preferred else 'unlabelled'
-            return None, (f"instant concept shown {occurrences} times; for its "
-                          f"{short} reference the renderer's choice of "
-                          "opening or closing balance is not determinable")
-        arc_says = 'opening' if is_start else 'closing'
-        if label_says is not None and label_says != arc_says:
-            return None, ("the presentation arcs do not line up with the page's rows: the row label "
-                          f"says {label_says}, its arc in presentation order says {arc_says}")
-        return arc_says, None
+
+def _period_label_texts(labels: Dict[str, str]) -> Tuple[set, set, set]:
+    """A concept's label texts by role: period-start, period-end (both without blanks), and every other."""
+    start_labels = {(t or '').strip() for r, t in labels.items() if is_period_start_label_role(r)} - {''}
+    end_labels = {(t or '').strip() for r, t in labels.items() if is_period_end_label_role(r)} - {''}
+    other_labels = {(t or '').strip() for r, t in labels.items() if not is_period_start_label_role(r)}
+    return start_labels, end_labels, other_labels
+
+
+def _balance_from_arc(preferred: Optional[str], occurrences: int,
+                      label_says: Optional[str]) -> Tuple[Optional[str], Optional[str]]:
+    """Step 1 of ``_balance_role``: the row's own arc decides, unless the label contradicts it."""
+    is_start = is_period_start_label_role(preferred)
+    if occurrences > 2 and not (is_start or is_period_end_label_role(preferred)):
+        short = preferred.rsplit('/', 1)[-1] if preferred else 'unlabelled'
+        return None, (f"instant concept shown {occurrences} times; for its "
+                      f"{short} reference the renderer's choice of "
+                      "opening or closing balance is not determinable")
+    arc_says = 'opening' if is_start else 'closing'
+    if label_says is not None and label_says != arc_says:
+        return None, ("the presentation arcs do not line up with the page's rows: the row label "
+                      f"says {label_says}, its arc in presentation order says {arc_says}")
+    return arc_says, None
+
+
+def _balance_from_label(tag, label: str, start_labels: set, end_labels: set, label_says: Optional[str],
+                        occurrence: int, occurrences: int) -> Tuple[Optional[str], Optional[str]]:
+    """Steps 2 and 3 of ``_balance_role``: the row label stands in for the arc, then row order."""
     if occurrences > 2 and label not in start_labels | end_labels:
         return None, (f"instant concept shown {occurrences} times; a row with neither its "
                       "period-start nor its period-end label is undecidable")
@@ -767,6 +794,12 @@ def _balance_role(crow, tag, occurrence: int, occurrences: int,
         return 'closing', None
     if label_says is not None:
         return label_says, None
+    return _balance_from_end_label_or_order(label, start_labels, end_labels, occurrence, occurrences)
+
+
+def _balance_from_end_label_or_order(label: str, start_labels: set, end_labels: set, occurrence: int,
+                                     occurrences: int) -> Tuple[Optional[str], Optional[str]]:
+    """The end of ``_balance_role``: the period-end label's text is closing; else a pair is opening then closing."""
     if label and label in end_labels and label not in start_labels:
         return 'closing', None
     if occurrences == 2:
@@ -1156,11 +1189,34 @@ def _shared_symbol_scales(cr, index: '_FactIndex', metalinks, xbrl, role: str
         return None
     concepts = {_normalize_concept_id(c) for c in references}
     axes = {c for c in concepts if c.endswith('Axis')}
+    page_symbols = _page_unit_symbols(cr)
+    plain, fitting, codes = _statement_unit_facts(index, metalinks, concepts, axes)
+    shared = _symbols_shared_by_currencies(declared, codes, page_symbols)
+    if not shared:
+        return None
+    out: Dict[str, Tuple[Optional[int], Optional[str]]] = {}
+    for symbol, units in shared.items():
+        out.update(_shared_symbol_unit_scales(symbol, units, declared, codes, plain, fitting))
+    return out
+
+
+def _page_unit_symbols(cr) -> Dict[str, str]:
+    """``{ISO code: symbol}`` for every unit label the page prints (column units and the title's unit)."""
     page_symbols = {}
     for label in list(getattr(cr, 'column_units', None) or []) + [cr.header_unit]:
         if unit_code(label) and unit_symbol(label):
             page_symbols[unit_code(label)] = unit_symbol(label)
+    return page_symbols
 
+
+def _statement_unit_facts(index: '_FactIndex', metalinks, concepts: set, axes: set
+                          ) -> Tuple[Dict[str, list], Dict[str, list], Dict[str, str]]:
+    """The statement's facts by unit id: ``(undimensioned, all, {unit id: currency code})``.
+
+    A statement's facts are those of its presented concepts in contexts on
+    its own axes; a unit's currency code is taken from its monetary facts.
+    Part of ``_shared_symbol_scales``.
+    """
     # unit id -> facts: the statement's undimensioned facts, and all its facts
     plain: Dict[str, list] = defaultdict(list)
     fitting: Dict[str, list] = defaultdict(list)
@@ -1170,16 +1226,31 @@ def _shared_symbol_scales(cr, index: '_FactIndex', metalinks, xbrl, role: str
             continue
         tag = metalinks.get_tag(concept.replace(':', '_')) if metalinks is not None else None
         monetary = 'monetaryItemType' in ((tag.xbrltype if tag else '') or '')
-        for fact in facts:
-            unit = (fact.unit_ref or '').strip()
-            if not unit:
-                continue
-            if monetary and fact.currency:
-                codes.setdefault(unit, fact.currency)
-            fitting[unit].append(fact)
-            if not dims:
-                plain[unit].append(fact)
+        _add_unit_facts(facts, dims, monetary, plain, fitting, codes)
+    return plain, fitting, codes
 
+
+def _add_unit_facts(facts, dims, monetary: bool, plain: Dict[str, list], fitting: Dict[str, list],
+                    codes: Dict[str, str]) -> None:
+    """File one context's facts under their unit ids (see ``_statement_unit_facts``)."""
+    for fact in facts:
+        unit = (fact.unit_ref or '').strip()
+        if not unit:
+            continue
+        if monetary and fact.currency:
+            codes.setdefault(unit, fact.currency)
+        fitting[unit].append(fact)
+        if not dims:
+            plain[unit].append(fact)
+
+
+def _symbols_shared_by_currencies(declared: Dict[str, int], codes: Dict[str, str],
+                                  page_symbols: Dict[str, str]) -> Dict[str, list]:
+    """``{symbol: [unit id, ...]}`` for each declared symbol that units of different currencies print as.
+
+    A unit prints as the page's symbol for its currency, else the
+    registry's, else its own id. Part of ``_shared_symbol_scales``.
+    """
     def symbol_of(unit: str) -> str:
         code = codes[unit]
         return page_symbols.get(code) or _UTR_CURRENCY_SYMBOLS.get(code) or unit
@@ -1192,32 +1263,54 @@ def _shared_symbol_scales(cr, index: '_FactIndex', metalinks, xbrl, role: str
     # is read for it as for any single-currency page.
     shared = {symbol: units for symbol, units in sharing.items()
               if symbol in declared and len({codes[u] for u in units}) > 1}
-    if not shared:
-        return None
+    return shared
+
+
+def _settled_unit_exponents(units: list, plain: Dict[str, list], fitting: Dict[str, list]
+                            ) -> Dict[str, Optional[int]]:
+    """Each unit's renderer exponent, or None where its undimensioned facts and all its facts disagree."""
+    exponents = {}
+    for unit in units:
+        undimensioned, every = _renderer_unit_exponent(plain[unit]), _renderer_unit_exponent(fitting[unit])
+        exponents[unit] = undimensioned if undimensioned == every else None
+    return exponents
+
+
+def _scales_give_declaration(scales: Dict[str, int], declared_scale: int) -> bool:
+    """Whether per-unit scales produce the page's declaration: each 1 or the declared scale, one the declared."""
+    return not (any(scale not in (1, declared_scale) for scale in scales.values())
+                or declared_scale not in scales.values())
+
+
+def _shared_symbol_unit_scales(symbol: str, units: list, declared: Dict[str, int], codes: Dict[str, str],
+                               plain: Dict[str, list], fitting: Dict[str, list]
+                               ) -> Dict[str, Tuple[Optional[int], Optional[str]]]:
+    """Each unit's scale under one shared symbol by the renderer's rule, or a reason for all of them.
+
+    The rule must give the same answer on the statement's undimensioned
+    facts as on all its facts, and must reproduce the page's declaration
+    (every unit at 1 or the declared scale, at least one at the declared
+    scale). Part of ``_shared_symbol_scales``.
+    """
     out: Dict[str, Tuple[Optional[int], Optional[str]]] = {}
-    for symbol, units in shared.items():
-        named = ', '.join(sorted(codes[u] for u in units))
-        exponents = {}
-        for unit in units:
-            undimensioned, every = _renderer_unit_exponent(plain[unit]), _renderer_unit_exponent(fitting[unit])
-            exponents[unit] = undimensioned if undimensioned == every else None
-        if any(e is None for e in exponents.values()):
-            reason = (f"page declares '{symbol} in ...' and {named} all print as '{symbol}'; the renderer's rule "
-                      "(scale a unit only when all its facts on the report are at decimals -3 or below) gives "
-                      "different answers for the statement's undimensioned facts and for all its facts, so "
-                      "which unit is scaled is not settled")
-            out.update({u: (None, reason) for u in units})
-            continue
-        scales = {unit: 10 ** -e for unit, e in exponents.items()}
-        if (any(scale not in (1, declared[symbol]) for scale in scales.values())
-                or declared[symbol] not in scales.values()):
-            given = dict(sorted((codes[u], scale) for u, scale in scales.items()))
-            reason = (f"page declares '{symbol} in ...' ({declared[symbol]}) and {named} all print as "
-                      f"'{symbol}'; the renderer's rule gives {given}, which does not produce the page's "
-                      "declaration, so which unit is scaled is not settled")
-            out.update({u: (None, reason) for u in units})
-            continue
-        out.update({unit: (scale, None) for unit, scale in scales.items()})
+    named = ', '.join(sorted(codes[u] for u in units))
+    exponents = _settled_unit_exponents(units, plain, fitting)
+    if any(e is None for e in exponents.values()):
+        reason = (f"page declares '{symbol} in ...' and {named} all print as '{symbol}'; the renderer's rule "
+                  "(scale a unit only when all its facts on the report are at decimals -3 or below) gives "
+                  "different answers for the statement's undimensioned facts and for all its facts, so "
+                  "which unit is scaled is not settled")
+        out.update({u: (None, reason) for u in units})
+        return out
+    scales = {unit: 10 ** -e for unit, e in exponents.items()}
+    if not _scales_give_declaration(scales, declared[symbol]):
+        given = dict(sorted((codes[u], scale) for u, scale in scales.items()))
+        reason = (f"page declares '{symbol} in ...' ({declared[symbol]}) and {named} all print as "
+                  f"'{symbol}'; the renderer's rule gives {given}, which does not produce the page's "
+                  "declaration, so which unit is scaled is not settled")
+        out.update({u: (None, reason) for u in units})
+        return out
+    out.update({unit: (scale, None) for unit, scale in scales.items()})
     return out
 
 
@@ -1820,14 +1913,48 @@ def _compare_equity_statement(results: ComparisonResults, vr, cr, xbrl, index: '
     """
     rows = cr.rows
     columns = _EquityColumns(xbrl, getattr(vr, 'role', ''), names, metalinks)
+    headings = _equity_headings(cr)
+    cell_columns = cr.row_cell_columns if len(cr.row_cell_columns) == len(rows) else None
+    entries, other_cells = _equity_entries(cr, rows, columns, index)
+    column_dims, periods = _place_equity_entries(entries, columns, index, headings)
+    member_header_rows = any(crow.is_header and crow.is_dimensional for crow in rows)
+    page = SimpleNamespace(results=results, vr=vr, cr=cr, metalinks=metalinks, index=index, names=names,
+                           columns=columns, column_dims=column_dims, periods=periods,
+                           member_header_rows=member_header_rows, currency_scaling=currency_scaling,
+                           tolerance=tolerance, unit_scales=unit_scales)
+    judge = partial(_judge_equity_cell, page)
+
+    for entry in entries:
+        if entry['kind'] == 'balance':
+            for cell in entry['cells']:
+                judge(entry, cell.column, cell.value)
+        else:
+            crow = rows[entry['row']]
+            for value_key, display_val in crow.values.items():  # noqa: PD011 (dict)
+                column = cell_columns[entry['row']].get(value_key) if cell_columns is not None else None
+                judge(entry, column, display_val)
+
+    _emit_unextracted_cells(results, vr, cr, other_cells)
+
+
+def _equity_headings(cr) -> List[Tuple[List[str], Optional[str]]]:
+    """Each column's heading lines and unit, as ``_EquityColumns.resolve_page`` reads them."""
     heading_parts = getattr(cr, 'column_heading_parts', None) or []
     headings: List[Tuple[List[str], Optional[str]]] = []
     for c, header in enumerate(cr.period_headers):
         parts = heading_parts[c] if c < len(heading_parts) else [header]
         unit = cr.column_units[c] if c < len(cr.column_units) else None
         headings.append((parts, unit))
-    cell_columns = cr.row_cell_columns if len(cr.row_cell_columns) == len(rows) else None
+    return headings
 
+
+def _equity_entries(cr, rows, columns: '_EquityColumns', index: '_FactIndex') -> Tuple[List[dict], list]:
+    """The page's rows in order as entries, and the unextracted cells that are not balance rows.
+
+    Balance rows (``rc``, carried as unextracted cells) come before the
+    ConceptRow they precede; each entry carries the presentation options
+    its label fits and their arcs' roles. Part of ``_compare_equity_statement``.
+    """
     # The page's rows in order: balance rows (rc, carried as unextracted
     # cells) before the ConceptRow they precede, and every other data row.
     entries: List[dict] = []
@@ -1837,20 +1964,7 @@ def _compare_equity_statement(results: ComparisonResults, vr, cr, xbrl, index: '
         if cell.row_class != 'rc' or cell.row_index is None or not cell.concept_id:
             other_cells.append(cell)
             continue
-        group = balance_at[cell.row_index]
-        last = group[-1] if group else None
-        if (last is not None and last['concept_id'] == cell.concept_id and last['label'] == cell.label
-                and cell.column not in {c.column for c in last['cells']}):
-            last['cells'].append(cell)
-            continue
-        match = _BALANCE_DATE_RE.search(cell.label)
-        info = _parse_viewer_period(match.group(1)) if match else None
-        base = _BALANCE_DATE_RE.sub('', cell.label) if match else cell.label
-        roles: List[Optional[str]] = []
-        group.append(dict(kind='balance', concept_id=cell.concept_id, label=cell.label,
-                          date=info['end'] if info else None, cells=[cell],
-                          options=columns.row_options(cell.concept_id, base, ('start', 'end'), roles),
-                          roles=roles))
+        _add_balance_cell(balance_at[cell.row_index], cell, columns)
     for i, crow in enumerate(rows):
         entries.extend(balance_at.pop(i, []))
         if crow.is_abstract or crow.is_dimensional or crow.is_header or not crow.values:  # noqa: PD011 (dict)
@@ -1863,110 +1977,216 @@ def _compare_equity_statement(results: ComparisonResults, vr, cr, xbrl, index: '
                             roles=roles))
     for leftover in balance_at.values():
         entries.extend(leftover)
+    return entries, other_cells
 
+
+def _add_balance_cell(group: List[dict], cell, columns: '_EquityColumns') -> None:
+    """Add a balance-row cell to the balance entries before one ConceptRow.
+
+    A cell of the same concept and label in a column the last entry does
+    not have yet joins that entry; otherwise it starts a new balance entry,
+    dated by its label. Part of ``_equity_entries``.
+    """
+    last = group[-1] if group else None
+    if (last is not None and last['concept_id'] == cell.concept_id and last['label'] == cell.label
+            and cell.column not in {c.column for c in last['cells']}):
+        last['cells'].append(cell)
+        return
+    match = _BALANCE_DATE_RE.search(cell.label)
+    info = _parse_viewer_period(match.group(1)) if match else None
+    base = _BALANCE_DATE_RE.sub('', cell.label) if match else cell.label
+    roles: List[Optional[str]] = []
+    group.append(dict(kind='balance', concept_id=cell.concept_id, label=cell.label,
+                      date=info['end'] if info else None, cells=[cell],
+                      options=columns.row_options(cell.concept_id, base, ('start', 'end'), roles),
+                      roles=roles))
+
+
+def _place_equity_entries(entries: List[dict], columns: '_EquityColumns', index: '_FactIndex',
+                          headings) -> Tuple[list, List[dict]]:
+    """Resolve the columns' members and place each row in a period block.
+
+    Returns ``(column dims, periods)``; each placeable entry gains
+    ``groups`` (its possible period blocks) and has its ``roles`` narrowed
+    to the arcs some reading places it at. Part of ``_compare_equity_statement``.
+    """
     presented = {_normalize_concept_id(element_id) for _p, element_id, _r, _l in columns.primary}
     statement_dims = {dims for (concept, _key), contexts in index.period_contexts.items() if concept in presented
                       for dims in contexts}
     column_dims = columns.resolve_page(headings, statement_dims)
     periods = _statement_periods(index, presented, _page_movements(entries))
-    placeable = [e for e in entries if e['options'] and e['kind'] == 'balance' and e['date']
-                 or e['options'] and e['kind'] == 'row' and e['period_type'] in ('instant', 'duration')]
+    placeable = _placeable_entries(entries)
     used_options: List[set] = []
     placements = _place_rows(placeable, periods, used_options) if columns.reason is None else []
+    _record_placements(placeable, placements, used_options)
+    return column_dims, periods
+
+
+def _placeable_entries(entries: List[dict]) -> List[dict]:
+    """The entries ``_place_rows`` places: dated balance rows, and rows of instant or duration concepts."""
+    return [e for e in entries if e['options'] and e['kind'] == 'balance' and e['date']
+            or e['options'] and e['kind'] == 'row' and e['period_type'] in ('instant', 'duration')]
+
+
+def _record_placements(placeable: List[dict], placements: list, used_options: List[set]) -> None:
+    """Store each entry's possible period blocks, and narrow its roles to the arcs some reading uses."""
     for entry, groups, used in zip(placeable, placements, used_options, strict=False):
         entry['groups'] = groups
         # The row's sign is read from the arcs some reading places it at.
         if used and len(entry['roles']) == len(entry['options']):
             entry['roles'] = [entry['roles'][k] for k in sorted(used)]
 
-    member_header_rows = any(crow.is_header and crow.is_dimensional for crow in rows)
 
-    def period_of(entry) -> Tuple[Optional[List[str]], Optional[str], frozenset]:
-        if columns.reason:
-            return None, columns.reason, frozenset()
-        if entry['kind'] == 'balance' and not entry['date']:
-            return None, f"balance row {entry['label']!r} states no date", frozenset()
-        if not entry['options']:
-            return None, (f"row {entry['label']!r} is not a presented row of its concept, or names a "
-                          "row-axis member the statement does not present"), frozenset()
-        row_dims = {o[2] for o in entry['options']}
-        if len(row_dims) > 1:
-            return None, "the row's label fits more than one row-axis member", frozenset()
-        # A balance row is dated: its instant is its own date, wherever it
-        # sits and whatever facts exist. Any other row's period is its block's.
-        if entry['kind'] == 'balance':
-            return [f"instant_{entry['date']}"], None, next(iter(row_dims))
-        if 'groups' not in entry:
-            return None, "the row's concept has no facts to place it in a period", frozenset()
-        groups = entry['groups']
-        if groups is None:
-            return None, ("no reading of the page's row order fits the period blocks of the statement's "
-                          "facts and balance rows"), frozenset()
-        if not groups:
-            return None, ("the row does not fit any period block the statement's facts and balance rows "
-                          "give, in the renderer's order"), frozenset()
-        keys = sorted({_block_period_keys(entry, periods[g]) for g in groups})
-        if len(keys) > 1:
-            listed = ', '.join(' or '.join(k) for k in keys)
-            return None, f"the page's row order fits more than one period for this row: {listed}", frozenset()
-        return list(keys[0]), None, next(iter(row_dims))
+def _equity_period_of(entry: dict, columns: '_EquityColumns', periods: List[dict]
+                      ) -> Tuple[Optional[List[str]], Optional[str], frozenset]:
+    """The period keys an equity row's cells show, or a reason; and its row-axis dims.
 
-    def judge(entry, column: Optional[int], display_val: str):
-        concept_id, label = entry['concept_id'], entry['label']
-        xbrl_concept = _normalize_concept_id(concept_id)
-        tag = metalinks.get_tag(concept_id)
-        xbrltype = (tag.xbrltype if tag else '') or ''
-        unit = cr.column_units[column] if column is not None and column < len(cr.column_units) else None
-        viewer_num = _read_number(display_val, unit or cr.header_unit)
-        if viewer_num is None and (_is_footnote_marker(display_val)
-                                   or not (_is_numeric_type(xbrltype) and (display_val or '').strip())):
-            return
-        header = cr.period_headers[column] if column is not None and column < len(cr.period_headers) else ''
-        emit = partial(_emit, results, dict(concept_id=xbrl_concept, label=label, period=header,
-                                            viewer_value=viewer_num, report=vr.short_name))
-        if viewer_num is None:
-            emit(NOT_COMPARABLE, reason=f"value {display_val!r} cannot be read as a number")
-            return
-        if column is None or column >= len(column_dims):
-            emit(NOT_COMPARABLE, reason="cell is under no column")
-            return
-        if member_header_rows:
-            emit(NOT_COMPARABLE, reason="member header rows on a statement of equity are not read")
-            return
-        if index.period_types.get(xbrl_concept) is None:
-            emit(MISSING, reason="no XBRL fact for this concept")
-            return
-        period_keys, period_reason, row_dims = period_of(entry)
-        if period_keys is None:
-            emit(NOT_COMPARABLE, reason=period_reason)
-            return
-        dims, dims_reason = column_dims[column]
-        if dims is None:
-            emit(NOT_COMPARABLE, reason=dims_reason)
-            return
-        if len(period_keys) > 1:
-            filed = [k for k in period_keys if index.facts.get((xbrl_concept, k, dims | row_dims))]
-            if len(filed) > 1:
-                emit(NOT_COMPARABLE, reason=(
-                    f"an instant row inside a movement shows its opening or its closing balance and facts "
-                    f"exist for both ({', '.join(filed)}); the page does not say which"))
-                return
-            period_keys = filed or period_keys
-        negated, sign_role, sign_reason = _roles_sign(entry.get('roles') or [])
-        _judge_cell(emit, index, names, xbrl_concept, period_keys, dims | row_dims, xbrltype, display_val,
-                    viewer_num, cr, unit, currency_scaling, tolerance,
-                    sign=(negated, sign_role, sign_reason), unit_scales=unit_scales)
+    A balance row is its own date's instant; any other row's period is
+    its period block's (``_equity_block_period``). Part of
+    ``_compare_equity_statement``.
+    """
+    if columns.reason:
+        return None, columns.reason, frozenset()
+    if entry['kind'] == 'balance' and not entry['date']:
+        return None, f"balance row {entry['label']!r} states no date", frozenset()
+    if not entry['options']:
+        return None, (f"row {entry['label']!r} is not a presented row of its concept, or names a "
+                      "row-axis member the statement does not present"), frozenset()
+    row_dims = {o[2] for o in entry['options']}
+    if len(row_dims) > 1:
+        return None, "the row's label fits more than one row-axis member", frozenset()
+    # A balance row is dated: its instant is its own date, wherever it
+    # sits and whatever facts exist. Any other row's period is its block's.
+    if entry['kind'] == 'balance':
+        return [f"instant_{entry['date']}"], None, next(iter(row_dims))
+    return _equity_block_period(entry, periods, row_dims)
 
-    for entry in entries:
-        if entry['kind'] == 'balance':
-            for cell in entry['cells']:
-                judge(entry, cell.column, cell.value)
-        else:
-            crow = rows[entry['row']]
-            for value_key, display_val in crow.values.items():  # noqa: PD011 (dict)
-                column = cell_columns[entry['row']].get(value_key) if cell_columns is not None else None
-                judge(entry, column, display_val)
 
+def _equity_block_period(entry: dict, periods: List[dict], row_dims: set
+                         ) -> Tuple[Optional[List[str]], Optional[str], frozenset]:
+    """A non-balance equity row's period: its one possible period block's (see ``_place_rows``)."""
+    if 'groups' not in entry:
+        return None, "the row's concept has no facts to place it in a period", frozenset()
+    groups = entry['groups']
+    if groups is None:
+        return None, ("no reading of the page's row order fits the period blocks of the statement's "
+                      "facts and balance rows"), frozenset()
+    if not groups:
+        return None, ("the row does not fit any period block the statement's facts and balance rows "
+                      "give, in the renderer's order"), frozenset()
+    keys = sorted({_block_period_keys(entry, periods[g]) for g in groups})
+    if len(keys) > 1:
+        listed = ', '.join(' or '.join(k) for k in keys)
+        return None, f"the page's row order fits more than one period for this row: {listed}", frozenset()
+    return list(keys[0]), None, next(iter(row_dims))
+
+
+def _judge_equity_cell(page: SimpleNamespace, entry: dict, column: Optional[int], display_val: str):
+    """Compare one cell of a statement of equity and emit its outcome (part of ``_compare_equity_statement``).
+
+    ``page`` holds the statement's comparison state: results, report,
+    resolved column dims, periods and the scale and tolerance settings.
+    """
+    results, vr, cr, metalinks, index, names = (page.results, page.vr, page.cr, page.metalinks,
+                                                page.index, page.names)
+    currency_scaling, tolerance, unit_scales = page.currency_scaling, page.tolerance, page.unit_scales
+    label = entry['label']
+    reading = _equity_cell_reading(cr, metalinks, entry, column, display_val)
+    if reading is None:
+        return
+    xbrl_concept, xbrltype, unit, viewer_num, header = reading
+    emit = partial(_emit, results, dict(concept_id=xbrl_concept, label=label, period=header,
+                                        viewer_value=viewer_num, report=vr.short_name))
+    if _equity_cell_settled(emit, page, column, display_val, viewer_num, xbrl_concept):
+        return
+    context = _equity_cell_context(emit, page, entry, column, xbrl_concept)
+    if context is None:
+        return
+    period_keys, dims, row_dims = context
+    negated, sign_role, sign_reason = _roles_sign(entry.get('roles') or [])
+    _judge_cell(emit, index, names, xbrl_concept, period_keys, dims | row_dims, xbrltype, display_val,
+                viewer_num, cr, unit, currency_scaling, tolerance,
+                sign=(negated, sign_role, sign_reason), unit_scales=unit_scales)
+
+
+def _equity_cell_reading(cr, metalinks, entry: dict, column: Optional[int], display_val: str):
+    """``(concept, item type, column unit, number shown, column header)`` for an equity cell.
+
+    None when the cell is not a numeric cell of the statement: a footnote
+    marker, or an unreadable value of a concept whose type is not numeric
+    (or a blank). Part of ``_judge_equity_cell``.
+    """
+    concept_id = entry['concept_id']
+    xbrl_concept = _normalize_concept_id(concept_id)
+    tag = metalinks.get_tag(concept_id)
+    xbrltype = (tag.xbrltype if tag else '') or ''
+    unit = cr.column_units[column] if column is not None and column < len(cr.column_units) else None
+    viewer_num = _read_number(display_val, unit or cr.header_unit)
+    if viewer_num is None and _not_a_numeric_cell(display_val, xbrltype):
+        return None
+    header = cr.period_headers[column] if column is not None and column < len(cr.period_headers) else ''
+    return xbrl_concept, xbrltype, unit, viewer_num, header
+
+
+def _not_a_numeric_cell(display_val: str, xbrltype: str):
+    """An unread cell that is no number of the statement: a footnote marker, or a non-numeric type or blank."""
+    return (_is_footnote_marker(display_val)
+            or not (_is_numeric_type(xbrltype) and (display_val or '').strip()))
+
+
+def _equity_cell_settled(emit, page: SimpleNamespace, column: Optional[int], display_val: str,
+                         viewer_num: Optional[float], xbrl_concept: str) -> bool:
+    """Emit the outcome of an equity cell that cannot be compared at all; True when emitted.
+
+    An unreadable value, a cell under no column, a statement with member
+    header rows (not comparable), or a concept with no facts (missing).
+    Part of ``_judge_equity_cell``.
+    """
+    if viewer_num is None:
+        emit(NOT_COMPARABLE, reason=f"value {display_val!r} cannot be read as a number")
+        return True
+    if column is None or column >= len(page.column_dims):
+        emit(NOT_COMPARABLE, reason="cell is under no column")
+        return True
+    if page.member_header_rows:
+        emit(NOT_COMPARABLE, reason="member header rows on a statement of equity are not read")
+        return True
+    if page.index.period_types.get(xbrl_concept) is None:
+        emit(MISSING, reason="no XBRL fact for this concept")
+        return True
+    return False
+
+
+def _equity_cell_context(emit, page: SimpleNamespace, entry: dict, column: int, xbrl_concept: str):
+    """An equity cell's ``(period keys, column dims, row dims)``, or None after emitting why it has none.
+
+    The row's period (``_equity_period_of``) and the column's members must
+    both be known. An instant row inside a movement may show its opening or
+    its closing instant: it keeps only the filed one, and is not comparable
+    when both are filed. Part of ``_judge_equity_cell``.
+    """
+    index = page.index
+    period_keys, period_reason, row_dims = _equity_period_of(entry, page.columns, page.periods)
+    if period_keys is None:
+        emit(NOT_COMPARABLE, reason=period_reason)
+        return None
+    dims, dims_reason = page.column_dims[column]
+    if dims is None:
+        emit(NOT_COMPARABLE, reason=dims_reason)
+        return None
+    if len(period_keys) > 1:
+        filed = [k for k in period_keys if index.facts.get((xbrl_concept, k, dims | row_dims))]
+        if len(filed) > 1:
+            emit(NOT_COMPARABLE, reason=(
+                f"an instant row inside a movement shows its opening or its closing balance and facts "
+                f"exist for both ({', '.join(filed)}); the page does not say which"))
+            return None
+        period_keys = filed or period_keys
+    return period_keys, dims, row_dims
+
+
+def _emit_unextracted_cells(results: ComparisonResults, vr, cr, other_cells) -> None:
+    """Emit each numeric cell the extractor put in no row as not comparable, saying why."""
     for cell in other_cells:
         header = (cr.period_headers[cell.column]
                   if cell.column is not None and cell.column < len(cr.period_headers) else '')
@@ -2032,66 +2252,20 @@ def _judge_cell(emit, index: '_FactIndex', names: _Names, xbrl_concept: str, per
     """
     from edgar.xbrl.xbrl import XBRL
 
-    candidates: List[SimpleNamespace] = []
-    used_key = None
-    for period_key in period_keys:
-        candidates = index.facts.get((xbrl_concept, period_key, dims), [])
-        if candidates:
-            used_key = period_key
-            break
+    candidates, used_key = _cell_candidates(index, xbrl_concept, period_keys, dims)
     if not candidates:
-        wider = index.wider_context_reason(xbrl_concept, dims, period_keys)
-        if wider:
-            emit(NOT_COMPARABLE, reason=wider)
-        else:
-            emit(MISSING, reason=(
-                f"no fact for {' or '.join(period_keys)}"
-                + (f" with {names.show_dims(dims)}" if dims else " without dimensions")))
+        _emit_no_fact(emit, index, names, xbrl_concept, period_keys, dims)
         return
-
-    # Unit: the currency the column (or the report) names.
-    code = unit_code(column_unit or cr.header_unit)
-    currencies = {c.currency for c in candidates if c.currency}
-    if currencies:
-        if code:
-            candidates = [c for c in candidates if c.currency == code]
-            if not candidates:
-                emit(MISSING, reason=f"no fact in {code} (facts in {sorted(currencies)})")
-                return
-        elif len(currencies) > 1:
-            emit(NOT_COMPARABLE, reason=(
-                f"facts in {sorted(currencies)} and the page names no unit for this column"))
-            return
-    units = {c.unit_ref for c in candidates}
-    if len(units) > 1 and any(not c.currency for c in candidates):
-        emit(NOT_COMPARABLE, reason=(
-            f"facts in units {sorted(u or '?' for u in units)} and no currency to tell "
-            "which unit this cell shows"))
+    candidates = _candidates_in_cell_unit(emit, candidates, column_unit, cr)
+    if candidates is None:
         return
 
     chosen = XBRL._select_most_precise_fact(candidates)
     note = _inconsistency(chosen, candidates)
 
-    def compare(fact):
-        """``(outcome, xbrl display, difference, sign only)`` for the cell against ``fact``."""
-        scaling, scale_reason = _cell_scale(fact, xbrltype, cr, column_unit, currency_scaling, unit_scales)
-        if scaling is None:
-            return None, scale_reason, None, False
-        xbrl_display = fact.numeric_value / scaling if scaling else fact.numeric_value
-        if 'percentItemType' in xbrltype and '%' in display_val:
-            xbrl_display *= 100  # the page shows the percent-type value as a percentage
-        negated = sign[0]
-        expected = -xbrl_display if negated else xbrl_display  # the renderer never negates zero
-        diff = viewer_num - expected
-        cell_tolerance = (_display_tolerance(display_val, viewer_num, xbrl_display)
-                          if tolerance is None else tolerance)
-        if negated is not None:
-            # The row's label role is known: the page must agree in sign too.
-            return (MATCHED if abs(diff) <= cell_tolerance else MISMATCHED), xbrl_display, diff, False
-        # Role unknown: the magnitude is checked, the sign is not verified.
-        magnitude = abs(abs(viewer_num) - abs(xbrl_display)) <= cell_tolerance
-        zero = magnitude and abs(xbrl_display) <= cell_tolerance
-        return (MATCHED if magnitude else MISMATCHED), xbrl_display, diff, magnitude and not zero
+    compare = partial(_compare_cell_to_fact, xbrltype=xbrltype, cr=cr, column_unit=column_unit,
+                      currency_scaling=currency_scaling, unit_scales=unit_scales, display_val=display_val,
+                      viewer_num=viewer_num, negated=sign[0], tolerance=tolerance)
 
     def paired(fact) -> dict:
         return dict(xbrl_period_key=used_key,
@@ -2113,19 +2287,121 @@ def _judge_cell(emit, index: '_FactIndex', names: _Names, xbrl_concept: str, per
         # decimals -3 as -27,661,459,000 and at -5 as -27,661,500,000; which
         # copy the renderer prints could not be established from its source).
         # A disagreeing duplicate never gets here: ``note`` is set.
-        for other in candidates:
-            if other is chosen or other.numeric_value == chosen.numeric_value:
-                continue
-            other_outcome, other_display, other_diff, other_sign = compare(other)
-            if other_outcome == MATCHED:
-                emit(MATCHED, other_display, other_diff, sign_only=other_sign, paired=paired(other),
-                     reason=sign_reason(other_sign), note=(
-                    f"the page shows a less precise duplicate: {other.numeric_value:.15g} "
-                    f"(decimals={other.decimals}); the most precise is {chosen.numeric_value:.15g} "
-                    f"(decimals={chosen.decimals}), and the less precise one is it rounded to its decimals"))
-                return
+        if _emit_less_precise_match(emit, candidates, chosen, compare, paired, sign_reason):
+            return
     emit(outcome, xbrl_display, diff, note=note, sign_only=sign_only, paired=paired(chosen),
          reason=sign_reason(sign_only))
+
+
+def _compare_cell_to_fact(fact, xbrltype: str, cr, column_unit: Optional[str], currency_scaling: int,
+                          unit_scales, display_val: str, viewer_num: float, negated: Optional[bool],
+                          tolerance: Optional[float]):
+    """``(outcome, xbrl display, difference, sign only)`` for the cell against ``fact`` (part of ``_judge_cell``).
+
+    The outcome is None, with the scale's reason in place of the display,
+    when the fact's scale on the page cannot be told.
+    """
+    scaling, scale_reason = _cell_scale(fact, xbrltype, cr, column_unit, currency_scaling, unit_scales)
+    if scaling is None:
+        return None, scale_reason, None, False
+    xbrl_display = fact.numeric_value / scaling if scaling else fact.numeric_value
+    if 'percentItemType' in xbrltype and '%' in display_val:
+        xbrl_display *= 100  # the page shows the percent-type value as a percentage
+    expected = -xbrl_display if negated else xbrl_display  # the renderer never negates zero
+    diff = viewer_num - expected
+    cell_tolerance = (_display_tolerance(display_val, viewer_num, xbrl_display)
+                      if tolerance is None else tolerance)
+    if negated is not None:
+        # The row's label role is known: the page must agree in sign too.
+        return (MATCHED if abs(diff) <= cell_tolerance else MISMATCHED), xbrl_display, diff, False
+    # Role unknown: the magnitude is checked, the sign is not verified.
+    magnitude = abs(abs(viewer_num) - abs(xbrl_display)) <= cell_tolerance
+    zero = magnitude and abs(xbrl_display) <= cell_tolerance
+    return (MATCHED if magnitude else MISMATCHED), xbrl_display, diff, magnitude and not zero
+
+
+def _cell_candidates(index: '_FactIndex', xbrl_concept: str, period_keys: List[str],
+                     dims: Dims) -> Tuple[List[SimpleNamespace], Optional[str]]:
+    """The facts for the first of ``period_keys`` that has any in ``dims``, and that key (part of ``_judge_cell``)."""
+    candidates: List[SimpleNamespace] = []
+    used_key = None
+    for period_key in period_keys:
+        candidates = index.facts.get((xbrl_concept, period_key, dims), [])
+        if candidates:
+            used_key = period_key
+            break
+    return candidates, used_key
+
+
+def _emit_no_fact(emit, index: '_FactIndex', names: _Names, xbrl_concept: str, period_keys: List[str],
+                  dims: Dims) -> None:
+    """Emit a cell with no fact in its context: not comparable when wider contexts have one, else missing."""
+    wider = index.wider_context_reason(xbrl_concept, dims, period_keys)
+    if wider:
+        emit(NOT_COMPARABLE, reason=wider)
+    else:
+        emit(MISSING, reason=(
+            f"no fact for {' or '.join(period_keys)}"
+            + (f" with {names.show_dims(dims)}" if dims else " without dimensions")))
+
+
+def _candidates_in_cell_unit(emit, candidates: List[SimpleNamespace], column_unit: Optional[str],
+                             cr) -> Optional[List[SimpleNamespace]]:
+    """The candidates in the currency the column (or the report) names.
+
+    Returns None after emitting the outcome when the unit rules settle the
+    cell: no fact in the named currency (missing), several currencies and
+    none named, or several units with no currency to choose (not
+    comparable). Part of ``_judge_cell``.
+    """
+    candidates = _candidates_in_named_currency(emit, candidates, column_unit, cr)
+    if candidates is None:
+        return None
+    units = {c.unit_ref for c in candidates}
+    if len(units) > 1 and any(not c.currency for c in candidates):
+        emit(NOT_COMPARABLE, reason=(
+            f"facts in units {sorted(u or '?' for u in units)} and no currency to tell "
+            "which unit this cell shows"))
+        return None
+    return candidates
+
+
+def _candidates_in_named_currency(emit, candidates: List[SimpleNamespace], column_unit: Optional[str],
+                                  cr) -> Optional[List[SimpleNamespace]]:
+    """The candidates in the currency the column (or the report) names, or None after emitting why not."""
+    # Unit: the currency the column (or the report) names.
+    code = unit_code(column_unit or cr.header_unit)
+    currencies = {c.currency for c in candidates if c.currency}
+    if currencies:
+        if code:
+            candidates = [c for c in candidates if c.currency == code]
+            if not candidates:
+                emit(MISSING, reason=f"no fact in {code} (facts in {sorted(currencies)})")
+                return None
+        elif len(currencies) > 1:
+            emit(NOT_COMPARABLE, reason=(
+                f"facts in {sorted(currencies)} and the page names no unit for this column"))
+            return None
+    return candidates
+
+
+def _emit_less_precise_match(emit, candidates, chosen, compare, paired, sign_reason) -> bool:
+    """Emit a match against a less precise duplicate the page shows, if one matches; True when emitted.
+
+    Part of ``_judge_cell``; ``compare``, ``paired`` and ``sign_reason`` are its helpers.
+    """
+    for other in candidates:
+        if other is chosen or other.numeric_value == chosen.numeric_value:
+            continue
+        other_outcome, other_display, other_diff, other_sign = compare(other)
+        if other_outcome == MATCHED:
+            emit(MATCHED, other_display, other_diff, sign_only=other_sign, paired=paired(other),
+                 reason=sign_reason(other_sign), note=(
+                f"the page shows a less precise duplicate: {other.numeric_value:.15g} "
+                f"(decimals={other.decimals}); the most precise is {chosen.numeric_value:.15g} "
+                f"(decimals={chosen.decimals}), and the less precise one is it rounded to its decimals"))
+            return True
+    return False
 
 
 def compare_viewer_to_xbrl(viewer: 'FilingViewer', xbrl: 'XBRL',
@@ -2245,174 +2521,267 @@ def compare_viewer_to_xbrl(viewer: 'FilingViewer', xbrl: 'XBRL',
     index = _FactIndex(xbrl, names)
 
     for vr in viewer.financial_statements:
-        cr = vr.concept_report
-        if cr is None:
-            results.unread_statements.append(vr.short_name)
-            continue
-
-        currency_scaling = vr.currency_scaling
-        results.scaling_factors[vr.short_name] = currency_scaling
-        rows = cr.rows
-        cell_columns = cr.row_cell_columns if len(cr.row_cell_columns) == len(rows) else None
-        unit_scales = _shared_symbol_scales(cr, index, metalinks, xbrl, getattr(vr, 'role', ''))
-        if _is_equity_layout(cr):
-            _compare_equity_statement(results, vr, cr, xbrl, index, names, metalinks, tolerance,
-                                      currency_scaling, unit_scales)
-            continue
-        references = _presentation_references(xbrl, getattr(vr, 'role', ''))
-
-        # Member context of every row: a member header (rh row) puts the rows
-        # below it in that member, up to the next member header.
-        row_contexts: List[Tuple[Optional[Dims], Optional[str]]] = []
-        current: Tuple[Optional[Dims], Optional[str]] = (frozenset(), None)
-        for crow in rows:
-            if crow.is_header and crow.is_dimensional:
-                current = _member_header_dims(crow, names, index.typed_values)
-            row_contexts.append(current)
-
-        def _is_data_row(crow) -> bool:
-            return not (crow.is_abstract or crow.is_dimensional or crow.is_header) and bool(crow.values)
-
-        occurrences: Counter = Counter()
-        for crow, context in zip(rows, row_contexts, strict=True):
-            if _is_data_row(crow):
-                occurrences[(context, crow.concept_id)] += 1
-        seen: Counter = Counter()
-
-        for i, crow in enumerate(rows):
-            if not _is_data_row(crow):
-                continue
-            dims, context_reason = row_contexts[i]
-            occurrence_key = (row_contexts[i], crow.concept_id)
-            occurrence = seen[occurrence_key]
-            seen[occurrence_key] += 1
-
-            xbrl_concept = _normalize_concept_id(crow.concept_id)
-            tag = metalinks.get_tag(crow.concept_id)
-            xbrltype = (tag.xbrltype if tag else '') or ''
-
-            for value_key, display_val in crow.values.items():
-                column_unit = None
-                if cell_columns is not None and value_key in cell_columns[i]:
-                    column = cell_columns[i][value_key]
-                    period_header = cr.period_headers[column]
-                    if column < len(cr.column_units):
-                        column_unit = cr.column_units[column]
-                else:
-                    period_header = _DUPLICATE_KEY_SUFFIX_RE.sub('', value_key)
-
-                viewer_num = _read_number(display_val, column_unit or cr.header_unit)
-                if viewer_num is None and (_is_footnote_marker(display_val)
-                                           or not (_is_numeric_type(xbrltype) and (display_val or '').strip())):
-                    continue  # not a numeric cell
-                emit = partial(_emit, results, dict(
-                    concept_id=xbrl_concept, label=crow.label, period=value_key,
-                    viewer_value=viewer_num, report=vr.short_name))
-                if viewer_num is None:
-                    emit(NOT_COMPARABLE, reason=f"value {display_val!r} cannot be read as a number")
-                    continue
-
-                period_info = _parse_viewer_period(period_header)
-                if not period_info:
-                    if _DATE_RE.search(period_header):
-                        emit(NOT_COMPARABLE, reason=(
-                            f"column header {period_header!r} names a member or unit by label "
-                            "before its period"))
-                    else:
-                        emit(NOT_COMPARABLE, reason=(
-                            f"column {period_header!r} states no period (a member column, as in "
-                            "an equity statement); the page does not give each row's period"))
-                    continue
-
-                header_match = _DATE_RE.match(period_header)
-                if header_match.end() < len(period_header.rstrip()):
-                    emit(NOT_COMPARABLE, reason=(
-                        f"column header {period_header!r} carries more than a period "
-                        "(a member or unit named only by label)"))
-                    continue
-
-                # Period keys the cell may show.
-                period_type = index.period_types.get(xbrl_concept)
-                if period_type is None:
-                    emit(MISSING, reason="no XBRL fact for this concept")
-                    continue
-                if dims is None:
-                    emit(NOT_COMPARABLE, reason=context_reason)
-                    continue
-                end_date = period_info['end']
-                months = period_info['months']
-                if months is None:
-                    if period_type != 'instant':
-                        emit(NOT_COMPARABLE, reason="duration concept under an instant column header")
-                        continue
-                    period_keys = [f'instant_{end_date}']
-                elif period_type == 'instant':
-                    role, role_reason = _balance_role(crow, tag, occurrence, occurrences[occurrence_key],
-                                                      references.get(crow.concept_id))
-                    if role is None:
-                        emit(NOT_COMPARABLE, reason=role_reason)
-                        continue
-                    if role == 'opening':
-                        starts = index.column_starts(end_date, months)
-                        if not starts:
-                            emit(MISSING, reason=(f"no period in the filing renders as {months} months "
-                                                  f"ending {end_date}"))
-                            continue
-                        # The opening balance of each period that renders with
-                        # this heading; they must agree, or the page cannot say
-                        # which one it shows.
-                        openings = {}
-                        for start in starts:
-                            for key in _opening_instant_keys(start):
-                                if index.facts.get((xbrl_concept, key, dims)):
-                                    openings[key] = index.value_signature(xbrl_concept, key, dims)
-                                    break
-                        if len(set(openings.values())) > 1:
-                            emit(NOT_COMPARABLE, reason=(
-                                f"periods that render as {months} months ending {end_date} start on "
-                                f"different dates whose opening balances disagree: {', '.join(sorted(openings))}"))
-                            continue
-                        period_keys = (sorted(openings)[:1]
-                                       or [key for start in starts for key in _opening_instant_keys(start)])
-                    else:
-                        period_keys = [f'instant_{end_date}']
-                else:
-                    duration_key, duration_reason = index.concept_period(xbrl_concept, dims, end_date, months)
-                    if duration_key is None:
-                        if duration_reason.startswith('no '):
-                            wider = index.wider_context_reason(
-                                xbrl_concept, dims, index.rendered_period_keys(end_date, months))
-                            if wider:
-                                emit(NOT_COMPARABLE, reason=wider)
-                            else:
-                                emit(MISSING, reason=duration_reason)
-                        else:
-                            emit(NOT_COMPARABLE, reason=duration_reason)
-                        continue
-                    period_keys = [duration_key]
-
-                _judge_cell(emit, index, names, xbrl_concept, period_keys, dims, xbrltype,
-                            display_val, viewer_num, cr, column_unit, currency_scaling, tolerance,
-                            sign=_row_sign(xbrl, tag, crow, references, occurrence,
-                                           occurrences[occurrence_key]),
-                            unit_scales=unit_scales)
-
-        # Numeric cells the extractor did not put in any row (equity-statement
-        # "Balance ... at <date>" rows of class rc, rows with no concept link,
-        # cells under no column): counted, never compared.
-        for cell in getattr(cr, 'unextracted_cells', None) or []:
-            header = (cr.period_headers[cell.column]
-                      if cell.column is not None and cell.column < len(cr.period_headers) else '')
-            what = (f"row class {cell.row_class!r} is not extracted (an equity-statement balance row)"
-                    if cell.row_class == 'rc' else
-                    f"cell is not extracted (row class {cell.row_class!r}"
-                    + (", no concept link" if not cell.concept_id else "")
-                    + (", under no column" if cell.column is None else "") + ")")
-            _emit(results, dict(concept_id=_normalize_concept_id(cell.concept_id) if cell.concept_id else '',
-                                label=cell.label, period=header, viewer_value=parse_numeric(cell.value),
-                                report=vr.short_name),
-                  NOT_COMPARABLE, reason=what)
+        _compare_statement(results, vr, xbrl, index, names, metalinks, tolerance)
 
     scales = set(results.scaling_factors.values())
     results.scaling_factor = scales.pop() if len(scales) == 1 else (None if scales else 1)
     return results
+
+
+def _compare_statement(results: ComparisonResults, vr, xbrl, index: '_FactIndex', names: _Names,
+                       metalinks, tolerance: Optional[float]) -> None:
+    """Compare every numeric cell of one statement page (part of ``compare_viewer_to_xbrl``).
+
+    A page with no concept report is listed as unread; a statement of
+    equity goes to ``_compare_equity_statement``; any other page is read
+    row by row, each row in the member context its member header gives.
+    """
+    cr = vr.concept_report
+    if cr is None:
+        results.unread_statements.append(vr.short_name)
+        return
+
+    currency_scaling = vr.currency_scaling
+    results.scaling_factors[vr.short_name] = currency_scaling
+    rows = cr.rows
+    cell_columns = cr.row_cell_columns if len(cr.row_cell_columns) == len(rows) else None
+    unit_scales = _shared_symbol_scales(cr, index, metalinks, xbrl, getattr(vr, 'role', ''))
+    if _is_equity_layout(cr):
+        _compare_equity_statement(results, vr, cr, xbrl, index, names, metalinks, tolerance,
+                                  currency_scaling, unit_scales)
+        return
+    references = _presentation_references(xbrl, getattr(vr, 'role', ''))
+    row_contexts = _row_contexts(rows, names, index)
+    occurrences = _row_occurrences(rows, row_contexts)
+    page = SimpleNamespace(results=results, vr=vr, cr=cr, xbrl=xbrl, index=index, names=names,
+                           metalinks=metalinks, tolerance=tolerance, currency_scaling=currency_scaling,
+                           unit_scales=unit_scales, references=references, cell_columns=cell_columns)
+    seen: Counter = Counter()
+
+    for i, crow in enumerate(rows):
+        if not _is_data_row(crow):
+            continue
+        occurrence_key = (row_contexts[i], crow.concept_id)
+        occurrence = seen[occurrence_key]
+        seen[occurrence_key] += 1
+        _compare_row(page, i, crow, row_contexts[i], occurrence, occurrences[occurrence_key])
+
+    _emit_page_unextracted_cells(results, vr, cr)
+
+
+def _row_contexts(rows, names: _Names, index: '_FactIndex') -> List[Tuple[Optional[Dims], Optional[str]]]:
+    """Member context of every row: a member header (rh row) puts the rows below it in that member."""
+    # Member context of every row: a member header (rh row) puts the rows
+    # below it in that member, up to the next member header.
+    row_contexts: List[Tuple[Optional[Dims], Optional[str]]] = []
+    current: Tuple[Optional[Dims], Optional[str]] = (frozenset(), None)
+    for crow in rows:
+        if crow.is_header and crow.is_dimensional:
+            current = _member_header_dims(crow, names, index.typed_values)
+        row_contexts.append(current)
+    return row_contexts
+
+
+def _is_data_row(crow) -> bool:
+    """A row that carries values: not abstract, not a member header, not dimensional."""
+    return not (crow.is_abstract or crow.is_dimensional or crow.is_header) and bool(crow.values)
+
+
+def _row_occurrences(rows, row_contexts) -> Counter:
+    """How many data rows each (member context, concept) has on the page."""
+    occurrences: Counter = Counter()
+    for crow, context in zip(rows, row_contexts, strict=True):
+        if _is_data_row(crow):
+            occurrences[(context, crow.concept_id)] += 1
+    return occurrences
+
+
+def _compare_row(page: SimpleNamespace, i: int, crow, row_context, occurrence: int, occurrence_count: int) -> None:
+    """Compare each cell of one data row (part of ``_compare_statement``).
+
+    ``occurrence`` is which of the ``occurrence_count`` rows of the concept
+    in this member context the row is.
+    """
+    dims, context_reason = row_context
+    xbrl_concept = _normalize_concept_id(crow.concept_id)
+    tag = page.metalinks.get_tag(crow.concept_id)
+    xbrltype = (tag.xbrltype if tag else '') or ''
+    row = SimpleNamespace(i=i, crow=crow, dims=dims, context_reason=context_reason, xbrl_concept=xbrl_concept,
+                          tag=tag, xbrltype=xbrltype, occurrence=occurrence, occurrence_count=occurrence_count)
+    for value_key, display_val in crow.values.items():
+        _compare_row_cell(page, row, value_key, display_val)
+
+
+def _cell_column(cr, cell_columns, i: int, value_key: str) -> Tuple[str, Optional[str]]:
+    """A cell's column header and the unit its column names (part of ``_compare_row_cell``)."""
+    column_unit = None
+    if cell_columns is not None and value_key in cell_columns[i]:
+        column = cell_columns[i][value_key]
+        period_header = cr.period_headers[column]
+        if column < len(cr.column_units):
+            column_unit = cr.column_units[column]
+    else:
+        period_header = _DUPLICATE_KEY_SUFFIX_RE.sub('', value_key)
+    return period_header, column_unit
+
+
+def _compare_row_cell(page: SimpleNamespace, row: SimpleNamespace, value_key: str, display_val: str) -> None:
+    """Compare one cell of a data row and emit its outcome (part of ``_compare_row``)."""
+    cr, crow, xbrl_concept, xbrltype = page.cr, row.crow, row.xbrl_concept, row.xbrltype
+    period_header, column_unit = _cell_column(cr, page.cell_columns, row.i, value_key)
+
+    viewer_num = _read_number(display_val, column_unit or cr.header_unit)
+    if viewer_num is None and (_is_footnote_marker(display_val)
+                               or not (_is_numeric_type(xbrltype) and (display_val or '').strip())):
+        return  # not a numeric cell
+    emit = partial(_emit, page.results, dict(
+        concept_id=xbrl_concept, label=crow.label, period=value_key,
+        viewer_value=viewer_num, report=page.vr.short_name))
+    if viewer_num is None:
+        emit(NOT_COMPARABLE, reason=f"value {display_val!r} cannot be read as a number")
+        return
+
+    period_info = _column_period(emit, period_header)
+    if period_info is None:
+        return
+    period_keys = _cell_period_keys(emit, page, row, period_info)
+    if period_keys is None:
+        return
+
+    _judge_cell(emit, page.index, page.names, xbrl_concept, period_keys, row.dims, xbrltype,
+                display_val, viewer_num, cr, column_unit, page.currency_scaling, page.tolerance,
+                sign=_row_sign(page.xbrl, row.tag, crow, page.references, row.occurrence,
+                               row.occurrence_count),
+                unit_scales=page.unit_scales)
+
+
+def _column_period(emit, period_header: str) -> Optional[dict]:
+    """The period a column header states, or None after emitting why the header gives none.
+
+    A header with no period, or one that names a member or unit by label
+    as well as its period, is not comparable. Part of ``_compare_row_cell``.
+    """
+    period_info = _parse_viewer_period(period_header)
+    if not period_info:
+        if _DATE_RE.search(period_header):
+            emit(NOT_COMPARABLE, reason=(
+                f"column header {period_header!r} names a member or unit by label "
+                "before its period"))
+        else:
+            emit(NOT_COMPARABLE, reason=(
+                f"column {period_header!r} states no period (a member column, as in "
+                "an equity statement); the page does not give each row's period"))
+        return None
+
+    header_match = _DATE_RE.match(period_header)
+    if header_match.end() < len(period_header.rstrip()):
+        emit(NOT_COMPARABLE, reason=(
+            f"column header {period_header!r} carries more than a period "
+            "(a member or unit named only by label)"))
+        return None
+    return period_info
+
+
+def _cell_period_keys(emit, page: SimpleNamespace, row: SimpleNamespace, period_info: dict
+                      ) -> Optional[List[str]]:
+    """The period keys a cell may show, or None after emitting why it has none.
+
+    An instant column shows an instant concept at its date; a duration
+    column shows a duration concept's own period (``_FactIndex.concept_period``)
+    or an instant concept's opening or closing balance (``_balance_role``).
+    Part of ``_compare_row_cell``.
+    """
+    index, xbrl_concept, dims = page.index, row.xbrl_concept, row.dims
+    # Period keys the cell may show.
+    period_type = index.period_types.get(xbrl_concept)
+    if period_type is None:
+        emit(MISSING, reason="no XBRL fact for this concept")
+        return None
+    if dims is None:
+        emit(NOT_COMPARABLE, reason=row.context_reason)
+        return None
+    end_date = period_info['end']
+    months = period_info['months']
+    if months is None:
+        if period_type != 'instant':
+            emit(NOT_COMPARABLE, reason="duration concept under an instant column header")
+            return None
+        return [f'instant_{end_date}']
+    if period_type == 'instant':
+        return _balance_period_keys(emit, page, row, end_date, months)
+    return _duration_period_keys(emit, index, xbrl_concept, dims, end_date, months)
+
+
+def _balance_period_keys(emit, page: SimpleNamespace, row: SimpleNamespace, end_date: str,
+                         months: int) -> Optional[List[str]]:
+    """An instant concept in a duration column: its opening or closing balance's keys, or None after emitting."""
+    index, xbrl_concept, dims = page.index, row.xbrl_concept, row.dims
+    role, role_reason = _balance_role(row.crow, row.tag, row.occurrence, row.occurrence_count,
+                                      page.references.get(row.crow.concept_id))
+    if role is None:
+        emit(NOT_COMPARABLE, reason=role_reason)
+        return None
+    if role == 'opening':
+        starts = index.column_starts(end_date, months)
+        if not starts:
+            emit(MISSING, reason=(f"no period in the filing renders as {months} months "
+                                  f"ending {end_date}"))
+            return None
+        # The opening balance of each period that renders with
+        # this heading; they must agree, or the page cannot say
+        # which one it shows.
+        openings = {}
+        for start in starts:
+            for key in _opening_instant_keys(start):
+                if index.facts.get((xbrl_concept, key, dims)):
+                    openings[key] = index.value_signature(xbrl_concept, key, dims)
+                    break
+        if len(set(openings.values())) > 1:
+            emit(NOT_COMPARABLE, reason=(
+                f"periods that render as {months} months ending {end_date} start on "
+                f"different dates whose opening balances disagree: {', '.join(sorted(openings))}"))
+            return None
+        return (sorted(openings)[:1]
+                or [key for start in starts for key in _opening_instant_keys(start)])
+    return [f'instant_{end_date}']
+
+
+def _duration_period_keys(emit, index: '_FactIndex', xbrl_concept: str, dims: Dims, end_date: str,
+                          months: int) -> Optional[List[str]]:
+    """A duration concept's own period for the column, or None after emitting why there is none."""
+    duration_key, duration_reason = index.concept_period(xbrl_concept, dims, end_date, months)
+    if duration_key is None:
+        if duration_reason.startswith('no '):
+            wider = index.wider_context_reason(
+                xbrl_concept, dims, index.rendered_period_keys(end_date, months))
+            if wider:
+                emit(NOT_COMPARABLE, reason=wider)
+            else:
+                emit(MISSING, reason=duration_reason)
+        else:
+            emit(NOT_COMPARABLE, reason=duration_reason)
+        return None
+    return [duration_key]
+
+
+def _emit_page_unextracted_cells(results: ComparisonResults, vr, cr) -> None:
+    """Emit each numeric cell the extractor put in no row as not comparable, saying why.
+
+    Equity-statement "Balance ... at <date>" rows of class rc, rows with no
+    concept link, cells under no column: counted, never compared.
+    """
+    # Numeric cells the extractor did not put in any row (equity-statement
+    # "Balance ... at <date>" rows of class rc, rows with no concept link,
+    # cells under no column): counted, never compared.
+    for cell in getattr(cr, 'unextracted_cells', None) or []:
+        header = (cr.period_headers[cell.column]
+                  if cell.column is not None and cell.column < len(cr.period_headers) else '')
+        what = (f"row class {cell.row_class!r} is not extracted (an equity-statement balance row)"
+                if cell.row_class == 'rc' else
+                f"cell is not extracted (row class {cell.row_class!r}"
+                + (", no concept link" if not cell.concept_id else "")
+                + (", under no column" if cell.column is None else "") + ")")
+        _emit(results, dict(concept_id=_normalize_concept_id(cell.concept_id) if cell.concept_id else '',
+                            label=cell.label, period=header, viewer_value=parse_numeric(cell.value),
+                            report=vr.short_name),
+              NOT_COMPARABLE, reason=what)
