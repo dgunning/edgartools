@@ -327,7 +327,8 @@ class DocumentBuilder:
             # IXBRL elements that can contain tables and complex content
             'ix:nonNumeric', 'ix:continuation'
         }
-        if tag not in skip_header_detection_tags and self.strategies.get('header_detection'):
+        if (tag not in skip_header_detection_tags and self.strategies.get('header_detection')
+                and not self._is_mid_sentence_run(element, tag)):
             header_info = self.strategies['header_detection'].detect(element, self.context)
             if header_info and header_info.confidence > self.config.header_detection_threshold:
                 text = self._get_element_text(element)
@@ -645,6 +646,30 @@ class DocumentBuilder:
             style.text_align = align
 
         return style
+
+    def _is_mid_sentence_run(self, element: HtmlElement, tag: str) -> bool:
+        """Whether an inline element continues text that started before it in its block.
+
+        A heading starts its block. '<p>Paragraph with <b>bold</b> and ...</p>' is
+        one sentence, and its bold word is emphasis, not a heading; scored alone,
+        the style detector would promote it. Its score used to be averaged down by
+        the pattern detector's case-insensitive vote, which edgartools-s4cg removed.
+        A run-in heading ('<b>General.</b> The company ...') has text only after it
+        and is unaffected.
+        """
+        if tag not in self.INLINE_ELEMENTS:
+            return False
+        parent = element.getparent()
+        if parent is None:
+            return False
+        if (parent.text or '').strip():
+            return True
+        for sibling in element.itersiblings(preceding=True):
+            if (sibling.tail or '').strip():
+                return True
+            if isinstance(sibling.tag, str) and sibling.text_content().strip():
+                return True
+        return False
 
     def _get_heading_text(self, element: HtmlElement) -> str:
         """Get a heading's text as a browser lays it out.

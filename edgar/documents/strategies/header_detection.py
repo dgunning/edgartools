@@ -135,22 +135,32 @@ class StyleBasedDetector(HeaderDetector):
 class PatternBasedDetector(HeaderDetector):
     """Detect headers based on text patterns."""
 
-    # Common header patterns in SEC filings
+    # Common header patterns in SEC filings.
+    #
+    # Matched case-SENSITIVELY. The vocabulary patterns (Item, Part, section
+    # names) say so with an inline (?i); the shape patterns below them encode
+    # their discrimination in the case class itself — "all caps" is [A-Z], "title
+    # case" is a leading [A-Z] — and a global re.IGNORECASE turned them into "any
+    # letters" at a confidence that clears the single-detector threshold, so
+    # Apple's FY2024 10-K promoted the bare word 'or' to a heading
+    # (edgartools-s4cg).
     HEADER_PATTERNS = [
         # Item patterns
-        (r'^(Item|ITEM)\s+(\d+[A-Z]?)[.\s]+(.+)$', 1, 0.95),
-        (r'^Part\s+[IVX]+[.\s]*$', 1, 0.9),
-        (r'^PART\s+[IVX]+[.\s]*$', 1, 0.9),
+        (r'(?i)^(Item|ITEM)\s+(\d+[A-Z]?)[.\s]+(.+)$', 1, 0.95),
+        (r'(?i)^Part\s+[IVX]+[.\s]*$', 1, 0.9),
+        (r'(?i)^PART\s+[IVX]+[.\s]*$', 1, 0.9),
 
         # Section patterns
-        (r'^(BUSINESS|RISK FACTORS|PROPERTIES|LEGAL PROCEEDINGS)$', 2, 0.85),
-        (r'^(Management\'?s?\s+Discussion|MD&A)', 2, 0.85),
-        (r'^(Financial\s+Statements|Consolidated\s+Financial\s+Statements)$', 2, 0.85),
+        (r'(?i)^(BUSINESS|RISK FACTORS|PROPERTIES|LEGAL PROCEEDINGS)$', 2, 0.85),
+        (r'(?i)^(Management\'?s?\s+Discussion|MD&A)', 2, 0.85),
+        (r'(?i)^(Financial\s+Statements|Consolidated\s+Financial\s+Statements)$', 2, 0.85),
 
         # Numbered sections
         (r'^\d+\.\s+[A-Z][A-Za-z\s]+$', 3, 0.7),
-        (r'^[A-Z]\.\s+[A-Z][A-Za-z\s]+$', 3, 0.7),
-        (r'^\([a-z]\)\s+[A-Z][A-Za-z\s]+$', 4, 0.6),
+        # The enumerator may be either case ('a.', '(B)'); the title after it
+        # still has to start with a capital.
+        (r'^[A-Za-z]\.\s+[A-Z][A-Za-z\s]+$', 3, 0.7),
+        (r'^\([A-Za-z]\)\s+[A-Z][A-Za-z\s]+$', 4, 0.6),
 
         # Title case headers
         (r'^[A-Z][A-Za-z\s]+[A-Za-z]$', 3, 0.5),
@@ -181,7 +191,7 @@ class PatternBasedDetector(HeaderDetector):
 
         # Check against patterns
         for pattern, level, base_confidence in self.HEADER_PATTERNS:
-            match = re.match(pattern, text, re.IGNORECASE)
+            match = re.match(pattern, text)
             if match:
                 # Adjust confidence based on context
                 confidence = base_confidence
@@ -297,12 +307,19 @@ class ContextualDetector(HeaderDetector):
         if len(text) == 1 and text in '.,!?;:()[]{}':
             return None
 
-        confidence = 0.0
+        # The text has to look like a header. Context alone — a heading before it,
+        # a long paragraph after it, an early position — scores 0.8, above the
+        # threshold, so without this gate a checkbox answer ('No') or a function
+        # word split off a sentence ('and') between a heading and a paragraph
+        # became a heading itself (edgartools-s4cg). An Item or Part label set
+        # apart from its title ('Item 4.') keeps the context-only score it had:
+        # section boundaries on some filings depend on exactly which of those
+        # become headings, and that is llmp.12's to change, not this gate's.
+        looks_like_header = self._looks_like_header(text)
+        if not looks_like_header and not _STRUCTURAL_LABEL.match(text):
+            return None
+        confidence = 0.4 if looks_like_header else 0.0
         level = 3
-
-        # Check if text looks like a header
-        if self._looks_like_header(text):
-            confidence += 0.4
 
         # Check relationship to previous content
         prev_elem = element.getprevious()
@@ -368,6 +385,10 @@ class ContextualDetector(HeaderDetector):
 
         # No ending punctuation (except colon)
         if text.rstrip().endswith(('.', '!', '?', ';')):
+            return False
+
+        # A title has a word in it: 'No', 'In' and 'or' are not titles.
+        if sum(ch.isalpha() for ch in text) < 3:
             return False
 
         # Title case or all caps
