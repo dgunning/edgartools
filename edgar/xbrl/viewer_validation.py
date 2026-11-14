@@ -407,48 +407,61 @@ class _FactIndex:
         # typed axis -> every value the filing's contexts give it
         self.typed_values: Dict[str, set] = defaultdict(set)
 
-        contexts = getattr(xbrl, 'contexts', None) or {}
-        typed_axes = {self.names.axis_name(axis) for axis in self.names.typed}
+        self._contexts = getattr(xbrl, 'contexts', None) or {}
+        self._typed_axes = {self.names.axis_name(axis) for axis in self.names.typed}
         facts_df = xbrl.facts.to_dataframe()
         if facts_df is None or facts_df.empty:
             return
         for row in facts_df.to_dict('records'):
-            concept = row.get('concept')
-            period_key = row.get('period_key')
-            if not concept or not isinstance(period_key, str) or not period_key:
-                continue
-            self.fact_periods.add((concept, period_key))
-            value = _float_or_none(row.get('numeric_value'))
-            if value is None:
-                value = _float_or_none(row.get('value'))
-            if value is None:
-                continue
-            context = contexts.get(row.get('context_ref'))
-            if context is not None:
-                dims = self.names.context_dims(context.dimensions)
-            elif row.get('is_dimensioned', False):
-                continue  # dimensioned, but its members cannot be read
-            else:
-                dims = frozenset()
-            if period_key.startswith('duration_'):
-                parts = period_key[len('duration_'):].split('_')
-                if len(parts) == 2:
-                    self.durations_by_end[parts[1]][period_key] = parts[0]
-                    self.concept_durations[(concept, dims, parts[1])][period_key] = parts[0]
-            period_type = row.get('period_type')
-            if isinstance(period_type, str) and period_type:
-                self.period_types.setdefault(concept, period_type)
-            self.period_contexts[(concept, period_key)].add(dims)
-            for axis, member in dims:
-                if axis in typed_axes:
-                    self.typed_values[axis].add(member)
-            self.facts[(concept, period_key, dims)].append(SimpleNamespace(
-                numeric_value=value,
-                value=row.get('value'),
-                decimals=row.get('decimals'),
-                unit_ref=_text_or_none(row.get('unit_ref')),
-                currency=_text_or_none(row.get('currency')),
-            ))
+            self._add_row(row)
+
+    def _row_dims(self, row: dict) -> Optional[Dims]:
+        """The row's context dimensions, or None when it is dimensioned but its members cannot be read."""
+        context = self._contexts.get(row.get('context_ref'))
+        if context is not None:
+            return self.names.context_dims(context.dimensions)
+        if row.get('is_dimensioned', False):
+            return None
+        return frozenset()
+
+    def _record_duration(self, concept: str, period_key: str, dims: Dims) -> None:
+        if not period_key.startswith('duration_'):
+            return
+        parts = period_key[len('duration_'):].split('_')
+        if len(parts) == 2:
+            self.durations_by_end[parts[1]][period_key] = parts[0]
+            self.concept_durations[(concept, dims, parts[1])][period_key] = parts[0]
+
+    def _add_row(self, row: dict) -> None:
+        """Index one row of the facts DataFrame."""
+        concept = row.get('concept')
+        period_key = row.get('period_key')
+        if not concept or not isinstance(period_key, str) or not period_key:
+            return
+        self.fact_periods.add((concept, period_key))
+        value = _float_or_none(row.get('numeric_value'))
+        if value is None:
+            value = _float_or_none(row.get('value'))
+        if value is None:
+            return
+        dims = self._row_dims(row)
+        if dims is None:
+            return
+        self._record_duration(concept, period_key, dims)
+        period_type = row.get('period_type')
+        if isinstance(period_type, str) and period_type:
+            self.period_types.setdefault(concept, period_type)
+        self.period_contexts[(concept, period_key)].add(dims)
+        for axis, member in dims:
+            if axis in self._typed_axes:
+                self.typed_values[axis].add(member)
+        self.facts[(concept, period_key, dims)].append(SimpleNamespace(
+            numeric_value=value,
+            value=row.get('value'),
+            decimals=row.get('decimals'),
+            unit_ref=_text_or_none(row.get('unit_ref')),
+            currency=_text_or_none(row.get('currency')),
+        ))
 
     def wider_context_reason(self, concept: str, dims: Dims, period_keys: List[str]) -> Optional[str]:
         """Why the page does not identify the context, when facts carry more dimensions than the row.
