@@ -86,7 +86,11 @@ def vcr_cassette_name():
 @pytest.mark.vcr
 def test_opera_lease_interest_is_interest_expense(tmp_path):
     """Opera Ltd FY2025 20-F, 0001737450-26-000005, Note 6: interest expense on lease
-    liabilities $461K (2024: $518K, 2023: $356K)."""
+    liabilities $461K (2024: $518K, 2023: $356K).
+
+    The SEC page for this role (R57.htm) shows the line as (461), (518) and (356): the arc
+    carries a negated label, which now applies on every statement (edgartools-auvk1.13), so
+    the presented values are negative and the filed facts stay positive."""
     for name in OPRA_20F_XBRL_FILES:
         (tmp_path / name).write_text(download_file(OPRA_20F_FOLDER + name), encoding="utf-8")
     statement = XBRL.from_directory(tmp_path).statements[FINANCE_EXPENSE_ROLE]
@@ -94,7 +98,10 @@ def test_opera_lease_interest_is_interest_expense(tmp_path):
     frame = statement.render(standard=True).to_dataframe()
     rows = frame[(frame["concept"] == "ifrs-full_InterestExpenseOnLeaseLiabilities") & ~frame["dimension"]]
     assert rows["standard_concept"].tolist() == ["InterestExpense"]
-    assert rows["2025-12-31"].tolist() == [461_000]
-    assert rows["2024-12-31"].tolist() == [518_000]
-    assert rows["2023-12-31"].tolist() == [356_000]
+    assert rows["2025-12-31"].tolist() == [-461_000]
+    assert rows["2024-12-31"].tolist() == [-518_000]
+    assert rows["2023-12-31"].tolist() == [-356_000]
     assert (frame["standard_concept"] == "OperatingLeaseExpense").sum() == 0
+    raw = statement.to_dataframe(presentation=False)
+    filed = raw[(raw["concept"] == "ifrs-full_InterestExpenseOnLeaseLiabilities") & ~raw["dimension"]]
+    assert filed["2025-12-31 (FY)"].tolist() == [461_000]
