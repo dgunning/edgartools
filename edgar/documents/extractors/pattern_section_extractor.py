@@ -1283,6 +1283,7 @@ class SectionExtractor:
             current_level = current_node.level if isinstance(current_node, HeadingNode) else 1
             current_item = _ITEM_HEADER_START.match(headers[section_index][1])
             current_item = current_item.group(1).upper() if current_item else None
+            current_part = not current_item and bool(_PART_HEADER.match(headers[section_index][1]))
 
             for i in range(section_index + 1, len(headers)):
                 next_node = headers[i][0]
@@ -1332,6 +1333,16 @@ class SectionExtractor:
                 next_item = _ITEM_HEADER_START.match(next_text)
                 if current_item and next_item and next_item.group(1).upper() != current_item:
                     return headers[i][2]
+
+                # A Part runs from its divider to the next divider; its own items
+                # are inside it, not after it. Comparing levels here closed the
+                # Part at its first item whenever the item header scored the
+                # same level as the divider, so nine of fifteen corpus 20-Fs
+                # returned part_i == 'PART I' (edgartools-qw60x.1).
+                if current_part:
+                    if _PART_HEADER.match(next_text):
+                        return headers[i][2]
+                    continue
 
                 # If next header is at same or higher level, that's our end
                 if next_level <= current_level:

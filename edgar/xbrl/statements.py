@@ -1828,9 +1828,11 @@ class Statement:
         # 0001562762-22-000397 by role) and skipped parentheticals.
         if 'preferred_sign' in result.columns:
             # Numeric, so the product stays float: an object-dtype sign column
-            # (None beside -1) made an all-NaN object result that pandas refuses
-            # to write into a float column (TypeError on DiamondRock's
-            # parenthetical balance sheet, 0001298946-24-000052).
+            # (None beside -1) made an object result that pandas refuses to write
+            # into a float column -- TypeError on DiamondRock's parenthetical
+            # balance sheet (0001298946-24-000052), and under pandas 3 on a role
+            # where no row has a sign (GH #1960, KEYS FY2020 land-sale details).
+            # The column is replaced whole, never assigned through .loc.
             signs = pd.to_numeric(result['preferred_sign'], errors='coerce')
             mask = signs.notna() & (signs != 0)
             for col in period_cols:
