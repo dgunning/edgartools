@@ -1,0 +1,93 @@
+[
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "i23793b8e8e334deb90799bc9fd1a7d6c_D20190801-20200731",
+  "period_key": "duration_2019-08-01_2020-07-31",
+  "period_type": "duration",
+  "value": "79317000",
+  "numeric_value": 79317000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "if4e790b0b69840449f6553e1cc83a5cc_D20180801-20190731",
+  "period_key": "duration_2018-08-01_2019-07-31",
+  "period_type": "duration",
+  "value": "58027000",
+  "numeric_value": 58027000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "id0cf2aa65cbc43c093b665e15a077698_D20170801-20180731",
+  "period_key": "duration_2017-08-01_2018-07-31",
+  "period_type": "duration",
+  "value": "17307000",
+  "numeric_value": 17307000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "i25f850eeef8c40bcab31e432e1730ee7_I20170731",
+  "period_key": "instant_2017-07-31",
+  "period_type": "instant",
+  "value": "88546000",
+  "numeric_value": 88546000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "i9857e45e58434bbfa779087644ecdb6a_I20190731",
+  "period_key": "instant_2019-07-31",
+  "period_type": "instant",
+  "value": "78484000",
+  "numeric_value": 78484000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "i0a31c51d69cf44fb8e874aa6a8da80ef_I20180731",
+  "period_key": "instant_2018-07-31",
+  "period_type": "instant",
+  "value": "136147000",
+  "numeric_value": 136147000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "ib0d151d35d894938bdfc4d80afa56856_I20200731",
+  "period_key": "instant_2020-07-31",
+  "period_type": "instant",
+  "value": "141851000",
+  "numeric_value": 141851000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ }
+]

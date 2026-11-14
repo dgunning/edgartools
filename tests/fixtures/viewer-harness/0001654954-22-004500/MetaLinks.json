@@ -1,0 +1,1272 @@
+{
+ "version": "2.1",
+ "instance": {
+  "ndm_40f.htm ndm_ex995.htm": {
+   "tag": {
+    "ifrs-full_AdministrativeExpense": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 3.0,
+       "parentTag": "ndm_LossFromOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of expenses that the entity classifies as being administrative."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "General and administrative expenses"
+       }
+      }
+     },
+     "localname": "AdministrativeExpense",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_Assets": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of a present economic resource controlled by the entity as a result of past events. Economic resource is a right that has the potential to produce economic benefits."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Assets]",
+        "totalLabel": "Total Assets"
+       }
+      }
+     },
+     "localname": "Assets",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_AuditorsRemunerationForAuditServices": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 4.0,
+       "parentTag": "ndm_LossFromOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of fees paid or payable to the entity's auditors for auditing services."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Legal, accounting and audit"
+       }
+      }
+     },
+     "localname": "AuditorsRemunerationForAuditServices",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_CashAndCashEquivalents": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 4.0,
+       "parentTag": "ifrs-full_CurrentAssets",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of cash on hand and demand deposits, along with short-term, highly liquid investments that are readily convertible to known amounts of cash and that are subject to an insignificant risk of changes in value. [Refer: Cash; Cash equivalents]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Cash and cash equivalents",
+        "periodEndLabel": "Cash and cash equivalents - ending balance",
+        "periodStartLabel": "Cash and cash equivalents - beginning balance",
+        "terseLabel": "Cash and cash equivalents",
+        "verboseLabel": "Cash and cash equivalents"
+       }
+      }
+     },
+     "localname": "CashAndCashEquivalents",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition",
+      "http://northerndynastyminerals.com/role/FinancialRiskManagementDetails",
+      "http://northerndynastyminerals.com/role/NatureAndContinuanceOfOperationsDetailsNarrative"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTaxAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Items that may be subsequently reclassified to net loss"
+       }
+      }
+     },
+     "localname": "ComponentsOfOtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTaxAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_CurrentAssets": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 6.0,
+       "parentTag": "ifrs-full_Assets",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of assets that the entity (a) expects to realise or intends to sell or consume in its normal operating cycle; (b) holds primarily for the purpose of trading; (c) expects to realise within twelve months after the reporting period; or (d) classifies as cash or cash equivalents (as defined in IAS 7) unless the asset is restricted from being exchanged or used to settle a liability for at least twelve months after the reporting period. [Refer: Assets]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Current assets]",
+        "totalLabel": "Total current assets"
+       }
+      }
+     },
+     "localname": "CurrentAssets",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_CurrentAssetsAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Current assets"
+       }
+      }
+     },
+     "localname": "CurrentAssetsAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_CurrentLiabilities": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 14.0,
+       "parentTag": "ifrs-full_Liabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "Expiry date 2023-01-01: The amount of liabilities that: (a) the entity expects to settle in its normal operating cycle; (b) the entity holds primarily for the purpose of trading; (c) are due to be settled within twelve months after the reporting period; or (d) the entity does not have an unconditional right to defer settlement for at least twelve months after the reporting period.\nEffective 2023-01-01: The amount of liabilities that: (a) the entity expects to settle in its normal operating cycle; (b) the entity holds primarily for the purpose of trading; (c) are due to be settled within twelve months after the reporting period; or (d) the entity does not have the right at the end of the reporting period to defer settlement for at least twelve months after the reporting period."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Current liabilities]",
+        "totalLabel": "Total current liabilities"
+       }
+      }
+     },
+     "localname": "CurrentLiabilities",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_CurrentLiabilitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Current liabilities"
+       }
+      }
+     },
+     "localname": "CurrentLiabilitiesAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_EmployeeBenefitsExpense": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 5.0,
+       "parentTag": "ndm_LossFromOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The expense of all forms of consideration given by an entity in exchange for a service rendered by employees or for the termination of employment."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Share-based compensation"
+       }
+      }
+     },
+     "localname": "EmployeeBenefitsExpense",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_Equity": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 17.0,
+       "parentTag": "ifrs-full_EquityAndLiabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of residual interest in the assets of the entity after deducting all its liabilities."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Equity]",
+        "periodEndLabel": "Balance, amount",
+        "periodStartLabel": "Balance, amount",
+        "totalLabel": "Total equity"
+       }
+      }
+     },
+     "localname": "Equity",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_EquityAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Capital and reserves"
+       }
+      }
+     },
+     "localname": "EquityAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_EquityAndLiabilities": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of the entity's equity and liabilities. [Refer: Equity; Liabilities]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Equity and liabilities]",
+        "totalLabel": "Total Equity and Liabilities"
+       }
+      }
+     },
+     "localname": "EquityAndLiabilities",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_EquityAndLiabilitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "EQUITY"
+       }
+      }
+     },
+     "localname": "EquityAndLiabilitiesAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_ExpenseArisingFromExplorationForAndEvaluationOfMineralResources": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 2.0,
+       "parentTag": "ndm_LossFromOperatingActivities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of expense arising from the search for mineral resources, including minerals, oil, natural gas and similar non-regenerative resources after the entity has obtained legal rights to explore in a specific area, as well as the determination of the technical feasibility and commercial viability of extracting the mineral resource."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Exploration and evaluation expenses"
+       }
+      }
+     },
+     "localname": "ExpenseArisingFromExplorationForAndEvaluationOfMineralResources",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_FinanceCosts": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 9.0,
+       "parentTag": "ndm_NetLoss",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of costs associated with financing activities of the entity."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Finance expense"
+       }
+      }
+     },
+     "localname": "FinanceCosts",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_GainsLossesOnExchangeDifferencesOnTranslationRecognisedInProfitOrLoss": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 7.0,
+       "parentTag": "ndm_NetLoss",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of exchange differences recognised in profit or loss that arise from foreign currency transactions, excluding those arising on financial instruments measured at fair value through profit or loss in accordance with IFRS 9. [Refer: At fair value [member]; Financial instruments, class [member]]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Foreign exchange gain (loss)]",
+        "negatedLabel": "Foreign exchange loss"
+       }
+      }
+     },
+     "localname": "GainsLossesOnExchangeDifferencesOnTranslationRecognisedInProfitOrLoss",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_IncomeStatementAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Consolidated Statements of Comprehensive Loss"
+       }
+      }
+     },
+     "localname": "IncomeStatementAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_IssuedCapital": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 10.0,
+       "parentTag": "ifrs-full_Equity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The nominal value of capital issued."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Share capital"
+       }
+      }
+     },
+     "localname": "IssuedCapital",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_Liabilities": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 16.0,
+       "parentTag": "ifrs-full_EquityAndLiabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of a present obligation of the entity to transfer an economic resource as a result of past events. Economic resource is a right that has the potential to produce economic benefits."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Liabilities]",
+        "totalLabel": "Total liabilities"
+       }
+      }
+     },
+     "localname": "Liabilities",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_LiabilitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "LIABILITIES"
+       }
+      }
+     },
+     "localname": "LiabilitiesAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_NoncurrentAssets": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 7.0,
+       "parentTag": "ifrs-full_Assets",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of assets that do not meet the definition of current assets. [Refer: Current assets]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Non-current assets]",
+        "totalLabel": "Total non-current assets"
+       }
+      }
+     },
+     "localname": "NoncurrentAssets",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_NoncurrentAssetsAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Non-current assets"
+       }
+      }
+     },
+     "localname": "NoncurrentAssetsAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_NoncurrentLiabilities": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 15.0,
+       "parentTag": "ifrs-full_Liabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of liabilities that do not meet the definition of current liabilities. [Refer: Current liabilities]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Non-current liabilities]",
+        "totalLabel": "Total non-current liabilities"
+       }
+      }
+     },
+     "localname": "NoncurrentLiabilities",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_NoncurrentLiabilitiesAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Non-current liabilities"
+       }
+      }
+     },
+     "localname": "NoncurrentLiabilitiesAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_NoncurrentPayables": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 11.0,
+       "parentTag": "ifrs-full_NoncurrentLiabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of non-current trade payables and non-current other payables. [Refer: Other non-current payables; Non-current trade payables]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Trade and other payables",
+        "terseLabel": "Non-current trade payables",
+        "verboseLabel": "Total, noncurrent"
+       }
+      }
+     },
+     "localname": "NoncurrentPayables",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition",
+      "http://northerndynastyminerals.com/role/FinancialRiskManagementDetails",
+      "http://northerndynastyminerals.com/role/TradeAndOtherPayablesDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_OtherComprehensiveIncomeAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive loss (income)"
+       }
+      }
+     },
+     "localname": "OtherComprehensiveIncomeAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 14.0,
+       "parentTag": "ndm_OtherComprehensiveLoss",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of other comprehensive income, net of tax, after reclassification adjustments, related to exchange differences when financial statements of foreign operations are translated. [Refer: Other comprehensive income]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Other comprehensive income, net of tax, exchange differences on translation of foreign operations]",
+        "negatedLabel": "Foreign exchange translation difference"
+       }
+      }
+     },
+     "localname": "OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_OtherIncome": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 10.0,
+       "parentTag": "ndm_NetLoss",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of operating income that the entity does not separately disclose in the same statement or note."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Other income]",
+        "negatedLabel": "Other income"
+       }
+      }
+     },
+     "localname": "OtherIncome",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_OtherReserves": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 9.0,
+       "parentTag": "ifrs-full_Equity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "A component of equity representing reserves within equity, not including retained earnings. [Refer: Retained earnings]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Reserves"
+       }
+      }
+     },
+     "localname": "OtherReserves",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_ProfitLossAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Expenses"
+       }
+      }
+     },
+     "localname": "ProfitLossAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_PropertyPlantAndEquipment": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 2.0,
+       "parentTag": "ifrs-full_NoncurrentAssets",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of tangible assets that: (a) are held for use in the production or supply of goods or services, for rental to others, or for administrative purposes; and (b) are expected to be used during more than one period."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Mineral property, plant and equipment",
+        "periodEndLabel": "Property, plant, and equipment, ending",
+        "periodStartLabel": "Property, plant, and equipment, beginning"
+       }
+      }
+     },
+     "localname": "PropertyPlantAndEquipment",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition",
+      "http://northerndynastyminerals.com/role/MineralPropertyPlantAndEquipmentDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_RestrictedCashAndCashEquivalents": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 3.0,
+       "parentTag": "ifrs-full_NoncurrentAssets",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of cash and cash equivalents whose use or withdrawal is restricted. [Refer: Cash and cash equivalents]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Restricted Cash",
+        "verboseLabel": "Restricted cash"
+       }
+      }
+     },
+     "localname": "RestrictedCashAndCashEquivalents",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition",
+      "http://northerndynastyminerals.com/role/FinancialRiskManagementDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_RetainedEarnings": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 8.0,
+       "parentTag": "ifrs-full_Equity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "A component of equity representing the entity's cumulative undistributed earnings or deficit."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Retained earnings]",
+        "verboseLabel": "Deficit"
+       }
+      }
+     },
+     "localname": "RetainedEarnings",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition",
+      "http://northerndynastyminerals.com/role/NatureAndContinuanceOfOperationsDetailsNarrative"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_StatementOfFinancialPositionAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Consolidated Statements of Financial Position"
+       }
+      }
+     },
+     "localname": "StatementOfFinancialPositionAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_TradeAndOtherCurrentPayables": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 12.0,
+       "parentTag": "ifrs-full_CurrentLiabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of current trade payables and current other payables. [Refer: Current trade payables; Other current payables]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "[Trade and other current payables]",
+        "terseLabel": "Current trade and other payables",
+        "verboseLabel": "Trade and other payables"
+       }
+      }
+     },
+     "localname": "TradeAndOtherCurrentPayables",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition",
+      "http://northerndynastyminerals.com/role/FinancialRiskManagementDetails",
+      "http://northerndynastyminerals.com/role/TradeAndOtherPayablesDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_TradeAndOtherCurrentReceivables": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 5.0,
+       "parentTag": "ifrs-full_CurrentAssets",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of current trade receivables and current other receivables. [Refer: Current trade receivables; Other current receivables]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Amounts receivable and prepaid expenses",
+        "verboseLabel": "Total"
+       }
+      }
+     },
+     "localname": "TradeAndOtherCurrentReceivables",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/AmountsReceivableAndPrepaidExpensesDetails",
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_TradeAndOtherPayablesToRelatedParties": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+       "order": 13.0,
+       "parentTag": "ifrs-full_CurrentLiabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of payables due to related parties. [Refer: Related parties [member]]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Payables to related parties",
+        "terseLabel": "Payables to related parties",
+        "verboseLabel": "Payables to related parties"
+       }
+      }
+     },
+     "localname": "TradeAndOtherPayablesToRelatedParties",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition",
+      "http://northerndynastyminerals.com/role/FinancialRiskManagementDetails",
+      "http://northerndynastyminerals.com/role/RelatedPartyBalancesAndTransactionsDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ndm_BasicAndDilutedEarningsLossPerShare": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Basic and diluted loss per common share"
+       }
+      }
+     },
+     "localname": "BasicAndDilutedEarningsLossPerShare",
+     "nsuri": "http://northerndynastyminerals.com/20211231",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "perShareItemType"
+    },
+    "ndm_GainLossOnDisposalOfPlantAndEquipment": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 13.0,
+       "parentTag": "ndm_NetLoss",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "[Loss on disposal of plant and equipment]",
+        "negatedLabel": "Loss on disposal of plant and equipment"
+       }
+      }
+     },
+     "localname": "GainLossOnDisposalOfPlantAndEquipment",
+     "nsuri": "http://northerndynastyminerals.com/20211231",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ndm_GainLossOnrevaluationofwarrantliabilities": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 12.0,
+       "parentTag": "ndm_NetLoss",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "[Gain (loss) on revaluation of warrant liabilities]",
+        "negatedLabel": "Gain (loss) on revaluation of warrant liabilities"
+       }
+      }
+     },
+     "localname": "GainLossOnrevaluationofwarrantliabilities",
+     "nsuri": "http://northerndynastyminerals.com/20211231",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ndm_Gainonmodificationoflease": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfCashFlows": {
+       "order": 4.0,
+       "parentTag": "ifrs-full_CashFlowsFromUsedInOperatingActivities",
+       "weight": -1.0
+      },
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 11.0,
+       "parentTag": "ndm_NetLoss",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "[Gain on modification of lease]",
+        "negatedLabel": "Gain on modification of lease"
+       }
+      }
+     },
+     "localname": "Gainonmodificationoflease",
+     "nsuri": "http://northerndynastyminerals.com/20211231",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ndm_InterestIncome": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 8.0,
+       "parentTag": "ndm_NetLoss",
+       "weight": -1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "[Interest income]",
+        "negatedLabel": "Interest income"
+       }
+      }
+     },
+     "localname": "InterestIncome",
+     "nsuri": "http://northerndynastyminerals.com/20211231",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ndm_LossFromOperatingActivities": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 6.0,
+       "parentTag": "ndm_NetLoss",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "[Loss from operating activities]",
+        "totalLabel": "Loss from operating activities"
+       }
+      }
+     },
+     "localname": "LossFromOperatingActivities",
+     "nsuri": "http://northerndynastyminerals.com/20211231",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ndm_NetLoss": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfCashFlows": {
+       "order": 2.0,
+       "parentTag": "ifrs-full_CashFlowsFromUsedInOperatingActivities",
+       "weight": 1.0
+      },
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 15.0,
+       "parentTag": "ndm_TotalComprehensiveLoss",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "[Net loss]",
+        "negatedLabel": "Net loss",
+        "totalLabel": "Net loss"
+       }
+      }
+     },
+     "localname": "NetLoss",
+     "nsuri": "http://northerndynastyminerals.com/20211231",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ndm_OtherComprehensiveLoss": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": 16.0,
+       "parentTag": "ndm_TotalComprehensiveLoss",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "[Other comprehensive loss]",
+        "totalLabel": "Other comprehensive loss"
+       }
+      }
+     },
+     "localname": "OtherComprehensiveLoss",
+     "nsuri": "http://northerndynastyminerals.com/20211231",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ndm_TotalComprehensiveLoss": {
+     "calculation": {
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "[Total comprehensive loss]",
+        "totalLabel": "Total comprehensive loss"
+       }
+      }
+     },
+     "localname": "TotalComprehensiveLoss",
+     "nsuri": "http://northerndynastyminerals.com/20211231",
+     "presentation": [
+      "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    }
+   },
+   "report": {
+    "R2": {
+     "firstAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "tbody",
+       "table",
+       "body",
+       "html"
+      ],
+      "baseRef": "ndm_ex995.htm",
+      "contextRef": "AsOf2021-12-31",
+      "decimals": "-3",
+      "first": true,
+      "lang": null,
+      "name": "ifrs-full:RestrictedCashAndCashEquivalents",
+      "reportCount": 1,
+      "unitRef": "CAD",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "000002 - Statement - Consolidated Statements of Financial Position",
+     "role": "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition",
+     "shortName": "Consolidated Statements of Financial Position",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "tbody",
+       "table",
+       "body",
+       "html"
+      ],
+      "baseRef": "ndm_ex995.htm",
+      "contextRef": "AsOf2021-12-31",
+      "decimals": "-3",
+      "lang": null,
+      "name": "ifrs-full:NoncurrentAssets",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "CAD",
+      "xsiNil": "false"
+     }
+    },
+    "R3": {
+     "firstAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "tbody",
+       "table",
+       "body",
+       "html"
+      ],
+      "baseRef": "ndm_ex995.htm",
+      "contextRef": "From2021-01-01to2021-12-31",
+      "decimals": "-3",
+      "first": true,
+      "lang": null,
+      "name": "ifrs-full:ExpenseArisingFromExplorationForAndEvaluationOfMineralResources",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "CAD",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "000003 - Statement - Consolidated Statements of Comprehensive Loss",
+     "role": "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss",
+     "shortName": "Consolidated Statements of Comprehensive Loss",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "tbody",
+       "table",
+       "body",
+       "html"
+      ],
+      "baseRef": "ndm_ex995.htm",
+      "contextRef": "From2021-01-01to2021-12-31",
+      "decimals": "-3",
+      "first": true,
+      "lang": null,
+      "name": "ifrs-full:ExpenseArisingFromExplorationForAndEvaluationOfMineralResources",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "CAD",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,842 @@
+{
+ "version": "2.2",
+ "instance": {
+  "ea0297580-20f_hubcyber.htm": {
+   "tag": {
+    "hubc_ConsolidatedStatementsOfChangesInEquityDeficitAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://www.hubcybersecurity.com/20251231",
+     "localname": "ConsolidatedStatementsOfChangesInEquityDeficitAbstract",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Consolidated Statements of Changes In Equity [Abstract]"
+       }
+      }
+     }
+    },
+    "hubc_ForeignCurrencyTranslationAdjustmentsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.hubcybersecurity.com/20251231",
+     "localname": "ForeignCurrencyTranslationAdjustmentsMember",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Foreign currency translation adjustments",
+        "label": "Foreign Currency Translation Adjustments Member"
+       }
+      }
+     }
+    },
+    "hubc_IncreaseDecreaseThroughConversionOfConvertibleLoans": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.hubcybersecurity.com/20251231",
+     "localname": "IncreaseDecreaseThroughConversionOfConvertibleLoans",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Conversion of convertible loans",
+        "documentation": "The increase (decrease) in equity resulting from the conversion of convertible loans.",
+        "label": "Increase Decrease Through Conversion Of Convertible Loans"
+       }
+      }
+     }
+    },
+    "hubc_IncreaseDecreaseThroughIssuanceOfPrefundedWarrants": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.hubcybersecurity.com/20251231",
+     "localname": "IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Issuance of Prefunded warrants",
+        "documentation": "Represent the amount of issuance of prefunded warrants.",
+        "label": "Increase Decrease Through Issuance Of Prefunded Warrants"
+       }
+      }
+     }
+    },
+    "hubc_IncreaseDecreaseThroughIssuanceOfSharesAndWarrants": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.hubcybersecurity.com/20251231",
+     "localname": "IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Issuance of shares and warrants",
+        "documentation": "Issuance of shares and warrants.",
+        "label": "Increase Decrease Through Issuance Of Shares And Warrants"
+       }
+      }
+     }
+    },
+    "hubc_IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.hubcybersecurity.com/20251231",
+     "localname": "IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Issuance of shares to Equity line of Credit (“ELOC’)",
+        "documentation": "The increase (decrease) in equity resulting from the issuance of shares of line of credit (“ELOC’).",
+        "label": "Increase Decrease Through Issuance Of Shares To Equity Line Of Credit ELOC"
+       }
+      }
+     }
+    },
+    "hubc_IncreaseDecreaseThroughSharebasedPaymentIssuedForServices": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.hubcybersecurity.com/20251231",
+     "localname": "IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Share-based payment issued for services",
+        "documentation": "Amount of share-based payment issued for services.",
+        "label": "Increase Decrease Through Sharebased Payment Issued For Services"
+       }
+      }
+     }
+    },
+    "hubc_IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.hubcybersecurity.com/20251231",
+     "localname": "IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Cashless exercise of liability warrants",
+        "documentation": "Amount of cashless exercise of liability warrants.",
+        "label": "Increase Decreasethrough Cashless Exercise Of Liability Warrants"
+       }
+      }
+     }
+    },
+    "hubc_ReclassificationOfWarrantsFromLiabilityToEquity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.hubcybersecurity.com/20251231",
+     "localname": "ReclassificationOfWarrantsFromLiabilityToEquity",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Reclassification of warrants from liability to equity",
+        "documentation": "Amount of reclassification of warrants from liability to equity.",
+        "label": "Reclassification Of Warrants From Liability To Equity"
+       }
+      }
+     }
+    },
+    "hubc_ReserveForTransactionsWithNoncontrollingInterestsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.hubcybersecurity.com/20251231",
+     "localname": "ReserveForTransactionsWithNoncontrollingInterestsMember",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Reserve for transactions with noncontrolling interests",
+        "label": "Reserve For Transactions With Noncontrolling Interests Member"
+       }
+      }
+     }
+    },
+    "ifrs-full_ComponentsOfEquityAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "ComponentsOfEquityAxis",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/EventsAftertheReportingDateDetails",
+      "http://www.hubcybersecurity.com/role/FinancialLiabilitiesDetails1",
+      "http://www.hubcybersecurity.com/role/FinancialLiabilitiesDetails2",
+      "http://www.hubcybersecurity.com/role/FinancialLiabilitiesDetails3",
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Components of equity [axis]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      }
+     }
+    },
+    "ifrs-full_ComponentsOfEquityDomain": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "ComponentsOfEquityDomain",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/EventsAftertheReportingDateDetails",
+      "http://www.hubcybersecurity.com/role/FinancialLiabilitiesDetails1",
+      "http://www.hubcybersecurity.com/role/FinancialLiabilitiesDetails2",
+      "http://www.hubcybersecurity.com/role/FinancialLiabilitiesDetails3",
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Components of equity [domain]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for the residual interest in the assets of the entity after deducting all its liabilities. It also represents the standard value for the 'Components of equity' axis if no other member is used."
+       }
+      }
+     }
+    },
+    "ifrs-full_ComprehensiveIncome": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "ComprehensiveIncome",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.hubcybersecurity.com/role/ConsolidatedComprehensiveIncome": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      },
+      "http://www.hubcybersecurity.com/role/ConsolidatedComprehensiveIncomeAlt0": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ConsolidatedComprehensiveIncome",
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total comprehensive loss",
+        "terseLabel": "Total comprehensive income (loss)",
+        "verboseLabel": "Total comprehensive income for the year",
+        "label": "Comprehensive income"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The amount of change in equity resulting from transactions and other events, other than those changes resulting from transactions with owners in their capacity as owners."
+       }
+      }
+     }
+    },
+    "ifrs-full_DividendsPaidToNoncontrollingInterests": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "DividendsPaidToNoncontrollingInterests",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Dividend distribution to non-controlling interests",
+        "label": "Dividends paid to non-controlling interests"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The amount of dividends paid to non-controlling interests. [Refer: Non-controlling interests]"
+       }
+      }
+     }
+    },
+    "ifrs-full_Equity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "Equity",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.hubcybersecurity.com/role/ConsolidatedBalanceSheet": {
+       "parentTag": "ifrs-full_EquityAndLiabilities",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ConsolidatedBalanceSheet",
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total shareholders’ equity (deficit)",
+        "periodStartLabel": "Balance",
+        "periodEndLabel": "Balance",
+        "label": "Equity"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The amount of residual interest in the assets of the entity after deducting all its liabilities."
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseThroughAcquisitionOfSubsidiary": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Issuance of shares in consideration of BlackSwan acquisition",
+        "label": "Increase (decrease) through acquisition of subsidiary, equity"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from the acquisition of subsidiaries. [Refer: Total for all subsidiaries [member]]"
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Transactions with Non controlling interest",
+        "label": "Increase (decrease) through changes in ownership interests in subsidiaries that do not result in loss of control, equity"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity through changes in ownership interests in subsidiaries that do not result in loss of control. [Refer: Total for all subsidiaries [member]]"
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseThroughConversionOfConvertibleInstruments": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Conversion of convertible loans",
+        "label": "Increase (decrease) through conversion of convertible instruments, equity"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from the conversion of convertible instruments."
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseThroughExerciseOfOptions": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "IncreaseDecreaseThroughExerciseOfOptions",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Options exercise",
+        "label": "Increase (decrease) through exercise of options, equity"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from the exercise of options."
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseThroughExerciseOfWarrantsEquity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Warrants exercise",
+        "label": "Increase (decrease) through exercise of warrants, equity"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from the exercise of warrants."
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "IncreaseDecreaseThroughSharebasedPaymentTransactions",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Cost of share-based payment",
+        "label": "Increase (decrease) through share-based payment transactions, equity"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from share-based payment transactions. [Refer: Equity]"
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseThroughTransactionsWithOwners": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "IncreaseDecreaseThroughTransactionsWithOwners",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Issuance of shares related to RNER merger transaction (Note 5)",
+        "label": "Increase (decrease) through transactions with owners, equity"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from transactions with owners."
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseThroughTransfersAndOtherChangesEquity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Issuance of shares",
+        "label": "Increase (decrease) through other changes, equity"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from changes that the entity does not separately disclose in the same statement or note. [Refer: Equity]"
+       }
+      }
+     }
+    },
+    "ifrs-full_IssueOfEquity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "IssueOfEquity",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Issuance of shares and warrants related to the PIPE, net of issuance expenses",
+        "label": "Issue of equity"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase in equity through the issue of equity instruments."
+       }
+      }
+     }
+    },
+    "ifrs-full_IssuedCapitalMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "IssuedCapitalMember",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Share capital and premium",
+        "label": "Issued capital [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing issued capital."
+       }
+      }
+     }
+    },
+    "ifrs-full_NoncontrollingInterestsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "NoncontrollingInterestsMember",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Non- controlling interests",
+        "label": "Non-controlling interests [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for equity in a subsidiary not attributable, directly or indirectly, to the parent."
+       }
+      }
+     }
+    },
+    "ifrs-full_OtherComprehensiveIncome": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "OtherComprehensiveIncome",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.hubcybersecurity.com/role/ConsolidatedComprehensiveIncome": {
+       "parentTag": "ifrs-full_ComprehensiveIncome",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ConsolidatedComprehensiveIncome",
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total other comprehensive loss",
+        "terseLabel": "Other comprehensive loss",
+        "label": "Other comprehensive income"
+       }
+      }
+     }
+    },
+    "ifrs-full_ParentMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "ParentMember",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Total",
+        "label": "Parent [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for an entity that controls one or more entities."
+       }
+      }
+     }
+    },
+    "ifrs-full_ProfitLoss": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "ProfitLoss",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.hubcybersecurity.com/role/ConsolidatedCashFlow": {
+       "parentTag": "ifrs-full_CashFlowsFromUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 1.0
+      },
+      "http://www.hubcybersecurity.com/role/ConsolidatedIncomeStatement": {
+       "parentTag": "ifrs-full_ProfitLossAttributableToOwnersOfParent",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ConsolidatedCashFlow",
+      "http://www.hubcybersecurity.com/role/ConsolidatedIncomeStatement",
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Profit (loss)",
+        "terseLabel": "Total loss",
+        "verboseLabel": "Loss",
+        "label": "Profit (loss)"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The total of income less expenses from continuing and discontinued operations, excluding the components of other comprehensive income. [Refer: Other comprehensive income]"
+       }
+      }
+     }
+    },
+    "ifrs-full_ReserveOfRemeasurementsOfDefinedBenefitPlansMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "ReserveOfRemeasurementsOfDefinedBenefitPlansMember",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Reserve for remeasurement of defined benefit plan",
+        "label": "Reserve of remeasurements of defined benefit plans [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity resulting from remeasurements of defined benefit plans. [Refer: Other comprehensive income, net of tax, gains (losses) on remeasurements of defined benefit plans]"
+       }
+      }
+     }
+    },
+    "ifrs-full_ReserveOfSharebasedPaymentsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "ReserveOfSharebasedPaymentsMember",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Reserve for share-based payment transactions",
+        "label": "Reserve of share-based payments [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity resulting from share-based payments."
+       }
+      }
+     }
+    },
+    "ifrs-full_RetainedEarningsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "RetainedEarningsMember",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Accumulated deficit",
+        "label": "Retained earnings [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing an entity's cumulative undistributed earnings or deficit."
+       }
+      }
+     }
+    },
+    "ifrs-full_ShareOptionsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "ShareOptionsMember",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Share options",
+        "label": "Share options [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for share options."
+       }
+      }
+     }
+    },
+    "ifrs-full_StatementOfChangesInEquityLineItems": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "StatementOfChangesInEquityLineItems",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of changes in equity [line items]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "Line items represent concepts included in a table. These concepts are used to disclose reportable information associated with members defined in one or many axes of the table."
+       }
+      }
+     }
+    },
+    "ifrs-full_StatementOfChangesInEquityTable": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "StatementOfChangesInEquityTable",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of changes in equity [table]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "Schedule disclosing information related to changes in equity."
+       }
+      }
+     }
+    },
+    "ifrs-full_TreasurySharesMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2025-03-27/ifrs-full",
+     "localname": "TreasurySharesMember",
+     "presentation": [
+      "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Treasury shares",
+        "label": "Treasury shares [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for the entity’s own equity instruments, held by the entity or other members of the consolidated group."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R5": {
+     "role": "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3",
+     "longName": "004 - Statement - Consolidated Statements of Changes In Equity (Deficit)",
+     "shortName": "Consolidated Statements of Changes In Equity (Deficit)",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "5",
+     "firstAnchor": {
+      "contextRef": "c60",
+      "name": "ifrs-full:Equity",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-3",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "ea0297580-20f_hubcyber.htm",
+      "first": true,
+      "unique": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c60",
+      "name": "ifrs-full:Equity",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-3",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "ea0297580-20f_hubcyber.htm",
+      "first": true,
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

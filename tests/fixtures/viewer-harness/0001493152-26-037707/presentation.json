@@ -1,0 +1,262 @@
+{
+ "http://graniteshares.com/role/SchedulesOfInvestments": {
+  "roots": [
+   "us-gaap_ScheduleOfInvestmentsAbstract"
+  ],
+  "nodes": {
+   "us-gaap_ScheduleOfInvestmentsAbstract": {
+    "children": [
+     "us-gaap_StatementTable"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "us-gaap_StatementTable": {
+    "children": [
+     "srt_StatementScenarioAxis",
+     "us-gaap_StatementLineItems"
+    ],
+    "child_preferred_labels": [
+     null,
+     null
+    ]
+   },
+   "srt_StatementScenarioAxis": {
+    "children": [
+     "srt_ScenarioUnspecifiedDomain"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "srt_ScenarioUnspecifiedDomain": {
+    "children": [
+     "BAR_GoldBullionMember"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "us-gaap_StatementLineItems": {
+    "children": [
+     "us-gaap_InvestmentOwnedBalanceOtherMeasure",
+     "us-gaap_InvestmentOwnedAtCost",
+     "us-gaap_InvestmentOwnedAtFairValue",
+     "us-gaap_InvestmentOwnedPercentOfNetAssets",
+     "us-gaap_NonInvestmentAssetsLessNonInvestmentLiabilities",
+     "us-gaap_NonInvestmentAssetsLessNonInvestmentLiabilitiesPercentOfNetAssets",
+     "us-gaap_AssetsNet",
+     "BAR_NetAssetsPercentageOfNetAssets"
+    ],
+    "child_preferred_labels": [
+     null,
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     null,
+     null,
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_ScheduleOfInvestmentsAbstract",
+    "us-gaap_StatementTable",
+    100.0,
+    null
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementLineItems",
+    200.0,
+    null
+   ],
+   [
+    "us-gaap_StatementTable",
+    "srt_StatementScenarioAxis",
+    10.0,
+    null
+   ],
+   [
+    "srt_StatementScenarioAxis",
+    "srt_ScenarioUnspecifiedDomain",
+    0.0,
+    null
+   ],
+   [
+    "srt_ScenarioUnspecifiedDomain",
+    "BAR_GoldBullionMember",
+    10.0,
+    null
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_InvestmentOwnedBalanceOtherMeasure",
+    0.0,
+    null
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_InvestmentOwnedAtCost",
+    10.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_InvestmentOwnedAtFairValue",
+    20.0,
+    null
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_InvestmentOwnedPercentOfNetAssets",
+    30.0,
+    null
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_NonInvestmentAssetsLessNonInvestmentLiabilities",
+    40.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_NonInvestmentAssetsLessNonInvestmentLiabilitiesPercentOfNetAssets",
+    50.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_AssetsNet",
+    60.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "BAR_NetAssetsPercentageOfNetAssets",
+    70.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ]
+  ]
+ },
+ "http://graniteshares.com/role/FinancialHighlights": {
+  "roots": [
+   "us-gaap_FairValueDisclosuresAbstract"
+  ],
+  "nodes": {
+   "us-gaap_FairValueDisclosuresAbstract": {
+    "children": [
+     "us-gaap_NetAssetValuePerShare",
+     "us-gaap_InvestmentCompanyInvestmentIncomeLossPerShare",
+     "us-gaap_InvestmentCompanyGainLossOnInvestmentPerShare",
+     "us-gaap_InvestmentCompanyInvestmentIncomeLossFromOperationsPerShare",
+     "us-gaap_NetAssetValuePerShare",
+     "us-gaap_InvestmentCompanyMarketValuePerShare",
+     "us-gaap_InvestmentCompanyTotalReturn",
+     "BAR_AggregateReturnAtMarketPrice",
+     "us-gaap_AssetsNet",
+     "us-gaap_InvestmentCompanyFinancialRatiosAbstract"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     null,
+     null,
+     "http://www.xbrl.org/2003/role/periodEndLabel",
+     "http://www.xbrl.org/2003/role/periodEndLabel",
+     null,
+     null,
+     "http://www.xbrl.org/2003/role/periodEndLabel",
+     null
+    ]
+   },
+   "us-gaap_InvestmentCompanyFinancialRatiosAbstract": {
+    "children": [
+     "us-gaap_InvestmentCompanyInvestmentIncomeLossRatio",
+     "us-gaap_InvestmentCompanyExpenseRatioAfterIncentiveAllocation"
+    ],
+    "child_preferred_labels": [
+     null,
+     "http://www.xbrl.org/2003/role/verboseLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_FairValueDisclosuresAbstract",
+    "us-gaap_NetAssetValuePerShare",
+    0.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "us-gaap_FairValueDisclosuresAbstract",
+    "us-gaap_InvestmentCompanyInvestmentIncomeLossPerShare",
+    10.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_FairValueDisclosuresAbstract",
+    "us-gaap_InvestmentCompanyGainLossOnInvestmentPerShare",
+    20.0,
+    null
+   ],
+   [
+    "us-gaap_FairValueDisclosuresAbstract",
+    "us-gaap_InvestmentCompanyInvestmentIncomeLossFromOperationsPerShare",
+    30.0,
+    null
+   ],
+   [
+    "us-gaap_FairValueDisclosuresAbstract",
+    "us-gaap_NetAssetValuePerShare",
+    40.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ],
+   [
+    "us-gaap_FairValueDisclosuresAbstract",
+    "us-gaap_InvestmentCompanyMarketValuePerShare",
+    50.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ],
+   [
+    "us-gaap_FairValueDisclosuresAbstract",
+    "us-gaap_InvestmentCompanyTotalReturn",
+    60.0,
+    null
+   ],
+   [
+    "us-gaap_FairValueDisclosuresAbstract",
+    "BAR_AggregateReturnAtMarketPrice",
+    70.0,
+    null
+   ],
+   [
+    "us-gaap_FairValueDisclosuresAbstract",
+    "us-gaap_AssetsNet",
+    80.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ],
+   [
+    "us-gaap_FairValueDisclosuresAbstract",
+    "us-gaap_InvestmentCompanyFinancialRatiosAbstract",
+    90.0,
+    null
+   ],
+   [
+    "us-gaap_InvestmentCompanyFinancialRatiosAbstract",
+    "us-gaap_InvestmentCompanyInvestmentIncomeLossRatio",
+    100.0,
+    null
+   ],
+   [
+    "us-gaap_InvestmentCompanyFinancialRatiosAbstract",
+    "us-gaap_InvestmentCompanyExpenseRatioAfterIncentiveAllocation",
+    110.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ]
+  ]
+ }
+}

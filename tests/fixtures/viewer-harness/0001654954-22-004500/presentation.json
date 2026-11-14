@@ -1,0 +1,452 @@
+{
+ "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfFinancialPosition": {
+  "roots": [
+   "ifrs-full_StatementOfFinancialPositionAbstract"
+  ],
+  "nodes": {
+   "ifrs-full_StatementOfFinancialPositionAbstract": {
+    "children": [
+     "ifrs-full_NoncurrentAssetsAbstract"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "ifrs-full_NoncurrentAssetsAbstract": {
+    "children": [
+     "ifrs-full_RestrictedCashAndCashEquivalents",
+     "ifrs-full_PropertyPlantAndEquipment",
+     "ifrs-full_NoncurrentAssets",
+     "ifrs-full_CurrentAssetsAbstract"
+    ],
+    "child_preferred_labels": [
+     null,
+     null,
+     "http://www.xbrl.org/2003/role/totalLabel",
+     null
+    ]
+   },
+   "ifrs-full_CurrentAssetsAbstract": {
+    "children": [
+     "ifrs-full_TradeAndOtherCurrentReceivables",
+     "ifrs-full_CashAndCashEquivalents",
+     "ifrs-full_CurrentAssets",
+     "ifrs-full_Assets",
+     "ifrs-full_EquityAndLiabilitiesAbstract"
+    ],
+    "child_preferred_labels": [
+     null,
+     null,
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     null
+    ]
+   },
+   "ifrs-full_EquityAndLiabilitiesAbstract": {
+    "children": [
+     "ifrs-full_EquityAbstract"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "ifrs-full_EquityAbstract": {
+    "children": [
+     "ifrs-full_IssuedCapital",
+     "ifrs-full_OtherReserves",
+     "ifrs-full_RetainedEarnings",
+     "ifrs-full_Equity",
+     "ifrs-full_LiabilitiesAbstract"
+    ],
+    "child_preferred_labels": [
+     null,
+     null,
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     null
+    ]
+   },
+   "ifrs-full_LiabilitiesAbstract": {
+    "children": [
+     "ifrs-full_NoncurrentLiabilitiesAbstract"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "ifrs-full_NoncurrentLiabilitiesAbstract": {
+    "children": [
+     "ifrs-full_NoncurrentPayables",
+     "ifrs-full_NoncurrentLiabilities",
+     "ifrs-full_CurrentLiabilitiesAbstract"
+    ],
+    "child_preferred_labels": [
+     null,
+     "http://www.xbrl.org/2003/role/totalLabel",
+     null
+    ]
+   },
+   "ifrs-full_CurrentLiabilitiesAbstract": {
+    "children": [
+     "ifrs-full_TradeAndOtherPayablesToRelatedParties",
+     "ifrs-full_TradeAndOtherCurrentPayables",
+     "ifrs-full_CurrentLiabilities",
+     "ifrs-full_Liabilities",
+     "ifrs-full_EquityAndLiabilities"
+    ],
+    "child_preferred_labels": [
+     null,
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "ifrs-full_StatementOfFinancialPositionAbstract",
+    "ifrs-full_NoncurrentAssetsAbstract",
+    1.0,
+    null
+   ],
+   [
+    "ifrs-full_NoncurrentAssetsAbstract",
+    "ifrs-full_RestrictedCashAndCashEquivalents",
+    2.0,
+    null
+   ],
+   [
+    "ifrs-full_NoncurrentAssetsAbstract",
+    "ifrs-full_PropertyPlantAndEquipment",
+    3.0,
+    null
+   ],
+   [
+    "ifrs-full_NoncurrentAssetsAbstract",
+    "ifrs-full_NoncurrentAssets",
+    4.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_NoncurrentAssetsAbstract",
+    "ifrs-full_CurrentAssetsAbstract",
+    5.0,
+    null
+   ],
+   [
+    "ifrs-full_CurrentAssetsAbstract",
+    "ifrs-full_TradeAndOtherCurrentReceivables",
+    6.0,
+    null
+   ],
+   [
+    "ifrs-full_CurrentAssetsAbstract",
+    "ifrs-full_CashAndCashEquivalents",
+    7.0,
+    null
+   ],
+   [
+    "ifrs-full_CurrentAssetsAbstract",
+    "ifrs-full_CurrentAssets",
+    8.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_CurrentAssetsAbstract",
+    "ifrs-full_Assets",
+    9.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_CurrentAssetsAbstract",
+    "ifrs-full_EquityAndLiabilitiesAbstract",
+    10.0,
+    null
+   ],
+   [
+    "ifrs-full_EquityAndLiabilitiesAbstract",
+    "ifrs-full_EquityAbstract",
+    11.0,
+    null
+   ],
+   [
+    "ifrs-full_EquityAbstract",
+    "ifrs-full_IssuedCapital",
+    12.0,
+    null
+   ],
+   [
+    "ifrs-full_EquityAbstract",
+    "ifrs-full_OtherReserves",
+    13.0,
+    null
+   ],
+   [
+    "ifrs-full_EquityAbstract",
+    "ifrs-full_RetainedEarnings",
+    14.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "ifrs-full_EquityAbstract",
+    "ifrs-full_Equity",
+    15.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_EquityAbstract",
+    "ifrs-full_LiabilitiesAbstract",
+    16.0,
+    null
+   ],
+   [
+    "ifrs-full_LiabilitiesAbstract",
+    "ifrs-full_NoncurrentLiabilitiesAbstract",
+    17.0,
+    null
+   ],
+   [
+    "ifrs-full_NoncurrentLiabilitiesAbstract",
+    "ifrs-full_NoncurrentPayables",
+    18.0,
+    null
+   ],
+   [
+    "ifrs-full_NoncurrentLiabilitiesAbstract",
+    "ifrs-full_NoncurrentLiabilities",
+    19.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_NoncurrentLiabilitiesAbstract",
+    "ifrs-full_CurrentLiabilitiesAbstract",
+    20.0,
+    null
+   ],
+   [
+    "ifrs-full_CurrentLiabilitiesAbstract",
+    "ifrs-full_TradeAndOtherPayablesToRelatedParties",
+    21.0,
+    null
+   ],
+   [
+    "ifrs-full_CurrentLiabilitiesAbstract",
+    "ifrs-full_TradeAndOtherCurrentPayables",
+    22.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "ifrs-full_CurrentLiabilitiesAbstract",
+    "ifrs-full_CurrentLiabilities",
+    23.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_CurrentLiabilitiesAbstract",
+    "ifrs-full_Liabilities",
+    24.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_CurrentLiabilitiesAbstract",
+    "ifrs-full_EquityAndLiabilities",
+    25.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ]
+  ]
+ },
+ "http://northerndynastyminerals.com/role/ConsolidatedStatementsOfComprehensiveLoss": {
+  "roots": [
+   "ifrs-full_IncomeStatementAbstract"
+  ],
+  "nodes": {
+   "ifrs-full_IncomeStatementAbstract": {
+    "children": [
+     "ifrs-full_ProfitLossAbstract"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "ifrs-full_ProfitLossAbstract": {
+    "children": [
+     "ifrs-full_ExpenseArisingFromExplorationForAndEvaluationOfMineralResources",
+     "ifrs-full_AdministrativeExpense",
+     "ifrs-full_AuditorsRemunerationForAuditServices",
+     "ifrs-full_EmployeeBenefitsExpense",
+     "ndm_LossFromOperatingActivities",
+     "ifrs-full_GainsLossesOnExchangeDifferencesOnTranslationRecognisedInProfitOrLoss",
+     "ndm_InterestIncome",
+     "ifrs-full_FinanceCosts",
+     "ifrs-full_OtherIncome",
+     "ndm_Gainonmodificationoflease",
+     "ndm_GainLossOnrevaluationofwarrantliabilities",
+     "ndm_GainLossOnDisposalOfPlantAndEquipment",
+     "ndm_NetLoss",
+     "ifrs-full_OtherComprehensiveIncomeAbstract"
+    ],
+    "child_preferred_labels": [
+     null,
+     null,
+     null,
+     null,
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     null,
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     null
+    ]
+   },
+   "ifrs-full_OtherComprehensiveIncomeAbstract": {
+    "children": [
+     "ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTaxAbstract"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTaxAbstract": {
+    "children": [
+     "ifrs-full_OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation",
+     "ndm_OtherComprehensiveLoss",
+     "ndm_TotalComprehensiveLoss",
+     "ndm_BasicAndDilutedEarningsLossPerShare"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     null
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "ifrs-full_IncomeStatementAbstract",
+    "ifrs-full_ProfitLossAbstract",
+    1.0,
+    null
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ifrs-full_ExpenseArisingFromExplorationForAndEvaluationOfMineralResources",
+    2.0,
+    null
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ifrs-full_AdministrativeExpense",
+    3.0,
+    null
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ifrs-full_AuditorsRemunerationForAuditServices",
+    4.0,
+    null
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ifrs-full_EmployeeBenefitsExpense",
+    5.0,
+    null
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ndm_LossFromOperatingActivities",
+    6.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ifrs-full_GainsLossesOnExchangeDifferencesOnTranslationRecognisedInProfitOrLoss",
+    7.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ndm_InterestIncome",
+    8.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ifrs-full_FinanceCosts",
+    9.0,
+    null
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ifrs-full_OtherIncome",
+    10.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ndm_Gainonmodificationoflease",
+    11.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ndm_GainLossOnrevaluationofwarrantliabilities",
+    12.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ndm_GainLossOnDisposalOfPlantAndEquipment",
+    13.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ndm_NetLoss",
+    14.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_ProfitLossAbstract",
+    "ifrs-full_OtherComprehensiveIncomeAbstract",
+    15.0,
+    null
+   ],
+   [
+    "ifrs-full_OtherComprehensiveIncomeAbstract",
+    "ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTaxAbstract",
+    16.0,
+    null
+   ],
+   [
+    "ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTaxAbstract",
+    "ifrs-full_OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation",
+    17.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTaxAbstract",
+    "ndm_OtherComprehensiveLoss",
+    18.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTaxAbstract",
+    "ndm_TotalComprehensiveLoss",
+    19.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTaxAbstract",
+    "ndm_BasicAndDilutedEarningsLossPerShare",
+    20.0,
+    null
+   ]
+  ]
+ }
+}

@@ -1,0 +1,196 @@
+[
+ {
+  "concept": "us-gaap:Liabilities",
+  "context_ref": "PAsOn12_31_2023",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "18754800000",
+  "numeric_value": 18754800000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Liabilities",
+  "context_ref": "PAsOn12_31_2024",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "18594587000",
+  "numeric_value": 18594587000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Liabilities",
+  "context_ref": "PAsOn12_31_2024",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "2547447000",
+  "numeric_value": 2547447000.0,
+  "unit_ref": "Unit_USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:RetainedEarningsUnappropriated",
+  "context_ref": "PAsOn12_31_2024",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "-27661459000",
+  "numeric_value": -27661459000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:RetainedEarningsUnappropriated",
+  "context_ref": "PAsOn12_31_2024",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "-3789604000",
+  "numeric_value": -3789604000.0,
+  "unit_ref": "Unit_USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Liabilities",
+  "context_ref": "PAsOn12_31_2023_VariableInterestEntityPrimaryBeneficiaryMembersrtConsolidatedEntitiesAxis",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "20038700000",
+  "numeric_value": 20038700000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "us-gaap:VariableInterestEntityPrimaryBeneficiaryMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Liabilities",
+  "context_ref": "PAsOn12_31_2023_VariableInterestEntityPrimaryBeneficiaryMembersrtConsolidatedEntitiesAxis",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "20038653000",
+  "numeric_value": 20038653000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "us-gaap:VariableInterestEntityPrimaryBeneficiaryMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Liabilities",
+  "context_ref": "PAsOn12_31_2024_VariableInterestEntityPrimaryBeneficiaryMembersrtConsolidatedEntitiesAxis",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "19202800000",
+  "numeric_value": 19202800000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "us-gaap:VariableInterestEntityPrimaryBeneficiaryMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Liabilities",
+  "context_ref": "PAsOn12_31_2024_VariableInterestEntityPrimaryBeneficiaryMembersrtConsolidatedEntitiesAxis",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "19202838000",
+  "numeric_value": 19202838000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "us-gaap:VariableInterestEntityPrimaryBeneficiaryMember"
+  }
+ },
+ {
+  "concept": "us-gaap:RetainedEarningsUnappropriated",
+  "context_ref": "PAsOn12_31_2023",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "-26310766000",
+  "numeric_value": -26310766000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:RetainedEarningsUnappropriated",
+  "context_ref": "PAsOn12_31_2023",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "-26310800000",
+  "numeric_value": -26310800000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:RetainedEarningsUnappropriated",
+  "context_ref": "PAsOn12_31_2024",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "-27661500000",
+  "numeric_value": -27661500000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Liabilities",
+  "context_ref": "PAsOn12_31_2023_ParentCompanyMembersrtConsolidatedEntitiesAxis",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "6365987000",
+  "numeric_value": 6365987000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Liabilities",
+  "context_ref": "PAsOn12_31_2024_ParentCompanyMembersrtConsolidatedEntitiesAxis",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "3272590000",
+  "numeric_value": 3272590000.0,
+  "unit_ref": "Unit_CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ }
+]

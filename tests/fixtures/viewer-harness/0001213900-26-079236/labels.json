@@ -1,0 +1,155 @@
+{
+ "hubc_ConsolidatedStatementsOfChangesInEquityDeficitAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Consolidated Statements of Changes In Equity [Abstract]"
+ },
+ "hubc_ForeignCurrencyTranslationAdjustmentsMember": {
+  "http://www.xbrl.org/2003/role/label": "Foreign Currency Translation Adjustments Member",
+  "http://www.xbrl.org/2003/role/terseLabel": "Foreign currency translation adjustments"
+ },
+ "hubc_IncreaseDecreaseThroughConversionOfConvertibleLoans": {
+  "http://www.xbrl.org/2003/role/documentation": "The increase (decrease) in equity resulting from the conversion of convertible loans.",
+  "http://www.xbrl.org/2003/role/label": "Increase Decrease Through Conversion Of Convertible Loans",
+  "http://www.xbrl.org/2003/role/terseLabel": "Conversion of convertible loans"
+ },
+ "hubc_IncreaseDecreaseThroughIssuanceOfPrefundedWarrants": {
+  "http://www.xbrl.org/2003/role/documentation": "Represent the amount of issuance of prefunded warrants.",
+  "http://www.xbrl.org/2003/role/label": "Increase Decrease Through Issuance Of Prefunded Warrants",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issuance of Prefunded warrants"
+ },
+ "hubc_IncreaseDecreaseThroughIssuanceOfSharesAndWarrants": {
+  "http://www.xbrl.org/2003/role/documentation": "Issuance of shares and warrants.",
+  "http://www.xbrl.org/2003/role/label": "Increase Decrease Through Issuance Of Shares And Warrants",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issuance of shares and warrants"
+ },
+ "hubc_IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC": {
+  "http://www.xbrl.org/2003/role/documentation": "The increase (decrease) in equity resulting from the issuance of shares of line of credit (“ELOC’).",
+  "http://www.xbrl.org/2003/role/label": "Increase Decrease Through Issuance Of Shares To Equity Line Of Credit ELOC",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issuance of shares to Equity line of Credit (“ELOC’)"
+ },
+ "hubc_IncreaseDecreaseThroughSharebasedPaymentIssuedForServices": {
+  "http://www.xbrl.org/2003/role/documentation": "Amount of share-based payment issued for services.",
+  "http://www.xbrl.org/2003/role/label": "Increase Decrease Through Sharebased Payment Issued For Services",
+  "http://www.xbrl.org/2003/role/terseLabel": "Share-based payment issued for services"
+ },
+ "hubc_IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants": {
+  "http://www.xbrl.org/2003/role/documentation": "Amount of cashless exercise of liability warrants.",
+  "http://www.xbrl.org/2003/role/label": "Increase Decreasethrough Cashless Exercise Of Liability Warrants",
+  "http://www.xbrl.org/2003/role/terseLabel": "Cashless exercise of liability warrants"
+ },
+ "hubc_ReclassificationOfWarrantsFromLiabilityToEquity": {
+  "http://www.xbrl.org/2003/role/documentation": "Amount of reclassification of warrants from liability to equity.",
+  "http://www.xbrl.org/2003/role/label": "Reclassification Of Warrants From Liability To Equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Reclassification of warrants from liability to equity"
+ },
+ "hubc_ReserveForTransactionsWithNoncontrollingInterestsMember": {
+  "http://www.xbrl.org/2003/role/label": "Reserve For Transactions With Noncontrolling Interests Member",
+  "http://www.xbrl.org/2003/role/terseLabel": "Reserve for transactions with noncontrolling interests"
+ },
+ "ifrs-full_ComponentsOfEquityAxis": {
+  "http://www.xbrl.org/2003/role/label": "Components of equity [axis]"
+ },
+ "ifrs-full_ComponentsOfEquityDomain": {
+  "http://www.xbrl.org/2003/role/label": "Components of equity [domain]"
+ },
+ "ifrs-full_ComprehensiveIncome": {
+  "http://www.xbrl.org/2003/role/label": "Comprehensive income",
+  "http://www.xbrl.org/2003/role/terseLabel": "Total comprehensive income (loss)",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total comprehensive loss",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Total comprehensive income for the year"
+ },
+ "ifrs-full_DividendsPaidToNoncontrollingInterests": {
+  "http://www.xbrl.org/2003/role/label": "Dividends paid to non-controlling interests",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Dividend distribution to non-controlling interests"
+ },
+ "ifrs-full_Equity": {
+  "http://www.xbrl.org/2003/role/label": "Equity",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Balance",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Balance",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total shareholders’ equity (deficit)"
+ },
+ "ifrs-full_IncreaseDecreaseThroughAcquisitionOfSubsidiary": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through acquisition of subsidiary, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issuance of shares in consideration of BlackSwan acquisition"
+ },
+ "ifrs-full_IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through changes in ownership interests in subsidiaries that do not result in loss of control, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Transactions with Non controlling interest"
+ },
+ "ifrs-full_IncreaseDecreaseThroughConversionOfConvertibleInstruments": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through conversion of convertible instruments, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Conversion of convertible loans"
+ },
+ "ifrs-full_IncreaseDecreaseThroughExerciseOfOptions": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through exercise of options, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Options exercise"
+ },
+ "ifrs-full_IncreaseDecreaseThroughExerciseOfWarrantsEquity": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through exercise of warrants, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Warrants exercise"
+ },
+ "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through share-based payment transactions, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Cost of share-based payment"
+ },
+ "ifrs-full_IncreaseDecreaseThroughTransactionsWithOwners": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through transactions with owners, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issuance of shares related to RNER merger transaction (Note 5)"
+ },
+ "ifrs-full_IncreaseDecreaseThroughTransfersAndOtherChangesEquity": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through other changes, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issuance of shares"
+ },
+ "ifrs-full_IssueOfEquity": {
+  "http://www.xbrl.org/2003/role/label": "Issue of equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issuance of shares and warrants related to the PIPE, net of issuance expenses"
+ },
+ "ifrs-full_IssuedCapitalMember": {
+  "http://www.xbrl.org/2003/role/label": "Issued capital [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Share capital and premium"
+ },
+ "ifrs-full_NoncontrollingInterestsMember": {
+  "http://www.xbrl.org/2003/role/label": "Non-controlling interests [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Non- controlling interests"
+ },
+ "ifrs-full_OtherComprehensiveIncome": {
+  "http://www.xbrl.org/2003/role/label": "Other comprehensive income",
+  "http://www.xbrl.org/2003/role/terseLabel": "Other comprehensive loss",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total other comprehensive loss"
+ },
+ "ifrs-full_ParentMember": {
+  "http://www.xbrl.org/2003/role/label": "Parent [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Total"
+ },
+ "ifrs-full_ProfitLoss": {
+  "http://www.xbrl.org/2003/role/label": "Profit (loss)",
+  "http://www.xbrl.org/2003/role/terseLabel": "Total loss",
+  "http://www.xbrl.org/2003/role/totalLabel": "Profit (loss)",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Loss"
+ },
+ "ifrs-full_ReserveOfRemeasurementsOfDefinedBenefitPlansMember": {
+  "http://www.xbrl.org/2003/role/label": "Reserve of remeasurements of defined benefit plans [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Reserve for remeasurement of defined benefit plan"
+ },
+ "ifrs-full_ReserveOfSharebasedPaymentsMember": {
+  "http://www.xbrl.org/2003/role/label": "Reserve of share-based payments [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Reserve for share-based payment transactions"
+ },
+ "ifrs-full_RetainedEarningsMember": {
+  "http://www.xbrl.org/2003/role/label": "Retained earnings [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Accumulated deficit"
+ },
+ "ifrs-full_ShareOptionsMember": {
+  "http://www.xbrl.org/2003/role/label": "Share options [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Share options"
+ },
+ "ifrs-full_StatementOfChangesInEquityLineItems": {
+  "http://www.xbrl.org/2003/role/label": "Statement of changes in equity [line items]"
+ },
+ "ifrs-full_StatementOfChangesInEquityTable": {
+  "http://www.xbrl.org/2003/role/label": "Statement of changes in equity [table]"
+ },
+ "ifrs-full_TreasurySharesMember": {
+  "http://www.xbrl.org/2003/role/label": "Treasury shares [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Treasury shares"
+ }
+}

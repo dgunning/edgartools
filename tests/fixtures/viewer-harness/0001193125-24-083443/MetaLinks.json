@@ -1,0 +1,205 @@
+{
+ "version": "2.2",
+ "instance": {
+  "d767749d10k.htm": {
+   "tag": {
+    "us-gaap_CommonClassAMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonClassAMember",
+     "presentation": [
+      "http://www.wsj.com/role/BalanceSheets",
+      "http://www.wsj.com/role/BalanceSheetsParenthetical",
+      "http://www.wsj.com/role/CoverPage",
+      "http://www.wsj.com/role/DescriptionOfOrganizationBusinessOperationsLiquidityAndGoingConcernAdditionalInformationDetail",
+      "http://www.wsj.com/role/InitialPublicOfferingAdditionalInformationDetail",
+      "http://www.wsj.com/role/RelatedPartyTransactionsAdditionalInformationDetail",
+      "http://www.wsj.com/role/ShareholdersDeficitAdditionalInformationDetail",
+      "http://www.wsj.com/role/StatementsOfChangesInShareholdersDeficitEquity",
+      "http://www.wsj.com/role/StatementsOfOperations",
+      "http://www.wsj.com/role/SubsequentEventsAdditionalInformationDetail",
+      "http://www.wsj.com/role/SummaryOfSignificantAccountingPoliciesAdditionalInformationDetail",
+      "http://www.wsj.com/role/SummaryOfSignificantAccountingPoliciesScheduleOfEarningsPerShareBasicAndDilutedDetail",
+      "http://www.wsj.com/role/SummaryOfSignificantAccountingPoliciesSummaryOfClassACommonStockSubjectToPossibleRedemptionDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Common Class A [Member]",
+        "terseLabel": "Common Class A [Member]",
+        "documentation": "Classification of common stock representing ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonClassBMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonClassBMember",
+     "presentation": [
+      "http://www.wsj.com/role/BalanceSheets",
+      "http://www.wsj.com/role/BalanceSheetsParenthetical",
+      "http://www.wsj.com/role/CoverPage",
+      "http://www.wsj.com/role/DescriptionOfOrganizationBusinessOperationsLiquidityAndGoingConcernAdditionalInformationDetail",
+      "http://www.wsj.com/role/RelatedPartyTransactionsAdditionalInformationDetail",
+      "http://www.wsj.com/role/ShareholdersDeficitAdditionalInformationDetail",
+      "http://www.wsj.com/role/StatementsOfChangesInShareholdersDeficitEquity",
+      "http://www.wsj.com/role/StatementsOfOperations",
+      "http://www.wsj.com/role/SummaryOfSignificantAccountingPoliciesScheduleOfEarningsPerShareBasicAndDilutedDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Common Class B [Member]",
+        "terseLabel": "Common Class B [Member]",
+        "documentation": "Classification of common stock that has different rights than Common Class A, representing ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_EarningsPerShareBasic": {
+     "xbrltype": "perShareItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "EarningsPerShareBasic",
+     "presentation": [
+      "http://www.wsj.com/role/StatementsOfOperations",
+      "http://www.wsj.com/role/SummaryOfSignificantAccountingPoliciesScheduleOfEarningsPerShareBasicAndDilutedDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Earnings Per Share, Basic",
+        "negatedLabel": "Basic net income per share",
+        "negatedTerseLabel": "Basic net income per ordinary share",
+        "documentation": "The amount of net income (loss) for the period per each share of common stock or unit outstanding during the reporting period."
+       }
+      }
+     }
+    },
+    "us-gaap_NetIncomeLoss": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "NetIncomeLoss",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.wsj.com/role/StatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 18.0
+      },
+      "http://www.wsj.com/role/StatementsOfOperations": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.wsj.com/role/StatementsOfCashFlows",
+      "http://www.wsj.com/role/StatementsOfChangesInShareholdersDeficitEquity",
+      "http://www.wsj.com/role/StatementsOfOperations",
+      "http://www.wsj.com/role/SummaryOfSignificantAccountingPoliciesScheduleOfEarningsPerShareBasicAndDilutedDetail",
+      "http://xbrl.sec.gov/ecd/role/PvpDisclosure"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net income",
+        "verboseLabel": "Net income",
+        "label": "Net Income (Loss)",
+        "terseLabel": "Net Income (Loss)",
+        "documentation": "The portion of profit or loss for the period, net of income taxes, which is attributable to the parent."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementClassOfStockAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StatementClassOfStockAxis",
+     "presentation": [
+      "http://www.wsj.com/role/BalanceSheets",
+      "http://www.wsj.com/role/BalanceSheetsParenthetical",
+      "http://www.wsj.com/role/CoverPage",
+      "http://www.wsj.com/role/DescriptionOfOrganizationBusinessOperationsLiquidityAndGoingConcernAdditionalInformationDetail",
+      "http://www.wsj.com/role/InitialPublicOfferingAdditionalInformationDetail",
+      "http://www.wsj.com/role/RelatedPartyTransactionsAdditionalInformationDetail",
+      "http://www.wsj.com/role/ShareholdersDeficitAdditionalInformationDetail",
+      "http://www.wsj.com/role/StatementsOfChangesInShareholdersDeficitEquity",
+      "http://www.wsj.com/role/StatementsOfOperations",
+      "http://www.wsj.com/role/SubsequentEventsAdditionalInformationDetail",
+      "http://www.wsj.com/role/SummaryOfSignificantAccountingPoliciesAdditionalInformationDetail",
+      "http://www.wsj.com/role/SummaryOfSignificantAccountingPoliciesScheduleOfEarningsPerShareBasicAndDilutedDetail",
+      "http://www.wsj.com/role/SummaryOfSignificantAccountingPoliciesSummaryOfClassACommonStockSubjectToPossibleRedemptionDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Class of Stock [Axis]",
+        "documentation": "Information by the different classes of stock of the entity."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R4": {
+     "role": "http://www.wsj.com/role/StatementsOfOperations",
+     "longName": "1004 - Statement - Statements Of Operations",
+     "shortName": "Statements Of Operations",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "4",
+     "firstAnchor": {
+      "contextRef": "P01_01_2023To12_31_2023",
+      "name": "ivcp:FormationAndOperatingCosts",
+      "unitRef": "Unit_USD",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "0",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "d767749d10k.htm",
+      "first": true,
+      "unique": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "P01_01_2023To12_31_2023",
+      "name": "ivcp:FormationAndOperatingCosts",
+      "unitRef": "Unit_USD",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "0",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "d767749d10k.htm",
+      "first": true,
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,523 @@
+{
+ "version": "2.2",
+ "instance": {
+  "etr-20240930.htm": {
+   "tag": {
+    "dei_LegalEntityAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://xbrl.sec.gov/dei/2024",
+     "localname": "LegalEntityAxis",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/AssetRetirementObligationsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessCombinationsandAssetAcquisitions",
+      "http://www.entergy.com/role/BusinessCombinationsandAssetAcquisitionsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/BusinessSegmentInformationTables",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/CommitmentsandContingenciesNarrativeDetails",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsofComprehensiveIncomeParentheticals",
+      "http://www.entergy.com/role/DecommissioningTrustFunds",
+      "http://www.entergy.com/role/DecommissioningTrustFundsNarrativeDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofAvailableforSaleSecuritiesReconciliationDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofDebtSecuritiesAvailableforSaleUnrealizedLossPositionFairValueDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofInvestmentsClassifiedbyContractualMaturityDateDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsTables",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/Equity",
+      "http://www.entergy.com/role/EquityNarrativeDetails",
+      "http://www.entergy.com/role/EquityScheduleofAccumulatedOtherComprehensiveIncomeLossDetails",
+      "http://www.entergy.com/role/EquityScheduleofReclassificationoutofAccumulatedOtherComprehensiveIncomeDetails",
+      "http://www.entergy.com/role/EquityTables",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofreclassificationsoutofaccumulatedothercomprehensiveincomeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofnuclearfuelcompanyVIEcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofnuclearfuelcompanyVIEnotespayableDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/StockBasedCompensation",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Legal Entity [Axis]",
+        "label": "Legal Entity [Axis]",
+        "documentation": "The set of legal entities associated with a report."
+       }
+      }
+     }
+    },
+    "etr_EntergyArkansasMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "EntergyArkansasMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/AssetRetirementObligationsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessCombinationsandAssetAcquisitions",
+      "http://www.entergy.com/role/BusinessCombinationsandAssetAcquisitionsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/CommitmentsandContingenciesNarrativeDetails",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/DecommissioningTrustFunds",
+      "http://www.entergy.com/role/DecommissioningTrustFundsNarrativeDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofAvailableforSaleSecuritiesReconciliationDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofDebtSecuritiesAvailableforSaleUnrealizedLossPositionFairValueDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofInvestmentsClassifiedbyContractualMaturityDateDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsTables",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofnuclearfuelcompanyVIEnotespayableDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entergy Arkansas [Member]",
+        "label": "Entergy Arkansas [Member]",
+        "documentation": "Entergy Arkansas."
+       }
+      }
+     }
+    },
+    "etr_EntergyLouisianaMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "EntergyLouisianaMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/AssetRetirementObligationsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/CommitmentsandContingenciesNarrativeDetails",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsofComprehensiveIncomeParentheticals",
+      "http://www.entergy.com/role/DecommissioningTrustFunds",
+      "http://www.entergy.com/role/DecommissioningTrustFundsNarrativeDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofAvailableforSaleSecuritiesReconciliationDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofDebtSecuritiesAvailableforSaleUnrealizedLossPositionFairValueDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofInvestmentsClassifiedbyContractualMaturityDateDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsTables",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/Equity",
+      "http://www.entergy.com/role/EquityNarrativeDetails",
+      "http://www.entergy.com/role/EquityScheduleofAccumulatedOtherComprehensiveIncomeLossDetails",
+      "http://www.entergy.com/role/EquityScheduleofReclassificationoutofAccumulatedOtherComprehensiveIncomeDetails",
+      "http://www.entergy.com/role/EquityTables",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofreclassificationsoutofaccumulatedothercomprehensiveincomeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entergy Louisiana [Member]",
+        "label": "Entergy Louisiana [Member]",
+        "documentation": "Entergy Louisiana."
+       }
+      }
+     }
+    },
+    "etr_EntergyMississippiMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "EntergyMississippiMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/AssetRetirementObligationsNarrativeDetails",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/CommitmentsandContingenciesNarrativeDetails",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entergy Mississippi [Member]",
+        "label": "Entergy Mississippi [Member]",
+        "documentation": "Entergy Mississippi."
+       }
+      }
+     }
+    },
+    "etr_EntergyNewOrleansMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "EntergyNewOrleansMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/CommitmentsandContingenciesNarrativeDetails",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/IncomeTaxesNarrativeDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entergy New Orleans [Member]",
+        "label": "Entergy New Orleans [Member]",
+        "documentation": "Entergy New Orleans."
+       }
+      }
+     }
+    },
+    "etr_EntergyTexasMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "EntergyTexasMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeAllOtherDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofAllowanceforDoubtfulAccountsDetails",
+      "http://www.entergy.com/role/RevenueRecognitionScheduleofDisaggregationofRevenueDetails",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLineofCreditFacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofuncommittedstandbyletterofcreditfacilitiesDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesInstrumentsStatementsofFinancialPerformanceandFinancialPositionLocationDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofDerivativesNotDesignatedAsHedgingInstrumentsDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Entergy Texas [Member]",
+        "label": "Entergy Texas [Member]",
+        "documentation": "Entergy Texas."
+       }
+      }
+     }
+    },
+    "etr_SystemEnergyMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.entergy.com/20240930",
+     "localname": "SystemEnergyMember",
+     "presentation": [
+      "http://www.entergy.com/role/AssetRetirementObligations",
+      "http://www.entergy.com/role/BusinessSegmentInformation",
+      "http://www.entergy.com/role/CommitmentsandContingencies",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheets",
+      "http://www.entergy.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfChangesInEquity",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.entergy.com/role/ConsolidatedStatementsOfIncome",
+      "http://www.entergy.com/role/DecommissioningTrustFunds",
+      "http://www.entergy.com/role/DecommissioningTrustFundsNarrativeDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofAvailableforSaleSecuritiesReconciliationDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofDebtSecuritiesAvailableforSaleUnrealizedLossPositionFairValueDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsScheduleofInvestmentsClassifiedbyContractualMaturityDateDetails",
+      "http://www.entergy.com/role/DecommissioningTrustFundsTables",
+      "http://www.entergy.com/role/DocumentandEntityInformation",
+      "http://www.entergy.com/role/IncomeTaxes",
+      "http://www.entergy.com/role/RateAndRegulatoryMatters",
+      "http://www.entergy.com/role/RateAndRegulatoryMattersNarrativeComplaintsAgainstSystemEnergyDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefits",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsNarrativeDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofExpectedBenefitPaymentsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsScheduleofNetBenefitCostsDetails",
+      "http://www.entergy.com/role/RetirementAndOtherPostretirementBenefitsTables",
+      "http://www.entergy.com/role/RevenueRecognition",
+      "http://www.entergy.com/role/RevenueRecognitionTables",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebt",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtNarrativeDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofLongTermDebtInstrumentsDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtScheduleofShortTermDebtDetails",
+      "http://www.entergy.com/role/RevolvingCreditFacilitiesLinesOfCreditShortTermBorrowingsAndLongTermDebtTables",
+      "http://www.entergy.com/role/RiskManagementAndFairValues",
+      "http://www.entergy.com/role/RiskManagementAndFairValuesTables",
+      "http://www.entergy.com/role/RiskManagementandFairValuesNarrativeDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisDetails",
+      "http://www.entergy.com/role/RiskManagementandFairValuesScheduleofFairValueAssetsandLiabilitiesMeasuredonRecurringBasisUnobservableInputReconciliationDetails",
+      "http://www.entergy.com/role/VariableInterestEntities",
+      "http://www.entergy.com/role/VariableInterestEntitiesNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "System Energy [Member]",
+        "label": "System Energy [Member]",
+        "documentation": "System Energy."
+       }
+      }
+     }
+    },
+    "us-gaap_PaymentsForProceedsFromOtherInvestingActivities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PaymentsForProceedsFromOtherInvestingActivities",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0,
+       "order": 6.0
+      }
+     },
+     "presentation": [
+      "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Payments for (Proceeds from) Other Investing Activities",
+        "terseLabel": "Payments for (Proceeds from) Other Investing Activities",
+        "label": "Payments for (Proceeds from) Other Investing Activities",
+        "documentation": "Amount of cash (inflow) outflow from investing activities classified as other."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R3": {
+     "role": "http://www.entergy.com/role/ConsolidatedStatementsOfCashFlows",
+     "longName": "9952152 - Statement - Consolidated Statements Of Cash Flows",
+     "shortName": "Consolidated Statements Of Cash Flows",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "3",
+     "firstAnchor": {
+      "contextRef": "c-1",
+      "name": "us-gaap:ProfitLoss",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "etr-20240930.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-1",
+      "name": "us-gaap:DepreciationAmortizationAndAccretionNet",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "etr-20240930.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

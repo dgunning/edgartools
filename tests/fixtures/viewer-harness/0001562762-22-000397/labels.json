@@ -1,0 +1,104 @@
+{
+ "drd_TransactionsWithOwnersOfParentAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Transactions with owners of parent [abstract]"
+ },
+ "ifrs-full_ChangesInEquity": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) in equity",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total contributions and distributions"
+ },
+ "ifrs-full_ChangesInEquityAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Changes in equity [abstract]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Contributions and distributions"
+ },
+ "ifrs-full_ComponentsOfEquityAxis": {
+  "http://www.xbrl.org/2003/role/label": "Components of equity [axis]"
+ },
+ "ifrs-full_ComprehensiveIncome": {
+  "http://www.xbrl.org/2003/role/label": "Comprehensive income",
+  "http://www.xbrl.org/2003/role/terseLabel": "Total comprehensive income",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total comprehensive income for the year"
+ },
+ "ifrs-full_ComprehensiveIncomeAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Total comprehensive income [abstract]"
+ },
+ "ifrs-full_DividendsPaid": {
+  "http://www.xbrl.org/2003/role/label": "Dividends recognised as distributions to owners",
+  "http://www.xbrl.org/2003/role/terseLabel": "Total dividends",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total dividends",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Dividends paid",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Dividend on ordinary shares"
+ },
+ "ifrs-full_Equity": {
+  "http://www.xbrl.org/2003/role/label": "Equity",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Ending balance",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Beginning balance",
+  "http://www.xbrl.org/2003/role/totalLabel": "Equity"
+ },
+ "ifrs-full_EquityAttributableToOwnersOfParentMember": {
+  "http://www.xbrl.org/2003/role/label": "Equity attributable to owners of parent [member]"
+ },
+ "ifrs-full_EquityMember": {
+  "http://www.xbrl.org/2003/role/label": "Equity [member]"
+ },
+ "ifrs-full_IncreaseDecreaseThroughAcquisitionOfSubsidiary": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through acquisition of subsidiary, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity instruments issued as purchase consideration for the FWGR Acquisition"
+ },
+ "ifrs-full_IncreaseDecreaseThroughExerciseOfOptions": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through exercise of options, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Reallocation of the equity instruments on exercise of the Sibanye-Stillwater option"
+ },
+ "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions": {
+  "http://www.xbrl.org/2003/role/label": "Increase Decrease Through Share based Payment Transactions",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity settled share-based payment",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Equity settled Long-Term Incentive (\"LTI\") scheme",
+  "http://www.xbrl.org/2009/role/negatedTerseLabel": "Equity-settled share-based payment"
+ },
+ "ifrs-full_IncreaseDecreaseThroughTreasuryShareTransactions": {
+  "http://www.xbrl.org/2003/role/label": "Increase Decrease Through Treasury Share Transactions",
+  "http://www.xbrl.org/2003/role/terseLabel": "Treasury shares disposed of for the vesting of the equitty-settled share-based payment"
+ },
+ "ifrs-full_IssueOfEquity": {
+  "http://www.xbrl.org/2003/role/label": "Issue Of Equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issue of ordinary shares"
+ },
+ "ifrs-full_IssuedCapitalMember": {
+  "http://www.xbrl.org/2003/role/label": "Issued capital [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Share capital [member]",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Stated share capital [member]"
+ },
+ "ifrs-full_OtherComprehensiveIncome": {
+  "http://www.xbrl.org/2003/role/label": "Other comprehensive income",
+  "http://www.xbrl.org/2003/role/terseLabel": "Other comprehensive income",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total other comprehensive income for the year"
+ },
+ "ifrs-full_OtherReservesMember": {
+  "http://www.xbrl.org/2003/role/label": "Other reserves [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Other reserves [member]"
+ },
+ "ifrs-full_ProfitLoss": {
+  "http://www.xbrl.org/2003/role/label": "Profit (loss)",
+  "http://www.xbrl.org/2003/role/terseLabel": "Profit for the year",
+  "http://www.xbrl.org/2003/role/totalLabel": "Profit for the year",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Basic Earnings",
+  "http://www.xbrl.org/2003/role/zeroTerseLabel": "Profit (loss) after tax"
+ },
+ "ifrs-full_RetainedEarningsMember": {
+  "http://www.xbrl.org/2003/role/label": "Retained earnings [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Retained earnings [member]"
+ },
+ "ifrs-full_ShareIssueRelatedCost": {
+  "http://www.xbrl.org/2003/role/label": "Share issue related cost",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Share issue expenses",
+  "http://www.xbrl.org/2009/role/negatedTerseLabel": "Expenses incurred on issue of ordinary shares"
+ },
+ "ifrs-full_StatementOfChangesInEquityAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Statement of changes in equity [abstract]"
+ },
+ "ifrs-full_StatementOfChangesInEquityLineItems": {
+  "http://www.xbrl.org/2003/role/label": "Statement of changes in equity [line items]"
+ },
+ "ifrs-full_StatementOfChangesInEquityTable": {
+  "http://www.xbrl.org/2003/role/label": "Statement of changes in equity [table]"
+ }
+}

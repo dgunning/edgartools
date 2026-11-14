@@ -1,0 +1,732 @@
+{
+ "version": "2.2",
+ "instance": {
+  "gnss20230930_10k.htm": {
+   "tag": {
+    "gnss_AdjustmentsRelatedToTaxWithholdingForCashlessShareBasedCompensation": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.lradx.com/20230930",
+     "localname": "AdjustmentsRelatedToTaxWithholdingForCashlessShareBasedCompensation",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "gnss_AdjustmentsRelatedToTaxWithholdingForCashlessShareBasedCompensation",
+        "negatedLabel": "Adjustments Related To Tax Withholding For Cashless Share Based Compensation",
+        "documentation": "Amount of decrease to equity for cashless grantee's tax withholding obligation for award under share-based payment arrangement."
+       }
+      }
+     }
+    },
+    "gnss_SharesPaidForTaxWithholdingForShareBasedCompensationCashless": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://www.lradx.com/20230930",
+     "localname": "SharesPaidForTaxWithholdingForShareBasedCompensationCashless",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "gnss_SharesPaidForTaxWithholdingForShareBasedCompensationCashless",
+        "negatedLabel": "Shares Paid For Tax Withholding For Share Based Compensation, Cashless (in shares)",
+        "documentation": "Number of shares used to settle cashless grantee's tax withholding obligation for award under share-based arrangement."
+       }
+      }
+     }
+    },
+    "gnss_StockIssuedDuringPeriodSharesStockOptionsExercisedCashless": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://www.lradx.com/20230930",
+     "localname": "StockIssuedDuringPeriodSharesStockOptionsExercisedCashless",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Stock Issued During Period Shares Stock Options Exercised, Cashless (in shares)",
+        "documentation": "Number of share options ( or share units exercised during the current period that are cashless."
+       }
+      }
+     }
+    },
+    "gnss_StockIssuedDuringPeriodValueStockOptionsExercisedCashless": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.lradx.com/20230930",
+     "localname": "StockIssuedDuringPeriodValueStockOptionsExercisedCashless",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Stock Issued During Period Value Stock Options Exercised, Cashless",
+        "documentation": "The cashless value of stock issued as a result of the exercise of stock options"
+       }
+      }
+     }
+    },
+    "gnss_StockReleasedFromObligationToIssueShares": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://www.lradx.com/20230930",
+     "localname": "StockReleasedFromObligationToIssueShares",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Release of obligation to issue common stock (in shares)",
+        "documentation": "The number of shares of stock released from the obligation to issue during the period."
+       }
+      }
+     }
+    },
+    "gnss_StockReleasedFromObligationToIssueValue": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.lradx.com/20230930",
+     "localname": "StockReleasedFromObligationToIssueValue",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Release of obligation to issue commons stock",
+        "documentation": "The value of stock released from the obligation to issue."
+       }
+      }
+     }
+    },
+    "us-gaap_AccumulatedOtherComprehensiveIncomeMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AccumulatedOtherComprehensiveIncomeMember",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "AOCI Attributable to Parent [Member]",
+        "documentation": "Accumulated increase (decrease) in equity from transactions and other events and circumstances from non-owner sources, attributable to the parent. Excludes net income (loss), and accumulated changes in equity from transactions resulting from investments by owners and distributions to owners."
+       }
+      }
+     }
+    },
+    "us-gaap_AdditionalPaidInCapitalMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AdditionalPaidInCapitalMember",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Additional Paid-in Capital [Member]",
+        "documentation": "Excess of issue price over par or stated value of the entity's capital stock and amounts received from other transactions involving the entity's stock or stockholders."
+       }
+      }
+     }
+    },
+    "us-gaap_AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Shares retained for payment of taxes in connection with net share settlement of restricted stock units",
+        "negatedLabel": "Shares retained for payment of taxes in connection with net share settlement of restricted stock units",
+        "documentation": "Amount of decrease to equity for grantee's tax withholding obligation for award under share-based payment arrangement."
+       }
+      }
+     }
+    },
+    "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Share-based compensation expense",
+        "documentation": "Amount of increase to additional paid-in capital (APIC) for recognition of cost for award under share-based payment arrangement."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonStockMember",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Common Stock [Member]",
+        "documentation": "Stock that is subordinate to all other stock of the issuer."
+       }
+      }
+     }
+    },
+    "us-gaap_EquityComponentDomain": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "EquityComponentDomain",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Equity Component [Domain]",
+        "documentation": "Components of equity are the parts of the total Equity balance including that which is allocated to common, preferred, treasury stock, retained earnings, etc."
+       }
+      }
+     }
+    },
+    "us-gaap_NetIncomeLoss": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "NetIncomeLoss",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-comprehensive-loss-income": {
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTax",
+       "weight": 1.0,
+       "order": 0.0
+      },
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-cash-flows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 2.0
+      },
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-operations": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-cash-flows",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-comprehensive-loss-income",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-operations",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity",
+      "http://www.lradx.com/20230930/role/statement-note-17-net-loss-income-per-share-basic-and-diluted-loss-per-share-details"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Net loss",
+        "label": "Net (loss) income",
+        "totalLabel": "Net (loss) income",
+        "terseLabel": "Net income",
+        "documentation": "The portion of profit or loss for the period, net of income taxes, which is attributable to the parent."
+       }
+      }
+     }
+    },
+    "us-gaap_OtherComprehensiveIncomeLossNetOfTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "OtherComprehensiveIncomeLossNetOfTax",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Accumulated other comprehensive income",
+        "documentation": "Amount after tax and reclassification adjustments of other comprehensive income (loss)."
+       }
+      }
+     }
+    },
+    "us-gaap_RetainedEarningsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "RetainedEarningsMember",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Retained Earnings [Member]",
+        "documentation": "Accumulated undistributed earnings (deficit)."
+       }
+      }
+     }
+    },
+    "us-gaap_SharesOutstanding": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "SharesOutstanding",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "us-gaap_SharesOutstanding",
+        "periodStartLabel": "Balance (in shares)",
+        "periodEndLabel": "Balance (in shares)",
+        "documentation": "Number of shares issued which are neither cancelled nor held in the treasury."
+       }
+      }
+     }
+    },
+    "us-gaap_SharesPaidForTaxWithholdingForShareBasedCompensation": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "SharesPaidForTaxWithholdingForShareBasedCompensation",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity",
+      "http://www.lradx.com/20230930/role/statement-note-16-stockholders-equity-details-textual"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Shares retained for payment of taxes in connection with net share settlement of restricted stock units (in shares)",
+        "negatedLabel": "Shares retained for payment of taxes in connection with net share settlement of restricted stock units (in shares)",
+        "terseLabel": "Share-Based Payment Arrangement, Shares Withheld for Tax Withholding Obligation",
+        "documentation": "Number of shares used to settle grantee's tax withholding obligation for award under share-based payment arrangement."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StatementEquityComponentsAxis",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Equity Components [Axis]",
+        "documentation": "Information by component of equity."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementLineItems": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StatementLineItems",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-balance-sheets",
+      "http://www.lradx.com/20230930/role/statement-consolidated-balance-sheets-parentheticals",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-cash-flows",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-comprehensive-loss-income",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-operations",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity",
+      "http://www.lradx.com/20230930/role/statement-note-1-operations",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities-changes-in-warranty-reserve-details",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities-other-noncurrent-liabilities-details",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities-summary-of-accrued-liabilities-details",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities-tables",
+      "http://www.lradx.com/20230930/role/statement-note-11-debt",
+      "http://www.lradx.com/20230930/role/statement-note-11-debt-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-12-leases",
+      "http://www.lradx.com/20230930/role/statement-note-12-leases-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-12-leases-initial-measurement-of-operating-lease-details",
+      "http://www.lradx.com/20230930/role/statement-note-12-leases-maturities-of-operating-lease-liabilities-details",
+      "http://www.lradx.com/20230930/role/statement-note-12-leases-tables",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes-reconciliation-of-income-taxes-details",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes-significant-portion-of-net-deferred-tax-asset-details",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes-summary-of-income-taxes-details",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes-tables",
+      "http://www.lradx.com/20230930/role/statement-note-14-commitments-and-contingencies",
+      "http://www.lradx.com/20230930/role/statement-note-14-commitments-and-contingencies-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-restricted-stock-activity-details",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-stock-option-activity-details",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-stock-options-outstanding-details",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-summary-of-sharebased-compensation-expense-details",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-tables",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-weightedaverage-assumptions-details",
+      "http://www.lradx.com/20230930/role/statement-note-16-stockholders-equity",
+      "http://www.lradx.com/20230930/role/statement-note-16-stockholders-equity-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-17-net-loss-income-per-share",
+      "http://www.lradx.com/20230930/role/statement-note-17-net-loss-income-per-share-basic-and-diluted-loss-per-share-details",
+      "http://www.lradx.com/20230930/role/statement-note-17-net-loss-income-per-share-tables",
+      "http://www.lradx.com/20230930/role/statement-note-18-segment-information",
+      "http://www.lradx.com/20230930/role/statement-note-18-segment-information-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-18-segment-information-segment-disclosures-details",
+      "http://www.lradx.com/20230930/role/statement-note-18-segment-information-tables",
+      "http://www.lradx.com/20230930/role/statement-note-19-major-customers-suppliers-and-related-information-",
+      "http://www.lradx.com/20230930/role/statement-note-19-major-customers-suppliers-and-related-information-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-19-major-customers-suppliers-and-related-information-schedule-of-longlived-assets-details",
+      "http://www.lradx.com/20230930/role/statement-note-19-major-customers-suppliers-and-related-information-schedule-of-major-customers-details",
+      "http://www.lradx.com/20230930/role/statement-note-19-major-customers-suppliers-and-related-information-tables",
+      "http://www.lradx.com/20230930/role/statement-note-2-basis-of-presentation-and-significant-accounting-policies",
+      "http://www.lradx.com/20230930/role/statement-note-2-basis-of-presentation-and-significant-accounting-policies-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-20-subsequent-events",
+      "http://www.lradx.com/20230930/role/statement-note-20-subsequent-events-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-3-recent-accounting-pronouncements",
+      "http://www.lradx.com/20230930/role/statement-note-4-revenue-recognition",
+      "http://www.lradx.com/20230930/role/statement-note-4-revenue-recognition-1-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-4-revenue-recognition-2-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-4-revenue-recognition-contract-asset-and-contract-liabilities-details",
+      "http://www.lradx.com/20230930/role/statement-note-4-revenue-recognition-tables",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements-fair-value-by-major-security-type-details",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements-holdback-liability-measured-at-fair-value-on-a-nonrecurring-basis-details",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements-operating-lease-right-of-use-assets-currency-translation-adjustments-details",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements-tables",
+      "http://www.lradx.com/20230930/role/statement-note-6-inventories",
+      "http://www.lradx.com/20230930/role/statement-note-6-inventories-schedule-of-inventory-details",
+      "http://www.lradx.com/20230930/role/statement-note-6-inventories-tables",
+      "http://www.lradx.com/20230930/role/statement-note-7-property-and-equipment",
+      "http://www.lradx.com/20230930/role/statement-note-7-property-and-equipment-property-and-equipment-details",
+      "http://www.lradx.com/20230930/role/statement-note-7-property-and-equipment-tables",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets-changes-in-carrying-amount-of-goodwill-details",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets-estimated-future-amortization-expense-details",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets-summary-of-intangible-assets-details",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets-tables",
+      "http://www.lradx.com/20230930/role/statement-note-9-prepaid-expenses-and-other",
+      "http://www.lradx.com/20230930/role/statement-note-9-prepaid-expenses-and-other-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-9-prepaid-expenses-and-other-summary-of-prepaid-expenses-and-others-details",
+      "http://www.lradx.com/20230930/role/statement-note-9-prepaid-expenses-and-other-tables"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement [Line Items]",
+        "documentation": "Line items represent financial concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes to the table."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementOfStockholdersEquityAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StatementOfStockholdersEquityAbstract",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of Stockholders' Equity [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_StatementTable": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StatementTable",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-balance-sheets",
+      "http://www.lradx.com/20230930/role/statement-consolidated-balance-sheets-parentheticals",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-cash-flows",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-comprehensive-loss-income",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-operations",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity",
+      "http://www.lradx.com/20230930/role/statement-note-1-operations",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities-changes-in-warranty-reserve-details",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities-other-noncurrent-liabilities-details",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities-summary-of-accrued-liabilities-details",
+      "http://www.lradx.com/20230930/role/statement-note-10-accrued-and-other-liabilities-tables",
+      "http://www.lradx.com/20230930/role/statement-note-11-debt",
+      "http://www.lradx.com/20230930/role/statement-note-11-debt-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-12-leases",
+      "http://www.lradx.com/20230930/role/statement-note-12-leases-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-12-leases-initial-measurement-of-operating-lease-details",
+      "http://www.lradx.com/20230930/role/statement-note-12-leases-maturities-of-operating-lease-liabilities-details",
+      "http://www.lradx.com/20230930/role/statement-note-12-leases-tables",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes-reconciliation-of-income-taxes-details",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes-significant-portion-of-net-deferred-tax-asset-details",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes-summary-of-income-taxes-details",
+      "http://www.lradx.com/20230930/role/statement-note-13-income-taxes-tables",
+      "http://www.lradx.com/20230930/role/statement-note-14-commitments-and-contingencies",
+      "http://www.lradx.com/20230930/role/statement-note-14-commitments-and-contingencies-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-restricted-stock-activity-details",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-stock-option-activity-details",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-stock-options-outstanding-details",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-summary-of-sharebased-compensation-expense-details",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-tables",
+      "http://www.lradx.com/20230930/role/statement-note-15-sharebased-compensation-weightedaverage-assumptions-details",
+      "http://www.lradx.com/20230930/role/statement-note-16-stockholders-equity",
+      "http://www.lradx.com/20230930/role/statement-note-16-stockholders-equity-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-17-net-loss-income-per-share",
+      "http://www.lradx.com/20230930/role/statement-note-17-net-loss-income-per-share-basic-and-diluted-loss-per-share-details",
+      "http://www.lradx.com/20230930/role/statement-note-17-net-loss-income-per-share-tables",
+      "http://www.lradx.com/20230930/role/statement-note-18-segment-information",
+      "http://www.lradx.com/20230930/role/statement-note-18-segment-information-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-18-segment-information-segment-disclosures-details",
+      "http://www.lradx.com/20230930/role/statement-note-18-segment-information-tables",
+      "http://www.lradx.com/20230930/role/statement-note-19-major-customers-suppliers-and-related-information-",
+      "http://www.lradx.com/20230930/role/statement-note-19-major-customers-suppliers-and-related-information-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-19-major-customers-suppliers-and-related-information-schedule-of-longlived-assets-details",
+      "http://www.lradx.com/20230930/role/statement-note-19-major-customers-suppliers-and-related-information-schedule-of-major-customers-details",
+      "http://www.lradx.com/20230930/role/statement-note-19-major-customers-suppliers-and-related-information-tables",
+      "http://www.lradx.com/20230930/role/statement-note-2-basis-of-presentation-and-significant-accounting-policies",
+      "http://www.lradx.com/20230930/role/statement-note-2-basis-of-presentation-and-significant-accounting-policies-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-20-subsequent-events",
+      "http://www.lradx.com/20230930/role/statement-note-20-subsequent-events-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-3-recent-accounting-pronouncements",
+      "http://www.lradx.com/20230930/role/statement-note-4-revenue-recognition",
+      "http://www.lradx.com/20230930/role/statement-note-4-revenue-recognition-1-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-4-revenue-recognition-2-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-4-revenue-recognition-contract-asset-and-contract-liabilities-details",
+      "http://www.lradx.com/20230930/role/statement-note-4-revenue-recognition-tables",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements-fair-value-by-major-security-type-details",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements-holdback-liability-measured-at-fair-value-on-a-nonrecurring-basis-details",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements-operating-lease-right-of-use-assets-currency-translation-adjustments-details",
+      "http://www.lradx.com/20230930/role/statement-note-5-fair-value-measurements-tables",
+      "http://www.lradx.com/20230930/role/statement-note-6-inventories",
+      "http://www.lradx.com/20230930/role/statement-note-6-inventories-schedule-of-inventory-details",
+      "http://www.lradx.com/20230930/role/statement-note-6-inventories-tables",
+      "http://www.lradx.com/20230930/role/statement-note-7-property-and-equipment",
+      "http://www.lradx.com/20230930/role/statement-note-7-property-and-equipment-property-and-equipment-details",
+      "http://www.lradx.com/20230930/role/statement-note-7-property-and-equipment-tables",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets-changes-in-carrying-amount-of-goodwill-details",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets-estimated-future-amortization-expense-details",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets-summary-of-intangible-assets-details",
+      "http://www.lradx.com/20230930/role/statement-note-8-goodwill-and-intangible-assets-tables",
+      "http://www.lradx.com/20230930/role/statement-note-9-prepaid-expenses-and-other",
+      "http://www.lradx.com/20230930/role/statement-note-9-prepaid-expenses-and-other-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-9-prepaid-expenses-and-other-summary-of-prepaid-expenses-and-others-details",
+      "http://www.lradx.com/20230930/role/statement-note-9-prepaid-expenses-and-other-tables"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement [Table]",
+        "documentation": "Schedule reflecting a Statement of Income, Statement of Cash Flows, Statement of Financial Position, Statement of Shareholders' Equity and Other Comprehensive Income, or other statement as needed."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesAcquisitions": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StockIssuedDuringPeriodSharesAcquisitions",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity",
+      "http://www.lradx.com/20230930/role/statement-note-14-commitments-and-contingencies-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-16-stockholders-equity-details-textual"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of common stock in business combination (in shares)",
+        "terseLabel": "Stock Issued During Period, Shares, Acquisitions",
+        "documentation": "Number of shares of stock issued during the period pursuant to acquisitions."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity",
+      "http://www.lradx.com/20230930/role/statement-note-16-stockholders-equity-details-textual"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of common stock upon vesting of restricted stock units (in shares)",
+        "terseLabel": "Stock Issued During Period, Shares, Restricted Stock Award, Net of Forfeitures",
+        "documentation": "Number of shares issued during the period related to Restricted Stock Awards, net of any shares forfeited."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesStockOptionsExercised": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StockIssuedDuringPeriodSharesStockOptionsExercised",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity",
+      "http://www.lradx.com/20230930/role/statement-note-16-stockholders-equity-details-textual",
+      "http://www.lradx.com/20230930/role/statement-note-20-subsequent-events-details-textual"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of common stock upon exercise of stock options, net (in shares)",
+        "terseLabel": "Share-Based Compensation Arrangement by Share-Based Payment Award, Options, Exercises in Period",
+        "documentation": "Number of share options (or share units) exercised during the current period."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodValueAcquisitions": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StockIssuedDuringPeriodValueAcquisitions",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of common stock in business combination",
+        "documentation": "Value of stock issued pursuant to acquisitions during the period."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of common stock upon vesting of restricted stock units",
+        "documentation": "Value of stock related to Restricted Stock Awards issued during the period, net of the stock value of such awards forfeited."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodValueStockOptionsExercised": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StockIssuedDuringPeriodValueStockOptionsExercised",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of common stock upon exercise of stock options, net",
+        "documentation": "Value of stock issued as a result of the exercise of stock options."
+       }
+      }
+     }
+    },
+    "us-gaap_StockholdersEquity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StockholdersEquity",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.lradx.com/20230930/role/statement-consolidated-balance-sheets": {
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0,
+       "order": 0.0
+      }
+     },
+     "presentation": [
+      "http://www.lradx.com/20230930/role/statement-consolidated-balance-sheets",
+      "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "us-gaap_StockholdersEquity",
+        "totalLabel": "Total stockholders' equity",
+        "periodStartLabel": "Balance",
+        "periodEndLabel": "Balance",
+        "documentation": "Amount of equity (deficit) attributable to parent. Excludes temporary equity and equity attributable to noncontrolling interest."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R6": {
+     "role": "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity",
+     "longName": "005 - Statement - Consolidated Statements of Stockholders' Equity",
+     "shortName": "Consolidated Statements of Stockholders' Equity",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "6",
+     "firstAnchor": {
+      "contextRef": "i_2021-09-30_StatementEquityComponentsAxis-CommonStockMember",
+      "name": "us-gaap:SharesOutstanding",
+      "unitRef": "Share",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "INF",
+      "ancestors": [
+       "td",
+       "tr",
+       "tbody",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "gnss20230930_10k.htm",
+      "first": true,
+      "unique": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "i_2021-09-30_StatementEquityComponentsAxis-CommonStockMember",
+      "name": "us-gaap:SharesOutstanding",
+      "unitRef": "Share",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "INF",
+      "ancestors": [
+       "td",
+       "tr",
+       "tbody",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "gnss20230930_10k.htm",
+      "first": true,
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,172 @@
+{
+ "version": "2.2",
+ "instance": {
+  "form10-k.htm": {
+   "tag": {
+    "BAR_GoldBullionMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://graniteshares.com/20260630",
+     "localname": "GoldBullionMember",
+     "presentation": [
+      "http://graniteshares.com/role/SchedulesOfInvestments"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Gold Bullion [Member]",
+        "documentation": "Gold Bullion [Member]"
+       }
+      }
+     }
+    },
+    "srt_StatementScenarioAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/srt/2026",
+     "localname": "StatementScenarioAxis",
+     "presentation": [
+      "http://graniteshares.com/role/SchedulesOfInvestments"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Scenario [Axis]"
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentCompanyTotalReturn": {
+     "xbrltype": "percentItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "InvestmentCompanyTotalReturn",
+     "presentation": [
+      "http://graniteshares.com/role/FinancialHighlights"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Total return ratio, at net asset value",
+        "documentation": "Percentage increase (decrease) in fund net asset value, assuming reinvestment of dividends and capital gain distributions."
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentOwnedBalanceOtherMeasure": {
+     "xbrltype": "massItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "InvestmentOwnedBalanceOtherMeasure",
+     "presentation": [
+      "http://graniteshares.com/role/ScheduleOfInvestmentInGoldDetails",
+      "http://graniteshares.com/role/SchedulesOfInvestments"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Investment in Gold bullion",
+        "periodStartLabel": "Opening balance (in Ounces)",
+        "periodEndLabel": "Ending balance (in Ounces)",
+        "documentation": "Quantity of the investment. Indicate the measure in the unit of measure. This is commonly used for investments other than securities. For example, if the investment is gold, the balance would be the number of ounces and the unit of measure would indicate \"ounces\"."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R4": {
+     "role": "http://graniteshares.com/role/SchedulesOfInvestments",
+     "longName": "00000004 - Statement - Schedules of Investments",
+     "shortName": "Schedules of Investments",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "4",
+     "firstAnchor": {
+      "contextRef": "AsOf2026-06-30",
+      "name": "us-gaap:InvestmentOwnedBalanceOtherMeasure",
+      "unitRef": "oz",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "3",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "us-gaap:InvestmentHoldingsScheduleOfInvestmentsTableTextBlock",
+       "us-gaap:InvestmentHoldingsTextBlock",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "form10-k.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "AsOf2026-06-30",
+      "name": "us-gaap:InvestmentOwnedAtFairValue",
+      "unitRef": "USD",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "form10-k.htm",
+      "unique": true
+     }
+    },
+    "R8": {
+     "role": "http://graniteshares.com/role/FinancialHighlights",
+     "longName": "00000008 - Statement - Financial Highlights",
+     "shortName": "Financial Highlights",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "8",
+     "firstAnchor": {
+      "contextRef": "AsOf2025-06-30",
+      "name": "us-gaap:NetAssetValuePerShare",
+      "unitRef": "USDPShares",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "INF",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "form10-k.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "AsOf2023-06-30",
+      "name": "us-gaap:NetAssetValuePerShare",
+      "unitRef": "USDPShares",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "INF",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "form10-k.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,170 @@
+{
+ "version": "2.1",
+ "instance": {
+  "brx-20201231.htm": {
+   "tag": {
+    "srt_ConsolidatedEntitiesAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by consolidated entity or group of entities.",
+        "label": "Consolidated Entities [Axis]",
+        "terseLabel": "Consolidated Entities [Axis]"
+       }
+      }
+     },
+     "localname": "ConsolidatedEntitiesAxis",
+     "nsuri": "http://fasb.org/srt/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+      "http://www.brixmor.com/role/DebtObligationsNarrativeDetails",
+      "http://www.brixmor.com/role/DebtObligationsSheduleofDebtDetails",
+      "http://www.brixmor.com/role/EarningsperUnit",
+      "http://www.brixmor.com/role/EarningsperUnitDetails",
+      "http://www.brixmor.com/role/EarningsperUnitTables",
+      "http://www.brixmor.com/role/NatureofBusinessandFinancialStatementPresentationNarrativeDetails",
+      "http://www.brixmor.com/role/SupplementalFinancialInformationDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "srt_SubsidiariesMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Entity owned or controlled by another entity.",
+        "label": "Subsidiaries [Member]",
+        "terseLabel": "Brixmor Operating Partnership LP"
+       }
+      }
+     },
+     "localname": "SubsidiariesMember",
+     "nsuri": "http://fasb.org/srt/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.brixmor.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWSParenthetical",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCHANGESINEQUITY",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFOPERATIONS",
+      "http://www.brixmor.com/role/DebtObligationsNarrativeDetails",
+      "http://www.brixmor.com/role/DebtObligationsSheduleofDebtDetails",
+      "http://www.brixmor.com/role/EarningsperUnit",
+      "http://www.brixmor.com/role/EarningsperUnitDetails",
+      "http://www.brixmor.com/role/EarningsperUnitTables",
+      "http://www.brixmor.com/role/SupplementalFinancialInformationDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash and cash equivalents, and cash and cash equivalents restricted to withdrawal or usage. Excludes amount for disposal group and discontinued operations. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates.",
+        "label": "Cash, Cash Equivalents, Restricted Cash and Restricted Cash Equivalents",
+        "periodEndLabel": "Cash, cash equivalents and restricted cash at end of period",
+        "periodStartLabel": "Cash, cash equivalents and restricted cash at beginning of period",
+        "totalLabel": "Cash, cash equivalents and restricted cash at end of period"
+       }
+      }
+     },
+     "localname": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInOperatingActivities": {
+     "calculation": {
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 1.0,
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+       "weight": 1.0
+      }
+     },
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash inflow (outflow) from operating activities, including discontinued operations. Operating activity cash flows include transactions, adjustments, and changes in value not defined as investing or financing activities.",
+        "label": "Net Cash Provided by (Used in) Operating Activities",
+        "totalLabel": "Net cash provided by operating activities"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInOperatingActivities",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS"
+     ],
+     "xbrltype": "monetaryItemType"
+    }
+   },
+   "report": {
+    "R8": {
+     "firstAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "brx-20201231.htm",
+      "contextRef": "i649d8343095f438387c3f6db5bf51e5a_D20200101-20201231",
+      "decimals": "-3",
+      "first": true,
+      "lang": "en-US",
+      "name": "us-gaap:ProfitLoss",
+      "reportCount": 1,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "1007008 - Statement - CONSOLIDATED STATEMENTS OF CASH FLOWS",
+     "role": "http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+     "shortName": "CONSOLIDATED STATEMENTS OF CASH FLOWS",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "brx-20201231.htm",
+      "contextRef": "i649d8343095f438387c3f6db5bf51e5a_D20200101-20201231",
+      "decimals": "-3",
+      "lang": "en-US",
+      "name": "us-gaap:DepreciationDepletionAndAmortization",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

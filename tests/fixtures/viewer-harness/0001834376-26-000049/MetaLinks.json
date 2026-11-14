@@ -1,0 +1,755 @@
+{
+ "version": "2.2",
+ "instance": {
+  "innv-20260630.htm": {
+   "tag": {
+    "innv_FairValueAdjustmentForRedeemableNoncontrollingInterests": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.innovage.com/20260630",
+     "localname": "FairValueAdjustmentForRedeemableNoncontrollingInterests",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Fair value adjustment for redeemable noncontrolling interests",
+        "label": "Fair Value Adjustment For Redeemable Noncontrolling Interests",
+        "documentation": "Fair Value Adjustment For Redeemable Noncontrolling Interests"
+       }
+      }
+     }
+    },
+    "innv_NoncontrollingInterestIncreaseFromJointVentureContributions": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.innovage.com/20260630",
+     "localname": "NoncontrollingInterestIncreaseFromJointVentureContributions",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Contributions from joint venture partner",
+        "label": "Noncontrolling Interest, Increase From Joint Venture Contributions",
+        "documentation": "Noncontrolling Interest, Increase From Joint Venture Contributions"
+       }
+      }
+     }
+    },
+    "innv_RedeemableNoncontrollingInterestFairValueCarryingAmount": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.innovage.com/20260630",
+     "localname": "RedeemableNoncontrollingInterestFairValueCarryingAmount",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Fair value adjustment for redeemable noncontrolling interests",
+        "label": "Redeemable Noncontrolling Interest, Fair Value, Carrying Amount",
+        "documentation": "Redeemable Noncontrolling Interest, Fair Value, Carrying Amount"
+       }
+      }
+     }
+    },
+    "innv_TemporaryEquityDecreaseFromDistributionToJointVenture": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.innovage.com/20260630",
+     "localname": "TemporaryEquityDecreaseFromDistributionToJointVenture",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedTerseLabel": "Distributions to joint venture",
+        "label": "Temporary Equity, Decrease From Distribution To Joint Venture",
+        "documentation": "Temporary Equity, Decrease From Distribution To Joint Venture"
+       }
+      }
+     }
+    },
+    "us-gaap_AdditionalPaidInCapitalMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "AdditionalPaidInCapitalMember",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Additional Paid-in Capital",
+        "label": "Additional Paid-in Capital [Member]",
+        "documentation": "Excess of issue price over par or stated value of the entity's capital stock and amounts received from other transactions involving the entity's stock or stockholders."
+       }
+      }
+     }
+    },
+    "us-gaap_AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedTerseLabel": "Tax withholding related to the net share settlements of stock-based compensation awards",
+        "label": "Share-Based Payment Arrangement, Decrease for Tax Withholding Obligation",
+        "documentation": "Amount of decrease to equity for grantee's tax withholding obligation for award under share-based payment arrangement."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "CommonStockMember",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Capital Stock",
+        "label": "Common Stock [Member]",
+        "documentation": "Stock that is subordinate to all other stock of the issuer."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockSharesOutstanding": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "CommonStockSharesOutstanding",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Common stock outstanding (in shares)",
+        "periodStartLabel": "Beginning, balances (in shares)",
+        "periodEndLabel": "Ending, balances (in shares)",
+        "label": "Common Stock, Shares, Outstanding",
+        "documentation": "Number of shares of common stock outstanding. Common stock represent the ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_EquityComponentDomain": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "EquityComponentDomain",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Equity Component [Domain]",
+        "label": "Equity Component [Domain]",
+        "documentation": "Components of equity are the parts of the total Equity balance including that which is allocated to common, preferred, treasury stock, retained earnings, etc."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInAccountsReceivable": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "IncreaseDecreaseInAccountsReceivable",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.innovage.com/role/ConsolidatedStatementsofCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": -1.0,
+       "order": 9.0
+      }
+     },
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Accounts receivable",
+        "label": "Increase (Decrease) in Accounts Receivable",
+        "documentation": "The increase (decrease) during the reporting period in amount due within one year (or one business cycle) from customers for the credit sale of goods and services."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "IncreaseDecreaseInStockholdersEquityRollForward",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Increase (Decrease) in Stockholders' Equity [Roll Forward]",
+        "label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]",
+        "documentation": "A roll forward is a reconciliation of a concept from the beginning of a period to the end of a period."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInTemporaryEquityRollForward": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "IncreaseDecreaseInTemporaryEquityRollForward",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Redeemable Noncontrolling Interests (Temporary Equity)",
+        "label": "Increase (Decrease) in Temporary Equity [Roll Forward]",
+        "documentation": "A roll forward is a reconciliation of a concept from the beginning of a period to the end of a period."
+       }
+      }
+     }
+    },
+    "us-gaap_NetCashProvidedByUsedInOperatingActivities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "NetCashProvidedByUsedInOperatingActivities",
+     "calculation": {
+      "http://www.innovage.com/role/ConsolidatedStatementsofCashFlows": {
+       "parentTag": "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net cash provided by operating activities",
+        "label": "Cash Provided by (Used in) Operating Activity, Including Discontinued Operation",
+        "documentation": "Amount of cash inflow (outflow) from operating activity, including, but not limited to, discontinued operation. Operating activity includes, but is not limited to, transaction, adjustment, and change in value not defined as investing or financing activity."
+       }
+      }
+     }
+    },
+    "us-gaap_NetIncomeLossAttributableToRedeemableNoncontrollingInterest": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "NetIncomeLossAttributableToRedeemableNoncontrollingInterest",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity": {
+       "parentTag": "us-gaap_NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest",
+       "weight": -1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Net loss",
+        "label": "Net Income (Loss) Attributable to Redeemable Noncontrolling Interest",
+        "documentation": "Amount of Net Income (Loss) attributable to redeemable noncontrolling interest."
+       }
+      }
+     }
+    },
+    "us-gaap_NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net loss",
+        "label": "Net Income (Loss), Including Portion Attributable to Nonredeemable Noncontrolling Interest",
+        "documentation": "Amount after income tax of income (loss) including the portion attributable to nonredeemable noncontrolling interest. Excludes the portion attributable to redeemable noncontrolling interest recognized as temporary equity."
+       }
+      }
+     }
+    },
+    "us-gaap_NoncontrollingInterestMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "NoncontrollingInterestMember",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Noncontrolling Interests",
+        "label": "Noncontrolling Interest [Member]",
+        "documentation": "This element represents that portion of equity (net assets) in a subsidiary not attributable, directly or indirectly, to the parent. A noncontrolling interest is sometimes called a minority interest."
+       }
+      }
+     }
+    },
+    "us-gaap_PaymentsToAcquirePropertyPlantAndEquipment": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "PaymentsToAcquirePropertyPlantAndEquipment",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.innovage.com/role/ConsolidatedStatementsofCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+       "weight": -1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofCashFlows"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Purchases of property and equipment",
+        "label": "Payments to Acquire Property, Plant, and Equipment",
+        "documentation": "The cash outflow associated with the acquisition of long-lived, physical assets that are used in the normal conduct of business to produce goods and services and not intended for resale; includes cash outflows to pay for construction of self-constructed assets."
+       }
+      }
+     }
+    },
+    "us-gaap_ProfitLoss": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "ProfitLoss",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity": {
+       "parentTag": "us-gaap_NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest",
+       "weight": 1.0,
+       "order": 1.0
+      },
+      "http://www.innovage.com/role/ConsolidatedStatementsofCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 1.0
+      },
+      "http://www.innovage.com/role/ConsolidatedStatementsofOperations": {
+       "parentTag": "us-gaap_NetIncomeLoss",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofCashFlows",
+      "http://www.innovage.com/role/ConsolidatedStatementsofOperations",
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net Loss",
+        "verboseLabel": "Net Loss",
+        "terseLabel": "Net loss",
+        "label": "Net Income (Loss), Including Portion Attributable to Noncontrolling Interest",
+        "documentation": "The consolidated profit or loss for the period, net of income taxes, including the portion attributable to the noncontrolling interest."
+       }
+      }
+     }
+    },
+    "us-gaap_RedeemableNoncontrollingInterestEquityCarryingAmount": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "RedeemableNoncontrollingInterestEquityCarryingAmount",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.innovage.com/role/ConsolidatedBalanceSheets": {
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedBalanceSheets",
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity",
+      "http://www.innovage.com/role/FairValueMeasurementsNarrativeDetails",
+      "http://www.innovage.com/role/InvestmentsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Redeemable Noncontrolling Interest (See Note 4)",
+        "periodStartLabel": "Beginning balance",
+        "periodEndLabel": "Ending balance",
+        "verboseLabel": "Redeemable noncontrolling interest, equity, carrying amount",
+        "label": "Redeemable Noncontrolling Interest, Equity, Carrying Amount",
+        "documentation": "As of the reporting date, the aggregate carrying amount of all noncontrolling interests which are redeemable by the (parent) entity (1) at a fixed or determinable price on a fixed or determinable date, (2) at the option of the holder of the noncontrolling interest, or (3) upon occurrence of an event that is not solely within the control of the (parent) entity. This item includes noncontrolling interest holder's ownership (or holders' ownership) regardless of the type of equity interest (common, preferred, other) including all potential organizational (legal) forms of the investee entity."
+       }
+      }
+     }
+    },
+    "us-gaap_RetainedEarningsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "RetainedEarningsMember",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Retained Earnings (Deficit)",
+        "label": "Retained Earnings [Member]",
+        "documentation": "Accumulated undistributed earnings (deficit)."
+       }
+      }
+     }
+    },
+    "us-gaap_SharesPaidForTaxWithholdingForShareBasedCompensation": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "SharesPaidForTaxWithholdingForShareBasedCompensation",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedTerseLabel": "Tax withholding related to the net share settlements of stock-based compensation awards (in shares)",
+        "label": "Share-Based Payment Arrangement, Shares Withheld for Tax Withholding Obligation",
+        "documentation": "Number of shares used to settle grantee's tax withholding obligation for award under share-based payment arrangement."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "StatementEquityComponentsAxis",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Equity Components [Axis]",
+        "label": "Equity Components [Axis]",
+        "documentation": "Information by component of equity."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementLineItems": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "StatementLineItems",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofOperations",
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Statement [Line Items]",
+        "label": "Statement [Line Items]",
+        "documentation": "Line items represent financial concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes to the table."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementOfStockholdersEquityAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "StatementOfStockholdersEquityAbstract",
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Statement of Stockholders' Equity [Abstract]",
+        "label": "Statement of Stockholders' Equity [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_StatementTable": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "StatementTable",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofOperations",
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Statement [Table]",
+        "label": "Statement [Table]",
+        "documentation": "Presentation of information about comprehensive income, income, other comprehensive income, financial position, cash flows, and shareholders' equity."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesShareBasedCompensation": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "StockIssuedDuringPeriodSharesShareBasedCompensation",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Stock-based compensation (in shares)",
+        "label": "Shares Issued, Shares, Share-Based Payment Arrangement, after Forfeiture",
+        "documentation": "Number, after forfeiture, of shares or units issued under share-based payment arrangement. Excludes shares or units issued under employee stock ownership plan (ESOP)."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "StockIssuedDuringPeriodValueShareBasedCompensation",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Stock-based compensation",
+        "label": "Shares Issued, Value, Share-Based Payment Arrangement, after Forfeiture",
+        "documentation": "Value, after forfeiture, of shares issued under share-based payment arrangement. Excludes employee stock ownership plan (ESOP)."
+       }
+      }
+     }
+    },
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.innovage.com/role/ConsolidatedBalanceSheets": {
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0,
+       "order": 4.0
+      }
+     },
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedBalanceSheets",
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total stockholders’ equity",
+        "periodStartLabel": "Beginning, balances",
+        "periodEndLabel": "Ending, balances",
+        "label": "Equity, Including Portion Attributable to Noncontrolling Interest",
+        "documentation": "Amount of equity (deficit) attributable to parent and noncontrolling interest. Excludes temporary equity."
+       }
+      }
+     }
+    },
+    "us-gaap_TreasuryStockCommonMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "TreasuryStockCommonMember",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Treasury Stock",
+        "label": "Treasury Stock, Common [Member]",
+        "documentation": "Previously issued common shares repurchased by the issuing entity and held in treasury."
+       }
+      }
+     }
+    },
+    "us-gaap_TreasuryStockCommonShares": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "TreasuryStockCommonShares",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Treasury stock at cost (in shares)",
+        "periodStartLabel": "Treasury Stock, Beginning (in shares)",
+        "periodEndLabel": "Treasury Stock, Ending (in shares)",
+        "label": "Treasury Stock, Common, Shares",
+        "documentation": "Number of previously issued common shares repurchased by the issuing entity and held in treasury."
+       }
+      }
+     }
+    },
+    "us-gaap_TreasuryStockSharesAcquired": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "TreasuryStockSharesAcquired",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Shares repurchased at cost (in shares)",
+        "label": "Treasury Stock, Shares, Acquired",
+        "documentation": "Number of shares that have been repurchased during the period and are being held in treasury."
+       }
+      }
+     }
+    },
+    "us-gaap_TreasuryStockValueAcquiredCostMethod": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2026",
+     "localname": "TreasuryStockValueAcquiredCostMethod",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedTerseLabel": "Shares repurchased at cost",
+        "label": "Treasury Stock, Value, Acquired, Cost Method",
+        "documentation": "Equity impact of the cost of common and preferred stock that were repurchased during the period. Recorded using the cost method."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R6": {
+     "role": "http://www.innovage.com/role/ConsolidatedStatementsofStockholdersEquity",
+     "longName": "9952154 - Statement - Consolidated Statements of Stockholders' Equity",
+     "shortName": "Consolidated Statements of Stockholders' Equity",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "6",
+     "firstAnchor": {
+      "contextRef": "c-11",
+      "name": "us-gaap:CommonStockSharesOutstanding",
+      "unitRef": "shares",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "INF",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "innv-20260630.htm",
+      "first": true,
+      "unique": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-11",
+      "name": "us-gaap:CommonStockSharesOutstanding",
+      "unitRef": "shares",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "INF",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "innv-20260630.htm",
+      "first": true,
+      "unique": true
+     }
+    },
+    "R7": {
+     "role": "http://www.innovage.com/role/ConsolidatedStatementsofCashFlows",
+     "longName": "9952155 - Statement - Consolidated Statements of Cash Flows",
+     "shortName": "Consolidated Statements of Cash Flows",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "7",
+     "firstAnchor": {
+      "contextRef": "c-1",
+      "name": "us-gaap:ProfitLoss",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "innv-20260630.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-1",
+      "name": "us-gaap:GainLossOnDispositionOfAssets1",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "innv-20260630.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

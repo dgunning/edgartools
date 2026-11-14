@@ -1,0 +1,1065 @@
+[
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "d_2022-10-01_2023-09-30",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "-18396000",
+  "numeric_value": -18396000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "d_2021-10-01_2022-09-30",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "-16212000",
+  "numeric_value": -16212000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesOutstanding",
+  "context_ref": "i_2021-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "36403833",
+  "numeric_value": 36403833.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2021-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "364000",
+  "numeric_value": 364000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2021-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "107110000",
+  "numeric_value": 107110000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-4",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2021-09-30_StatementEquityComponentsAxis-RetainedEarningsMember",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "-41154000",
+  "numeric_value": -41154000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2021-09-30_StatementEquityComponentsAxis-AccumulatedOtherComprehensiveIncomeMember",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "2000",
+  "numeric_value": 2000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2021-09-30",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "65958000",
+  "numeric_value": 65958000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "2227000",
+  "numeric_value": 2227000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+  "context_ref": "d_2021-10-01_2022-09-30",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "2227000",
+  "numeric_value": 2227000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesStockOptionsExercised",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "145235",
+  "numeric_value": 145235.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueStockOptionsExercised",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "2000",
+  "numeric_value": 2000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueStockOptionsExercised",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "282000",
+  "numeric_value": 282000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueStockOptionsExercised",
+  "context_ref": "d_2021-10-01_2022-09-30",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "282000",
+  "numeric_value": 282000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "270262",
+  "numeric_value": 270262.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "2000",
+  "numeric_value": 2000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesPaidForTaxWithholdingForShareBasedCompensation",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "18344",
+  "numeric_value": 18344.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "70000",
+  "numeric_value": 70000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-4",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+  "context_ref": "d_2021-10-01_2022-09-30",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "70000",
+  "numeric_value": 70000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-4",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesAcquisitions",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "259310",
+  "numeric_value": 259310.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueAcquisitions",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "2000",
+  "numeric_value": 2000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueAcquisitions",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "998000",
+  "numeric_value": 998000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueAcquisitions",
+  "context_ref": "d_2021-10-01_2022-09-30",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "998000",
+  "numeric_value": 998000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "gnss:StockReleasedFromObligationToIssueValue",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:OtherComprehensiveIncomeLossNetOfTax",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-AccumulatedOtherComprehensiveIncomeMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "-794000",
+  "numeric_value": -794000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:OtherComprehensiveIncomeLossNetOfTax",
+  "context_ref": "d_2021-10-01_2022-09-30",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "-794000",
+  "numeric_value": -794000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "d_2021-10-01_2022-09-30_StatementEquityComponentsAxis-RetainedEarningsMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "-16212000",
+  "numeric_value": -16212000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesOutstanding",
+  "context_ref": "i_2022-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "instant_2022-09-30",
+  "period_type": "instant",
+  "value": "36611240",
+  "numeric_value": 36611240.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2022-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "instant_2022-09-30",
+  "period_type": "instant",
+  "value": "366000",
+  "numeric_value": 366000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2022-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "instant_2022-09-30",
+  "period_type": "instant",
+  "value": "108551000",
+  "numeric_value": 108551000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2022-09-30_StatementEquityComponentsAxis-RetainedEarningsMember",
+  "period_key": "instant_2022-09-30",
+  "period_type": "instant",
+  "value": "-57366000",
+  "numeric_value": -57366000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2022-09-30_StatementEquityComponentsAxis-AccumulatedOtherComprehensiveIncomeMember",
+  "period_key": "instant_2022-09-30",
+  "period_type": "instant",
+  "value": "-792000",
+  "numeric_value": -792000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2022-09-30",
+  "period_key": "instant_2022-09-30",
+  "period_type": "instant",
+  "value": "50393000",
+  "numeric_value": 50393000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "1642000",
+  "numeric_value": 1642000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+  "context_ref": "d_2022-10-01_2023-09-30",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "1642000",
+  "numeric_value": 1642000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesStockOptionsExercised",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "84765",
+  "numeric_value": 84765.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueStockOptionsExercised",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "1000",
+  "numeric_value": 1000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueStockOptionsExercised",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "138000",
+  "numeric_value": 138000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueStockOptionsExercised",
+  "context_ref": "d_2022-10-01_2023-09-30",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "138000",
+  "numeric_value": 138000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "gnss:StockIssuedDuringPeriodSharesStockOptionsExercisedCashless",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "278712",
+  "numeric_value": 278712.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "gnss:StockIssuedDuringPeriodValueStockOptionsExercisedCashless",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "3000",
+  "numeric_value": 3000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "gnss:StockIssuedDuringPeriodValueStockOptionsExercisedCashless",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "300000",
+  "numeric_value": 300000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "gnss:StockIssuedDuringPeriodValueStockOptionsExercisedCashless",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-RetainedEarningsMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "-300000",
+  "numeric_value": -300000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "gnss:SharesPaidForTaxWithholdingForShareBasedCompensationCashless",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "74606",
+  "numeric_value": 74606.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "gnss:AdjustmentsRelatedToTaxWithholdingForCashlessShareBasedCompensation",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "1000",
+  "numeric_value": 1000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "gnss:AdjustmentsRelatedToTaxWithholdingForCashlessShareBasedCompensation",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "207000",
+  "numeric_value": 207000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "gnss:AdjustmentsRelatedToTaxWithholdingForCashlessShareBasedCompensation",
+  "context_ref": "d_2022-10-01_2023-09-30",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "207000",
+  "numeric_value": 207000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "253012",
+  "numeric_value": 253012.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "-2000",
+  "numeric_value": -2000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesPaidForTaxWithholdingForShareBasedCompensation",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "-11616",
+  "numeric_value": -11616.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "45000",
+  "numeric_value": 45000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+  "context_ref": "d_2022-10-01_2023-09-30",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "45000",
+  "numeric_value": 45000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "gnss:StockReleasedFromObligationToIssueShares",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "69564",
+  "numeric_value": 69564.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:OtherComprehensiveIncomeLossNetOfTax",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-AccumulatedOtherComprehensiveIncomeMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "287000",
+  "numeric_value": 287000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:OtherComprehensiveIncomeLossNetOfTax",
+  "context_ref": "d_2022-10-01_2023-09-30",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "287000",
+  "numeric_value": 287000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "d_2022-10-01_2023-09-30_StatementEquityComponentsAxis-RetainedEarningsMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "-18396000",
+  "numeric_value": -18396000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesOutstanding",
+  "context_ref": "i_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "instant_2023-09-30",
+  "period_type": "instant",
+  "value": "37211071",
+  "numeric_value": 37211071.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2023-09-30_StatementEquityComponentsAxis-CommonStockMember",
+  "period_key": "instant_2023-09-30",
+  "period_type": "instant",
+  "value": "372000",
+  "numeric_value": 372000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2023-09-30_StatementEquityComponentsAxis-AdditionalPaidInCapitalMember",
+  "period_key": "instant_2023-09-30",
+  "period_type": "instant",
+  "value": "110379000",
+  "numeric_value": 110379000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2023-09-30_StatementEquityComponentsAxis-RetainedEarningsMember",
+  "period_key": "instant_2023-09-30",
+  "period_type": "instant",
+  "value": "-76062000",
+  "numeric_value": -76062000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2023-09-30_StatementEquityComponentsAxis-AccumulatedOtherComprehensiveIncomeMember",
+  "period_key": "instant_2023-09-30",
+  "period_type": "instant",
+  "value": "-505000",
+  "numeric_value": -505000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i_2023-09-30",
+  "period_key": "instant_2023-09-30",
+  "period_type": "instant",
+  "value": "33812000",
+  "numeric_value": 33812000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesAcquisitions",
+  "context_ref": "d_2022-10-01_2023-09-30_BusinessAcquisitionAxis-AssetsAcquisitionOfAmikaMobileCorporationMember_CounterpartyNameAxis-FormerOwnerOfAmikaMobileMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "69564",
+  "numeric_value": 69564.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:CounterpartyNameAxis": "gnss:FormerOwnerOfAmikaMobileMember",
+   "us-gaap:BusinessAcquisitionAxis": "gnss:AssetsAcquisitionOfAmikaMobileCorporationMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesStockOptionsExercised",
+  "context_ref": "d_2022-10-01_2023-09-30",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "84765",
+  "numeric_value": 84765.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesPaidForTaxWithholdingForShareBasedCompensation",
+  "context_ref": "d_2022-10-01_2023-09-30_GranteeStatusAxis-ShareBasedPaymentArrangementEmployeeMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "74606",
+  "numeric_value": 74606.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:GranteeStatusAxis": "us-gaap:ShareBasedPaymentArrangementEmployeeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesStockOptionsExercised",
+  "context_ref": "d_2022-10-01_2023-09-30_GranteeStatusAxis-ShareBasedPaymentArrangementEmployeeMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "162841",
+  "numeric_value": 162841.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:GranteeStatusAxis": "us-gaap:ShareBasedPaymentArrangementEmployeeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesStockOptionsExercised",
+  "context_ref": "d_2022-10-01_2023-09-30_AwardTypeAxis-IncentiveStockOptionsMember_GranteeStatusAxis-ShareBasedPaymentArrangementEmployeeMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "150753",
+  "numeric_value": 150753.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:AwardTypeAxis": "gnss:IncentiveStockOptionsMember",
+   "us-gaap:GranteeStatusAxis": "us-gaap:ShareBasedPaymentArrangementEmployeeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesStockOptionsExercised",
+  "context_ref": "d_2021-10-01_2022-09-30",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "145235",
+  "numeric_value": 145235.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures",
+  "context_ref": "d_2022-10-01_2023-09-30_AwardTypeAxis-RestrictedStockUnitsRSUMember",
+  "period_key": "duration_2022-10-01_2023-09-30",
+  "period_type": "duration",
+  "value": "253012",
+  "numeric_value": 253012.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:AwardTypeAxis": "us-gaap:RestrictedStockUnitsRSUMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures",
+  "context_ref": "d_2021-10-01_2022-09-30",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "270262",
+  "numeric_value": 270262.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesAcquisitions",
+  "context_ref": "d_2020-10-01_2021-09-30_BusinessAcquisitionAxis-AssetsAcquisitionOfAmikaMobileCorporationMember_CounterpartyNameAxis-FormerOwnerOfAmikaMobileMember",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "365109",
+  "numeric_value": 365109.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:CounterpartyNameAxis": "gnss:FormerOwnerOfAmikaMobileMember",
+   "us-gaap:BusinessAcquisitionAxis": "gnss:AssetsAcquisitionOfAmikaMobileCorporationMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesAcquisitions",
+  "context_ref": "d_2021-10-01_2022-09-30_BusinessAcquisitionAxis-AssetsAcquisitionOfAmikaMobileCorporationMember_CounterpartyNameAxis-FormerOwnerOfAmikaMobileMember",
+  "period_key": "duration_2021-10-01_2022-09-30",
+  "period_type": "duration",
+  "value": "69564",
+  "numeric_value": 69564.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:CounterpartyNameAxis": "gnss:FormerOwnerOfAmikaMobileMember",
+   "us-gaap:BusinessAcquisitionAxis": "gnss:AssetsAcquisitionOfAmikaMobileCorporationMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesStockOptionsExercised",
+  "context_ref": "d_2023-10-04_2023-10-04_SubsequentEventTypeAxis-SubsequentEventMember",
+  "period_key": "duration_2023-10-04_2023-10-04",
+  "period_type": "duration",
+  "value": "986486",
+  "numeric_value": 986486.0,
+  "unit_ref": "Share",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:SubsequentEventTypeAxis": "us-gaap:SubsequentEventMember"
+  }
+ }
+]

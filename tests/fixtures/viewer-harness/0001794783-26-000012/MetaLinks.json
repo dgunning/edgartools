@@ -1,0 +1,91 @@
+{
+ "version": "2.2",
+ "instance": {
+  "slqt-20251231.htm": {
+   "tag": {
+    "us-gaap_Goodwill": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "Goodwill",
+     "crdr": "debit",
+     "calculation": {
+      "http://selectquote.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://selectquote.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://selectquote.com/role/IntangibleAssetsandGoodwillNarrativeDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "GOODWILL",
+        "verboseLabel": "Goodwill",
+        "label": "Goodwill",
+        "documentation": "Amount, after accumulated impairment loss, of asset representing future economic benefit arising from other asset acquired in business combination or from joint venture formation or both, that is not individually identified and separately recognized."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R2": {
+     "role": "http://selectquote.com/role/CONSOLIDATEDBALANCESHEETS",
+     "longName": "9952151 - Statement - CONSOLIDATED BALANCE SHEETS",
+     "shortName": "CONSOLIDATED BALANCE SHEETS",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "2",
+     "firstAnchor": {
+      "contextRef": "c-3",
+      "name": "us-gaap:CashCashEquivalentsAndShortTermInvestments",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "ix:continuation",
+       "ix:continuation",
+       "ix:continuation",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "slqt-20251231.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-3",
+      "name": "us-gaap:AccountsAndOtherReceivablesNetCurrent",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "slqt-20251231.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

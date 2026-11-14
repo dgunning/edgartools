@@ -1,0 +1,41 @@
+[
+ {
+  "concept": "us-gaap:Goodwill",
+  "context_ref": "c-4",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "29438000",
+  "numeric_value": 29438000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Goodwill",
+  "context_ref": "c-3",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "29438000",
+  "numeric_value": 29438000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Goodwill",
+  "context_ref": "c-3",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "29400000",
+  "numeric_value": 29400000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ }
+]

@@ -1,0 +1,45 @@
+[
+ {
+  "concept": "us-gaap:PreferredStockDividendRatePercentage",
+  "context_ref": "c-1",
+  "period_key": "duration_2024-01-01_2024-03-31",
+  "period_type": "duration",
+  "value": "0.08250",
+  "numeric_value": 0.0825,
+  "unit_ref": "number",
+  "currency": null,
+  "decimals": "5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:PreferredStockDividendRatePercentage",
+  "context_ref": "c-145",
+  "period_key": "duration_2024-01-01_2024-03-31",
+  "period_type": "duration",
+  "value": "0.08250",
+  "numeric_value": 0.0825,
+  "unit_ref": "number",
+  "currency": null,
+  "decimals": "4",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:SeriesAPreferredStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PreferredStockDividendRatePercentage",
+  "context_ref": "c-146",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "0.08250",
+  "numeric_value": 0.0825,
+  "unit_ref": "number",
+  "currency": null,
+  "decimals": "4",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:SeriesAPreferredStockMember"
+  }
+ }
+]

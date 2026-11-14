@@ -1,0 +1,14 @@
+{
+ "http://www.hubcybersecurity.com/role/ShareholdersEquityType2or3": {
+  "ifrs-full_ComponentsOfEquityAxis": {
+   "default_member_id": "ifrs-full_ComponentsOfEquityDomain",
+   "is_typed_dimension": false
+  }
+ },
+ "merged": {
+  "ifrs-full_ComponentsOfEquityAxis": {
+   "default_member_id": "ifrs-full_ComponentsOfEquityDomain",
+   "is_typed_dimension": false
+  }
+ }
+}

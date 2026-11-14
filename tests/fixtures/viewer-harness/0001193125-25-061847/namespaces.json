@@ -1,0 +1,30 @@
+{
+ "namespace_prefixes": {
+  "http://fasb.org/srt-types/2024": "srt-types",
+  "http://fasb.org/srt/2024": "srt",
+  "http://fasb.org/us-gaap/2024": "us-gaap",
+  "http://fasb.org/us-types/2024": "us-types",
+  "http://www.bilibili.com/20241231": "bili",
+  "http://www.w3.org/1999/xlink": "xlink",
+  "http://www.w3.org/2001/XMLSchema-instance": "xsi",
+  "http://www.xbrl.org/2003/XLink": "xl",
+  "http://www.xbrl.org/2003/instance": "xbrli",
+  "http://www.xbrl.org/2003/iso4217": "iso4217",
+  "http://www.xbrl.org/2003/linkbase": "link",
+  "http://www.xbrl.org/2009/arcrole/fact-explanatoryFact": "deprecated",
+  "http://www.xbrl.org/2009/utr": "utr",
+  "http://www.xbrl.org/dtr/type/2020-01-21": "dtr-types",
+  "http://xbrl.org/2005/xbrldt": "xbrldt",
+  "http://xbrl.org/2006/xbrldi": "xbrldi",
+  "http://xbrl.sec.gov/country/2024": "country",
+  "http://xbrl.sec.gov/currency/2024": "currency",
+  "http://xbrl.sec.gov/cyd/2024": "cyd",
+  "http://xbrl.sec.gov/dei/2024": "dei",
+  "http://xbrl.sec.gov/ecd/2024": "ecd",
+  "http://xbrl.sec.gov/exch/2024": "exch",
+  "http://xbrl.sec.gov/naics/2024": "naics",
+  "http://xbrl.sec.gov/sic/2024": "sic",
+  "http://xbrl.sec.gov/stpr/2024": "stpr"
+ },
+ "typed_dimensions": []
+}

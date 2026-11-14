@@ -31,7 +31,7 @@ from lxml.html import HtmlElement
 
 from edgar.documents.utils.html_utils import create_lxml_parser, text_stripped
 
-__all__ = ['ConceptRow', 'ConceptReport', 'declared_currency_scales', 'extract_concepts_from_report',
+__all__ = ['ConceptRow', 'ConceptReport', 'UnextractedCell', 'declared_currency_scales', 'extract_concepts_from_report',
            'is_currency_unit', 'parse_numeric', 'unit_code', 'unit_symbol']
 
 _DEFREF_RE = re.compile(r"defref_([^'\"]+)")
@@ -313,6 +313,27 @@ class ConceptRow:
 
 
 @dataclass
+class UnextractedCell:
+    """A numeric cell of the report table that no ``ConceptRow`` carries.
+
+    Typically a cell of a row whose class the extractor does not read (the
+    ``rc`` "Balance ... at <date>" rows of an equity statement), of a row
+    with no concept link, or one that sits under no period column.
+    """
+    row_class: str
+    concept_id: str
+    label: str
+    value: str
+    #: Index into ``ConceptReport.period_headers``, or None when the cell
+    #: is under no column.
+    column: Optional[int] = None
+    #: How many ``ConceptReport.rows`` precede the cell's table row, so the
+    #: cell can be placed among them (an equity statement's balance rows
+    #: bound the rows of each movement).
+    row_index: Optional[int] = None
+
+
+@dataclass
 class ConceptReport:
     """A parsed R*.htm report with concept annotations extracted.
 
@@ -329,6 +350,22 @@ class ConceptReport:
       (``{'shares': 1_000, '$': 1_000_000}``).
     - ``header_unit``: the report-wide unit named in the title
       (``'USD ($)'``), or None when the report names none or several.
+    - ``column_units``: per entry of ``period_headers``, the unit its column
+      header names (``'INR (₨)'``), or None.
+    - ``row_cell_columns``: per entry of ``rows``, each key of that row's
+      ``values`` mapped to its index in ``period_headers``. Needed because a
+      values key alone does not identify the column when two columns share a
+      date label.
+    - ``unextracted_cells``: every numeric cell of the report table (a
+      ``td`` whose class names a number and whose text has a digit) that
+      ``rows`` does not carry, so a consumer can account for every number
+      the page shows.
+    - ``column_heading_parts``: per entry of ``period_headers``, each line
+      of its heading as the page prints it: the texts of any group cells
+      above it, then every ``<div>`` of the column's own header cell. An
+      equity statement prints one line per member that names the column
+      (``['Common shares', 'Class A common shares']``), where
+      ``period_headers`` keeps only the first line of the cell.
     """
     title: str
     period_headers: List[str]
@@ -339,6 +376,10 @@ class ConceptReport:
     header_found: bool = False
     unit_scales: Dict[str, int] = field(default_factory=dict)
     header_unit: Optional[str] = None
+    column_units: List[Optional[str]] = field(default_factory=list)
+    row_cell_columns: List[Dict[str, int]] = field(default_factory=list)
+    unextracted_cells: List[UnextractedCell] = field(default_factory=list)
+    column_heading_parts: List[List[str]] = field(default_factory=list)
 
     @property
     def concepts(self) -> List[str]:
@@ -417,6 +458,21 @@ def _th_text(th: HtmlElement) -> str:
     return text_stripped(th)
 
 
+def _th_unit(th: HtmlElement) -> Optional[str]:
+    """The unit a column header names on its own line, e.g. ``'INR (₨)'``.
+
+    A report in more than one currency puts each column's unit in a second
+    ``<div>`` under the date; ``_th_text`` reads only the first. Only text
+    shaped like a renderer unit label is returned.
+    """
+    divs = th.findall('.//div')
+    for div in divs[1:]:
+        text = text_stripped(div)
+        if text and _UNIT_LABEL_RE.fullmatch(text.split('/')[0].strip()):
+            return text
+    return None
+
+
 def _build_header_grid(
     header_rows: List[HtmlElement],
 ) -> List[List[Optional[Tuple[HtmlElement, int]]]]:
@@ -460,6 +516,8 @@ class _SemanticColumn:
     label: str
     start_col: int
     end_col: int
+    unit: Optional[str] = None
+    parts: List[str] = field(default_factory=list)
 
 
 def _extract_period_headers(
@@ -578,8 +636,11 @@ def _extract_period_headers(
         # Compose label: outermost group first, innermost group, then leaf.
         parts = list(reversed(group_texts)) + [leaf_text]
         label = ' '.join(parts)
+        leaf_lines = [text for text in (text_stripped(div) for div in leaf_cell.findall('.//div')) if text]
         semantic_columns.append(
-            _SemanticColumn(label=label, start_col=start_col, end_col=end_col)
+            _SemanticColumn(label=label, start_col=start_col, end_col=end_col,
+                            unit=_th_unit(leaf_cell),
+                            parts=list(reversed(group_texts)) + (leaf_lines or [leaf_text]))
         )
         col += cs
 
@@ -677,6 +738,32 @@ def _pick_primary_period(period_headers: List[str], form: Optional[str]) -> Opti
     return best
 
 
+def _is_numeric_cell(td: HtmlElement) -> bool:
+    """A value cell the renderer formats as a number (``num``, ``nump``, ``numD``) that shows a digit."""
+    return any(c.startswith('num') for c in _classes(td)) and bool(re.search(r'\d', td.text_content()))
+
+
+def _unextracted_cells(tr: HtmlElement, row_class: str, consumed: List[HtmlElement],
+                       semantic_columns, row_index: Optional[int] = None) -> List[UnextractedCell]:
+    """The numeric cells of a body row that no ConceptRow value carries."""
+    tds = tr.xpath('./td')
+    label_cell = _find_by_class(tr, 'td', 'pl')
+    concept_id = (_extract_concept_id(label_cell) if label_cell is not None else None) or ''
+    label = _extract_label(label_cell) if label_cell is not None else ''
+    value_cells = [td for td in tds if td is not label_cell and not _is_styling_only_th(_classes(td))]
+    positions = dict(enumerate(_data_cell_positions(value_cells)))
+    out = []
+    for index, td in enumerate(value_cells):
+        if not _is_numeric_cell(td) or any(td is c for c in consumed):
+            continue
+        pos = positions.get(index)
+        column = next((i for i, sc in enumerate(semantic_columns)
+                       if pos is not None and sc.start_col <= pos <= sc.end_col), None)
+        out.append(UnextractedCell(row_class=row_class, concept_id=concept_id, label=label,
+                                   value=_extract_value(td), column=column, row_index=row_index))
+    return out
+
+
 def extract_concepts_from_report(html_content: str, form: Optional[str] = None) -> ConceptReport:
     """
     Parse an R*.htm file and extract concept-annotated rows.
@@ -771,9 +858,15 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
 
     # Extract data rows
     rows = []
+    row_cell_columns: List[Dict[str, int]] = []
+    trs_seen = []
     for tr in report_table.xpath('./tr'):
         css_classes = _classes(tr)
         row_class = css_classes[0] if css_classes else ''
+        # Cells that end up in a ConceptRow's values; held by reference and
+        # compared by identity (never by id() of an lxml proxy).
+        consumed: List[HtmlElement] = []
+        trs_seen.append((tr, row_class, consumed, len(rows)))
 
         if row_class not in _DATA_CLASSES:
             continue
@@ -821,6 +914,7 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
         # in the same table (ADI 2019 R2.htm, GH #812).
         positions = _data_cell_positions(value_cells)
         values = {}
+        cell_columns: Dict[str, int] = {}
         for cell, pos in zip(value_cells, positions):
             val = _extract_value(cell)
             if not val:
@@ -839,6 +933,8 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
                 # both labelled "Mar. 29, 2025") so neither value is lost.
                 header = f"{header} ({pos})"
             values[header] = val
+            cell_columns[header] = semantic_columns.index(sc)
+            consumed.append(cell)
 
         rows.append(ConceptRow(
             concept_id=concept_id,
@@ -851,6 +947,10 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
             css_class=row_class,
             primary_period=primary_period,
         ))
+        row_cell_columns.append(cell_columns)
+
+    unextracted_cells = [cell for tr, row_class, consumed, row_index in trs_seen
+                         for cell in _unextracted_cells(tr, row_class, consumed, semantic_columns, row_index)]
 
     return ConceptReport(
         title=title,
@@ -862,4 +962,8 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
         header_found=header_found,
         unit_scales=unit_scales,
         header_unit=header_unit,
+        column_units=[sc.unit for sc in semantic_columns],
+        row_cell_columns=row_cell_columns,
+        unextracted_cells=unextracted_cells,
+        column_heading_parts=[list(sc.parts) for sc in semantic_columns],
     )

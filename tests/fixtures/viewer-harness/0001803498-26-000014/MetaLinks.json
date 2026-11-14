@@ -1,0 +1,149 @@
+{
+ "version": "2.2",
+ "instance": {
+  "bcred-20251231.htm": {
+   "tag": {
+    "us-gaap_EquitySecuritiesMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "EquitySecuritiesMember",
+     "presentation": [
+      "http://www.bcred.com/role/CondensedConsolidatedScheduleofInvestments",
+      "http://www.bcred.com/role/CondensedConsolidatedScheduleofInvestmentsParenthetical",
+      "http://www.bcred.com/role/FairValueMeasurementsScheduleofChangesinFairValueofInvestmentsMeasuredUsingLevel3InputsDetails",
+      "http://www.bcred.com/role/FairValueMeasurementsSignificantUnobservableInputsoftheCompanysLevel3FinancialInstrumentsDetails",
+      "http://www.bcred.com/role/JointVenturesConsolidatedScheduleofInvestmentsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Equity and other",
+        "verboseLabel": "Equity Securities",
+        "label": "Equity Securities [Member]",
+        "documentation": "Ownership interest or right to acquire or dispose of ownership interest in corporations and other legal entities for which ownership interest is represented by shares of common or preferred stock, convertible securities, stock rights, or stock warrants."
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentCompanyFinancialCommitmentToInvesteeFutureAmount": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "InvestmentCompanyFinancialCommitmentToInvesteeFutureAmount",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.bcred.com/role/CommitmentandContingenciesDetails",
+      "http://www.bcred.com/role/CondensedConsolidatedScheduleofInvestmentsParenthetical",
+      "http://www.bcred.com/role/JointVenturesSOIFootnotesDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Unfunded commitments",
+        "label": "Investment Company, Financial Support to Investee Contractually Required, Not Provided, Amount",
+        "documentation": "Amount of financial support committed by investment company to investee that is contractually required but not provided."
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentIdentifierAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "InvestmentIdentifierAxis",
+     "presentation": [
+      "http://www.bcred.com/role/CommitmentandContingenciesDetails",
+      "http://www.bcred.com/role/CondensedConsolidatedScheduleofInvestments",
+      "http://www.bcred.com/role/CondensedConsolidatedScheduleofInvestmentsParenthetical",
+      "http://www.bcred.com/role/JointVenturesConsolidatedScheduleofInvestmentsDetails",
+      "http://www.bcred.com/role/JointVenturesSOIFootnotesDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Investment, Identifier [Axis]",
+        "label": "Investment, Identifier [Axis]",
+        "documentation": "Identification of investment in security, including, but not limited to, name, title, and other identifying information."
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentTypeAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "InvestmentTypeAxis",
+     "presentation": [
+      "http://www.bcred.com/role/CondensedConsolidatedScheduleofInvestments",
+      "http://www.bcred.com/role/CondensedConsolidatedScheduleofInvestmentsParenthetical",
+      "http://www.bcred.com/role/InvestmentsNarrativeDetails",
+      "http://www.bcred.com/role/InvestmentsScheduleofInvestmentPortfolioatCostandFairValueDetails",
+      "http://www.bcred.com/role/JointVenturesBCREDEmeraldJVandBCREDVerdeliteJVDetails",
+      "http://www.bcred.com/role/JointVenturesConsolidatedScheduleofInvestmentsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Investment Type [Axis]",
+        "label": "Investment Type [Axis]",
+        "documentation": "Information by type of investments."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R9": {
+     "role": "http://www.bcred.com/role/CondensedConsolidatedScheduleofInvestmentsParenthetical",
+     "longName": "0000009 - Statement - Condensed Consolidated Schedule of Investments (Parenthetical)",
+     "shortName": "Condensed Consolidated Schedule of Investments (Parenthetical)",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "parenthetical",
+     "menuCat": "Statements",
+     "order": "9",
+     "firstAnchor": {
+      "contextRef": "c-6",
+      "name": "us-gaap:InvestmentOwnedPercentOfNetAssets",
+      "unitRef": "number",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "4",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "ix:continuation",
+       "ix:continuation",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "bcred-20251231.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-3829",
+      "name": "us-gaap:InvestmentOwnedAtFairValue",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "ix:continuation",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "bcred-20251231.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}
