@@ -64,8 +64,7 @@ def _sum_items(items):
     return sum((item.value * item.weight for item in items), Decimal(0))
 
 
-def derive_from_balance_sheet(xbrl, role, period, accession):
-    period_key = f"instant_{period}"
+def _balance_sheet_arcs(xbrl, role):
     tree = xbrl.calculation_trees.get(role)
     if not tree:
         raise LiabilityDerivationError("missing-calculation-role", role)
@@ -80,16 +79,20 @@ def derive_from_balance_sheet(xbrl, role, period, accession):
     for arc in tree.all_arcs:
         if arc.arcrole == arcrole:
             arcs.setdefault(arc.parent_id, []).append(arc)
+    return arcs
 
-    def descendants(concept, path=frozenset()):
-        if concept in path:
-            raise LiabilityDerivationError("cyclic-components", concept)
-        children = set()
-        for arc in arcs.get(concept, ()):
-            children.add(arc.child_id)
-            children.update(descendants(arc.child_id, path | {concept}))
-        return children
 
+def _descendants(arcs, concept, path=frozenset()):
+    if concept in path:
+        raise LiabilityDerivationError("cyclic-components", concept)
+    children = set()
+    for arc in arcs.get(concept, ()):
+        children.add(arc.child_id)
+        children.update(_descendants(arcs, arc.child_id, path | {concept}))
+    return children
+
+
+def _balance_sheet_rows(xbrl, role, period_key):
     rows = {}
     for row in xbrl.get_statement(role, period_filter=period_key, should_display_dimensions=False):
         if row.get("is_abstract"):
@@ -100,51 +103,60 @@ def derive_from_balance_sheet(xbrl, role, period, accession):
             if any(row.get(key) != rows[concept].get(key) for key in keys):
                 raise LiabilityDerivationError("ambiguous-component", concept)
         rows[concept] = row
+    return rows
 
-    currencies = set()
 
-    def read(concept, weight):
-        row = rows.get(concept, {})
-        raw = row.get("values", {}).get(period_key)
-        if raw is None or raw == "":
-            raise LiabilityDerivationError("missing-component", concept)
-        currency = xbrl._currency_measure(row.get("units", {}).get(period_key))
-        if currency is None:
-            raise LiabilityDerivationError("invalid-currency", concept)
-        currencies.add(currency)
-        try:
-            value = Decimal(str(raw))
-        except InvalidOperation as error:
-            raise LiabilityDerivationError("invalid-component", concept) from error
-        if not value.is_finite():
-            raise LiabilityDerivationError("invalid-component", concept)
-        return LiabilityLineItem(concept, row["label"], value, weight)
+def _read_item(xbrl, rows, period_key, currencies, concept, weight):
+    row = rows.get(concept, {})
+    raw = row.get("values", {}).get(period_key)
+    if raw is None or raw == "":
+        raise LiabilityDerivationError("missing-component", concept)
+    currency = xbrl._currency_measure(row.get("units", {}).get(period_key))
+    if currency is None:
+        raise LiabilityDerivationError("invalid-currency", concept)
+    currencies.add(currency)
+    try:
+        value = Decimal(str(raw))
+    except InvalidOperation as error:
+        raise LiabilityDerivationError("invalid-component", concept) from error
+    if not value.is_finite():
+        raise LiabilityDerivationError("invalid-component", concept)
+    return LiabilityLineItem(concept, row["label"], value, weight)
 
-    components: list[LiabilityLineItem] = []
-    equity: list[LiabilityLineItem] = []
-    temporary: list[LiabilityLineItem] = []
+
+def _component_kind(rows, period_key, concept):
+    row = rows.get(concept, {"concept": concept})
+    missing = row.get("values", {}).get(period_key) in (None, "")
+    if concept == _CONTINGENCIES and missing:
+        return None
+    if concept in (_PARENT_EQUITY, _TOTAL_EQUITY):
+        return "equity"
+    if concept in _TEMPORARY:
+        return "temporary"
+    if _is_liability(row):
+        return "liability"
+    reason = "missing-component" if missing else "unclassified-component"
+    raise LiabilityDerivationError(reason, concept)
+
+
+def _collect_components(arcs, rows, period_key, read):
+    groups: dict[str, list[LiabilityLineItem]] = {"liability": [], "equity": [], "temporary": []}
     used = set()
     for arc in arcs[_COMBINED]:
         concept = arc.child_id
         if arc.weight != 1:
             raise LiabilityDerivationError("unsupported-weight", concept)
-        branch = {concept} | descendants(concept)
+        branch = {concept} | _descendants(arcs, concept)
         if used & branch:
             raise LiabilityDerivationError("overlapping-components", concept)
         used.update(branch)
-        if concept == _CONTINGENCIES and rows.get(concept, {}).get("values", {}).get(period_key) in (None, ""):
-            continue
-        if concept in (_PARENT_EQUITY, _TOTAL_EQUITY):
-            equity.append(read(concept, -1))
-        elif concept in _TEMPORARY:
-            temporary.append(read(concept, -1))
-        elif _is_liability(rows.get(concept, {"concept": concept})):
-            components.append(read(concept, 1))
-        elif concept not in rows or rows[concept].get("values", {}).get(period_key) in (None, ""):
-            raise LiabilityDerivationError("missing-component", concept)
-        else:
-            raise LiabilityDerivationError("unclassified-component", concept)
+        kind = _component_kind(rows, period_key, concept)
+        if kind is not None:
+            groups[kind].append(read(concept, 1 if kind == "liability" else -1))
+    return groups, used
 
+
+def _validate_components(components, equity, temporary, rows, period):
     if len(equity) != 1 or len(temporary) > 1:
         raise LiabilityDerivationError("ambiguous-equity", period)
     if equity[0].concept == _PARENT_EQUITY and _NCI in rows:
@@ -152,6 +164,8 @@ def derive_from_balance_sheet(xbrl, role, period, accession):
     if not components:
         raise LiabilityDerivationError("missing-liability-components", period)
 
+
+def _check_face_rows(rows, period_key, used):
     # A monetary row on the liabilities/equity side with no calculation
     # relationship might be an omitted input. Refuse to guess where it belongs.
     seen_assets = False
@@ -162,6 +176,21 @@ def derive_from_balance_sheet(xbrl, role, period, accession):
             break
         elif seen_assets and concept not in used and row.get("values", {}).get(period_key) not in (None, ""):
             raise LiabilityDerivationError("unclassified-face-row", concept)
+
+
+def derive_from_balance_sheet(xbrl, role, period, accession):
+    period_key = f"instant_{period}"
+    arcs = _balance_sheet_arcs(xbrl, role)
+    rows = _balance_sheet_rows(xbrl, role, period_key)
+    currencies = set()
+
+    def read(concept, weight):
+        return _read_item(xbrl, rows, period_key, currencies, concept, weight)
+
+    groups, used = _collect_components(arcs, rows, period_key, read)
+    components, equity, temporary = groups["liability"], groups["equity"], groups["temporary"]
+    _validate_components(components, equity, temporary, rows, period)
+    _check_face_rows(rows, period_key, used)
 
     assets = read(_ASSETS, 1)
     combined = read(_COMBINED, 1)
