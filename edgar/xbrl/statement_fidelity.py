@@ -458,7 +458,7 @@ class _Surface:
                     if i < len(row.cells):
                         cell = row.cells[i]
                         signs, sign_key = _presentation_sign_source(row, key)
-                        values[key] = apply_presentation_sign(cell.value, rendered.statement_type, signs, sign_key)
+                        values[key] = apply_presentation_sign(cell.value, signs, sign_key)
                         text[key] = cell.get_formatted_value()
                 library_rows.append((row, values, text))
         except Exception as e:  # noqa: BLE001 - the library's own calls
