@@ -49,6 +49,14 @@ design mandates *before* the move:
     Re-snapshotted the same way on 2026-10-13 for edgartools-llmp.12.1: the
     Regulation S-B titles "Description of Business" and "Description of
     Property" were APPENDED to Items 1 and 2, item-numbered only.
+    The 10-K, 10-Q and 20-F entries were re-snapshotted on 2026-11-13 for
+    edgartools-ga4a: every lettered item number is now spelled by
+    ``form_schema._item_no``, which also accepts the letter as its own token
+    ("Item 16. A.") and one restatement of the label ("Item 16.B. Item 16.B.");
+    the bare 16E title became ``Purchases?``. A mechanical check showed all 24
+    changed patterns collapse to their previous spelling with the new optional
+    parts removed, so each accepts a strict superset, and every key, label and
+    ordering is byte-identical.
   * The data must actually live on the schema now (``FormSchema.section_patterns``),
     not only on the extractor — that is what lets the Phase 3 routing flip
     (edgartools-llmp.3) feed prospectus section text through the TOC engine using
