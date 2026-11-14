@@ -28,7 +28,7 @@
     ],
     "risk_factors": [
       [
-        "^(Item|ITEM)\\s+1A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Risk\\s+Factors",
+        "^(Item|ITEM)\\s+1(?:\\s*\\.\\s*)?A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:1(?:\\s*\\.\\s*)?)?A\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Risk\\s+Factors",
         "Item 1A - Risk Factors"
       ],
       [
@@ -42,7 +42,7 @@
     ],
     "unresolved_staff_comments": [
       [
-        "^(Item|ITEM)\\s+1B(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Unresolved\\s+Staff\\s+Comments",
+        "^(Item|ITEM)\\s+1(?:\\s*\\.\\s*)?B(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:1(?:\\s*\\.\\s*)?)?B\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Unresolved\\s+Staff\\s+Comments",
         "Item 1B - Unresolved Staff Comments"
       ],
       [
@@ -52,7 +52,7 @@
     ],
     "cybersecurity": [
       [
-        "^(Item|ITEM)\\s+1C(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Cybersecurity",
+        "^(Item|ITEM)\\s+1(?:\\s*\\.\\s*)?C(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:1(?:\\s*\\.\\s*)?)?C\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Cybersecurity",
         "Item 1C - Cybersecurity"
       ],
       [
@@ -98,7 +98,7 @@
     ],
     "market_risk": [
       [
-        "^(Item|ITEM)\\s+7A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Quantitative.*Disclosures",
+        "^(Item|ITEM)\\s+7(?:\\s*\\.\\s*)?A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:7(?:\\s*\\.\\s*)?)?A\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Quantitative.*Disclosures",
         "Item 7A - Market Risk"
       ],
       [
@@ -140,7 +140,7 @@
     ],
     "controls_procedures": [
       [
-        "^(Item|ITEM)\\s+9A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Controls.*Procedures",
+        "^(Item|ITEM)\\s+9(?:\\s*\\.\\s*)?A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:9(?:\\s*\\.\\s*)?)?A\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Controls.*Procedures",
         "Item 9A - Controls and Procedures"
       ],
       [
@@ -182,13 +182,13 @@
     ],
     "part_ii_item_9b": [
       [
-        "^(Item|ITEM)\\s+9B(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Other\\s+Information",
+        "^(Item|ITEM)\\s+9(?:\\s*\\.\\s*)?B(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:9(?:\\s*\\.\\s*)?)?B\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Other\\s+Information",
         "Item 9B - Other Information"
       ]
     ],
     "part_ii_item_9c": [
       [
-        "^(Item|ITEM)\\s+9C(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Disclosure\\s+Regarding\\s+Foreign",
+        "^(Item|ITEM)\\s+9(?:\\s*\\.\\s*)?C(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:9(?:\\s*\\.\\s*)?)?C\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Disclosure\\s+Regarding\\s+Foreign",
         "Item 9C - Disclosure Regarding Foreign Jurisdictions"
       ]
     ],
@@ -296,7 +296,7 @@
     ],
     "part_ii_item_1a": [
       [
-        "^(Item|ITEM)\\s+1A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Risk\\s+Factors",
+        "^(Item|ITEM)\\s+1(?:\\s*\\.\\s*)?A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:1(?:\\s*\\.\\s*)?)?A\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Risk\\s+Factors",
         "Item 1A - Risk Factors"
       ],
       [
@@ -406,7 +406,7 @@
     ],
     "item_4a": [
       [
-        "^(Item|ITEM)\\s+4A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Unresolved\\s+Staff",
+        "^(Item|ITEM)\\s+4(?:\\s*\\.\\s*)?A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:4(?:\\s*\\.\\s*)?)?A\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Unresolved\\s+Staff",
         "Item 4A - Unresolved Staff Comments"
       ],
       [
@@ -536,7 +536,7 @@
     ],
     "item_16a": [
       [
-        "^(Item|ITEM)\\s+16A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Audit\\s+Committee",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?A(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?A\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Audit\\s+Committee",
         "Item 16A - Audit Committee Financial Expert"
       ],
       [
@@ -546,7 +546,7 @@
     ],
     "item_16b": [
       [
-        "^(Item|ITEM)\\s+16B(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Code\\s+of\\s+Ethics",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?B(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?B\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Code\\s+of\\s+Ethics",
         "Item 16B - Code of Ethics"
       ],
       [
@@ -556,7 +556,7 @@
     ],
     "item_16c": [
       [
-        "^(Item|ITEM)\\s+16C(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Principal\\s+Accountant",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?C(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?C\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Principal\\s+Accountant",
         "Item 16C - Principal Accountant Fees and Services"
       ],
       [
@@ -566,7 +566,7 @@
     ],
     "item_16d": [
       [
-        "^(Item|ITEM)\\s+16D(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Exemptions.*Audit\\s+Committees",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?D(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?D\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Exemptions.*Audit\\s+Committees",
         "Item 16D - Exemptions from the Listing Standards for Audit Committees"
       ],
       [
@@ -576,17 +576,17 @@
     ],
     "item_16e": [
       [
-        "^(Item|ITEM)\\s+16E(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Purchases.*Equity\\s+Securities",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?E(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?E\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Purchases?.*Equity\\s+Securities",
         "Item 16E - Purchases of Equity Securities by the Issuer"
       ],
       [
-        "^Purchases.*Equity\\s+Securities.*Issuer",
+        "^Purchases?.*Equity\\s+Securities.*Issuer",
         "Equity Purchases"
       ]
     ],
     "item_16f": [
       [
-        "^(Item|ITEM)\\s+16F(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Change.*Certifying\\s+Accountant",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?F(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?F\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Change.*Certifying\\s+Accountant",
         "Item 16F - Change in Registrant's Certifying Accountant"
       ],
       [
@@ -596,7 +596,7 @@
     ],
     "item_16g": [
       [
-        "^(Item|ITEM)\\s+16G(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Corporate\\s+Governance",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?G(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?G\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Corporate\\s+Governance",
         "Item 16G - Corporate Governance"
       ],
       [
@@ -606,7 +606,7 @@
     ],
     "item_16h": [
       [
-        "^(Item|ITEM)\\s+16H(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Mine\\s+Safety",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?H(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?H\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Mine\\s+Safety",
         "Item 16H - Mine Safety Disclosure"
       ],
       [
@@ -616,7 +616,7 @@
     ],
     "item_16i": [
       [
-        "^(Item|ITEM)\\s+16I(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Disclosure.*Foreign\\s+Jurisdictions",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?I(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?I\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Disclosure.*Foreign\\s+Jurisdictions",
         "Item 16I - Disclosure Regarding Foreign Jurisdictions That Prevent Inspections"
       ],
       [
@@ -624,13 +624,13 @@
         "Foreign Jurisdiction Disclosure"
       ],
       [
-        "^(Item|ITEM)\\s+16I(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*$",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?I(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?I\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?$",
         "Item 16I"
       ]
     ],
     "item_16j": [
       [
-        "^(Item|ITEM)\\s+16J(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Insider\\s+Trading",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?J(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?J\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Insider\\s+Trading",
         "Item 16J - Insider Trading Policies"
       ],
       [
@@ -638,13 +638,13 @@
         "Insider Trading Policies"
       ],
       [
-        "^(Item|ITEM)\\s+16J(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*$",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?J(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?J\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?$",
         "Item 16J"
       ]
     ],
     "item_16k": [
       [
-        "^(Item|ITEM)\\s+16K(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*Cybersecurity",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?K(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?K\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?Cybersecurity",
         "Item 16K - Cybersecurity"
       ],
       [
@@ -652,7 +652,7 @@
         "Cybersecurity"
       ],
       [
-        "^(Item|ITEM)\\s+16K(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*$",
+        "^(Item|ITEM)\\s+16(?:\\s*\\.\\s*)?K(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*(?:(?:(?:Item|ITEM)\\s+)?(?:16(?:\\s*\\.\\s*)?)?K\\b(?:\\s*\\([A-Za-z]\\))?\\s*[.:;\\-\u2013\u2014]?\\s*[-\u2013\u2014.]?\\s*)?$",
         "Item 16K"
       ]
     ],

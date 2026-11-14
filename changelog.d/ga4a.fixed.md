@@ -1,0 +1,1 @@
+**A 20-F that writes its lettered items as `Item 16. A.` returned none of them as sections.** Section patterns expected the letter attached (`Item 16A`), so 20-F 0001062993-16-008650 lost all eight of Items 16A-16H; all eight now resolve, and the same spelling is accepted for every lettered 10-K, 10-Q and 20-F item. (bead edgartools-ga4a)
