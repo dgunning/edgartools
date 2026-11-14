@@ -1821,45 +1821,37 @@ class Statement:
                         'dimension_member_label', 'dimension_label']
         period_cols = [col for col in df.columns if col not in metadata_cols]
 
-        # Decide on the type render() resolves for this statement, so the frame and
-        # the rendered view always agree. render() looks up canonical_type (or the
-        # role) with find_statement and gates on the type of the role it finds;
-        # classified_type reports the requested kind instead. They differ when
-        # comprehensive_income() lands on an equity role: KO's FY2011 10-K has its
-        # comprehensive income inside ConsolidatedStatementsOfShareownersEquity,
-        # which resolves to StatementOfEquity, so render() kept "Dividends paid to
-        # noncontrolling interests" at 38 while the frame flipped it to -38 (GH #1676).
-        statement_type = self._presentation_sign_type()
-
-        # Same statements as the rendered view (PRESENTATION_SIGN_STATEMENTS): income,
-        # cash flow, balance sheet (contra accounts like Treasury Stock) and
-        # comprehensive income (GH #1676)
-        from edgar.xbrl.rendering import PRESENTATION_SIGN_STATEMENTS
-        if statement_type in PRESENTATION_SIGN_STATEMENTS:
-            if 'preferred_sign' in result.columns:
-                for col in period_cols:
-                    if col not in result.columns:
-                        continue
-                    # Convert to numeric - handles object dtype columns with None values (Issue #556)
-                    # This is needed because columns with None values become object dtype
-                    numeric_col = pd.to_numeric(result[col], errors='coerce')
-                    if pd.api.types.is_numeric_dtype(numeric_col):
-                        # FIX (Issue #599): Convert entire column to numeric first to prevent
-                        # pandas FutureWarning about assigning incompatible dtype to object column
-                        result[col] = numeric_col
-                        # Apply preferred_sign where it's not None and not 0
-                        mask = result['preferred_sign'].notna() & (result['preferred_sign'] != 0)
-                        result.loc[mask, col] = numeric_col[mask] * result.loc[mask, 'preferred_sign']
+        # The presentation sign applies on every statement, wherever the arc
+        # carries a negated role, as the SEC renderer and render() apply it
+        # (edgartools-auvk1.13). Gating it on the statement type made the sign
+        # depend on how the statement was reached (GH #1676, DRDGOLD
+        # 0001562762-22-000397 by role) and skipped parentheticals.
+        if 'preferred_sign' in result.columns:
+            # Numeric, so the product stays float: an object-dtype sign column
+            # (None beside -1) made an all-NaN object result that pandas refuses
+            # to write into a float column (TypeError on DiamondRock's
+            # parenthetical balance sheet, 0001298946-24-000052).
+            signs = pd.to_numeric(result['preferred_sign'], errors='coerce')
+            mask = signs.notna() & (signs != 0)
+            for col in period_cols:
+                if col not in result.columns:
+                    continue
+                # Convert to numeric - handles object dtype columns with None values (Issue #556)
+                # This is needed because columns with None values become object dtype
+                original = result[col]
+                numeric_col = pd.to_numeric(original, errors='coerce')
+                is_text = original.notna() & numeric_col.isna() & original.astype(str).str.strip().ne('')
+                if not is_text.any():
+                    # FIX (Issue #599): a column of numbers (and blanks) becomes numeric,
+                    # with preferred_sign applied where it's not None and not 0
+                    result[col] = numeric_col.where(~mask, numeric_col * signs)
+                else:
+                    # A text cell (a note's narrative, Issue #762) stays as it is;
+                    # only the numeric cells take the sign
+                    flip = mask & numeric_col.notna()
+                    result[col] = original.where(~flip, numeric_col * signs)
 
         return result
-
-    def _presentation_sign_type(self) -> Optional[str]:
-        """The statement type render() gates the presentation sign on."""
-        rendering_type = self.canonical_type if self.canonical_type else self.role_or_type
-        try:
-            return self.xbrl.find_statement(rendering_type)[2]
-        except StatementNotFoundError:
-            return self.classified_type
 
     def _pivot_to_matrix(self, df: pd.DataFrame) -> pd.DataFrame:
         """

@@ -452,8 +452,8 @@ Convert statement to pandas DataFrame with optional transformations.
 **Value Modes:**
 - **Raw mode** (default): Preserves values exactly as reported in instance document
 - **Presentation mode** (`presentation=True`): Applies transformations to match SEC HTML rendering
-  - Cash Flow: outflows with preferred_sign=-1 shown as negative
-  - Income Statement: applies preferred_sign transformations
+  - Every statement, parentheticals and statements of equity included: a row with preferred_sign=-1 (a negated label on its presentation arc) has its values negated, as the SEC page shows them
+  - The result does not depend on how the statement was reached (`income_statement()` or `xbrl.statements[role]`)
 
 **Example:**
 ```python

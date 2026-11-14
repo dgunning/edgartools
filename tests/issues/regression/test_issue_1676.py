@@ -23,9 +23,8 @@ from edgar.xbrl.rendering import apply_presentation_sign
 
 def test_presentation_sign_applies_to_comprehensive_income():
     signs = {"duration_2025-01-01_2025-12-31": -1}
-    assert apply_presentation_sign(-176.0, "ComprehensiveIncome", signs, "duration_2025-01-01_2025-12-31") == 176.0
-    # Statements outside the list are still shown as filed.
-    assert apply_presentation_sign(-176.0, "StatementOfEquity", signs, "duration_2025-01-01_2025-12-31") == -176.0
+    assert apply_presentation_sign(-176.0, signs, "duration_2025-01-01_2025-12-31") == 176.0
+    # The sign no longer depends on the statement type (edgartools-auvk1.13).
 
 
 AAL_FOLDER = "https://www.sec.gov/Archives/edgar/data/6201/000000620126000014/"
@@ -63,10 +62,12 @@ def test_render_and_dataframe_agree_when_comprehensive_income_is_an_equity_role(
     """Fixture: Coca-Cola FY2011 10-K (tests/fixtures/xbrl/ko/10k_2012).
 
     KO reports comprehensive income inside its shareowners' equity statement, so
-    `comprehensive_income()` resolves to an equity role. render() gates the sign
-    on the resolved type (StatementOfEquity, still excluded) and the DataFrame
-    now does too: both show the filed 38, where the DataFrame alone used to flip
-    it to -38.
+    `comprehensive_income()` resolves to an equity role. The two surfaces used to
+    disagree (render() kept the filed 38, the DataFrame flipped it); then both
+    kept 38 because the sign was gated on the statement type. The SEC page
+    (R6, CONSOLIDATED STATEMENTS OF SHAREOWNERS' EQUITY, 0000021344-12-000007)
+    shows (38) | (32) | (14): the negated label applies on an equity statement too
+    (edgartools-auvk1.13).
     """
     from pathlib import Path
 
@@ -80,6 +81,6 @@ def test_render_and_dataframe_agree_when_comprehensive_income_is_an_equity_role(
     assert row["preferred_sign"] == -1
 
     rendered = next(line for line in str(statement).splitlines() if label in line)
-    assert rendered.split()[-3:] == ["38", "32", "14"]
+    assert rendered.split()[-3:] == ["(38)", "(32)", "(14)"]
     assert [row[c] for c in ("2011-12-31 (FY)", "2010-12-31 (FY)", "2009-12-31 (FY)")] == [
-        38_000_000, 32_000_000, 14_000_000]
+        -38_000_000, -32_000_000, -14_000_000]

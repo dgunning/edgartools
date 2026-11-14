@@ -161,30 +161,29 @@ def test_entergy_headline():
     assert len(res.of_kind('cell_matched', 'rendered')) == 528
 
 
-def test_finding_bhe_parenthetical_sign():
+def test_bhe_parenthetical_negated_label_is_signed():
     """Berkshire Hathaway Energy 10-Q (0001081316-24-000016), comprehensive income
     (parenthetical), reached through comprehensive_income(parenthetical=True): the page
-    shows the Q2 2024 pension OCI tax as 1 (a negated label); the library shows
-    -1,000,000. Bead: edgartools-auvk1.13."""
+    shows the Q2 2024 pension OCI tax as 1 (a negated label on the -1,000,000 fact).
+    The library showed -1,000,000 until the sign stopped being gated on four
+    statement types. Bead: edgartools-auvk1.13 (fixed)."""
     res = results(BHE)
+    concept = 'us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax'
     for surface in ('dataframe', 'rendered'):
-        [cell] = find(res, 'sign_differs', surface,
-                      concept='us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax',
-                      period_key='duration_2024-04-01_2024-06-30')
-        assert (cell.page_value, cell.fact_value, cell.library_value) == (1.0, -1000000.0, -1000000.0)
-        assert cell.reason == 'label role http://www.xbrl.org/2009/role/negatedTerseLabel'
+        assert not find(res, 'sign_differs', surface)
+        [cell] = find(res, 'cell_matched', surface, concept=concept, period_key='duration_2024-04-01_2024-06-30')
+        assert (cell.page_value, cell.fact_value, cell.library_value) == (1.0, -1000000.0, 1000000.0)
 
 
-def test_finding_drdgold_access_path_sign():
+def test_drdgold_sign_does_not_depend_on_the_access_path():
     """DRDGOLD 20-F (0001562762-22-000397): income_statement() shows FY2022 cost of sales
-    as -3,741,500,000, as the page signs it; the same statement by role shows
-    +3,741,500,000. Bead: edgartools-auvk1.13."""
+    as -3,741,500,000, as the page signs it; the same statement by role used to show
+    +3,741,500,000 (typed None, so the sign gate skipped it). Bead: edgartools-auvk1.13 (fixed)."""
     res = results(DRDGOLD)
     kw = dict(concept='ifrs-full:CostOfSales', period_key='duration_2021-07-01_2022-06-30')
-    [cell] = find(res, 'access_path_disagrees', 'dataframe', **kw)
+    assert not res.of_kind('access_path_disagrees')
+    [cell] = find(res, 'cell_matched', 'dataframe', **kw)
     assert (cell.page_value, cell.library_value) == (-3741.5, -3741500000.0)
-    assert cell.reason == 'statements[role] shows 3741500000.0'
-    assert find(res, 'cell_matched', 'dataframe', **kw)
     assert res.pages[0].access == 'income_statement()'
 
 
@@ -538,9 +537,10 @@ def test_dataframe_column_names_match_the_library():
                 if len(columns) == 1:
                     assert columns[0] == sf._dataframe_column(xbrl, key), (accession, page.page, key)
                     checked += 1
-    assert checked == 28
-    # Requesting an instant alone on Good Times' cash-flow statement raises TypeError in the library.
-    assert raised == [(GOOD_TIMES, 'Condensed Consolidated Statements of Cash Flows (Unaudited)', 'instant_2022-05-05')]
+    assert checked == 29
+    # Requesting an instant alone on Good Times' cash-flow statement raised TypeError in the
+    # library (an object-dtype sign column); fixed with edgartools-auvk1.13.
+    assert raised == []
 
 
 def test_getter_raised_is_reported_and_the_role_statement_used(monkeypatch):

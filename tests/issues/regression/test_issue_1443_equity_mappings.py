@@ -194,11 +194,13 @@ def test_coca_cola_par_value_is_not_an_equity_total():
 
 
 def test_microsoft_dividends_declared_are_an_equity_change():
-    """Microsoft FY2024 10-K (0000950170-24-087843): common stock cash dividends $22,296M on the statement of equity."""
+    """Microsoft FY2024 10-K (0000950170-24-087843): common stock cash dividends (22,296) $M on the statement of equity.
+
+    A negated label: signed as the SEC page shows it since edgartools-auvk1.13."""
     frame = _frame("msft/10k_2024", "statement_of_equity")
     dividends = frame[frame["concept"] == "us-gaap_DividendsCommonStockCash"]
     assert len(dividends) == 1
-    assert dividends["2024-06-30 (FY)"].iloc[0] == 22_296_000_000
+    assert dividends["2024-06-30 (FY)"].iloc[0] == -22_296_000_000
     assert dividends["standard_concept"].iloc[0] == "DividendsEquity"
 
 
