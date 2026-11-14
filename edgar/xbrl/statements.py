@@ -717,7 +717,7 @@ class Statement:
         # - STANDARD: include_dimensions=False (filter breakdown dimensions)
         # - SUMMARY: include_dimensions=False (filter all dimensions - handled separately)
         effective_include_dimensions = effective_view == StatementView.DETAILED
-
+ 
         # Use the canonical type for rendering if available, otherwise use the role
         rendering_type = self.canonical_type if self.canonical_type else self.role_or_type
 
