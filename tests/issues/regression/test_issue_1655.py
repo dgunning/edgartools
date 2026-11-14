@@ -208,15 +208,19 @@ def test_ordinary_usd_rows_unchanged():
     assert xbrl.currency_lookups  # ordinary cells keep their existing lookup
 
 
-def test_dimensioned_rows_do_not_use_period_boundary_mapping():
+def test_dimensioned_rows_use_their_own_period_boundary_role():
+    """A member row carries its own arc's role, so under a period-start parent it shows
+    the opening balance with that cell's own source fields (edgartools-auvk1.14)."""
     rendered = _render([_row("Segment cash", START, {OPEN25: 9_609_000_000}, is_dimension=True)])
     row = rendered.rows[0]
-    assert "selected_cells" not in row.metadata
-    assert row.cells[0].value == ""
+    assert row.cells[0].value == 9_609_000_000
+    assert row.metadata["selected_cells"][FY25]["source_period_key"] == OPEN25
 
 
 def test_equity_roll_forward_branch_unchanged():
-    """The StatementOfEquity first-occurrence branch keeps its existing behaviour."""
+    """The StatementOfEquity first-occurrence fallback keeps its values; each selected
+    cell now carries its own source key, like every other instant shown under a
+    duration column (edgartools-auvk1.14)."""
     xbrl = _FakeXbrl(competing="iso4217:EUR")
     concept = "us-gaap_StockholdersEquity"
     rendered = _render([
@@ -226,7 +230,8 @@ def test_equity_roll_forward_branch_unchanged():
     ], xbrl, statement_type="StatementOfEquity")
     values = [r.cells[0].value for r in rendered.rows]
     assert values[:3] == [100_000_000, 20_000_000, 120_000_000]
-    assert all("selected_cells" not in r.metadata for r in rendered.rows)
+    sources = [r.metadata.get("selected_cells", {}).get(FY25, {}).get("source_period_key") for r in rendered.rows]
+    assert sources[:3] == [OPEN25, None, CLOSE25]
 
 
 # --- real filings ------------------------------------------------------------------
@@ -237,7 +242,10 @@ def _cash_rows(accession, concept):
     rows = [r for r in rendered.rows
             if r.metadata.get("concept") == concept and not r.is_dimension
             and isinstance(r.cells[0].value, (int, float))]
-    assert len(rows) == 2, [r.label for r in rows]
+    # A third reference on a plain or total arc (a reconciliation row) shows the
+    # closing balance, as the SEC page does (edgartools-auvk1.14)
+    assert len(rows) in (2, 3), [r.label for r in rows]
+    assert all(r.cells[0].value == rows[1].cells[0].value for r in rows[2:])
     return rendered, rows[0], rows[1]
 
 
@@ -263,7 +271,10 @@ def test_sap_fy2025_cash_balances_render_in_euros():
 @pytest.mark.network
 @pytest.mark.vcr
 def test_gsk_fy2025_cash_and_overdrafts_render_in_pounds():
-    """GSK 20-F FY2025, 0001131399-26-000004, R7 -- keeps its cash-and-overdrafts concept."""
+    """GSK 20-F FY2025, 0001131399-26-000004, R7 -- keeps its cash-and-overdrafts concept.
+
+    R7's third row of the concept, "Cash and bank overdrafts" on a totalLabel arc,
+    shows 3,207 for 2025: the closing balance, which _cash_rows checks."""
     _, opening, closing = _cash_rows(
         "0001131399-26-000004",
         "ifrs-full_CashAndCashEquivalentsIfDifferentFromStatementOfFinancialPosition")

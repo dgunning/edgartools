@@ -294,16 +294,16 @@ print(f"{results.value_rate('dataframe'):.1%} of {results.compared_cells('datafr
       f"coverage {results.coverage('dataframe'):.1%}")
 print(results.family_counts('dataframe'))
 
-for r in results.of_kind('value_differs', 'dataframe')[:1]:
+for r in results.of_kind('negative_zero', 'dataframe')[:1]:
     print(r.page, '|', r.page_label, '|', r.library_label)
     print(r.column, r.page_value, r.fact_value, r.library_value)
 ```
 
 ```text
-99.0% of 480 cells, coverage 77.2%
-{'not_comparable': 36, 'matched': 668, 'presentation': 92, 'disagreement': 62}
-CONSOLIDATED STATEMENTS OF CASH FLOWS | Cash, cash equivalents and restricted cash at beginning of period | Brixmor Operating Partnership LP
-12 Months Ended Dec. 31, 2020 21507.0 21507000.0 360073000.0
+99.6% of 480 cells, coverage 77.2%
+{'not_comparable': 36, 'matched': 671, 'presentation': 89, 'disagreement': 50}
+CONSOLIDATED STATEMENTS OF CASH FLOWS | Repayment of secured debt obligations | Repayment of secured debt obligations
+12 Months Ended Dec. 31, 2019 0.0 0.0 -0.0
 ```
 
 The headline is a pair per surface (`'dataframe'` or `'rendered'`). `value_rate` is the share of compared cells the library shows, under the page column's own period (requested when the default view leaves it out), with the page's value and sign. A cell is compared when `compare()` matched it to a fact, its row has a library row and its column's period is known, unless the library row shows that period in another currency or unit (`unit_column_not_shown`) or the page prints a less precise duplicate fact (`less_precise_duplicate`); those two are reported beside. A library call that raises counts against `value_rate`: when `to_dataframe()` or `render()` raises on a page's statement, the page gets a `statement_raised` outcome and each cell that would have been looked up (matched by `compare()`, in a row whose context `compare()` established, under a column whose period is known) is `library_raised`; when requesting a period the default view leaves out raises, that cell is `library_raised`. Both carry the exception in `reason`. `coverage` is the share of all the pages' numeric cells that were compared. Every other outcome is reported beside the pair: each has a `kind` named for what was observed (`row_dropped`, `sign_differs`, `negative_zero`, `zero_rendered_blank`, `period_not_in_default_view` and so on; see `KINDS` in `edgar.xbrl.statement_fidelity`), and each kind belongs to one family, `disagreement`, `presentation` or `not_comparable`. `results.to_dataframe()` has one row per outcome.
