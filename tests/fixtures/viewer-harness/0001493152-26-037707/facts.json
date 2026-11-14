@@ -1,0 +1,110 @@
+[
+ {
+  "concept": "us-gaap:InvestmentOwnedBalanceOtherMeasure",
+  "context_ref": "AsOf2026-06-30_custom_GoldBullionMember",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "331344.906",
+  "numeric_value": 331344.906,
+  "unit_ref": "oz",
+  "currency": null,
+  "decimals": "3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementScenarioAxis": "BAR:GoldBullionMember"
+  }
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedBalanceOtherMeasure",
+  "context_ref": "AsOf2025-06-30_custom_GoldBullionMember",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "336351.098",
+  "numeric_value": 336351.098,
+  "unit_ref": "oz",
+  "currency": null,
+  "decimals": "3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementScenarioAxis": "BAR:GoldBullionMember"
+  }
+ },
+ {
+  "concept": "us-gaap:InvestmentCompanyTotalReturn",
+  "context_ref": "From2025-07-01to2026-06-30",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "0.2227",
+  "numeric_value": 0.2227,
+  "unit_ref": "Pure",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:InvestmentCompanyTotalReturn",
+  "context_ref": "From2024-07-012025-06-30",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "0.4077",
+  "numeric_value": 0.4077,
+  "unit_ref": "Pure",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:InvestmentCompanyTotalReturn",
+  "context_ref": "From2023-07-012024-06-30",
+  "period_key": "duration_2023-07-01_2024-06-30",
+  "period_type": "duration",
+  "value": "0.2172",
+  "numeric_value": 0.2172,
+  "unit_ref": "Pure",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedBalanceOtherMeasure",
+  "context_ref": "AsOf2026-06-30",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "331344.906",
+  "numeric_value": 331344.906,
+  "unit_ref": "oz",
+  "currency": null,
+  "decimals": "3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedBalanceOtherMeasure",
+  "context_ref": "AsOf2024-06-30",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "339410.178",
+  "numeric_value": 339410.178,
+  "unit_ref": "oz",
+  "currency": null,
+  "decimals": "3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedBalanceOtherMeasure",
+  "context_ref": "AsOf2025-06-30",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "336351.098",
+  "numeric_value": 336351.098,
+  "unit_ref": "oz",
+  "currency": null,
+  "decimals": "3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ }
+]

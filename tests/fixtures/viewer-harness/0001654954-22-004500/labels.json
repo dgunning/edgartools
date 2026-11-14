@@ -1,0 +1,180 @@
+{
+ "ifrs-full_AdministrativeExpense": {
+  "http://www.xbrl.org/2003/role/label": "General and administrative expenses"
+ },
+ "ifrs-full_Assets": {
+  "http://www.xbrl.org/2003/role/label": "[Assets]",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total Assets"
+ },
+ "ifrs-full_AuditorsRemunerationForAuditServices": {
+  "http://www.xbrl.org/2003/role/label": "Legal, accounting and audit"
+ },
+ "ifrs-full_CashAndCashEquivalents": {
+  "http://www.xbrl.org/2003/role/label": "Cash and cash equivalents",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Cash and cash equivalents - ending balance",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Cash and cash equivalents - beginning balance",
+  "http://www.xbrl.org/2003/role/terseLabel": "Cash and cash equivalents",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Cash and cash equivalents"
+ },
+ "ifrs-full_ComponentsOfOtherComprehensiveIncomeThatWillBeReclassifiedToProfitOrLossNetOfTaxAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Items that may be subsequently reclassified to net loss"
+ },
+ "ifrs-full_CurrentAssets": {
+  "http://www.xbrl.org/2003/role/label": "[Current assets]",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total current assets"
+ },
+ "ifrs-full_CurrentAssetsAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Current assets"
+ },
+ "ifrs-full_CurrentLiabilities": {
+  "http://www.xbrl.org/2003/role/label": "[Current liabilities]",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total current liabilities"
+ },
+ "ifrs-full_CurrentLiabilitiesAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Current liabilities"
+ },
+ "ifrs-full_EmployeeBenefitsExpense": {
+  "http://www.xbrl.org/2003/role/label": "Share-based compensation"
+ },
+ "ifrs-full_Equity": {
+  "http://www.xbrl.org/2003/role/label": "[Equity]",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Balance, amount",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Balance, amount",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total equity"
+ },
+ "ifrs-full_EquityAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Capital and reserves"
+ },
+ "ifrs-full_EquityAndLiabilities": {
+  "http://www.xbrl.org/2003/role/label": "[Equity and liabilities]",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total Equity and Liabilities"
+ },
+ "ifrs-full_EquityAndLiabilitiesAbstract": {
+  "http://www.xbrl.org/2003/role/label": "EQUITY"
+ },
+ "ifrs-full_ExpenseArisingFromExplorationForAndEvaluationOfMineralResources": {
+  "http://www.xbrl.org/2003/role/label": "Exploration and evaluation expenses"
+ },
+ "ifrs-full_FinanceCosts": {
+  "http://www.xbrl.org/2003/role/label": "Finance expense"
+ },
+ "ifrs-full_GainsLossesOnExchangeDifferencesOnTranslationRecognisedInProfitOrLoss": {
+  "http://www.xbrl.org/2003/role/label": "[Foreign exchange gain (loss)]",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Foreign exchange loss"
+ },
+ "ifrs-full_IncomeStatementAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Consolidated Statements of Comprehensive Loss"
+ },
+ "ifrs-full_IssuedCapital": {
+  "http://www.xbrl.org/2003/role/label": "Share capital"
+ },
+ "ifrs-full_Liabilities": {
+  "http://www.xbrl.org/2003/role/label": "[Liabilities]",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total liabilities"
+ },
+ "ifrs-full_LiabilitiesAbstract": {
+  "http://www.xbrl.org/2003/role/label": "LIABILITIES"
+ },
+ "ifrs-full_NoncurrentAssets": {
+  "http://www.xbrl.org/2003/role/label": "[Non-current assets]",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total non-current assets"
+ },
+ "ifrs-full_NoncurrentAssetsAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Non-current assets"
+ },
+ "ifrs-full_NoncurrentLiabilities": {
+  "http://www.xbrl.org/2003/role/label": "[Non-current liabilities]",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total non-current liabilities"
+ },
+ "ifrs-full_NoncurrentLiabilitiesAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Non-current liabilities"
+ },
+ "ifrs-full_NoncurrentPayables": {
+  "http://www.xbrl.org/2003/role/label": "Trade and other payables",
+  "http://www.xbrl.org/2003/role/terseLabel": "Non-current trade payables",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Total, noncurrent"
+ },
+ "ifrs-full_OtherComprehensiveIncomeAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Other comprehensive loss (income)"
+ },
+ "ifrs-full_OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation": {
+  "http://www.xbrl.org/2003/role/label": "[Other comprehensive income, net of tax, exchange differences on translation of foreign operations]",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Foreign exchange translation difference"
+ },
+ "ifrs-full_OtherIncome": {
+  "http://www.xbrl.org/2003/role/label": "[Other income]",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Other income"
+ },
+ "ifrs-full_OtherReserves": {
+  "http://www.xbrl.org/2003/role/label": "Reserves"
+ },
+ "ifrs-full_ProfitLossAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Expenses"
+ },
+ "ifrs-full_PropertyPlantAndEquipment": {
+  "http://www.xbrl.org/2003/role/label": "Mineral property, plant and equipment",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Property, plant, and equipment, ending",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Property, plant, and equipment, beginning"
+ },
+ "ifrs-full_RestrictedCashAndCashEquivalents": {
+  "http://www.xbrl.org/2003/role/label": "Restricted Cash",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Restricted cash"
+ },
+ "ifrs-full_RetainedEarnings": {
+  "http://www.xbrl.org/2003/role/label": "[Retained earnings]",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Deficit"
+ },
+ "ifrs-full_StatementOfFinancialPositionAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Consolidated Statements of Financial Position"
+ },
+ "ifrs-full_TradeAndOtherCurrentPayables": {
+  "http://www.xbrl.org/2003/role/label": "[Trade and other current payables]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Current trade and other payables",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Trade and other payables"
+ },
+ "ifrs-full_TradeAndOtherCurrentReceivables": {
+  "http://www.xbrl.org/2003/role/label": "Amounts receivable and prepaid expenses",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Total"
+ },
+ "ifrs-full_TradeAndOtherPayablesToRelatedParties": {
+  "http://www.xbrl.org/2003/role/label": "Payables to related parties",
+  "http://www.xbrl.org/2003/role/terseLabel": "Payables to related parties",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Payables to related parties"
+ },
+ "ndm_BasicAndDilutedEarningsLossPerShare": {
+  "http://www.xbrl.org/2003/role/label": "Basic and diluted loss per common share"
+ },
+ "ndm_GainLossOnDisposalOfPlantAndEquipment": {
+  "http://www.xbrl.org/2003/role/label": "[Loss on disposal of plant and equipment]",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Loss on disposal of plant and equipment"
+ },
+ "ndm_GainLossOnrevaluationofwarrantliabilities": {
+  "http://www.xbrl.org/2003/role/label": "[Gain (loss) on revaluation of warrant liabilities]",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Gain (loss) on revaluation of warrant liabilities"
+ },
+ "ndm_Gainonmodificationoflease": {
+  "http://www.xbrl.org/2003/role/label": "[Gain on modification of lease]",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Gain on modification of lease"
+ },
+ "ndm_InterestIncome": {
+  "http://www.xbrl.org/2003/role/label": "[Interest income]",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Interest income"
+ },
+ "ndm_LossFromOperatingActivities": {
+  "http://www.xbrl.org/2003/role/label": "[Loss from operating activities]",
+  "http://www.xbrl.org/2003/role/totalLabel": "Loss from operating activities"
+ },
+ "ndm_NetLoss": {
+  "http://www.xbrl.org/2003/role/label": "[Net loss]",
+  "http://www.xbrl.org/2003/role/totalLabel": "Net loss",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Net loss"
+ },
+ "ndm_OtherComprehensiveLoss": {
+  "http://www.xbrl.org/2003/role/label": "[Other comprehensive loss]",
+  "http://www.xbrl.org/2003/role/totalLabel": "Other comprehensive loss"
+ },
+ "ndm_TotalComprehensiveLoss": {
+  "http://www.xbrl.org/2003/role/label": "[Total comprehensive loss]",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total comprehensive loss"
+ }
+}

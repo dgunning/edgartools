@@ -1,0 +1,208 @@
+[
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-1",
+  "period_key": "duration_2024-01-01_2024-09-30",
+  "period_type": "duration",
+  "value": "-3812000",
+  "numeric_value": -3812000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-31",
+  "period_key": "duration_2023-01-01_2023-09-30",
+  "period_type": "duration",
+  "value": "4998000",
+  "numeric_value": 4998000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-3",
+  "period_key": "duration_2024-01-01_2024-09-30",
+  "period_type": "duration",
+  "value": "-30000",
+  "numeric_value": -30000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:EntergyArkansasMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-827",
+  "period_key": "duration_2023-01-01_2023-09-30",
+  "period_type": "duration",
+  "value": "-106000",
+  "numeric_value": -106000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:EntergyArkansasMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-5",
+  "period_key": "duration_2024-01-01_2024-09-30",
+  "period_type": "duration",
+  "value": "-35000",
+  "numeric_value": -35000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:EntergyLouisianaMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-499",
+  "period_key": "duration_2023-01-01_2023-09-30",
+  "period_type": "duration",
+  "value": "-396000",
+  "numeric_value": -396000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:EntergyLouisianaMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-7",
+  "period_key": "duration_2024-01-01_2024-09-30",
+  "period_type": "duration",
+  "value": "80000",
+  "numeric_value": 80000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:EntergyMississippiMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-1097",
+  "period_key": "duration_2023-01-01_2023-09-30",
+  "period_type": "duration",
+  "value": "1076000",
+  "numeric_value": 1076000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:EntergyMississippiMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-2",
+  "period_key": "duration_2024-01-01_2024-09-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:EntergyNewOrleansMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-1098",
+  "period_key": "duration_2023-01-01_2023-09-30",
+  "period_type": "duration",
+  "value": "-51000",
+  "numeric_value": -51000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:EntergyNewOrleansMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-4",
+  "period_key": "duration_2024-01-01_2024-09-30",
+  "period_type": "duration",
+  "value": "-840000",
+  "numeric_value": -840000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:EntergyTexasMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-1099",
+  "period_key": "duration_2023-01-01_2023-09-30",
+  "period_type": "duration",
+  "value": "-86000",
+  "numeric_value": -86000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:EntergyTexasMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-6",
+  "period_key": "duration_2024-01-01_2024-09-30",
+  "period_type": "duration",
+  "value": "-23000",
+  "numeric_value": -23000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:SystemEnergyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:PaymentsForProceedsFromOtherInvestingActivities",
+  "context_ref": "c-834",
+  "period_key": "duration_2023-01-01_2023-09-30",
+  "period_type": "duration",
+  "value": "4000",
+  "numeric_value": 4000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "etr:SystemEnergyMember"
+  }
+ }
+]

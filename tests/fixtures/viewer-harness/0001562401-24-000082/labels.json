@@ -1,0 +1,148 @@
+{
+ "us-gaap_AccumulatedOtherComprehensiveIncomeMember": {
+  "http://www.xbrl.org/2003/role/label": "AOCI Attributable to Parent [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Accumulated other comprehensive income",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Accumulated other comprehensive income"
+ },
+ "us-gaap_AdditionalPaidInCapitalMember": {
+  "http://www.xbrl.org/2003/role/label": "Additional Paid-in Capital [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Additional paid-in capital"
+ },
+ "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue": {
+  "http://www.xbrl.org/2003/role/label": "APIC, Share-Based Payment Arrangement, Increase for Cost Recognition",
+  "http://www.xbrl.org/2003/role/terseLabel": "Share-based compensation"
+ },
+ "us-gaap_ClassOfStockDomain": {
+  "http://www.xbrl.org/2003/role/label": "Class of Stock [Domain]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Class of Stock [Domain]"
+ },
+ "us-gaap_CommonClassAMember": {
+  "http://www.xbrl.org/2003/role/label": "Common Class A [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Class A common shares"
+ },
+ "us-gaap_CommonClassBMember": {
+  "http://www.xbrl.org/2003/role/label": "Common Class B [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Class B common shares",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Class B common shares"
+ },
+ "us-gaap_CommonStockMember": {
+  "http://www.xbrl.org/2003/role/label": "Common Stock [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Common capital",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Common shares"
+ },
+ "us-gaap_CommonStockSharesOutstanding": {
+  "http://www.xbrl.org/2003/role/label": "Common Stock, Shares, Outstanding",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Ending balances, common stock (in shares)",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Beginning balances, common stock (in shares)",
+  "http://www.xbrl.org/2003/role/terseLabel": "Common stock outstanding (in shares)"
+ },
+ "us-gaap_DividendsAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Dividends [Abstract]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Distributions to equity holders:",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Distributions to capital holders:"
+ },
+ "us-gaap_DividendsCommonStock": {
+  "http://www.xbrl.org/2003/role/label": "Dividends, Common Stock",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Common shares"
+ },
+ "us-gaap_EquityComponentDomain": {
+  "http://www.xbrl.org/2003/role/label": "Equity Component [Domain]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity Component [Domain]"
+ },
+ "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+  "http://www.xbrl.org/2003/role/label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Increase (Decrease) in Stockholders' Equity"
+ },
+ "us-gaap_MinorityInterestDecreaseFromDistributionsToNoncontrollingInterestHolders": {
+  "http://www.xbrl.org/2003/role/label": "Noncontrolling Interest, Decrease from Distributions to Noncontrolling Interest Holders",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Noncontrolling interests"
+ },
+ "us-gaap_NoncontrollingInterestMember": {
+  "http://www.xbrl.org/2003/role/label": "Noncontrolling Interest [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Noncontrolling interest"
+ },
+ "us-gaap_OtherComprehensiveIncomeLossNetOfTax": {
+  "http://www.xbrl.org/2003/role/label": "Other Comprehensive Income (Loss), Net of Tax",
+  "http://www.xbrl.org/2003/role/terseLabel": "Total other comprehensive income (loss)",
+  "http://www.xbrl.org/2003/role/totalLabel": "Other comprehensive income (loss)",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Total other comprehensive income (loss)"
+ },
+ "us-gaap_ParentMember": {
+  "http://www.xbrl.org/2003/role/label": "Parent [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Shareholders’ equity"
+ },
+ "us-gaap_PreferredStockDividendsIncomeStatementImpact": {
+  "http://www.xbrl.org/2003/role/label": "Preferred Stock Dividends, Income Statement Impact",
+  "http://www.xbrl.org/2003/role/terseLabel": "Preferred distributions",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Dividends on preferred shares",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Preferred shares (Note 10)",
+  "http://www.xbrl.org/2009/role/netLabel": "Preferred distributions"
+ },
+ "us-gaap_PreferredStockMember": {
+  "http://www.xbrl.org/2003/role/label": "Preferred Stock [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Preferred shares",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Preferred capital amount"
+ },
+ "us-gaap_PreferredStockSharesOutstanding": {
+  "http://www.xbrl.org/2003/role/label": "Preferred Stock, Shares Outstanding",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Ending balances, preferred stock (in shares)",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Beginning balances, preferred stock (in shares)",
+  "http://www.xbrl.org/2003/role/terseLabel": "Preferred shares outstanding (in shares)",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Outstanding shares (in shares)"
+ },
+ "us-gaap_ProfitLoss": {
+  "http://www.xbrl.org/2003/role/label": "Net Income (Loss), Including Portion Attributable to Noncontrolling Interest",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net income",
+  "http://www.xbrl.org/2003/role/totalLabel": "Net income",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Net income"
+ },
+ "us-gaap_RetainedEarningsMember": {
+  "http://www.xbrl.org/2003/role/label": "Retained Earnings [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Accumulated deficit"
+ },
+ "us-gaap_StatementClassOfStockAxis": {
+  "http://www.xbrl.org/2003/role/label": "Class of Stock [Axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Class of Stock [Axis]"
+ },
+ "us-gaap_StatementEquityComponentsAxis": {
+  "http://www.xbrl.org/2003/role/label": "Equity Components [Axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity Components [Axis]"
+ },
+ "us-gaap_StatementLineItems": {
+  "http://www.xbrl.org/2003/role/label": "Statement [Line Items]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement [Line Items]"
+ },
+ "us-gaap_StatementOfStockholdersEquityAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Statement of Stockholders' Equity [Abstract]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement of Stockholders' Equity [Abstract]"
+ },
+ "us-gaap_StatementTable": {
+  "http://www.xbrl.org/2003/role/label": "Statement [Table]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement [Table]"
+ },
+ "us-gaap_StockIssuedDuringPeriodSharesNewIssues": {
+  "http://www.xbrl.org/2003/role/label": "Stock Issued During Period, Shares, New Issues",
+  "http://www.xbrl.org/2003/role/terseLabel": "Shares issued (in shares)",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Issuance of Class A common shares, net of offering costs (in shares)"
+ },
+ "us-gaap_StockIssuedDuringPeriodSharesShareBasedCompensation": {
+  "http://www.xbrl.org/2003/role/label": "Shares Issued, Shares, Share-Based Payment Arrangement, after Forfeiture",
+  "http://www.xbrl.org/2003/role/terseLabel": "Common stock issued under share-based compensation plans, net of shares withheld for employee taxes (in shares)",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Common units issued under share-based compensation plans, net of units withheld for employee taxes (in shares)"
+ },
+ "us-gaap_StockIssuedDuringPeriodValueNewIssues": {
+  "http://www.xbrl.org/2003/role/label": "Stock Issued During Period, Value, New Issues",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issuance of Class A common shares, net of offering costs"
+ },
+ "us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation": {
+  "http://www.xbrl.org/2003/role/label": "Shares Issued, Value, Share-Based Payment Arrangement, after Forfeiture",
+  "http://www.xbrl.org/2003/role/terseLabel": "Common stock issued under share-based compensation plans, net of shares withheld for employee taxes",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Common units issued under share-based compensation plans, net of units withheld for employee taxes"
+ },
+ "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest": {
+  "http://www.xbrl.org/2003/role/label": "Equity, Including Portion Attributable to Noncontrolling Interest",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Ending balances",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Beginning balances",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total equity"
+ }
+}

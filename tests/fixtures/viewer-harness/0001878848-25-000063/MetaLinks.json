@@ -1,0 +1,283 @@
+{
+ "version": "2.2",
+ "instance": {
+  "iren-20250630.htm": {
+   "tag": {
+    "iren_AICloudServicesMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.iren.com/20250630",
+     "localname": "AICloudServicesMember",
+     "presentation": [
+      "http://www.iren.com/role/ConsolidatedStatementsofOperationsandComprehensiveIncomeLoss",
+      "http://www.iren.com/role/CostofrevenueDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "AI Cloud Services",
+        "label": "AI Cloud Services [Member]",
+        "documentation": "AI Cloud Services"
+       }
+      }
+     }
+    },
+    "iren_BitcoinMiningRevenueMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.iren.com/20250630",
+     "localname": "BitcoinMiningRevenueMember",
+     "presentation": [
+      "http://www.iren.com/role/BasisofpresentationsummaryofsignificantaccountingpoliciesandrecentaccountingpronouncementsNarrativeDetails",
+      "http://www.iren.com/role/ConsolidatedStatementsofOperationsandComprehensiveIncomeLoss",
+      "http://www.iren.com/role/CostofrevenueDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Bitcoin Mining",
+        "label": "Bitcoin Mining Revenue [Member]",
+        "documentation": "Bitcoin Mining Revenue"
+       }
+      }
+     }
+    },
+    "srt_ProductOrServiceAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/srt/2025",
+     "localname": "ProductOrServiceAxis",
+     "presentation": [
+      "http://www.iren.com/role/BasisofpresentationsummaryofsignificantaccountingpoliciesandrecentaccountingpronouncementsNarrativeDetails",
+      "http://www.iren.com/role/ConsolidatedStatementsofOperationsandComprehensiveIncomeLoss",
+      "http://www.iren.com/role/CostofrevenueDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Product and Service [Axis]",
+        "label": "Product and Service [Axis]"
+       }
+      }
+     }
+    },
+    "us-gaap_CashAndCashEquivalentsAtCarryingValue": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "CashAndCashEquivalentsAtCarryingValue",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.iren.com/role/ConsolidatedBalanceSheets": {
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.iren.com/role/AdjustmentsforthetransitiontoUSGAAPConsolidatedBalanceSheetDetails",
+      "http://www.iren.com/role/ConsolidatedBalanceSheets"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Cash and cash equivalents",
+        "label": "Cash and Cash Equivalent",
+        "documentation": "Amount of cash and cash equivalent. Cash includes, but is not limited to, currency on hand, demand deposit with financial institution, and account with general characteristic of demand deposit. Cash equivalent includes, but is not limited to, short-term, highly liquid investment that is both readily convertible to known amount of cash and so near maturity that it presents insignificant risk of change in value because of change in interest rate."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonClassAMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "CommonClassAMember",
+     "presentation": [
+      "http://www.iren.com/role/AdjustmentsforthetransitiontoUSGAAPConsolidatedBalanceSheetDetails",
+      "http://www.iren.com/role/ConsolidatedBalanceSheets",
+      "http://www.iren.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.iren.com/role/CoverPage"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class A common stock",
+        "label": "Common Class A [Member]",
+        "documentation": "Classification of common stock representing ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonClassBMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "CommonClassBMember",
+     "presentation": [
+      "http://www.iren.com/role/AdjustmentsforthetransitiontoUSGAAPConsolidatedBalanceSheetDetails",
+      "http://www.iren.com/role/ConsolidatedBalanceSheets",
+      "http://www.iren.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.iren.com/role/CoverPage",
+      "http://www.iren.com/role/StockholdersequityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class B common stock",
+        "label": "Common Class B [Member]",
+        "documentation": "Classification of common stock that has different rights than Common Class A, representing ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "RevenueFromContractWithCustomerExcludingAssessedTax",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.iren.com/role/ConsolidatedStatementsofOperationsandComprehensiveIncomeLoss": {
+       "parentTag": "us-gaap_OperatingIncomeLoss",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.iren.com/role/ConsolidatedStatementsofOperationsandComprehensiveIncomeLoss"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Total revenue",
+        "label": "Revenue from Contract with Customer, Excluding Assessed Tax",
+        "documentation": "Amount, excluding tax collected from customer, of revenue from satisfaction of performance obligation by transferring promised good or service to customer. Tax collected from customer is tax assessed by governmental authority that is both imposed on and concurrent with specific revenue-producing transaction, including, but not limited to, sales, use, value added and excise."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementClassOfStockAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "StatementClassOfStockAxis",
+     "presentation": [
+      "http://www.iren.com/role/AdjustmentsforthetransitiontoUSGAAPConsolidatedBalanceSheetDetails",
+      "http://www.iren.com/role/ConsolidatedBalanceSheets",
+      "http://www.iren.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.iren.com/role/CoverPage",
+      "http://www.iren.com/role/DerivativesNarrativeDetails",
+      "http://www.iren.com/role/StockholdersequityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class of Stock [Axis]",
+        "label": "Class of Stock [Axis]",
+        "documentation": "Information by the different classes of stock of the entity."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R3": {
+     "role": "http://www.iren.com/role/ConsolidatedBalanceSheets",
+     "longName": "9952151 - Statement - Consolidated Balance Sheets",
+     "shortName": "Consolidated Balance Sheets",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "3",
+     "firstAnchor": {
+      "contextRef": "c-5",
+      "name": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "ix:continuation",
+       "ix:continuation",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "iren-20250630.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-5",
+      "name": "us-gaap:CommitmentsAndContingencies",
+      "unitRef": "usd",
+      "xsiNil": "true",
+      "lang": "en-US",
+      "decimals": null,
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "iren-20250630.htm",
+      "unique": true
+     }
+    },
+    "R5": {
+     "role": "http://www.iren.com/role/ConsolidatedStatementsofOperationsandComprehensiveIncomeLoss",
+     "longName": "9952153 - Statement - Consolidated Statements of Operations and Comprehensive Income (Loss)",
+     "shortName": "Consolidated Statements of Operations and Comprehensive Income (Loss)",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "5",
+     "firstAnchor": {
+      "contextRef": "c-1",
+      "name": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "iren-20250630.htm",
+      "first": true,
+      "unique": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-1",
+      "name": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "iren-20250630.htm",
+      "first": true,
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

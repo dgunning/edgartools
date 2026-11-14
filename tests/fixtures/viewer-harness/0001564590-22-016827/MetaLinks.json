@@ -1,0 +1,253 @@
+{
+ "version": "2.1",
+ "instance": {
+  "cd-20f_20211231.htm": {
+   "tag": {
+    "srt_ConsolidatedEntitiesAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by consolidated entity or group of entities.",
+        "label": "Consolidated Entities [Axis]",
+        "terseLabel": "Consolidated Entities"
+       }
+      }
+     },
+     "localname": "ConsolidatedEntitiesAxis",
+     "nsuri": "http://fasb.org/srt/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyBasisOfPresentationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedStatementsOfCashFlowsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedStatementsOfComprehensiveLossIncomeDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfPrincipalSubsidiariesVariableInterestEntitiesAndSubsidiariesOfVariableInterestEntitiesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureRelatedPartyTransactionsSummaryOfRelatedPartyTransactionsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureRestrictedNetAssetsAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_CommonClassAMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Classification of common stock representing ownership interest in a corporation.",
+        "label": "Common Class A [Member]",
+        "terseLabel": "Class A",
+        "verboseLabel": "Class A Ordinary Shares"
+       }
+      }
+     },
+     "localname": "CommonClassAMember",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureLossEarningsPerShareSummaryOfBasicAndDilutedLossEarningsPerShareDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DocumentDocumentAndEntityInformation",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_CommonClassBMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Classification of common stock that has different rights than Common Class A, representing ownership interest in a corporation.",
+        "label": "Common Class B [Member]",
+        "terseLabel": "Class B",
+        "verboseLabel": "Class B Ordinary Shares"
+       }
+      }
+     },
+     "localname": "CommonClassBMember",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureLossEarningsPerShareSummaryOfBasicAndDilutedLossEarningsPerShareDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureShareBasedPaymentsAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DocumentDocumentAndEntityInformation",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_CommonStockSharesAuthorized": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The maximum number of common shares permitted to be issued by an entity's charter and bylaws.",
+        "label": "Common Stock Shares Authorized",
+        "terseLabel": "Common stock, shares authorized"
+       }
+      }
+     },
+     "localname": "CommonStockSharesAuthorized",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_CommonStockSharesIssued": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Total number of common shares of an entity that have been sold or granted to shareholders (includes common shares that were issued, repurchased and remain in the treasury). These shares represent capital invested by the firm's shareholders and owners, and may be all or only a portion of the number of shares authorized. Shares issued include shares outstanding and shares held in the treasury.",
+        "label": "Common Stock Shares Issued",
+        "terseLabel": "Common stock, shares, issued"
+       }
+      }
+     },
+     "localname": "CommonStockSharesIssued",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_LiabilitiesCurrent": {
+     "calculation": {
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails": {
+       "order": 10010.0,
+       "parentTag": "us-gaap_LiabilitiesNoncurrent",
+       "weight": 1.0
+      },
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": {
+       "order": 10090.0,
+       "parentTag": "us-gaap_Liabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Total obligations incurred as part of normal operations that are expected to be paid during the following twelve months or within one business cycle, if longer.",
+        "label": "Liabilities Current",
+        "terseLabel": "Current liabilities",
+        "totalLabel": "Total current liabilities"
+       }
+      }
+     },
+     "localname": "LiabilitiesCurrent",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StatementClassOfStockAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by the different classes of stock of the entity.",
+        "label": "Statement Class Of Stock [Axis]",
+        "terseLabel": "Class of Stock"
+       }
+      }
+     },
+     "localname": "StatementClassOfStockAxis",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureCondensedFinancialInformationOfParentCompanyCondensedBalanceSheetsParentheticalDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureLossEarningsPerShareSummaryOfBasicAndDilutedLossEarningsPerShareDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureShareBasedPaymentsAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DocumentDocumentAndEntityInformation",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_VariableInterestEntityPrimaryBeneficiaryMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Variable Interest Entities (VIE) in which the entity has a controlling financial interest (as defined) and of which it is therefore the primary beneficiary. A controlling financial interest is determined based on both: (a) the entity's power to direct activities of the VIE that most significantly impact the VIE's economic performance and (b) the entity's obligation to absorb losses of the VIE that could potentially be significant to the VIE or the right to receive benefits from the VIE that could potentially be significant to the VIE. VIEs of which the entity is the primary beneficiary are included in the consolidated financial statements of the entity.",
+        "label": "Variable Interest Entity Primary Beneficiary [Member]",
+        "terseLabel": "VIEs"
+       }
+      }
+     },
+     "localname": "VariableInterestEntityPrimaryBeneficiaryMember",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfAssetsLiabilitiesAndResultOfOperationsAndCashFlowOfViesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureOrganizationScheduleOfPrincipalSubsidiariesVariableInterestEntitiesAndSubsidiariesOfVariableInterestEntitiesDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/DisclosureRestrictedNetAssetsAdditionalInformationDetails",
+      "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical"
+     ],
+     "xbrltype": "domainItemType"
+    }
+   },
+   "report": {
+    "R3": {
+     "firstAnchor": {
+      "ancestors": [
+       "p",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "us-gaap:AccountsReceivableAllowanceForCreditLossTableTextBlock",
+       "us-gaap:LoansNotesTradeAndOtherReceivablesDisclosureTextBlock",
+       "body",
+       "html"
+      ],
+      "baseRef": "cd-20f_20211231.htm",
+      "contextRef": "C_0001807192_20211231",
+      "decimals": "-3",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:AllowanceForDoubtfulAccountsReceivable",
+      "reportCount": 1,
+      "unitRef": "U_iso4217CNY",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "100020 - Statement - Consolidated Balance Sheets (Parenthetical)",
+     "role": "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical",
+     "shortName": "Consolidated Balance Sheets (Parenthetical)",
+     "subGroupType": "parenthetical",
+     "uniqueAnchor": {
+      "ancestors": [
+       "p",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "cd-20f_20211231.htm",
+      "contextRef": "C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20211231",
+      "decimals": "-3",
+      "lang": null,
+      "name": "us-gaap:LiabilitiesCurrent",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "U_iso4217CNY",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,435 @@
+{
+ "http://comstockhomes.com/role/ConsolidatedBalanceSheets": {
+  "roots": [
+   "us-gaap_StatementOfFinancialPositionAbstract"
+  ],
+  "nodes": {
+   "us-gaap_StatementOfFinancialPositionAbstract": {
+    "children": [
+     "us-gaap_StatementTable"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementTable": {
+    "children": [
+     "us-gaap_StatementClassOfStockAxis",
+     "us-gaap_RelatedPartyTransactionsByRelatedPartyAxis",
+     "us-gaap_StatementLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementClassOfStockAxis": {
+    "children": [
+     "us-gaap_ClassOfStockDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_ClassOfStockDomain": {
+    "children": [
+     "us-gaap_SeriesCPreferredStockMember",
+     "us-gaap_CommonClassAMember",
+     "us-gaap_CommonClassBMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_RelatedPartyTransactionsByRelatedPartyAxis": {
+    "children": [
+     "us-gaap_RelatedPartyDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_RelatedPartyDomain": {
+    "children": [
+     "us-gaap_NonrelatedPartyMember",
+     "us-gaap_RelatedPartyMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementLineItems": {
+    "children": [
+     "us-gaap_AssetsAbstract",
+     "us-gaap_LiabilitiesAndStockholdersEquityAbstract"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_AssetsAbstract": {
+    "children": [
+     "us-gaap_AssetsCurrentAbstract",
+     "us-gaap_PropertyPlantAndEquipmentNet",
+     "us-gaap_IntangibleAssetsNetExcludingGoodwill",
+     "chci_LeaseholdImprovementsNet",
+     "us-gaap_RealEstateInvestmentsJointVentures",
+     "us-gaap_OperatingLeaseRightOfUseAsset",
+     "us-gaap_DeferredIncomeTaxAssetsNet",
+     "us-gaap_DeferredCompensationPlanAssets",
+     "us-gaap_OtherAssets",
+     "us-gaap_Assets"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   },
+   "us-gaap_AssetsCurrentAbstract": {
+    "children": [
+     "us-gaap_CashAndCashEquivalentsAtCarryingValue",
+     "us-gaap_AccountsReceivableNetCurrent",
+     "us-gaap_PrepaidExpenseAndOtherAssets",
+     "us-gaap_AssetsCurrent"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   },
+   "us-gaap_LiabilitiesAndStockholdersEquityAbstract": {
+    "children": [
+     "us-gaap_LiabilitiesCurrentAbstract",
+     "us-gaap_DeferredCompensationLiabilityClassifiedNoncurrent",
+     "us-gaap_OperatingLeaseLiabilityNoncurrent",
+     "us-gaap_Liabilities",
+     "us-gaap_CommitmentsAndContingencies",
+     "us-gaap_StockholdersEquityAbstract",
+     "us-gaap_LiabilitiesAndStockholdersEquity"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   },
+   "us-gaap_LiabilitiesCurrentAbstract": {
+    "children": [
+     "chci_AccruedPersonnelCosts",
+     "us-gaap_AccountsPayableAndAccruedLiabilitiesCurrent",
+     "us-gaap_OperatingLeaseLiabilityCurrent",
+     "us-gaap_LiabilitiesCurrent"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   },
+   "us-gaap_StockholdersEquityAbstract": {
+    "children": [
+     "us-gaap_PreferredStockValue",
+     "us-gaap_CommonStockValue",
+     "us-gaap_AdditionalPaidInCapital",
+     "us-gaap_TreasuryStockCommonValue",
+     "us-gaap_RetainedEarningsAccumulatedDeficit",
+     "us-gaap_StockholdersEquity"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_StatementOfFinancialPositionAbstract",
+    "us-gaap_StatementTable",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementClassOfStockAxis",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementClassOfStockAxis",
+    "us-gaap_ClassOfStockDomain",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ClassOfStockDomain",
+    "us-gaap_SeriesCPreferredStockMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ClassOfStockDomain",
+    "us-gaap_CommonClassAMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ClassOfStockDomain",
+    "us-gaap_CommonClassBMember",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_RelatedPartyTransactionsByRelatedPartyAxis",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_RelatedPartyTransactionsByRelatedPartyAxis",
+    "us-gaap_RelatedPartyDomain",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_RelatedPartyDomain",
+    "us-gaap_NonrelatedPartyMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_RelatedPartyDomain",
+    "us-gaap_RelatedPartyMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementLineItems",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_AssetsAbstract",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsAbstract",
+    "us-gaap_AssetsCurrentAbstract",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsCurrentAbstract",
+    "us-gaap_CashAndCashEquivalentsAtCarryingValue",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsCurrentAbstract",
+    "us-gaap_AccountsReceivableNetCurrent",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsCurrentAbstract",
+    "us-gaap_PrepaidExpenseAndOtherAssets",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsCurrentAbstract",
+    "us-gaap_AssetsCurrent",
+    4.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_AssetsAbstract",
+    "us-gaap_PropertyPlantAndEquipmentNet",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsAbstract",
+    "us-gaap_IntangibleAssetsNetExcludingGoodwill",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsAbstract",
+    "chci_LeaseholdImprovementsNet",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsAbstract",
+    "us-gaap_RealEstateInvestmentsJointVentures",
+    5.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsAbstract",
+    "us-gaap_OperatingLeaseRightOfUseAsset",
+    6.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsAbstract",
+    "us-gaap_DeferredIncomeTaxAssetsNet",
+    7.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsAbstract",
+    "us-gaap_DeferredCompensationPlanAssets",
+    8.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsAbstract",
+    "us-gaap_OtherAssets",
+    9.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_AssetsAbstract",
+    "us-gaap_Assets",
+    10.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+    "us-gaap_LiabilitiesCurrentAbstract",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_LiabilitiesCurrentAbstract",
+    "chci_AccruedPersonnelCosts",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_LiabilitiesCurrentAbstract",
+    "us-gaap_AccountsPayableAndAccruedLiabilitiesCurrent",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_LiabilitiesCurrentAbstract",
+    "us-gaap_OperatingLeaseLiabilityCurrent",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_LiabilitiesCurrentAbstract",
+    "us-gaap_LiabilitiesCurrent",
+    4.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+    "us-gaap_DeferredCompensationLiabilityClassifiedNoncurrent",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+    "us-gaap_OperatingLeaseLiabilityNoncurrent",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+    "us-gaap_Liabilities",
+    4.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+    "us-gaap_CommitmentsAndContingencies",
+    5.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+    "us-gaap_StockholdersEquityAbstract",
+    6.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityAbstract",
+    "us-gaap_PreferredStockValue",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityAbstract",
+    "us-gaap_CommonStockValue",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityAbstract",
+    "us-gaap_AdditionalPaidInCapital",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityAbstract",
+    "us-gaap_TreasuryStockCommonValue",
+    4.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityAbstract",
+    "us-gaap_RetainedEarningsAccumulatedDeficit",
+    5.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityAbstract",
+    "us-gaap_StockholdersEquity",
+    6.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_LiabilitiesAndStockholdersEquityAbstract",
+    "us-gaap_LiabilitiesAndStockholdersEquity",
+    7.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ]
+  ]
+ }
+}

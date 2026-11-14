@@ -1,0 +1,1126 @@
+[
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2019_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_IssuedCapitalMember",
+  "period_key": "instant_2019-06-30",
+  "period_type": "instant",
+  "value": "5072800000",
+  "numeric_value": 5072800000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2019_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_OtherReservesMember",
+  "period_key": "instant_2019-06-30",
+  "period_type": "instant",
+  "value": "453600000",
+  "numeric_value": 453600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherReservesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2019_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "instant_2019-06-30",
+  "period_type": "instant",
+  "value": "-2837800000",
+  "numeric_value": -2837800000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2019_Entity_0001023512",
+  "period_key": "instant_2019-06-30",
+  "period_type": "instant",
+  "value": "2688600000",
+  "numeric_value": 2688600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "635000000.0",
+  "numeric_value": 635000000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "635000000.0",
+  "numeric_value": 635000000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "190600000",
+  "numeric_value": 190600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "190600000",
+  "numeric_value": 190600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "825600000",
+  "numeric_value": 825600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "825600000",
+  "numeric_value": 825600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_IssuedCapitalMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "1085600000",
+  "numeric_value": 1085600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "1085600000",
+  "numeric_value": 1085600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ShareIssueRelatedCost",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_IssuedCapitalMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "500000",
+  "numeric_value": 500000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ShareIssueRelatedCost",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "500000",
+  "numeric_value": 500000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_OtherReservesMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "-453600000",
+  "numeric_value": -453600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherReservesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "453600000",
+  "numeric_value": 453600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "565100000",
+  "numeric_value": 565100000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "6000000.0",
+  "numeric_value": 6000000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "6000000.0",
+  "numeric_value": 6000000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_IssuedCapitalMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "1085100000",
+  "numeric_value": 1085100000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_OtherReservesMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "-453600000",
+  "numeric_value": -453600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherReservesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "-105500000",
+  "numeric_value": -105500000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "526000000.0",
+  "numeric_value": 526000000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_IssuedCapitalMember",
+  "period_key": "instant_2020-06-30",
+  "period_type": "instant",
+  "value": "6157900000",
+  "numeric_value": 6157900000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_OtherReservesMember",
+  "period_key": "instant_2020-06-30",
+  "period_type": "instant",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherReservesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2020_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "instant_2020-06-30",
+  "period_type": "instant",
+  "value": "-2117700000",
+  "numeric_value": -2117700000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2020_Entity_0001023512",
+  "period_key": "instant_2020-06-30",
+  "period_type": "instant",
+  "value": "4040200000",
+  "numeric_value": 4040200000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "1439900000",
+  "numeric_value": 1439900000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "1439900000",
+  "numeric_value": 1439900000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "-34400000",
+  "numeric_value": -34400000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "-34400000",
+  "numeric_value": -34400000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "1405500000",
+  "numeric_value": 1405500000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "1405500000",
+  "numeric_value": 1405500000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "641300000",
+  "numeric_value": 641300000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "16000000.0",
+  "numeric_value": 16000000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "16000000.0",
+  "numeric_value": 16000000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_IssuedCapitalMember",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_OtherReservesMember",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherReservesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "-625300000",
+  "numeric_value": -625300000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "-625300000",
+  "numeric_value": -625300000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_IssuedCapitalMember",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "6157900000",
+  "numeric_value": 6157900000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_OtherReservesMember",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherReservesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2021_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "-1337500000",
+  "numeric_value": -1337500000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2021_Entity_0001023512",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "4820400000",
+  "numeric_value": 4820400000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "1123800000",
+  "numeric_value": 1123800000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "1123800000",
+  "numeric_value": 1123800000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "-9100000",
+  "numeric_value": -9100000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "-9100000",
+  "numeric_value": -9100000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "1114700000",
+  "numeric_value": 1114700000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "1114700000",
+  "numeric_value": 1114700000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "513600000",
+  "numeric_value": 513600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTreasuryShareTransactions",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_IssuedCapitalMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "15400000",
+  "numeric_value": 15400000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTreasuryShareTransactions",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "-15400000",
+  "numeric_value": -15400000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTreasuryShareTransactions",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "18400000",
+  "numeric_value": 18400000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "18400000",
+  "numeric_value": 18400000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_IssuedCapitalMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "15400000",
+  "numeric_value": 15400000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_OtherReservesMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherReservesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "-510600000",
+  "numeric_value": -510600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ChangesInEquity",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "-495200000",
+  "numeric_value": -495200000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_IssuedCapitalMember",
+  "period_key": "instant_2022-06-30",
+  "period_type": "instant",
+  "value": "6173300000",
+  "numeric_value": 6173300000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_OtherReservesMember",
+  "period_key": "instant_2022-06-30",
+  "period_type": "instant",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherReservesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2022_Entity_0001023512_ifrs-full_ComponentsOfEquityAxis_ifrs-full_RetainedEarningsMember",
+  "period_key": "instant_2022-06-30",
+  "period_type": "instant",
+  "value": "-733400000",
+  "numeric_value": -733400000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AS_OF_Jun30_2022_Entity_0001023512",
+  "period_key": "instant_2022-06-30",
+  "period_type": "instant",
+  "value": "5439900000",
+  "numeric_value": 5439900000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "513600000",
+  "numeric_value": 513600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "641300000",
+  "numeric_value": 641300000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "565100000",
+  "numeric_value": 565100000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "530900000",
+  "numeric_value": 530900000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentConsolidationItemsAxis": "ifrs-full:OperatingSegmentsMember",
+   "ifrs-full:SegmentsAxis": "drd:ErgoOperationsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "570200000",
+  "numeric_value": 570200000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentConsolidationItemsAxis": "ifrs-full:OperatingSegmentsMember",
+   "ifrs-full:SegmentsAxis": "drd:FwgrMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2021_TO_Jun30_2022_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember",
+  "period_key": "duration_2021-07-01_2022-06-30",
+  "period_type": "duration",
+  "value": "22700000",
+  "numeric_value": 22700000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentConsolidationItemsAxis": "ifrs-full:MaterialReconcilingItemsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "799600000",
+  "numeric_value": 799600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentConsolidationItemsAxis": "ifrs-full:OperatingSegmentsMember",
+   "ifrs-full:SegmentsAxis": "drd:ErgoOperationsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "553000000.0",
+  "numeric_value": 553000000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentConsolidationItemsAxis": "ifrs-full:OperatingSegmentsMember",
+   "ifrs-full:SegmentsAxis": "drd:FwgrMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2020_TO_Jun30_2021_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember",
+  "period_key": "duration_2020-07-01_2021-06-30",
+  "period_type": "duration",
+  "value": "87300000",
+  "numeric_value": 87300000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentConsolidationItemsAxis": "ifrs-full:MaterialReconcilingItemsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_ErgoOperationsMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "320900000",
+  "numeric_value": 320900000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentConsolidationItemsAxis": "ifrs-full:OperatingSegmentsMember",
+   "ifrs-full:SegmentsAxis": "drd:ErgoOperationsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_OperatingSegmentsMember_ifrs-full_SegmentsAxis_drd_FwgrMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "436600000",
+  "numeric_value": 436600000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentConsolidationItemsAxis": "ifrs-full:OperatingSegmentsMember",
+   "ifrs-full:SegmentsAxis": "drd:FwgrMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "FROM_Jul01_2019_TO_Jun30_2020_Entity_0001023512_ifrs-full_SegmentConsolidationItemsAxis_ifrs-full_MaterialReconcilingItemsMember",
+  "period_key": "duration_2019-07-01_2020-06-30",
+  "period_type": "duration",
+  "value": "-122500000",
+  "numeric_value": -122500000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentConsolidationItemsAxis": "ifrs-full:MaterialReconcilingItemsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "FROM_Sep26_2022_TO_Sep26_2022_Entity_0001023512_ifrs-full_NonadjustingEventsAfterReportingPeriodAxis_ifrs-full_MajorOrdinaryShareTransactionsMember",
+  "period_key": "duration_2022-09-26_2022-09-26",
+  "period_type": "duration",
+  "value": "342000000.0",
+  "numeric_value": 342000000.0,
+  "unit_ref": "ZAR",
+  "currency": "ZAR",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:NonadjustingEventsAfterReportingPeriodAxis": "ifrs-full:MajorOrdinaryShareTransactionsMember"
+  }
+ }
+]

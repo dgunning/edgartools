@@ -1,0 +1,237 @@
+{
+ "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity": {
+  "roots": [
+   "ifrs-full_StatementOfChangesInEquityAbstract"
+  ],
+  "nodes": {
+   "ifrs-full_StatementOfChangesInEquityAbstract": {
+    "children": [
+     "ifrs-full_StatementOfChangesInEquityTable"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_StatementOfChangesInEquityTable": {
+    "children": [
+     "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis",
+     "ifrs-full_ComponentsOfEquityAxis",
+     "ifrs-full_StatementOfChangesInEquityLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis": {
+    "children": [
+     "ifrs-full_RestatedMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_RestatedMember": {
+    "children": [
+     "ifrs-full_PreviouslyStatedMember",
+     "ifrs-full_IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_ComponentsOfEquityAxis": {
+    "children": [
+     "ifrs-full_EquityMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_EquityMember": {
+    "children": [
+     "ifrs-full_RetainedEarningsMember",
+     "ifrs-full_AccumulatedOtherComprehensiveIncomeMember",
+     "ifrs-full_IssuedCapitalMember",
+     "ifrs-full_AdditionalPaidinCapitalMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_StatementOfChangesInEquityLineItems": {
+    "children": [
+     "ifrs-full_Equity",
+     "ifrs-full_ProfitLoss",
+     "ifrs-full_OtherComprehensiveIncome",
+     "ifrs-full_ComprehensiveIncome",
+     "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions",
+     "ifrs-full_DecreaseIncreaseThroughTaxOnSharebasedPaymentTransactions",
+     "ifrs-full_IncreaseDecreaseThroughExerciseOfOptions",
+     "gib_IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+     "gib_PurchaseOfTreasurySharesForCancellation",
+     "ifrs-full_PurchaseOfTreasuryShares",
+     "ifrs-full_Equity"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedTerseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedTerseLabel",
+     "http://www.xbrl.org/2009/role/negatedTerseLabel",
+     "http://www.xbrl.org/2003/role/periodEndLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "ifrs-full_StatementOfChangesInEquityAbstract",
+    "ifrs-full_StatementOfChangesInEquityTable",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis",
+    "ifrs-full_RestatedMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_RestatedMember",
+    "ifrs-full_PreviouslyStatedMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_RestatedMember",
+    "ifrs-full_IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_ComponentsOfEquityAxis",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ComponentsOfEquityAxis",
+    "ifrs-full_EquityMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_EquityMember",
+    "ifrs-full_RetainedEarningsMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_EquityMember",
+    "ifrs-full_AccumulatedOtherComprehensiveIncomeMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_EquityMember",
+    "ifrs-full_IssuedCapitalMember",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_EquityMember",
+    "ifrs-full_AdditionalPaidinCapitalMember",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_Equity",
+    1.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_ProfitLoss",
+    2.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_OtherComprehensiveIncome",
+    3.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_ComprehensiveIncome",
+    4.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions",
+    5.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_DecreaseIncreaseThroughTaxOnSharebasedPaymentTransactions",
+    6.0,
+    "http://www.xbrl.org/2009/role/negatedTerseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_IncreaseDecreaseThroughExerciseOfOptions",
+    7.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "gib_IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+    8.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "gib_PurchaseOfTreasurySharesForCancellation",
+    9.0,
+    "http://www.xbrl.org/2009/role/negatedTerseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_PurchaseOfTreasuryShares",
+    10.0,
+    "http://www.xbrl.org/2009/role/negatedTerseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_Equity",
+    11.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ]
+  ]
+ }
+}

@@ -1,0 +1,275 @@
+{
+ "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity": {
+  "roots": [
+   "us-gaap_StatementOfStockholdersEquityAbstract"
+  ],
+  "nodes": {
+   "us-gaap_StatementOfStockholdersEquityAbstract": {
+    "children": [
+     "us-gaap_StatementTable"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementTable": {
+    "children": [
+     "us-gaap_StatementEquityComponentsAxis",
+     "srt_CumulativeEffectPeriodOfAdoptionAxis",
+     "us-gaap_StatementLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementEquityComponentsAxis": {
+    "children": [
+     "us-gaap_EquityComponentDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_EquityComponentDomain": {
+    "children": [
+     "us-gaap_CommonStockMember",
+     "us-gaap_TreasuryStockMember",
+     "us-gaap_AdditionalPaidInCapitalMember",
+     "us-gaap_RetainedEarningsMember",
+     "us-gaap_AccumulatedOtherComprehensiveIncomeMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "srt_CumulativeEffectPeriodOfAdoptionAxis": {
+    "children": [
+     "srt_CumulativeEffectPeriodOfAdoptionDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "srt_CumulativeEffectPeriodOfAdoptionDomain": {
+    "children": [
+     "srt_CumulativeEffectPeriodOfAdoptionAdjustmentMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementLineItems": {
+    "children": [
+     "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+    "children": [
+     "us-gaap_StockholdersEquity",
+     "us-gaap_SharesIssued",
+     "us-gaap_StockholdersEquity",
+     "us-gaap_NetIncomeLoss",
+     "us-gaap_OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+     "us-gaap_StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans",
+     "us-gaap_StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+     "us-gaap_TreasuryStockSharesAcquired",
+     "us-gaap_TreasuryStockValueAcquiredCostMethod",
+     "us-gaap_StockIssuedDuringPeriodSharesShareBasedCompensation",
+     "us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation",
+     "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+     "us-gaap_SharesIssued",
+     "us-gaap_StockholdersEquity"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedTerseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedTerseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/periodEndLabel",
+     "http://www.xbrl.org/2003/role/periodEndLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_StatementOfStockholdersEquityAbstract",
+    "us-gaap_StatementTable",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementEquityComponentsAxis",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementEquityComponentsAxis",
+    "us-gaap_EquityComponentDomain",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_EquityComponentDomain",
+    "us-gaap_CommonStockMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_EquityComponentDomain",
+    "us-gaap_TreasuryStockMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_EquityComponentDomain",
+    "us-gaap_AdditionalPaidInCapitalMember",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_EquityComponentDomain",
+    "us-gaap_RetainedEarningsMember",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_EquityComponentDomain",
+    "us-gaap_AccumulatedOtherComprehensiveIncomeMember",
+    5.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "srt_CumulativeEffectPeriodOfAdoptionAxis",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "srt_CumulativeEffectPeriodOfAdoptionAxis",
+    "srt_CumulativeEffectPeriodOfAdoptionDomain",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "srt_CumulativeEffectPeriodOfAdoptionDomain",
+    "srt_CumulativeEffectPeriodOfAdoptionAdjustmentMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementLineItems",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockholdersEquity",
+    1.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_SharesIssued",
+    2.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockholdersEquity",
+    3.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_NetIncomeLoss",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+    5.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans",
+    6.0,
+    "http://www.xbrl.org/2009/role/negatedTerseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+    7.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_TreasuryStockSharesAcquired",
+    8.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_TreasuryStockValueAcquiredCostMethod",
+    9.0,
+    "http://www.xbrl.org/2009/role/negatedTerseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockIssuedDuringPeriodSharesShareBasedCompensation",
+    10.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation",
+    11.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+    12.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_SharesIssued",
+    13.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockholdersEquity",
+    14.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ]
+  ]
+ }
+}

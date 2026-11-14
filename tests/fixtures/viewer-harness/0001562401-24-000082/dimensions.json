@@ -1,0 +1,22 @@
+{
+ "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity": {
+  "us-gaap_StatementClassOfStockAxis": {
+   "default_member_id": "us-gaap_ClassOfStockDomain",
+   "is_typed_dimension": false
+  },
+  "us-gaap_StatementEquityComponentsAxis": {
+   "default_member_id": "us-gaap_EquityComponentDomain",
+   "is_typed_dimension": false
+  }
+ },
+ "merged": {
+  "us-gaap_StatementClassOfStockAxis": {
+   "default_member_id": "us-gaap_ClassOfStockDomain",
+   "is_typed_dimension": false
+  },
+  "us-gaap_StatementEquityComponentsAxis": {
+   "default_member_id": "us-gaap_EquityComponentDomain",
+   "is_typed_dimension": false
+  }
+ }
+}

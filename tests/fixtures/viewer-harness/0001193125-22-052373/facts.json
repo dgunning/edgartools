@@ -1,0 +1,71 @@
+[
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "P01_13_2021To12_31_2021_AdditionalPaidInCapitalMemberusgaapStatementEquityComponentsAxis",
+  "period_key": "duration_2021-01-13_2021-12-31",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "Unit_USD",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "P01_13_2021To12_31_2021_RetainedEarningsMemberusgaapStatementEquityComponentsAxis",
+  "period_key": "duration_2021-01-13_2021-12-31",
+  "period_type": "duration",
+  "value": "2698369",
+  "numeric_value": 2698369.0,
+  "unit_ref": "Unit_USD",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "P01_13_2021To12_31_2021",
+  "period_key": "duration_2021-01-13_2021-12-31",
+  "period_type": "duration",
+  "value": "2698369",
+  "numeric_value": 2698369.0,
+  "unit_ref": "Unit_USD",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "P01_13_2021To12_31_2021",
+  "period_key": "duration_2021-01-13_2021-12-31",
+  "period_type": "duration",
+  "value": "-1922242",
+  "numeric_value": -1922242.0,
+  "unit_ref": "Unit_USD",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Cash",
+  "context_ref": "PAsOn12_31_2021",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "507233",
+  "numeric_value": 507233.0,
+  "unit_ref": "Unit_USD",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ }
+]

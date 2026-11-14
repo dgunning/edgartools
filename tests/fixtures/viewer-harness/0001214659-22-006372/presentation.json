@@ -1,0 +1,377 @@
+{
+ "http://goodtimesburgers.com/role/ConsolidatedIncomeStatement": {
+  "roots": [
+   "us-gaap_IncomeStatementAbstract"
+  ],
+  "nodes": {
+   "us-gaap_IncomeStatementAbstract": {
+    "children": [
+     "us-gaap_StatementTable"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "us-gaap_StatementTable": {
+    "children": [
+     "srt_ProductOrServiceAxis",
+     "us-gaap_StatementLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label",
+     null
+    ]
+   },
+   "srt_ProductOrServiceAxis": {
+    "children": [
+     "srt_ProductsAndServicesDomain",
+     "us-gaap_ServiceMember",
+     "us-gaap_RoyaltyMember"
+    ],
+    "child_preferred_labels": [
+     null,
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementLineItems": {
+    "children": [
+     "us-gaap_RevenuesAbstract",
+     "us-gaap_CostOfRevenueAbstract",
+     "us-gaap_OperatingIncomeLoss",
+     "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+     "us-gaap_ProfitLoss",
+     "us-gaap_NetIncomeLoss",
+     "gtim_NetLossIncomePerShareAttributableToCommonShareholdersAbstract",
+     "gtim_WeightedAverageCommonSharesOutstandingAbstract"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_RevenuesAbstract": {
+    "children": [
+     "us-gaap_Revenues"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_CostOfRevenueAbstract": {
+    "children": [
+     "us-gaap_CostDirectMaterial",
+     "us-gaap_CostDirectLabor",
+     "us-gaap_CostOfGoodsAndServicesSoldOverhead",
+     "us-gaap_CostOfOtherPropertyOperatingExpense",
+     "us-gaap_PreOpeningCosts",
+     "us-gaap_CostOfGoodsAndServicesSoldDepreciationAndAmortization",
+     "us-gaap_GeneralAndAdministrativeExpense",
+     "us-gaap_AdvertisingExpense",
+     "gtim_FranchiseCost",
+     "us-gaap_ImpairmentOfLongLivedAssetsHeldForUse",
+     "us-gaap_GainLossOnSaleOfPropertyPlantEquipment",
+     "gtim_LitigationContingencies"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel"
+    ]
+   },
+   "us-gaap_CostOfGoodsAndServicesSoldDepreciationAndAmortization": {
+    "children": [
+     "us-gaap_OperatingCostsAndExpenses"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   },
+   "us-gaap_OperatingIncomeLoss": {
+    "children": [
+     "us-gaap_OtherExpensesAbstract"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_OtherExpensesAbstract": {
+    "children": [
+     "us-gaap_InterestIncomeExpenseNonoperatingNet"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest": {
+    "children": [
+     "us-gaap_IncomeTaxExpenseBenefit"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2009/role/negatedLabel"
+    ]
+   },
+   "us-gaap_ProfitLoss": {
+    "children": [
+     "us-gaap_NetIncomeLossAttributableToNoncontrollingInterest"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2009/role/negatedLabel"
+    ]
+   },
+   "gtim_NetLossIncomePerShareAttributableToCommonShareholdersAbstract": {
+    "children": [
+     "us-gaap_EarningsPerShareBasic",
+     "us-gaap_EarningsPerShareDiluted"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "gtim_WeightedAverageCommonSharesOutstandingAbstract": {
+    "children": [
+     "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic",
+     "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_IncomeStatementAbstract",
+    "us-gaap_StatementTable",
+    1.0,
+    null
+   ],
+   [
+    "us-gaap_StatementTable",
+    "srt_ProductOrServiceAxis",
+    1.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "srt_ProductOrServiceAxis",
+    "srt_ProductsAndServicesDomain",
+    0.0,
+    null
+   ],
+   [
+    "srt_ProductOrServiceAxis",
+    "us-gaap_ServiceMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "srt_ProductOrServiceAxis",
+    "us-gaap_RoyaltyMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementLineItems",
+    2.0,
+    null
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_RevenuesAbstract",
+    0.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_RevenuesAbstract",
+    "us-gaap_Revenues",
+    0.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_CostOfRevenueAbstract",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "us-gaap_CostDirectMaterial",
+    0.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "us-gaap_CostDirectLabor",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "us-gaap_CostOfGoodsAndServicesSoldOverhead",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "us-gaap_CostOfOtherPropertyOperatingExpense",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "us-gaap_PreOpeningCosts",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "us-gaap_CostOfGoodsAndServicesSoldDepreciationAndAmortization",
+    5.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_CostOfGoodsAndServicesSoldDepreciationAndAmortization",
+    "us-gaap_OperatingCostsAndExpenses",
+    0.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "us-gaap_GeneralAndAdministrativeExpense",
+    6.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "us-gaap_AdvertisingExpense",
+    7.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "gtim_FranchiseCost",
+    8.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "us-gaap_ImpairmentOfLongLivedAssetsHeldForUse",
+    9.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "us-gaap_GainLossOnSaleOfPropertyPlantEquipment",
+    10.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_CostOfRevenueAbstract",
+    "gtim_LitigationContingencies",
+    11.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_OperatingIncomeLoss",
+    2.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_OperatingIncomeLoss",
+    "us-gaap_OtherExpensesAbstract",
+    0.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_OtherExpensesAbstract",
+    "us-gaap_InterestIncomeExpenseNonoperatingNet",
+    0.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+    3.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_IncomeLossFromContinuingOperationsBeforeIncomeTaxesExtraordinaryItemsNoncontrollingInterest",
+    "us-gaap_IncomeTaxExpenseBenefit",
+    0.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_ProfitLoss",
+    4.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_ProfitLoss",
+    "us-gaap_NetIncomeLossAttributableToNoncontrollingInterest",
+    0.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_NetIncomeLoss",
+    5.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "gtim_NetLossIncomePerShareAttributableToCommonShareholdersAbstract",
+    6.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "gtim_NetLossIncomePerShareAttributableToCommonShareholdersAbstract",
+    "us-gaap_EarningsPerShareBasic",
+    0.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "gtim_NetLossIncomePerShareAttributableToCommonShareholdersAbstract",
+    "us-gaap_EarningsPerShareDiluted",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "gtim_WeightedAverageCommonSharesOutstandingAbstract",
+    7.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "gtim_WeightedAverageCommonSharesOutstandingAbstract",
+    "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic",
+    0.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "gtim_WeightedAverageCommonSharesOutstandingAbstract",
+    "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ]
+  ]
+ }
+}

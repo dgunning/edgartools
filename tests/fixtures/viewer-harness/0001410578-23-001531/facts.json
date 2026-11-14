@@ -1,0 +1,41 @@
+[
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "As_Of_12_31_2022_RcUh8ClR70ixBOYKhBjjEg",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "2860628",
+  "numeric_value": 2860628.0,
+  "unit_ref": "Unit_Standard_USD_mkeQm1ush06IWES_sPiG9A",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "As_Of_6_30_2023_ZvOkE8zQc0GVxWJ1e3jrbA",
+  "period_key": "instant_2023-06-30",
+  "period_type": "instant",
+  "value": "4759129",
+  "numeric_value": 4759129.0,
+  "unit_ref": "Unit_Standard_USD_mkeQm1ush06IWES_sPiG9A",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "As_Of_6_30_2023_ZvOkE8zQc0GVxWJ1e3jrbA",
+  "period_key": "instant_2023-06-30",
+  "period_type": "instant",
+  "value": "4800000",
+  "numeric_value": 4800000.0,
+  "unit_ref": "Unit_Standard_USD_mkeQm1ush06IWES_sPiG9A",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ }
+]

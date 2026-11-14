@@ -1,0 +1,543 @@
+{
+ "version": "2.1",
+ "instance": {
+  "dgii-20200930.htm": {
+   "tag": {
+    "srt_CumulativeEffectPeriodOfAdoptionAdjustmentMember": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Increase (decrease) to financial statements for cumulative-effect adjustment in period of adoption of amendment to accounting standards.",
+        "label": "Cumulative Effect, Period of Adoption, Adjustment [Member]",
+        "terseLabel": "Cumulative Effect, Period of Adoption, Adjustment [Member]"
+       }
+      }
+     },
+     "localname": "CumulativeEffectPeriodOfAdoptionAdjustmentMember",
+     "nsuri": "http://fasb.org/srt/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "srt_CumulativeEffectPeriodOfAdoptionAxis": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Information by cumulative-effect adjustment to financial statements in period of adoption of amendment to accounting standards.",
+        "label": "Cumulative Effect, Period of Adoption [Axis]",
+        "terseLabel": "Cumulative Effect, Period of Adoption [Axis]"
+       }
+      }
+     },
+     "localname": "CumulativeEffectPeriodOfAdoptionAxis",
+     "nsuri": "http://fasb.org/srt/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "srt_CumulativeEffectPeriodOfAdoptionDomain": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Cumulative-effect adjustment to financial statements in period of adoption of amendment to accounting standards.",
+        "label": "Cumulative Effect, Period of Adoption [Domain]",
+        "terseLabel": "Cumulative Effect, Period of Adoption [Domain]"
+       }
+      }
+     },
+     "localname": "CumulativeEffectPeriodOfAdoptionDomain",
+     "nsuri": "http://fasb.org/srt/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_AccumulatedOtherComprehensiveIncomeMember": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Accumulated increase (decrease) in equity from transactions and other events and circumstances from non-owner sources, attributable to the parent. Excludes net income (loss), and accumulated changes in equity from transactions resulting from investments by owners and distributions to owners.",
+        "label": "AOCI Attributable to Parent [Member]",
+        "terseLabel": "Accumulated Other Comprehensive Loss"
+       }
+      }
+     },
+     "localname": "AccumulatedOtherComprehensiveIncomeMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_AdditionalPaidInCapitalMember": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Excess of issue price over par or stated value of the entity's capital stock and amounts received from other transactions involving the entity's stock or stockholders.",
+        "label": "Additional Paid-in Capital [Member]",
+        "terseLabel": "Additional Paid-in Capital"
+       }
+      }
+     },
+     "localname": "AdditionalPaidInCapitalMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue": {
+     "crdr": "credit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Amount of increase to additional paid-in capital (APIC) for recognition of cost for award under share-based payment arrangement.",
+        "label": "APIC, Share-based Payment Arrangement, Increase for Cost Recognition",
+        "terseLabel": "Stock-based compensation expense"
+       }
+      }
+     },
+     "localname": "AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_CommonStockMember": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Stock that is subordinate to all other stock of the issuer.",
+        "label": "Common Stock [Member]",
+        "terseLabel": "Common Stock"
+       }
+      }
+     },
+     "localname": "CommonStockMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_EquityComponentDomain": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Components of equity are the parts of the total Equity balance including that which is allocated to common, preferred, treasury stock, retained earnings, etc.",
+        "label": "Equity Component [Domain]",
+        "terseLabel": "Equity Component [Domain]"
+       }
+      }
+     },
+     "localname": "EquityComponentDomain",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "A roll forward is a reconciliation of a concept from the beginning of a period to the end of a period.",
+        "label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]",
+        "terseLabel": "Increase (Decrease) in Stockholders' Equity [Roll Forward]"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInStockholdersEquityRollForward",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_NetIncomeLoss": {
+     "calculation": {
+      "http://www.digi.com/role/ConsolidatedStatementsofCashFlows": {
+       "order": 1.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      },
+      "http://www.digi.com/role/ConsolidatedStatementsofComprehensiveIncome": {
+       "order": 1.0,
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTax",
+       "weight": 1.0
+      },
+      "http://www.digi.com/role/ConsolidatedStatementsofOperations": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "The portion of profit or loss for the period, net of income taxes, which is attributable to the parent.",
+        "label": "Net Income (Loss) Attributable to Parent",
+        "terseLabel": "Net income",
+        "totalLabel": "Net income",
+        "verboseLabel": "Net (loss) income"
+       }
+      }
+     },
+     "localname": "NetIncomeLoss",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofCashFlows",
+      "http://www.digi.com/role/ConsolidatedStatementsofComprehensiveIncome",
+      "http://www.digi.com/role/ConsolidatedStatementsofOperations",
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity",
+      "http://www.digi.com/role/QuarterlyFinancialDataDetails",
+      "http://www.digi.com/role/SummaryofSignificantAccountingPoliciesNetIncomePerCommonShareDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent": {
+     "calculation": {
+      "http://www.digi.com/role/ConsolidatedStatementsofComprehensiveIncome": {
+       "order": 2.0,
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTax",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Amount after tax of other comprehensive income (loss) attributable to parent entity.",
+        "label": "Other Comprehensive Income (Loss), Net of Tax, Portion Attributable to Parent",
+        "terseLabel": "Other comprehensive income (loss)",
+        "totalLabel": "Other comprehensive income (loss), net of tax"
+       }
+      }
+     },
+     "localname": "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofComprehensiveIncome",
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_RetainedEarningsMember": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "The cumulative amount of the reporting entity's undistributed earnings or deficit.",
+        "label": "Retained Earnings [Member]",
+        "terseLabel": "Retained Earnings"
+       }
+      }
+     },
+     "localname": "RetainedEarningsMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_SharesIssued": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Number of shares of stock issued as of the balance sheet date, including shares that had been issued and were previously outstanding but which are now held in the treasury.",
+        "label": "Shares, Issued",
+        "periodEndLabel": "Ending balance (in shares)",
+        "periodStartLabel": "Beginning balance (in shares)"
+       }
+      }
+     },
+     "localname": "SharesIssued",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Information by component of equity.",
+        "label": "Equity Components [Axis]",
+        "terseLabel": "Equity Components [Axis]"
+       }
+      }
+     },
+     "localname": "StatementEquityComponentsAxis",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementLineItems": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Line items represent financial concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes to the table.",
+        "label": "Statement [Line Items]",
+        "terseLabel": "Statement [Line Items]"
+       }
+      }
+     },
+     "localname": "StatementLineItems",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/CommonStockRepurchaseDetails",
+      "http://www.digi.com/role/ConsolidatedStatementsofOperations",
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity",
+      "http://www.digi.com/role/SummaryofSignificantAccountingPoliciesRevenueRecognitionDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementOfStockholdersEquityAbstract": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "label": "Statement of Stockholders' Equity [Abstract]",
+        "terseLabel": "Statement of Stockholders' Equity [Abstract]"
+       }
+      }
+     },
+     "localname": "StatementOfStockholdersEquityAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementTable": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Schedule reflecting a Statement of Income, Statement of Cash Flows, Statement of Financial Position, Statement of Shareholders' Equity and Other Comprehensive Income, or other statement as needed.",
+        "label": "Statement [Table]",
+        "terseLabel": "Statement [Table]"
+       }
+      }
+     },
+     "localname": "StatementTable",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/CommonStockRepurchaseDetails",
+      "http://www.digi.com/role/ConsolidatedStatementsofOperations",
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity",
+      "http://www.digi.com/role/SummaryofSignificantAccountingPoliciesRevenueRecognitionDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Number of shares issued during the period as a result of an employee stock purchase plan.",
+        "label": "Stock Issued During Period, Shares, Employee Stock Purchase Plans",
+        "negatedTerseLabel": "Employee stock purchase issuances (in shares)",
+        "terseLabel": "Common shares issued to employees"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity",
+      "http://www.digi.com/role/StockBasedCompensationDetails"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesShareBasedCompensation": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Number, after forfeiture, of shares or units issued under share-based payment arrangement. Excludes shares or units issued under employee stock ownership plan (ESOP).",
+        "label": "Shares Issued, Shares, Share-based Payment Arrangement, after Forfeiture",
+        "terseLabel": "Issuance of stock under stock award plans (in shares)"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodSharesShareBasedCompensation",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodValueEmployeeStockPurchasePlan": {
+     "crdr": "credit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Aggregate change in value for stock issued during the period as a result of employee stock purchase plan.",
+        "label": "Stock Issued During Period, Value, Employee Stock Purchase Plan",
+        "terseLabel": "Employee stock purchase issuances"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation": {
+     "crdr": "credit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Value, after forfeiture, of shares issued under share-based payment arrangement. Excludes employee stock ownership plan (ESOP).",
+        "label": "Shares Issued, Value, Share-based Payment Arrangement, after Forfeiture",
+        "terseLabel": "Issuance of stock under stock award plans"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodValueShareBasedCompensation",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StockholdersEquity": {
+     "calculation": {
+      "http://www.digi.com/role/ConsolidatedBalanceSheets": {
+       "order": 2.0,
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Total of all stockholders' equity (deficit) items, net of receivables from officers, directors, owners, and affiliates of the entity which are attributable to the parent. The amount of the economic entity's stockholders' equity attributable to the parent excludes the amount of stockholders' equity which is allocable to that ownership interest in subsidiary equity which is not attributable to the parent (noncontrolling interest, minority interest). This excludes temporary equity and is sometimes called permanent equity.",
+        "label": "Stockholders' Equity Attributable to Parent",
+        "periodEndLabel": "Ending balance",
+        "periodStartLabel": "Beginning balance",
+        "totalLabel": "Total stockholders’ equity",
+        "verboseLabel": "Cumulative-effect adjustment from adoption of ASU 2016-09"
+       }
+      }
+     },
+     "localname": "StockholdersEquity",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedBalanceSheets",
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_TreasuryStockMember": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Shares of an entity that have been repurchased by the entity. This stock has no voting rights and receives no dividends. Note that treasury stock may be recorded at its total cost or separately as par (or stated) value and additional paid in capital. Classified within stockholders' equity if nonredeemable or redeemable solely at the option of the issuer. Classified within temporary equity if redemption is outside the control of the issuer.",
+        "label": "Treasury Stock [Member]",
+        "terseLabel": "Treasury Stock"
+       }
+      }
+     },
+     "localname": "TreasuryStockMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_TreasuryStockSharesAcquired": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Number of shares that have been repurchased during the period and are being held in treasury.",
+        "label": "Treasury Stock, Shares, Acquired",
+        "terseLabel": "Repurchase of common stock (in shares)",
+        "verboseLabel": "Shares repurchased"
+       }
+      }
+     },
+     "localname": "TreasuryStockSharesAcquired",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/CommonStockRepurchaseDetails",
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_TreasuryStockValueAcquiredCostMethod": {
+     "crdr": "debit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Equity impact of the cost of common and preferred stock that were repurchased during the period. Recorded using the cost method.",
+        "label": "Treasury Stock, Value, Acquired, Cost Method",
+        "negatedTerseLabel": "Repurchase of common stock"
+       }
+      }
+     },
+     "localname": "TreasuryStockValueAcquiredCostMethod",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    }
+   },
+   "report": {
+    "R7": {
+     "firstAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "dgii-20200930.htm",
+      "contextRef": "i0be83db7f65a4e1abda61ab046abb42e_I20170930",
+      "decimals": "-3",
+      "first": true,
+      "lang": "en-US",
+      "name": "us-gaap:StockholdersEquity",
+      "reportCount": 1,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "1006007 - Statement - Consolidated Statements of Stockholders' Equity",
+     "role": "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity",
+     "shortName": "Consolidated Statements of Stockholders' Equity",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "dgii-20200930.htm",
+      "contextRef": "i5f328841f29c4109a3b48afc611ecda3_I20170930",
+      "decimals": "-3",
+      "lang": "en-US",
+      "name": "us-gaap:SharesIssued",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "shares",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

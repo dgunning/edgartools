@@ -1,0 +1,217 @@
+[
+ {
+  "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+  "context_ref": "c-11",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "484629000",
+  "numeric_value": 484629000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ProductOrServiceAxis": "iren:BitcoinMiningRevenueMember"
+  }
+ },
+ {
+  "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+  "context_ref": "c-12",
+  "period_key": "duration_2023-07-01_2024-06-30",
+  "period_type": "duration",
+  "value": "184087000",
+  "numeric_value": 184087000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ProductOrServiceAxis": "iren:BitcoinMiningRevenueMember"
+  }
+ },
+ {
+  "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+  "context_ref": "c-13",
+  "period_key": "duration_2022-07-01_2023-06-30",
+  "period_type": "duration",
+  "value": "75509000",
+  "numeric_value": 75509000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ProductOrServiceAxis": "iren:BitcoinMiningRevenueMember"
+  }
+ },
+ {
+  "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+  "context_ref": "c-14",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "16394000",
+  "numeric_value": 16394000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ProductOrServiceAxis": "iren:AICloudServicesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+  "context_ref": "c-15",
+  "period_key": "duration_2023-07-01_2024-06-30",
+  "period_type": "duration",
+  "value": "3105000",
+  "numeric_value": 3105000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ProductOrServiceAxis": "iren:AICloudServicesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+  "context_ref": "c-16",
+  "period_key": "duration_2022-07-01_2023-06-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ProductOrServiceAxis": "iren:AICloudServicesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+  "context_ref": "c-1",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "501023000",
+  "numeric_value": 501023000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+  "context_ref": "c-17",
+  "period_key": "duration_2023-07-01_2024-06-30",
+  "period_type": "duration",
+  "value": "187192000",
+  "numeric_value": 187192000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:RevenueFromContractWithCustomerExcludingAssessedTax",
+  "context_ref": "c-18",
+  "period_key": "duration_2022-07-01_2023-06-30",
+  "period_type": "duration",
+  "value": "75509000",
+  "numeric_value": 75509000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-82",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "564526000",
+  "numeric_value": 564526000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:RestatementAxis": "srt:ScenarioPreviouslyReportedMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-83",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:RestatementAxis": "srt:RevisionOfPriorPeriodAccountingStandardsUpdateAdjustmentMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-5",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "564526000",
+  "numeric_value": 564526000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-88",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "404601000",
+  "numeric_value": 404601000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:RestatementAxis": "srt:ScenarioPreviouslyReportedMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-89",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:RestatementAxis": "srt:RevisionOfPriorPeriodAccountingStandardsUpdateAdjustmentMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-6",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "404601000",
+  "numeric_value": 404601000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ }
+]

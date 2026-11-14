@@ -1,0 +1,228 @@
+{
+ "version": "2.2",
+ "instance": {
+  "chci-20231231.htm": {
+   "tag": {
+    "us-gaap_CommonClassAMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonClassAMember",
+     "presentation": [
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheets",
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://comstockhomes.com/role/ConsolidatedStatementsofChangesinStockholdersEquity",
+      "http://comstockhomes.com/role/Cover",
+      "http://comstockhomes.com/role/StockholdersEquityAdditionalInformationDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class A",
+        "label": "Common Class A [Member]",
+        "documentation": "Classification of common stock representing ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonClassBMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonClassBMember",
+     "presentation": [
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheets",
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://comstockhomes.com/role/ConsolidatedStatementsofChangesinStockholdersEquity",
+      "http://comstockhomes.com/role/Cover",
+      "http://comstockhomes.com/role/StockholdersEquityAdditionalInformationDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class B",
+        "label": "Common Class B [Member]",
+        "documentation": "Classification of common stock that has different rights than Common Class A, representing ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockValue": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CommonStockValue",
+     "crdr": "credit",
+     "calculation": {
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheets": {
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheets"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Common stock",
+        "label": "Common Stock, Value, Issued",
+        "documentation": "Aggregate par or stated value of issued nonredeemable common stock (or common stock redeemable solely at the option of the issuer). This item includes treasury stock repurchased by the entity. Note: elements for number of nonredeemable common shares, par value and other disclosure concepts are in another section within stockholders' equity."
+       }
+      }
+     }
+    },
+    "us-gaap_NonrelatedPartyMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "NonrelatedPartyMember",
+     "presentation": [
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheets"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Nonrelated Party",
+        "label": "Nonrelated Party [Member]",
+        "documentation": "Party not related to reporting entity."
+       }
+      }
+     }
+    },
+    "us-gaap_RelatedPartyMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "RelatedPartyMember",
+     "presentation": [
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheets",
+      "http://comstockhomes.com/role/SummaryofSignificantAccountingPoliciesNarrativeDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Related party",
+        "label": "Related Party [Member]",
+        "documentation": "Party related to reporting entity. Includes, but is not limited to, affiliate, entity for which investment is accounted for by equity method, trust for benefit of employees, and principal owner, management, and members of immediate family."
+       }
+      }
+     }
+    },
+    "us-gaap_RelatedPartyTransactionsByRelatedPartyAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "RelatedPartyTransactionsByRelatedPartyAxis",
+     "presentation": [
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheets",
+      "http://comstockhomes.com/role/DebtDetails",
+      "http://comstockhomes.com/role/RelatedPartyTransactionsNarrativeDetail",
+      "http://comstockhomes.com/role/RelatedPartyTransactionsScheduleofMarketRateFeeDetails",
+      "http://comstockhomes.com/role/RelatedPartyTransactionsScheduleofSupplementalFeesDetails",
+      "http://comstockhomes.com/role/SummaryofSignificantAccountingPoliciesNarrativeDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Related Party",
+        "label": "Related Party, Type [Axis]",
+        "documentation": "Information by type of related party. Related parties include, but not limited to, affiliates; other entities for which investments are accounted for by the equity method by the entity; trusts for benefit of employees; and principal owners, management, and members of immediate families. It also may include other parties with which the entity may control or can significantly influence the management or operating policies of the other to an extent that one of the transacting parties might be prevented from fully pursuing its own separate interests."
+       }
+      }
+     }
+    },
+    "us-gaap_SeriesCPreferredStockMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "SeriesCPreferredStockMember",
+     "presentation": [
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheets",
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://comstockhomes.com/role/ConsolidatedStatementsofChangesinStockholdersEquity",
+      "http://comstockhomes.com/role/StockholdersEquityAdditionalInformationDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Series C",
+        "label": "Series C Preferred Stock [Member]",
+        "documentation": "Series C preferred stock."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementClassOfStockAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "StatementClassOfStockAxis",
+     "presentation": [
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheets",
+      "http://comstockhomes.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://comstockhomes.com/role/ConsolidatedStatementsofChangesinStockholdersEquity",
+      "http://comstockhomes.com/role/Cover",
+      "http://comstockhomes.com/role/StockholdersEquityAdditionalInformationDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class of Stock",
+        "label": "Class of Stock [Axis]",
+        "documentation": "Information by the different classes of stock of the entity."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R3": {
+     "role": "http://comstockhomes.com/role/ConsolidatedBalanceSheets",
+     "longName": "0000003 - Statement - Consolidated Balance Sheets",
+     "shortName": "Consolidated Balance Sheets",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "3",
+     "firstAnchor": {
+      "contextRef": "c-5",
+      "name": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "chci-20231231.htm",
+      "first": true,
+      "unique": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-5",
+      "name": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "chci-20231231.htm",
+      "first": true,
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

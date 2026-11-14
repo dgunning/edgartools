@@ -1,0 +1,2042 @@
+[
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxCashFlowHedges",
+  "context_ref": "P11_01_2023To10_31_2024",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "1535000000",
+  "numeric_value": 1535000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxCashFlowHedges",
+  "context_ref": "P11_01_2022To10_31_2023",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "-364000000",
+  "numeric_value": -364000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans",
+  "context_ref": "P11_01_2023To10_31_2024",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "250000000",
+  "numeric_value": 250000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans",
+  "context_ref": "P11_01_2022To10_31_2023",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "-240000000",
+  "numeric_value": -240000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiability",
+  "context_ref": "P11_01_2023To10_31_2024",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "-216000000",
+  "numeric_value": -216000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiability",
+  "context_ref": "P11_01_2022To10_31_2023",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "-106000000",
+  "numeric_value": -106000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "4923000000",
+  "numeric_value": 4923000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "P11_01_2023To10_31_2024_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "1000000000",
+  "numeric_value": 1000000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember"
+  }
+ },
+ {
+  "concept": "cm:RedemptionOfPreferredSharesValue",
+  "context_ref": "P11_01_2023To10_31_2024_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "-975000000",
+  "numeric_value": -975000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTreasuryShareTransactions",
+  "context_ref": "P11_01_2023To10_31_2024_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "-4000000",
+  "numeric_value": -4000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTreasuryShareTransactions",
+  "context_ref": "P11_01_2022To10_31_2023_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "2000000",
+  "numeric_value": 2000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "4946000000",
+  "numeric_value": 4946000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "4925000000",
+  "numeric_value": 4925000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "P11_01_2023To10_31_2024_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "1019000000",
+  "numeric_value": 1019000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "P11_01_2022To10_31_2023_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "1358000000",
+  "numeric_value": 1358000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "16082000000",
+  "numeric_value": 16082000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_AdditionalPaidinCapitalMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "115000000",
+  "numeric_value": 115000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "P11_01_2023To10_31_2024_AdditionalPaidinCapitalMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "16000000",
+  "numeric_value": 16000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "P11_01_2022To10_31_2023_AdditionalPaidinCapitalMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "13000000",
+  "numeric_value": 13000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "cm:IncreaseDecreaseThroughExerciseOfStockOptionsAndSettlementOfOtherEquitysettledSharebasedAwards",
+  "context_ref": "P11_01_2023To10_31_2024_AdditionalPaidinCapitalMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "-9000000",
+  "numeric_value": -9000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "cm:IncreaseDecreaseThroughExerciseOfStockOptionsAndSettlementOfOtherEquitysettledSharebasedAwards",
+  "context_ref": "P11_01_2022To10_31_2023_AdditionalPaidinCapitalMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "-20000000",
+  "numeric_value": -20000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "P11_01_2023To10_31_2024_AdditionalPaidinCapitalMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "43000000",
+  "numeric_value": 43000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "P11_01_2022To10_31_2023_AdditionalPaidinCapitalMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "1000000",
+  "numeric_value": 1000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_AdditionalPaidinCapitalMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "159000000",
+  "numeric_value": 159000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_AdditionalPaidinCapitalMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "109000000",
+  "numeric_value": 109000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_PreviouslyStatedMemberifrsfullRetrospectiveApplicationAndRetrospectiveRestatementAxis_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "28823000000",
+  "numeric_value": 28823000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember",
+   "ifrs-full:RetrospectiveApplicationAndRetrospectiveRestatementAxis": "ifrs-full:PreviouslyStatedMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_IFRS17MemberifrsfullInitiallyAppliedIFRSsAxis_IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMemberifrsfullRetrospectiveApplicationAndRetrospectiveRestatementAxis_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "-56000000",
+  "numeric_value": -56000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember",
+   "ifrs-full:InitiallyAppliedIFRSsAxis": "ifrs-full:IFRS17Member",
+   "ifrs-full:RetrospectiveApplicationAndRetrospectiveRestatementAxis": "ifrs-full:IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "28767000000",
+  "numeric_value": 28767000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2023To10_31_2024_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "7115000000",
+  "numeric_value": 7115000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2022To10_31_2023_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "5001000000",
+  "numeric_value": 5001000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2023To10_31_2024_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "263000000",
+  "numeric_value": 263000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2022To10_31_2023_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "267000000",
+  "numeric_value": 267000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2023To10_31_2024_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "3382000000",
+  "numeric_value": 3382000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2022To10_31_2023_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "3149000000",
+  "numeric_value": 3149000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "cm:PremiumOnPurchaseOfCommonSharesForCancellation",
+  "context_ref": "P11_01_2023To10_31_2024_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "-329000000",
+  "numeric_value": -329000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ReclassificationAdjustmentsOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax",
+  "context_ref": "P11_01_2023To10_31_2024_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "-15000000",
+  "numeric_value": -15000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "P11_01_2023To10_31_2024_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "-7000000",
+  "numeric_value": -7000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "33471000000",
+  "numeric_value": 33471000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "30352000000",
+  "numeric_value": 30352000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfExchangeDifferencesOnTranslationMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "1811000000",
+  "numeric_value": 1811000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfExchangeDifferencesOnTranslationMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation",
+  "context_ref": "P11_01_2023To10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfExchangeDifferencesOnTranslationMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "14000000",
+  "numeric_value": 14000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfExchangeDifferencesOnTranslationMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation",
+  "context_ref": "P11_01_2022To10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfExchangeDifferencesOnTranslationMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "351000000",
+  "numeric_value": 351000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfExchangeDifferencesOnTranslationMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfExchangeDifferencesOnTranslationMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "2176000000",
+  "numeric_value": 2176000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfExchangeDifferencesOnTranslationMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfExchangeDifferencesOnTranslationMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "2162000000",
+  "numeric_value": 2162000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfExchangeDifferencesOnTranslationMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMemberifrsfullCategoriesOfFinancialAssetsAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "-616000000",
+  "numeric_value": -616000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfFinancialAssetsAxis": "ifrs-full:FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "cm:AvailableForSaleFinancialAssetsOtherComprehensiveIncomeNetOfTaxAfterReclassification",
+  "context_ref": "P11_01_2023To10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMemberifrsfullCategoriesOfFinancialAssetsAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "100000000",
+  "numeric_value": 100000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfFinancialAssetsAxis": "ifrs-full:FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "cm:AvailableForSaleFinancialAssetsOtherComprehensiveIncomeNetOfTaxAfterReclassification",
+  "context_ref": "P11_01_2022To10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMemberifrsfullCategoriesOfFinancialAssetsAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "209000000",
+  "numeric_value": 209000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfFinancialAssetsAxis": "ifrs-full:FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMemberifrsfullCategoriesOfFinancialAssetsAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "-307000000",
+  "numeric_value": -307000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfFinancialAssetsAxis": "ifrs-full:FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMemberifrsfullCategoriesOfFinancialAssetsAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "-407000000",
+  "numeric_value": -407000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfFinancialAssetsAxis": "ifrs-full:FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfCashFlowHedgesMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "-662000000",
+  "numeric_value": -662000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfCashFlowHedgesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxCashFlowHedges",
+  "context_ref": "P11_01_2023To10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfCashFlowHedgesMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "1535000000",
+  "numeric_value": 1535000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfCashFlowHedgesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxCashFlowHedges",
+  "context_ref": "P11_01_2022To10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfCashFlowHedgesMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "-364000000",
+  "numeric_value": -364000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfCashFlowHedgesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfCashFlowHedgesMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "509000000",
+  "numeric_value": 509000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfCashFlowHedgesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfCashFlowHedgesMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "-1026000000",
+  "numeric_value": -1026000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfCashFlowHedgesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfRemeasurementsOfDefinedBenefitPlansMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "832000000",
+  "numeric_value": 832000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans",
+  "context_ref": "P11_01_2023To10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfRemeasurementsOfDefinedBenefitPlansMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "250000000",
+  "numeric_value": 250000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans",
+  "context_ref": "P11_01_2022To10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfRemeasurementsOfDefinedBenefitPlansMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "-240000000",
+  "numeric_value": -240000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfRemeasurementsOfDefinedBenefitPlansMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "842000000",
+  "numeric_value": 842000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfRemeasurementsOfDefinedBenefitPlansMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "592000000",
+  "numeric_value": 592000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "234000000",
+  "numeric_value": 234000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiability",
+  "context_ref": "P11_01_2023To10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "-216000000",
+  "numeric_value": -216000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiability",
+  "context_ref": "P11_01_2022To10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "-106000000",
+  "numeric_value": -106000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "-88000000",
+  "numeric_value": -88000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "128000000",
+  "numeric_value": 128000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "ifrs-full:ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "-5000000",
+  "numeric_value": -5000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "cm:ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:GainsLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax",
+  "context_ref": "P11_01_2023To10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "-13000000",
+  "numeric_value": -13000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "cm:ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:GainsLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax",
+  "context_ref": "P11_01_2022To10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "19000000",
+  "numeric_value": 19000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "cm:ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ReclassificationAdjustmentsOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax",
+  "context_ref": "P11_01_2023To10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "15000000",
+  "numeric_value": 15000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "cm:ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "16000000",
+  "numeric_value": 16000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "cm:ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis_ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMemberifrsfullReservesWithinEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "14000000",
+  "numeric_value": 14000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:ReservesWithinEquityAxis": "cm:ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "3148000000",
+  "numeric_value": 3148000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_AccumulatedOtherComprehensiveIncomeMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "1463000000",
+  "numeric_value": 1463000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_NoncontrollingInterestsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "201000000",
+  "numeric_value": 201000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToNoncontrollingInterests",
+  "context_ref": "P11_01_2023To10_31_2024_NoncontrollingInterestsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "39000000",
+  "numeric_value": 39000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToNoncontrollingInterests",
+  "context_ref": "P11_01_2022To10_31_2023_NoncontrollingInterestsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "38000000",
+  "numeric_value": 38000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2023To10_31_2024_NoncontrollingInterestsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "8000000",
+  "numeric_value": 8000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2022To10_31_2023_NoncontrollingInterestsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "8000000",
+  "numeric_value": 8000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "P11_01_2023To10_31_2024_NoncontrollingInterestsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "9000000",
+  "numeric_value": 9000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "P11_01_2022To10_31_2023_NoncontrollingInterestsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "1000000",
+  "numeric_value": 1000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_NoncontrollingInterestsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "272000000",
+  "numeric_value": 272000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_NoncontrollingInterestsMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "232000000",
+  "numeric_value": 232000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "59007000000",
+  "numeric_value": 59007000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "53163000000",
+  "numeric_value": 53163000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2023To10_31_2024_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "3382000000",
+  "numeric_value": 3382000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2022To10_31_2023_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "3149000000",
+  "numeric_value": 3149000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2023To10_31_2024_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "143000000",
+  "numeric_value": 143000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2022To10_31_2023_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "140000000",
+  "numeric_value": 140000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis_TreasurySharesMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "2000000",
+  "numeric_value": 2000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis_TreasurySharesMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "2000000",
+  "numeric_value": 2000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_PreferenceSharesMemberifrsfullClassesOfShareCapitalAxis_TreasurySharesMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "-4000000",
+  "numeric_value": -4000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:PreferenceSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_FourPointThreeSevenFivePercentLimitedRecourseCapitalNotesSeriesOneMemberifrsfullClassesOfShareCapitalAxis_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "750000000",
+  "numeric_value": 750000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:FourPointThreeSevenFivePercentLimitedRecourseCapitalNotesSeriesOneMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2023To10_31_2024_FourPointThreeSevenFivePercentLimitedRecourseCapitalNotesSeriesOneMemberifrsfullClassesOfShareCapitalAxis_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "33000000",
+  "numeric_value": 33000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:FourPointThreeSevenFivePercentLimitedRecourseCapitalNotesSeriesOneMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_FourPointThreeSevenFivePercentLimitedRecourseCapitalNotesSeriesOneMemberifrsfullClassesOfShareCapitalAxis_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "750000000",
+  "numeric_value": 750000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:FourPointThreeSevenFivePercentLimitedRecourseCapitalNotesSeriesOneMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2022To10_31_2023_FourPointThreeSevenFivePercentLimitedRecourseCapitalNotesSeriesOneMemberifrsfullClassesOfShareCapitalAxis_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "33000000",
+  "numeric_value": 33000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:FourPointThreeSevenFivePercentLimitedRecourseCapitalNotesSeriesOneMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_FourPointZeroZeroZeroPercentLimitedRecourseCapitalNotesSeriesTwoMemberifrsfullClassesOfShareCapitalAxis_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "750000000",
+  "numeric_value": 750000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:FourPointZeroZeroZeroPercentLimitedRecourseCapitalNotesSeriesTwoMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2023To10_31_2024_FourPointZeroZeroZeroPercentLimitedRecourseCapitalNotesSeriesTwoMemberifrsfullClassesOfShareCapitalAxis_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "30000000",
+  "numeric_value": 30000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:FourPointZeroZeroZeroPercentLimitedRecourseCapitalNotesSeriesTwoMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_FourPointZeroZeroZeroPercentLimitedRecourseCapitalNotesSeriesTwoMemberifrsfullClassesOfShareCapitalAxis_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "750000000",
+  "numeric_value": 750000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:FourPointZeroZeroZeroPercentLimitedRecourseCapitalNotesSeriesTwoMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2022To10_31_2023_FourPointZeroZeroZeroPercentLimitedRecourseCapitalNotesSeriesTwoMemberifrsfullClassesOfShareCapitalAxis_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "30000000",
+  "numeric_value": 30000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:FourPointZeroZeroZeroPercentLimitedRecourseCapitalNotesSeriesTwoMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis_SevenPointOneFivePercentLimitedRecourseCapitalNotesSeriesThreeMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "800000000",
+  "numeric_value": 800000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:SevenPointOneFivePercentLimitedRecourseCapitalNotesSeriesThreeMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2023To10_31_2024_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis_SevenPointOneFivePercentLimitedRecourseCapitalNotesSeriesThreeMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "57000000",
+  "numeric_value": 57000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:SevenPointOneFivePercentLimitedRecourseCapitalNotesSeriesThreeMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2023_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis_SevenPointOneFivePercentLimitedRecourseCapitalNotesSeriesThreeMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "instant_2023-10-31",
+  "period_type": "instant",
+  "value": "800000000",
+  "numeric_value": 800000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:SevenPointOneFivePercentLimitedRecourseCapitalNotesSeriesThreeMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaid",
+  "context_ref": "P11_01_2022To10_31_2023_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis_SevenPointOneFivePercentLimitedRecourseCapitalNotesSeriesThreeMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "64000000",
+  "numeric_value": 64000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:SevenPointOneFivePercentLimitedRecourseCapitalNotesSeriesThreeMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_OtherEquityInterestMemberifrsfullComponentsOfEquityAxis_SixPointNineEightSevenPercentLimitedRecourseCapitalNotesSeriesFourMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "500000000",
+  "numeric_value": 500000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "cm:SixPointNineEightSevenPercentLimitedRecourseCapitalNotesSeriesFourMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:OtherEquityInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2022_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "instant_2022-10-31",
+  "period_type": "instant",
+  "value": "14726000000",
+  "numeric_value": 14726000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ReductionOfIssuedCapital",
+  "context_ref": "P11_01_2023To10_31_2024_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "90000000",
+  "numeric_value": 90000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTreasuryShareTransactions",
+  "context_ref": "P11_01_2022To10_31_2023_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "-2000000",
+  "numeric_value": -2000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_OrdinarySharesMemberifrsfullClassesOfShareCapitalAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "17011000000",
+  "numeric_value": 17011000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "ifrs-full:OrdinarySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2023To10_31_2024",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "7115000000",
+  "numeric_value": 7115000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2022To10_31_2023",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "5001000000",
+  "numeric_value": 5001000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToNoncontrollingInterests",
+  "context_ref": "P11_01_2023To10_31_2024_CorporateAndOtherMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "39000000",
+  "numeric_value": 39000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:CorporateAndOtherMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToNoncontrollingInterests",
+  "context_ref": "P11_01_2023To10_31_2024",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "39000000",
+  "numeric_value": 39000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToNoncontrollingInterests",
+  "context_ref": "P11_01_2023To10_31_2024_CaribbeanMemberifrsfullGeographicalAreasAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "39000000",
+  "numeric_value": 39000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:GeographicalAreasAxis": "cm:CaribbeanMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2023To10_31_2024_CanadianPersonalAndBusinessBankingMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "2670000000",
+  "numeric_value": 2670000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:CanadianPersonalAndBusinessBankingMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2023To10_31_2024_CanadianCommercialBankingAndWealthManagementMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "1938000000",
+  "numeric_value": 1938000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:CanadianCommercialBankingAndWealthManagementMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2023To10_31_2024_USCommercialBankingAndWealthManagementMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "501000000",
+  "numeric_value": 501000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:USCommercialBankingAndWealthManagementMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2023To10_31_2024_CapitalMarketsAndDirectFinancialServicesMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "1988000000",
+  "numeric_value": 1988000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:CapitalMarketsAndDirectFinancialServicesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2023To10_31_2024_CorporateAndOtherMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "18000000",
+  "numeric_value": 18000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:CorporateAndOtherMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2023To10_31_2024_CAifrsfullGeographicalAreasAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "3621000000",
+  "numeric_value": 3621000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:GeographicalAreasAxis": "country:CA"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2023To10_31_2024_USifrsfullGeographicalAreasAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "1400000000",
+  "numeric_value": 1400000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:GeographicalAreasAxis": "country:US"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2023To10_31_2024_CaribbeanMemberifrsfullGeographicalAreasAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "1655000000",
+  "numeric_value": 1655000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:GeographicalAreasAxis": "cm:CaribbeanMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2023To10_31_2024_OtherCountriesMemberifrsfullGeographicalAreasAxis",
+  "period_key": "duration_2023-11-01_2024-10-31",
+  "period_type": "duration",
+  "value": "439000000",
+  "numeric_value": 439000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:GeographicalAreasAxis": "cm:OtherCountriesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToNoncontrollingInterests",
+  "context_ref": "P11_01_2022To10_31_2023_CorporateAndOtherMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "38000000",
+  "numeric_value": 38000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:CorporateAndOtherMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToNoncontrollingInterests",
+  "context_ref": "P11_01_2022To10_31_2023",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "38000000",
+  "numeric_value": 38000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToNoncontrollingInterests",
+  "context_ref": "P11_01_2022To10_31_2023_CaribbeanMemberifrsfullGeographicalAreasAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "38000000",
+  "numeric_value": 38000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:GeographicalAreasAxis": "cm:CaribbeanMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2022To10_31_2023_CanadianPersonalAndBusinessBankingMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "2364000000",
+  "numeric_value": 2364000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:CanadianPersonalAndBusinessBankingMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2022To10_31_2023_CanadianCommercialBankingAndWealthManagementMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "1878000000",
+  "numeric_value": 1878000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:CanadianCommercialBankingAndWealthManagementMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2022To10_31_2023_USCommercialBankingAndWealthManagementMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "379000000",
+  "numeric_value": 379000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:USCommercialBankingAndWealthManagementMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2022To10_31_2023_CapitalMarketsAndDirectFinancialServicesMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "1986000000",
+  "numeric_value": 1986000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:CapitalMarketsAndDirectFinancialServicesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2022To10_31_2023_CorporateAndOtherMemberifrsfullSegmentsAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "-1606000000",
+  "numeric_value": -1606000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SegmentsAxis": "cm:CorporateAndOtherMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2022To10_31_2023_CAifrsfullGeographicalAreasAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "2597000000",
+  "numeric_value": 2597000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:GeographicalAreasAxis": "country:CA"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2022To10_31_2023_USifrsfullGeographicalAreasAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "919000000",
+  "numeric_value": 919000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:GeographicalAreasAxis": "country:US"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2022To10_31_2023_CaribbeanMemberifrsfullGeographicalAreasAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "1171000000",
+  "numeric_value": 1171000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:GeographicalAreasAxis": "cm:CaribbeanMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLossAttributableToOwnersOfParent",
+  "context_ref": "P11_01_2022To10_31_2023_OtherCountriesMemberifrsfullGeographicalAreasAxis",
+  "period_key": "duration_2022-11-01_2023-10-31",
+  "period_type": "duration",
+  "value": "314000000",
+  "numeric_value": 314000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:GeographicalAreasAxis": "cm:OtherCountriesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "PAsOn10_31_2024_NoSpecificMaturityMemberifrsfullMaturityAxis",
+  "period_key": "instant_2024-10-31",
+  "period_type": "instant",
+  "value": "59007000000",
+  "numeric_value": 59007000000.0,
+  "unit_ref": "Unit_CAD",
+  "currency": "CAD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:MaturityAxis": "cm:NoSpecificMaturityMember"
+  }
+ }
+]

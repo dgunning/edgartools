@@ -1,0 +1,1718 @@
+[
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2019Q4YTD",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "530100000",
+  "numeric_value": 530100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2018Q4YTD",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "617000000.0",
+  "numeric_value": 617000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2017Q4YTD",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "354900000",
+  "numeric_value": 354900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesOutstanding",
+  "context_ref": "FI2016Q4_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember",
+  "period_key": "instant_2016-12-31",
+  "period_type": "instant",
+  "value": "121642556",
+  "numeric_value": 121642556.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2017Q4YTD_us-gaap_StatementEquityComponentsAxis_us-gaap_StockholdersEquityTotalMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "354900000",
+  "numeric_value": 354900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:StockholdersEquityTotalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesOutstanding",
+  "context_ref": "FI2017Q4_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember",
+  "period_key": "instant_2017-12-31",
+  "period_type": "instant",
+  "value": "114447605",
+  "numeric_value": 114447605.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2018Q4YTD_us-gaap_StatementEquityComponentsAxis_us-gaap_StockholdersEquityTotalMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "617000000.0",
+  "numeric_value": 617000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:StockholdersEquityTotalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesOutstanding",
+  "context_ref": "FI2018Q4_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember",
+  "period_key": "instant_2018-12-31",
+  "period_type": "instant",
+  "value": "105461817",
+  "numeric_value": 105461817.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2019Q4YTD_us-gaap_StatementEquityComponentsAxis_us-gaap_StockholdersEquityTotalMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "530100000",
+  "numeric_value": 530100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:StockholdersEquityTotalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesOutstanding",
+  "context_ref": "FI2019Q4_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "104882379",
+  "numeric_value": 104882379.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_us-gaap_TimingOfTransferOfGoodOrServiceAxis_us-gaap_TransferredOverTimeMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "5963500000",
+  "numeric_value": 5963500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:TimingOfTransferOfGoodOrServiceAxis": "us-gaap:TransferredOverTimeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_us-gaap_TimingOfTransferOfGoodOrServiceAxis_us-gaap_TransferredOverTimeMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "5628500000",
+  "numeric_value": 5628500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:TimingOfTransferOfGoodOrServiceAxis": "us-gaap:TransferredOverTimeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_us-gaap_TimingOfTransferOfGoodOrServiceAxis_us-gaap_TransferredAtPointInTimeMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "1899600000",
+  "numeric_value": 1899600000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:TimingOfTransferOfGoodOrServiceAxis": "us-gaap:TransferredAtPointInTimeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_us-gaap_TimingOfTransferOfGoodOrServiceAxis_us-gaap_TransferredAtPointInTimeMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "1593500000",
+  "numeric_value": 1593500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:TimingOfTransferOfGoodOrServiceAxis": "us-gaap:TransferredAtPointInTimeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "7863100000",
+  "numeric_value": 7863100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "7222000000.0",
+  "numeric_value": 7222000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_srt_MajorCustomersAxis_spr_BoeingallprogramsMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "6237200000",
+  "numeric_value": 6237200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:MajorCustomersAxis": "spr:BoeingallprogramsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_MajorCustomersAxis_spr_BoeingallprogramsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "5677700000",
+  "numeric_value": 5677700000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:MajorCustomersAxis": "spr:BoeingallprogramsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_srt_MajorCustomersAxis_spr_AirbusMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "1250600000",
+  "numeric_value": 1250600000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:MajorCustomersAxis": "spr:AirbusMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_MajorCustomersAxis_spr_AirbusMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "1180800000",
+  "numeric_value": 1180800000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:MajorCustomersAxis": "spr:AirbusMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_srt_MajorCustomersAxis_us-gaap_OtherCustomerMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "375300000",
+  "numeric_value": 375300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:MajorCustomersAxis": "us-gaap:OtherCustomerMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_MajorCustomersAxis_us-gaap_OtherCustomerMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "363500000",
+  "numeric_value": 363500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:MajorCustomersAxis": "us-gaap:OtherCustomerMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_StatementGeographicalAxis_spr_LocationUnitedStatesMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "5967100000",
+  "numeric_value": 5967100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "spr:LocationUnitedStatesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_StatementGeographicalAxis_spr_LocationUnitedKingdomMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "763300000",
+  "numeric_value": 763300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "spr:LocationUnitedKingdomMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_StatementGeographicalAxis_spr_DisaggregationofrevenuetotalinternationallocationsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "1254900000",
+  "numeric_value": 1254900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "spr:DisaggregationofrevenuetotalinternationallocationsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:EarningsPerShareBasic",
+  "context_ref": "FD2019Q4YTD",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "5.11",
+  "numeric_value": 5.11,
+  "unit_ref": "usdPerShare",
+  "currency": "USD",
+  "decimals": "2",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:EarningsPerShareBasic",
+  "context_ref": "FD2018Q4YTD",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "5.71",
+  "numeric_value": 5.71,
+  "unit_ref": "usdPerShare",
+  "currency": "USD",
+  "decimals": "2",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:EarningsPerShareBasic",
+  "context_ref": "FD2017Q4YTD",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "3.04",
+  "numeric_value": 3.04,
+  "unit_ref": "usdPerShare",
+  "currency": "USD",
+  "decimals": "2",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_FuselageSystemsMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "4206200000",
+  "numeric_value": 4206200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:FuselageSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_FuselageSystemsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "4000800000",
+  "numeric_value": 4000800000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:FuselageSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_FuselageSystemsMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "3730800000",
+  "numeric_value": 3730800000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:FuselageSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_PropulsionSystemsMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "2057800000",
+  "numeric_value": 2057800000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:PropulsionSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_PropulsionSystemsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "1702500000",
+  "numeric_value": 1702500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:PropulsionSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_PropulsionSystemsMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "1666200000",
+  "numeric_value": 1666200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:PropulsionSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_WingSystemsMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "1588300000",
+  "numeric_value": 1588300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:WingSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_WingSystemsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "1513000000.0",
+  "numeric_value": 1513000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:WingSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_WingSystemsMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "1578800000",
+  "numeric_value": 1578800000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:WingSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_OtherSystemsMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "10800000",
+  "numeric_value": 10800000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:OtherSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_OtherSystemsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "5700000",
+  "numeric_value": 5700000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:OtherSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_us-gaap_StatementBusinessSegmentsAxis_spr_OtherSystemsMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "7200000",
+  "numeric_value": 7200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:OtherSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "6983000000.0",
+  "numeric_value": 6983000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2018Q4YTD_us-gaap_AdjustmentsForNewAccountingPronouncementsAxis_spr_Impactof201707Member_us-gaap_StatementBusinessSegmentsAxis_spr_FuselageSystemsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "18.1",
+  "numeric_value": 18.1,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "1",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:AdjustmentsForNewAccountingPronouncementsAxis": "spr:Impactof201707Member",
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:FuselageSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2018Q4YTD_us-gaap_AdjustmentsForNewAccountingPronouncementsAxis_spr_Impactof201707Member_us-gaap_StatementBusinessSegmentsAxis_spr_PropulsionSystemsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "7.4",
+  "numeric_value": 7.4,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "1",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:AdjustmentsForNewAccountingPronouncementsAxis": "spr:Impactof201707Member",
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:PropulsionSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2018Q4YTD_us-gaap_AdjustmentsForNewAccountingPronouncementsAxis_spr_Impactof201707Member_us-gaap_StatementBusinessSegmentsAxis_spr_WingSystemsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "7.3",
+  "numeric_value": 7.3,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "1",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:AdjustmentsForNewAccountingPronouncementsAxis": "spr:Impactof201707Member",
+   "us-gaap:StatementBusinessSegmentsAxis": "spr:WingSystemsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_srt_StatementGeographicalAxis_spr_LocationUnitedStatesMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "6566300000",
+  "numeric_value": 6566300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "spr:LocationUnitedStatesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_StatementGeographicalAxis_country_US",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "5967100000",
+  "numeric_value": 5967100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "country:US"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_srt_StatementGeographicalAxis_country_US",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "5722900000",
+  "numeric_value": 5722900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "country:US"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_srt_StatementGeographicalAxis_spr_LocationUnitedKingdomMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "771900000",
+  "numeric_value": 771900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "spr:LocationUnitedKingdomMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_StatementGeographicalAxis_country_GB",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "763300000",
+  "numeric_value": 763300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "country:GB"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_srt_StatementGeographicalAxis_country_GB",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "740900000",
+  "numeric_value": 740900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "country:GB"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_srt_StatementGeographicalAxis_spr_OtherCountriesMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "524900000",
+  "numeric_value": 524900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "spr:OtherCountriesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_StatementGeographicalAxis_spr_OtherCountriesMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "491600000",
+  "numeric_value": 491600000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "spr:OtherCountriesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_srt_StatementGeographicalAxis_spr_OtherCountriesMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "519200000",
+  "numeric_value": 519200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "spr:OtherCountriesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_srt_StatementGeographicalAxis_spr_DisaggregationofrevenuetotalinternationallocationsMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "1296800000",
+  "numeric_value": 1296800000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "spr:DisaggregationofrevenuetotalinternationallocationsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_StatementGeographicalAxis_spr_SegmentGeographicalGroupsOfCountriesGroupThreeMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "1254900000",
+  "numeric_value": 1254900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "spr:SegmentGeographicalGroupsOfCountriesGroupThreeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_srt_StatementGeographicalAxis_spr_SegmentGeographicalGroupsOfCountriesGroupThreeMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "1260100000",
+  "numeric_value": 1260100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:StatementGeographicalAxis": "spr:SegmentGeographicalGroupsOfCountriesGroupThreeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4QTD",
+  "period_key": "duration_2019-09-27_2019-12-31",
+  "period_type": "duration",
+  "value": "1959300000",
+  "numeric_value": 1959300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q3QTD",
+  "period_key": "duration_2019-06-28_2019-09-26",
+  "period_type": "duration",
+  "value": "1919900000",
+  "numeric_value": 1919900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q2QTD",
+  "period_key": "duration_2019-03-29_2019-06-27",
+  "period_type": "duration",
+  "value": "2016100000",
+  "numeric_value": 2016100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q1QTD",
+  "period_key": "duration_2019-01-01_2019-03-28",
+  "period_type": "duration",
+  "value": "1967800000",
+  "numeric_value": 1967800000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2019Q4QTD",
+  "period_key": "duration_2019-09-27_2019-12-31",
+  "period_type": "duration",
+  "value": "67700000",
+  "numeric_value": 67700000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2019Q3QTD",
+  "period_key": "duration_2019-06-28_2019-09-26",
+  "period_type": "duration",
+  "value": "131300000",
+  "numeric_value": 131300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2019Q2QTD",
+  "period_key": "duration_2019-03-29_2019-06-27",
+  "period_type": "duration",
+  "value": "168000000.0",
+  "numeric_value": 168000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2019Q1QTD",
+  "period_key": "duration_2019-01-01_2019-03-28",
+  "period_type": "duration",
+  "value": "163100000",
+  "numeric_value": 163100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:EarningsPerShareBasic",
+  "context_ref": "FD2019Q4QTD",
+  "period_key": "duration_2019-09-27_2019-12-31",
+  "period_type": "duration",
+  "value": "0.65",
+  "numeric_value": 0.65,
+  "unit_ref": "usdPerShare",
+  "currency": "USD",
+  "decimals": "2",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:EarningsPerShareBasic",
+  "context_ref": "FD2019Q3QTD",
+  "period_key": "duration_2019-06-28_2019-09-26",
+  "period_type": "duration",
+  "value": "1.27",
+  "numeric_value": 1.27,
+  "unit_ref": "usdPerShare",
+  "currency": "USD",
+  "decimals": "2",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:EarningsPerShareBasic",
+  "context_ref": "FD2019Q2QTD",
+  "period_key": "duration_2019-03-29_2019-06-27",
+  "period_type": "duration",
+  "value": "1.62",
+  "numeric_value": 1.62,
+  "unit_ref": "usdPerShare",
+  "currency": "USD",
+  "decimals": "2",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:EarningsPerShareBasic",
+  "context_ref": "FD2019Q1QTD",
+  "period_key": "duration_2019-01-01_2019-03-28",
+  "period_type": "duration",
+  "value": "1.57",
+  "numeric_value": 1.57,
+  "unit_ref": "usdPerShare",
+  "currency": "USD",
+  "decimals": "2",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4QTD",
+  "period_key": "duration_2018-09-28_2018-12-31",
+  "period_type": "duration",
+  "value": "1835300000",
+  "numeric_value": 1835300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q3QTD",
+  "period_key": "duration_2018-06-29_2018-09-27",
+  "period_type": "duration",
+  "value": "1813700000",
+  "numeric_value": 1813700000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q2QTD",
+  "period_key": "duration_2018-03-30_2018-06-28",
+  "period_type": "duration",
+  "value": "1836900000",
+  "numeric_value": 1836900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q1YTD",
+  "period_key": "duration_2018-01-01_2018-03-29",
+  "period_type": "duration",
+  "value": "1736100000",
+  "numeric_value": 1736100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2018Q4QTD",
+  "period_key": "duration_2018-09-28_2018-12-31",
+  "period_type": "duration",
+  "value": "177600000",
+  "numeric_value": 177600000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2018Q3QTD",
+  "period_key": "duration_2018-06-29_2018-09-27",
+  "period_type": "duration",
+  "value": "168800000",
+  "numeric_value": 168800000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2018Q2QTD",
+  "period_key": "duration_2018-03-30_2018-06-28",
+  "period_type": "duration",
+  "value": "145200000",
+  "numeric_value": 145200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2018Q1YTD",
+  "period_key": "duration_2018-01-01_2018-03-29",
+  "period_type": "duration",
+  "value": "125400000",
+  "numeric_value": 125400000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:EarningsPerShareBasic",
+  "context_ref": "FD2018Q4QTD",
+  "period_key": "duration_2018-09-28_2018-12-31",
+  "period_type": "duration",
+  "value": "1.70",
+  "numeric_value": 1.7,
+  "unit_ref": "usdPerShare",
+  "currency": "USD",
+  "decimals": "2",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:EarningsPerShareBasic",
+  "context_ref": "FD2018Q3QTD",
+  "period_key": "duration_2018-06-29_2018-09-27",
+  "period_type": "duration",
+  "value": "1.61",
+  "numeric_value": 1.61,
+  "unit_ref": "usdPerShare",
+  "currency": "USD",
+  "decimals": "2",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:EarningsPerShareBasic",
+  "context_ref": "FD2018Q2QTD",
+  "period_key": "duration_2018-03-30_2018-06-28",
+  "period_type": "duration",
+  "value": "1.32",
+  "numeric_value": 1.32,
+  "unit_ref": "usdPerShare",
+  "currency": "USD",
+  "decimals": "2",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:EarningsPerShareBasic",
+  "context_ref": "FD2018Q1YTD",
+  "period_key": "duration_2018-01-01_2018-03-29",
+  "period_type": "duration",
+  "value": "1.11",
+  "numeric_value": 1.11,
+  "unit_ref": "usdPerShare",
+  "currency": "USD",
+  "decimals": "2",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidatedEntitiesAxis_srt_ParentCompanyMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidatedEntitiesAxis_srt_SubsidiaryIssuerMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "7116700000",
+  "numeric_value": 7116700000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiaryIssuerMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidatedEntitiesAxis_srt_NonGuarantorSubsidiariesMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "1420500000",
+  "numeric_value": 1420500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:NonGuarantorSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidationItemsAxis_srt_ConsolidationEliminationsMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "-674100000",
+  "numeric_value": -674100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidationItemsAxis": "srt:ConsolidationEliminationsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidatedEntitiesAxis_srt_ParentCompanyMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidatedEntitiesAxis_srt_SubsidiaryIssuerMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "6197000000.0",
+  "numeric_value": 6197000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiaryIssuerMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidatedEntitiesAxis_srt_NonGuarantorSubsidiariesMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "1263500000",
+  "numeric_value": 1263500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:NonGuarantorSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidationItemsAxis_srt_ConsolidationEliminationsMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "-674100000",
+  "numeric_value": -674100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidationItemsAxis": "srt:ConsolidationEliminationsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2019Q4YTD",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "6786400000",
+  "numeric_value": 6786400000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidatedEntitiesAxis_srt_ParentCompanyMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "530100000",
+  "numeric_value": 530100000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidatedEntitiesAxis_srt_SubsidiaryIssuerMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "544500000",
+  "numeric_value": 544500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiaryIssuerMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidatedEntitiesAxis_srt_NonGuarantorSubsidiariesMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "106200000",
+  "numeric_value": 106200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:NonGuarantorSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2019Q4YTD_srt_ConsolidationItemsAxis_srt_ConsolidationEliminationsMember",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "-650700000",
+  "numeric_value": -650700000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidationItemsAxis": "srt:ConsolidationEliminationsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidatedEntitiesAxis_srt_ParentCompanyMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidatedEntitiesAxis_srt_SubsidiaryIssuerMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "6487300000",
+  "numeric_value": 6487300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiaryIssuerMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidatedEntitiesAxis_srt_NonGuarantorSubsidiariesMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "1361200000",
+  "numeric_value": 1361200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:NonGuarantorSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidationItemsAxis_srt_ConsolidationEliminationsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "-626500000",
+  "numeric_value": -626500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidationItemsAxis": "srt:ConsolidationEliminationsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidatedEntitiesAxis_srt_ParentCompanyMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidatedEntitiesAxis_srt_SubsidiaryIssuerMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "5541400000",
+  "numeric_value": 5541400000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiaryIssuerMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidatedEntitiesAxis_srt_NonGuarantorSubsidiariesMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "1221000000.0",
+  "numeric_value": 1221000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:NonGuarantorSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidationItemsAxis_srt_ConsolidationEliminationsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "-626500000",
+  "numeric_value": -626500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidationItemsAxis": "srt:ConsolidationEliminationsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2018Q4YTD",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "6135900000",
+  "numeric_value": 6135900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidatedEntitiesAxis_srt_ParentCompanyMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "617000000.0",
+  "numeric_value": 617000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidatedEntitiesAxis_srt_SubsidiaryIssuerMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "624800000",
+  "numeric_value": 624800000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiaryIssuerMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidatedEntitiesAxis_srt_NonGuarantorSubsidiariesMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "91700000",
+  "numeric_value": 91700000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:NonGuarantorSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2018Q4YTD_srt_ConsolidationItemsAxis_srt_ConsolidationEliminationsMember",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "-716500000",
+  "numeric_value": -716500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidationItemsAxis": "srt:ConsolidationEliminationsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidatedEntitiesAxis_srt_ParentCompanyMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidatedEntitiesAxis_srt_SubsidiaryIssuerMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "6236400000",
+  "numeric_value": 6236400000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiaryIssuerMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidatedEntitiesAxis_srt_NonGuarantorSubsidiariesMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "1362300000",
+  "numeric_value": 1362300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:NonGuarantorSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidationItemsAxis_srt_ConsolidationEliminationsMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "-615700000",
+  "numeric_value": -615700000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidationItemsAxis": "srt:ConsolidationEliminationsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidatedEntitiesAxis_srt_ParentCompanyMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidatedEntitiesAxis_srt_SubsidiaryIssuerMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "5592200000",
+  "numeric_value": 5592200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiaryIssuerMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidatedEntitiesAxis_srt_NonGuarantorSubsidiariesMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "1218800000",
+  "numeric_value": 1218800000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:NonGuarantorSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidationItemsAxis_srt_ConsolidationEliminationsMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "-615700000",
+  "numeric_value": -615700000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidationItemsAxis": "srt:ConsolidationEliminationsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CostOfGoodsAndServicesSold",
+  "context_ref": "FD2017Q4YTD",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "6195300000",
+  "numeric_value": 6195300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidatedEntitiesAxis_srt_ParentCompanyMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "354900000",
+  "numeric_value": 354900000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidatedEntitiesAxis_srt_SubsidiaryIssuerMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "362300000",
+  "numeric_value": 362300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiaryIssuerMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidatedEntitiesAxis_srt_NonGuarantorSubsidiariesMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "97300000",
+  "numeric_value": 97300000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:NonGuarantorSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "FD2017Q4YTD_srt_ConsolidationItemsAxis_srt_ConsolidationEliminationsMember",
+  "period_key": "duration_2017-01-01_2017-12-31",
+  "period_type": "duration",
+  "value": "-459600000",
+  "numeric_value": -459600000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidationItemsAxis": "srt:ConsolidationEliminationsMember"
+  }
+ }
+]

@@ -1,0 +1,343 @@
+[
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_12_1_2018_To_2_28_2019_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_N_PSvsJGfEuKdeIDQuhi3g",
+  "period_key": "duration_2018-12-01_2019-02-28",
+  "period_type": "duration",
+  "value": "-4336000",
+  "numeric_value": -4336000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_12_1_2018_To_2_28_2019_Ppj0vpzvNE2Tf1Jf7lHWwQ",
+  "period_key": "duration_2018-12-01_2019-02-28",
+  "period_type": "duration",
+  "value": "-4336000",
+  "numeric_value": -4336000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_3_1_2019_To_5_31_2019_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_vhowaPtwekacdGWGc8Gh9w",
+  "period_key": "duration_2019-03-01_2019-05-31",
+  "period_type": "duration",
+  "value": "-4509000",
+  "numeric_value": -4509000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_3_1_2019_To_5_31_2019_174OUQxjE0SW01OQGRIqyQ",
+  "period_key": "duration_2019-03-01_2019-05-31",
+  "period_type": "duration",
+  "value": "-4509000",
+  "numeric_value": -4509000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_6_1_2019_To_8_31_2019_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_Bg3yt6DiqEqxRCGhvgOlOQ",
+  "period_key": "duration_2019-06-01_2019-08-31",
+  "period_type": "duration",
+  "value": "-12535000",
+  "numeric_value": -12535000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_6_1_2019_To_8_31_2019_URcrl5zSA0-Ar-mGBrpCqg",
+  "period_key": "duration_2019-06-01_2019-08-31",
+  "period_type": "duration",
+  "value": "-12535000",
+  "numeric_value": -12535000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_12_1_2019_To_2_29_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_6f5fc24RVkWL8D7WDpPSzg",
+  "period_key": "duration_2019-12-01_2020-02-29",
+  "period_type": "duration",
+  "value": "171179000",
+  "numeric_value": 171179000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_12_1_2019_To_2_29_2020_doQ1v208WkuUBQS6VI2A-w",
+  "period_key": "duration_2019-12-01_2020-02-29",
+  "period_type": "duration",
+  "value": "171179000",
+  "numeric_value": 171179000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_3_1_2020_To_5_31_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_0OcfoaSGLEuSSFGzLJZbyQ",
+  "period_key": "duration_2020-03-01_2020-05-31",
+  "period_type": "duration",
+  "value": "-3002000",
+  "numeric_value": -3002000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_3_1_2020_To_5_31_2020_RhOnFIFcN0yvmKqa5U8RUQ",
+  "period_key": "duration_2020-03-01_2020-05-31",
+  "period_type": "duration",
+  "value": "-3002000",
+  "numeric_value": -3002000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_6_1_2020_To_8_31_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_3e_DsTstx0e35yxYamKVmA",
+  "period_key": "duration_2020-06-01_2020-08-31",
+  "period_type": "duration",
+  "value": "-3184000",
+  "numeric_value": -3184000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_6_1_2020_To_8_31_2020_SQ2MTaCkuUSvxTx4dB0Mbw",
+  "period_key": "duration_2020-06-01_2020-08-31",
+  "period_type": "duration",
+  "value": "-3184000",
+  "numeric_value": -3184000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_12_1_2019_To_8_31_2020_RUQKVzfu40agfvt9BldZpQ",
+  "period_key": "duration_2019-12-01_2020-08-31",
+  "period_type": "duration",
+  "value": "164993000",
+  "numeric_value": 164993000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_12_1_2018_To_8_31_2019_XJ7cmqgzzUOwaye9J3TOZg",
+  "period_key": "duration_2018-12-01_2019-08-31",
+  "period_type": "duration",
+  "value": "-21380000",
+  "numeric_value": -21380000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:AmortizationOfLeaseIncentives",
+  "context_ref": "Duration_12_1_2019_To_8_31_2020_RUQKVzfu40agfvt9BldZpQ",
+  "period_key": "duration_2019-12-01_2020-08-31",
+  "period_type": "duration",
+  "value": "124000",
+  "numeric_value": 124000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "As_Of_11_30_2019_-oUzJTIOikGLnGZo75a9Lw",
+  "period_key": "instant_2019-11-30",
+  "period_type": "instant",
+  "value": "19174000",
+  "numeric_value": 19174000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "As_Of_11_30_2018_t9fsSJBuCEa2lu2zuK-yCw",
+  "period_key": "instant_2018-11-30",
+  "period_type": "instant",
+  "value": "22991000",
+  "numeric_value": 22991000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "As_Of_8_31_2020_Ij59_XFb9kC2U4Ov2QmaHw",
+  "period_key": "instant_2020-08-31",
+  "period_type": "instant",
+  "value": "12780000",
+  "numeric_value": 12780000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "As_Of_8_31_2019_IVtiai6V4UiTjttXFQrDEg",
+  "period_key": "instant_2019-08-31",
+  "period_type": "instant",
+  "value": "26852000",
+  "numeric_value": 26852000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_12_1_2019_To_8_31_2020_srt_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis_tmq_AmblerMetalsLlcMember_gbQ-6GixLUWcuVQ6TGk-2g",
+  "period_key": "duration_2019-12-01_2020-08-31",
+  "period_type": "duration",
+  "value": "3670000",
+  "numeric_value": 3670000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-4",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis": "tmq:AmblerMetalsLlcMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "Duration_6_1_2020_To_8_31_2020_srt_ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis_tmq_AmblerMetalsLlcMember_zW4U1q8f_kqeN1hs_738tQ",
+  "period_key": "duration_2020-06-01_2020-08-31",
+  "period_type": "duration",
+  "value": "2190000",
+  "numeric_value": 2190000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-4",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ScheduleOfEquityMethodInvestmentEquityMethodInvesteeNameAxis": "tmq:AmblerMetalsLlcMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AmortizationOfLeaseIncentives",
+  "context_ref": "Duration_12_2_2019_To_8_31_2020_Z2dBtHA9nkqP3Evmi9T5-w",
+  "period_key": "duration_2019-12-02_2020-08-31",
+  "period_type": "duration",
+  "value": "124000",
+  "numeric_value": 124000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:AccretionExpense",
+  "context_ref": "Duration_12_2_2019_To_8_31_2020_Z2dBtHA9nkqP3Evmi9T5-w",
+  "period_key": "duration_2019-12-02_2020-08-31",
+  "period_type": "duration",
+  "value": "39000",
+  "numeric_value": 39000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "tmq:DerecognitionOfRightOfUseAsset",
+  "context_ref": "Duration_12_2_2019_To_8_31_2020_Z2dBtHA9nkqP3Evmi9T5-w",
+  "period_key": "duration_2019-12-02_2020-08-31",
+  "period_type": "duration",
+  "value": "93000",
+  "numeric_value": 93000.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "tmq:DerecognitionOfRightOfUseAsset",
+  "context_ref": "Duration_12_1_2019_To_8_31_2020_RUQKVzfu40agfvt9BldZpQ",
+  "period_key": "duration_2019-12-01_2020-08-31",
+  "period_type": "duration",
+  "value": "92974",
+  "numeric_value": 92974.0,
+  "unit_ref": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ }
+]

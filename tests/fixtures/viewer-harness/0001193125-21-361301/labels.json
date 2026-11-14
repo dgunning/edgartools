@@ -1,0 +1,104 @@
+{
+ "gib_IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity": {
+  "http://www.xbrl.org/2003/role/documentation": "Increase (Decrease) Through Exercise Of Other Equity Instruments, Equity",
+  "http://www.xbrl.org/2003/role/label": "Increase (Decrease) Through Exercise Of Other Equity Instruments, Equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Exercise of performance share units",
+  "http://www.xbrl.org/2003/role/verboseLabel": "PSUs exercised"
+ },
+ "gib_PurchaseOfTreasurySharesForCancellation": {
+  "http://www.xbrl.org/2003/role/documentation": "Purchase Of Treasury Shares For Cancellation",
+  "http://www.xbrl.org/2003/role/label": "Purchase Of Treasury Shares For Cancellation",
+  "http://www.xbrl.org/2009/role/negatedTerseLabel": "Purchase for cancellation of Class A subordinate voting shares"
+ },
+ "ifrs-full_AccumulatedOtherComprehensiveIncomeMember": {
+  "http://www.xbrl.org/2003/role/label": "Accumulated other comprehensive income [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Accumulated other comprehensive income"
+ },
+ "ifrs-full_AdditionalPaidinCapitalMember": {
+  "http://www.xbrl.org/2003/role/label": "Additional paid-in capital [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Contributed surplus"
+ },
+ "ifrs-full_ComponentsOfEquityAxis": {
+  "http://www.xbrl.org/2003/role/label": "Components of equity [axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Components of equity [axis]"
+ },
+ "ifrs-full_ComprehensiveIncome": {
+  "http://www.xbrl.org/2003/role/label": "Comprehensive income",
+  "http://www.xbrl.org/2003/role/totalLabel": "Comprehensive income (loss)"
+ },
+ "ifrs-full_DecreaseIncreaseThroughTaxOnSharebasedPaymentTransactions": {
+  "http://www.xbrl.org/2003/role/label": "Decrease (increase) through tax on share-based payment transactions, equity",
+  "http://www.xbrl.org/2009/role/negatedTerseLabel": "Income tax impact associated with stock options"
+ },
+ "ifrs-full_Equity": {
+  "http://www.xbrl.org/2003/role/label": "Equity",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Ending balance",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Beginning balance",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total equity"
+ },
+ "ifrs-full_EquityMember": {
+  "http://www.xbrl.org/2003/role/label": "Equity [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity [member]"
+ },
+ "ifrs-full_IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) due to changes in accounting policy required by IFRSs [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Adoption of IFRS 16"
+ },
+ "ifrs-full_IncreaseDecreaseThroughExerciseOfOptions": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through exercise of options, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Exercise of stock options",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Issued upon exercise of stock options"
+ },
+ "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through share-based payment transactions, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Share-based payment costs"
+ },
+ "ifrs-full_IssuedCapitalMember": {
+  "http://www.xbrl.org/2003/role/label": "Issued capital [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Capital stock"
+ },
+ "ifrs-full_OtherComprehensiveIncome": {
+  "http://www.xbrl.org/2003/role/label": "Other comprehensive income",
+  "http://www.xbrl.org/2003/role/totalLabel": "Other comprehensive (loss) income",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Other comprehensive (loss) income"
+ },
+ "ifrs-full_PreviouslyStatedMember": {
+  "http://www.xbrl.org/2003/role/label": "Previously stated [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Previously stated"
+ },
+ "ifrs-full_ProfitLoss": {
+  "http://www.xbrl.org/2003/role/label": "Profit (loss)",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net earnings",
+  "http://www.xbrl.org/2003/role/totalLabel": "Net earnings",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Net earnings"
+ },
+ "ifrs-full_PurchaseOfTreasuryShares": {
+  "http://www.xbrl.org/2003/role/label": "Purchase of treasury shares",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Purchased and held in trust",
+  "http://www.xbrl.org/2009/role/negatedTerseLabel": "Purchase of Class A subordinate voting shares held in trusts"
+ },
+ "ifrs-full_RestatedMember": {
+  "http://www.xbrl.org/2003/role/label": "Currently stated [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Currently stated [member]"
+ },
+ "ifrs-full_RetainedEarningsMember": {
+  "http://www.xbrl.org/2003/role/label": "Retained earnings [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Retained earnings"
+ },
+ "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis": {
+  "http://www.xbrl.org/2003/role/label": "Retrospective application and retrospective restatement [axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Retrospective application and retrospective restatement [axis]"
+ },
+ "ifrs-full_StatementOfChangesInEquityAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Statement of changes in equity [abstract]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement of changes in equity [abstract]"
+ },
+ "ifrs-full_StatementOfChangesInEquityLineItems": {
+  "http://www.xbrl.org/2003/role/label": "Statement of changes in equity [line items]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement of changes in equity [line items]"
+ },
+ "ifrs-full_StatementOfChangesInEquityTable": {
+  "http://www.xbrl.org/2003/role/label": "Statement of changes in equity [table]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement of changes in equity [table]"
+ }
+}

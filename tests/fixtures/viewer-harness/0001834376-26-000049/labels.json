@@ -1,0 +1,133 @@
+{
+ "innv_FairValueAdjustmentForRedeemableNoncontrollingInterests": {
+  "http://www.xbrl.org/2003/role/documentation": "Fair Value Adjustment For Redeemable Noncontrolling Interests",
+  "http://www.xbrl.org/2003/role/label": "Fair Value Adjustment For Redeemable Noncontrolling Interests",
+  "http://www.xbrl.org/2003/role/terseLabel": "Fair value adjustment for redeemable noncontrolling interests"
+ },
+ "innv_NoncontrollingInterestIncreaseFromJointVentureContributions": {
+  "http://www.xbrl.org/2003/role/documentation": "Noncontrolling Interest, Increase From Joint Venture Contributions",
+  "http://www.xbrl.org/2003/role/label": "Noncontrolling Interest, Increase From Joint Venture Contributions",
+  "http://www.xbrl.org/2003/role/terseLabel": "Contributions from joint venture partner"
+ },
+ "innv_RedeemableNoncontrollingInterestFairValueCarryingAmount": {
+  "http://www.xbrl.org/2003/role/documentation": "Redeemable Noncontrolling Interest, Fair Value, Carrying Amount",
+  "http://www.xbrl.org/2003/role/label": "Redeemable Noncontrolling Interest, Fair Value, Carrying Amount",
+  "http://www.xbrl.org/2003/role/terseLabel": "Fair value adjustment for redeemable noncontrolling interests"
+ },
+ "innv_TemporaryEquityDecreaseFromDistributionToJointVenture": {
+  "http://www.xbrl.org/2003/role/documentation": "Temporary Equity, Decrease From Distribution To Joint Venture",
+  "http://www.xbrl.org/2003/role/label": "Temporary Equity, Decrease From Distribution To Joint Venture",
+  "http://www.xbrl.org/2009/role/negatedTerseLabel": "Distributions to joint venture"
+ },
+ "us-gaap_AdditionalPaidInCapitalMember": {
+  "http://www.xbrl.org/2003/role/label": "Additional Paid-in Capital [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Additional Paid-in Capital"
+ },
+ "us-gaap_AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation": {
+  "http://www.xbrl.org/2003/role/label": "Share-Based Payment Arrangement, Decrease for Tax Withholding Obligation",
+  "http://www.xbrl.org/2009/role/negatedTerseLabel": "Tax withholding related to the net share settlements of stock-based compensation awards"
+ },
+ "us-gaap_CommonStockMember": {
+  "http://www.xbrl.org/2003/role/label": "Common Stock [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Capital Stock"
+ },
+ "us-gaap_CommonStockSharesOutstanding": {
+  "http://www.xbrl.org/2003/role/label": "Common Stock, Shares, Outstanding",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Ending, balances (in shares)",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Beginning, balances (in shares)",
+  "http://www.xbrl.org/2003/role/terseLabel": "Common stock outstanding (in shares)"
+ },
+ "us-gaap_EquityComponentDomain": {
+  "http://www.xbrl.org/2003/role/label": "Equity Component [Domain]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity Component [Domain]"
+ },
+ "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+  "http://www.xbrl.org/2003/role/label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Increase (Decrease) in Stockholders' Equity [Roll Forward]"
+ },
+ "us-gaap_IncreaseDecreaseInTemporaryEquityRollForward": {
+  "http://www.xbrl.org/2003/role/label": "Increase (Decrease) in Temporary Equity [Roll Forward]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Redeemable Noncontrolling Interests (Temporary Equity)"
+ },
+ "us-gaap_NetIncomeLossAttributableToRedeemableNoncontrollingInterest": {
+  "http://www.xbrl.org/2003/role/label": "Net Income (Loss) Attributable to Redeemable Noncontrolling Interest",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net loss"
+ },
+ "us-gaap_NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest": {
+  "http://www.xbrl.org/2003/role/label": "Net Income (Loss), Including Portion Attributable to Nonredeemable Noncontrolling Interest",
+  "http://www.xbrl.org/2003/role/totalLabel": "Net loss"
+ },
+ "us-gaap_NoncontrollingInterestMember": {
+  "http://www.xbrl.org/2003/role/label": "Noncontrolling Interest [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Noncontrolling Interests"
+ },
+ "us-gaap_ProfitLoss": {
+  "http://www.xbrl.org/2003/role/label": "Net Income (Loss), Including Portion Attributable to Noncontrolling Interest",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net loss",
+  "http://www.xbrl.org/2003/role/totalLabel": "Net Loss",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Net Loss"
+ },
+ "us-gaap_RedeemableNoncontrollingInterestEquityCarryingAmount": {
+  "http://www.xbrl.org/2003/role/label": "Redeemable Noncontrolling Interest, Equity, Carrying Amount",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Ending balance",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Beginning balance",
+  "http://www.xbrl.org/2003/role/terseLabel": "Redeemable Noncontrolling Interest (See Note 4)",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Redeemable noncontrolling interest, equity, carrying amount"
+ },
+ "us-gaap_RetainedEarningsMember": {
+  "http://www.xbrl.org/2003/role/label": "Retained Earnings [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Retained Earnings (Deficit)"
+ },
+ "us-gaap_SharesPaidForTaxWithholdingForShareBasedCompensation": {
+  "http://www.xbrl.org/2003/role/label": "Share-Based Payment Arrangement, Shares Withheld for Tax Withholding Obligation",
+  "http://www.xbrl.org/2009/role/negatedTerseLabel": "Tax withholding related to the net share settlements of stock-based compensation awards (in shares)"
+ },
+ "us-gaap_StatementEquityComponentsAxis": {
+  "http://www.xbrl.org/2003/role/label": "Equity Components [Axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity Components [Axis]"
+ },
+ "us-gaap_StatementLineItems": {
+  "http://www.xbrl.org/2003/role/label": "Statement [Line Items]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement [Line Items]"
+ },
+ "us-gaap_StatementOfStockholdersEquityAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Statement of Stockholders' Equity [Abstract]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement of Stockholders' Equity [Abstract]"
+ },
+ "us-gaap_StatementTable": {
+  "http://www.xbrl.org/2003/role/label": "Statement [Table]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement [Table]"
+ },
+ "us-gaap_StockIssuedDuringPeriodSharesShareBasedCompensation": {
+  "http://www.xbrl.org/2003/role/label": "Shares Issued, Shares, Share-Based Payment Arrangement, after Forfeiture",
+  "http://www.xbrl.org/2003/role/terseLabel": "Stock-based compensation (in shares)"
+ },
+ "us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation": {
+  "http://www.xbrl.org/2003/role/label": "Shares Issued, Value, Share-Based Payment Arrangement, after Forfeiture",
+  "http://www.xbrl.org/2003/role/terseLabel": "Stock-based compensation"
+ },
+ "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest": {
+  "http://www.xbrl.org/2003/role/label": "Equity, Including Portion Attributable to Noncontrolling Interest",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Ending, balances",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Beginning, balances",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total stockholders’ equity"
+ },
+ "us-gaap_TreasuryStockCommonMember": {
+  "http://www.xbrl.org/2003/role/label": "Treasury Stock, Common [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Treasury Stock"
+ },
+ "us-gaap_TreasuryStockCommonShares": {
+  "http://www.xbrl.org/2003/role/label": "Treasury Stock, Common, Shares",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Treasury Stock, Ending (in shares)",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Treasury Stock, Beginning (in shares)",
+  "http://www.xbrl.org/2003/role/terseLabel": "Treasury stock at cost (in shares)"
+ },
+ "us-gaap_TreasuryStockSharesAcquired": {
+  "http://www.xbrl.org/2003/role/label": "Treasury Stock, Shares, Acquired",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Shares repurchased at cost (in shares)"
+ },
+ "us-gaap_TreasuryStockValueAcquiredCostMethod": {
+  "http://www.xbrl.org/2003/role/label": "Treasury Stock, Value, Acquired, Cost Method",
+  "http://www.xbrl.org/2009/role/negatedTerseLabel": "Shares repurchased at cost"
+ }
+}

@@ -347,7 +347,7 @@ class FilingViewer:
         """Validate calculation trees sum correctly."""
         return self.concepts.validate(tolerance=tolerance)
 
-    def compare(self, xbrl, tolerance: float = 1.0):
+    def compare(self, xbrl, tolerance: Optional[float] = None):
         """
         Compare viewer values against XBRL parser output.
 
@@ -357,8 +357,9 @@ class FilingViewer:
 
         Args:
             xbrl: XBRL object from filing.xbrl()
-            tolerance: Maximum allowed difference in display units
-                       (default 1.0 = ±$1M for filings in millions)
+            tolerance: Maximum allowed difference in display units. None
+                       (the default) allows half a unit in the last digit
+                       each cell displays.
 
         Returns:
             ComparisonResults with match rate, mismatches, and to_dataframe()

@@ -1,0 +1,160 @@
+{
+ "http://grayscale.com/20230930/taxonomy/role/StatementStatementsOfAssetsAndLiabilitiesParenthetical": {
+  "roots": [
+   "us-gaap_StatementOfFinancialPositionAbstract"
+  ],
+  "nodes": {
+   "us-gaap_StatementOfFinancialPositionAbstract": {
+    "children": [
+     "us-gaap_InvestmentOwnedAtCost",
+     "us-gaap_CommonStockSharesAuthorizedUnlimited",
+     "us-gaap_CommonStockParOrStatedValuePerShare"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_StatementOfFinancialPositionAbstract",
+    "us-gaap_InvestmentOwnedAtCost",
+    0.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementOfFinancialPositionAbstract",
+    "us-gaap_CommonStockSharesAuthorizedUnlimited",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementOfFinancialPositionAbstract",
+    "us-gaap_CommonStockParOrStatedValuePerShare",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ]
+  ]
+ },
+ "http://grayscale.com/20230930/taxonomy/role/StatementSchedulesOfInvestment": {
+  "roots": [
+   "us-gaap_ScheduleOfInvestmentsAbstract"
+  ],
+  "nodes": {
+   "us-gaap_ScheduleOfInvestmentsAbstract": {
+    "children": [
+     "us-gaap_ScheduleOfInvestmentsTable"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "us-gaap_ScheduleOfInvestmentsTable": {
+    "children": [
+     "us-gaap_InvestmentTypeAxis",
+     "us-gaap_ScheduleOfInvestmentsLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label",
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "us-gaap_InvestmentTypeAxis": {
+    "children": [
+     "us-gaap_InvestmentTypeCategorizationMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "us-gaap_InvestmentTypeCategorizationMember": {
+    "children": [
+     "gxlm_InvestmentInLumensMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_ScheduleOfInvestmentsLineItems": {
+    "children": [
+     "gxlm_QuantityOfLumens",
+     "gxlm_QuantityOfLitecoin",
+     "us-gaap_InvestmentOwnedAtCost",
+     "us-gaap_InvestmentOwnedAtFairValue",
+     "us-gaap_InvestmentOwnedPercentOfNetAssets"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/label",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_ScheduleOfInvestmentsAbstract",
+    "us-gaap_ScheduleOfInvestmentsTable",
+    0.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_InvestmentTypeAxis",
+    "us-gaap_InvestmentTypeCategorizationMember",
+    0.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_InvestmentTypeCategorizationMember",
+    "gxlm_InvestmentInLumensMember",
+    0.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ScheduleOfInvestmentsTable",
+    "us-gaap_InvestmentTypeAxis",
+    0.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_ScheduleOfInvestmentsLineItems",
+    "gxlm_QuantityOfLumens",
+    0.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_ScheduleOfInvestmentsTable",
+    "us-gaap_ScheduleOfInvestmentsLineItems",
+    1.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_ScheduleOfInvestmentsLineItems",
+    "gxlm_QuantityOfLitecoin",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ScheduleOfInvestmentsLineItems",
+    "us-gaap_InvestmentOwnedAtCost",
+    2.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_ScheduleOfInvestmentsLineItems",
+    "us-gaap_InvestmentOwnedAtFairValue",
+    3.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_ScheduleOfInvestmentsLineItems",
+    "us-gaap_InvestmentOwnedPercentOfNetAssets",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ]
+  ]
+ }
+}

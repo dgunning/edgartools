@@ -1,0 +1,14 @@
+{
+ "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT": {
+  "us-gaap_StatementEquityComponentsAxis": {
+   "default_member_id": "us-gaap_EquityComponentDomain",
+   "is_typed_dimension": false
+  }
+ },
+ "merged": {
+  "us-gaap_StatementEquityComponentsAxis": {
+   "default_member_id": "us-gaap_EquityComponentDomain",
+   "is_typed_dimension": false
+  }
+ }
+}

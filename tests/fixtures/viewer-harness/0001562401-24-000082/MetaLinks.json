@@ -1,0 +1,953 @@
+{
+ "version": "2.2",
+ "instance": {
+  "amh-20240930.htm": {
+   "tag": {
+    "amh_AmericanHomes4RentLimitedPartnershipMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.americanhomes4rent.com/20240930",
+     "localname": "AmericanHomes4RentLimitedPartnershipMember",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLPParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapitalParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlowsLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncomeLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperationsLP",
+      "http://www.americanhomes4rent.com/role/CoverPage",
+      "http://www.americanhomes4rent.com/role/EarningsperShareUnitOperatingPartnershipsComputationofNetIncomeperCommonUnitDetails",
+      "http://www.americanhomes4rent.com/role/RelatedPartyTransactionsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "American Homes 4 Rent, L.P.",
+        "label": "American Homes 4 Rent, Limited Partnership [Member]",
+        "documentation": "American Homes 4 Rent, Limited Partnership [Member]"
+       }
+      }
+     }
+    },
+    "dei_LegalEntityAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://xbrl.sec.gov/dei/2024",
+     "localname": "LegalEntityAxis",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLPParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapitalParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlowsLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncomeLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperationsLP",
+      "http://www.americanhomes4rent.com/role/CoverPage",
+      "http://www.americanhomes4rent.com/role/EarningsperShareUnitOperatingPartnershipsComputationofNetIncomeperCommonUnitDetails",
+      "http://www.americanhomes4rent.com/role/RelatedPartyTransactionsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Legal Entity [Axis]",
+        "label": "Legal Entity [Axis]",
+        "documentation": "The set of legal entities associated with a report."
+       }
+      }
+     }
+    },
+    "us-gaap_AccumulatedOtherComprehensiveIncomeMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "AccumulatedOtherComprehensiveIncomeMember",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Accumulated other comprehensive income",
+        "verboseLabel": "Accumulated other comprehensive income",
+        "label": "AOCI Attributable to Parent [Member]",
+        "documentation": "Accumulated increase (decrease) in equity from transactions and other events and circumstances from non-owner sources, attributable to the parent. Excludes net income (loss), and accumulated changes in equity from transactions resulting from investments by owners and distributions to owners."
+       }
+      }
+     }
+    },
+    "us-gaap_AdditionalPaidInCapitalMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "AdditionalPaidInCapitalMember",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Additional paid-in capital",
+        "label": "Additional Paid-in Capital [Member]",
+        "documentation": "Excess of issue price over par or stated value of the entity's capital stock and amounts received from other transactions involving the entity's stock or stockholders."
+       }
+      }
+     }
+    },
+    "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Share-based compensation",
+        "label": "APIC, Share-Based Payment Arrangement, Increase for Cost Recognition",
+        "documentation": "Amount of increase to additional paid-in capital (APIC) for recognition of cost for award under share-based payment arrangement."
+       }
+      }
+     }
+    },
+    "us-gaap_ClassOfStockDomain": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ClassOfStockDomain",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheets",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapitalParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlows",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlowsLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquityParenthetical",
+      "http://www.americanhomes4rent.com/role/CoverPage",
+      "http://www.americanhomes4rent.com/role/RelatedPartyTransactionsDetails",
+      "http://www.americanhomes4rent.com/role/ShareBasedCompensationNarrativeDetails",
+      "http://www.americanhomes4rent.com/role/ShareBasedCompensationPSUTSRValuationInputsDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalAttheMarketCommonShareOfferingProgramDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalDistributionsDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalParticipatingPreferredSharesDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalShareRepurchaseDetails",
+      "http://www.americanhomes4rent.com/role/SubsequentEventsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class of Stock [Domain]",
+        "label": "Class of Stock [Domain]",
+        "documentation": "Share of stock differentiated by the voting rights the holder receives. Examples include, but are not limited to, common stock, redeemable preferred stock, nonredeemable preferred stock, and convertible stock."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonClassAMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "CommonClassAMember",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheets",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlows",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquityParenthetical",
+      "http://www.americanhomes4rent.com/role/CoverPage",
+      "http://www.americanhomes4rent.com/role/RelatedPartyTransactionsDetails",
+      "http://www.americanhomes4rent.com/role/ShareBasedCompensationNarrativeDetails",
+      "http://www.americanhomes4rent.com/role/ShareBasedCompensationPSUTSRValuationInputsDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalAttheMarketCommonShareOfferingProgramDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalDistributionsDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalShareRepurchaseDetails",
+      "http://www.americanhomes4rent.com/role/SubsequentEventsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class A common shares",
+        "label": "Common Class A [Member]",
+        "documentation": "Classification of common stock representing ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonClassBMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "CommonClassBMember",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheets",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/CoverPage",
+      "http://www.americanhomes4rent.com/role/RelatedPartyTransactionsDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalDistributionsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class B common shares",
+        "verboseLabel": "Class B common shares",
+        "label": "Common Class B [Member]",
+        "documentation": "Classification of common stock that has different rights than Common Class A, representing ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "CommonStockMember",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquityParenthetical",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalShareRepurchaseDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Common shares",
+        "terseLabel": "Common capital",
+        "label": "Common Stock [Member]",
+        "documentation": "Stock that is subordinate to all other stock of the issuer."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockSharesOutstanding": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "CommonStockSharesOutstanding",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/RelatedPartyTransactionsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Common stock outstanding (in shares)",
+        "periodStartLabel": "Beginning balances, common stock (in shares)",
+        "periodEndLabel": "Ending balances, common stock (in shares)",
+        "label": "Common Stock, Shares, Outstanding",
+        "documentation": "Number of shares of common stock outstanding. Common stock represent the ownership interest in a corporation."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonUnitIssued": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "CommonUnitIssued",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLPParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Common units issued (in shares)",
+        "label": "Common Unit, Issued",
+        "documentation": "Number of common units issued of limited liability company (LLC)."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonUnitOutstanding": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "CommonUnitOutstanding",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLPParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Common units outstanding (in shares)",
+        "label": "Common Unit, Outstanding",
+        "documentation": "Number of common units of ownership outstanding of a limited liability company (LLC)."
+       }
+      }
+     }
+    },
+    "us-gaap_DividendsAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "DividendsAbstract",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Distributions to equity holders:",
+        "verboseLabel": "Distributions to capital holders:",
+        "label": "Dividends [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_DividendsCommonStock": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "DividendsCommonStock",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Common shares",
+        "label": "Dividends, Common Stock",
+        "documentation": "Amount of paid and unpaid common stock dividends declared with the form of settlement in cash, stock and payment-in-kind (PIK)."
+       }
+      }
+     }
+    },
+    "us-gaap_EquityComponentDomain": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "EquityComponentDomain",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquityParenthetical",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalShareRepurchaseDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Equity Component [Domain]",
+        "label": "Equity Component [Domain]",
+        "documentation": "Components of equity are the parts of the total Equity balance including that which is allocated to common, preferred, treasury stock, retained earnings, etc."
+       }
+      }
+     }
+    },
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "IncreaseDecreaseInStockholdersEquityRollForward",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Increase (Decrease) in Stockholders' Equity",
+        "label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]",
+        "documentation": "A roll forward is a reconciliation of a concept from the beginning of a period to the end of a period."
+       }
+      }
+     }
+    },
+    "us-gaap_MinorityInterestDecreaseFromDistributionsToNoncontrollingInterestHolders": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "MinorityInterestDecreaseFromDistributionsToNoncontrollingInterestHolders",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "negatedLabel": "Noncontrolling interests",
+        "label": "Noncontrolling Interest, Decrease from Distributions to Noncontrolling Interest Holders",
+        "documentation": "Decrease in noncontrolling interest balance from payment of dividends or other distributions by the non-wholly owned subsidiary or partially owned entity, included in the consolidation of the parent entity, to the noncontrolling interest holders."
+       }
+      }
+     }
+    },
+    "us-gaap_NoncontrollingInterestMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "NoncontrollingInterestMember",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Noncontrolling interest",
+        "label": "Noncontrolling Interest [Member]",
+        "documentation": "This element represents that portion of equity (net assets) in a subsidiary not attributable, directly or indirectly, to the parent. A noncontrolling interest is sometimes called a minority interest."
+       }
+      }
+     }
+    },
+    "us-gaap_OtherComprehensiveIncomeLossNetOfTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "OtherComprehensiveIncomeLossNetOfTax",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncome": {
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
+       "weight": 1.0,
+       "order": 2.0
+      }
+     },
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncome",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncomeLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Other comprehensive income (loss)",
+        "terseLabel": "Total other comprehensive income (loss)",
+        "verboseLabel": "Total other comprehensive income (loss)",
+        "label": "Other Comprehensive Income (Loss), Net of Tax",
+        "documentation": "Amount after tax and reclassification adjustments of other comprehensive income (loss)."
+       }
+      }
+     }
+    },
+    "us-gaap_ParentMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ParentMember",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Shareholders’ equity",
+        "label": "Parent [Member]",
+        "documentation": "Portion of equity, or net assets, in the consolidated entity attributable, directly or indirectly, to the parent. Excludes noncontrolling interests."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredStockDividendsIncomeStatementImpact": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PreferredStockDividendsIncomeStatementImpact",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncome": {
+       "parentTag": "amh_ComprehensiveIncomeLossNetOfTaxAvailableForCommonShareholders",
+       "weight": -1.0,
+       "order": 2.0
+      },
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperations": {
+       "parentTag": "us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic",
+       "weight": -1.0,
+       "order": 3.0
+      },
+      "http://www.americanhomes4rent.com/role/EarningsperShareUnitComputationofNetIncomeperCommonShareDetails": {
+       "parentTag": "amh_NetIncomeLossAvailableToCommonStockholdersIncludingAllocationToParticipatingSecuritiesDiluted",
+       "weight": -1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncome",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncomeLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperations",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperationsLP",
+      "http://www.americanhomes4rent.com/role/EarningsperShareUnitComputationofNetIncomeperCommonShareDetails",
+      "http://www.americanhomes4rent.com/role/EarningsperShareUnitOperatingPartnershipsComputationofNetIncomeperCommonUnitDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Dividends on preferred shares",
+        "negatedLabel": "Preferred shares (Note 10)",
+        "terseLabel": "Preferred distributions",
+        "netLabel": "Preferred distributions",
+        "label": "Preferred Stock Dividends, Income Statement Impact",
+        "documentation": "The amount of preferred stock dividends that is an adjustment to net income apportioned to common stockholders."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredStockMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PreferredStockMember",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalShareRepurchaseDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Preferred shares",
+        "verboseLabel": "Preferred capital amount",
+        "label": "Preferred Stock [Member]",
+        "documentation": "Preferred shares may provide a preferential dividend to the dividend on common stock and may take precedence over common stock in the event of a liquidation. Preferred shares typically represent an ownership interest in the company."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredStockSharesOutstanding": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PreferredStockSharesOutstanding",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalParticipatingPreferredSharesDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Preferred shares outstanding (in shares)",
+        "periodStartLabel": "Beginning balances, preferred stock (in shares)",
+        "periodEndLabel": "Ending balances, preferred stock (in shares)",
+        "verboseLabel": "Outstanding shares (in shares)",
+        "label": "Preferred Stock, Shares Outstanding",
+        "documentation": "Aggregate share number for all nonredeemable preferred stock (or preferred stock redeemable solely at the option of the issuer) held by stockholders. Does not include preferred shares that have been repurchased."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredUnitsIssued": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PreferredUnitsIssued",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLPParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Preferred units issued (in shares)",
+        "label": "Preferred Units, Issued",
+        "documentation": "The number of preferred units issued."
+       }
+      }
+     }
+    },
+    "us-gaap_PreferredUnitsOutstanding": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "PreferredUnitsOutstanding",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLPParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Preferred units outstanding (in shares)",
+        "label": "Preferred Units, Outstanding",
+        "documentation": "The number of preferred units outstanding."
+       }
+      }
+     }
+    },
+    "us-gaap_ProfitLoss": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "ProfitLoss",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperations": {
+       "parentTag": "us-gaap_NetIncomeLossAvailableToCommonStockholdersBasic",
+       "weight": 1.0,
+       "order": 1.0
+      },
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncome": {
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest",
+       "weight": 1.0,
+       "order": 1.0
+      },
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlows": {
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0,
+       "order": 1.0
+      },
+      "http://www.americanhomes4rent.com/role/EarningsperShareUnitComputationofNetIncomeperCommonShareDetails": {
+       "parentTag": "amh_NetIncomeLossAvailableToCommonStockholdersIncludingAllocationToParticipatingSecuritiesDiluted",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlows",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlowsLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncome",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncomeLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperations",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperationsLP",
+      "http://www.americanhomes4rent.com/role/EarningsperShareUnitComputationofNetIncomeperCommonShareDetails",
+      "http://www.americanhomes4rent.com/role/EarningsperShareUnitOperatingPartnershipsComputationofNetIncomeperCommonUnitDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net income",
+        "terseLabel": "Net income",
+        "verboseLabel": "Net income",
+        "label": "Net Income (Loss), Including Portion Attributable to Noncontrolling Interest",
+        "documentation": "The consolidated profit or loss for the period, net of income taxes, including the portion attributable to the noncontrolling interest."
+       }
+      }
+     }
+    },
+    "us-gaap_RetainedEarningsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "RetainedEarningsMember",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Accumulated deficit",
+        "label": "Retained Earnings [Member]",
+        "documentation": "Accumulated undistributed earnings (deficit)."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementClassOfStockAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementClassOfStockAxis",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheets",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapitalParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlows",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlowsLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquityParenthetical",
+      "http://www.americanhomes4rent.com/role/CoverPage",
+      "http://www.americanhomes4rent.com/role/RelatedPartyTransactionsDetails",
+      "http://www.americanhomes4rent.com/role/ShareBasedCompensationNarrativeDetails",
+      "http://www.americanhomes4rent.com/role/ShareBasedCompensationPSUTSRValuationInputsDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalAttheMarketCommonShareOfferingProgramDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalDistributionsDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalParticipatingPreferredSharesDetails",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalShareRepurchaseDetails",
+      "http://www.americanhomes4rent.com/role/SubsequentEventsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Class of Stock [Axis]",
+        "label": "Class of Stock [Axis]",
+        "documentation": "Information by the different classes of stock of the entity."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementEquityComponentsAxis",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquityParenthetical",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalShareRepurchaseDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Equity Components [Axis]",
+        "label": "Equity Components [Axis]",
+        "documentation": "Information by component of equity."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementLineItems": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementLineItems",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheets",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLPParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapitalParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlows",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlowsLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncomeLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquityParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperations",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperationsLP"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Statement [Line Items]",
+        "label": "Statement [Line Items]",
+        "documentation": "Line items represent financial concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes to the table."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementOfStockholdersEquityAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementOfStockholdersEquityAbstract",
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Statement of Stockholders' Equity [Abstract]",
+        "label": "Statement of Stockholders' Equity [Abstract]"
+       }
+      }
+     }
+    },
+    "us-gaap_StatementTable": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementTable",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheets",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLPParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapitalParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlows",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCashFlowsLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofComprehensiveIncomeLP",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquityParenthetical",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperations",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofOperationsLP"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Statement [Table]",
+        "label": "Statement [Table]",
+        "documentation": "Disclosure of information about statement of comprehensive income, income, other comprehensive income, financial position, cash flows, and shareholders' equity."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesNewIssues": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StockIssuedDuringPeriodSharesNewIssues",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+      "http://www.americanhomes4rent.com/role/ShareholdersEquityPartnersCapitalAttheMarketCommonShareOfferingProgramDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Issuance of Class A common shares, net of offering costs (in shares)",
+        "terseLabel": "Shares issued (in shares)",
+        "label": "Stock Issued During Period, Shares, New Issues",
+        "documentation": "Number of new stock issued during the period."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesShareBasedCompensation": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StockIssuedDuringPeriodSharesShareBasedCompensation",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Common stock issued under share-based compensation plans, net of shares withheld for employee taxes (in shares)",
+        "verboseLabel": "Common units issued under share-based compensation plans, net of units withheld for employee taxes (in shares)",
+        "label": "Shares Issued, Shares, Share-Based Payment Arrangement, after Forfeiture",
+        "documentation": "Number, after forfeiture, of shares or units issued under share-based payment arrangement. Excludes shares or units issued under employee stock ownership plan (ESOP)."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodValueNewIssues": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StockIssuedDuringPeriodValueNewIssues",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Issuance of Class A common shares, net of offering costs",
+        "label": "Stock Issued During Period, Value, New Issues",
+        "documentation": "Equity impact of the value of new stock issued during the period. Includes shares issued in an initial public offering or a secondary public offering."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StockIssuedDuringPeriodValueShareBasedCompensation",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofCapital",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Common stock issued under share-based compensation plans, net of shares withheld for employee taxes",
+        "verboseLabel": "Common units issued under share-based compensation plans, net of units withheld for employee taxes",
+        "label": "Shares Issued, Value, Share-Based Payment Arrangement, after Forfeiture",
+        "documentation": "Value, after forfeiture, of shares issued under share-based payment arrangement. Excludes employee stock ownership plan (ESOP)."
+       }
+      }
+     }
+    },
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheets": {
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0,
+       "order": 3.0
+      }
+     },
+     "presentation": [
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheets",
+      "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total equity",
+        "periodStartLabel": "Beginning balances",
+        "periodEndLabel": "Ending balances",
+        "label": "Equity, Including Portion Attributable to Noncontrolling Interest",
+        "documentation": "Amount of equity (deficit) attributable to parent and noncontrolling interest. Excludes temporary equity."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R6": {
+     "role": "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity",
+     "longName": "9952155 - Statement - Condensed Consolidated Statements of Equity",
+     "shortName": "Condensed Consolidated Statements of Equity",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "6",
+     "firstAnchor": {
+      "contextRef": "c-25",
+      "name": "us-gaap:CommonStockSharesOutstanding",
+      "unitRef": "shares",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "INF",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "amh-20240930.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-36",
+      "name": "us-gaap:AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "amh-20240930.htm",
+      "unique": true
+     }
+    },
+    "R10": {
+     "role": "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLPParenthetical",
+     "longName": "9952159 - Statement - Condensed Consolidated Balance Sheets (L.P.) (Parenthetical)",
+     "shortName": "Condensed Consolidated Balance Sheets (L.P.) (Parenthetical)",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "parenthetical",
+     "menuCat": "Statements",
+     "order": "10",
+     "firstAnchor": {
+      "contextRef": "c-146",
+      "name": "us-gaap:CommonUnitIssued",
+      "unitRef": "shares",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "INF",
+      "ancestors": [
+       "us-gaap:CommonUnitOutstanding",
+       "span",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "amh-20240930.htm",
+      "first": true,
+      "unique": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-146",
+      "name": "us-gaap:CommonUnitIssued",
+      "unitRef": "shares",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "INF",
+      "ancestors": [
+       "us-gaap:CommonUnitOutstanding",
+       "span",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "amh-20240930.htm",
+      "first": true,
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

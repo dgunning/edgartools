@@ -1,0 +1,198 @@
+{
+ "version": "2.2",
+ "instance": {
+  "gxlm-20230930.htm": {
+   "tag": {
+    "gxlm_InvestmentInLumensMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://grayscale.com/20230930",
+     "localname": "InvestmentInLumensMember",
+     "presentation": [
+      "http://grayscale.com/20230930/taxonomy/role/StatementSchedulesOfInvestment"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Investment in Lumens [Member]",
+        "documentation": "Investment in lumens.",
+        "terseLabel": "Investment in XLM"
+       }
+      }
+     }
+    },
+    "gxlm_QuantityOfLumens": {
+     "xbrltype": "decimalItemType",
+     "nsuri": "http://grayscale.com/20230930",
+     "localname": "QuantityOfLumens",
+     "presentation": [
+      "http://grayscale.com/20230930/taxonomy/role/StatementSchedulesOfInvestment"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Quantity of lumens.",
+        "label": "Quantity of XLM"
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentOwnedAtCost": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "InvestmentOwnedAtCost",
+     "crdr": "debit",
+     "presentation": [
+      "http://grayscale.com/20230930/taxonomy/role/StatementSchedulesOfInvestment",
+      "http://grayscale.com/20230930/taxonomy/role/StatementStatementsOfAssetsAndLiabilitiesParenthetical"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "verboseLabel": "Cost",
+        "label": "Investment Owned, Cost",
+        "terseLabel": "Cost of investment in XLM, at fair value",
+        "documentation": "Cost of the investment."
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentOwnedPercentOfNetAssets": {
+     "xbrltype": "percentItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "InvestmentOwnedPercentOfNetAssets",
+     "presentation": [
+      "http://grayscale.com/20230930/taxonomy/role/StatementSchedulesOfInvestment"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "% of Net Assets",
+        "label": "Investment Owned, Net Assets, Percentage",
+        "documentation": "Percentage of investment owned to net assets."
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentTypeAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "InvestmentTypeAxis",
+     "presentation": [
+      "http://grayscale.com/20230930/taxonomy/role/StatementSchedulesOfInvestment"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Investment Type [Axis]",
+        "documentation": "Information by type of investments."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R3": {
+     "role": "http://grayscale.com/20230930/taxonomy/role/StatementStatementsOfAssetsAndLiabilitiesParenthetical",
+     "longName": "100020 - Statement - STATEMENTS OF ASSETS AND LIABILITIES (Parenthetical)",
+     "shortName": "STATEMENTS OF ASSETS AND LIABILITIES (Parenthetical)",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "parenthetical",
+     "menuCat": "Statements",
+     "order": "3",
+     "firstAnchor": {
+      "contextRef": "C_51b22f1f-e6a6-4eae-ba22-81a13ffbfd18",
+      "name": "us-gaap:InvestmentOwnedAtCost",
+      "unitRef": "U_USD",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "p",
+       "td",
+       "tr",
+       "table",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "gxlm-20230930.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "C_51b22f1f-e6a6-4eae-ba22-81a13ffbfd18",
+      "name": "us-gaap:CommonStockParOrStatedValuePerShare",
+      "unitRef": "U_UnitedStatesOfAmericaDollarsShare",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "INF",
+      "ancestors": [
+       "us-gaap:CommonStockParOrStatedValuePerShare",
+       "span",
+       "p",
+       "td",
+       "tr",
+       "table",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "gxlm-20230930.htm",
+      "unique": true
+     }
+    },
+    "R4": {
+     "role": "http://grayscale.com/20230930/taxonomy/role/StatementSchedulesOfInvestment",
+     "longName": "100030 - Statement - SCHEDULES OF INVESTMENT",
+     "shortName": "SCHEDULES OF INVESTMENT",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "4",
+     "firstAnchor": {
+      "contextRef": "C_51b22f1f-e6a6-4eae-ba22-81a13ffbfd18",
+      "name": "us-gaap:InvestmentOwnedAtCost",
+      "unitRef": "U_USD",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-3",
+      "ancestors": [
+       "span",
+       "p",
+       "td",
+       "tr",
+       "table",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "gxlm-20230930.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "C_51b22f1f-e6a6-4eae-ba22-81a13ffbfd18",
+      "name": "us-gaap:InvestmentOwnedPercentOfNetAssets",
+      "unitRef": "U_pure",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "INF",
+      "ancestors": [
+       "span",
+       "p",
+       "td",
+       "tr",
+       "table",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "gxlm-20230930.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

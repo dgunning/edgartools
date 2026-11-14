@@ -1,0 +1,1057 @@
+[
+ {
+  "concept": "us-gaap:CommonStockSharesOutstanding",
+  "context_ref": "c-4",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "136020049",
+  "numeric_value": 136020049.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesOutstanding",
+  "context_ref": "c-5",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "135440292",
+  "numeric_value": 135440292.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:TreasuryStockCommonShares",
+  "context_ref": "c-4",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "1462979",
+  "numeric_value": 1462979.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:TreasuryStockCommonShares",
+  "context_ref": "c-5",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "1462979",
+  "numeric_value": 1462979.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesOutstanding",
+  "context_ref": "c-11",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "136116299",
+  "numeric_value": 136116299.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-11",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "136000",
+  "numeric_value": 136000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-12",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "337615000",
+  "numeric_value": 337615000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-13",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "-68311000",
+  "numeric_value": -68311000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockCommonShares",
+  "context_ref": "c-14",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "37",
+  "numeric_value": 37.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockCommonMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-14",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "-179000",
+  "numeric_value": -179000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockCommonMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-15",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "8347000",
+  "numeric_value": 8347000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:NoncontrollingInterestMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-16",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "277608000",
+  "numeric_value": 277608000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:RedeemableNoncontrollingInterestEquityCarryingAmount",
+  "context_ref": "c-16",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "22200000",
+  "numeric_value": 22200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation",
+  "context_ref": "c-17",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "1156941",
+  "numeric_value": 1156941.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "c-17",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "1000",
+  "numeric_value": 1000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "c-18",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "7618000",
+  "numeric_value": 7618000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "c-10",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "7619000",
+  "numeric_value": 7619000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesPaidForTaxWithholdingForShareBasedCompensation",
+  "context_ref": "c-17",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "406528",
+  "numeric_value": 406528.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+  "context_ref": "c-18",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "1855000",
+  "numeric_value": 1855000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+  "context_ref": "c-10",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "1855000",
+  "numeric_value": 1855000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:TreasuryStockSharesAcquired",
+  "context_ref": "c-17",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "1426420",
+  "numeric_value": 1426420.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockSharesAcquired",
+  "context_ref": "c-19",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "1426420",
+  "numeric_value": 1426420.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockCommonMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockValueAcquiredCostMethod",
+  "context_ref": "c-19",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "7321000",
+  "numeric_value": 7321000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockCommonMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockValueAcquiredCostMethod",
+  "context_ref": "c-10",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "7321000",
+  "numeric_value": 7321000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "innv:FairValueAdjustmentForRedeemableNoncontrollingInterests",
+  "context_ref": "c-20",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "-2423000",
+  "numeric_value": -2423000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "innv:FairValueAdjustmentForRedeemableNoncontrollingInterests",
+  "context_ref": "c-10",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "-2423000",
+  "numeric_value": -2423000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "innv:RedeemableNoncontrollingInterestFairValueCarryingAmount",
+  "context_ref": "c-10",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "2423000",
+  "numeric_value": 2423000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest",
+  "context_ref": "c-20",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "-30313000",
+  "numeric_value": -30313000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest",
+  "context_ref": "c-21",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "-5417000",
+  "numeric_value": -5417000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:NoncontrollingInterestMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest",
+  "context_ref": "c-10",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "-35730000",
+  "numeric_value": -35730000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLossAttributableToRedeemableNoncontrollingInterest",
+  "context_ref": "c-10",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "387000",
+  "numeric_value": 387000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:ProfitLoss",
+  "context_ref": "c-10",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "-35343000",
+  "numeric_value": -35343000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesOutstanding",
+  "context_ref": "c-22",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "135440292",
+  "numeric_value": 135440292.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-22",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "137000",
+  "numeric_value": 137000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-23",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "343378000",
+  "numeric_value": 343378000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-24",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "-101047000",
+  "numeric_value": -101047000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockCommonShares",
+  "context_ref": "c-25",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "1462979",
+  "numeric_value": 1462979.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockCommonMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-25",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "-7500000",
+  "numeric_value": -7500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockCommonMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-26",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "2930000",
+  "numeric_value": 2930000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:NoncontrollingInterestMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-5",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "237898000",
+  "numeric_value": 237898000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:RedeemableNoncontrollingInterestEquityCarryingAmount",
+  "context_ref": "c-5",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "25010000",
+  "numeric_value": 25010000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation",
+  "context_ref": "c-27",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "861246",
+  "numeric_value": 861246.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "c-28",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "7048000",
+  "numeric_value": 7048000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "7048000",
+  "numeric_value": 7048000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesPaidForTaxWithholdingForShareBasedCompensation",
+  "context_ref": "c-27",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "281489",
+  "numeric_value": 281489.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+  "context_ref": "c-28",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "1702000",
+  "numeric_value": 1702000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "1702000",
+  "numeric_value": 1702000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "innv:NoncontrollingInterestIncreaseFromJointVentureContributions",
+  "context_ref": "c-29",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "3200000",
+  "numeric_value": 3200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:NoncontrollingInterestMember"
+  }
+ },
+ {
+  "concept": "innv:NoncontrollingInterestIncreaseFromJointVentureContributions",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "3200000",
+  "numeric_value": 3200000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "innv:TemporaryEquityDecreaseFromDistributionToJointVenture",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "1995000",
+  "numeric_value": 1995000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "innv:FairValueAdjustmentForRedeemableNoncontrollingInterests",
+  "context_ref": "c-30",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "-2174000",
+  "numeric_value": -2174000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "innv:FairValueAdjustmentForRedeemableNoncontrollingInterests",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "-2174000",
+  "numeric_value": -2174000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "innv:RedeemableNoncontrollingInterestFairValueCarryingAmount",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "2174000",
+  "numeric_value": 2174000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest",
+  "context_ref": "c-30",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "-2537000",
+  "numeric_value": -2537000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest",
+  "context_ref": "c-29",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "-2970000",
+  "numeric_value": -2970000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:NoncontrollingInterestMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLossIncludingPortionAttributableToNonredeemableNoncontrollingInterest",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "-5507000",
+  "numeric_value": -5507000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLossAttributableToRedeemableNoncontrollingInterest",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "4824000",
+  "numeric_value": 4824000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:ProfitLoss",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "-683000",
+  "numeric_value": -683000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesOutstanding",
+  "context_ref": "c-31",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "136020049",
+  "numeric_value": 136020049.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-31",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "137000",
+  "numeric_value": 137000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-32",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "348724000",
+  "numeric_value": 348724000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-33",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "-105758000",
+  "numeric_value": -105758000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockCommonShares",
+  "context_ref": "c-34",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "1462979",
+  "numeric_value": 1462979.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockCommonMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-34",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "-7500000",
+  "numeric_value": -7500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockCommonMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-35",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "3160000",
+  "numeric_value": 3160000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:NoncontrollingInterestMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+  "context_ref": "c-4",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "238763000",
+  "numeric_value": 238763000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:RedeemableNoncontrollingInterestEquityCarryingAmount",
+  "context_ref": "c-4",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "30013000",
+  "numeric_value": 30013000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:IncreaseDecreaseInAccountsReceivable",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "6018000",
+  "numeric_value": 6018000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:IncreaseDecreaseInAccountsReceivable",
+  "context_ref": "c-10",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "-11210000",
+  "numeric_value": -11210000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "64714000",
+  "numeric_value": 64714000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "c-10",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "32866000",
+  "numeric_value": 32866000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+  "context_ref": "c-1",
+  "period_key": "duration_2025-07-01_2026-06-30",
+  "period_type": "duration",
+  "value": "14309000",
+  "numeric_value": 14309000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:PaymentsToAcquirePropertyPlantAndEquipment",
+  "context_ref": "c-10",
+  "period_key": "duration_2024-07-01_2025-06-30",
+  "period_type": "duration",
+  "value": "6263000",
+  "numeric_value": 6263000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:RedeemableNoncontrollingInterestEquityCarryingAmount",
+  "context_ref": "c-4",
+  "period_key": "instant_2026-06-30",
+  "period_type": "instant",
+  "value": "30000000.0",
+  "numeric_value": 30000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:RedeemableNoncontrollingInterestEquityCarryingAmount",
+  "context_ref": "c-5",
+  "period_key": "instant_2025-06-30",
+  "period_type": "instant",
+  "value": "25000000.0",
+  "numeric_value": 25000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": false,
+  "dimensions": {}
+ }
+]

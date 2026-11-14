@@ -1,0 +1,22 @@
+{
+ "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity": {
+  "ifrs-full_ComponentsOfEquityAxis": {
+   "default_member_id": "ifrs-full_EquityMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis": {
+   "default_member_id": "ifrs-full_RestatedMember",
+   "is_typed_dimension": false
+  }
+ },
+ "merged": {
+  "ifrs-full_ComponentsOfEquityAxis": {
+   "default_member_id": "ifrs-full_EquityMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis": {
+   "default_member_id": "ifrs-full_RestatedMember",
+   "is_typed_dimension": false
+  }
+ }
+}
