@@ -21,7 +21,8 @@ Value cell classes:
     text — non-numeric (empty or label)
 """
 import re
-from dataclasses import dataclass
+import unicodedata
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple, Union
 
 import lxml.html
@@ -30,7 +31,8 @@ from lxml.html import HtmlElement
 
 from edgar.documents.utils.html_utils import create_lxml_parser, text_stripped
 
-__all__ = ['ConceptRow', 'ConceptReport', 'extract_concepts_from_report', 'parse_numeric']
+__all__ = ['ConceptRow', 'ConceptReport', 'declared_currency_scales', 'extract_concepts_from_report',
+           'is_currency_unit', 'parse_numeric', 'unit_code', 'unit_symbol']
 
 _DEFREF_RE = re.compile(r"defref_([^'\"]+)")
 _TOTAL_CLASSES = frozenset({'reu', 'rou'})
@@ -48,6 +50,86 @@ _SCALING_MAP = {
     'billions': 1_000_000_000,
     'hundreds': 100,
 }
+
+# The scale statements the SEC renderer writes under a report title, one per
+# unit, comma separated: "shares in Thousands, $ in Millions",
+# "₨ in Millions, $ in Millions", "$ / shares in Units". A unit with no
+# statement is shown in whole units.
+_SCALE_STATEMENT_RE = re.compile(
+    r'^(?P<unit>.+?)\s*in\s+(?P<scale>Units|Hundreds|Thousands|Millions|Billions)$',
+    re.IGNORECASE,
+)
+_SCALE_WORDS = dict(_SCALING_MAP, units=1)
+
+# The unit the renderer names for a whole report ("... - USD ($)") or for one
+# column ("INR (₨)"): an ISO code and the symbol the values carry.
+_UNIT_LABEL_RE = re.compile(r'\b(?P<code>[A-Z]{3})\s+\((?P<symbol>[^)]+)\)')
+_SHARE_SCALE_UNIT = 'shares'
+
+
+def _parse_scale_statements(text: str) -> Dict[str, int]:
+    """``{unit symbol: multiplier}`` from the lines under a report title.
+
+    ``"shares in Thousands, $ in Millions"`` -> ``{'shares': 1000, '$': 1000000}``.
+    """
+    scales: Dict[str, int] = {}
+    for part in text.split(','):
+        match = _SCALE_STATEMENT_RE.match(part.strip())
+        if match:
+            unit = match.group('unit').strip()
+            if unit.lower() == _SHARE_SCALE_UNIT:
+                unit = _SHARE_SCALE_UNIT  # "Shares in Thousands" as well as "shares in ..."
+            scales[unit] = _SCALE_WORDS[match.group('scale').lower()]
+    return scales
+
+
+def is_currency_unit(unit: str) -> bool:
+    """True when a scale-statement unit names a currency (not shares, ounces, MWh, per-share)."""
+    unit = (unit or '').strip()
+    if not unit or '/' in unit:
+        return False
+    if re.fullmatch(r'[A-Z]{3}', unit):
+        return True
+    return (unicodedata.category(unit[-1]) == 'Sc'
+            and all(ch.isalpha() and ch.isupper() for ch in unit[:-1]))
+
+
+def unit_symbol(unit_label: Optional[str]) -> Optional[str]:
+    """The value symbol of a unit label: ``'INR (₨)'`` -> ``'₨'``."""
+    if not unit_label:
+        return None
+    match = _UNIT_LABEL_RE.search(unit_label)
+    return match.group('symbol') if match else None
+
+
+def unit_code(unit_label: Optional[str]) -> Optional[str]:
+    """The ISO 4217 code of a unit label: ``'INR (₨)'`` -> ``'INR'``."""
+    if not unit_label:
+        return None
+    match = _UNIT_LABEL_RE.search(unit_label)
+    return match.group('code') if match else None
+
+
+def _declared_currency_scale(unit_scales: Dict[str, int], header_unit: Optional[str]) -> int:
+    """The one currency scale a report's title cell declares.
+
+    The scale of the report-wide unit when the title names one; otherwise the
+    scale every currency statement agrees on. No statement means whole units
+    (1). When currencies are declared at different scales and no report-wide
+    unit picks one, the ``$`` scale is returned (1 if none), as before.
+    """
+    symbol = unit_symbol(header_unit)
+    if symbol is not None:
+        return unit_scales.get(symbol, 1)
+    currency_scales = declared_currency_scales(unit_scales)
+    if len(currency_scales) == 1:
+        return currency_scales.pop()
+    return unit_scales.get('$', 1)
+
+
+def declared_currency_scales(unit_scales: Dict[str, int]) -> set:
+    """The distinct scales a title cell declares for currencies (see ``is_currency_unit``)."""
+    return {scale for unit, scale in unit_scales.items() if is_currency_unit(unit)}
 
 
 def _parser():
@@ -118,16 +200,53 @@ def _child_cells(el: HtmlElement) -> List[HtmlElement]:
     return el.xpath('./*[self::th or self::td]')
 
 
+# ISO 4217 currency codes, which the renderer may write before an amount
+# ("CHF 10") instead of a symbol.
+_ISO_4217_CODES = frozenset("""
+AED AFN ALL AMD ANG AOA ARS AUD AWG AZN BAM BBD BDT BGN BHD BIF BMD BND BOB BRL BSD BTN BWP BYN
+BZD CAD CDF CHF CLP CNY COP CRC CUP CVE CZK DJF DKK DOP DZD EGP ERN ETB EUR FJD FKP GBP GEL GHS
+GIP GMD GNF GTQ GYD HKD HNL HTG HUF IDR ILS INR IQD IRR ISK JMD JOD JPY KES KGS KHR KMF KPW KRW
+KWD KYD KZT LAK LBP LKR LRD LSL LYD MAD MDL MGA MKD MMK MNT MOP MRU MUR MVR MWK MXN MYR MZN NAD
+NGN NIO NOK NPR NZD OMR PAB PEN PGK PHP PKR PLN PYG QAR RON RSD RUB RWF SAR SBD SCR SDG SEK SGD
+SHP SLE SLL SOS SRD SSP STN SVC SYP SZL THB TJS TMT TND TOP TRY TTD TWD TZS UAH UGX USD UYU UZS
+VES VED VND VUV WST XAF XCD XOF XPF YER ZAR ZMW ZWL
+""".split())
+_ISO_CODE_PREFIX_RE = re.compile(r'^(\(?)\s*([A-Z]{3})\s+(?=[\d(.-])')
+_SYMBOL_LETTERS_RE = re.compile(r'^(\(?)\s*([A-Z]{1,3})(?=(.))')
+
+
+def _strip_currency_prefix(value_str: str) -> str:
+    """Drop a currency prefix written in letters: ``'CHF 10'``, ``'R$ 10'``, ``'US$ 5'``.
+
+    Only an ISO 4217 code followed by a space, or one to three capitals
+    directly before a currency symbol, is a currency prefix; other leading
+    letters (``'ABC 12'``) are left, so the value does not parse.
+    """
+    match = _ISO_CODE_PREFIX_RE.match(value_str)
+    if match and match.group(2) in _ISO_4217_CODES:
+        return match.group(1) + value_str[match.end():]
+    match = _SYMBOL_LETTERS_RE.match(value_str)
+    if match and unicodedata.category(match.group(3)) == 'Sc':
+        return match.group(1) + value_str[match.end():]
+    return value_str
+
+
 def parse_numeric(value_str: str) -> Optional[float]:
     """
     Parse a display value like '$ 95,359' or '(279)' into a float.
 
     Handles currency symbols, commas, parenthetical negatives, and unicode minus.
+    Any Unicode currency symbol is dropped, not only ``$``: a report in
+    rupees or yen shows ``'₨ 12,724'`` or ``'¥ 924'``. So is a currency
+    prefix the renderer writes in letters: ``'R$ 10'``, ``'US$ 5'``,
+    ``'CHF 10'``.
     Returns None for empty or non-numeric strings.
     """
     if not value_str:
         return None
-    cleaned = value_str.replace('$', '').replace(',', '').replace('%', '').replace(' ', '').strip()
+    value_str = _strip_currency_prefix(value_str.strip())
+    cleaned = ''.join(ch for ch in value_str if unicodedata.category(ch) != 'Sc')
+    cleaned = cleaned.replace(',', '').replace('%', '').replace(' ', '').strip()
     if cleaned.startswith('(') and cleaned.endswith(')'):
         cleaned = '-' + cleaned[1:-1]
     cleaned = cleaned.replace('−', '-')  # unicode minus
@@ -197,13 +316,19 @@ class ConceptRow:
 class ConceptReport:
     """A parsed R*.htm report with concept annotations extracted.
 
-    Note on ``currency_scaling``: this default is populated by a narrow text
-    match on the R*.htm header (``$ in Millions`` only) and is unreliable
-    across the filer population (see GH #807). When this report is reached
-    via ``ViewerReport.currency_scaling``, the value is replaced in place by
-    a scale derived from the XBRL ``decimals`` attribute (filer-mandated,
-    uniform). Prefer ``ViewerReport.currency_scaling`` over reading this
-    field directly.
+    ``currency_scaling`` is the scale the report's title cell declares for its
+    currency (``$ in Millions`` -> 1_000_000; no statement -> 1, whole units).
+    ``header_found`` is True when the report had a title cell to read it
+    from; a report built without one (``header_found=False``) has its scale
+    resolved from XBRL ``decimals`` by ``ViewerReport.currency_scaling``
+    (GH #807).
+
+    The remaining fields record what the page states about units:
+
+    - ``unit_scales``: every scale statement under the title, by unit symbol
+      (``{'shares': 1_000, '$': 1_000_000}``).
+    - ``header_unit``: the report-wide unit named in the title
+      (``'USD ($)'``), or None when the report names none or several.
     """
     title: str
     period_headers: List[str]
@@ -211,6 +336,9 @@ class ConceptReport:
     currency: str = 'USD'
     currency_scaling: int = 1
     shares_scaling: int = 1
+    header_found: bool = False
+    unit_scales: Dict[str, int] = field(default_factory=dict)
+    header_unit: Optional[str] = None
 
     @property
     def concepts(self) -> List[str]:
@@ -590,30 +718,48 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
     currency = 'USD'
     currency_scaling = 1
     shares_scaling = 1
+    header_found = False
+    unit_scales: Dict[str, int] = {}
+    header_unit: Optional[str] = None
     tl = _find_by_class(report_table, 'th', 'tl')
     if tl is not None:
         strong = tl.find('.//strong')
         if strong is not None:
+            header_found = True
             full_header = strong.text_content()
-            # Title is the first line (before <br>)
+            # Title is the first line (before <br>); the scale statements
+            # follow it ("shares in Thousands, $ in Millions").
             title_parts = []
+            scale_parts = []
+            seen_br = False
             for child in _child_nodes(strong):
                 if not isinstance(child, str) and child.tag == 'br':
-                    break
+                    seen_br = True
+                    continue
                 text = child if isinstance(child, str) else child.text_content()
                 if text:
-                    title_parts.append(text.strip())
+                    (scale_parts if seen_br else title_parts).append(text.strip())
             title = ' '.join(title_parts).strip()
             if not title:
                 title = full_header.strip()
-            # Parse scaling from lines after <br>
-            # e.g., "shares in Thousands, $ in Millions"
-            header_lower = full_header.lower()
-            for word, factor in _SCALING_MAP.items():
-                if f'$ in {word}' in header_lower or f'$in {word}' in header_lower:
-                    currency_scaling = factor
-                if f'shares in {word}' in header_lower:
-                    shares_scaling = factor
+            unit_match = re.search(r'\b([A-Z]{3})\s+\(([^)]+)\)\s*$', title)
+            if unit_match:
+                header_unit = unit_match.group(0).strip()
+            if seen_br:
+                unit_scales = _parse_scale_statements(' '.join(scale_parts))
+                shares_scaling = unit_scales.get(_SHARE_SCALE_UNIT, 1)
+                currency_scaling = _declared_currency_scale(unit_scales, header_unit)
+            else:
+                # No line break: no separable scale statement. Keep the
+                # original narrow match on the whole text.
+                header_lower = full_header.lower()
+                for word, factor in _SCALING_MAP.items():
+                    if f'$ in {word}' in header_lower or f'$in {word}' in header_lower:
+                        currency_scaling = factor
+                        unit_scales['$'] = factor
+                    if f'shares in {word}' in header_lower:
+                        shares_scaling = factor
+                        unit_scales[_SHARE_SCALE_UNIT] = factor
 
     # Extract period headers via a column-position-aware grid walk so we
     # correctly handle (a) multi-row headers with colspan groups, (b)
@@ -713,4 +859,7 @@ def extract_concepts_from_report(html_content: str, form: Optional[str] = None) 
         currency=currency,
         currency_scaling=currency_scaling,
         shares_scaling=shares_scaling,
+        header_found=header_found,
+        unit_scales=unit_scales,
+        header_unit=header_unit,
     )
