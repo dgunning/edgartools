@@ -17,6 +17,9 @@ from edgar.documents.extractors.pattern_section_extractor import SectionExtracto
 from edgar.documents.extractors.toc_section_detector import TOCSectionDetector
 from edgar.documents.nodes import HeadingNode, SectionNode
 
+# A whole-Part section ('part_ii'), as opposed to an item inside one ('part_ii_item_5').
+_PART_CONTAINER = re.compile(r'^part_[ivx]+$')
+
 logger = logging.getLogger(__name__)
 
 
@@ -322,11 +325,18 @@ class HybridSectionDetector:
         if enable_cross_validation and self.thresholds.enable_cross_validation:
             sections = self._cross_validate(sections)
 
-        # Validate boundaries
-        sections = self._validate_boundaries(sections)
-
-        # Deduplicate
-        sections = self._deduplicate(sections)
+        # Boundaries and duplicates are judged within a layer. A Part section
+        # holds its items, so against them it always "overlaps": checked as one
+        # flat list, the boundary pass cut the Part at its first item and the
+        # duplicate pass grouped the Part with items it contains and kept one
+        # (edgartools-qw60x.1).
+        parts = {k: s for k, s in sections.items() if _PART_CONTAINER.match(k) and not s.item}
+        layered = {}
+        for layer in ({k: s for k, s in sections.items() if k not in parts}, parts):
+            if layer:
+                layered.update(self._deduplicate(self._validate_boundaries(layer)))
+        sections = {k: layered[k] for k in sections if k in layered}
+        sections.update({k: s for k, s in layered.items() if k not in sections})
 
         # Filter by confidence
         sections = self._filter_by_confidence(sections)

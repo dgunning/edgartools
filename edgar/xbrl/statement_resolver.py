@@ -656,18 +656,6 @@ class StatementResolver:
 
         return is_valid, confidence, reason
 
-    def _accepted_candidates(self, statements: List[Dict[str, Any]], statement_type: str) -> List[Dict[str, Any]]:
-        """Candidates that pass essential-concept validation (issue #659).
-
-        GH #1843: a filing's own primary need not use the ordinary concepts
-        (AEON's custom combined loss, a BDC's investment income). When no
-        candidate validates, one accepted on identity - typed this kind by its
-        root abstract and declared a statement - is returned instead, so a
-        validated role still wins over an unvalidated one.
-        """
-        valid = [s for s in statements if self._validate_statement(s, statement_type)[0]]
-        return valid or [s for s in statements if self._is_declared_primary(s, statement_type)]
-
     @staticmethod
     def _is_declared_primary(stmt: Dict[str, Any], statement_type: str) -> bool:
         """Whether a role is, by the filing's own account, the statement asked for.
@@ -1276,6 +1264,21 @@ class StatementResolver:
                 (self._match_by_role_definition(statement_type), 0.5),
             ]
 
+        def _resolved(statements, role, conf):
+            canonical_type = statement_type if is_canonical_type else statements[0].get('type', statement_type)
+            result = (statements, role, canonical_type, conf)
+            self._cache[cache_key] = result
+            return result
+
+        # GH #1843 accepts a declared primary that fails validation, but only as
+        # a fallback held while later steps run. Accepting it inside its own step
+        # returned MTD's FY2021-2023 "Statement of Financial Position, Classified"
+        # role, which holds only the Schedule II text block, before the
+        # role-pattern step reached the Consolidated Balance Sheets (GH #1970).
+        # A later validated candidate replaces the held fallback when the filing
+        # declares it a statement too; a validated detail or note does not, so
+        # AEON's restatement details still lose to its declared primary.
+        held = None
         for match, min_conf in cascade:
             statements, role, conf = match
             if not statements or conf < min_conf:
@@ -1284,16 +1287,20 @@ class StatementResolver:
             # Issue #659: Validate that the top candidate actually contains the
             # essential concepts for this statement type. Filter out mislabeled roles.
             if needs_validation:
-                valid = self._accepted_candidates(statements, statement_type)
-                if not valid:
-                    continue
-                statements = valid
-                role = valid[0]['role']
+                valid = [s for s in statements if self._validate_statement(s, statement_type)[0]]
+                if valid:
+                    if held and not declares_statement(valid[0].get('definition'), valid[0].get('menu_category')):
+                        return _resolved(*held)
+                    return _resolved(valid, valid[0]['role'], conf)
+                declared = [s for s in statements if self._is_declared_primary(s, statement_type)]
+                if declared and held is None:
+                    held = (declared, declared[0]['role'], conf)
+                continue
 
-            canonical_type = statement_type if is_canonical_type else statements[0].get('type', statement_type)
-            result = (statements, role, canonical_type, conf)
-            self._cache[cache_key] = result
-            return result
+            return _resolved(statements, role, conf)
+
+        if held:
+            return _resolved(*held)
 
         # Issue #518: Special fallback for IncomeStatement -> ComprehensiveIncome
         # Many filings have ComprehensiveIncome instead of separate IncomeStatement

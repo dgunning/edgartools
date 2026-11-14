@@ -1,0 +1,1 @@
+**Negated labels sign the value on every statement** — the presentation sign applied only to four statement types, so a statement reached by role kept the filed sign (DRDGOLD cost of sales: +3,741,500,000 where the SEC page shows (3,742) million) and parentheticals and statements of equity ignored negated labels. On an 82-filing sample, sign disagreements fell from 58 cells to 0.
