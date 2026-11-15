@@ -1771,15 +1771,22 @@ class Statement:
                 original = result[col]
                 numeric_col = pd.to_numeric(original, errors='coerce')
                 is_text = original.notna() & numeric_col.isna() & original.astype(str).str.strip().ne('')
+                # Under a negated label the SEC page shows a zero as 0, however it was
+                # filed; 0.0 * -1 is -0.0 (edgartools-auvk1.12: Entergy
+                # 0000065984-24-000112). Without one, a zero filed with a minus sign
+                # keeps it, as the page's (0.00) loss per share does (0001493152-24-046709).
+                flip = mask & numeric_col.notna() & numeric_col.ne(0)
+                negated_zero = mask & signs.lt(0) & numeric_col.eq(0)
+                presented = (numeric_col * signs).where(flip, 0.0)
+                change = flip | negated_zero
                 if not is_text.any():
                     # FIX (Issue #599): a column of numbers (and blanks) becomes numeric,
                     # with preferred_sign applied where it's not None and not 0
-                    result[col] = numeric_col.where(~mask, numeric_col * signs)
+                    result[col] = numeric_col.where(~change, presented)
                 else:
                     # A text cell (a note's narrative, Issue #762) stays as it is;
                     # only the numeric cells take the sign
-                    flip = mask & numeric_col.notna()
-                    result[col] = original.where(~flip, numeric_col * signs)
+                    result[col] = original.where(~change, presented)
 
         return result
 

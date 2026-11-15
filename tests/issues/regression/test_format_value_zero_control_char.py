@@ -12,8 +12,9 @@ likely a mangled em dash (U+2014, whose low byte is 0x14). Zero now goes
 through the same formatting as every other number: "$0" for a monetary value,
 "0" otherwise, with the decimals the caller asked for.
 
-Statement rendering blanks a zero cell before it reaches this helper; that
-display is unchanged (asserted below on a tracked fixture).
+Statement rendering used to blank a zero cell before it reached this helper.
+Since edgartools-auvk1.12 a reported zero reaches it and prints as the SEC page
+shows it (asserted below on a tracked fixture).
 """
 from pathlib import Path
 
@@ -56,8 +57,9 @@ def test_source_has_no_control_characters():
     assert not CONTROL_CHARS & set(source)
 
 
-def test_rendered_statement_zero_cells_stay_blank():
-    """Statement rendering keeps blanking a filed zero before it reaches format_value.
+def test_rendered_statement_zero_cells_show_zero():
+    """Statement rendering prints a filed zero as the page does (edgartools-auvk1.12); it used
+    to blank it, so it looked like a fact that was never filed.
 
     Ground truth: Golub Capital BDC 10-Q for 2025-03-31, 0001476765-25-000040
     (tests/fixtures/xbrl/gbdc), R6 cash flow, $ thousands: "Proceeds from non-cash
@@ -67,6 +69,6 @@ def test_rendered_statement_zero_cells_stay_blank():
     rendered = XBRL.from_directory(Path("tests/fixtures/xbrl/gbdc")).render_statement("CashFlowStatement")
     row = next(r for r in rendered.rows if r.metadata.get("concept") == "gbdc_ProceedsFromNonCashDividends")
     assert [c.value for c in row.cells] == [3_549_000, 0]
-    assert [c.get_formatted_value() for c in row.cells] == ["$3,549", ""]
+    assert [c.get_formatted_value() for c in row.cells] == ["$3,549", "$0"]
     text = str(rendered) + rendered.to_markdown()
     assert "\x14" not in text

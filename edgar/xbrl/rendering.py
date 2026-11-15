@@ -1406,6 +1406,12 @@ def apply_presentation_sign(
     statement types, so a statement reached by its role (typed None) or a
     parenthetical kept the filed sign (edgartools-auvk1.13: DRDGOLD
     0001562762-22-000397 cost of sales, BHE 0001081316-24-000016 pension OCI tax).
+
+    Under a negated label the SEC page shows a zero as 0, however it was filed,
+    where 0.0 * -1 is -0.0 (edgartools-auvk1.12: Entergy 0000065984-24-000112 filed
+    0; Nocopi 0001683168-26-003002 goodwill impairment on the income statement,
+    filed -0). Without one, a zero filed with a minus sign keeps it: the page
+    shows (0.00) for a loss per share that rounds to zero (0001493152-24-046709).
     """
     if not isinstance(value, (int, float)) or isinstance(value, bool):
         return value
@@ -1414,6 +1420,8 @@ def apply_presentation_sign(
     preferred_sign = (preferred_signs or {}).get(period_key)
     if preferred_sign is None or preferred_sign == 0:
         return value
+    if value == 0:
+        return abs(value) if preferred_sign < 0 else value
     return value * preferred_sign
 
 
@@ -1649,8 +1657,10 @@ def _format_value_for_display_as_string(
     Returns:
         str: Formatted value as a string
     """
-    # Fast path for empty values
-    if not value or value == "":
+    # Fast path for empty values. A reported zero is a value, not an empty cell:
+    # `not value` blanked it, so it looked like a fact that was never filed
+    # (edgartools-auvk1.12: Digi 0000854775-20-000032 shows 0 for FY2020 OCI).
+    if value is None or value == "":
         return ""
 
     # Type check without multiple isinstance calls

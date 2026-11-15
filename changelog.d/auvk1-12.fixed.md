@@ -1,0 +1,1 @@
+**A reported zero shows as 0** — the rendered table printed nothing for a filed zero, as if no fact were filed, and a negated label turned a zero into -0.0 in `to_dataframe()`; the SEC page shows 0 for both. On an 82-filing sample, blank zeros fell from 840 cells to 0 and negative zeros from 185 to 0.
