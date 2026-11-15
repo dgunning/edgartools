@@ -96,6 +96,31 @@ def balance_cell_key(values: Mapping[str, Any], column_key: str, preferred_label
     return None
 
 
+def balance_cell_keys(column_key: str) -> frozenset:
+    """Every key ``balance_cell_key`` can choose for ``column_key``, whatever the row's label role.
+
+    A statement requested for a single duration period must keep the instant
+    facts that column can show: the closing balance (the period end), the
+    opening balance (the day before the start, or the start itself). Without
+    them a balance row, such as a par value on a parenthetical page under
+    a "12 Months Ended" column, has no fact and drops out of the
+    statement (edgartools-auvk1.21, MindMed 0000950170-22-004724).
+    """
+    keys = {column_key}
+    if column_key.startswith('duration_'):
+        parts = column_key.split('_')
+        if len(parts) >= 3:
+            start_date, end_date = parts[1], parts[2]
+            keys.add(f"instant_{end_date}")
+            keys.add(f"instant_{start_date}")
+            try:
+                prior_day = datetime.strptime(start_date, '%Y-%m-%d').toordinal() - 1
+                keys.add(f"instant_{date.fromordinal(prior_day).isoformat()}")
+            except ValueError:
+                pass
+    return frozenset(keys)
+
+
 def iso4217_code(measure: Optional[str]) -> Optional[str]:
     """Return the ISO 4217 code of an ``iso4217:`` unit measure, else ``None``."""
     if measure and measure.startswith('iso4217:'):
