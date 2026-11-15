@@ -251,26 +251,43 @@ def test_finding_chindata_unit_column():
         assert cell.reason == 'page unit U_iso4217USD, library row unit U_iso4217CNY'
 
 
-def test_cell_is_judged_under_its_column_period_with_the_fact_period_beside():
+SHARES_ISSUED = 'us-gaap:CommonStockSharesIssued'
+DIAMONDROCK_Q1 = '3 Months Ended Mar. 31, 2024'
+
+
+def test_cell_is_judged_under_its_column_period():
     """DiamondRock 10-Q (0001298946-24-000052), balance sheet parenthetical: R3 heads the first column
     "3 Months Ended / Mar. 31, 2024" and prints 210,064,433 common shares issued, a fact for the instant
-    Mar. 31, 2024. Requesting the column's period (duration 2024-01-01 to 2024-03-31) the library shows
-    no value: value_not_shown. Beside it, the library shows the fact under its own instant."""
+    Mar. 31, 2024. Requesting the column's period (duration 2024-01-01 to 2024-03-31), the library shows
+    the closing instant under it, as the page does (bead edgartools-auvk1.21; before it, the request
+    dropped instant facts and the cell was value_not_shown)."""
     res = results(DIAMONDROCK)
     for surface in ('dataframe', 'rendered'):
-        [blank] = find(res, 'value_not_shown', surface, concept='us-gaap:CommonStockSharesIssued',
-                       column='3 Months Ended Mar. 31, 2024')
+        [cell] = find(res, 'cell_matched', surface, concept=SHARES_ISSUED, column=DIAMONDROCK_Q1)
+        assert (cell.period_key, cell.page_value, cell.library_value) == (
+            'duration_2024-01-01_2024-03-31', 210064433.0, 210064433.0)
+        assert not find(res, 'value_not_shown', surface, concept=SHARES_ISSUED, column=DIAMONDROCK_Q1)
+    # The Dec. 31, 2023 column is the fact's own instant: matched.
+    [dec] = find(res, 'cell_matched', 'dataframe', concept=SHARES_ISSUED, column='Dec. 31, 2023')
+    assert dec.library_value == 209627197.0
+
+
+def test_mutation_blank_under_the_column_period_shows_the_fact_period_beside(monkeypatch):
+    """DiamondRock, as above, with the shares-issued row blanked only when the column's duration is
+    requested: the cell is value_not_shown under the column's period, and beside it the library's
+    value under the fact's own instant is reported as shown_under_fact_period."""
+    def mutate(rows, kind, period_filter):
+        if period_filter == 'duration_2024-01-01_2024-03-31':
+            for row in rows_of(rows, SHARES_ISSUED):
+                row['values'] = {k: None for k in row['values']}
+    res, _ = mutated(monkeypatch, DIAMONDROCK, mutate, surfaces=('dataframe', 'rendered'))
+    for surface in ('dataframe', 'rendered'):
+        [blank] = find(res, 'value_not_shown', surface, concept=SHARES_ISSUED, column=DIAMONDROCK_Q1)
         assert (blank.period_key, blank.page_value, blank.fact_value) == (
             'duration_2024-01-01_2024-03-31', 210064433.0, 210064433.0)
-        assert not find(res, 'cell_matched', surface, concept='us-gaap:CommonStockSharesIssued',
-                        column='3 Months Ended Mar. 31, 2024')
-        [beside] = find(res, 'shown_under_fact_period', surface, concept='us-gaap:CommonStockSharesIssued',
-                        column='3 Months Ended Mar. 31, 2024')
+        assert not find(res, 'cell_matched', surface, concept=SHARES_ISSUED, column=DIAMONDROCK_Q1)
+        [beside] = find(res, 'shown_under_fact_period', surface, concept=SHARES_ISSUED, column=DIAMONDROCK_Q1)
         assert (beside.period_key, beside.library_value) == ('instant_2024-03-31', 210064433.0)
-    # The Dec. 31, 2023 column is the fact's own instant: matched.
-    [dec] = find(res, 'cell_matched', 'dataframe', concept='us-gaap:CommonStockSharesIssued',
-                 column='Dec. 31, 2023')
-    assert dec.library_value == 209627197.0
 
 
 # ---------------------------------------------------------------------------
