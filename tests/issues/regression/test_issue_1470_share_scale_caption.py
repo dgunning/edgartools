@@ -402,9 +402,11 @@ def test_generic_negative_precisions_keep_their_exact_scale(first_decimals, seco
 @pytest.mark.parametrize(
     "value,expected",
     [
-        pytest.param(0, "", id="zero-int"),
-        pytest.param(0.0, "", id="zero-float"),
-        pytest.param(-0.0, "", id="negative-zero"),
+        pytest.param(0, "0", id="zero-int"),
+        pytest.param(0.0, "0", id="zero-float"),
+        # a zero prints 0 (edgartools-auvk1.12); with no negated label a filed -0 keeps its
+        # sign, as the SEC page shows (0.00) for a loss per share that rounds to zero
+        pytest.param(-0.0, "-0", id="negative-zero"),
         pytest.param(None, "", id="none"),
         pytest.param("", "", id="empty-string"),
         pytest.param("276000000", "276000000", id="numeric-string"),
@@ -448,8 +450,8 @@ def test_nonfinite_share_placeholders_do_not_choose_units(value, formatted):
 
 
 @pytest.mark.parametrize("standard", [False, True])
-@pytest.mark.parametrize("value", [0, "", None])
-def test_no_displayed_share_quantities_keep_the_default_caption(value, standard):
+@pytest.mark.parametrize("value, shown", [(0, "0"), ("", ""), (None, "")])
+def test_no_displayed_share_quantities_keep_the_default_caption(value, shown, standard):
     rendered = _render_custom_shares(
         [
             _share_item(BASIC, {CURRENT: value, PREVIOUS: value}, {CURRENT: "INF", PREVIOUS: "INF"}),
@@ -457,7 +459,8 @@ def test_no_displayed_share_quantities_keep_the_default_caption(value, standard)
         standard=standard,
     )
     assert rendered.header.metadata["shares_scale"] is None
-    assert [cell.get_formatted_value() for cell in _row(rendered, BASIC).cells] == ["", ""]
+    # a zero is shown as 0 (edgartools-auvk1.12) but, like a blank, chooses no share scale
+    assert [cell.get_formatted_value() for cell in _row(rendered, BASIC).cells] == [shown, shown]
     _assert_eps(rendered)
     _assert_caption_exports(rendered, "[italic](In millions, except shares and per share data)[/italic]")
 

@@ -133,6 +133,7 @@ def test_unconfigured_currency_shows_its_code_never_a_dollar():
     assert _format(8_220_000_000, _unit([f"{ISO}NZD"])) == "NZD 8,220"
 
 
-def test_zero_stays_blank_whatever_its_unit():
-    assert _format(0, _unit([f"{XBRLI}pure"])) == ""
-    assert _format(0.0, _unit([f"{XBRLI}shares"])) == ""
+def test_zero_shows_as_zero_whatever_its_unit():
+    # A reported zero prints 0, not a blank (edgartools-auvk1.12)
+    assert _format(0, _unit([f"{XBRLI}pure"])) == "0"
+    assert _format(0.0, _unit([f"{XBRLI}shares"])) == "0"

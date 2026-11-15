@@ -118,26 +118,31 @@ def test_finding_entergy_second_row_of_a_concept_is_dropped():
 
 def test_finding_entergy_negative_zero():
     """Entergy 10-Q, cash flows: Entergy New Orleans' 2024 year-to-date other investing
-    activities are 0 on the page and -0.0 in the library, on both surfaces. Bead: edgartools-auvk1.12."""
+    activities are 0 on the page. The negated label made it -0.0 in the library, on both
+    surfaces, until a zero kept its sign (edgartools-auvk1.12); it now matches."""
     res = results(ENTERGY)
+    new_orleans = {'dei:LegalEntityAxis': 'etr:EntergyNewOrleansMember'}
     for surface in ('dataframe', 'rendered'):
-        [cell] = find(res, 'negative_zero', surface, concept='us-gaap:PaymentsForProceedsFromOtherInvestingActivities',
-                      period_key='duration_2024-01-01_2024-09-30')
-        assert cell.dimensions == {'dei:LegalEntityAxis': 'etr:EntergyNewOrleansMember'}
-        assert cell.page_value == 0.0
-        assert cell.library_value == 0.0 and math.copysign(1.0, cell.library_value) == -1.0
+        cells = find(res, 'cell_matched', surface, concept='us-gaap:PaymentsForProceedsFromOtherInvestingActivities',
+                     period_key='duration_2024-01-01_2024-09-30', dimensions=new_orleans)
+        assert cells
+        for cell in cells:
+            assert cell.page_value == 0.0
+            assert cell.library_value == 0.0 and math.copysign(1.0, cell.library_value) == 1.0
+        assert not res.of_kind('negative_zero', surface)
 
 
 def test_finding_entergy_zero_rendered_blank():
     """Entergy 10-Q, cash flows: the page shows 0 for 2023 year-to-date noncash pension
-    expense; the rendered table prints nothing. Bead: edgartools-auvk1.12."""
+    expense. The rendered table printed nothing, as for a fact never filed, until a zero
+    was formatted like any other value (edgartools-auvk1.12); it now prints 0."""
     res = results(ENTERGY)
-    [cell] = find(res, 'zero_rendered_blank', 'rendered', concept='us-gaap:PensionExpenseReversalOfExpenseNoncash',
+    [cell] = find(res, 'cell_matched', 'rendered', concept='us-gaap:PensionExpenseReversalOfExpenseNoncash',
                   period_key='duration_2023-01-01_2023-09-30', dimensions={})
     assert cell.page_value == 0.0
     assert cell.library_value == 0.0
-    assert cell.library_text == ''
-    assert not find(res, 'zero_rendered_blank', 'dataframe')
+    assert not res.of_kind('zero_rendered_blank', 'rendered')
+    assert not res.of_kind('zero_rendered_blank', 'dataframe')
 
 
 def test_finding_entergy_period_not_in_default_view():
@@ -157,9 +162,10 @@ def test_entergy_headline():
     res = results(ENTERGY)
     assert res.facts.total == 560
     assert res.compared_cells('dataframe') == 546
-    assert len(res.of_kind('cell_matched', 'dataframe')) == 542
+    # 542 before edgartools-auvk1.12: four zeros were -0.0 (negative_zero)
+    assert len(res.of_kind('cell_matched', 'dataframe')) == 546
     # 528 before edgartools-auvk1.14: the rendered table blanked 14 cash-total cells
-    assert len(res.of_kind('cell_matched', 'rendered')) == 542
+    assert len(res.of_kind('cell_matched', 'rendered')) == 546
 
 
 def test_entergy_cash_total_on_a_terse_arc_is_rendered():
@@ -435,18 +441,21 @@ def test_mutation_unaligned_first_row_does_not_shift_the_rows_after_it(monkeypat
                 and r.kind in ('extra_row_in_role', 'duplicate_library_row')]
 
 
-def test_guide_example_negative_zero_offline():
-    """The guide's Brixmor example (docs/guides/sec-viewer-guide.md). The fixture holds only the cash
-    flow page, so the rate and coverage lines (all pages) are not reproducible offline; its first
-    negative_zero, which is on that page, is. (Until edgartools-auvk1.14 the example was a
-    value_differs, the member row under the opening balance.)"""
+def test_guide_example_repayment_zero_matches_offline():
+    """The guide's Brixmor example (docs/guides/sec-viewer-guide.md) used to print this cell as its
+    first negative_zero: the page shows 0 for 2019 repayment of secured debt and the library had
+    -0.0 (until edgartools-auvk1.14 the example was a value_differs). The fixture holds only the cash
+    flow page, so the guide's rate and coverage lines (all pages) are not reproducible offline; the
+    cell is, and it now matches (edgartools-auvk1.12)."""
     res = results(BRIXMOR)
-    r = res.of_kind('negative_zero', 'dataframe')[0]
-    assert (r.page, r.page_label, r.library_label) == (
-        'CONSOLIDATED STATEMENTS OF CASH FLOWS', 'Repayment of secured debt obligations',
-        'Repayment of secured debt obligations')
-    assert (r.column, r.page_value, r.fact_value, r.library_value) == (
-        '12 Months Ended Dec. 31, 2019', 0.0, 0.0, -0.0)
+    cells = [r for r in res.of_kind('cell_matched', 'dataframe')
+             if r.page_label == 'Repayment of secured debt obligations' and r.column == '12 Months Ended Dec. 31, 2019']
+    assert cells
+    for r in cells:
+        assert r.page == 'CONSOLIDATED STATEMENTS OF CASH FLOWS'
+        assert (r.page_value, r.fact_value) == (0.0, 0.0)
+        assert r.library_value == 0.0 and math.copysign(1.0, r.library_value) == 1.0
+    assert not res.of_kind('negative_zero', 'dataframe')
     assert not res.of_kind('value_differs', 'dataframe')
 
 
@@ -653,3 +662,23 @@ def test_default_view_column_name_is_verified(monkeypatch):
     assert res.compared_cells('dataframe') == 0
     reasons = [r.reason for r in res.of_kind('cell_not_comparable', 'dataframe') if 'names its column' in r.reason]
     assert len(reasons) == 54 and all("names its column 'renamed', not '" in r for r in reasons)
+
+
+def test_a_negative_zero_the_page_also_shows_negative_matches():
+    """A loss per share that rounds to zero is filed -0 and shown (0.00) on the page
+    (0001493152-24-046709). The library's -0 matches it; negative_zero is a -0 where the
+    page shows 0, and a 0 where the page shows (0) is a sign difference (edgartools-auvk1.12)."""
+    assert sf._sign_kind(sf._sign(-0.0), sf._sign(-0.0)) == 'cell_matched'
+    assert sf._sign_kind(sf._sign(-0.0), sf._sign(0.0)) == 'negative_zero'
+    assert sf._sign_kind(sf._sign(0.0), sf._sign(-0.0)) == 'sign_differs'
+    assert sf._sign_kind(sf._sign(-5.0), sf._sign(5.0)) == 'sign_differs'
+    emitted = []
+
+    def emit(kind, r, **common):
+        emitted.append(kind)
+    for text, page in (('-0.00', -0.0), ('(0)', -0.0), ('0', 0.0), ('$0', 0.0)):
+        sf._judge_rendered_text(emit, SimpleNamespace(viewer_value=page), text, {})
+    assert emitted == []
+    sf._judge_rendered_text(emit, SimpleNamespace(viewer_value=0.0), '-0.00', {})
+    sf._judge_rendered_text(emit, SimpleNamespace(viewer_value=-0.0), '0.00', {})
+    assert emitted == ['rendered_text_sign_differs', 'rendered_text_sign_differs']

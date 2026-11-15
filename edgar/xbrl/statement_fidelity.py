@@ -1229,19 +1229,23 @@ def _judge_magnitude(ctx, emit, r, value: float, library_unit, common) -> str:
 
 
 def _sign_kind(library_sign, page_sign) -> str:
-    """The outcome of a value of the fact's magnitude, by its sign against the page's."""
+    """The outcome of a value of the fact's magnitude, by its sign against the page's.
+
+    A -0 the page also shows negative, as (0.00) for a loss per share that rounds to
+    zero (0001493152-24-046709), is a match; negative_zero is a -0 where the page shows 0.
+    """
+    if library_sign == page_sign:
+        return 'cell_matched'
     if library_sign == '-0':
         return 'negative_zero'
-    if library_sign != page_sign:
-        return 'sign_differs'
-    return 'cell_matched'
+    return 'sign_differs'
 
 
 def _judge_rendered_text(emit, r, text: str, common) -> None:
     """Report rendered text that is blank, or whose sign is not the page's."""
     if not text.strip():
         emit('zero_rendered_blank' if r.viewer_value == 0 else 'rendered_text_blank', r, **common)
-    elif _text_sign(text) != ('-' if r.viewer_value < 0 else '+'):
+    elif _text_sign(text) != ('-' if _sign(r.viewer_value) in ('-', '-0') else '+'):
         emit('rendered_text_sign_differs', r, **common)
 
 

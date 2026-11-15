@@ -158,10 +158,11 @@ def test_row_owned_unit_wins_over_competing_currency_for_same_concept_and_date()
     assert _cells(rendered, "Cash at end (USD)")[1] == ["$9,000"]
 
 
-def test_zero_stays_selected_and_blank():
+def test_zero_stays_selected_and_shows_as_zero():
+    # A reported zero prints 0, not a blank (edgartools-auvk1.12)
     rendered = _render([_row("Cash at end", END, {CLOSE25: 0, "instant_2025-06-30": 5})])
     row, text = _cells(rendered, "Cash at end")
-    assert text == [""]
+    assert text == ["€0"]
     assert row.cells[0].value == 0
     assert row.metadata["selected_cells"][FY25]["value"] == 0
     assert "\x14" not in rendered.to_markdown()
