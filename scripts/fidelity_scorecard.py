@@ -667,6 +667,39 @@ OUTCOME_EXTRA = ['accession', 'fact_status']
 PAGE_FIELDS = ['accession', 'page', 'role', 'access', 'compared', 'cells', 'reason']
 
 
+WORST_FILINGS = 5
+REASONS_SHOWN = 15   # reason rows printed per table in scorecard.md; scorecard.json keeps them all
+
+
+def per_filing_spread(filings: Sequence[Dict[str, Any]], worst: int = WORST_FILINGS) -> Dict[str, Any]:
+    """Each filing's value rate (``cell_matched`` over ``compared_cells``), summarised across filings.
+
+    The pooled rate weighs a filing by its cell count, so one large filing (a fund's
+    schedule of investments runs to thousands of cells) can move it by several points.
+    These numbers weigh every filing the same. Only filings with compared cells count.
+    The 10th percentile is the nearest-rank one: the rate of the filing at position
+    ceil(0.1 x n) from the bottom.
+    """
+    rated = sorted(({**f, 'value_rate': f['cell_matched'] / f['compared_cells']} for f in filings
+                    if f.get('compared_cells')), key=lambda f: (f['value_rate'], f['accession']))
+    n = len(rated)
+    if not n:
+        return {'filings': 0, 'median': None, 'p10': None, 'share_at_100': None, 'share_at_99': None,
+                'min': None, 'worst': []}
+    rates = [f['value_rate'] for f in rated]
+    mid = n // 2
+    median = rates[mid] if n % 2 else (rates[mid - 1] + rates[mid]) / 2
+    return {
+        'filings': n,
+        'median': median,
+        'p10': rates[max(math.ceil(0.1 * n), 1) - 1],
+        'share_at_100': sum(1 for f in rated if f['cell_matched'] == f['compared_cells']) / n,
+        'share_at_99': sum(1 for r in rates if r >= 0.99) / n,
+        'min': rates[0],
+        'worst': [f for f in rated[:worst] if f['value_rate'] < 1],
+    }
+
+
 class ScorecardWriter:
     """
     Streams each filing's outcomes to CSV as it is added and keeps the pooled counts for the scorecard.
@@ -695,6 +728,7 @@ class ScorecardWriter:
         self.families = {s: Counter() for s in SURFACES}
         self.kind_outcomes = {s: Counter() for s in SURFACES}
         self.kind_filings = {s: Counter() for s in SURFACES}
+        self.per_filing: Dict[str, List[Dict[str, Any]]] = {s: [] for s in SURFACES}
         self.facts_cols: Optional[List[str]] = None
         self.outcome_cols: Optional[List[str]] = None
         self._filings_fields = self._filing_fields()
@@ -765,6 +799,10 @@ class ScorecardWriter:
                             f'{s}_presentation': fam.get('presentation', 0),
                             f'{s}_not_comparable': fam.get('not_comparable', 0)})
                 self.surface[s].update(compared_cells=compared, cell_matched=matched, facts_cells=st.facts.total)
+                if compared:
+                    self.per_filing[s].append({'accession': acc, 'form': r.get('form', ''),
+                                               'company': r.get('company', ''), 'compared_cells': compared,
+                                               'cell_matched': matched})
                 self.families[s].update(fam)
                 kinds = Counter(o.kind for o in st.results if o.surface in (s, ''))
                 self.kind_outcomes[s].update(kinds)
@@ -800,6 +838,7 @@ class ScorecardWriter:
                 'facts_cells': c['facts_cells'],
                 'value_rate': _rate(c['cell_matched'], c['compared_cells']),
                 'coverage': _rate(c['compared_cells'], c['facts_cells']),
+                'per_filing': per_filing_spread(self.per_filing[s]),
                 'families': {fam: self.families[s].get(fam, 0)
                              for fam in ('disagreement', 'presentation', 'not_comparable', 'matched')},
                 'kinds': [{'kind': k, 'family': fam, 'level': lvl, 'outcomes': self.kind_outcomes[s].get(k, 0),
@@ -895,8 +934,13 @@ def render_markdown(card: Dict[str, Any]) -> str:
         md += ['', f"{fc['unread_statements']} statement page(s) could not be read and are not in the cells."]
     for title, key in (('Not comparable by reason', 'not_comparable_by_reason'), ('Missing by reason', 'missing_by_reason')):
         if fc[key]:
+            reasons = list(fc[key].items())
             md += ['', f"{title} (quoted values and numbers shown as <v> and <n>):", '']
-            md += _table(['Cells', 'Reason'], [(n, reason) for reason, n in fc[key].items()])
+            md += _table(['Cells', 'Reason'], reasons[:REASONS_SHOWN])
+            rest = reasons[REASONS_SHOWN:]
+            if rest:
+                md += ['', f"{len(rest)} more reason(s), {sum(n for _r, n in rest)} cell(s); "
+                           f"all are in scorecard.json under `facts_check.{key}`."]
 
     outside = run['filings'] - run['compared']
     md += ['', '## Statement check (`viewer.compare_statements`)', '',
@@ -912,6 +956,20 @@ def render_markdown(card: Dict[str, Any]) -> str:
                  [(name, v['compared_cells'], v['cell_matched'], _pct(v['value_rate']), v['facts_cells'],
                    _pct(v['coverage']), v['families']['disagreement'], v['families']['presentation'],
                    v['families']['not_comparable'], v['families']['matched']) for name, v in surfaces.items()])
+    md += ['', 'Per filing: each filing\'s own value rate, every filing weighed the same. The pooled rate above '
+               'weighs filings by their cell counts, so one large filing (a fund\'s schedule of investments runs '
+               'to thousands of cells) can move it by several points; these numbers move by one filing at most. '
+               'The 10th percentile is nearest-rank.', '']
+    md += _table(['Surface', 'Filings', 'Median', '10th percentile', 'At 100%', 'At 99% or more', 'Lowest'],
+                 [(name, p['filings'], _pct(p['median']), _pct(p['p10']), _pct(p['share_at_100']),
+                   _pct(p['share_at_99']), _pct(p['min']))
+                  for name, p in ((name, v['per_filing']) for name, v in surfaces.items())])
+    worst = surfaces[next(iter(surfaces))]['per_filing']['worst'] if surfaces else []
+    if worst:
+        md += ['', f"Lowest value rates ({next(iter(surfaces))}), with the outcomes behind them in outcomes.csv:", '']
+        md += _table(['Accession', 'Form', 'Company', 'Compared cells', 'Cell matched', 'Value rate'],
+                     [(f['accession'], f['form'], f['company'], f['compared_cells'], f['cell_matched'],
+                       _pct(f['value_rate'])) for f in worst])
     md += ['', 'Outcomes by kind; each surface counts the outcomes not tied to a surface too. '
                '"Filings" is the number of filings the kind appears in.', '']
     names = list(surfaces)

@@ -315,6 +315,8 @@ Limits:
 - Heading rows under a member header are not compared, and `to_dataframe()` names only the first axis of a row with several, so such library rows are `library_row_not_identifiable`.
 - It reports what each side shows. Whether a disagreement is a library defect is for the reader to decide.
 
+Both checks run on a random sample of filings each release; the results are in the [As-Filed Fidelity Scorecard](../xbrl/fidelity-scorecard.md).
+
 ### LLM-based comparison
 
 For qualitative differences that numeric comparison misses (labels, ordering, missing items), generate a side-by-side text prompt:
