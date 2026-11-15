@@ -2917,6 +2917,12 @@ class EntityFacts:
             gross_profit_fact.numeric_value is not None and
             cost_of_revenue_fact.numeric_value is not None):
 
+            if (
+                gross_profit_fact.period_start != cost_of_revenue_fact.period_start
+                or gross_profit_fact.period_end != cost_of_revenue_fact.period_end
+            ):
+                return None
+
             # Use enhanced unit compatibility checking
             gp_result = UnitNormalizer.get_normalized_value(gross_profit_fact, target_unit=unit, apply_scale=True,
                                                             strict_unit_match=strict_unit_match)
@@ -2977,6 +2983,12 @@ class EntityFacts:
             cost_of_revenue_fact.numeric_value is not None):
 
             # Use enhanced unit compatibility checking
+            if (
+                revenue_fact.period_start != cost_of_revenue_fact.period_start
+                or revenue_fact.period_end != cost_of_revenue_fact.period_end
+            ):
+                return None
+
             rev_result = UnitNormalizer.get_normalized_value(revenue_fact, target_unit=unit, apply_scale=True,
                                                              strict_unit_match=strict_unit_match)
             cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True,
