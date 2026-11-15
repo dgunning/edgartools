@@ -32,6 +32,7 @@ from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import (
+    balance_cell_keys,
     catalog_entry,
     element_catalog_key,
     STANDARD_LABEL,
@@ -2274,8 +2275,19 @@ class XBRL:
             # two surfaces cannot disagree about a sign.
             preferred_sign_value = -1 if is_negated_label_role(effective_preferred_label) else 1
 
-        # Find facts for any of these concept names
-        all_relevant_facts = self._find_facts_for_element(node.element_name, period_filter)
+        # Find facts for any of these concept names. A single requested period
+        # keeps every fact its column can show: under a duration column that
+        # includes the opening and closing instants (edgartools-auvk1.21), which
+        # balance_cell_key then chooses between per row, as in the default view.
+        if period_filter:
+            keep = balance_cell_keys(period_filter)
+            all_relevant_facts = {
+                context_id: fact
+                for context_id, fact in self._find_facts_for_element(node.element_name).items()
+                if self.context_period_map.get(context_id) in keep
+            }
+        else:
+            all_relevant_facts = self._find_facts_for_element(node.element_name)
 
         # GH #1468: a co-registrant's own face statement reads that registrant's facts
         coregistrant_member = self._coregistrant_member(statement_role)
