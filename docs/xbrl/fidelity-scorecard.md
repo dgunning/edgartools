@@ -13,7 +13,7 @@ Two checks run on every filing (see [SEC Viewer: Cross-Validate Against the XBRL
 
 ## Latest result
 
-edgartools 6.2.0 with the fix for single-period statement requests, measured 2026-11-15.
+edgartools `main` at commit `1f3c6cd6` (6.2.0 plus the fix for single-period statement requests, #1981), measured 2026-11-15.
 
 **Sample**: seed 20261115; 120 original 10-K, 10-Q, 20-F and 40-F filings filed from 2020-01-01 to 2026-09-30, drawn at random by form and era, plus 1 filing added so every industry group has a minimum share. 756 filings used while building the checks were excluded. Of the 121 filings, 98 have SEC statement pages and were compared, and 23 have none. No filing raised an error.
 
@@ -60,7 +60,7 @@ A scorecard's sample is drawn fresh for each release, so its numbers come from f
 
 | Version | Seed | Filings compared | `to_dataframe()` rate | Filings at 100% | Coverage |
 |---|---|---|---|---|---|
-| 6.2.0 + single-period fix | 20261115 | 98 | 99.97% | 98.0% | 68.51% |
+| 6.2.0 + #1981 (`1f3c6cd6`) | 20261115 | 98 | 99.97% | 98.0% | 68.51% |
 
 ## Limits
 
@@ -80,4 +80,4 @@ python scripts/fidelity_scorecard.py --seed 20261115 --size 120 --end 2026-09-30
     --exclude scripts/fidelity_scorecard_excluded.txt --out scorecard-run
 ```
 
-The same seed, size, dates and exclusion list draw the same sample; use `scripts/fidelity_scorecard_excluded.txt` as it was at the run's commit, since each release adds its sample to it. The run writes the sample, every cell and every outcome as CSV files, plus `scorecard.md` and `scorecard.json`. The SEC can re-render a filing's pages, so a later run of the same sample can differ slightly.
+The same seed, size, dates and exclusion list draw the same sample; use `scripts/fidelity_scorecard_excluded.txt` as it was at the run's commit, since each later release adds the previous sample to it. The run writes the sample, every cell and every outcome as CSV files, plus `scorecard.md` and `scorecard.json`. The SEC can re-render a filing's pages, so a later run of the same sample can differ slightly.

@@ -7,9 +7,9 @@
 # filings.csv and cells.csv. A published number must come from filings the
 # checks were not tuned on.
 #
-# Each release's published sample is added here afterwards, so the next
-# release draws fresh filings. To reproduce a published run, use this file
-# at that run's commit.
+# Before drawing a release's sample, add the previous published sample here
+# (its sample.csv), so every published sample is fresh. To reproduce a
+# published run, use this file at that run's commit.
 0000004127-25-000085
 0000008947-25-000046
 0000011544-23-000023
