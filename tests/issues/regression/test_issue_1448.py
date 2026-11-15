@@ -69,6 +69,7 @@ GitHub Issue: https://github.com/dgunning/edgartools/issues/1448
 import json
 from pathlib import Path
 
+import pandas as pd
 import pytest
 
 from edgar.entity.mappings_loader import get_primary_statement, load_virtual_trees
@@ -242,7 +243,7 @@ def test_nvidia_jurisdiction_rows_take_the_new_concepts(nvda_xbrl):
     assert federal["2026-01-25"] == 16_755_000_000
     total = plain[plain["concept"] == "us-gaap_IncomeTaxesPaidNet"].iloc[0]
     assert total["2026-01-25"] == 20_288_000_000
-    assert total["standard_concept"] != total["standard_concept"]  # NaN: the aggregate stays unmapped
+    assert pd.isna(total["standard_concept"])  # the aggregate stays unmapped (NaN on pandas 3, None on 2.x)
 
     # California, Israel and the "Other" members are inside their jurisdiction totals.
     dimensioned = frame[frame["dimension"]]
@@ -368,7 +369,7 @@ def test_allegro_federal_refund_and_a_net_refund_year(tmp_path):
     assert row("us-gaap_IncomeTaxPaidStateAndLocalAfterRefundReceived")["2026-03-27"] == 484_000
     net_refunded = row("us-gaap_ProceedsFromIncomeTaxRefunds")
     assert net_refunded["2026-03-27"] == 30_889_000 - 3_324_000 - 484_000 == 27_081_000
-    assert net_refunded["standard_concept"] != net_refunded["standard_concept"]  # NaN: stays unmapped
+    assert pd.isna(net_refunded["standard_concept"])  # stays unmapped (NaN on pandas 3, None on 2.x)
 
     # Refunds exceeded payments, so the year's net taxes paid is negative.
     facts = xbrl.facts.to_dataframe()
