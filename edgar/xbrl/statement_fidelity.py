@@ -108,6 +108,7 @@ import re
 from bisect import bisect_left
 from collections import Counter, defaultdict
 from dataclasses import dataclass, field
+from functools import partial
 from types import SimpleNamespace
 from typing import TYPE_CHECKING, Any, Dict, FrozenSet, List, Optional, Tuple
 
@@ -607,12 +608,9 @@ def _compare_page(out: StatementFidelityResults, check: SimpleNamespace, xbrl, t
     if cr is None:
         not_compared("the page could not be read")
         return
-    equity = vv._is_equity_layout(cr)
-    if equity and any(crow.is_header and crow.is_dimensional for crow in cr.rows):
-        not_compared("a statement of equity with member header rows: the facts check does not read them")
-        return
-    if not equity and not all(vv._parse_viewer_period(h) for h in cr.period_headers):
-        not_compared("the page's column headings are not periods")
+    equity, why = _page_layout(cr)
+    if why is not None:
+        not_compared(why)
         return
     out.pages.append(StatementFidelityPage(page, role, access, True, len(cells)))
     tree = xbrl.presentation_trees.get(role)
@@ -657,6 +655,21 @@ def _compare_page(out: StatementFidelityResults, check: SimpleNamespace, xbrl, t
             continue
         aligned = _compare_rows(ctx, surface_name, surface, page_rows)
         _compare_cells(ctx, surface_name, surface, aligned, cells, role_frame, seen_values)
+    _emit_surface_disagreements(out, page, role, seen_values)
+
+
+def _page_layout(cr) -> Tuple[bool, Optional[str]]:
+    """Whether the page is a statement of equity, and why it cannot be compared (None when it can)."""
+    equity = vv._is_equity_layout(cr)
+    if equity and any(crow.is_header and crow.is_dimensional for crow in cr.rows):
+        return equity, "a statement of equity with member header rows: the facts check does not read them"
+    if not equity and not all(vv._parse_viewer_period(h) for h in cr.period_headers):
+        return equity, "the page's column headings are not periods"
+    return equity, None
+
+
+def _emit_surface_disagreements(out: StatementFidelityResults, page, role, seen_values) -> None:
+    """``surfaces_disagree`` for each cell the two surfaces show with different values."""
     for values in seen_values.values():
         if len(values) == 2 and _differs(values['dataframe'][0], values['rendered'][0]):
             r = values['dataframe'][1]
@@ -988,41 +1001,53 @@ def _emit_extra_rows(ctx, surface_name, surface, matched_library, aligned_contex
                   reason=reason if reason else ('has values' if has_value else 'no values'))
 
 
-def _compare_cells(ctx, surface_name, surface, aligned, cells, role_frame, seen_values) -> None:
-    role_by_key = role_frame.by_key if role_frame is not None and not role_frame.error else {}
-
+def _cell_emitter(ctx, surface_name: str):
+    """An ``emit(kind, r, period_key=None, **kw)`` that records one cell outcome of a surface."""
     def emit(kind, r, period_key=None, **kw):
         ctx.out.results.append(StatementFidelityResult(
             kind=kind, page=ctx.page, role=ctx.role, surface=surface_name, concept=r.concept_id,
             dimensions=r.xbrl_dimensions, occurrence=r.row_occurrence, column=r.period,
             period_key=period_key or r.column_period_key, page_label=r.label, page_value=r.viewer_value,
             fact_value=r.xbrl_fact_value, fact=r, **kw))
+    return emit
 
-    def lookup(key: str):
-        return _lookup_period(ctx, surface_name, surface, key)
 
+def _read_cell(ctx, emit, surface_name, surface, r, library_row, role_by_key, seen_values) -> Optional[str]:
+    """Read an aligned cell under its page column's own period and judge it.
+
+    The period is requested when the default view leaves it out. Returns the
+    judged kind, or None when the library could not be read for the cell.
+    """
+    period_key = r.column_period_key
+    source, column, default, raised = _lookup_period(ctx, surface_name, surface, period_key)
+    if source is None:
+        emit('library_raised' if raised else 'cell_not_comparable', r, reason=column)
+        return None
+    if not default:
+        emit('period_not_in_default_view', r, default_view=False)
+        library_row = source.by_key.get(library_row['key'])
+        if library_row is None:
+            emit('row_missing_in_period_request', r, default_view=False)
+            return None
+    return _judge(ctx, emit, surface_name, r, library_row, column, default, period_key, role_by_key, seen_values)
+
+
+def _role_by_key(role_frame) -> dict:
+    return role_frame.by_key if role_frame is not None and not role_frame.error else {}
+
+
+def _compare_cells(ctx, surface_name, surface, aligned, cells, role_frame, seen_values) -> None:
+    role_by_key = _role_by_key(role_frame)
+    emit = _cell_emitter(ctx, surface_name)
     for r in cells:
         why = _cell_not_comparable(r, aligned)
         if why is not None:
             emit('cell_not_comparable', r, reason=why)
             continue
         library_row = aligned[r.row_index]
-        # The page column's own period, as a user requesting it sees it.
-        period_key = r.column_period_key
-        source, column, default, raised = lookup(period_key)
-        if source is None:
-            emit('library_raised' if raised else 'cell_not_comparable', r, reason=column)
-            continue
-        if not default:
-            emit('period_not_in_default_view', r, default_view=False)
-            library_row = source.by_key.get(library_row['key'])
-            if library_row is None:
-                emit('row_missing_in_period_request', r, default_view=False)
-                continue
-        kind = _judge(ctx, emit, surface_name, r, library_row, column, default, period_key, role_by_key,
-                      seen_values)
-        if kind != 'cell_matched' and r.xbrl_period_key and r.xbrl_period_key != period_key:
-            _beside_fact_period(emit, lookup, r, library_row['key'])
+        kind = _read_cell(ctx, emit, surface_name, surface, r, library_row, role_by_key, seen_values)
+        if kind not in (None, 'cell_matched') and r.xbrl_period_key and r.xbrl_period_key != r.column_period_key:
+            _beside_fact_period(emit, partial(_lookup_period, ctx, surface_name, surface), r, library_row['key'])
 
 
 def _equity_slot(r: vv.ComparisonResult) -> str:
@@ -1039,6 +1064,42 @@ def _equity_slot(r: vv.ComparisonResult) -> str:
     return 'closing' if fact[len('instant_'):] == block.rsplit('_', 1)[-1] else 'opening'
 
 
+def _equity_library_rows(surface) -> Tuple[Dict[tuple, List[dict]], set]:
+    """The surface's non-abstract rows by (concept, dims), and the concepts of rows it does not identify."""
+    by_context: Dict[tuple, List[dict]] = defaultdict(list)
+    unidentified = set()
+    for row in surface.rows:
+        if row['abstract']:
+            continue
+        if row['dims'] is None:
+            unidentified.add(row['concept'])
+        else:
+            by_context[(row['concept'], row['dims'])].append(row)
+    return by_context, unidentified
+
+
+def _equity_row_index(r: vv.ComparisonResult, slot: str, n_candidates: int, block_rows: List[int]) -> int:
+    """Which of its concept's library rows (in its context) an equity cell reads.
+
+    A movement's k-th page row in its block is the library's k-th (Park Aerospace
+    presents cash dividends twice, negated and plain; the library once). A balance
+    is the first row when opening, the last when closing.
+    """
+    if slot != 'row':
+        return n_candidates - 1 if slot == 'closing' else 0
+    if r.row_index not in block_rows:
+        block_rows.append(r.row_index)
+    return block_rows.index(r.row_index)
+
+
+def _equity_cell_blocked(r: vv.ComparisonResult) -> Optional[str]:
+    if r.status != vv.MATCHED:
+        return f"facts check: {r.status}" + (f": {r.reason}" if r.reason else '')
+    if r.column_period_key is None:
+        return "the page's row order does not settle the row's period block"
+    return None
+
+
 def _compare_equity_cells(ctx, surface_name, surface, cells, role_frame, seen_values) -> None:
     """Compare a statement-of-equity page with the library cell by cell (edgartools-auvk1.22).
 
@@ -1049,45 +1110,21 @@ def _compare_equity_cells(ctx, surface_name, surface, cells, role_frame, seen_va
     Its value is read under the block's period, requested when the default
     view leaves it out, and judged as on any other page.
     """
-    role_by_key = role_frame.by_key if role_frame is not None and not role_frame.error else {}
-    by_context: Dict[tuple, List[dict]] = defaultdict(list)
-    unidentified = set()
-    for row in surface.rows:
-        if row['abstract']:
-            continue
-        if row['dims'] is None:
-            unidentified.add(row['concept'])
-        else:
-            by_context[(row['concept'], row['dims'])].append(row)
+    role_by_key = _role_by_key(role_frame)
+    by_context, unidentified = _equity_library_rows(surface)
     matched_library, aligned_contexts, announced, dropped = set(), set(), set(), set()
     rows_in_block: Dict[tuple, List[int]] = defaultdict(list)
-
-    def emit(kind, r, period_key=None, **kw):
-        ctx.out.results.append(StatementFidelityResult(
-            kind=kind, page=ctx.page, role=ctx.role, surface=surface_name, concept=r.concept_id,
-            dimensions=r.xbrl_dimensions, occurrence=r.row_occurrence, column=r.period,
-            period_key=period_key or r.column_period_key, page_label=r.label, page_value=r.viewer_value,
-            fact_value=r.xbrl_fact_value, fact=r, **kw))
+    emit = _cell_emitter(ctx, surface_name)
 
     for r in cells:
-        if r.status != vv.MATCHED:
-            emit('cell_not_comparable', r, reason=f"facts check: {r.status}" + (f": {r.reason}" if r.reason else ''))
-            continue
-        if r.column_period_key is None:
-            emit('cell_not_comparable', r, reason="the page's row order does not settle the row's period block")
+        why = _equity_cell_blocked(r)
+        if why is not None:
+            emit('cell_not_comparable', r, reason=why)
             continue
         concept, dims = r.concept_id, ctx.names.context_dims(r.xbrl_dimensions)
         candidates = by_context.get((concept, dims), [])
         slot = _equity_slot(r)
-        if slot == 'row':
-            # The k-th page row of the concept in this context and block is the library's k-th
-            # (Park Aerospace presents cash dividends twice, negated and plain; the library once).
-            page_rows = rows_in_block[(concept, dims, r.column_period_key)]
-            if r.row_index not in page_rows:
-                page_rows.append(r.row_index)
-            k = page_rows.index(r.row_index)
-        else:
-            k = len(candidates) - 1 if slot == 'closing' else 0
+        k = _equity_row_index(r, slot, len(candidates), rows_in_block[(concept, dims, r.column_period_key)])
         if not candidates and len(dims) > 1 and concept in unidentified:
             emit('cell_not_comparable', r, reason="the DataFrame names only the first axis of a row with several")
             continue
@@ -1106,22 +1143,9 @@ def _compare_equity_cells(ctx, surface_name, surface, cells, role_frame, seen_va
             announced.add(id(library_row))
             _emit_row(ctx, surface_name, 'row_matched', dict(concept=concept, label=r.label), dims,
                       library_label=library_row['label'], occurrence=library_row['key'][-1])
-        matched_library.add(id(library_row))
-        if slot != 'row':
-            # A balance is listed twice, opening and closing: aligning one accounts for both.
-            matched_library.update(id(row) for row in candidates)
-        period_key = r.column_period_key
-        source, column, default, raised = _lookup_period(ctx, surface_name, surface, period_key)
-        if source is None:
-            emit('library_raised' if raised else 'cell_not_comparable', r, reason=column)
-            continue
-        if not default:
-            emit('period_not_in_default_view', r, default_view=False)
-            library_row = source.by_key.get(library_row['key'])
-            if library_row is None:
-                emit('row_missing_in_period_request', r, default_view=False)
-                continue
-        _judge(ctx, emit, surface_name, r, library_row, column, default, period_key, role_by_key, seen_values)
+        # A balance is listed twice, opening and closing: aligning one accounts for both.
+        matched_library.update(id(row) for row in (candidates if slot != 'row' else [library_row]))
+        _read_cell(ctx, emit, surface_name, surface, r, library_row, role_by_key, seen_values)
     _emit_extra_rows(ctx, surface_name, surface, matched_library, aligned_contexts)
 
 
