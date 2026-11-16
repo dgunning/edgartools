@@ -1,0 +1,730 @@
+{
+ "version": "2.2",
+ "instance": {
+  "ribt20221231_10k.htm": {
+   "tag": {
+    "ribt_AtthemarketOfferingProgramMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Represents the at-the-market offering program.",
+        "label": "At-the-market Offering Program [Member]"
+       }
+      }
+     },
+     "localname": "AtthemarketOfferingProgramMember",
+     "nsuri": "http://www.ricebrantech.com/20221231",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-details-textual"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ribt_OfferingPursuantToShelfRegistrationStatementMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Represents the offering pursuant to the shelf registration statement.",
+        "label": "Offering Pursuant to Shelf Registration Statement [Member]"
+       }
+      }
+     },
+     "localname": "OfferingPursuantToShelfRegistrationStatementMember",
+     "nsuri": "http://www.ricebrantech.com/20221231",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-details-textual"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ribt_StockIssuedDuringPeriodSharesSalesOfCommonStockAndWarrantsNetOfCosts": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of shares of stock issued from sales of common stock and warrants, net of issuance costs.",
+        "label": "Sales of common stock and common stock warrants, net of costs (in shares)"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodSharesSalesOfCommonStockAndWarrantsNetOfCosts",
+     "nsuri": "http://www.ricebrantech.com/20221231",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "ribt_StockIssuedDuringPeriodSharesWarrantsExercised": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of shares of stock issued during the period pursuant to exercises of warrants.",
+        "label": "Exercise of common stock warrants (in shares)"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodSharesWarrantsExercised",
+     "nsuri": "http://www.ricebrantech.com/20221231",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "ribt_StockIssuedDuringPeriodValueSaleOfCommonStockAndWarrantsNetOfCosts": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Value of stock issued during the period for sales of common stock and warrants, net of issuance costs.",
+        "label": "Sales of common stock and common stock warrants, net of costs"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodValueSaleOfCommonStockAndWarrantsNetOfCosts",
+     "nsuri": "http://www.ricebrantech.com/20221231",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ribt_StockIssuedDuringPeriodValueWarrantsExercised": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Value of stock issued pursuant to warrant exercises during the period.",
+        "label": "Exercise of common stock warrants"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodValueWarrantsExercised",
+     "nsuri": "http://www.ricebrantech.com/20221231",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ribt_StockUnitsIssuedSUIMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Represents Stock Units Issued (SUI).",
+        "label": "Stock Units Issued (SUI) [Member]"
+       }
+      }
+     },
+     "localname": "StockUnitsIssuedSUIMember",
+     "nsuri": "http://www.ricebrantech.com/20221231",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-restricted-stock-unit-activity-details"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_AwardTypeAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by type of award under share-based payment arrangement.",
+        "label": "Award Type [Axis]"
+       }
+      }
+     },
+     "localname": "AwardTypeAxis",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-exercisable-and-outstanding-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-restricted-stock-unit-activity-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-sharebased-compensation-expenses-related-to-employees-and-directors-details"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_CommonStockMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Stock that is subordinate to all other stock of the issuer.",
+        "label": "Common Stock [Member]"
+       }
+      }
+     },
+     "localname": "CommonStockMember",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-information-regarding-common-stock-issued-details"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_EquityComponentDomain": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Components of equity are the parts of the total Equity balance including that which is allocated to common, preferred, treasury stock, retained earnings, etc.",
+        "label": "Equity Component [Domain]"
+       }
+      }
+     },
+     "localname": "EquityComponentDomain",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-information-regarding-common-stock-issued-details"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_NetIncomeLoss": {
+     "calculation": {
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-cash-flows": {
+       "order": 5.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      },
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-operations": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The portion of profit or loss for the period, net of income taxes, which is attributable to the parent.",
+        "label": "Net loss",
+        "terseLabel": "Net loss",
+        "totalLabel": "Net loss"
+       }
+      }
+     },
+     "localname": "NetIncomeLoss",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-cash-flows",
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-operations"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_PreferredStockMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Preferred shares may provide a preferential dividend to the dividend on common stock and may take precedence over common stock in the event of a liquidation. Preferred shares typically represent an ownership interest in the company.",
+        "label": "Preferred Stock [Member]"
+       }
+      }
+     },
+     "localname": "PreferredStockMember",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_RetainedEarningsMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cumulative amount of the reporting entity's undistributed earnings or deficit.",
+        "label": "Retained Earnings [Member]"
+       }
+      }
+     },
+     "localname": "RetainedEarningsMember",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_ShareBasedCompensationArrangementsByShareBasedPaymentAwardAwardTypeAndPlanNameDomain": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Award under share-based payment arrangement.",
+        "label": "Award Type [Domain]"
+       }
+      }
+     },
+     "localname": "ShareBasedCompensationArrangementsByShareBasedPaymentAwardAwardTypeAndPlanNameDomain",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-exercisable-and-outstanding-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-restricted-stock-unit-activity-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-sharebased-compensation-expenses-related-to-employees-and-directors-details"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_SharesOutstanding": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of shares issued which are neither cancelled nor held in the treasury.",
+        "label": "us-gaap_SharesOutstanding",
+        "periodEndLabel": "Balance (in shares)",
+        "periodStartLabel": "Balance (in shares)"
+       }
+      }
+     },
+     "localname": "SharesOutstanding",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by component of equity.",
+        "label": "Equity Components [Axis]"
+       }
+      }
+     },
+     "localname": "StatementEquityComponentsAxis",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-information-regarding-common-stock-issued-details"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementLineItems": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Line items represent financial concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes to the table.",
+        "label": "Statement [Line Items]"
+       }
+      }
+     },
+     "localname": "StatementLineItems",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-balance-sheets",
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-balance-sheets-parentheticals",
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-cash-flows",
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-operations",
+      "http://www.ricebrantech.com/20221231/role/statement-note-1-liquidity-and-managements-plan",
+      "http://www.ricebrantech.com/20221231/role/statement-note-1-liquidity-and-managements-plan-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-exercisable-and-outstanding-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-information-regarding-common-stock-issued-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-restricted-stock-unit-activity-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-sharebased-compensation-expenses-related-to-employees-and-directors-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-warrants-activity-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-deferred-tax-asset-liability-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-income-tax-expense-benefit-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-summarizes-the-changes-in-the-valuation-allowance-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-12-fair-value-measurement-fair-value-assumption-measurement-of-warrant-a-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-12-income-loss-per-share-eps",
+      "http://www.ricebrantech.com/20221231/role/statement-note-12-income-loss-per-share-eps-eps-computations-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-12-income-loss-per-share-eps-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-13-fair-value-measurement-changes-in-level-3-items-measured-at-fair-value-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-13-fair-value-measurement-fair-value-of-liabilities-on-recurring-basis-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-13-fair-value-measurements",
+      "http://www.ricebrantech.com/20221231/role/statement-note-13-fair-value-measurements-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-13-fair-value-measurements-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-14-commitments-and-contingencies-",
+      "http://www.ricebrantech.com/20221231/role/statement-note-14-commitments-and-contingencies-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-2-business-and-summary-of-significant-accounting-policies",
+      "http://www.ricebrantech.com/20221231/role/statement-note-2-business-and-summary-of-significant-accounting-policies-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-3-cash-and-cash-equivalents",
+      "http://www.ricebrantech.com/20221231/role/statement-note-3-cash-and-cash-equivalents-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-4-accounts-receivable-and-revenues",
+      "http://www.ricebrantech.com/20221231/role/statement-note-4-accounts-receivable-and-revenues-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-4-accounts-receivable-and-revenues-revenues-and-accounts-receivable-from-significant-customers-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-4-accounts-receivable-and-revenues-revenues-by-product-line-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-4-accounts-receivable-and-revenues-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-5-inventories",
+      "http://www.ricebrantech.com/20221231/role/statement-note-5-inventories-components-of-inventories-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-5-inventories-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-6-property-and-equipment",
+      "http://www.ricebrantech.com/20221231/role/statement-note-6-property-and-equipment-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-6-property-and-equipment-property-plant-and-equipment-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-6-property-and-equipment-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-7-intangible-assets-and-goodwill",
+      "http://www.ricebrantech.com/20221231/role/statement-note-7-intangible-assets-and-goodwill-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-7-intangible-assets-and-goodwill-future-intangible-amortization-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-7-intangible-assets-and-goodwill-intangible-assets-excluding-goodwill-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-7-intangible-assets-and-goodwill-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases-components-of-lease-expense-and-cash-flows-from-leases-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases-maturities-of-lease-liabilities-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases-remaining-terms-and-discount-rates-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-due-under-factoring-agreement-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-future-principal-maturities-of-longterm-debt-outstanding-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-longterm-debt-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-longterm-debt-details-parentheticals",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-significant-accounting-policies-policies"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementOfStockholdersEquityAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of Stockholders' Equity [Abstract]"
+       }
+      }
+     },
+     "localname": "StatementOfStockholdersEquityAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementTable": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Schedule reflecting a Statement of Income, Statement of Cash Flows, Statement of Financial Position, Statement of Shareholders' Equity and Other Comprehensive Income, or other statement as needed.",
+        "label": "Statement [Table]"
+       }
+      }
+     },
+     "localname": "StatementTable",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-balance-sheets",
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-balance-sheets-parentheticals",
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-cash-flows",
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-operations",
+      "http://www.ricebrantech.com/20221231/role/statement-note-1-liquidity-and-managements-plan",
+      "http://www.ricebrantech.com/20221231/role/statement-note-1-liquidity-and-managements-plan-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-exercisable-and-outstanding-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-information-regarding-common-stock-issued-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-restricted-stock-unit-activity-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-sharebased-compensation-expenses-related-to-employees-and-directors-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-warrants-activity-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-deferred-tax-asset-liability-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-income-tax-expense-benefit-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-summarizes-the-changes-in-the-valuation-allowance-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-11-income-taxes-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-12-fair-value-measurement-fair-value-assumption-measurement-of-warrant-a-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-12-income-loss-per-share-eps",
+      "http://www.ricebrantech.com/20221231/role/statement-note-12-income-loss-per-share-eps-eps-computations-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-12-income-loss-per-share-eps-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-13-fair-value-measurement-changes-in-level-3-items-measured-at-fair-value-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-13-fair-value-measurement-fair-value-of-liabilities-on-recurring-basis-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-13-fair-value-measurements",
+      "http://www.ricebrantech.com/20221231/role/statement-note-13-fair-value-measurements-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-13-fair-value-measurements-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-14-commitments-and-contingencies-",
+      "http://www.ricebrantech.com/20221231/role/statement-note-14-commitments-and-contingencies-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-2-business-and-summary-of-significant-accounting-policies",
+      "http://www.ricebrantech.com/20221231/role/statement-note-2-business-and-summary-of-significant-accounting-policies-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-3-cash-and-cash-equivalents",
+      "http://www.ricebrantech.com/20221231/role/statement-note-3-cash-and-cash-equivalents-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-4-accounts-receivable-and-revenues",
+      "http://www.ricebrantech.com/20221231/role/statement-note-4-accounts-receivable-and-revenues-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-4-accounts-receivable-and-revenues-revenues-and-accounts-receivable-from-significant-customers-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-4-accounts-receivable-and-revenues-revenues-by-product-line-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-4-accounts-receivable-and-revenues-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-5-inventories",
+      "http://www.ricebrantech.com/20221231/role/statement-note-5-inventories-components-of-inventories-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-5-inventories-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-6-property-and-equipment",
+      "http://www.ricebrantech.com/20221231/role/statement-note-6-property-and-equipment-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-6-property-and-equipment-property-plant-and-equipment-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-6-property-and-equipment-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-7-intangible-assets-and-goodwill",
+      "http://www.ricebrantech.com/20221231/role/statement-note-7-intangible-assets-and-goodwill-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-7-intangible-assets-and-goodwill-future-intangible-amortization-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-7-intangible-assets-and-goodwill-intangible-assets-excluding-goodwill-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-7-intangible-assets-and-goodwill-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases-components-of-lease-expense-and-cash-flows-from-leases-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases-maturities-of-lease-liabilities-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases-remaining-terms-and-discount-rates-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-8-leases-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-details-textual",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-due-under-factoring-agreement-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-future-principal-maturities-of-longterm-debt-outstanding-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-longterm-debt-details",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-longterm-debt-details-parentheticals",
+      "http://www.ricebrantech.com/20221231/role/statement-note-9-debt-tables",
+      "http://www.ricebrantech.com/20221231/role/statement-significant-accounting-policies-policies"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of shares issued during the period as a result of the conversion of convertible securities.",
+        "label": "Conversion of preferred stock into common stock (in shares)"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesIssuedForServices": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of shares issued in lieu of cash for services contributed to the entity. Number of shares includes, but is not limited to, shares issued for services contributed by vendors and founders.",
+        "label": "Common stock issued to vendors (in shares)"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodSharesIssuedForServices",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesNewIssues": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of new stock issued during the period.",
+        "label": "Sales of common stock, net of costs (in shares)",
+        "terseLabel": "Stock Issued During Period, Shares, New Issues (in shares)"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodSharesNewIssues",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-details-textual"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesReverseStockSplits": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Reduction in the number of shares during the period as a result of a reverse stock split.",
+        "label": "Other (in shares)"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodSharesReverseStockSplits",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesShareBasedCompensation": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number, after forfeiture, of shares or units issued under share-based payment arrangement. Excludes shares or units issued under employee stock ownership plan (ESOP).",
+        "label": "Common stock awards under equity incentive plans (in shares)"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodSharesShareBasedCompensation",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodValueConversionOfConvertibleSecurities": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The gross value of stock issued during the period upon the conversion of convertible securities.",
+        "label": "Conversion of preferred stock into common stock"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodValueConversionOfConvertibleSecurities",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodValueIssuedForServices": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Value of stock issued in lieu of cash for services contributed to the entity. Value of the stock issued includes, but is not limited to, services contributed by vendors and founders.",
+        "label": "Common stock issued to vendors"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodValueIssuedForServices",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodValueNewIssues": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Equity impact of the value of new stock issued during the period. Includes shares issued in an initial public offering or a secondary public offering.",
+        "label": "Sales of common stock, net of costs"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodValueNewIssues",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Value, after forfeiture, of shares issued under share-based payment arrangement. Excludes employee stock ownership plan (ESOP).",
+        "label": "Common stock awards under equity incentive plans"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodValueShareBasedCompensation",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StockholdersEquity": {
+     "calculation": {
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-balance-sheets": {
+       "order": 1.0,
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Total of all stockholders' equity (deficit) items, net of receivables from officers, directors, owners, and affiliates of the entity which are attributable to the parent. The amount of the economic entity's stockholders' equity attributable to the parent excludes the amount of stockholders' equity which is allocable to that ownership interest in subsidiary equity which is not attributable to the parent (noncontrolling interest, minority interest). This excludes temporary equity and is sometimes called permanent equity.",
+        "label": "us-gaap_StockholdersEquity",
+        "periodEndLabel": "Balance",
+        "periodStartLabel": "Balance",
+        "totalLabel": "Total shareholders' equity"
+       }
+      }
+     },
+     "localname": "StockholdersEquity",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-balance-sheets",
+      "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_SubsidiarySaleOfStockAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by type of sale of the entity's stock.",
+        "label": "Sale of Stock [Axis]"
+       }
+      }
+     },
+     "localname": "SubsidiarySaleOfStockAxis",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings",
+      "http://www.ricebrantech.com/20221231/role/statement-note-10-equity-sharebased-compensation-warrants-and-securities-offerings-details-textual"
+     ],
+     "xbrltype": "stringItemType"
+    }
+   },
+   "report": {
+    "R5": {
+     "firstAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "tbody",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "ribt20221231_10k.htm",
+      "contextRef": "i_2020-12-31_StatementEquityComponentsAxis-PreferredStockMember",
+      "decimals": "INF",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:SharesOutstanding",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "Share",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "004 - Statement - Consolidated Statements of Changes in Shareholders' Equity",
+     "menuCat": "Statements",
+     "order": "5",
+     "role": "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+     "shortName": "Consolidated Statements of Changes in Shareholders' Equity",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "tbody",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "ribt20221231_10k.htm",
+      "contextRef": "i_2020-12-31_StatementEquityComponentsAxis-PreferredStockMember",
+      "decimals": "INF",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:SharesOutstanding",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "Share",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

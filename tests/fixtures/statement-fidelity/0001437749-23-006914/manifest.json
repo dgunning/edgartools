@@ -1,0 +1,15 @@
+{
+ "accession": "0001437749-23-006914",
+ "filer": "RiceBran Technologies",
+ "form": "10-K",
+ "filing_date": "2023-03-16",
+ "role": "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity",
+ "page": "R5.htm",
+ "short_name": "Consolidated Statements of Changes in Shareholders' Equity",
+ "sic": "2040",
+ "period_of_report": "2022-12-31",
+ "menu_categories": {
+  "http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity": "Statements"
+ },
+ "access": "statement_of_equity()"
+}

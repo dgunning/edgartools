@@ -1,0 +1,459 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:country="http://xbrl.sec.gov/country/2022" xmlns:dei="http://xbrl.sec.gov/dei/2022" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:ribt="http://www.ricebrantech.com/20221231" xmlns:srt="http://fasb.org/srt/2022" xmlns:stpr="http://xbrl.sec.gov/stpr/2022" xmlns:thunderdome="http://www.RDGFilings.com" xmlns:us-gaap="http://fasb.org/us-gaap/2022" xmlns:utr="http://www.xbrl.org/2009/utr" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <link:schemaRef xlink:href="ribt-20221231.xsd" xlink:type="simple"/>
+    <context id="d_2022-01-01_2022-12-31">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+        </entity>
+        <period>
+            <startDate>2022-01-01</startDate>
+            <endDate>2022-12-31</endDate>
+        </period>
+    </context>
+    <context id="i_2022-06-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+        </entity>
+        <period>
+            <instant>2022-06-30</instant>
+        </period>
+    </context>
+    <context id="i_2023-03-16">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+        </entity>
+        <period>
+            <instant>2023-03-16</instant>
+        </period>
+    </context>
+    <context id="i_2022-12-31">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+        </entity>
+        <period>
+            <instant>2022-12-31</instant>
+        </period>
+    </context>
+    <context id="i_2021-12-31">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+        </entity>
+        <period>
+            <instant>2021-12-31</instant>
+        </period>
+    </context>
+    <context id="d_2021-01-01_2021-12-31">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+        </entity>
+        <period>
+            <startDate>2021-01-01</startDate>
+            <endDate>2021-12-31</endDate>
+        </period>
+    </context>
+    <context id="i_2020-12-31_StatementEquityComponentsAxis-PreferredStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:PreferredStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2020-12-31</instant>
+        </period>
+    </context>
+    <context id="i_2020-12-31_StatementEquityComponentsAxis-CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2020-12-31</instant>
+        </period>
+    </context>
+    <context id="i_2020-12-31_StatementEquityComponentsAxis-RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2020-12-31</instant>
+        </period>
+    </context>
+    <context id="i_2020-12-31">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+        </entity>
+        <period>
+            <instant>2020-12-31</instant>
+        </period>
+    </context>
+    <context id="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:PreferredStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-01-01</startDate>
+            <endDate>2021-12-31</endDate>
+        </period>
+    </context>
+    <context id="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-01-01</startDate>
+            <endDate>2021-12-31</endDate>
+        </period>
+    </context>
+    <context id="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-01-01</startDate>
+            <endDate>2021-12-31</endDate>
+        </period>
+    </context>
+    <context id="i_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:PreferredStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2021-12-31</instant>
+        </period>
+    </context>
+    <context id="i_2021-12-31_StatementEquityComponentsAxis-CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2021-12-31</instant>
+        </period>
+    </context>
+    <context id="i_2021-12-31_StatementEquityComponentsAxis-RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2021-12-31</instant>
+        </period>
+    </context>
+    <context id="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:PreferredStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2022-01-01</startDate>
+            <endDate>2022-12-31</endDate>
+        </period>
+    </context>
+    <context id="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2022-01-01</startDate>
+            <endDate>2022-12-31</endDate>
+        </period>
+    </context>
+    <context id="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2022-01-01</startDate>
+            <endDate>2022-12-31</endDate>
+        </period>
+    </context>
+    <context id="d_2022-01-01_2022-12-31_AwardTypeAxis-StockUnitsIssuedSUIMember_StatementEquityComponentsAxis-PreferredStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:AwardTypeAxis">ribt:StockUnitsIssuedSUIMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:PreferredStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2022-01-01</startDate>
+            <endDate>2022-12-31</endDate>
+        </period>
+    </context>
+    <context id="d_2022-01-01_2022-12-31_AwardTypeAxis-StockUnitsIssuedSUIMember_StatementEquityComponentsAxis-CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:AwardTypeAxis">ribt:StockUnitsIssuedSUIMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2022-01-01</startDate>
+            <endDate>2022-12-31</endDate>
+        </period>
+    </context>
+    <context id="d_2022-01-01_2022-12-31_AwardTypeAxis-StockUnitsIssuedSUIMember_StatementEquityComponentsAxis-RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:AwardTypeAxis">ribt:StockUnitsIssuedSUIMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2022-01-01</startDate>
+            <endDate>2022-12-31</endDate>
+        </period>
+    </context>
+    <context id="d_2022-01-01_2022-12-31_AwardTypeAxis-StockUnitsIssuedSUIMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:AwardTypeAxis">ribt:StockUnitsIssuedSUIMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2022-01-01</startDate>
+            <endDate>2022-12-31</endDate>
+        </period>
+    </context>
+    <context id="i_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:PreferredStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2022-12-31</instant>
+        </period>
+    </context>
+    <context id="i_2022-12-31_StatementEquityComponentsAxis-CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2022-12-31</instant>
+        </period>
+    </context>
+    <context id="i_2022-12-31_StatementEquityComponentsAxis-RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2022-12-31</instant>
+        </period>
+    </context>
+    <context id="d_2022-10-01_2022-10-31_SubsidiarySaleOfStockAxis-OfferingPursuantToShelfRegistrationStatementMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:SubsidiarySaleOfStockAxis">ribt:OfferingPursuantToShelfRegistrationStatementMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2022-10-01</startDate>
+            <endDate>2022-10-31</endDate>
+        </period>
+    </context>
+    <context id="d_2021-09-13_2021-09-13_SubsidiarySaleOfStockAxis-OfferingPursuantToShelfRegistrationStatementMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:SubsidiarySaleOfStockAxis">ribt:OfferingPursuantToShelfRegistrationStatementMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-09-13</startDate>
+            <endDate>2021-09-13</endDate>
+        </period>
+    </context>
+    <context id="d_2021-07-01_2021-09-30_SubsidiarySaleOfStockAxis-AtthemarketOfferingProgramMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001063537</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:SubsidiarySaleOfStockAxis">ribt:AtthemarketOfferingProgramMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-07-01</startDate>
+            <endDate>2021-09-30</endDate>
+        </period>
+    </context>
+    <unit id="USD">
+        <measure>iso4217:USD</measure>
+    </unit>
+    <unit id="Share">
+        <measure>shares</measure>
+    </unit>
+    <dei:EntityCentralIndexKey contextRef="d_2022-01-01_2022-12-31" id="thunderdome-EntityCentralIndexKey">0001063537</dei:EntityCentralIndexKey>
+    <dei:EntityRegistrantName contextRef="d_2022-01-01_2022-12-31" id="thunderdome-EntityRegistrantName">RiceBran Technologies</dei:EntityRegistrantName>
+    <dei:AmendmentFlag contextRef="d_2022-01-01_2022-12-31">false</dei:AmendmentFlag>
+    <dei:CurrentFiscalYearEndDate contextRef="d_2022-01-01_2022-12-31">--12-31</dei:CurrentFiscalYearEndDate>
+    <dei:DocumentFiscalPeriodFocus contextRef="d_2022-01-01_2022-12-31">FY</dei:DocumentFiscalPeriodFocus>
+    <dei:DocumentFiscalYearFocus contextRef="d_2022-01-01_2022-12-31">2022</dei:DocumentFiscalYearFocus>
+    <dei:DocumentType contextRef="d_2022-01-01_2022-12-31">10-K</dei:DocumentType>
+    <dei:DocumentAnnualReport contextRef="d_2022-01-01_2022-12-31">true</dei:DocumentAnnualReport>
+    <dei:DocumentPeriodEndDate contextRef="d_2022-01-01_2022-12-31">2022-12-31</dei:DocumentPeriodEndDate>
+    <dei:DocumentTransitionReport contextRef="d_2022-01-01_2022-12-31">false</dei:DocumentTransitionReport>
+    <dei:EntityFileNumber contextRef="d_2022-01-01_2022-12-31">001-36245</dei:EntityFileNumber>
+    <dei:EntityIncorporationStateCountryCode contextRef="d_2022-01-01_2022-12-31">CA</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityTaxIdentificationNumber contextRef="d_2022-01-01_2022-12-31">87-0673375</dei:EntityTaxIdentificationNumber>
+    <dei:EntityAddressAddressLine1 contextRef="d_2022-01-01_2022-12-31">25420 Kuykendahl Rd., Suite B300</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="d_2022-01-01_2022-12-31">Tomball</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="d_2022-01-01_2022-12-31">TX</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="d_2022-01-01_2022-12-31">77375</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="d_2022-01-01_2022-12-31">281</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="d_2022-01-01_2022-12-31">675-2421</dei:LocalPhoneNumber>
+    <dei:Security12bTitle contextRef="d_2022-01-01_2022-12-31">Common Stock, no par value per share</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="d_2022-01-01_2022-12-31">RIBT</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="d_2022-01-01_2022-12-31">NASDAQ</dei:SecurityExchangeName>
+    <dei:EntityWellKnownSeasonedIssuer contextRef="d_2022-01-01_2022-12-31">No</dei:EntityWellKnownSeasonedIssuer>
+    <dei:EntityVoluntaryFilers contextRef="d_2022-01-01_2022-12-31">No</dei:EntityVoluntaryFilers>
+    <dei:EntityCurrentReportingStatus contextRef="d_2022-01-01_2022-12-31">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityInteractiveDataCurrent contextRef="d_2022-01-01_2022-12-31">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityFilerCategory contextRef="d_2022-01-01_2022-12-31">Non-accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntitySmallBusiness contextRef="d_2022-01-01_2022-12-31">true</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="d_2022-01-01_2022-12-31">false</dei:EntityEmergingGrowthCompany>
+    <dei:IcfrAuditorAttestationFlag contextRef="d_2022-01-01_2022-12-31">false</dei:IcfrAuditorAttestationFlag>
+    <dei:EntityShellCompany contextRef="d_2022-01-01_2022-12-31">false</dei:EntityShellCompany>
+    <dei:EntityPublicFloat contextRef="i_2022-06-30" decimals="1" unitRef="USD">34300000</dei:EntityPublicFloat>
+    <dei:EntityCommonStockSharesOutstanding contextRef="i_2023-03-16" decimals="INF" unitRef="Share">6384334</dei:EntityCommonStockSharesOutstanding>
+    <dei:AuditorFirmId contextRef="d_2022-01-01_2022-12-31">49</dei:AuditorFirmId>
+    <dei:AuditorName contextRef="d_2022-01-01_2022-12-31">RSM US LLP</dei:AuditorName>
+    <dei:AuditorLocation contextRef="d_2022-01-01_2022-12-31">Houston, Texas</dei:AuditorLocation>
+    <us-gaap:StockholdersEquity contextRef="i_2022-12-31" decimals="-3" id="c95403283" unitRef="USD">12909000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="i_2021-12-31" decimals="-3" id="c95403284" unitRef="USD">18495000</us-gaap:StockholdersEquity>
+    <us-gaap:NetIncomeLoss contextRef="d_2022-01-01_2022-12-31" decimals="-3" id="c95403318" unitRef="USD">-7858000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="d_2021-01-01_2021-12-31" decimals="-3" id="c95403319" unitRef="USD">-8949000</us-gaap:NetIncomeLoss>
+    <us-gaap:SharesOutstanding contextRef="i_2020-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403330" unitRef="Share">225</us-gaap:SharesOutstanding>
+    <us-gaap:SharesOutstanding contextRef="i_2020-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403331" unitRef="Share">4523809</us-gaap:SharesOutstanding>
+    <us-gaap:StockholdersEquity contextRef="i_2020-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403332" unitRef="USD">112000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="i_2020-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403333" unitRef="USD">322218000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="i_2020-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-4" id="c95403334" unitRef="USD">-298910000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="i_2020-12-31" decimals="-4" id="c95403335" unitRef="USD">23420000</us-gaap:StockholdersEquity>
+    <us-gaap:StockIssuedDuringPeriodSharesNewIssues contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" id="c95403336" unitRef="Share" xsi:nil="true"/>
+    <us-gaap:StockIssuedDuringPeriodSharesNewIssues contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403337" unitRef="Share">306240</us-gaap:StockIssuedDuringPeriodSharesNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403338" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403339" unitRef="USD">2721000</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403340" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="d_2021-01-01_2021-12-31" decimals="-3" id="c95403341" unitRef="USD">2721000</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403342" unitRef="Share">0</us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation>
+    <us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403343" unitRef="Share">70858</us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation>
+    <us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403344" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation>
+    <us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403345" unitRef="USD">1114000</us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation>
+    <us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403346" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation>
+    <us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation contextRef="d_2021-01-01_2021-12-31" decimals="-3" id="c95403347" unitRef="USD">1114000</us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation>
+    <ribt:StockIssuedDuringPeriodSharesWarrantsExercised contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403348" unitRef="Share">0</ribt:StockIssuedDuringPeriodSharesWarrantsExercised>
+    <ribt:StockIssuedDuringPeriodSharesWarrantsExercised contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403349" unitRef="Share">248543</ribt:StockIssuedDuringPeriodSharesWarrantsExercised>
+    <ribt:StockIssuedDuringPeriodValueWarrantsExercised contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403350" unitRef="USD">0</ribt:StockIssuedDuringPeriodValueWarrantsExercised>
+    <ribt:StockIssuedDuringPeriodValueWarrantsExercised contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403351" unitRef="USD">171000</ribt:StockIssuedDuringPeriodValueWarrantsExercised>
+    <ribt:StockIssuedDuringPeriodValueWarrantsExercised contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403352" unitRef="USD">0</ribt:StockIssuedDuringPeriodValueWarrantsExercised>
+    <ribt:StockIssuedDuringPeriodValueWarrantsExercised contextRef="d_2021-01-01_2021-12-31" decimals="-3" id="c95403353" unitRef="USD">171000</ribt:StockIssuedDuringPeriodValueWarrantsExercised>
+    <us-gaap:StockIssuedDuringPeriodSharesIssuedForServices contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403354" unitRef="Share">0</us-gaap:StockIssuedDuringPeriodSharesIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodSharesIssuedForServices contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403355" unitRef="Share">2400</us-gaap:StockIssuedDuringPeriodSharesIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403356" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403357" unitRef="USD">18000</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403358" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2021-01-01_2021-12-31" decimals="-3" id="c95403359" unitRef="USD">18000</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403360" unitRef="Share">-75</us-gaap:StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities>
+    <us-gaap:StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403361" unitRef="Share">7117</us-gaap:StockIssuedDuringPeriodSharesConversionOfConvertibleSecurities>
+    <us-gaap:StockIssuedDuringPeriodValueConversionOfConvertibleSecurities contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403362" unitRef="USD">-37000</us-gaap:StockIssuedDuringPeriodValueConversionOfConvertibleSecurities>
+    <us-gaap:StockIssuedDuringPeriodValueConversionOfConvertibleSecurities contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403363" unitRef="USD">37000</us-gaap:StockIssuedDuringPeriodValueConversionOfConvertibleSecurities>
+    <us-gaap:StockIssuedDuringPeriodValueConversionOfConvertibleSecurities contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403364" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueConversionOfConvertibleSecurities>
+    <us-gaap:StockIssuedDuringPeriodValueConversionOfConvertibleSecurities contextRef="d_2021-01-01_2021-12-31" decimals="-3" id="c95403365" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueConversionOfConvertibleSecurities>
+    <us-gaap:NetIncomeLoss contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403368" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403369" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="d_2021-01-01_2021-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403370" unitRef="USD">-8949000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="d_2021-01-01_2021-12-31" decimals="-3" id="c95403371" unitRef="USD">-8949000</us-gaap:NetIncomeLoss>
+    <us-gaap:SharesOutstanding contextRef="i_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403372" unitRef="Share">150</us-gaap:SharesOutstanding>
+    <us-gaap:SharesOutstanding contextRef="i_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403373" unitRef="Share">5158967</us-gaap:SharesOutstanding>
+    <us-gaap:StockholdersEquity contextRef="i_2021-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403374" unitRef="USD">75000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="i_2021-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403375" unitRef="USD">326279000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="i_2021-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403376" unitRef="USD">-307859000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="i_2021-12-31" decimals="-3" id="c95403377" unitRef="USD">18495000</us-gaap:StockholdersEquity>
+    <ribt:StockIssuedDuringPeriodSharesSalesOfCommonStockAndWarrantsNetOfCosts contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403378" unitRef="Share">0</ribt:StockIssuedDuringPeriodSharesSalesOfCommonStockAndWarrantsNetOfCosts>
+    <ribt:StockIssuedDuringPeriodSharesSalesOfCommonStockAndWarrantsNetOfCosts contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403379" unitRef="Share">675000</ribt:StockIssuedDuringPeriodSharesSalesOfCommonStockAndWarrantsNetOfCosts>
+    <ribt:StockIssuedDuringPeriodValueSaleOfCommonStockAndWarrantsNetOfCosts contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403380" unitRef="USD">0</ribt:StockIssuedDuringPeriodValueSaleOfCommonStockAndWarrantsNetOfCosts>
+    <ribt:StockIssuedDuringPeriodValueSaleOfCommonStockAndWarrantsNetOfCosts contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403381" unitRef="USD">986000</ribt:StockIssuedDuringPeriodValueSaleOfCommonStockAndWarrantsNetOfCosts>
+    <ribt:StockIssuedDuringPeriodValueSaleOfCommonStockAndWarrantsNetOfCosts contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403382" unitRef="USD">0</ribt:StockIssuedDuringPeriodValueSaleOfCommonStockAndWarrantsNetOfCosts>
+    <ribt:StockIssuedDuringPeriodValueSaleOfCommonStockAndWarrantsNetOfCosts contextRef="d_2022-01-01_2022-12-31" decimals="-3" id="c95403383" unitRef="USD">986000</ribt:StockIssuedDuringPeriodValueSaleOfCommonStockAndWarrantsNetOfCosts>
+    <us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403384" unitRef="Share">0</us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation>
+    <us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403385" unitRef="Share">137695</us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation>
+    <us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403386" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation>
+    <us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403387" unitRef="USD">1261000</us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation>
+    <us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403388" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation>
+    <us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation contextRef="d_2022-01-01_2022-12-31" decimals="-3" id="c95403389" unitRef="USD">1261000</us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation>
+    <ribt:StockIssuedDuringPeriodSharesWarrantsExercised contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403390" unitRef="Share">0</ribt:StockIssuedDuringPeriodSharesWarrantsExercised>
+    <ribt:StockIssuedDuringPeriodSharesWarrantsExercised contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403391" unitRef="Share">325000</ribt:StockIssuedDuringPeriodSharesWarrantsExercised>
+    <ribt:StockIssuedDuringPeriodValueWarrantsExercised contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403392" unitRef="USD">0</ribt:StockIssuedDuringPeriodValueWarrantsExercised>
+    <ribt:StockIssuedDuringPeriodValueWarrantsExercised contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403393" unitRef="USD">0</ribt:StockIssuedDuringPeriodValueWarrantsExercised>
+    <ribt:StockIssuedDuringPeriodValueWarrantsExercised contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403394" unitRef="USD">0</ribt:StockIssuedDuringPeriodValueWarrantsExercised>
+    <ribt:StockIssuedDuringPeriodValueWarrantsExercised contextRef="d_2022-01-01_2022-12-31" decimals="-3" id="c95403395" unitRef="USD">0</ribt:StockIssuedDuringPeriodValueWarrantsExercised>
+    <us-gaap:StockIssuedDuringPeriodSharesIssuedForServices contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403396" unitRef="Share">0</us-gaap:StockIssuedDuringPeriodSharesIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodSharesIssuedForServices contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403397" unitRef="Share">2400</us-gaap:StockIssuedDuringPeriodSharesIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403398" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-4" id="c95403399" unitRef="USD">10000</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403400" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2022-01-01_2022-12-31" decimals="-4" id="c95403401" unitRef="USD">10000</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodSharesIssuedForServices contextRef="d_2022-01-01_2022-12-31_AwardTypeAxis-StockUnitsIssuedSUIMember_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403402" unitRef="Share">0</us-gaap:StockIssuedDuringPeriodSharesIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodSharesIssuedForServices contextRef="d_2022-01-01_2022-12-31_AwardTypeAxis-StockUnitsIssuedSUIMember_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403403" unitRef="Share">0</us-gaap:StockIssuedDuringPeriodSharesIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2022-01-01_2022-12-31_AwardTypeAxis-StockUnitsIssuedSUIMember_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403404" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2022-01-01_2022-12-31_AwardTypeAxis-StockUnitsIssuedSUIMember_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403405" unitRef="USD">15000</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2022-01-01_2022-12-31_AwardTypeAxis-StockUnitsIssuedSUIMember_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403406" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodValueIssuedForServices contextRef="d_2022-01-01_2022-12-31_AwardTypeAxis-StockUnitsIssuedSUIMember" decimals="-3" id="c95403407" unitRef="USD">15000</us-gaap:StockIssuedDuringPeriodValueIssuedForServices>
+    <us-gaap:StockIssuedDuringPeriodSharesReverseStockSplits contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403408" unitRef="Share">0</us-gaap:StockIssuedDuringPeriodSharesReverseStockSplits>
+    <us-gaap:StockIssuedDuringPeriodSharesReverseStockSplits contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403409" unitRef="Share">10447</us-gaap:StockIssuedDuringPeriodSharesReverseStockSplits>
+    <us-gaap:NetIncomeLoss contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403416" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403417" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="d_2022-01-01_2022-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403418" unitRef="USD">-7858000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="d_2022-01-01_2022-12-31" decimals="-3" id="c95403419" unitRef="USD">-7858000</us-gaap:NetIncomeLoss>
+    <us-gaap:SharesOutstanding contextRef="i_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="INF" id="c95403420" unitRef="Share">150</us-gaap:SharesOutstanding>
+    <us-gaap:SharesOutstanding contextRef="i_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="INF" id="c95403421" unitRef="Share">6309509</us-gaap:SharesOutstanding>
+    <us-gaap:StockholdersEquity contextRef="i_2022-12-31_StatementEquityComponentsAxis-PreferredStockMember" decimals="-3" id="c95403422" unitRef="USD">75000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="i_2022-12-31_StatementEquityComponentsAxis-CommonStockMember" decimals="-3" id="c95403423" unitRef="USD">328551000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="i_2022-12-31_StatementEquityComponentsAxis-RetainedEarningsMember" decimals="-3" id="c95403424" unitRef="USD">-315717000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="i_2022-12-31" decimals="-3" id="c95403425" unitRef="USD">12909000</us-gaap:StockholdersEquity>
+    <us-gaap:NetIncomeLoss contextRef="d_2022-01-01_2022-12-31" decimals="-3" id="c95403427" unitRef="USD">-7858000</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="d_2021-01-01_2021-12-31" decimals="-3" id="c95403428" unitRef="USD">-8949000</us-gaap:NetIncomeLoss>
+    <us-gaap:StockIssuedDuringPeriodSharesNewIssues contextRef="d_2022-10-01_2022-10-31_SubsidiarySaleOfStockAxis-OfferingPursuantToShelfRegistrationStatementMember" decimals="INF" id="c95403906" unitRef="Share">675000</us-gaap:StockIssuedDuringPeriodSharesNewIssues>
+    <us-gaap:StockIssuedDuringPeriodSharesNewIssues contextRef="d_2021-09-13_2021-09-13_SubsidiarySaleOfStockAxis-OfferingPursuantToShelfRegistrationStatementMember" decimals="INF" id="c95403922" unitRef="Share">230750</us-gaap:StockIssuedDuringPeriodSharesNewIssues>
+    <us-gaap:StockIssuedDuringPeriodSharesNewIssues contextRef="d_2021-07-01_2021-09-30_SubsidiarySaleOfStockAxis-AtthemarketOfferingProgramMember" decimals="INF" id="c95403943" unitRef="Share">75490</us-gaap:StockIssuedDuringPeriodSharesNewIssues>
+    </xbrl>

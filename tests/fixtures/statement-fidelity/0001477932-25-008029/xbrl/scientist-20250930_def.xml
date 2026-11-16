@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--XBRL Document Created with XBRLMaster--><!--Version: 2.3.08--><!--Based on XBRL 2.1--><!--Date of creation: 11/12/2025--><!--Software architectural design and coding: A'c Dharmapremananda Avt.--><!--Copyright (c) 2025 I-NET Business Solutions, Inc. All Rights Reserved.--><link:linkbase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xsi:schemaLocation="http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd">
+  <link:roleRef roleURI="http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited" xlink:href="scientist-20250930.xsd#CondensedConsolidatedStatementOfStockholdersEquityUnaudited" xlink:type="simple"/>
+  <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#hypercube-dimension" arcroleURI="http://xbrl.org/int/dim/arcrole/hypercube-dimension"/>
+  <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-domain" arcroleURI="http://xbrl.org/int/dim/arcrole/dimension-domain"/>
+  <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#domain-member" arcroleURI="http://xbrl.org/int/dim/arcrole/domain-member"/>
+  <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#all" arcroleURI="http://xbrl.org/int/dim/arcrole/all"/>
+  <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#notAll" arcroleURI="http://xbrl.org/int/dim/arcrole/notAll"/>
+  <link:arcroleRef xlink:type="simple" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-default" arcroleURI="http://xbrl.org/int/dim/arcrole/dimension-default"/>
+  <link:definitionLink xlink:type="extended" xlink:role="http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited" xlink:title="148600 - Statement - CONDENSED CONSOLIDATED STATEMENT OF STOCKHOLDERS EQUITY (Unaudited)">
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_StatementLineItems" xlink:label="loc_us-gaapStatementLineItems"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_StatementTable" xlink:label="loc_us-gaapStatementTable"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/all" xlink:from="loc_us-gaapStatementLineItems" xlink:to="loc_us-gaapStatementTable" order="2000" xbrldt:contextElement="segment" xbrldt:closed="true"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_StatementEquityComponentsAxis" xlink:label="loc_us-gaapStatementEquityComponentsAxis"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/hypercube-dimension" xlink:from="loc_us-gaapStatementTable" xlink:to="loc_us-gaapStatementEquityComponentsAxis" order="1020"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_EquityComponentDomain" xlink:label="loc_us-gaapEquityComponentDomain"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/dimension-domain" xlink:from="loc_us-gaapStatementEquityComponentsAxis" xlink:to="loc_us-gaapEquityComponentDomain" order="1030"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_EquityComponentDomain" xlink:label="loc_us-gaapEquityComponentDomain_10"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/dimension-default" xlink:from="loc_us-gaapStatementEquityComponentsAxis" xlink:to="loc_us-gaapEquityComponentDomain_10" order="1040" xbrldt:contextElement="segment"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_CommonStockMember" xlink:label="loc_us-gaapCommonStockMember"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapEquityComponentDomain" xlink:to="loc_us-gaapCommonStockMember" order="1021"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_AdditionalPaidInCapitalMember" xlink:label="loc_us-gaapAdditionalPaidInCapitalMember"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapEquityComponentDomain" xlink:to="loc_us-gaapAdditionalPaidInCapitalMember" order="1022"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_AccumulatedOtherComprehensiveIncomeMember" xlink:label="loc_us-gaapAccumulatedOtherComprehensiveIncomeMember"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapEquityComponentDomain" xlink:to="loc_us-gaapAccumulatedOtherComprehensiveIncomeMember" order="1023"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_RetainedEarningsMember" xlink:label="loc_us-gaapRetainedEarningsMember"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapEquityComponentDomain" xlink:to="loc_us-gaapRetainedEarningsMember" order="1024"/>
+    <link:loc xlink:type="locator" xlink:href="scientist-20250930.xsd#scientist_SubcriptionReceivableMember" xlink:label="loc_scientistSubcriptionReceivableMember"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapEquityComponentDomain" xlink:to="loc_scientistSubcriptionReceivableMember" order="1025"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_SharesIssued" xlink:label="loc_us-gaapSharesIssued"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapStatementLineItems" xlink:to="loc_us-gaapSharesIssued" order="1"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_StockholdersEquity" xlink:label="loc_us-gaapStockholdersEquity"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapStatementLineItems" xlink:to="loc_us-gaapStockholdersEquity" order="2"/>
+    <link:loc xlink:type="locator" xlink:href="scientist-20250930.xsd#scientist_IssuanceOfShareCapitalFoundersSharesShares" xlink:label="loc_scientistIssuanceOfShareCapitalFoundersSharesShares"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapStatementLineItems" xlink:to="loc_scientistIssuanceOfShareCapitalFoundersSharesShares" order="3"/>
+    <link:loc xlink:type="locator" xlink:href="scientist-20250930.xsd#scientist_IssuanceOfShareCapitalFoundersSharesAmount" xlink:label="loc_scientistIssuanceOfShareCapitalFoundersSharesAmount"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapStatementLineItems" xlink:to="loc_scientistIssuanceOfShareCapitalFoundersSharesAmount" order="4"/>
+    <link:loc xlink:type="locator" xlink:href="scientist-20250930.xsd#scientist_IssuanceOfShareCapitalPrivatePlacementShares" xlink:label="loc_scientistIssuanceOfShareCapitalPrivatePlacementShares"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapStatementLineItems" xlink:to="loc_scientistIssuanceOfShareCapitalPrivatePlacementShares" order="5"/>
+    <link:loc xlink:type="locator" xlink:href="scientist-20250930.xsd#scientist_IssuanceOfShareCapitalPrivatePlacementAmount" xlink:label="loc_scientistIssuanceOfShareCapitalPrivatePlacementAmount"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapStatementLineItems" xlink:to="loc_scientistIssuanceOfShareCapitalPrivatePlacementAmount" order="6"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_NetIncomeLoss" xlink:label="loc_us-gaapNetIncomeLoss"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapStatementLineItems" xlink:to="loc_us-gaapNetIncomeLoss" order="7"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax" xlink:label="loc_us-gaapOtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapStatementLineItems" xlink:to="loc_us-gaapOtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax" order="8"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_StockIssuedDuringPeriodSharesNewIssues" xlink:label="loc_us-gaapStockIssuedDuringPeriodSharesNewIssues"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapStatementLineItems" xlink:to="loc_us-gaapStockIssuedDuringPeriodSharesNewIssues" order="9"/>
+    <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd#us-gaap_StockIssuedDuringPeriodValueNewIssues" xlink:label="loc_us-gaapStockIssuedDuringPeriodValueNewIssues"/>
+    <link:definitionArc xlink:type="arc" xlink:arcrole="http://xbrl.org/int/dim/arcrole/domain-member" xlink:from="loc_us-gaapStatementLineItems" xlink:to="loc_us-gaapStockIssuedDuringPeriodValueNewIssues" order="10"/>
+  </link:definitionLink>
+  </link:linkbase>
