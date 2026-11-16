@@ -2,11 +2,12 @@ import os
 import re
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
+from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
 
 if TYPE_CHECKING:
-    from edgar._filings import Filings
+    from edgar._filings import Filing, Filings
     from edgar.filesystem import EdgarPath
 
 import pandas as pd
@@ -293,6 +294,16 @@ def download_edgar_data(submissions: bool = True,
              "download_filings('YYYY-MM-DD')")
 
 
+def _validate_download_options(source: str, max_workers: int, filings: Optional['Filings']) -> None:
+    if source not in ('submission', 'feed'):
+        raise ValidationError(f"source must be 'submission' or 'feed', not {source!r}")
+
+    if isinstance(max_workers, bool) or not isinstance(max_workers, int) or max_workers < 1:
+        raise ValidationError("max_workers must be a positive integer")
+    if max_workers != 1 and (filings is None or source != 'submission'):
+        raise ValidationError("max_workers greater than 1 requires filings and source='submission'")
+
+
 def download_filings(filing_date: Optional[str] = None,
                      data_directory: Optional[str] = None,
                      overwrite_existing:bool=False,
@@ -348,13 +359,7 @@ def download_filings(filing_date: Optional[str] = None,
         max_workers: Maximum concurrent downloads for selected submissions. Defaults to 1.
             All workers share the HTTP rate limiter. Daily feed downloads require 1.
     """
-    if source not in ('submission', 'feed'):
-        raise ValidationError(f"source must be 'submission' or 'feed', not {source!r}")
-
-    if isinstance(max_workers, bool) or not isinstance(max_workers, int) or max_workers < 1:
-        raise ValidationError("max_workers must be a positive integer")
-    if max_workers != 1 and (filings is None or source != 'submission'):
-        raise ValidationError("max_workers greater than 1 requires filings and source='submission'")
+    _validate_download_options(source, max_workers, filings)
 
     if not data_directory:
         data_directory = get_edgar_data_directory() / 'filings'
@@ -494,6 +499,40 @@ def _as_date(value) -> date:
     return datetime.strptime(str(value)[:10], '%Y-%m-%d').date()
 
 
+def _download_single_submission(filing: 'Filing',
+                                data_directory: Path,
+                                overwrite_existing: bool,
+                                compress: bool,
+                                compression_level: int) -> tuple[str, str]:
+    from edgar.httprequests import get_with_retry
+
+    accession_number = filing.accession_no
+    filing_date = _as_date(filing.filing_date)
+    if not overwrite_existing and _stored_filing_path(data_directory, filing_date, accession_number):
+        return "skipped", accession_number
+
+    try:
+        response = get_with_retry(url=filing.text_url)
+        inspect_response(response)
+    except TransportError as e:
+        if http_status(e) == 404:
+            return "not_found", accession_number
+        raise
+
+    folder = data_directory / filing_date.strftime('%Y%m%d')
+    folder.mkdir(parents=True, exist_ok=True)
+    target = folder / f"{accession_number}.nc"
+    partial = folder / f"{accession_number}.nc.part"
+    partial.write_bytes(response.content)
+    partial.replace(target)
+    stale = Path(f"{target}.gz")
+    if compress:
+        compress_filing(target, compression_level=compression_level)
+    elif stale.exists():
+        stale.unlink()   # an overwrite must not leave the old compressed copy in front of the new one
+    return "stored", accession_number
+
+
 def _download_filing_submissions(filings: 'Filings',
                                  data_directory: Path,
                                  overwrite_existing: bool,
@@ -506,35 +545,13 @@ def _download_filing_submissions(filings: 'Filings',
     Each one goes to <data_directory>/<YYYYMMDD of its filing date>/<accession>.nc,
     where the local readers look first. Returns the number of filings stored.
     """
-    from edgar.httprequests import get_with_retry
-
-    def download_one(filing):
-        # Return the outcome so progress and counters belong to the caller.
-        accession_number = filing.accession_no
-        filing_date = _as_date(filing.filing_date)
-        if not overwrite_existing and _stored_filing_path(data_directory, filing_date, accession_number):
-            return "skipped", accession_number
-
-        try:
-            response = get_with_retry(url=filing.text_url)
-            inspect_response(response)
-        except TransportError as e:
-            if http_status(e) == 404:
-                return "not_found", accession_number
-            raise
-
-        folder = data_directory / filing_date.strftime('%Y%m%d')
-        folder.mkdir(parents=True, exist_ok=True)
-        target = folder / f"{accession_number}.nc"
-        partial = folder / f"{accession_number}.nc.part"
-        partial.write_bytes(response.content)
-        partial.replace(target)
-        stale = Path(f"{target}.gz")
-        if compress:
-            compress_filing(target, compression_level=compression_level)
-        elif stale.exists():
-            stale.unlink()   # an overwrite must not leave the old compressed copy in front of the new one
-        return "stored", accession_number
+    download_one = partial(
+        _download_single_submission,
+        data_directory=data_directory,
+        overwrite_existing=overwrite_existing,
+        compress=compress,
+        compression_level=compression_level,
+    )
 
     def download_results():
         if max_workers == 1:
