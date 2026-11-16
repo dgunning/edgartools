@@ -1357,6 +1357,10 @@ class EntityFacts:
             return (f.filing_date or date.min, f.period_end or date.min)
 
         def _build_result(value, tag, unit_used, fact):
+            if (group.name == 'operating_cash_flow'
+                    and fact.concept == 'us-gaap:NetCashProvidedByUsedInOperatingActivitiesContinuingOperations'
+                    and self._has_discontinued_operating_cash(fact)):
+                return None
             if not return_metadata:
                 return value
             result = {
@@ -1443,6 +1447,20 @@ class EntityFacts:
             return _build_result(value, tag, unit_used, fact)
 
         return None
+
+    def _has_discontinued_operating_cash(self, continuing: FinancialFact) -> bool:
+        # Match the actual dates: a quarter and a year-to-date fact can both be labeled Q2.
+        facts = self._fact_index['by_concept'].get(
+            'us-gaap:CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations', []
+        )
+        for fact in facts:
+            if (fact.period_start == continuing.period_start
+                    and fact.period_end == continuing.period_end
+                    and fact.unit == continuing.unit
+                    and not fact.is_dimensioned
+                    and fact.numeric_value not in (None, 0)):
+                return True
+        return False
 
     def discover_concept_tags(self, concept_name: str) -> List[str]:
         """
