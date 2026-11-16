@@ -41,6 +41,7 @@ from edgar.bdc.investments import (
     _get_investment_member_candidates,
     _parse_investment_identifier,
     _reported_total_fair_value,
+    _strip_footnote_marks,
 )
 from edgar.xbrl.core import catalog_entry
 
@@ -590,6 +591,8 @@ def _extract_nonaccrual_from_xbrl(
         num_investments=len(nonaccrual_investments),
         period=period,
     )
+    if method == 'footnote':
+        warnings.extend(_reconcile_with_tagged(nonaccrual_investments, all_facts, period))
 
     return NonAccrualResult(
         cik=cik,
@@ -641,6 +644,106 @@ def _build_warnings(
             f"gap rather than genuinely zero non-accruals."
         )
 
+    return warnings
+
+
+# A share rather than a balance: "...Percent...", "...Rate" (CamelCase, so "Corporate" is not one)
+_A_RATE = re.compile(r'[Pp]ercent|Ratio|Rate(?=[A-Z]|$)|Of(?:Total|Net)Assets')
+# A total for one class of instrument rather than for every holding: GBDC tags its loans and its
+# preferred equity apart, us-gaap's aggregate covers loans held under the fair value option.
+_ONE_CLASS = re.compile(r'Loans?(?=[A-Z]|$)|Preferred|Equity|Debt')
+# A count of loans, read after "Number". Loans are rows of the schedule; borrowers and companies
+# are not, and neither are "investments": CCAP tags 11 while listing their pieces as 24 rows.
+_COUNTS_HOLDINGS = re.compile(r'(?:of)?(?:debt)?loans?')
+
+
+def _tagged_nonaccrual_balances(all_facts: List[dict], period: str) -> List[Tuple[str, str, Decimal]]:
+    """``(kind, concept, value)`` for each non-accrual total the filer tags at *period*.
+
+    *kind* is ``'cost'``, ``'fair_value'`` or ``'loans'``. Only undimensioned
+    facts count, at the instant or for a duration ending on it: Trinity Capital
+    tags ``trin:NonAccrualCost`` for the quarter rather than at its end.
+    Percentages, borrower counts and the concepts ``_tagged_zero`` sets aside
+    (income, thresholds, allowances) are not balances this can compare.
+    """
+    found: Dict[Tuple[str, str], Decimal] = {}
+    for fact in all_facts:
+        concept = fact.get('concept') or ''
+        lower = concept.lower()
+        if 'nonaccrual' not in lower and 'non_accrual' not in lower:
+            continue
+        if _NOT_A_NONACCRUAL_BALANCE.search(lower) or _A_RATE.search(concept) or _dims(fact):
+            continue
+        if fact.get('period_instant') != period and fact.get('period_end') != period:
+            continue
+        value = fact.get('numeric_value')
+        if value is None or pd.isna(value):
+            continue
+        if 'number' in lower:
+            # What is counted follows "Number": BXSL tags ...NumberOfLoans = 8 beside
+            # ...NumberOfBorrowers = 5, and only loans compare with the rows read here.
+            if not _COUNTS_HOLDINGS.match(lower.split('number', 1)[1]):
+                continue
+            kind = 'loans'
+        elif 'cost' in lower:
+            kind = 'cost'
+        elif 'fairvalue' in lower or concept == CONCEPT_NONACCRUAL_LOANS_FV:
+            kind = 'fair_value'
+        else:
+            continue
+        try:
+            found.setdefault((kind, concept), Decimal(str(value)))
+        except (ValueError, InvalidOperation):
+            continue
+    return [(kind, concept, value) for (kind, concept), value in found.items()]
+
+
+def _reconcile_with_tagged(investments: List[NonAccrualInvestment], all_facts: List[dict],
+                           period: str) -> List[str]:
+    """Warn where the footnote-flagged holdings disagree with a total the filer tags (GH #1959).
+
+    A filer's footnote links can be looser than the marks in its printed
+    schedule. Sixth Street links its non-accrual footnote to a Varinem loan its
+    schedule marks (3)(4), not (14), in the same way as to an ASP Unifrax note
+    marked (14), so no rule over the links can tell them apart. Where the filer
+    also tags a total, the disagreement is visible, and the result says so
+    rather than returning a confident list.
+
+    A total for every holding, and a count of loans, must match. Totals for one
+    class of instrument are added together and only bound the holdings from
+    below: GBDC tags its loans ($73.3M) and its preferred equity ($85.3M) apart,
+    and they add up to the $158.6M read. Amounts are compared within 1% or
+    $150,000, since filers tag them rounded to $0.1M.
+    """
+    def close(found: Decimal, tagged: Decimal) -> bool:
+        return abs(found - tagged) <= max(abs(tagged) / 100, Decimal(150_000))
+
+    def disagree(concept: str, tagged: str, found: str) -> str:
+        return (f"The filer tags {concept} = {tagged} at {period}, but the holdings read from its "
+                f"non-accrual footnotes come to {found}; the list may include holdings its schedule "
+                f"does not mark, or miss some.")
+
+    warnings: List[str] = []
+    totals = {
+        'cost': sum((inv.cost for inv in investments if inv.cost), Decimal(0)),
+        'fair_value': sum((inv.fair_value for inv in investments if inv.fair_value), Decimal(0)),
+    }
+    one_class: Dict[str, List[Tuple[str, Decimal]]] = {}
+    for kind, concept, tagged in _tagged_nonaccrual_balances(all_facts, period):
+        if kind == 'loans':
+            if int(tagged) != len(investments):
+                warnings.append(disagree(concept, str(int(tagged)), f"{len(investments)} holding(s)"))
+        elif _ONE_CLASS.search(concept.split(':')[-1]):
+            one_class.setdefault(kind, []).append((concept, tagged))
+        elif not close(totals[kind], tagged):
+            basis = 'cost' if kind == 'cost' else 'fair value'
+            warnings.append(disagree(concept, f"${tagged:,.0f}", f"${totals[kind]:,.0f} at {basis}"))
+    for kind, tags in one_class.items():
+        floor = sum((tagged for _, tagged in tags), Decimal(0))
+        if totals[kind] < floor and not close(totals[kind], floor):
+            basis = 'cost' if kind == 'cost' else 'fair value'
+            names = ' + '.join(concept for concept, _ in tags)
+            warnings.append(disagree(names, f"${floor:,.0f}", f"${totals[kind]:,.0f} at {basis}"))
     return warnings
 
 
@@ -867,8 +970,71 @@ def _extract_from_footnotes(
         ))
 
     if identifier_axis:
+        investments = _drop_schedule_subtotals(investments, all_facts, period)
         investments = _drop_restated(investments)
     return investments, recognized
+
+
+# A suffix that numbers a piece of the row rather than naming another holding:
+# MAIN's "... 1.1" and "... Secured Debt 1.4", ARCC's "... loan 1", GSBD's and CCAP's "... One".
+_PIECE_COUNTER = re.compile(
+    r'^[\s\-\u2013|]*(?:\.?\d+(?:\.\d+)*|one|two|three|four|five|six|seven|eight|nine|ten)$', re.IGNORECASE)
+# A company total listed under the same heading: Trinity's "... Transportation Technology Total Uveye, Inc."
+_TOTAL_WORD = re.compile(r'\bTotal\b')
+# How closely a subtotal's parts must add up to it. Trinity's two subtotals are 0.3% and
+# 1.8% from the rows under them (a few of its holdings are spelled with a doubled space and
+# fall outside the prefix); holdings whose pieces are listed under them sit 40% or more away.
+_SUBTOTAL_TOLERANCE = 0.05
+
+
+def _drop_schedule_subtotals(investments: List[NonAccrualInvestment], all_facts: List[dict],
+                             period: str) -> List[NonAccrualInvestment]:
+    """Leave out flagged rows that are subtotals of the schedule (GH #1959).
+
+    Identifier-axis members carry no hierarchy, so a subtotal is a member like
+    any loan. Trinity Capital names its subtotals by their heading,
+    "Portfolio Company Debt Securities- United States", and its holdings by the
+    heading followed by the company, and it links its non-accrual footnote to
+    the cost and principal of two such subtotals: its Q1 2025 non-accruals read
+    $1.85B at cost where it reports $49.7M. ``_drop_restated`` cannot see them,
+    because it compares flagged rows with each other and the subtotals' parts
+    are not flagged.
+
+    A flagged row is a subtotal when two or more of the schedule's rows extend
+    its identifier and the innermost of them add up to its fair value. Other
+    rows extend a holding too: New Mountain lists "LogRhythm, Inc. | First lien"
+    and then its "- Drawn" and "- Undrawn" pieces, Main Street a loan and its
+    ".1" to ".4", Goldman Sachs BDC a note and its "One" and "Two". None of them
+    adds up to the holding. Company totals ("Total Uveye, Inc.") restate rows
+    already counted and are left out of the sum, and a suffix that only numbers
+    a piece does not count as an extension, so a parent beside its own tranches
+    is left to ``_drop_restated``.
+    """
+    fair_values: Dict[str, float] = {}
+    for fact in all_facts:
+        member = fact.get(DIM_KEY)
+        value = fact.get('numeric_value')
+        if (member and fact.get('concept') == CONCEPT_FAIR_VALUE and fact.get('period_instant') == period
+                and value is not None and not pd.isna(value)):
+            fair_values.setdefault(_strip_footnote_marks(member).rstrip(), float(value))
+
+    def extends(member: str, head: str) -> bool:
+        return len(member) > len(head) and member.startswith(head) and not member[len(head)].isalnum()
+
+    def is_subtotal(inv: NonAccrualInvestment) -> bool:
+        head = _strip_footnote_marks(inv.identifier).rstrip()
+        total = fair_values.get(head)
+        if not head or not total:
+            return False
+        parts = [member for member in fair_values
+                 if extends(member, head) and not _PIECE_COUNTER.match(member[len(head):])
+                 and not _TOTAL_WORD.search(member[len(head):])]
+        innermost = [member for member in parts if not any(extends(other, member) for other in parts)]
+        if len(innermost) < 2:
+            return False
+        return abs(sum(fair_values[member] for member in innermost) - total) <= abs(total) * _SUBTOTAL_TOLERANCE
+
+    return [inv for inv in investments if not is_subtotal(inv)]
 
 
 def _drop_restated(investments: List[NonAccrualInvestment]) -> List[NonAccrualInvestment]:
