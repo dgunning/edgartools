@@ -130,6 +130,45 @@ def test_scorecard_files(tmp_path):
     assert '## Limits' in md and 'commit `abc123`' in md
 
 
+def test_per_filing_spread_weighs_every_filing_the_same():
+    """Nine small filings at 100% and one large filing at 10%: the pooled rate is 19.1%, the
+    per-filing median 100%, the nearest-rank 10th percentile the lowest filing's 10%."""
+    filings = [{'accession': f'a{i}', 'form': '10-Q', 'company': 'Small', 'compared_cells': 10,
+                'cell_matched': 10} for i in range(9)]
+    filings.append({'accession': 'big', 'form': '10-Q', 'company': 'Fund', 'compared_cells': 1000,
+                    'cell_matched': 100})
+    spread = sc.per_filing_spread(filings)
+    assert (sum(f['cell_matched'] for f in filings), sum(f['compared_cells'] for f in filings)) == (190, 1090)
+    assert (spread['filings'], spread['median'], spread['p10'], spread['min']) == (10, 1.0, 0.1, 0.1)
+    assert (spread['share_at_100'], spread['share_at_99']) == (0.9, 0.9)
+    assert [f['accession'] for f in spread['worst']] == ['big']
+    # an even count takes the mean of the middle two; a filing with no compared cells is not rated
+    spread = sc.per_filing_spread([{'accession': 'x', 'compared_cells': 4, 'cell_matched': 3},
+                                   {'accession': 'y', 'compared_cells': 4, 'cell_matched': 4},
+                                   {'accession': 'z', 'compared_cells': 0, 'cell_matched': 0}])
+    assert (spread['filings'], spread['median']) == (2, 0.875)
+    assert sc.per_filing_spread([])['median'] is None
+
+
+def test_scorecard_reports_the_per_filing_spread(tmp_path):
+    card = _write(tmp_path, [_ok_run('0000000001-24-000001'), _ok_run('0000000004-24-000004')])
+    spread = card['statement_check']['surfaces']['dataframe']['per_filing']
+    assert (spread['filings'], spread['median'], spread['share_at_100']) == (2, 2 / 3, 0.0)
+    md = (tmp_path / 'scorecard.md').read_text()
+    assert '| dataframe | 2 | 66.67% | 66.67% | 0.00% | 0.00% | 66.67% |' in md
+    assert '| 0000000001-24-000001 | 10-K | Stub Co | 3 | 2 | 66.67% |' in md
+
+
+def test_reason_tables_are_capped_in_markdown_only(tmp_path):
+    cells = [_cell('not_comparable', f'reason number {chr(97 + i)}') for i in range(sc.REASONS_SHOWN + 2)]
+    run = _ok_run('0000000001-24-000001')
+    run.facts = vv.ComparisonResults(results=cells)
+    card = _write(tmp_path, [run])
+    assert len(card['facts_check']['not_comparable_by_reason']) == sc.REASONS_SHOWN + 2
+    md = (tmp_path / 'scorecard.md').read_text()
+    assert '2 more reason(s), 2 cell(s); all are in scorecard.json' in md
+
+
 def test_limits_are_read_from_the_module_and_the_guide():
     limits = sc.collect_limits()
     sources = {lim['source'].split(',')[0] for lim in limits}
