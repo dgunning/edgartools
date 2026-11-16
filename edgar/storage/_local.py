@@ -1,5 +1,6 @@
 import os
 import re
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import TYPE_CHECKING, List, Optional, Union
@@ -300,7 +301,9 @@ def download_filings(filing_date: Optional[str] = None,
                      compression_level: int = 6,
                      upload_to_cloud: bool = False,
                      disable_progress: bool = False,
-                     source: str = 'submission'):
+                     source: str = 'submission',
+                     *,
+                     max_workers: int = 1):
     """
     Download filings into local storage, for a date or date range or for specific filings.
     Optionally compresses the stored files to save disk space.
@@ -342,9 +345,16 @@ def download_filings(filing_date: Optional[str] = None,
         source: With ``filings``, where each filing comes from: 'submission' (default) fetches
             each filing on its own; 'feed' downloads the daily feed files that contain them.
             Ignored without ``filings``.
+        max_workers: Maximum concurrent downloads for selected submissions. Defaults to 1.
+            All workers share the HTTP rate limiter. Daily feed downloads require 1.
     """
     if source not in ('submission', 'feed'):
         raise ValidationError(f"source must be 'submission' or 'feed', not {source!r}")
+
+    if isinstance(max_workers, bool) or not isinstance(max_workers, int) or max_workers < 1:
+        raise ValidationError("max_workers must be a positive integer")
+    if max_workers != 1 and (filings is None or source != 'submission'):
+        raise ValidationError("max_workers greater than 1 requires filings and source='submission'")
 
     if not data_directory:
         data_directory = get_edgar_data_directory() / 'filings'
@@ -362,7 +372,8 @@ def download_filings(filing_date: Optional[str] = None,
                                          overwrite_existing=overwrite_existing,
                                          compress=compress,
                                          compression_level=compression_level,
-                                         disable_progress=disable_progress)
+                                         disable_progress=disable_progress,
+                                         max_workers=max_workers)
         else:
             _download_feed_files_for_filings(filings, data_directory,
                                              overwrite_existing=overwrite_existing,
@@ -488,7 +499,8 @@ def _download_filing_submissions(filings: 'Filings',
                                  overwrite_existing: bool,
                                  compress: bool,
                                  compression_level: int,
-                                 disable_progress: bool) -> int:
+                                 disable_progress: bool,
+                                 max_workers: int = 1) -> int:
     """Store each filing's full submission file, the same file Filing.sgml() fetches.
 
     Each one goes to <data_directory>/<YYYYMMDD of its filing date>/<accession>.nc,
@@ -496,22 +508,19 @@ def _download_filing_submissions(filings: 'Filings',
     """
     from edgar.httprequests import get_with_retry
 
-    stored = skipped = 0
-    not_found = []
-    for filing in tqdm(filings, desc='Downloading filing(s)', total=len(filings), disable=disable_progress):
+    def download_one(filing):
+        # Return the outcome so progress and counters belong to the caller.
         accession_number = filing.accession_no
         filing_date = _as_date(filing.filing_date)
         if not overwrite_existing and _stored_filing_path(data_directory, filing_date, accession_number):
-            skipped += 1
-            continue
+            return "skipped", accession_number
 
         try:
             response = get_with_retry(url=filing.text_url)
             inspect_response(response)
         except TransportError as e:
             if http_status(e) == 404:
-                not_found.append(accession_number)
-                continue
+                return "not_found", accession_number
             raise
 
         folder = data_directory / filing_date.strftime('%Y%m%d')
@@ -525,7 +534,40 @@ def _download_filing_submissions(filings: 'Filings',
             compress_filing(target, compression_level=compression_level)
         elif stale.exists():
             stale.unlink()   # an overwrite must not leave the old compressed copy in front of the new one
-        stored += 1
+        return "stored", accession_number
+
+    def download_results():
+        if max_workers == 1:
+            for filing in filings:
+                yield download_one(filing)
+            return
+
+        # groups duplicate filings together
+        filings_by_accession = {}
+        for filing in filings:
+            accession = filing.accession_no
+            if accession not in filings_by_accession:
+                filings_by_accession[accession] = []
+            filings_by_accession[accession].append(filing)
+
+        def download_group(group):
+            return [download_one(filing) for filing in group]
+
+        with ThreadPoolExecutor(max_workers=max_workers) as pool:
+            for results in pool.map(download_group, filings_by_accession.values()):
+                yield from results
+
+    stored = skipped = 0
+    not_found = []
+    results = download_results()
+    for outcome, accession in tqdm(results, desc='Downloading filing(s)', total=len(filings),
+                                   disable=disable_progress):
+        if outcome == "stored":
+            stored += 1
+        elif outcome == "skipped":
+            skipped += 1
+        else:
+            not_found.append(accession)
 
     log.info('Download complete. Stored %d filings, skipped %d already stored.', stored, skipped)
     if not_found:
