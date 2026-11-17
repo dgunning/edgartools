@@ -68,7 +68,7 @@ bd create --title "..." --type bug --priority P1  # Create issue
 
 **Statuses**: `open`, `in_progress`, `blocked`, `closed`
 
-**Bead IDs are internal.** Never publish a bead identifier (`edgartools-xxxx`) on GitHub: not in issues, PR titles or bodies, review comments, commit messages, or changelog fragments. Refer to the GitHub issue number, or describe the problem in words.
+**Bead IDs are the maintainer's internal tracker.** Never publish a bead identifier (`edgartools-xxxx`), or anything else from the internal workflow, on GitHub: not in issues, PR titles or bodies, review comments, commit messages, or changelog fragments. Refer to the GitHub issue number, or describe the problem in words.
 
 ## Development
 
