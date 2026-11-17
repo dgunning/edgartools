@@ -292,7 +292,7 @@ data.summary()                             # balances, WA rate, states, makes
 data.code_meanings("vehicle_type_code")    # {'1': 'Car', '2': 'Truck', '3': 'SUV', ...}
 ```
 
-Auto loan, auto lease and CMBS columns are typed from SEC's XSDs (CMBS adds `data.properties`); RMBS and debt-securities pools keep their original tag names as strings (`data.info.curated` is `False`). The EX-102 is streamed, so a 376 MB pool parses in about 11 seconds and under 0.5 GB of memory. `AssetData.from_source()` reads a local `.xml`, `.gz`, a full submission `.nc`/`.txt`, bytes, or a binary stream.
+Auto loan, auto lease and CMBS columns are typed from SEC's XSDs (CMBS adds `data.properties`); RMBS and debt-securities pools keep their original tag names as strings (`data.info.curated` is `False`). The EX-102 is streamed, so a 376 MB pool parses in about 6 seconds and under 0.4 GB of memory. `AssetData.from_source()` reads a local `.xml`, `.gz`, a full submission `.nc`/`.txt`, bytes, or a binary stream.
 
 ---
 

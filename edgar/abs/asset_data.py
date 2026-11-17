@@ -85,7 +85,7 @@ ABS_EE_FORMS = ['ABS-EE', 'ABS-EE/A']
 MULTI_VALUE_SEPARATOR = '|'
 
 _CHUNK_SIZE = 1 << 20      # bytes fed to the parser per call
-_FLUSH_ROWS = 20_000       # rows buffered as Python objects before typing them
+_FLUSH_ROWS = 5_000        # rows buffered as Python objects before typing them
 _SNIFF_SIZE = 4096         # bytes read up front to tell a submission from bare XML
 _STRING = pd.StringDtype("pyarrow")
 
@@ -194,11 +194,15 @@ def _ex102_from_submission(chunks: Iterable[bytes]) -> Iterator[bytes]:
             break
         buffer += chunk
     buffer = buffer.lstrip()
+    end = b'</TEXT>'
     if buffer[:5].upper() == b'<XML>':
         buffer = buffer[5:].lstrip()  # an XML declaration must come first
-    tail = 7  # len(b'</TEXT>')
+        end = b'</XML>'
+    # One marker to search for, now that the wrapper is known: the scan runs
+    # over every byte of the document (376 MB for Honda 2025-4).
+    tail = len(end)
     while True:
-        cut = min((p for p in (buffer.find(b'</XML>'), buffer.find(b'</TEXT>')) if p >= 0), default=-1)
+        cut = buffer.find(end)
         if cut >= 0:
             yield buffer[:cut]
             return
@@ -262,30 +266,32 @@ def _chunks_from_stream(stream: IO[bytes], close: bool) -> Iterator[bytes]:
 # ---------------------------------------------------------------------------
 
 class _ColumnBuffer:
-    """Rows accumulated column-wise, typed in blocks of _FLUSH_ROWS."""
+    """Rows buffered as dicts, turned into typed columns every _FLUSH_ROWS rows.
+
+    Columns are built at flush time, one list comprehension each, rather than
+    appending to every column on every row: a row-by-column Python loop cost
+    ~3 s of Honda 2025-4's 105k x 72 values.
+    """
 
     def __init__(self, typer):
-        self.columns: Dict[str, List[Optional[str]]] = {}
-        self.n = 0
+        self.rows: List[Dict[str, str]] = []
         self.frames: List[pd.DataFrame] = []
         self.typer = typer
 
     def append(self, row: Dict[str, str]):
-        columns = self.columns
-        for tag in row:
-            if tag not in columns:
-                columns[tag] = [None] * self.n
-        for tag, values in columns.items():
-            values.append(row.get(tag))
-        self.n += 1
-        if self.n >= _FLUSH_ROWS:
+        self.rows.append(row)
+        if len(self.rows) >= _FLUSH_ROWS:
             self.flush()
 
     def flush(self):
-        if self.n:
-            self.frames.append(self.typer(self.columns, self.n))
-        self.columns = {}
-        self.n = 0
+        rows = self.rows
+        if rows:
+            tags: Dict[str, None] = {}
+            for row in rows:          # union of tags, in order of first appearance
+                tags.update(row)
+            columns = {tag: [row.get(tag) for row in rows] for tag in tags}
+            self.frames.append(self.typer(columns, len(rows)))
+        self.rows = []
 
     def frame(self) -> Optional[pd.DataFrame]:
         self.flush()
@@ -319,6 +325,13 @@ class _Parse:
         self.buffers: Dict[str, _ColumnBuffer] = {}
         self.coercion_failures: Dict[str, int] = {}
         self.unmapped: Dict[str, set] = {}
+        self._names: Dict[str, str] = {}   # '{namespace}tag' -> 'tag'
+
+    def _name(self, tag: str) -> str:
+        name = self._names.get(tag)
+        if name is None:
+            name = self._names[tag] = _local(tag)
+        return name
 
     # -- typing ---------------------------------------------------------
     def _typer(self, table: str):
@@ -381,15 +394,17 @@ class _Parse:
     def _asset(self, el):
         row: Dict[str, str] = {}
         children: List = []
-        for child in el:
-            tag = child.tag
-            if not isinstance(tag, str):  # comment or processing instruction
-                continue
+        names = self._names
+        # This loop runs once per field (6 M times on Honda 2025-4): keep it lean.
+        # iterchildren(etree.Element) skips comments and PIs in C.
+        for child in el.iterchildren(etree.Element):
             if len(child):
                 children.append(child)
                 continue
-            name = _local(tag)
-            text = (child.text or '').strip()
+            tag = child.tag
+            name = names.get(tag) or self._name(tag)
+            text = child.text
+            text = text.strip() if text else ''
             if name in row:
                 row[name] = f"{row[name]}{MULTI_VALUE_SEPARATOR}{text}"
             else:
@@ -401,16 +416,19 @@ class _Parse:
             for leaf in child.iter():
                 if leaf is child or not isinstance(leaf.tag, str) or len(leaf):
                     continue
-                name = _local(leaf.tag)
+                name = self._name(leaf.tag)
                 text = (leaf.text or '').strip()
                 sub[name] = f"{sub[name]}{MULTI_VALUE_SEPARATOR}{text}" if name in sub else text
-            self._buffer(_local(child.tag)).append(sub)
+            self._buffer(self._name(child.tag)).append(sub)
 
     def run(self, chunks: Iterable[bytes]) -> Dict[str, pd.DataFrame]:
-        # 'end' events only: the root is checked at the first one, which arrives
-        # after a few hundred bytes, so a non-ABS-EE document fails fast.
-        parser = etree.XMLPullParser(events=('end',), huge_tree=True, resolve_entities=False,
-                                     no_network=True)
+        # lxml still builds the whole tree, but reports only <assetData> and
+        # <assets> events, so Python never visits the ~60 leaf elements per
+        # asset (6 M events on Honda 2025-4) just to skip them. The start of an
+        # <assetData> root is checked at once, so a document in a foreign
+        # namespace fails fast; one with another root name is checked at close.
+        parser = etree.XMLPullParser(events=('start', 'end'), tag=('{*}assetData', '{*}assets'),
+                                     huge_tree=True, resolve_entities=False, no_network=True)
         root_seen = False
         fed = 0
         try:
@@ -419,26 +437,25 @@ class _Parse:
                     continue
                 fed += len(chunk)
                 parser.feed(chunk)
-                for _event, el in parser.read_events():
-                    if not root_seen:
-                        root_seen = True
-                        self._check_root(el.getroottree().getroot())
-                    tag = el.tag
-                    if not isinstance(tag, str):
+                for event, el in parser.read_events():
+                    if event == 'start':
+                        if not root_seen and el.getparent() is None:
+                            root_seen = True
+                            self._check_root(el)
                         continue
                     parent = el.getparent()
-                    if _local(tag) == 'assets' and parent is not None and parent.getparent() is None:
+                    if parent is not None and parent.getparent() is None and self._name(el.tag) == 'assets':
                         self._asset(el)
                         el.clear()
                         while el.getprevious() is not None:
                             del parent[0]
             if fed == 0:
                 raise ParsingError("The EX-102 source is empty: no XML was found to parse.")
-            parser.close()
+            root = parser.close()
         except etree.XMLSyntaxError as e:
             raise ParsingError(f"The EX-102 document is not well-formed XML: {e}") from e
         if not root_seen:
-            raise ParsingError("The EX-102 source is empty: no XML was found to parse.")
+            self._check_root(root)   # raises: the root is not <assetData>
         tables = {}
         for table, buffer in self.buffers.items():
             frame = buffer.frame()
