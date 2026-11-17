@@ -53,6 +53,10 @@ _ROW_HAS_VALUES = '_row_has_values'
 # Working column that carries each row's own presentation parent (GH #1705).
 _ROW_PARENT = '_row_parent_abstract_concept'
 
+# Statements whose to_dataframe() value columns hold only numbers (GH #1995).
+# Elsewhere a text cell, such as a note's narrative (Issue #762), is kept.
+_NUMERIC_VALUE_STATEMENTS = ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet', 'ComprehensiveIncome')
+
 
 def _row_presentation_parents(raw_data: List[Dict[str, Any]]) -> List[Optional[str]]:
     """
@@ -1254,7 +1258,8 @@ class Statement:
 
             # Apply presentation transformation if requested (Issue #463)
             if presentation:
-                df = self._apply_presentation(df)
+                df = self._apply_presentation(
+                    df, numeric_only=self.classified_type in _NUMERIC_VALUE_STATEMENTS)
 
             # Apply matrix transformation for equity statements (Issue edgartools-uqg7)
             if matrix:
@@ -1726,7 +1731,7 @@ class Statement:
 
         return df
 
-    def _apply_presentation(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _apply_presentation(self, df: pd.DataFrame, numeric_only: bool = False) -> pd.DataFrame:
         """
         Apply presentation logic to match SEC HTML display.
 
@@ -1735,6 +1740,9 @@ class Statement:
         - preferred_sign = -1: negate for display (expenses, dividends, outflows)
         - preferred_sign = 1: show as-is
         - preferred_sign = None: no transformation
+
+        ``numeric_only`` is set for a primary statement: its value columns hold
+        numbers, and any text that is not a text block becomes NaN (GH #1995).
         """
         if df.empty:
             return df
@@ -1763,6 +1771,18 @@ class Statement:
             # The column is replaced whole, never assigned through .loc.
             signs = pd.to_numeric(result['preferred_sign'], errors='coerce')
             mask = signs.notna() & (signs != 0)
+            # A primary statement's value columns are numbers, as in 6.0. Some
+            # filers put a non-numeric fact on the face: Zimmer Biomet's income
+            # statement carries TypeOfRevenueExtensibleList = us-gaap:ProductMember
+            # (0001564590-19-004283), which left str beside float and broke
+            # pl.from_pandas (GH #1995). The caller decides from classified_type,
+            # which answers by name and by role alike, so the rule doesn't depend
+            # on how the statement was reached.
+            # A text block is narrative, never a face line, and keeps its text: a
+            # 2010 Netflix 10-Q's comprehensive income resolves to its note.
+            if numeric_only:
+                from edgar.xbrl.abstract_detection import is_textblock_concept
+                narrative = result['concept'].map(lambda c: is_textblock_concept(str(c).replace(':', '_')))
             for col in period_cols:
                 if col not in result.columns:
                     continue
@@ -1771,6 +1791,9 @@ class Statement:
                 original = result[col]
                 numeric_col = pd.to_numeric(original, errors='coerce')
                 is_text = original.notna() & numeric_col.isna() & original.astype(str).str.strip().ne('')
+                if numeric_only:
+                    # Other text on a primary statement becomes NaN (GH #1995)
+                    is_text = is_text & narrative
                 # Under a negated label the SEC page shows a zero as 0, however it was
                 # filed; 0.0 * -1 is -0.0 (edgartools-auvk1.12: Entergy
                 # 0000065984-24-000112). Without one, a zero filed with a minus sign
@@ -1783,6 +1806,8 @@ class Statement:
                     # FIX (Issue #599): a column of numbers (and blanks) becomes numeric,
                     # with preferred_sign applied where it's not None and not 0
                     result[col] = numeric_col.where(~change, presented)
+                elif numeric_only:
+                    result[col] = original.where(is_text, numeric_col).where(~change, presented)
                 else:
                     # A text cell (a note's narrative, Issue #762) stays as it is;
                     # only the numeric cells take the sign
