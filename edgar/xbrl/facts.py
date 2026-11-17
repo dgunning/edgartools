@@ -821,6 +821,21 @@ class FactQuery:
         self._filters.append(lambda f: 'unit_ref' in f and f['unit_ref'] == unit)
         return self
 
+    def by_extension(self) -> FactQuery:
+        """Filter to facts in the namespaces declared by the filing's schemas.
+
+        A query returns no matches when the filing schema is unavailable.
+        """
+        xbrl = self._facts_view.xbrl
+        target_namespaces = xbrl.parser.schema_parser.target_namespaces
+
+        def is_extension_fact(fact):
+            fact_key = fact['fact_key']
+            original_fact = xbrl._facts[fact_key]
+            return original_fact.namespace in target_namespaces
+
+        return self.by_custom(is_extension_fact)
+
     def by_custom(self, filter_func: Callable) -> FactQuery:
         """
         Add a custom filter function.

@@ -241,6 +241,7 @@ class Fact(BaseModel):
     # value '' and numeric_value None (GH #1254).
     is_nil: bool = False
 
+    namespace: Optional[str] = None
 
 class Footnote(BaseModel):
     """

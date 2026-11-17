@@ -47,6 +47,7 @@ class SchemaParser(BaseParser):
 
         # Store references to data structures
         self.element_catalog = element_catalog
+        self.target_namespaces: set[str] = set()
         self.role_types = role_types if role_types is not None else {}
 
         # Will be set by coordinator when needed
@@ -126,6 +127,10 @@ class SchemaParser(BaseParser):
             # Use the safe XML parsing helper
             root = self._safe_parse_xml(content)
             self._record_namespace_bindings(root)
+
+            target_namespace = root.get('targetNamespace')
+            if target_namespace:
+                self.target_namespaces.add(target_namespace)
 
             # Extract element declarations
             for element in root.findall('.//{http://www.w3.org/2001/XMLSchema}element'):

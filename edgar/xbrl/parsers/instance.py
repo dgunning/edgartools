@@ -899,6 +899,7 @@ class InstanceParser(BaseParser):
                         prefix = self._resolve_prefix(
                             namespace, element, prefix_map, claimed_prefixes)
                 else:
+                    namespace = None
                     element_name = tag
                     prefix = ''
 
@@ -1003,6 +1004,7 @@ class InstanceParser(BaseParser):
                     fact_id=fact_id,
                     # The filer's nil marker, kept as source metadata; the
                     # value and numeric_value above are unchanged (GH #1254).
+                    namespace=namespace,
                     is_nil=_is_nil(element),
                 )
 
