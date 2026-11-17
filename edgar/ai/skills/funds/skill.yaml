@@ -95,13 +95,18 @@ patterns:
       result.evidence_level                      # 'investment' | 'aggregate' | 'none'
       result.num_nonaccrual                      # int when 'investment', 0 when tagged zero; else None
       result.investments                         # NonAccrualInvestment rows (company_name, fair_value, cost)
+      result.warnings                            # read before trusting the rows
     note: |
       num_nonaccrual None means the filing does not itemize non-accruals: an
       aggregate rate (evidence_level 'aggregate') proves some exist without a
       count, and 'none' means no XBRL signal. Never read None as zero. A filer
       that tags its non-accruals as zero reads extraction_method 'tagged_zero',
       rate 0.0 and num_nonaccrual 0. The count is of schedule rows, so one
-      company with two loans counts twice.
+      company with two loans counts twice. The rows follow the filer's XBRL
+      footnote links, which can be looser than its printed marks; where the
+      filer also tags a non-accrual total or loan count that disagrees,
+      result.warnings says so (Trinity Capital's 10-K for 2025: $31.2M read at
+      cost against $20.7M tagged).
 
   - name: Report Backlinks
     when: Navigate from report to filing
