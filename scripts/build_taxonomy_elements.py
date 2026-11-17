@@ -27,6 +27,13 @@ between releases: in 2026 FASB moved every us-gaap linkrole from
 http://fasb.org/us-gaap/role/eedm/ExtensibleEnumerationLists to
 http://fasb.org/srt/role/srt-eedm/ExtensibleEnumerationLists.
 
+And it writes edgar/xbrl/data/taxonomy_typed_dimensions.parquet: one row per
+(prefix, name, year) for every year whose schema declares the element a typed
+dimension, with its xbrldt:typedDomainRef copied verbatim (GH #1234). Per year
+again: through 2025 each typed axis pointed at a domain of its own
+(#us-gaap_InvestmentIdentifierAxis.domain), and in 2026 at a shared one
+(#us-gaap_limitedToken.domain). No axis changed between typed and explicit.
+
 Usage:
   EDGAR_IDENTITY="Name email" python scripts/build_taxonomy_elements.py \
       [--years 2011-2026] [--cache-dir DIR]
@@ -47,9 +54,11 @@ from lxml import etree
 DATA_DIR = Path(__file__).resolve().parent.parent / "edgar" / "xbrl" / "data"
 TARGET = DATA_DIR / "taxonomy_elements.parquet"
 ENUM_TARGET = DATA_DIR / "taxonomy_enumerations.parquet"
+TYPED_TARGET = DATA_DIR / "taxonomy_typed_dimensions.parquet"
 
 XS_ELEMENT = "{http://www.w3.org/2001/XMLSchema}element"
 XBRLI = "{http://www.xbrl.org/2003/instance}"
+XBRLDT_TYPED_DOMAIN_REF = "{http://xbrl.org/2005/xbrldt}typedDomainRef"
 SRT_FIRST_YEAR = 2018
 # Through 2021 the schemas carry the release date in the file name.
 DATED_NAMES_UNTIL = 2021
@@ -59,6 +68,7 @@ ENUM_NAMESPACES = ("{http://xbrl.org/2020/extensible-enumerations-2.0}",
 COLUMNS = ["prefix", "name", "type", "balance", "period_type", "abstract",
            "substitution_group", "last_year"]
 ENUM_COLUMNS = ["prefix", "name", "year", "domain", "linkrole", "head_usable"]
+TYPED_COLUMNS = ["prefix", "name", "year", "typed_domain_ref"]
 
 
 def schema_url(prefix: str, year: int) -> str:
@@ -90,7 +100,7 @@ def enum_attribute(attrs, local_name: str):
 
 
 def schema_rows(prefix: str, year: int, content: bytes):
-    """(element row, enumeration row or None) for each declared element."""
+    """(element row, enumeration row or None, typed-dimension row or None) for each declared element."""
     root = etree.fromstring(content)
     for element in root.iter(XS_ELEMENT):
         attrs = element.attrib
@@ -102,22 +112,27 @@ def schema_rows(prefix: str, year: int, content: bytes):
                attrs.get("substitutionGroup"), year)
         enum = (enum_attribute(attrs, "domain"), enum_attribute(attrs, "linkrole"),
                 enum_attribute(attrs, "headUsable"))
-        yield row, ((prefix, name, year) + enum if any(v is not None for v in enum) else None)
+        typed_domain_ref = attrs.get(XBRLDT_TYPED_DOMAIN_REF)
+        yield (row, ((prefix, name, year) + enum if any(v is not None for v in enum) else None),
+               (prefix, name, year, typed_domain_ref) if typed_domain_ref else None)
 
 
 def build(years, cache_dir: Path):
-    """The element table (newest declaration per element) and the per-year enumeration table."""
+    """The element table (newest declaration per element) and the per-year enumeration and typed-dimension tables."""
     rows = []
     enum_rows = []
+    typed_rows = []
     for year in years:
         for prefix in ("us-gaap", "srt"):
             if prefix == "srt" and year < SRT_FIRST_YEAR:
                 continue
             content = fetch(schema_url(prefix, year), cache_dir)
-            for row, enum_row in schema_rows(prefix, year, content):
+            for row, enum_row, typed_row in schema_rows(prefix, year, content):
                 rows.append(row)
                 if enum_row is not None:
                     enum_rows.append(enum_row)
+                if typed_row is not None:
+                    typed_rows.append(typed_row)
     df = pd.DataFrame(rows, columns=COLUMNS)
     # Newest declaration wins.
     df = (df.sort_values("last_year")
@@ -134,7 +149,13 @@ def build(years, cache_dir: Path):
     for column in ("prefix", "domain", "linkrole", "head_usable"):
         enums[column] = enums[column].astype("category")
     enums["year"] = enums["year"].astype("int16")
-    return df, enums
+
+    typed = (pd.DataFrame(typed_rows, columns=TYPED_COLUMNS)
+               .sort_values(["prefix", "name", "year"])
+               .reset_index(drop=True))
+    typed["prefix"] = typed["prefix"].astype("category")
+    typed["year"] = typed["year"].astype("int16")
+    return df, enums, typed
 
 
 def parse_years(text: str):
@@ -150,13 +171,15 @@ def main() -> None:
     parser.add_argument("--cache-dir", default=str(Path.home() / ".cache" / "edgartools" / "fasb-taxonomy"))
     parser.add_argument("--output", default=str(TARGET))
     parser.add_argument("--enum-output", default=str(ENUM_TARGET))
+    parser.add_argument("--typed-output", default=str(TYPED_TARGET))
     args = parser.parse_args()
 
     cache_dir = Path(args.cache_dir)
     cache_dir.mkdir(parents=True, exist_ok=True)
-    df, enums = build(parse_years(args.years), cache_dir)
+    df, enums, typed = build(parse_years(args.years), cache_dir)
     df.to_parquet(args.output, index=False, compression="zstd")
     enums.to_parquet(args.enum_output, index=False, compression="zstd")
+    typed.to_parquet(args.typed_output, index=False, compression="zstd")
 
     print(f"elements      : {len(df):,}")
     print(f"with balance  : {int(df['balance'].notna().sum()):,}")
@@ -168,6 +191,9 @@ def main() -> None:
           f"years {enums['year'].min()}-{enums['year'].max()})")
     print(f"enum size     : {Path(args.enum_output).stat().st_size / 1024:.0f} KB")
     print(f"wrote         : {args.enum_output}")
+    print(f"typed rows    : {len(typed):,} ({typed[['prefix', 'name']].drop_duplicates().shape[0]:,} axes, "
+          f"years {typed['year'].min()}-{typed['year'].max()})")
+    print(f"wrote         : {args.typed_output}")
 
 
 if __name__ == "__main__":

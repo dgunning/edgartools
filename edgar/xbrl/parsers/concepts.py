@@ -157,6 +157,7 @@ LEGITIMATE_NEGATIVE_CONCEPTS = {
 
 TAXONOMY_ELEMENTS_FILE = 'taxonomy_elements.parquet'
 TAXONOMY_ENUMERATIONS_FILE = 'taxonomy_enumerations.parquet'
+TAXONOMY_TYPED_DIMENSIONS_FILE = 'taxonomy_typed_dimensions.parquet'
 _STANDARD_PREFIXES = ('us-gaap', 'srt')
 
 
@@ -303,6 +304,52 @@ def get_standard_enumeration(concept: str, year: Optional[int] = None) -> Option
             chosen = at_or_below[-1]
     row_year, domain, linkrole, head_usable = chosen
     return {'year': row_year, 'domain': domain, 'linkrole': linkrole, 'head_usable': head_usable}
+
+
+@lru_cache(maxsize=1)
+def _standard_typed_dimensions() -> Dict[str, Tuple[Tuple[int, str], ...]]:
+    """``prefix:name`` -> ((year, typed_domain_ref), ...) in ascending year order."""
+    import pandas as pd
+
+    ref = resources.files('edgar.xbrl.data').joinpath(TAXONOMY_TYPED_DIMENSIONS_FILE)
+    with resources.as_file(ref) as path:
+        df = pd.read_parquet(path)
+    table: Dict[str, list] = {}
+    for prefix, name, year, typed_domain_ref in zip(
+            df['prefix'].astype(str), df['name'], df['year'], df['typed_domain_ref'], strict=True):
+        table.setdefault(f"{prefix}:{name}", []).append((int(year), typed_domain_ref))
+    return {key: tuple(sorted(rows)) for key, rows in table.items()}
+
+
+def get_standard_typed_domain_ref(concept: str, year: Optional[int] = None) -> Optional[str]:
+    """
+    The xbrldt:typedDomainRef FASB declares for a typed us-gaap axis, as
+    published in one taxonomy year (GH #1234).
+
+    The reference changed in 2026: through 2025 each typed axis pointed at a
+    domain of its own (#us-gaap_InvestmentIdentifierAxis.domain), from 2026 at
+    a shared one (#us-gaap_limitedToken.domain). The value used is the newest
+    one at or below ``year``. A ``year`` older than the axis's first typed year
+    gets the oldest value, and None gets the newest. No axis has ever changed
+    between typed and explicit, so a value here means the axis is typed.
+
+    Returns the reference verbatim, or None for an axis no year declares typed.
+
+    Example:
+        >>> get_standard_typed_domain_ref('us-gaap:InvestmentIdentifierAxis', 2024)
+        '#us-gaap_InvestmentIdentifierAxis.domain'
+        >>> get_standard_typed_domain_ref('us-gaap_InvestmentIdentifierAxis', 2026)
+        '#us-gaap_limitedToken.domain'
+    """
+    if not concept:
+        return None
+    rows = _standard_typed_dimensions().get(_standard_key(concept))
+    if not rows:
+        return None
+    if year is None:
+        return rows[-1][1]
+    at_or_below = [row for row in rows if row[0] <= year]
+    return (at_or_below[-1] if at_or_below else rows[0])[1]
 
 
 def get_standard_abstract(concept: str) -> Optional[bool]:
