@@ -31,6 +31,10 @@ mappings:
     "proxy statement|executive comp": "DEF 14A"
     "merger proxy": "DEFM14A"
 
+  asset_backed:
+    "asset-level data|loan-level data|auto loan pool|auto lease pool|cmbs loans|abs-ee": "ABS-EE"
+    "abs distribution report|cmbs distribution": "10-D"
+
   foreign:
     "foreign annual": "20-F"
     "canadian annual|mjds": "40-F"
@@ -42,6 +46,7 @@ gotchas:
   - "/A suffix = amendment (10-K/A, 8-K/A)"
   - "Form 4 = insider trades; SC 13D = 5%+ ownership disclosure"
   - "SC 14D9 = target board's accept/reject/neutral recommendation on a tender offer; filing.obj() -> Schedule14D9. .recommendation is None in two cases, told apart by .item4_text: a string means Item 4 was read but its wording is hedged, indirect or unrecognised (read .recommendation_text); None means an SC 14D9/A that does not restate Item 4 (.is_amendment is True) - most amendments, so look at the original SC 14D9 for the board's position"
+  - "ABS-EE = asset-level data (EX-102) for an ABS trust, one row per loan/lease for one reporting period; filing.obj() -> AssetData (edgar.abs). .assets is the DataFrame (.properties too for CMBS), .info has schema/period/accession, .summary() the pool totals. Auto loan, auto lease and CMBS columns are typed snake_case XSD names (obligor_credit_score, original_loan_amount); other schemas (RMBS, debt securities) keep original tag names as strings and info.curated is False. Large pools stream: Honda 2025-4 (105k loans, 376 MB) reads in ~11 s from a stored submission. For a file or stream use AssetData.from_source(path_or_bytes); a filing without EX-102 raises DataObjectError"
   - "DEF 14A = final proxy; PRE 14A = preliminary draft"
   - "424B5 = shelf takedown supplement; 424B4 = IPO final; 424B3 = resale; 424B2 = structured notes"
   - "S-4/F-4 = securities registered in a merger/business combination; filing.obj() -> RegistrationS4 (fee table, cover page, offering_type)"

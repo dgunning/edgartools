@@ -3,83 +3,30 @@ CMBS (Commercial Mortgage-Backed Securities) asset data parsing.
 
 Parses EX-102 XML asset data files from 10-D filings for CMBS securitizations.
 The XML follows the SEC schema: http://www.sec.gov/edgar/document/absee/cmbs/assetdata
+
+CMBSAssetData reads through edgar.abs.AssetData (the streaming ABS-EE reader)
+and keeps its own column names for TenD; AssetData has every field typed from
+SEC's XSD under its snake_case XSD name.
 """
 
 from dataclasses import dataclass
-from datetime import date
 from functools import cached_property
-from typing import Any, Dict, List, Optional
-from xml.etree import ElementTree as ET
+from typing import Dict, Optional
 
+import pandas as pd
 from rich import box
 from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from edgar.abs.abs_ee import _legacy_frame
+from edgar.abs.absee_schemas import SCHEMAS
+from edgar.exceptions import DataObjectError, ParsingError
 from edgar.richtools import repr_rich
 
 __all__ = ['CMBSAssetData', 'CMBSSummary']
 
-# XML namespace for CMBS asset data
-CMBS_NS = {'cmbs': 'http://www.sec.gov/edgar/document/absee/cmbs/assetdata'}
-
-
-def _parse_xml_date(date_str: Optional[str]) -> Optional[date]:
-    """Parse date string in MM-DD-YYYY format."""
-    if not date_str:
-        return None
-    try:
-        parts = date_str.split('-')
-        if len(parts) == 3:
-            month, day, year = int(parts[0]), int(parts[1]), int(parts[2])
-            return date(year, month, day)
-    except (ValueError, IndexError):
-        pass
-    return None
-
-
-def _parse_decimal(value: Optional[str]) -> Optional[float]:
-    """Parse decimal string to float."""
-    if not value:
-        return None
-    try:
-        return float(value)
-    except ValueError:
-        return None
-
-
-def _parse_int(value: Optional[str]) -> Optional[int]:
-    """Parse integer string to int."""
-    if not value:
-        return None
-    try:
-        return int(float(value))  # Handle "0.00" style
-    except ValueError:
-        return None
-
-
-def _parse_bool(value: Optional[str]) -> Optional[bool]:
-    """Parse boolean string."""
-    if not value:
-        return None
-    return value.lower() == 'true'
-
-
-def _get_element_text(element: ET.Element, tag: str, ns: Optional[Dict[str, str]] = None) -> Optional[str]:
-    """Get text content from a child element."""
-    if ns:
-        child = element.find(f"cmbs:{tag}", ns)
-    else:
-        # Try without namespace first (for elements using default namespace)
-        child = element.find(tag)
-        if child is None:
-            # Try with namespace
-            for key, uri in (ns or {}).items():
-                child = element.find(f"{{{uri}}}{tag}")
-                if child is not None:
-                    break
-    return child.text if child is not None else None
-
+_SPEC = SCHEMAS['cmbs']['tables']
 
 @dataclass
 class CMBSSummary:
@@ -248,43 +195,6 @@ class CMBSAssetData:
         'mostRecentDebtServiceCoverageNetCashFlowpercentage': 'dscr_ncf_current',
     }
 
-    # Fields that should be parsed as dates
-    DATE_FIELDS = {
-        'period_start', 'period_end', 'origination_date', 'maturity_date',
-        'first_payment_date', 'lockout_end_date', 'yield_maintenance_end_date',
-        'prepayment_premium_end_date', 'paid_through_date', 'valuation_date',
-        'tenant_1_lease_exp', 'tenant_2_lease_exp', 'tenant_3_lease_exp',
-        'financials_date_securitization', 'financials_start_date', 'financials_end_date',
-    }
-
-    # Fields that should be parsed as floats
-    DECIMAL_FIELDS = {
-        'original_amount', 'original_rate', 'securitization_rate', 'scheduled_balance',
-        'period_begin_balance', 'scheduled_pi_due', 'current_rate', 'servicer_fee_rate',
-        'scheduled_interest', 'scheduled_principal', 'unscheduled_principal',
-        'actual_balance', 'scheduled_end_balance', 'pi_advances_outstanding',
-        'ti_advances_outstanding', 'other_advances_outstanding',
-        'valuation', 'occupancy_securitization', 'occupancy_current',
-        'revenue_securitization', 'revenue_current', 'opex_securitization', 'opex_current',
-        'noi_securitization', 'noi_current', 'ncf_securitization', 'ncf_current',
-        'debt_service_current', 'dscr_noi_securitization', 'dscr_noi_current',
-        'dscr_ncf_securitization', 'dscr_ncf_current',
-    }
-
-    # Fields that should be parsed as integers
-    INT_FIELDS = {
-        'original_term_months', 'io_term_months', 'num_properties_securitization',
-        'num_properties', 'grace_days', 'units', 'units_securitization',
-        'sqft', 'sqft_securitization', 'year_built', 'year_renovated',
-        'tenant_1_sqft', 'tenant_2_sqft', 'tenant_3_sqft',
-    }
-
-    # Fields that should be parsed as booleans
-    BOOL_FIELDS = {
-        'is_interest_only', 'is_balloon', 'has_prepayment_premium',
-        'has_negative_amortization', 'is_modified', 'subject_to_demand',
-    }
-
     def __init__(self, xml_content: str):
         """
         Initialize CMBS asset data parser.
@@ -293,70 +203,25 @@ class CMBSAssetData:
             xml_content: Raw XML content from EX-102 exhibit
         """
         self._xml_content = xml_content
-        self._loans_data: Optional[List[Dict[str, Any]]] = None
-        self._properties_data: Optional[List[Dict[str, Any]]] = None
 
-    def _parse_value(self, value: Optional[str], field_name: str) -> Any:
-        """Parse a value based on the field type."""
-        if value is None:
-            return None
-        if field_name in self.DATE_FIELDS:
-            return _parse_xml_date(value)
-        if field_name in self.DECIMAL_FIELDS:
-            return _parse_decimal(value)
-        if field_name in self.INT_FIELDS:
-            return _parse_int(value)
-        if field_name in self.BOOL_FIELDS:
-            return _parse_bool(value)
-        return value
-
-    def _parse_xml(self):
-        """Parse the XML content into loans and properties data."""
-        if self._loans_data is not None:
-            return  # Already parsed
-
-        self._loans_data = []
-        self._properties_data = []
-
+    @cached_property
+    def _asset_data(self):
+        """The EX-102 read by edgar.abs.AssetData, or None when it is not CMBS asset data."""
+        from edgar.abs.asset_data import AssetData
         try:
-            root = ET.fromstring(self._xml_content)
-        except ET.ParseError:
-            return
-
-        # Find all asset elements
-        # Handle both namespaced and non-namespaced XML
-        assets = root.findall('.//assets') or root.findall('.//{http://www.sec.gov/edgar/document/absee/cmbs/assetdata}assets')
-
-        for asset in assets:
-            # Extract loan-level data
-            loan_data = {}
-            for xml_tag, output_name in self.LOAN_FIELDS.items():
-                # Try without namespace
-                elem = asset.find(xml_tag)
-                if elem is None:
-                    # Try with namespace
-                    elem = asset.find(f'{{http://www.sec.gov/edgar/document/absee/cmbs/assetdata}}{xml_tag}')
-                value = elem.text if elem is not None else None
-                loan_data[output_name] = self._parse_value(value, output_name)
-
-            self._loans_data.append(loan_data)
-
-            # Extract property-level data
-            properties = asset.findall('property') or asset.findall('{http://www.sec.gov/edgar/document/absee/cmbs/assetdata}property')
-            for prop in properties:
-                prop_data = {'loan_id': loan_data.get('loan_id')}
-                for xml_tag, output_name in self.PROPERTY_FIELDS.items():
-                    elem = prop.find(xml_tag)
-                    if elem is None:
-                        elem = prop.find(f'{{http://www.sec.gov/edgar/document/absee/cmbs/assetdata}}{xml_tag}')
-                    value = elem.text if elem is not None else None
-                    prop_data[output_name] = self._parse_value(value, output_name)
-                self._properties_data.append(prop_data)
+            data = AssetData.from_xml(self._xml_content)
+        except (ParsingError, DataObjectError):
+            return None
+        return data if data.schema == 'cmbs' else None
 
     @cached_property
     def loans(self):
         """
         Loan-level data as a pandas DataFrame.
+
+        Read through :class:`edgar.abs.AssetData` and renamed to this class's
+        column names (``LOAN_FIELDS``); ``AssetData(...).assets`` has every CMBS
+        field under its XSD name.
 
         Returns:
             DataFrame with columns:
@@ -371,19 +236,15 @@ class CMBSAssetData:
                 - primary_servicer: Primary servicer name
                 - ... and many more fields
         """
-        import pandas as pd
-
-        self._parse_xml()
-        if not self._loans_data:
+        data = self._asset_data
+        if data is None or data.assets.empty:
             return pd.DataFrame()
-
-        df = pd.DataFrame(self._loans_data)
-        return df
+        return _legacy_frame(data.assets, _SPEC['assets'], self.LOAN_FIELDS)
 
     @cached_property
     def properties(self):
         """
-        Property-level data as a pandas DataFrame.
+        Property-level data as a pandas DataFrame, keyed to loans by ``loan_id``.
 
         Returns:
             DataFrame with columns:
@@ -397,14 +258,12 @@ class CMBSAssetData:
                 - dscr_noi_securitization: DSCR based on NOI
                 - ... and many more fields
         """
-        import pandas as pd
-
-        self._parse_xml()
-        if not self._properties_data:
+        data = self._asset_data
+        if data is None or data.properties is None or data.properties.empty:
             return pd.DataFrame()
-
-        df = pd.DataFrame(self._properties_data)
-        return df
+        frame = _legacy_frame(data.properties, _SPEC['property'], self.PROPERTY_FIELDS)
+        frame.insert(0, 'loan_id', data.properties['asset_number'])
+        return frame
 
     def summary(self) -> CMBSSummary:
         """
@@ -413,8 +272,6 @@ class CMBSAssetData:
         Returns:
             CMBSSummary with aggregate metrics
         """
-        self._parse_xml()
-
         loans_df = self.loans
         props_df = self.properties
 

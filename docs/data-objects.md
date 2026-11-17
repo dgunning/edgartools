@@ -279,6 +279,23 @@ notice.fiscal_year_end                     # e.g., '12/31/2025'
 
 ---
 
+## ABS Asset-Level Data (Form ABS-EE)
+
+Read the loan-by-loan (or lease-by-lease) pool behind an asset-backed security, one row per asset for one reporting period.
+
+```python
+data = find("0001104659-26-111517").obj()  # AssetData: World Omni Auto Receivables 2022-C
+data.assets                                # 17,425 loans, typed columns
+data.assets["obligor_credit_score"]        # Int64
+data.info.reporting_period_end             # date(2026, 8, 31)
+data.summary()                             # balances, WA rate, states, makes
+data.code_meanings("vehicle_type_code")    # {'1': 'Car', '2': 'Truck', '3': 'SUV', ...}
+```
+
+Auto loan, auto lease and CMBS columns are typed from SEC's XSDs (CMBS adds `data.properties`); RMBS and debt-securities pools keep their original tag names as strings (`data.info.curated` is `False`). The EX-102 is streamed, so a 376 MB pool parses in about 11 seconds and under 0.5 GB of memory. `AssetData.from_source()` reads a local `.xml`, `.gz`, a full submission `.nc`/`.txt`, bytes, or a binary stream.
+
+---
+
 ## ABS Distribution Reports (Form 10-D)
 
 Extract structured CMBS loan and property data from asset-backed securities distribution reports.
