@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.3.0] - 2026-11-17
+
+### Added
+
+- **`compare_statements()` now checks statements of equity.** Equity pages (member columns, period blocks in rows) are compared cell by cell under each block's period, opening and closing balances included, so the statement check's coverage on the scorecard sample rises from 68.5% to 94.5% of page cells. It also reports a page row the library shows once when the page repeats it within a block.
+- **`MappingResult` now exposes stored mapping annotations and their sources.** For `PremiumsEarnedNet`, callers can inspect its stored confidence of 0.5, the matched key, and any applied industry; accepted concepts stay unchanged. (GH #1422)
+- **A published as-filed fidelity scorecard.** A new docs page reports how closely statements match the SEC's own rendering on a fresh random sample, regenerated each release: 98.0% of 98 compared filings match every compared cell. `scripts/fidelity_scorecard.py` now reports the per-filing spread beside the pooled rate, which one large fund filing could move by 15 points.
+
+### Fixed
+
+- **Fund lookups by class or series ID work again.** Since 2026-11-16 SEC's browse-edgar rejects a page size of 1 with HTTP 400, so `Fund("C000032628")` and `Fund("S000002277")` returned None in 6.2.0. The lookup now asks for 10 results, and a request SEC refuses raises `TransportError` instead of reading as "no such fund".
+- **A typed US-GAAP axis reports its domain.** `Axis.typed_domain_ref` was empty for an axis declared in the imported US-GAAP taxonomy. It now comes from a bundled per-year table of FASB's 14 typed axes, so Zymeworks' 2026 `StatementOfIncomeLocationBalanceAxis` reports `#us-gaap_QName.domain`. (GH #1234)
+- **A primary statement's value columns are numbers again.** Since 6.2, `to_dataframe()` left text facts filed on a statement's face in its date columns: Zimmer Biomet's income statement showed `us-gaap:ProductMember` beside Net sales of 7,932,900,000 in eight of its last ten 10-Ks, and polars/pyarrow refused the frame. Those cells are NaN again, as in 6.0, and a note's text is kept. (GH #1995)
+- **`extract_nonaccrual()` counted a BDC's schedule subtotals as non-accrual holdings.** Trinity Capital's Q1 2025 10-Q read $1.85B at cost where it reports $49.7M; subtotals now drop out, and the result warns when it disagrees with a non-accrual total or loan count the filer tags. (GH #1959)
+- **Proxy statement tables come back from most DEF 14As, in the right columns.** `summary_compensation_table`, `beneficial_ownership`, `director_compensation_table` and `audit_fees` now follow rowspans, stacked headers and every heading that names the section. On 16 held-out proxies, audit fees went from 4 to 15 and the SCT from 8 to 14.
+- **ABS-EE asset data reads every schema, and `filing.obj()` returns it.** The old auto lease parser left 21 of 37 columns empty on World Omni's auto loans and needed 4.0 GB for Honda 2025-4's 105k loans. The new `edgar.abs.AssetData` streams the EX-102 in 360 MB, with columns typed from SEC's XSDs (auto loan, auto lease and CMBS; other schemas raw). `AutoLeaseAssetData` is deprecated.
+- **A fund name imported first failed with a circular import.** In a fresh process, `from edgar import Fund` (and `find_fund`, `FundReport`, `MoneyMarketFund`, `AlternativeTradingSystem`, `import edgar.funds`, or a first `obj()` on a `Filing` built directly) raised `ImportError: cannot import name 'FundData'` in 6.1.0 and 6.2.0, 7 of 7 entry points tested. `edgar.entity` now loads its fund re-exports on first use.
+- **A statement requested for one period lost its balance rows.** `to_dataframe(period_filter=...)` and `render(period_filter=...)` with a duration period dropped instant facts, so opening and closing balances showed blank and their member rows disappeared (Brixmor 0001581068-21-000012, 2020 cash at end of period 370,087,000 now shown). The default view already had them.
+
 ## [6.2.0] - 2026-11-14
 
 ### Added
