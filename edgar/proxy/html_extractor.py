@@ -8,7 +8,8 @@ a pre-parsed HTML tree shared via ProxyStatement._html_tree.
 
 Lessons from edgartools-workers implementation (20-company eval):
 - Proposals: 90% success rate (highest reliability)
-- Section headers are NOT reliable DOM anchors alone — use two-pass heading finder
+- Section headers are NOT reliable DOM anchors alone — every match is a candidate,
+  and the best-scoring table after any of them wins (_find_section_table)
 - Non-breaking spaces (\\u00a0) break regex — normalize first
 - First occurrence of proposal text is often in TOC — retry later occurrences
 """
@@ -485,14 +486,18 @@ class ExecutiveCompEntry:
 
 # ── Column classification ────────────────────────────────────────────
 
+# Multi-word patterns allow no space: a dropped <br> glues "Stockawards" (JPM)
+# and "Optionawards" (JNJ), which the camel-case split cannot separate.
 _SCT_COLUMN_PATTERNS: list[tuple[str, re.Pattern]] = [
-    ('name', re.compile(r'name|principal\s+position', re.I)),
+    # CAT adds "Total Without Change in Pension Value" after Total: not pension.
+    ('total_excluding', re.compile(r'total\s*(?:without|excluding|less)', re.I)),
+    ('name', re.compile(r'name|principal\s*position', re.I)),
     ('year', re.compile(r'\byear\b', re.I)),
-    ('stock_awards', re.compile(r'stock\s+award', re.I)),
-    ('option_awards', re.compile(r'option\s+award', re.I)),
-    ('non_equity_incentive', re.compile(r'non[- ]equity|incentive\s+plan', re.I)),
-    ('pension_change', re.compile(r'pension|nqdc|nonqualified\s+deferred|change\s+in\s+pension', re.I)),
-    ('other_compensation', re.compile(r'all\s+other|other\s+comp', re.I)),
+    ('stock_awards', re.compile(r'stock\s*award', re.I)),
+    ('option_awards', re.compile(r'option\s*award', re.I)),
+    ('non_equity_incentive', re.compile(r'non[- ]?equity|incentive\s*plan', re.I)),
+    ('pension_change', re.compile(r'pension|nqdc|nonqualified\s*deferred', re.I)),
+    ('other_compensation', re.compile(r'all\s*other|other\s*comp', re.I)),
     ('total', re.compile(r'\btotal\b', re.I)),
     ('salary', re.compile(r'\bsalary\b', re.I)),
     ('bonus', re.compile(r'\bbonus\b', re.I)),
@@ -515,8 +520,12 @@ _DASH_RE = re.compile(r'^[\s\u2014\u2013\u2015\u2012\u2212\-]+$')
 _ZERO_WIDTH_RE = re.compile(r'[\u200b\u00ad\ufeff]')
 
 
-def _parse_comp_dollar(text: str) -> Optional[int]:
-    """Parse a dollar amount from an SCT cell. Returns None for dashes/empty."""
+def _parse_comp_dollar(text: str, scale: int = 1) -> Optional[int]:
+    """Parse a dollar amount from an SCT cell. Returns None for dashes/empty.
+
+    ``scale`` applies a table's unit before rounding, so XOM's 37.6 (millions
+    of dollars) is 37,600,000 and not 38,000,000.
+    """
     # Strip footnotes and zero-width chars
     cleaned = _FOOTNOTE_RE.sub('', text)
     cleaned = _STAR_RE.sub('', cleaned)
@@ -536,7 +545,7 @@ def _parse_comp_dollar(text: str) -> Optional[int]:
         return None
 
     try:
-        value = round(float(cleaned))
+        value = round(float(cleaned) * scale)
         return -value if negative else value
     except ValueError:
         return None
@@ -564,14 +573,34 @@ _TITLE_ABBREVIATIONS = {
 }
 
 
+_TITLE_WORD_RE = re.compile(
+    r'\b(?:' + '|'.join(re.escape(kw) for kw in _TITLE_KEYWORDS) + r')\b', re.I)
+
+
+def _is_title_only(cell: str) -> bool:
+    """A cell holding only a job title: it opens with a title word or a joiner."""
+    words = cell.split()
+    return bool(words) and (bool(_TITLE_WORD_RE.match(cell)) or
+                            words[0].lower() in ('and', 'former', 'executive', 'senior', 'vice', 'interim'))
+
+
 def _split_name_title(cell: str) -> tuple[str, str]:
     """Split 'Tim Cook, Chief Executive Officer' → ('Tim Cook', 'CEO')."""
-    # Normalize whitespace
     cell = cell.replace('\xa0', ' ').replace('\u200b', '').strip()
+    # A line break ends the name (AMZN: "Andrew R. Jassy<br>President and Chief
+    # Executive Officer"); find it before whitespace is collapsed, or the title
+    # keyword search below splits at "Chief" and keeps "President and" in the name.
+    # The title keeps its words: abbreviating "Former Senior Vice President,
+    # Chief Financial Officer" to "CFO" would drop "Former".
+    lines = [' '.join(line.split()).rstrip(',') for line in cell.split('\n') if line.strip()]
+    if len(lines) > 1 and len(lines[0].split()) >= 2:   # F breaks "John / T. Lawler"
+        title_text = ' '.join(lines[1:])
+        if re.search(r'\b(?:' + '|'.join(_TITLE_KEYWORDS) + r'|founder|chair)\b', title_text, re.I):
+            return lines[0], title_text
     cell = re.sub(r'\s+', ' ', cell)
 
-    # Try splitting on comma or newline
-    for sep in [',', '\n']:
+    # Try splitting on a comma
+    for sep in [',']:
         idx = cell.find(sep)
         if idx == -1:
             continue
@@ -658,138 +687,181 @@ def _iter_following_tables(el, limit: int = 10):
                     return
 
 
-def _extract_table_grid(table_el) -> list[list[str]]:
-    """Extract a 2D text grid from an lxml <table>, expanding colspan."""
-    grid = []
+def _cell_span(cell, attr: str) -> int:
+    value = (cell.get(attr, '1') or '1').strip()
+    return max(int(value), 1) if value.isdigit() else 1
+
+
+# Superscripts in these tables are footnote markers: PG's "Percent of Class"
+# cell for each director holds only <sup>6</sup>, which read as 6%.
+_CELL_TEXT_XPATH = './/text()[not(ancestor::sup)]'
+
+
+def _cell_text(cell) -> str:
+    return ''.join(cell.xpath(_CELL_TEXT_XPATH)).strip()
+
+
+def _skip_spanned(row: list[str], row_filled: list[str], pending: dict[int, int]):
+    """Leave empty the columns a rowspan from an earlier row still covers."""
+    while pending.get(len(row), 0) > 0:
+        pending[len(row)] -= 1
+        row.append('')
+        row_filled.append('')
+
+
+def _extract_table_grids(table_el) -> tuple[list[list[str]], list[list[str]]]:
+    """A <table> as two text grids, with colspan and rowspan expanded.
+
+    In ``grid`` a cell's text sits in its first column only and the columns and
+    rows it spans are empty, so every value keeps its column: AMZN's SCT puts
+    each name in a rowspan=3 cell, and ignoring that shifted the 2024 and 2023
+    rows three columns left. ``filled`` repeats a cell's text across its
+    colspan, which is what a header row needs to label every column it covers.
+    """
+    grid: list[list[str]] = []
+    filled: list[list[str]] = []
+    pending: dict[int, int] = {}   # column -> rows a rowspan above still covers
     for tr in table_el.iter('tr'):
-        row_data = []
+        row: list[str] = []
+        row_filled: list[str] = []
         for cell in tr:
             if cell.tag not in ('td', 'th'):
                 continue
-            text = (cell.text_content() or '').strip()
-            text = _ZERO_WIDTH_RE.sub('', text).strip()
-            colspan_str = cell.get('colspan', '1') or '1'
-            colspan = int(colspan_str) if colspan_str.isdigit() else 1
-            row_data.append(text)
-            for _ in range(colspan - 1):
-                row_data.append('')
-        grid.append(row_data)
-    return grid
+            _skip_spanned(row, row_filled, pending)
+            text = _ZERO_WIDTH_RE.sub('', _cell_text(cell)).strip()
+            rowspan = _cell_span(cell, 'rowspan')
+            for k in range(_cell_span(cell, 'colspan')):
+                if rowspan > 1:
+                    pending[len(row)] = rowspan - 1
+                row.append(text if k == 0 else '')
+                row_filled.append(text)
+        _skip_spanned(row, row_filled, pending)
+        grid.append(row)
+        filled.append(row_filled)
+    return grid, filled
+
+
+def _extract_table_grid(table_el) -> list[list[str]]:
+    """A <table> as a text grid; see _extract_table_grids."""
+    return _extract_table_grids(table_el)[0]
+
+
+# A data row has a number of three or more digits once footnote markers like
+# "(1)" are gone: a year, a share count, a dollar amount.
+_DATA_NUMBER_RE = re.compile(r'\d[\d,.]{2,}')
+_HEADER_LEVEL_SEP = '\x1f'   # joins the stacked labels of one header column
+_HEADER_SCAN_ROWS = 10   # KO stacks its director-comp labels over 6+ rows
+
+
+def _is_data_row(row: list[str]) -> bool:
+    """A row with a value: a number of three or more digits, or a dash for none."""
+    return any(_DATA_NUMBER_RE.search(_FOOTNOTE_RE.sub('', c)) or _DASH_RE.match(c) for c in row if c)
 
 
 def _split_header_data(
     grid: list[list[str]],
     header_keywords: Optional[list[str]] = None,
+    filled: Optional[list[list[str]]] = None,
 ) -> Tuple[list[str], list[list[str]]]:
-    """Split a grid into header row and data rows."""
+    """Split a grid into one merged header row and data rows aligned to it.
+
+    The header is a block of rows, not one row: modern proxies stack labels
+    ("Shares of Class A Common Stock" over "Number" and "Percentage" on SHAK).
+    Each header column holds its labels top to bottom joined by
+    _HEADER_LEVEL_SEP, and only at the column where a label starts, so a
+    caller reads a label's column as the start of its span.
+    """
     if not grid:
         return [], []
+    filled = filled or grid
+    scan = grid[:_HEADER_SCAN_ROWS]
 
     header_row_idx = -1
     if header_keywords:
-        for i, row in enumerate(grid[:4]):
+        for i, row in enumerate(scan):
             row_text = ' '.join(row).lower()
-            matches = sum(1 for kw in header_keywords if kw in row_text)
-            if matches >= 2:
+            if sum(1 for kw in header_keywords if kw in row_text) >= 2:
                 header_row_idx = i
                 break
-
     if header_row_idx < 0:
-        for i, row in enumerate(grid[:4]):
-            non_empty = [c for c in row if c]
-            if len(non_empty) >= 3:
+        for i, row in enumerate(scan):
+            if len([c for c in row if c]) >= 3:
                 header_row_idx = i
                 break
-
     if header_row_idx < 0:
         return [], grid
 
-    return grid[header_row_idx], grid[header_row_idx + 1:]
+    # Extend the block over label rows: upward while a row has text and no
+    # data, downward while a row has two or more labels and no data. A row with
+    # one label (SHAK's "Named Executive Officers") is a section row of the data.
+    first = header_row_idx
+    while first > 0 and any(grid[first - 1]) and not _is_data_row(grid[first - 1]):
+        first -= 1
+    last = header_row_idx
+    while (last + 1 < len(grid) and last + 1 <= _HEADER_SCAN_ROWS
+           and len([c for c in grid[last + 1] if c]) >= 2 and not _is_data_row(grid[last + 1])):
+        last += 1
+    block = range(first, last + 1)
+
+    width = max(len(r) for r in grid)
+    starts = [col for col in range(width) if any(col < len(grid[r]) and grid[r][col] for r in block)]
+    # A row whose one label covers every column is the table's title, not a
+    # group label: "Director Compensation" over every column would make each
+    # of them the name column.
+    level_rows = [r for r in block
+                  if len({filled[r][c] for c in starts if c < len(filled[r]) and filled[r][c]}) > 1
+                  or not all(c < len(filled[r]) and filled[r][c] for c in starts)]
+    headers = [''] * width
+    for col in starts:
+        levels: list[str] = []
+        for r in level_rows:
+            label = filled[r][col] if col < len(filled[r]) else ''
+            if label and label not in levels:
+                levels.append(label)
+        headers[col] = _HEADER_LEVEL_SEP.join(levels)
+    return headers, [_align_to_headers(headers, row) for row in grid[last + 1:]]
 
 
-def _find_section_table(
-    tree,
-    heading_anchors: list[str],
-    heading_rejects: list[str],
-    table_scorer: Callable[[str], Tuple[int, bool]],
-    max_tables: int = 10,
-):
-    """Find a table in a named section of a proxy statement using lxml.
+def _align_to_headers(headers: list[str], row: list[str]) -> list[str]:
+    """Move each value to the column where its header label starts.
 
-    Two-pass heading finder: pass 1 outside tables, pass 2 inside tables.
-    Then scores subsequent tables using the provided scorer function.
-
-    Args:
-        tree: Pre-parsed lxml HTML tree (from ProxyStatement._html_tree).
-        heading_anchors: Anchor strings to match in heading text (lowercase).
-        heading_rejects: Reject strings — skip headings containing these.
-        table_scorer: Function(header_text) -> (score, is_valid).
-        max_tables: Maximum tables to examine after heading.
-
-    Returns:
-        lxml table element, or None.
+    A label covers the columns from its own up to the next label, and filing
+    agents put the value anywhere inside that span, often after a separate "$"
+    cell (AMZN's "Salary" spans columns 10-15 and its value sits at 12).
     """
-    if tree is None:
-        return None
+    starts = [i for i, h in enumerate(headers) if h]
+    if not starts:
+        return row
+    out = list(row[:starts[0]]) + [''] * max(0, len(row) - starts[0])
+    for n, start in enumerate(starts):
+        end = starts[n + 1] if n + 1 < len(starts) else len(row)
+        values = [c for c in row[start:end] if c and c != '$']
+        if values:
+            out[start] = values[0]
+    return out
 
-    heading_el = None
-    for allow_in_table in [False, True]:
-        for el in tree.iter():
-            if el.tag not in _HEADING_TAGS:
-                continue
-            text = (el.text_content() or '').strip()
-            if not text or len(text) > 150:
-                continue
-            text_lower = text.lower()
 
-            if not any(anchor in text_lower for anchor in heading_anchors):
-                continue
-            if any(reject in text_lower for reject in heading_rejects):
-                continue
-            if _is_inside_link(el):
-                continue
+_CAMEL_RE = re.compile(r'(?<=[a-z])(?=[A-Z])')
 
-            in_table = _is_inside_table(el)
-            if not allow_in_table and in_table:
-                continue
-            if allow_in_table and in_table:
-                if re.search(r'\d{2,3}\s*$', text):
-                    continue
-                if '.....' in text:
-                    continue
 
-            heading_el = el
-            break
-        if heading_el is not None:
-            break
+def _classify_header(header: str, classifier: Callable[[str], Optional[str]]) -> Optional[str]:
+    """Classify a stacked header as one label read top to bottom.
 
-    if heading_el is None:
-        return None
-
-    candidates = []
-    for table_el in _iter_following_tables(heading_el, limit=max_tables):
-        trs = list(table_el.iter('tr'))
-        if len(trs) < 3:
-            continue
-
-        all_cells = []
-        for tr in trs[:3]:
-            for cell in tr:
-                if cell.tag in ('td', 'th'):
-                    text = (cell.text_content() or '').strip()
-                    if text and len(text) > 1:
-                        all_cells.append(text)
-
-        header_text = ' '.join(all_cells).lower()
-        score, is_valid = table_scorer(header_text)
-        if is_valid:
-            candidates.append((table_el, score, len(trs)))
-
-    if not candidates:
-        return None
-
-    candidates.sort(key=lambda x: (x[1], x[2]), reverse=True)
-    return candidates[0][0]
+    The joined label is what a reader sees ("Percent of Outstanding Shares" on
+    KO, "Shares of Class A Common Stock Percentage" on SHAK), and the
+    classifiers test their most specific pattern first. A level on its own is
+    the fallback.
+    """
+    # Words glued where a <br> stood ("StockAwards" on FIVE) get their space back.
+    levels = [_CAMEL_RE.sub(' ', level.replace('\xa0', ' ')) for level in header.split(_HEADER_LEVEL_SEP)]
+    col_type = classifier(' '.join(levels))
+    if col_type or len(levels) == 1:
+        return col_type
+    for label in reversed(levels):
+        col_type = classifier(label)
+        if col_type:
+            return col_type
+    return None
 
 
 def _build_column_map(
@@ -798,12 +870,43 @@ def _build_column_map(
     classifier: Callable[[str], Optional[str]],
     min_columns: int = 3,
 ) -> dict[str, int]:
-    """Build a column index map from headers, with data-row fallback."""
-    col_map: dict[str, int] = {}
+    """Build a column index map from headers, with data-row fallback.
+
+    When several columns get the same type, the first one holding numbers
+    wins (the first, for names; a total of beneficial ownership, for shares):
+    on a dual-class table (SHAK) that is the first class, and JNJ's text column
+    "Role for additional cash retainer" does not take the place of "Fees
+    earned or paid in cash".
+    """
+    by_type: dict[str, list[int]] = {}
     for i, header in enumerate(headers):
-        col_type = classifier(header)
-        if col_type:
-            col_map[col_type] = i
+        if header:
+            col_type = _classify_header(header, classifier)
+            if col_type:
+                by_type.setdefault(col_type, []).append(i)
+
+    def has_numbers(col: int) -> bool:
+        # A dash is a value too: CAT's pension column holds nothing else.
+        return any(col < len(row) and (re.search(r'\d', row[col]) or _DASH_RE.match(row[col]))
+                   for row in data_rows if col < len(row) and row[col])
+
+    col_map: dict[str, int] = {}
+    for col_type, cols in by_type.items():
+        numeric = [c for c in cols if has_numbers(c)] if col_type != 'name' else []
+        if col_type == 'fees_earned':
+            # PG lists "Annual Retainer" and "Committee Chair Fees" before
+            # "Total Fees Earned or Paid in Cash", which is the column.
+            earned = [c for c in numeric if re.search(r'earned|paid', headers[c], re.I)]
+            numeric = earned or numeric
+        if col_type == 'shares':
+            # A total of beneficial ownership wins: NVDA and CMG split "Shares
+            # Owned" from shares acquirable within 60 days, then add them up.
+            # A bare "Total" does not: MSFT's adds stock units that are not
+            # beneficially owned.
+            totals = [c for c in numeric
+                      if re.search(r'\btotal\b', headers[c], re.I) and re.search(r'benefic', headers[c], re.I)]
+            numeric = totals or numeric
+        col_map[col_type] = numeric[0] if numeric else cols[0]
 
     if len(col_map) < min_columns:
         for row in data_rows[:2]:
@@ -815,19 +918,148 @@ def _build_column_map(
     return col_map
 
 
+# A heading that opens with one of these is a sentence or a footnote that
+# mentions the section ("See the Summary Compensation Table below", "(2)Based
+# on Summary Compensation Table ..."), not the section's title.
+_PROSE_HEADING_RE = re.compile(r'^(?:\(\w{1,3}\)|[*\u2022\u25cf]|see\b|the\b|as\b|based\b|includes?\b|for\b)', re.I)
+
+
+def _heading_quality(text: str, in_table: bool) -> int:
+    """2 for a title, 1 for a long or in-table match, 0 for prose or a footnote."""
+    if _PROSE_HEADING_RE.match(text):
+        return 0
+    if in_table or len(text) > 80:
+        return 1
+    return 2
+
+
+_MAX_LABEL_CHARS = 100
+
+
+def _table_header_text(trs) -> str:
+    """Lowercased text of a table's opening rows, for the table scorers.
+
+    The first six rows, then more up to _HEADER_SCAN_ROWS while they carry no
+    data. Three rows were too few: KO and PG put a title and blank rows above
+    their SCT labels, and an audit-fee table's labels ("Audit Fees") open its
+    data rows, below a year row (PG's "FY 2023-24").
+    """
+    texts = []
+    for n, tr in enumerate(trs[:_HEADER_SCAN_ROWS]):
+        cells = [(c.text_content() or '').strip() for c in tr if c.tag in ('td', 'th')]
+        if n >= 6 and _is_data_row(cells):
+            break
+        # Labels are short; a long cell is prose, and prose that mentions
+        # shares, names and percents (NKE's Q&A table) is not an ownership table.
+        texts.extend(t for t in cells if 1 < len(t) <= _MAX_LABEL_CHARS)
+    return ' '.join(texts).lower()
+
+
+def _find_section_table(
+    tree,
+    heading_anchors: list[str],
+    heading_rejects: list[str],
+    table_scorer: Callable[[str], Tuple[int, bool]],
+    max_tables: int = 10,
+):
+    """Find a table in a named section of a proxy statement using lxml.
+
+    Every element whose short text names the section is a candidate heading,
+    and the best-scoring table within ``max_tables`` after any of them wins.
+    Ties go to the better heading, then to the longer table: an ownership
+    section often splits 5% holders from directors and officers (PG, UNH), and
+    the longer table carries the group total. Taking only the first heading
+    lost the table whenever that heading was a table-of-contents row (PG,
+    ROKU) or a sentence that mentions the section (FIVE, BJRI, JNJ).
+
+    Args:
+        tree: Pre-parsed lxml HTML tree (from ProxyStatement._html_tree).
+        heading_anchors: Anchor strings to match in heading text (lowercase).
+        heading_rejects: Reject strings — skip headings containing these.
+        table_scorer: Function(header_text) -> (score, is_valid).
+        max_tables: Maximum tables to examine after each heading.
+
+    Returns:
+        lxml table element, or None.
+    """
+    if tree is None:
+        return None
+
+    root = tree.getroottree()
+    scored: dict[str, tuple] = {}     # table path -> (score, valid, rows, table)
+    best_anchor: dict[str, tuple[int, int]] = {}   # table path -> (heading quality, -distance)
+    seen_first: set[tuple[str, int]] = set()   # (first table, quality): nested copies of one heading
+
+    for el in tree.iter(*_HEADING_TAGS):
+        text = ' '.join((el.text_content() or '').split())
+        if not text or len(text) > 150:
+            continue
+        text_lower = text.lower()
+        if not any(anchor in text_lower for anchor in heading_anchors):
+            continue
+        if any(reject in text_lower for reject in heading_rejects):
+            continue
+        if _is_inside_link(el):
+            continue
+        in_table = _is_inside_table(el)
+        if in_table and (re.search(r'\d{2,3}\s*$', text) or '.....' in text):
+            continue   # a table-of-contents row with a page number
+        quality = _heading_quality(text, in_table)
+
+        # A heading in a table's title row (PG's and SHAK's SCTs) heads that
+        # table, which following:: never reaches.
+        following = list(_iter_following_tables(el, limit=max_tables))
+        if in_table:
+            following.insert(0, next(el.iterancestors('table')))
+        for distance, table_el in enumerate(following):
+            path = root.getpath(table_el)
+            if distance == 0:
+                if (path, quality) in seen_first:
+                    break
+                seen_first.add((path, quality))
+            if path not in scored:
+                trs = list(table_el.iter('tr'))
+                if len(trs) < 3:
+                    scored[path] = (0, False, len(trs), table_el)
+                else:
+                    score, is_valid = table_scorer(_table_header_text(trs))
+                    scored[path] = (score, is_valid, len(trs), table_el)
+            best_anchor[path] = max(best_anchor.get(path, (0, -max_tables)), (quality, -distance))
+
+    candidates = [(score, best_anchor[path][0], rows, best_anchor[path][1], table_el)
+                  for path, (score, is_valid, rows, table_el) in scored.items() if is_valid]
+    if not candidates:
+        return None
+    candidates.sort(key=lambda c: c[:4], reverse=True)
+    return candidates[0][4]
+
+
+def _first_text_column(data_rows: list[list[str]]) -> int:
+    """The first column whose cells hold words and no numbers: the names.
+
+    For a table with no "Name" header (ROKU's ownership table labels only its
+    numbers), where column 0 is often an empty spacer.
+    """
+    width = max((len(r) for r in data_rows), default=0)
+    for col in range(width):
+        cells = [r[col] for r in data_rows if col < len(r) and r[col]]
+        words = [c for c in cells if re.search(r'[A-Za-z]{2}', c) and not _DATA_NUMBER_RE.search(c)]
+        if cells and len(words) * 2 >= len(cells):
+            return col
+    return 0
+
+
 def _get_dollar_from_row(row: list[str], col_map: dict[str, int], col_name: str) -> Optional[int]:
-    """Get a dollar value from a row, handling split-cell patterns."""
+    """Get a dollar value from a row aligned by _split_header_data.
+
+    Alignment has already moved each value past any "$" cell to its label's
+    column, so an empty cell means no value. Reading the next column instead
+    copied SBUX's director total into fees, stock awards and option awards.
+    """
     idx = col_map.get(col_name, -1)
     if idx < 0 or idx >= len(row):
         return None
-    val = _parse_comp_dollar(row[idx])
-    if val is not None:
-        return val
-    if row[idx].strip() == '$' and idx + 1 < len(row):
-        return _parse_comp_dollar('$' + row[idx + 1])
-    if not row[idx].strip() and idx + 1 < len(row):
-        return _parse_comp_dollar(row[idx + 1])
-    return None
+    return _parse_comp_dollar(row[idx])
 
 
 # ── SCT table scorer ────────────────────────────────────────────────
@@ -853,13 +1085,15 @@ def extract_summary_compensation(tree) -> Optional[List[ExecutiveCompEntry]]:
         return None
 
     table_el = _find_section_table(
-        tree, ['summary compensation table'], [], _score_sct_table)
+        # "Summary Compensation" alone heads SHAK's table; the table scorer, not
+        # the heading, decides between candidates.
+        tree, ['summary compensation table', 'summary compensation'], [], _score_sct_table)
     if table_el is None:
         return None
 
-    grid = _extract_table_grid(table_el)
+    grid, filled = _extract_table_grids(table_el)
     headers, data_rows = _split_header_data(
-        grid, header_keywords=['salary', 'total', 'year', 'name'])
+        grid, header_keywords=['salary', 'total', 'year', 'name'], filled=filled)
     if not data_rows:
         return None
 
@@ -867,7 +1101,7 @@ def extract_summary_compensation(tree) -> Optional[List[ExecutiveCompEntry]]:
     if len(col_map) < 4:
         return None
 
-    name_col = col_map.get('name', 0)
+    name_col = col_map['name'] if 'name' in col_map else _first_text_column(data_rows)
     year_col = col_map.get('year', -1)
 
     entries: list[ExecutiveCompEntry] = []
@@ -879,7 +1113,11 @@ def extract_summary_compensation(tree) -> Optional[List[ExecutiveCompEntry]]:
             cell_text = row[name_col]
             if cell_text and not cell_text.startswith('(') and len(cell_text) > 2:
                 name, title = _split_name_title(cell_text)
-                if name and not any(kw in name.lower() for kw in ['total', 'footnote', 'note']):
+                if current_name and _is_title_only(' '.join(cell_text.split())):
+                    # The title on the executive's next row (FIVE, BJRI):
+                    # "Chief Executive Officer and" is not a new executive.
+                    current_title = f"{current_title} {' '.join(cell_text.split())}".strip()
+                elif name and not any(kw in name.lower() for kw in ['total', 'footnote', 'note']):
                     current_name = name
                     current_title = title
 
@@ -929,9 +1167,16 @@ class BeneficialOwner:
 
 
 _OWNERSHIP_COLUMN_PATTERNS: list[tuple[str, re.Pattern]] = [
+    # Percent and shares before name: "Amount and Nature of Beneficial
+    # Ownership" is the shares column, though it says "beneficial owner".
+    ('class_title', re.compile(r'title\s+of\s+class', re.I)),   # JNJ: not a percent
+    # "%" anywhere (ROKU labels a column "Class A" over a bare "%"), but not
+    # "of class": stacked labels read "Shares of Class A Common Stock Number".
+    ('percent', re.compile(r'percent|%', re.I)),
+    # "Total" too: PG's director table splits holdings into direct, right to
+    # acquire and family columns and gives the beneficial count under "Total".
+    ('shares', re.compile(r'\bshare(?!\s*holder)(?!ing)|\bnumber\b|\bamount\b|^\s*total\b', re.I)),   # not PG's "Profit Sharing Plan"
     ('name', re.compile(r'name|beneficial\s+owner', re.I)),
-    ('shares', re.compile(r'\bshare|\bnumber\b|\bamount\b', re.I)),
-    ('percent', re.compile(r'percent|%\s*of|of\s+class', re.I)),
 ]
 
 def _classify_ownership_column(header: str) -> Optional[str]:
@@ -946,6 +1191,7 @@ def _parse_shares(text: str) -> Optional[int]:
     cleaned = _ZERO_WIDTH_RE.sub('', cleaned).strip()
     if not cleaned or _DASH_RE.match(cleaned):
         return None
+    cleaned = re.sub(r'\s*shares?$', '', cleaned, flags=re.I)   # JNJ: "243,455,135 shares"
     cleaned = cleaned.replace(',', '').replace('$', '').replace(' ', '')
     try:
         return int(cleaned)
@@ -1002,15 +1248,11 @@ def _score_ownership_table(header_text: str) -> Tuple[int, bool]:
     if 'beneficially owned' in header_text: score += 1
     return score, score >= 3
 
-def _parse_with_adjacent(row: list[str], col: int, parser) -> Optional:
+def _parse_cell(row: list[str], col: int, parser) -> Optional:
+    """Parse one cell of an aligned row; see _get_dollar_from_row for why not its neighbour."""
     if col < 0 or col >= len(row):
         return None
-    val = parser(row[col])
-    if val is not None:
-        return val
-    if col + 1 < len(row):
-        return parser(row[col + 1])
-    return None
+    return parser(row[col])
 
 
 def extract_beneficial_ownership(tree) -> Optional[List[BeneficialOwner]]:
@@ -1023,13 +1265,13 @@ def extract_beneficial_ownership(tree) -> Optional[List[BeneficialOwner]]:
     if table_el is None:
         return None
 
-    grid = _extract_table_grid(table_el)
-    headers, data_rows = _split_header_data(grid)
+    grid, filled = _extract_table_grids(table_el)
+    headers, data_rows = _split_header_data(grid, filled=filled)
     if not data_rows:
         return None
 
     col_map = _build_column_map(headers, data_rows, _classify_ownership_column, min_columns=2)
-    name_col = col_map.get('name', 0)
+    name_col = col_map['name'] if 'name' in col_map else _first_text_column(data_rows)
     shares_col = col_map.get('shares', -1)
     percent_col = col_map.get('percent', -1)
 
@@ -1053,14 +1295,14 @@ def extract_beneficial_ownership(tree) -> Optional[List[BeneficialOwner]]:
             continue
 
         if _GROUP_RE.search(name_cell):
-            shares = _parse_with_adjacent(row, shares_col, _parse_shares) if shares_col >= 0 else None
-            pct = _parse_with_adjacent(row, percent_col, _parse_percent) if percent_col >= 0 else None
+            shares = _parse_cell(row, shares_col, _parse_shares) if shares_col >= 0 else None
+            pct = _parse_cell(row, percent_col, _parse_percent) if percent_col >= 0 else None
             if shares is not None or pct is not None:
                 owners.append(BeneficialOwner(name=name_cell, holder_type='group', shares=shares, percent_of_class=pct))
             continue
 
-        shares = _parse_with_adjacent(row, shares_col, _parse_shares) if shares_col >= 0 else None
-        pct = _parse_with_adjacent(row, percent_col, _parse_percent) if percent_col >= 0 else None
+        shares = _parse_cell(row, shares_col, _parse_shares) if shares_col >= 0 else None
+        pct = _parse_cell(row, percent_col, _parse_percent) if percent_col >= 0 else None
         if shares is None and pct is None:
             continue
 
@@ -1101,13 +1343,16 @@ class DirectorCompEntry:
 
 _DIR_COMP_COLUMN_PATTERNS: list[tuple[str, re.Pattern]] = [
     ('name', re.compile(r'name|director', re.I)),
-    ('stock_awards', re.compile(r'stock\s+award', re.I)),
-    ('option_awards', re.compile(r'option\s+award', re.I)),
-    ('non_equity_incentive', re.compile(r'non[- ]equity|incentive\s+plan', re.I)),
-    ('pension_change', re.compile(r'pension|nqdc|nonqualified\s+deferred|change\s+in\s+pension', re.I)),
-    ('other_compensation', re.compile(r'all\s+other|other\s+comp', re.I)),
+    # JPM's "Other fees earned or paid in cash" (subsidiary boards) is other pay.
+    ('other_compensation', re.compile(r'all\s*other|other\s*comp|other\s*fees', re.I)),
+    # Fees before total: PG's "Total Fees Earned or Paid in Cash" is the fees.
+    ('fees_earned', re.compile(r'fees?\s*earned|fees?\s*paid|retainer', re.I)),
+    # ROKU: "RSU Awards"; CAT: "Restricted Stock Units".
+    ('stock_awards', re.compile(r'stock\s*award|rsu\s*award|restricted\s*stock', re.I)),
+    ('option_awards', re.compile(r'option\s*award', re.I)),
+    ('non_equity_incentive', re.compile(r'non[- ]?equity|incentive\s*plan', re.I)),
+    ('pension_change', re.compile(r'pension|nqdc|nonqualified\s*deferred', re.I)),
     ('total', re.compile(r'\btotal\b', re.I)),
-    ('fees_earned', re.compile(r'fees?\s+earned|fees?\s+paid|retainer', re.I)),
 ]
 
 def _classify_dir_comp_column(header: str) -> Optional[str]:
@@ -1131,14 +1376,18 @@ _DIR_COMP_HEADING_REJECTS = [
 def _score_dir_comp_table(header_text: str) -> Tuple[int, bool]:
     score = 0
     has_fees = 'fees' in header_text or 'retainer' in header_text
+    has_stock = 'stock' in header_text and 'award' in header_text
     if has_fees: score += 3
     if 'total' in header_text: score += 2
-    if 'stock' in header_text and 'award' in header_text: score += 2
+    if has_stock: score += 2
     if 'name' in header_text: score += 1
     if 'option' in header_text: score += 1
-    if 'salary' in header_text:
-        score = 0; has_fees = False
-    return score, (score >= 3 and has_fees)
+    if 'salary' in header_text or 'audit' in header_text:   # an SCT, or AMZN's audit-fee table
+        return 0, False
+    if re.search(r'vesting|vested|acquired on|exercis', header_text):   # NEO stock-vested tables
+        return 0, False
+    # Directors paid only in stock (AMZN) have no fees column.
+    return score, score >= 3 and (has_fees or (has_stock and 'name' in header_text))
 
 
 def extract_director_compensation(tree) -> Optional[List[DirectorCompEntry]]:
@@ -1151,16 +1400,16 @@ def extract_director_compensation(tree) -> Optional[List[DirectorCompEntry]]:
     if table_el is None:
         return None
 
-    grid = _extract_table_grid(table_el)
-    headers, data_rows = _split_header_data(grid)
+    grid, filled = _extract_table_grids(table_el)
+    headers, data_rows = _split_header_data(grid, filled=filled)
     if not data_rows:
         return None
 
     col_map = _build_column_map(headers, data_rows, _classify_dir_comp_column, min_columns=3)
-    if len(col_map) < 3:
-        return None
+    if not {'fees_earned', 'stock_awards', 'total'} & col_map.keys():
+        return None   # no compensation column; AMZN's has only Name and Stock Awards
 
-    name_col = col_map.get('name', 0)
+    name_col = col_map['name'] if 'name' in col_map else _first_text_column(data_rows)
     entries: list[DirectorCompEntry] = []
 
     for row in data_rows:
@@ -1216,7 +1465,9 @@ class AuditFees:
 def _classify_fee_row(label: str) -> Optional[str]:
     """Classify a fee table row label. Most specific first."""
     lc = label.lower()
-    if re.search(r'audit[- ]related', lc):
+    if re.match(r'\s*sub-?\s*total', lc) or (re.match(r'\s*(?:total|aggregate)\b', lc) and re.search(r'audit|tax', lc)):
+        return None   # a subtotal: PG's "Subtotal", JNJ's "Total audit and audit-related fees"
+    if re.search(r'audit[-\s]*related', lc):   # BJRI: "Audit- Related Fees"
         return 'audit_related'
     if re.search(r'total|aggregate', lc):
         return 'total'
@@ -1232,9 +1483,14 @@ def _classify_fee_row(label: str) -> Optional[str]:
 _YEAR_RE = re.compile(r'\b(20\d{2})\b')
 
 
-def _detect_year_columns(grid: list[list[str]]) -> Optional[tuple[int, int, int, int]]:
-    """Detect year columns. Returns (current_col, prior_col, current_year, prior_year)."""
-    for row in grid[:3]:
+def _detect_year_columns(grid: list[list[str]]) -> Optional[tuple[int, int, int, int, int]]:
+    """Find the year header row.
+
+    Returns (row, current_col, prior_col, current_year, prior_year), where the
+    columns are those of the year labels; data rows are aligned to them with
+    _align_to_headers, so a value after a "$" cell still lands in its column.
+    """
+    for r, row in enumerate(grid[:_HEADER_SCAN_ROWS]):
         year_map: dict[int, int] = {}
         for i, cell in enumerate(row):
             m = _YEAR_RE.search(cell)
@@ -1246,28 +1502,37 @@ def _detect_year_columns(grid: list[list[str]]) -> Optional[tuple[int, int, int,
             sorted_years = sorted(year_map.items(), key=lambda x: -x[0])
             current_year, current_col = sorted_years[0]
             prior_year, prior_col = sorted_years[1]
-            current_col = _find_data_col(current_col, grid)
-            prior_col = _find_data_col(prior_col, grid)
-            return current_col, prior_col, current_year, prior_year
+            return r, current_col, prior_col, current_year, prior_year
     return None
 
 
-def _find_data_col(year_col: int, grid: list[list[str]]) -> int:
-    """Find the column with actual numeric data near a year header column."""
-    for offset in [0, 1, 2, -1, 3]:
-        col = year_col + offset
-        if col < 0:
-            continue
-        for row in grid:
-            if col < len(row):
-                val = row[col].strip()
-                if val and val not in ('\u200b', '$') and _parse_comp_dollar(val) is not None:
-                    return col
-    return year_col
+_THOUSANDS_RE = re.compile(r'\bin\s+thousands\b|\bthousands\s+of\s+dollars\b|\(\s*\$?\s*thousands\s*\)', re.I)
+_MILLIONS_RE = re.compile(r'\bin\s+millions\b|\bmillions\s+of\s+dollars\b|\(\s*\$?\s*millions\s*\)', re.I)   # XOM: "(millions of dollars)"
 
 
-_THOUSANDS_RE = re.compile(r'\bin\s+thousands\b', re.I)
-_MILLIONS_RE = re.compile(r'\bin\s+millions\b', re.I)
+def _fee_table_unit(table_el) -> int:
+    """A fee table's unit: the first one stated in its context, nearest first."""
+    for text in _fee_table_context(table_el):
+        unit = _detect_multiplier(text)
+        if unit != 1:
+            return unit
+    return 1
+
+
+def _fee_table_context(table_el) -> list[str]:
+    """Texts that may state a fee table's unit, nearest first.
+
+    The table itself (KO), the end of the three blocks just before it (AAPL's
+    "(in thousands)" closes the preceding sentence), then its parent. The
+    parent alone missed AAPL, whose parent holds 288k characters of the proxy.
+    """
+    parts = [table_el.text_content() or '']
+    for block in table_el.xpath('preceding::*[self::p or self::div][position() <= 3]'):
+        parts.append((block.text_content() or '')[-300:])
+    parent = table_el.getparent()
+    if parent is not None:
+        parts.append((parent.text_content() or '')[:2000])
+    return parts
 
 
 def _detect_multiplier(text: str) -> int:
@@ -1314,7 +1579,9 @@ def _score_audit_table(header_text: str) -> Tuple[int, bool]:
         score += 1
     if 'tax' in header_text:
         score += 1
-    return score, score >= 3
+    # A year alone is not enough: ETSY's equity-plan table ("Total Number of
+    # Shares Cancelled 3,333,880") was read as total audit fees.
+    return score, score >= 3 and ('audit' in header_text or 'fee' in header_text)
 
 
 def extract_audit_fees(tree) -> Optional[AuditFees]:
@@ -1334,35 +1601,31 @@ def extract_audit_fees(tree) -> Optional[AuditFees]:
     year_info = _detect_year_columns(grid)
     if year_info is None:
         return None
+    year_row, current_col, prior_col, current_year, prior_year = year_info
 
-    current_col, prior_col, current_year, prior_year = year_info
-
-    # Detect multiplier from surrounding text
     parent = table_el.getparent()
     context_text = (parent.text_content() or '') if parent is not None else ''
-    multiplier = _detect_multiplier(context_text[:2000])
+    multiplier = _fee_table_unit(table_el)
 
     fees: dict[str, tuple[Optional[int], Optional[int]]] = {}
-    for row in grid:
-        if not row:
-            continue
-        label = row[0] if row else ''
+    first_value_col = min(current_col, prior_col)
+    for raw in grid[year_row + 1:]:
+        row = _align_to_headers(grid[year_row], raw)
+        # The label is the first text before the values (column 1 on AMZN).
+        label = next((c for c in row[:first_value_col] if c), '')
         category = _classify_fee_row(label)
         if not category:
             continue
 
-        current_val = _parse_comp_dollar(row[current_col]) if current_col < len(row) else None
-        prior_val = _parse_comp_dollar(row[prior_col]) if prior_col < len(row) else None
+        current_val = _parse_comp_dollar(row[current_col], multiplier) if current_col < len(row) else None
+        prior_val = _parse_comp_dollar(row[prior_col], multiplier) if prior_col < len(row) else None
 
-        if multiplier != 1:
-            if current_val is not None:
-                current_val = round(current_val * multiplier)
-            if prior_val is not None:
-                prior_val = round(prior_val * multiplier)
+        if current_val is not None or prior_val is not None or category not in fees:
+            fees[category] = (current_val, prior_val)
 
-        fees[category] = (current_val, prior_val)
-
-    if not fees:
+    # Years with no fee under them are not a fee disclosure (SHAK and XOM read
+    # as an AuditFees of nothing but years).
+    if not any(v is not None for pair in fees.values() for v in pair):
         return None
 
     auditor_name = _extract_auditor_name(context_text[:3000])
