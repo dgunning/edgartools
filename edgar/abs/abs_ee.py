@@ -1,34 +1,23 @@
 """
-Form ABS-EE Asset Data Parser.
+Deprecated: auto lease ABS-EE parser, kept for compatibility.
 
-Form ABS-EE (Asset-Backed Securities - Exchange Act) provides asset-level data
-for securitized assets. This module parses the EX-102 XML exhibits.
+Use :class:`edgar.abs.AssetData` (or ``filing.obj()`` on an ABS-EE filing),
+which reads every ABS-EE schema, streams large files, and types its columns
+from SEC's XSDs. ``AutoLeaseAssetData`` is now a thin view over it that keeps
+the old column names; it is removed in 7.0.
 
-Supported Asset Types:
-- Auto Lease (autolease schema) - BMW Vehicle Lease Trust, etc.
-- Auto Loan (autoloan schema)
-
-Usage:
-    from edgar import find
-    from edgar.abs.abs_ee import AutoLeaseAssetData
-
-    filing = find('0000929638-25-004537')  # BMW ABS-EE
-    parser = AutoLeaseAssetData.from_filing(filing)
-
-    # Access as DataFrame
-    df = parser.assets
-    print(df[['vehicle_manufacturer', 'vehicle_model', 'credit_score']].head())
-
-    # Get summary
-    summary = parser.summary()
-    print(f"Total assets: {summary.num_assets:,}")
-    print(f"Total value: ${summary.total_acquisition_cost:,.0f}")
+Changes from 6.2 (see docs/upgrade/6.1.md): six of the old tag names did not
+exist in the auto lease schema and are now read from the schema's real tags,
+so ``scheduled_payment``, ``actual_payment``, ``paid_through_date``,
+``remaining_term_months``, ``securitization_balance`` and ``ending_balance``
+are filled; ``beginning_balance`` is gone because the schema has no such field;
+dates are datetime64 rather than strings; and vehicle type codes are decoded
+with SEC's meanings (2 is Truck, 3 is SUV).
 """
 
+import warnings
 from dataclasses import dataclass, field
-from datetime import date
 from typing import Dict, Optional
-from xml.etree import ElementTree as ET
 
 import pandas as pd
 from rich import box
@@ -37,16 +26,11 @@ from rich.panel import Panel
 from rich.table import Table
 from rich.text import Text
 
+from edgar.abs.absee_schemas import CODE_MEANINGS, SCHEMAS
+from edgar.exceptions import DataObjectError, ParsingError
 from edgar.richtools import repr_rich
 
 __all__ = ['AutoLeaseAssetData', 'AutoLeaseSummary']
-
-
-# Namespace mappings for ABS-EE XML
-NAMESPACES = {
-    'autolease': 'http://www.sec.gov/edgar/document/absee/autolease/assetdata',
-    'autoloan': 'http://www.sec.gov/edgar/document/absee/autoloan/assetdata',
-}
 
 
 @dataclass
@@ -67,96 +51,97 @@ class AutoLeaseSummary:
     states: Dict[str, int] = field(default_factory=dict)
 
 
+def _legacy_frame(curated: Optional[pd.DataFrame], spec_table: Dict, field_map: Dict[str, str]) -> pd.DataFrame:
+    """Select and rename curated columns to a legacy class's names (XML tag -> legacy name)."""
+    if curated is None:
+        return pd.DataFrame(columns=list(field_map.values()))
+    data = {}
+    for tag, legacy in field_map.items():
+        column = spec_table[tag][0] if tag in spec_table else legacy
+        data[legacy] = curated[column] if column in curated.columns else pd.Series([None] * len(curated), dtype=object)
+    return pd.DataFrame(data)
+
+
 class AutoLeaseAssetData:
     """
-    Parser for Auto Lease ABS-EE EX-102 XML asset data.
-
-    Extracts asset-level lease data including vehicle information,
-    lessee credit data, and lease terms from BMW and similar auto
-    lease securitizations.
+    Deprecated view of auto lease ABS-EE asset data; use :class:`edgar.abs.AssetData`.
 
     Example:
         >>> from edgar import find
-        >>> from edgar.abs.abs_ee import AutoLeaseAssetData
-        >>> filing = find('0000929638-25-004537')
-        >>> parser = AutoLeaseAssetData.from_filing(filing)
-        >>> print(f"Loaded {len(parser)} assets")
-        >>> df = parser.assets
+        >>> data = find('0000929638-25-004537').obj()   # AssetData
+        >>> data.assets[['vehicle_manufacturer_name', 'lessee_credit_score']]
     """
 
-    # Field mappings: XML tag -> (DataFrame column, parser function)
+    # XML tag -> legacy column name
     ASSET_FIELDS = {
-        'assetNumber': ('asset_id', str),
-        'assetTypeNumber': ('asset_type', str),
-        'reportingPeriodBeginDate': ('period_start', '_parse_date'),
-        'reportingPeriodEndDate': ('period_end', '_parse_date'),
-        'originatorName': ('originator', str),
-        'originationDate': ('origination_date', '_parse_month_year'),
-        'acquisitionCost': ('acquisition_cost', float),
-        'originalLeaseTermNumber': ('original_term_months', int),
-        'scheduledTerminationDate': ('termination_date', '_parse_month_year'),
-        'originalFirstPaymentDate': ('first_payment_date', '_parse_month_year'),
-        'gracePeriod': ('grace_period_days', int),
-        'paymentTypeCode': ('payment_type_code', str),
-        # Vehicle fields
-        'vehicleManufacturerName': ('vehicle_manufacturer', str),
-        'vehicleModelName': ('vehicle_model', str),
-        'vehicleNewUsedCode': ('vehicle_new_used', str),
-        'vehicleModelYear': ('vehicle_year', int),
-        'vehicleTypeCode': ('vehicle_type_code', str),
-        'vehicleValueAmount': ('vehicle_value', float),
-        'baseResidualValue': ('base_residual_value', float),
-        'contractResidualValue': ('contract_residual_value', float),
-        # Lessee credit fields
-        'lesseeCreditScoreType': ('credit_score_type', str),
-        'lesseeCreditScore': ('credit_score', int),
-        'lesseeIncomeVerificationLevelCode': ('income_verification_code', str),
-        'lesseeEmploymentVerificationCode': ('employment_verification_code', str),
-        'paymentToIncomePercentage': ('payment_to_income_ratio', float),
-        'lesseeGeographicLocation': ('lessee_state', str),
-        'coLesseePresentIndicator': ('has_co_lessee', '_parse_bool'),
-        # Payment/status fields
-        'scheduledPaymentAmount': ('scheduled_payment', float),
-        'actualPaymentAmount': ('actual_payment', float),
-        'paidThroughDate': ('paid_through_date', '_parse_month_year'),
-        'zeroBalanceCode': ('zero_balance_code', str),
-        'zeroBalanceEffectiveDate': ('zero_balance_date', '_parse_month_year'),
-        'currentDelinquencyStatus': ('delinquency_status', int),
-        'remainingTermToMaturityNumber': ('remaining_term_months', int),
-        'securitizationLeaseBalance': ('securitization_balance', float),
-        'reportingPeriodBeginningLeaseBalanceAmount': ('beginning_balance', float),
-        'reportingPeriodEndingActualBalance': ('ending_balance', float),
+        'assetNumber': 'asset_id',
+        'assetTypeNumber': 'asset_type',
+        'reportingPeriodBeginDate': 'period_start',
+        'reportingPeriodEndDate': 'period_end',
+        'originatorName': 'originator',
+        'originationDate': 'origination_date',
+        'acquisitionCost': 'acquisition_cost',
+        'originalLeaseTermNumber': 'original_term_months',
+        'scheduledTerminationDate': 'termination_date',
+        'originalFirstPaymentDate': 'first_payment_date',
+        'gracePeriod': 'grace_period_days',
+        'paymentTypeCode': 'payment_type_code',
+        'vehicleManufacturerName': 'vehicle_manufacturer',
+        'vehicleModelName': 'vehicle_model',
+        'vehicleNewUsedCode': 'vehicle_new_used',
+        'vehicleModelYear': 'vehicle_year',
+        'vehicleTypeCode': 'vehicle_type_code',
+        'vehicleValueAmount': 'vehicle_value',
+        'baseResidualValue': 'base_residual_value',
+        'contractResidualValue': 'contract_residual_value',
+        'lesseeCreditScoreType': 'credit_score_type',
+        'lesseeCreditScore': 'credit_score',
+        'lesseeIncomeVerificationLevelCode': 'income_verification_code',
+        'lesseeEmploymentVerificationCode': 'employment_verification_code',
+        'paymentToIncomePercentage': 'payment_to_income_ratio',
+        'lesseeGeographicLocation': 'lessee_state',
+        'coLesseePresentIndicator': 'has_co_lessee',
+        'reportingPeriodScheduledPaymentAmount': 'scheduled_payment',
+        'totalActualAmountPaid': 'actual_payment',
+        'paidThroughDate': 'paid_through_date',
+        'zeroBalanceCode': 'zero_balance_code',
+        'zeroBalanceEffectiveDate': 'zero_balance_date',
+        'currentDelinquencyStatus': 'delinquency_status',
+        'remainingTermNumber': 'remaining_term_months',
+        'reportingPeriodSecuritizationValueAmount': 'securitization_balance',
+        'reportingPeriodEndingActualBalanceAmount': 'ending_balance',
     }
 
-    # Vehicle type code mappings
-    VEHICLE_TYPE_CODES = {
-        '1': 'Passenger Car',
-        '2': 'SUV',
-        '3': 'Light Truck',
-        '4': 'Motorcycle',
-        '5': 'Recreational Vehicle',
-        '98': 'Other',
-        '99': 'Unknown',
-    }
+    # SEC's meanings for vehicleTypeCode in the auto lease schema
+    VEHICLE_TYPE_CODES = CODE_MEANINGS['autolease']['vehicle_type_code']
 
     def __init__(self, xml_content: str):
         """
-        Initialize from XML content.
+        Initialize from the XML of an auto lease EX-102 exhibit.
 
-        Args:
-            xml_content: Raw XML string from EX-102 exhibit
+        XML that is not auto lease asset data gives an empty object, as before;
+        :class:`edgar.abs.AssetData` raises instead.
         """
+        warnings.warn(
+            "AutoLeaseAssetData is deprecated and will be removed in 7.0. Use edgar.abs.AssetData, "
+            "or filing.obj() on an ABS-EE filing; its columns are the XSD names in snake_case.",
+            DeprecationWarning, stacklevel=2)
+        from edgar.abs.asset_data import AssetData
+
         self._xml_content = xml_content
-        self._assets_df: Optional[pd.DataFrame] = None
-        self._parse()
+        curated = None
+        try:
+            data = AssetData.from_xml(xml_content)
+            if data.schema == 'autolease':
+                curated = data.assets
+        except (ParsingError, DataObjectError):
+            pass
+        self._assets_df = _legacy_frame(curated, SCHEMAS['autolease']['tables']['assets'], self.ASSET_FIELDS)
 
     @classmethod
     def from_filing(cls, filing) -> Optional['AutoLeaseAssetData']:
         """
         Create parser from an ABS-EE filing.
-
-        Args:
-            filing: Filing object (ABS-EE form)
 
         Returns:
             AutoLeaseAssetData or None if no EX-102 exhibit found
@@ -168,170 +153,38 @@ class AutoLeaseAssetData:
                     return cls(xml_content)
         return None
 
-    def _parse(self):
-        """Parse the XML content into a DataFrame."""
-        try:
-            root = ET.fromstring(self._xml_content)
-        except ET.ParseError:
-            self._assets_df = pd.DataFrame()
-            return
-
-        # Detect namespace
-        ns = None
-        for prefix, uri in NAMESPACES.items():
-            if uri in self._xml_content:
-                ns = {'ns': uri}
-                break
-
-        # Find all asset elements
-        if ns:
-            assets = root.findall('.//ns:assets', ns)
-        else:
-            assets = root.findall('.//assets')
-
-        if not assets:
-            self._assets_df = pd.DataFrame()
-            return
-
-        # Parse each asset
-        rows = []
-        for asset in assets:
-            row = {}
-            for xml_tag, (col_name, parser) in self.ASSET_FIELDS.items():
-                if ns:
-                    elem = asset.find(f'ns:{xml_tag}', ns)
-                else:
-                    elem = asset.find(xml_tag)
-
-                if elem is not None and elem.text:
-                    value = elem.text.strip()
-                    if parser is str:
-                        row[col_name] = value
-                    elif parser is int:
-                        row[col_name] = self._safe_int(value)
-                    elif parser is float:
-                        row[col_name] = self._safe_float(value)
-                    elif parser == '_parse_date':
-                        row[col_name] = self._parse_date(value)
-                    elif parser == '_parse_month_year':
-                        row[col_name] = self._parse_month_year(value)
-                    elif parser == '_parse_bool':
-                        row[col_name] = self._parse_bool(value)
-                else:
-                    row[col_name] = None
-
-            rows.append(row)
-
-        self._assets_df = pd.DataFrame(rows)
-
-    @staticmethod
-    def _safe_int(value: str) -> Optional[int]:
-        """Safely parse integer, returning None on failure."""
-        try:
-            return int(float(value))
-        except (ValueError, TypeError):
-            return None
-
-    @staticmethod
-    def _safe_float(value: str) -> Optional[float]:
-        """Safely parse float, returning None on failure."""
-        try:
-            return float(value)
-        except (ValueError, TypeError):
-            return None
-
-    @staticmethod
-    def _parse_date(value: str) -> Optional[date]:
-        """Parse date in MM-DD-YYYY format."""
-        from datetime import datetime
-        try:
-            return datetime.strptime(value, '%m-%d-%Y').date()
-        except (ValueError, TypeError):
-            return None
-
-    @staticmethod
-    def _parse_month_year(value: str) -> Optional[str]:
-        """Parse MM/YYYY format, returning as string."""
-        # Keep as string for month/year only values
-        if value and '/' in value:
-            return value.strip()
-        return None
-
-    @staticmethod
-    def _parse_bool(value: str) -> Optional[bool]:
-        """Parse boolean string."""
-        if value:
-            return value.lower() in ('true', '1', 'yes')
-        return None
-
     @property
     def assets(self) -> pd.DataFrame:
-        """
-        Asset-level data as a DataFrame.
-
-        Returns DataFrame with columns including:
-        - asset_id, originator, origination_date
-        - vehicle_manufacturer, vehicle_model, vehicle_year
-        - credit_score, lessee_state
-        - acquisition_cost, residual values
-        - payment and balance information
-        """
-        return self._assets_df if self._assets_df is not None else pd.DataFrame()
+        """Asset-level data as a DataFrame, with the legacy column names."""
+        return self._assets_df
 
     def __len__(self) -> int:
-        """Number of assets in the dataset."""
         return len(self.assets)
 
     def summary(self) -> AutoLeaseSummary:
-        """
-        Calculate summary statistics for the asset data.
-
-        Returns:
-            AutoLeaseSummary with aggregate metrics
-        """
+        """Summary statistics for the asset data."""
         df = self.assets
-
         if df.empty:
             return AutoLeaseSummary()
 
         summary = AutoLeaseSummary(num_assets=len(df))
+        summary.total_acquisition_cost = float(df['acquisition_cost'].sum())
+        summary.total_residual_value = float(df['contract_residual_value'].sum())
 
-        # Financial totals
-        if 'acquisition_cost' in df.columns:
-            summary.total_acquisition_cost = df['acquisition_cost'].sum()
+        scores = df['credit_score'].dropna()
+        if len(scores) > 0:
+            summary.avg_credit_score = float(scores.mean())
+        terms = df['original_term_months'].dropna()
+        if len(terms) > 0:
+            summary.avg_lease_term = float(terms.mean())
 
-        if 'contract_residual_value' in df.columns:
-            summary.total_residual_value = df['contract_residual_value'].sum()
-
-        # Averages
-        if 'credit_score' in df.columns:
-            scores = df['credit_score'].dropna()
-            if len(scores) > 0:
-                summary.avg_credit_score = scores.mean()
-
-        if 'original_term_months' in df.columns:
-            terms = df['original_term_months'].dropna()
-            if len(terms) > 0:
-                summary.avg_lease_term = terms.mean()
-
-        # Vehicle distribution
-        if 'vehicle_manufacturer' in df.columns:
-            summary.vehicle_makes = df['vehicle_manufacturer'].value_counts().to_dict()
-
-        if 'vehicle_type_code' in df.columns:
-            type_counts = df['vehicle_type_code'].value_counts()
-            summary.vehicle_types = {
-                self.VEHICLE_TYPE_CODES.get(str(k), str(k)): v
-                for k, v in type_counts.items()
-            }
-
-        if 'vehicle_year' in df.columns:
-            summary.model_years = df['vehicle_year'].value_counts().to_dict()
-
-        # Geographic distribution
-        if 'lessee_state' in df.columns:
-            summary.states = df['lessee_state'].value_counts().to_dict()
-
+        summary.vehicle_makes = {str(k): int(v) for k, v in df['vehicle_manufacturer'].value_counts().items()}
+        summary.vehicle_types = {
+            self.VEHICLE_TYPE_CODES.get(str(k), str(k)): int(v)
+            for k, v in df['vehicle_type_code'].value_counts().items()
+        }
+        summary.model_years = {int(k): int(v) for k, v in df['vehicle_year'].value_counts().items()}
+        summary.states = {str(k): int(v) for k, v in df['lessee_state'].value_counts().items()}
         return summary
 
     def __str__(self) -> str:
@@ -350,7 +203,6 @@ class AutoLeaseAssetData:
             (f"({summary.num_assets:,} assets)", "dim"),
         )
 
-        # Info table
         info_table = Table(show_header=False, box=None, padding=(0, 2, 0, 0))
         info_table.add_column("Label", style="grey70")
         info_table.add_column("Value")
@@ -365,22 +217,13 @@ class AutoLeaseAssetData:
         if summary.avg_lease_term:
             info_table.add_row("Avg Lease Term", f"{summary.avg_lease_term:.0f} months")
 
-        # Top vehicle makes
         if summary.vehicle_makes:
             info_table.add_row("", "")
             top_makes = sorted(summary.vehicle_makes.items(), key=lambda x: -x[1])[:3]
-            makes_str = ", ".join(f"{make.strip()}: {count:,}" for make, count in top_makes)
-            info_table.add_row("Top Makes", makes_str)
+            info_table.add_row("Top Makes", ", ".join(f"{make.strip()}: {count:,}" for make, count in top_makes))
 
-        # Top states
         if summary.states:
             top_states = sorted(summary.states.items(), key=lambda x: -x[1])[:5]
-            states_str = ", ".join(f"{state}: {count:,}" for state, count in top_states)
-            info_table.add_row("Top States", states_str)
+            info_table.add_row("Top States", ", ".join(f"{state}: {count:,}" for state, count in top_states))
 
-        panel = Panel(
-            Group(info_table),
-            title=title,
-            box=box.ROUNDED,
-        )
-        return panel
+        return Panel(Group(info_table), title=title, box=box.ROUNDED)
