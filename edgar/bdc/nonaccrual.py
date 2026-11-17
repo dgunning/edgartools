@@ -669,33 +669,42 @@ def _tagged_nonaccrual_balances(all_facts: List[dict], period: str) -> List[Tupl
     found: Dict[Tuple[str, str], Decimal] = {}
     for fact in all_facts:
         concept = fact.get('concept') or ''
-        lower = concept.lower()
-        if 'nonaccrual' not in lower and 'non_accrual' not in lower:
-            continue
-        if _NOT_A_NONACCRUAL_BALANCE.search(lower) or _A_RATE.search(concept) or _dims(fact):
-            continue
-        if fact.get('period_instant') != period and fact.get('period_end') != period:
+        kind = _nonaccrual_balance_kind(concept)
+        if kind is None or not _is_undimensioned_at(fact, period):
             continue
         value = fact.get('numeric_value')
         if value is None or pd.isna(value):
-            continue
-        if 'number' in lower:
-            # What is counted follows "Number": BXSL tags ...NumberOfLoans = 8 beside
-            # ...NumberOfBorrowers = 5, and only loans compare with the rows read here.
-            if not _COUNTS_HOLDINGS.match(lower.split('number', 1)[1]):
-                continue
-            kind = 'loans'
-        elif 'cost' in lower:
-            kind = 'cost'
-        elif 'fairvalue' in lower or concept == CONCEPT_NONACCRUAL_LOANS_FV:
-            kind = 'fair_value'
-        else:
             continue
         try:
             found.setdefault((kind, concept), Decimal(str(value)))
         except (ValueError, InvalidOperation):
             continue
     return [(kind, concept, value) for (kind, concept), value in found.items()]
+
+
+def _nonaccrual_balance_kind(concept: str) -> Optional[str]:
+    """``'cost'``, ``'fair_value'`` or ``'loans'`` for a non-accrual balance concept, else ``None``."""
+    lower = concept.lower()
+    if 'nonaccrual' not in lower and 'non_accrual' not in lower:
+        return None
+    if _NOT_A_NONACCRUAL_BALANCE.search(lower) or _A_RATE.search(concept):
+        return None
+    if 'number' in lower:
+        # What is counted follows "Number": BXSL tags ...NumberOfLoans = 8 beside
+        # ...NumberOfBorrowers = 5, and only loans compare with the rows read here.
+        return 'loans' if _COUNTS_HOLDINGS.match(lower.split('number', 1)[1]) else None
+    if 'cost' in lower:
+        return 'cost'
+    if 'fairvalue' in lower or concept == CONCEPT_NONACCRUAL_LOANS_FV:
+        return 'fair_value'
+    return None
+
+
+def _is_undimensioned_at(fact: dict, period: str) -> bool:
+    """An undimensioned fact at *period*, or for a duration ending on it."""
+    if _dims(fact):
+        return False
+    return fact.get('period_instant') == period or fact.get('period_end') == period
 
 
 def _reconcile_with_tagged(investments: List[NonAccrualInvestment], all_facts: List[dict],
