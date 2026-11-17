@@ -1,1 +1,0 @@
-**Fund lookups by class or series ID work again.** Since 2026-11-16 SEC's browse-edgar rejects a page size of 1 with HTTP 400, so `Fund("C000032628")` and `Fund("S000002277")` returned None in 6.2.0. The lookup now asks for 10 results, and a request SEC refuses raises `TransportError` instead of reading as "no such fund". (bead edgartools-pjlj5.4)
