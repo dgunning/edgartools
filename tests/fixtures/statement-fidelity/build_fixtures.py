@@ -45,6 +45,9 @@ CASES = {
     '0001564590-22-016827': 'http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets',
     '0001214659-22-006372': 'http://goodtimesburgers.com/role/ConsolidatedCashFlow',
     '0001298946-24-000052': 'http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical',
+    # Statements of equity (edgartools-auvk1.22): member columns, period blocks in rows.
+    '0001437749-23-006914': 'http://www.ricebrantech.com/20221231/role/statement-consolidated-statements-of-changes-in-shareholders-equity',
+    '0001477932-25-008029': 'http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited',
 }
 # Further roles whose statements are kept (without their pages) so that the typed getters
 # resolve offline as they do live: without BHE's comprehensive income statement,

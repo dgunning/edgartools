@@ -930,13 +930,18 @@ class ComparisonResult:
     #: something else row by row (``statement_fidelity``): the index of its
     #: row in ``ViewerReport.concept_report.rows`` and which of the page's
     #: rows of the same concept in the same member context it is (0 for the
-    #: first). None for a cell in no row and on statement-of-equity pages.
+    #: first). None for a cell in no row. On a statement-of-equity page
+    #: ``row_index`` numbers the page's rows in order, its dated balance rows
+    #: included, and ``row_occurrence`` is None.
     row_index: Optional[int] = None
     row_occurrence: Optional[int] = None
     #: The column's own period: ``instant_<date>`` under a date column; under
     #: an "N Months Ended" column, the duration the cell's own fact covers,
     #: or, for an opening or closing balance, the one duration that renders
-    #: with that heading (None when the filing has several).
+    #: with that heading (None when the filing has several). On a
+    #: statement-of-equity page, whose columns are members, it is the
+    #: period of the row's block: the movement's duration, which a balance
+    #: row opens or closes (None when the page's row order leaves it open).
     column_period_key: Optional[str] = None
     #: The paired fact's value as filed (matched or mismatched cells).
     xbrl_fact_value: Optional[float] = None
@@ -1942,6 +1947,8 @@ def _compare_equity_statement(results: ComparisonResults, vr, cr, xbrl, index: '
                            tolerance=tolerance, unit_scales=unit_scales)
     judge = partial(_judge_equity_cell, page)
 
+    for ordinal, entry in enumerate(entries):
+        entry['ordinal'] = ordinal   # the cell's row_index: rows in page order, balance rows included
     for entry in entries:
         if entry['kind'] == 'balance':
             for cell in entry['cells']:
@@ -2099,6 +2106,25 @@ def _equity_block_period(entry: dict, periods: List[dict], row_dims: set
     return list(keys[0]), None, next(iter(row_dims))
 
 
+def _equity_block_key(entry: dict, periods: List[dict]) -> Optional[str]:
+    """The period key of the one block an equity row sits in, or None when the page leaves it open.
+
+    A movement's block is its duration, which is the column a statement of
+    equity built with periods as columns shows the row under. A dated
+    balance row has a block too: the movement it opens or closes.
+    """
+    groups = entry.get('groups')
+    if not groups:
+        return None
+    keys = {periods[g]['key'] for g in groups}
+    if len(keys) > 1 and entry['kind'] == 'balance':
+        # A balance row between two movements closes the first and opens the second
+        # ("Balance at Dec. 31, 2021" in a two-year statement); it shows the one fact
+        # either way, and is read as the closing balance of the movement it ends.
+        keys = {periods[g]['key'] for g in groups if periods[g].get('closing') == entry.get('date')}
+    return next(iter(keys)) if len(keys) == 1 else None
+
+
 def _judge_equity_cell(page: SimpleNamespace, entry: dict, column: Optional[int], display_val: str):
     """Compare one cell of a statement of equity and emit its outcome (part of ``_compare_equity_statement``).
 
@@ -2113,14 +2139,17 @@ def _judge_equity_cell(page: SimpleNamespace, entry: dict, column: Optional[int]
     if reading is None:
         return
     xbrl_concept, xbrltype, unit, viewer_num, header = reading
-    emit = partial(_emit, results, dict(concept_id=xbrl_concept, label=label, period=header,
-                                        viewer_value=viewer_num, report=vr.short_name))
+    cell = dict(concept_id=xbrl_concept, label=label, period=header, viewer_value=viewer_num,
+                report=vr.short_name, row_index=entry.get('ordinal'))
+    emit = partial(_emit, results, cell)
     if _equity_cell_settled(emit, page, column, display_val, viewer_num, xbrl_concept):
         return
     context = _equity_cell_context(emit, page, entry, column, xbrl_concept)
     if context is None:
         return
     period_keys, dims, row_dims = context
+    # The statement check reads the library's column for the cell's period block (edgartools-auvk1.22).
+    emit = partial(_emit, results, dict(cell, column_period_key=_equity_block_key(entry, page.periods)))
     negated, sign_role, sign_reason = _roles_sign(entry.get('roles') or [])
     _judge_cell(emit, index, names, xbrl_concept, period_keys, dims | row_dims, xbrltype, display_val,
                 viewer_num, cr, unit, currency_scaling, tolerance,

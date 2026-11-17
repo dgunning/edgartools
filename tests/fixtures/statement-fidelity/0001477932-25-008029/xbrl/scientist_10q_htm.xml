@@ -1,0 +1,797 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:dei="http://xbrl.sec.gov/dei/2025" xmlns:ecd="http://xbrl.sec.gov/ecd/2025" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:scientist="http://scientist.com/20250930" xmlns:srt="http://fasb.org/srt/2025" xmlns:us-gaap="http://fasb.org/us-gaap/2025" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <link:schemaRef xlink:href="scientist-20250930.xsd" xlink:type="simple"/>
+    <context id="From2025-01-01to2025-09-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-01-01to2025-09-30_scientist_NonHongKongMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:StatementGeographicalAxis">scientist:NonHongKongMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-01-01to2025-09-30_scientist_RetailTradingBusinessBMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementBusinessSegmentsAxis">scientist:RetailTradingBusinessBMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-01-01to2025-09-30_scientist_HongKongMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:IncomeTaxAuthorityNameAxis">scientist:HongKongMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-01-01to2025-09-30_scientist_ScientistHomeFutureHealthLimitedMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:RelatedPartyTransactionsByRelatedPartyAxis">scientist:ScientistHomeFutureHealthLimitedMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-01-01to2025-09-30_scientist_ScientistHomeFutureHealthHoldingLimitedMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:RelatedPartyTransactionsByRelatedPartyAxis">scientist:ScientistHomeFutureHealthHoldingLimitedMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="AsOf2025-09-30_scientist_SubcriptionReceivableMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">scientist:SubcriptionReceivableMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-09-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-09-30_us-gaap_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-09-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-09-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-09-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-09-30_us-gaap_AdditionalPaidInCapitalMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-09-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-09-30_us-gaap_CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-09-30</instant>
+        </period>
+    </context>
+    <context id="From2025-07-01to2025-09-30_scientist_SubcriptionReceivableMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">scientist:SubcriptionReceivableMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-07-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-07-01to2025-09-30_us-gaap_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-07-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-07-01to2025-09-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-07-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-07-01to2025-09-30_us-gaap_AdditionalPaidInCapitalMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-07-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-07-01to2025-09-30_us-gaap_CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-07-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_scientist_SubcriptionReceivableMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">scientist:SubcriptionReceivableMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_us-gaap_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_us-gaap_AdditionalPaidInCapitalMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_us-gaap_CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="From2025-04-01to2025-06-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <startDate>2025-04-01</startDate>
+            <endDate>2025-06-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-04-01to2025-06-30_scientist_SubcriptionReceivableMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">scientist:SubcriptionReceivableMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-04-01</startDate>
+            <endDate>2025-06-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-04-01to2025-06-30_us-gaap_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-04-01</startDate>
+            <endDate>2025-06-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-04-01to2025-06-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-04-01</startDate>
+            <endDate>2025-06-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-04-01to2025-06-30_us-gaap_AdditionalPaidInCapitalMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-04-01</startDate>
+            <endDate>2025-06-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-04-01to2025-06-30_us-gaap_CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-04-01</startDate>
+            <endDate>2025-06-30</endDate>
+        </period>
+    </context>
+    <context id="AsOf2025-03-31">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-03-31_scientist_SubcriptionReceivableMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">scientist:SubcriptionReceivableMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-03-31_us-gaap_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-03-31_us-gaap_AccumulatedOtherComprehensiveIncomeMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-03-31_us-gaap_AdditionalPaidInCapitalMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-03-31_us-gaap_CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-03-31</instant>
+        </period>
+    </context>
+    <context id="From2025-01-01to2025-03-31_scientist_SubcriptionReceivableMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">scientist:SubcriptionReceivableMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-03-31</endDate>
+        </period>
+    </context>
+    <context id="From2025-01-01to2025-03-31">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-03-31</endDate>
+        </period>
+    </context>
+    <context id="From2025-01-01to2025-03-31_us-gaap_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-03-31</endDate>
+        </period>
+    </context>
+    <context id="From2025-01-01to2025-03-31_us-gaap_AccumulatedOtherComprehensiveIncomeMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-03-31</endDate>
+        </period>
+    </context>
+    <context id="From2025-01-01to2025-03-31_us-gaap_AdditionalPaidInCapitalMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-03-31</endDate>
+        </period>
+    </context>
+    <context id="From2025-01-01to2025-03-31_us-gaap_CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2025-01-01</startDate>
+            <endDate>2025-03-31</endDate>
+        </period>
+    </context>
+    <context id="AsOf2024-12-31_us-gaap_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+    <context id="AsOf2024-12-31_us-gaap_AccumulatedOtherComprehensiveIncomeMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+    <context id="AsOf2024-12-31_us-gaap_AdditionalPaidInCapitalMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+    <context id="AsOf2024-12-31_us-gaap_CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+    <context id="AsOf2024-09-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <instant>2024-09-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2024-09-30_us-gaap_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-09-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2024-09-30_us-gaap_AdditionalPaidInCapitalMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-09-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2024-09-30_us-gaap_CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-09-30</instant>
+        </period>
+    </context>
+    <context id="From2024-07-04to2024-09-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <startDate>2024-07-04</startDate>
+            <endDate>2024-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2024-07-04to2024-09-30_us-gaap_RetainedEarningsMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:RetainedEarningsMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-07-04</startDate>
+            <endDate>2024-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2024-07-04to2024-09-30_us-gaap_AdditionalPaidInCapitalMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AdditionalPaidInCapitalMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-07-04</startDate>
+            <endDate>2024-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2024-07-04to2024-09-30_us-gaap_CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-07-04</startDate>
+            <endDate>2024-09-30</endDate>
+        </period>
+    </context>
+    <context id="AsOf2024-07-03">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <instant>2024-07-03</instant>
+        </period>
+    </context>
+    <context id="AsOf2024-07-03_us-gaap_CommonStockMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:CommonStockMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-07-03</instant>
+        </period>
+    </context>
+    <context id="From2024-01-01to2024-09-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2024-07-01to2024-09-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <startDate>2024-07-01</startDate>
+            <endDate>2024-09-30</endDate>
+        </period>
+    </context>
+    <context id="From2025-07-01to2025-09-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <startDate>2025-07-01</startDate>
+            <endDate>2025-09-30</endDate>
+        </period>
+    </context>
+    <context id="AsOf2024-12-31">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <instant>2024-12-31</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-09-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0002032609</identifier>
+        </entity>
+        <period>
+            <instant>2025-09-30</instant>
+        </period>
+    </context>
+    <unit id="USD">
+        <measure>iso4217:USD</measure>
+    </unit>
+    <unit id="Shares">
+        <measure>shares</measure>
+    </unit>
+    <dei:EntityCentralIndexKey contextRef="From2025-01-01to2025-09-30" id="ixv-8868">0002032609</dei:EntityCentralIndexKey>
+    <dei:AmendmentFlag contextRef="From2025-01-01to2025-09-30" id="ixv-8869">false</dei:AmendmentFlag>
+    <dei:CurrentFiscalYearEndDate contextRef="From2025-01-01to2025-09-30" id="ixv-8870">--12-31</dei:CurrentFiscalYearEndDate>
+    <dei:DocumentFiscalPeriodFocus contextRef="From2025-01-01to2025-09-30" id="ixv-8871">Q3</dei:DocumentFiscalPeriodFocus>
+    <dei:DocumentFiscalYearFocus contextRef="From2025-01-01to2025-09-30" id="ixv-8872">2025</dei:DocumentFiscalYearFocus>
+    <dei:EntityAddressPostalZipCode contextRef="From2025-01-01to2025-09-30" id="ixv-8873">89801</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="From2025-01-01to2025-09-30" id="ixv-8874">852</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="From2025-01-01to2025-09-30" id="ixv-8875">5702 3076</dei:LocalPhoneNumber>
+    <scientist:IssuanceOfShareCapitalPrivatePlacementAmount contextRef="From2024-07-04to2024-09-30_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="ixv-8879" unitRef="USD">6612</scientist:IssuanceOfShareCapitalPrivatePlacementAmount>
+    <us-gaap:SharesIssued contextRef="AsOf2024-09-30_us-gaap_CommonStockMember" decimals="0" id="ixv-8880" unitRef="Shares">23480000</us-gaap:SharesIssued>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-09-30_us-gaap_CommonStockMember" decimals="0" id="ixv-8881" unitRef="USD">2348</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-09-30_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="ixv-8882" unitRef="USD">6612</us-gaap:StockholdersEquity>
+    <dei:DocumentType contextRef="From2025-01-01to2025-09-30" id="ixv-9709">10-Q</dei:DocumentType>
+    <dei:DocumentQuarterlyReport contextRef="From2025-01-01to2025-09-30" id="ixv-9710">true</dei:DocumentQuarterlyReport>
+    <dei:DocumentPeriodEndDate contextRef="From2025-01-01to2025-09-30" id="ixv-9711">2025-09-30</dei:DocumentPeriodEndDate>
+    <dei:DocumentTransitionReport contextRef="From2025-01-01to2025-09-30" id="ixv-9712">false</dei:DocumentTransitionReport>
+    <dei:EntityFileNumber contextRef="From2025-01-01to2025-09-30" id="ixv-9713">333-283430</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="From2025-01-01to2025-09-30" id="ixv-9714">Scientist Home Future Health Limited</dei:EntityRegistrantName>
+    <dei:EntityIncorporationStateCountryCode contextRef="From2025-01-01to2025-09-30" id="ixv-9715">NV</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityTaxIdentificationNumber contextRef="From2025-01-01to2025-09-30" id="ixv-9716">30-1416636</dei:EntityTaxIdentificationNumber>
+    <dei:EntityAddressAddressLine1 contextRef="From2025-01-01to2025-09-30" id="ixv-9717">Room B3, Block B, 3/F, Mow Hing Industrial Building</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressAddressLine2 contextRef="From2025-01-01to2025-09-30" id="ixv-9718">205 Wai Yip Street</dei:EntityAddressAddressLine2>
+    <dei:EntityAddressCityOrTown contextRef="From2025-01-01to2025-09-30" id="ixv-9719">Kwun Tong</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressRegion contextRef="From2025-01-01to2025-09-30" id="ixv-9720">Kowloon</dei:EntityAddressRegion>
+    <dei:EntityAddressCountry contextRef="From2025-01-01to2025-09-30" id="ixv-9721">HK</dei:EntityAddressCountry>
+    <dei:EntityCurrentReportingStatus contextRef="From2025-01-01to2025-09-30" id="ixv-9722">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityInteractiveDataCurrent contextRef="From2025-01-01to2025-09-30" id="ixv-9723">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityFilerCategory contextRef="From2025-01-01to2025-09-30" id="ixv-9724">Non-accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntitySmallBusiness contextRef="From2025-01-01to2025-09-30" id="ixv-9725">true</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="From2025-01-01to2025-09-30" id="ixv-9726">true</dei:EntityEmergingGrowthCompany>
+    <dei:EntityExTransitionPeriod contextRef="From2025-01-01to2025-09-30" id="ixv-9727">false</dei:EntityExTransitionPeriod>
+    <dei:EntityShellCompany contextRef="From2025-01-01to2025-09-30" id="ixv-9728">false</dei:EntityShellCompany>
+    <dei:EntityCommonStockSharesOutstanding contextRef="AsOf2025-09-30" decimals="0" id="ixv-9729" unitRef="Shares">23716000</dei:EntityCommonStockSharesOutstanding>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-09-30" decimals="0" id="fid_1157" unitRef="USD">267004</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-12-31" decimals="0" id="fid_1158" unitRef="USD">-6020</us-gaap:StockholdersEquity>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-07-01to2025-09-30" decimals="0" id="fid_1201" unitRef="USD">-2184</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2024-07-01to2024-09-30" decimals="0" id="fid_1202" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-01-01to2025-09-30" decimals="0" id="fid_1203" unitRef="USD">-1977</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2024-01-01to2024-09-30" decimals="0" id="fid_1204" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:SharesIssued contextRef="AsOf2024-12-31_us-gaap_CommonStockMember" decimals="0" id="fid_1217" unitRef="Shares">23480000</us-gaap:SharesIssued>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-12-31_us-gaap_CommonStockMember" decimals="0" id="fid_1218" unitRef="USD">2348</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-12-31_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1219" unitRef="USD">6612</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-12-31_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1220" unitRef="USD">0</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-12-31_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1221" unitRef="USD">-14980</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-12-31" decimals="0" id="fid_1387" unitRef="USD">-6020</us-gaap:StockholdersEquity>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-03-31_us-gaap_CommonStockMember" decimals="0" id="fid_1224" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-03-31_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1225" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-03-31_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1226" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-03-31_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1227" unitRef="USD">6059</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-03-31" decimals="0" id="fid_1386" unitRef="USD">6059</us-gaap:NetIncomeLoss>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-01-01to2025-03-31_us-gaap_CommonStockMember" decimals="0" id="fid_1230" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-01-01to2025-03-31_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1231" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-01-01to2025-03-31_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1232" unitRef="USD">-12</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-01-01to2025-03-31_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1233" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-01-01to2025-03-31_scientist_SubcriptionReceivableMember" decimals="0" id="fid_1234" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-01-01to2025-03-31" decimals="0" id="fid_1235" unitRef="USD">-12</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:SharesIssued contextRef="AsOf2025-03-31_us-gaap_CommonStockMember" decimals="0" id="fid_1236" unitRef="Shares">23480000</us-gaap:SharesIssued>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-03-31_us-gaap_CommonStockMember" decimals="0" id="fid_1237" unitRef="USD">2348</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-03-31_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1238" unitRef="USD">6612</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-03-31_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1239" unitRef="USD">-12</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-03-31_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1240" unitRef="USD">-8921</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-03-31_scientist_SubcriptionReceivableMember" decimals="0" id="fid_1241" unitRef="USD">0</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-03-31" decimals="0" id="fid_1242" unitRef="USD">27</us-gaap:StockholdersEquity>
+    <us-gaap:StockIssuedDuringPeriodSharesNewIssues contextRef="From2025-04-01to2025-06-30_us-gaap_CommonStockMember" decimals="0" id="fid_1243" unitRef="Shares">64000</us-gaap:StockIssuedDuringPeriodSharesNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-04-01to2025-06-30_us-gaap_CommonStockMember" decimals="0" id="fid_1244" unitRef="USD">6</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-04-01to2025-06-30_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1245" unitRef="USD">95994</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-04-01to2025-06-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1246" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-04-01to2025-06-30_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1247" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-04-01to2025-06-30_scientist_SubcriptionReceivableMember" decimals="0" id="fid_1248" unitRef="USD">-7500</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-04-01to2025-06-30" decimals="0" id="fid_1249" unitRef="USD">88500</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:NetIncomeLoss contextRef="From2025-04-01to2025-06-30_us-gaap_CommonStockMember" decimals="0" id="fid_1250" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-04-01to2025-06-30_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1251" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-04-01to2025-06-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1252" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-04-01to2025-06-30_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1253" unitRef="USD">-37213</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-04-01to2025-06-30_scientist_SubcriptionReceivableMember" decimals="0" id="fid_1254" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-04-01to2025-06-30" decimals="0" id="fid_1255" unitRef="USD">-37213</us-gaap:NetIncomeLoss>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-04-01to2025-06-30_us-gaap_CommonStockMember" decimals="0" id="fid_1256" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-04-01to2025-06-30_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1257" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-04-01to2025-06-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1258" unitRef="USD">219</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-04-01to2025-06-30_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1259" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-04-01to2025-06-30_scientist_SubcriptionReceivableMember" decimals="0" id="fid_1260" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-04-01to2025-06-30" decimals="0" id="fid_1261" unitRef="USD">219</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:SharesIssued contextRef="AsOf2025-06-30_us-gaap_CommonStockMember" decimals="0" id="fid_1262" unitRef="Shares">23544000</us-gaap:SharesIssued>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-06-30_us-gaap_CommonStockMember" decimals="0" id="fid_1263" unitRef="USD">2354</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-06-30_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1264" unitRef="USD">102606</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-06-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1265" unitRef="USD">207</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-06-30_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1266" unitRef="USD">-46134</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-06-30_scientist_SubcriptionReceivableMember" decimals="0" id="fid_1267" unitRef="USD">-7500</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-06-30" decimals="0" id="fid_1268" unitRef="USD">51533</us-gaap:StockholdersEquity>
+    <us-gaap:StockIssuedDuringPeriodSharesNewIssues contextRef="From2025-07-01to2025-09-30_us-gaap_CommonStockMember" decimals="0" id="fid_1269" unitRef="Shares">172000</us-gaap:StockIssuedDuringPeriodSharesNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-07-01to2025-09-30_us-gaap_CommonStockMember" decimals="0" id="fid_1270" unitRef="USD">18</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-07-01to2025-09-30_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1271" unitRef="USD">257982</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-07-01to2025-09-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1272" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-07-01to2025-09-30_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1273" unitRef="USD">0</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-07-01to2025-09-30_scientist_SubcriptionReceivableMember" decimals="0" id="fid_1274" unitRef="USD">7500</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-07-01to2025-09-30" decimals="0" id="fid_1275" unitRef="USD">265500</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:NetIncomeLoss contextRef="From2025-07-01to2025-09-30_us-gaap_CommonStockMember" decimals="0" id="fid_1276" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-07-01to2025-09-30_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1277" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-07-01to2025-09-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1278" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-07-01to2025-09-30_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1279" unitRef="USD">-47845</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-07-01to2025-09-30_scientist_SubcriptionReceivableMember" decimals="0" id="fid_1280" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-07-01to2025-09-30" decimals="0" id="fid_1281" unitRef="USD">-47845</us-gaap:NetIncomeLoss>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-07-01to2025-09-30_us-gaap_CommonStockMember" decimals="0" id="fid_1282" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-07-01to2025-09-30_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1283" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-07-01to2025-09-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1284" unitRef="USD">-2184</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-07-01to2025-09-30_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1285" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-07-01to2025-09-30_scientist_SubcriptionReceivableMember" decimals="0" id="fid_1286" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-07-01to2025-09-30" decimals="0" id="fid_1287" unitRef="USD">-2184</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:SharesIssued contextRef="AsOf2025-09-30_us-gaap_CommonStockMember" decimals="0" id="fid_1288" unitRef="Shares">23716000</us-gaap:SharesIssued>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-09-30_us-gaap_CommonStockMember" decimals="0" id="fid_1289" unitRef="USD">2372</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-09-30_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1290" unitRef="USD">360588</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-09-30_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1291" unitRef="USD">-1977</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-09-30_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1292" unitRef="USD">-93979</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-09-30_scientist_SubcriptionReceivableMember" decimals="0" id="fid_1293" unitRef="USD">0</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-09-30" decimals="0" id="fid_1294" unitRef="USD">267004</us-gaap:StockholdersEquity>
+    <us-gaap:SharesIssued contextRef="AsOf2024-07-03_us-gaap_CommonStockMember" decimals="0" id="fid_1295" unitRef="Shares">100000</us-gaap:SharesIssued>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-07-03_us-gaap_CommonStockMember" decimals="0" id="fid_1296" unitRef="USD">10</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-12-31_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1220-a944bd" unitRef="USD">0</us-gaap:StockholdersEquity>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-03-31_us-gaap_CommonStockMember" decimals="0" id="fid_1224-8e6b5d" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-07-03" decimals="0" id="fid_1299" unitRef="USD">10</us-gaap:StockholdersEquity>
+    <scientist:IssuanceOfShareCapitalFoundersSharesShares contextRef="From2024-07-04to2024-09-30_us-gaap_CommonStockMember" decimals="0" id="fid_1300" unitRef="Shares">19900000</scientist:IssuanceOfShareCapitalFoundersSharesShares>
+    <scientist:IssuanceOfShareCapitalFoundersSharesAmount contextRef="From2024-07-04to2024-09-30_us-gaap_CommonStockMember" decimals="0" id="fid_1301" unitRef="USD">1990</scientist:IssuanceOfShareCapitalFoundersSharesAmount>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-03-31_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1225-998e24" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-03-31_us-gaap_AccumulatedOtherComprehensiveIncomeMember" decimals="0" id="fid_1226-fd5873" unitRef="USD">0</us-gaap:NetIncomeLoss>
+    <scientist:IssuanceOfShareCapitalPrivatePlacementShares contextRef="From2024-07-04to2024-09-30_us-gaap_CommonStockMember" decimals="0" id="fid_1305" unitRef="Shares">3480000</scientist:IssuanceOfShareCapitalPrivatePlacementShares>
+    <scientist:IssuanceOfShareCapitalPrivatePlacementAmount contextRef="From2024-07-04to2024-09-30_us-gaap_CommonStockMember" decimals="0" id="fid_1306" unitRef="USD">348</scientist:IssuanceOfShareCapitalPrivatePlacementAmount>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-12-31_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1219-ec6997" unitRef="USD">6612</us-gaap:StockholdersEquity>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-01-01to2025-03-31_us-gaap_CommonStockMember" decimals="0" id="fid_1230-f03761" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <scientist:IssuanceOfShareCapitalPrivatePlacementAmount contextRef="From2024-07-04to2024-09-30" decimals="0" id="fid_1309" unitRef="USD">6960</scientist:IssuanceOfShareCapitalPrivatePlacementAmount>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-01-01to2025-03-31_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1231-7516d0" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="From2025-01-01to2025-03-31_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1233-70197f" unitRef="USD">0</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:NetIncomeLoss contextRef="From2024-07-04to2024-09-30_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1312" unitRef="USD">175</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2024-07-04to2024-09-30" decimals="0" id="fid_1313" unitRef="USD">175</us-gaap:NetIncomeLoss>
+    <us-gaap:SharesIssued contextRef="AsOf2024-12-31_us-gaap_CommonStockMember" decimals="0" id="fid_1217-ac5434" unitRef="Shares">23480000</us-gaap:SharesIssued>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-12-31_us-gaap_CommonStockMember" decimals="0" id="fid_1218-f18c51" unitRef="USD">2348</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2025-03-31_us-gaap_AdditionalPaidInCapitalMember" decimals="0" id="fid_1238-d17d9d" unitRef="USD">6612</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-09-30_us-gaap_RetainedEarningsMember" decimals="0" id="fid_1317" unitRef="USD">175</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="AsOf2024-09-30" decimals="0" id="fid_1318" unitRef="USD">9135</us-gaap:StockholdersEquity>
+    <dei:EntityIncorporationDateOfIncorporation contextRef="From2025-01-01to2025-09-30_scientist_ScientistHomeFutureHealthHoldingLimitedMember" id="fid_230">2024-07-08</dei:EntityIncorporationDateOfIncorporation>
+    <dei:EntityIncorporationDateOfIncorporation contextRef="From2025-01-01to2025-09-30_scientist_ScientistHomeFutureHealthLimitedMember" id="fid_538">2024-07-08</dei:EntityIncorporationDateOfIncorporation>
+    <us-gaap:StockIssuedDuringPeriodSharesNewIssues contextRef="From2025-01-01to2025-09-30" decimals="0" id="fid_761" unitRef="Shares">236000</us-gaap:StockIssuedDuringPeriodSharesNewIssues>
+    <us-gaap:StockIssuedDuringPeriodValueNewIssues contextRef="From2025-01-01to2025-09-30" decimals="0" id="fid_762" unitRef="USD">354000</us-gaap:StockIssuedDuringPeriodValueNewIssues>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-09-30" decimals="0" id="fid_610" unitRef="USD">-78999</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-09-30_scientist_RetailTradingBusinessBMember" decimals="0" id="fid_1047" unitRef="USD">-78999</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-09-30_scientist_HongKongMember" decimals="0" id="fid_654" unitRef="USD">-37843</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-09-30_scientist_NonHongKongMember" decimals="0" id="fid_631" unitRef="USD">-41156</us-gaap:NetIncomeLoss>
+    <us-gaap:NetIncomeLoss contextRef="From2025-01-01to2025-09-30" decimals="0" id="fid_640" unitRef="USD">-78999</us-gaap:NetIncomeLoss>
+    </xbrl>

@@ -174,7 +174,7 @@ def test_limits_are_read_from_the_module_and_the_guide():
     sources = {lim['source'].split(',')[0] for lim in limits}
     assert sources == {'edgar/xbrl/statement_fidelity.py', 'docs/guides/sec-viewer-guide.md'}
     texts = [lim['text'] for lim in limits]
-    assert any(t.startswith('Statement-of-equity pages (member columns') for t in texts)
+    assert any(t.startswith('A statement-of-equity page (member columns') for t in texts)
     assert any(t.startswith('Only statement pages are compared') for t in texts)
     definitions = sc.headline_definitions()
     assert definitions[0] == 'Per surface:'

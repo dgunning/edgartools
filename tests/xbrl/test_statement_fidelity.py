@@ -699,3 +699,104 @@ def test_a_negative_zero_the_page_also_shows_negative_matches():
     sf._judge_rendered_text(emit, SimpleNamespace(viewer_value=0.0), '-0.00', {})
     sf._judge_rendered_text(emit, SimpleNamespace(viewer_value=-0.0), '0.00', {})
     assert emitted == ['rendered_text_sign_differs', 'rendered_text_sign_differs']
+
+
+# ---------------------------------------------------------------------------
+# Statements of equity (edgartools-auvk1.22): member columns, period blocks in rows
+
+RICEBRAN = "0001437749-23-006914"
+SCIENTIST = "0001477932-25-008029"
+EQUITY = 'us-gaap:StockholdersEquity'
+RETAINED = {'us-gaap:StatementEquityComponentsAxis': 'us-gaap:RetainedEarningsMember'}
+FY2021, FY2022 = 'duration_2021-01-01_2021-12-31', 'duration_2022-01-01_2022-12-31'
+
+
+def test_equity_page_is_compared_under_each_block_period():
+    """RiceBran Technologies 10-K (0001437749-23-006914), R5, $ in thousands, Retained Earnings column:
+    balance (298,910) at Dec. 31, 2020, net loss (8,949) for 2021, (307,859) at Dec. 31, 2021, net loss
+    (7,858) for 2022, (315,717) at Dec. 31, 2022. The library's statement of equity shows each under
+    the year it opens, moves or closes."""
+    res = results(RICEBRAN)
+    [page] = res.pages
+    assert (page.compared, page.access) == (True, 'statement_of_equity()')
+    expected = {('Balance at Dec. 31, 2020', FY2021): -298_910_000.0,
+                ('Net loss', FY2021): -8_949_000.0,
+                ('Balance at Dec. 31, 2021', FY2021): -307_859_000.0,
+                ('Net loss', FY2022): -7_858_000.0,
+                ('Balance at Dec. 31, 2022', FY2022): -315_717_000.0}
+    for surface in ('dataframe', 'rendered'):
+        shown = {(r.page_label, r.period_key): r.library_value for r in find(res, 'cell_matched', surface)
+                 if r.dimensions == RETAINED and r.concept in (EQUITY, 'us-gaap:NetIncomeLoss')}
+        assert shown == expected
+        assert res.value_rate(surface) == 1.0
+
+
+def test_a_balance_between_two_years_is_the_closing_balance_of_the_first():
+    """RiceBran prints "Balance at Dec. 31, 2021" once, between the 2021 and 2022 movements: it closes
+    2021 (and opens 2022). The facts check gives its cells the 2021 block; before, the row's block was
+    left open and the cells were not comparable."""
+    res = results(RICEBRAN)
+    cells = [r for r in res.facts.results if r.label == 'Balance at Dec. 31, 2021' and r.status == 'matched']
+    assert cells and {r.column_period_key for r in cells} == {FY2021}
+    assert len({r.row_index for r in cells}) == 1 and cells[0].row_index is not None
+
+
+def test_equity_row_with_two_axes_is_not_comparable_in_the_dataframe():
+    """RiceBran's "Common stock issued to vendors" sits on the award-type and equity-component axes;
+    to_dataframe() names only the first axis, so its cells are not comparable there (and are in the
+    rendered table)."""
+    res = results(RICEBRAN)
+    concept = 'us-gaap:StockIssuedDuringPeriodValueIssuedForServices'
+    blocked = find(res, 'cell_not_comparable', 'dataframe', concept=concept)
+    assert len(blocked) == 3
+    assert {r.reason for r in blocked} == {"the DataFrame names only the first axis of a row with several"}
+    two_axes = [r.dimensions for r in blocked]
+    assert all(len(d) == 2 for d in two_axes)
+    assert len([r for r in find(res, 'cell_matched', 'rendered', concept=concept) if r.dimensions in two_axes]) == 3
+
+
+def test_equity_quarter_outside_the_default_view_is_requested():
+    """Scientist Home 10-Q (0001477932-25-008029), R5: 116 page cells. The quarter blocks the default
+    view leaves out are requested with period_filter and matched. Six balances at Dec. 31, 2024 close a
+    quarter no fact covers, which the library cannot show as a column."""
+    res = results(SCIENTIST)
+    for surface in ('dataframe', 'rendered'):
+        assert len(find(res, 'cell_matched', surface)) == 110
+        assert len(find(res, 'period_not_in_default_view', surface)) == 18
+        blocked = find(res, 'cell_not_comparable', surface, period_key='duration_2024-10-01_2024-12-31')
+        assert len(blocked) == 6
+        assert all('(period_filter=duration_2024-10-01_2024-12-31)' in r.reason and r.reason.endswith('[]')
+                   for r in blocked)
+        assert not [r for r in res.results if r.surface == surface and r.family == DISAGREEMENT
+                    and r.level == 'cell']
+
+
+def test_mutation_closing_balance_is_read_from_the_last_row(monkeypatch):
+    """Double the library's last Retained Earnings equity row: the closing balances (Dec. 31, 2021 and
+    2022) differ, and the opening balance (Dec. 31, 2020), read from the first row, still matches."""
+    def mutate(rows, kind, period_filter):
+        retained = [r for r in rows if r['concept'] == EQUITY and r['dims'] and not r['abstract']
+                    and dict(r['dims']).get(next(iter(dict(r['dims'])))) .endswith('RetainedEarningsMember')]
+        last = retained[-1]
+        last['values'] = {k: (v * 2 if sf._number(v) else v) for k, v in last['values'].items()}
+    res, _ = mutated(monkeypatch, RICEBRAN, mutate)
+    differs = {r.page_label for r in find(res, 'value_differs', 'dataframe', concept=EQUITY, dimensions=RETAINED)}
+    assert differs == {'Balance at Dec. 31, 2021', 'Balance at Dec. 31, 2022'}
+    [opening] = find(res, 'cell_matched', 'dataframe', concept=EQUITY, dimensions=RETAINED,
+                     page_label='Balance at Dec. 31, 2020')
+    assert opening.library_value == -298_910_000.0
+
+
+def test_mutation_equity_row_the_library_drops(monkeypatch):
+    """Remove the library's Retained Earnings net-loss row: the page's net loss cells in that column
+    have no library row (row_dropped once, each cell not aligned), and no other column is affected."""
+    def mutate(rows, kind, period_filter):
+        rows[:] = [r for r in rows if not (r['concept'] == 'us-gaap:NetIncomeLoss' and r['dims']
+                                           and 'RetainedEarningsMember' in str(r['dims']))]
+    res, _ = mutated(monkeypatch, RICEBRAN, mutate)
+    [dropped] = find(res, 'row_dropped', 'dataframe', concept='us-gaap:NetIncomeLoss')
+    assert dropped.dimensions == RETAINED and 'the library 0' in dropped.reason
+    unaligned = find(res, 'cell_not_comparable', 'dataframe', concept='us-gaap:NetIncomeLoss', dimensions=RETAINED)
+    assert {r.period_key for r in unaligned} == {FY2021, FY2022}
+    assert {r.reason for r in unaligned} == {"the cell's row is not aligned"}
+    assert find(res, 'cell_matched', 'dataframe', concept='us-gaap:NetIncomeLoss')
