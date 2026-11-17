@@ -63,6 +63,7 @@ hatch run check-regression-provenance     # CI runs this before tests
 - use `git stash` in a worktree: every worktree shares one `refs/stash`, so parallel agents pop each other's changes (save with `git diff > file` instead)
 - invent a filing value you did not read from SEC
 - open, comment on or merge GitHub issues or PRs without the human you work for reviewing them first
+- publish an internal bead ID (`edgartools-xxxx`) on GitHub, in an issue, PR title or body, review comment, commit message or changelog fragment: refer to the GitHub issue number, or describe the problem in words
 
 ## Before opening a pull request
 
