@@ -64,6 +64,8 @@ hatch run check-regression-provenance     # CI runs this before tests
 - invent a filing value you did not read from SEC
 - open, comment on or merge GitHub issues or PRs without the human you work for reviewing them first
 
+**Best practice:** keep your own tracker's IDs (beads, Jira, Linear, a local TODO list) out of what you publish on GitHub: issues, PR titles and bodies, review comments, commit messages and changelog fragments. A reader can't open them. Refer to the GitHub issue number, or describe the problem in words.
+
 ## Before opening a pull request
 
 1. Check that nobody is already on it:

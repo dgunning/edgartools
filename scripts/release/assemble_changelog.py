@@ -5,8 +5,8 @@ Each PR adds one file to changelog.d/ instead of editing CHANGELOG.md, so
 concurrent PRs never conflict on the changelog. At release time this script
 moves every fragment into [Unreleased] and deletes it.
 
-Fragment naming: ``<id>.<section>.md`` where ``<id>`` is the bead ID, issue
-number, or a short slug, and ``<section>`` is one of the Keep a Changelog
+Fragment naming: ``<id>.<section>.md`` where ``<id>`` is the GitHub issue
+number or a short slug (never an internal bead ID), and ``<section>`` is one of the Keep a Changelog
 headings (added, changed, deprecated, removed, fixed, security, performance).
 
 Fragment body: the bullet text, written exactly as it should appear. A leading
