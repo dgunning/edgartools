@@ -127,8 +127,14 @@ def _read_item(xbrl, rows, period_key, currencies, concept, weight):
 def _component_kind(rows, period_key, concept):
     row = rows.get(concept, {"concept": concept})
     missing = row.get("values", {}).get(period_key) in (None, "")
-    if concept == _CONTINGENCIES and missing:
-        return None
+    if concept == _CONTINGENCIES:
+        if missing:
+            return None
+        try:
+            if Decimal(str(row["values"][period_key])) == 0:
+                return None
+        except InvalidOperation:
+            pass
     if concept in (_PARENT_EQUITY, _TOTAL_EQUITY):
         return "equity"
     if concept in _TEMPORARY:
@@ -159,7 +165,8 @@ def _collect_components(arcs, rows, period_key, read):
 def _validate_components(components, equity, temporary, rows, period):
     if len(equity) != 1 or len(temporary) > 1:
         raise LiabilityDerivationError("ambiguous-equity", period)
-    if equity[0].concept == _PARENT_EQUITY and _NCI in rows:
+    nci = rows.get(_NCI, {}).get("values", {}).get(f"instant_{period}")
+    if equity[0].concept == _PARENT_EQUITY and nci not in (None, ""):
         raise LiabilityDerivationError("ambiguous-noncontrolling-interest", period)
     if not components:
         raise LiabilityDerivationError("missing-liability-components", period)

@@ -932,19 +932,42 @@ class Financials:
         """
         if type(period_offset) is not int or period_offset < 0:
             raise LiabilityDerivationError("invalid-period-offset", str(period_offset))
-        rendered, frame = self._render_statement_frame("balance")
-        if frame is None:
-            raise LiabilityDerivationError("missing-balance-sheet", "No filed balance sheet")
+        role, rendered, frame = self._derivation_balance_sheet()
         _, period = _select_period_column(rendered, frame, period_offset)
         if not period or period["period_type"] != "instant":
             raise LiabilityDerivationError("missing-period", str(period_offset))
         end = period["end_date"]
-        if self.get_total_liabilities(period_offset) is not None:
-            raise LiabilityDerivationError("already-reported", end)
-        _, role, _ = self.xb.find_statement("BalanceSheet")
-        if not role:
-            raise LiabilityDerivationError("missing-balance-sheet", "No balance-sheet role")
+        # Reuse this exact frame for both filed-total lookup paths. Restore any
+        # enclosing metrics-call memo even when the derivation is refused.
+        previous_memo = self._statement_frame_memo
+        self._statement_frame_memo = {"balance": (rendered, frame)}
+        try:
+            if self.get_total_liabilities(period_offset) is not None:
+                raise LiabilityDerivationError("already-reported", end)
+        finally:
+            self._statement_frame_memo = previous_memo
         return derive_from_balance_sheet(self.xb, role, end, self._accession)
+
+    def _derivation_balance_sheet(self):
+        """Select one role and use it for rendering and calculation inputs."""
+        try:
+            statement = self.balance_sheet()
+            if statement is None:
+                raise LiabilityDerivationError("missing-balance-sheet", "No filed balance sheet")
+            role = statement.role_or_type
+            if role not in self.xb.calculation_trees and not role.startswith("http"):
+                _, role, _ = self.xb.find_statement(role)
+            if not role:
+                raise LiabilityDerivationError("missing-balance-sheet", "No balance-sheet role")
+            # Pin the selected role instead of resolving the canonical type again.
+            rendered = self.xb.render_statement(role, standard=True)
+            if rendered is None:
+                raise LiabilityDerivationError("missing-balance-sheet", role)
+            return role, rendered, rendered.to_dataframe(presentation=False)
+        except LiabilityDerivationError:
+            raise
+        except Exception as error:
+            raise LiabilityDerivationError("render-failed", str(error)) from error
 
     def get_total_liabilities(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """

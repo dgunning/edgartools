@@ -126,8 +126,111 @@ def test_refuses_incomplete_calculation(monkeypatch, reason):
     )
     financials = Financials(xb)
     rendered = SimpleNamespace(periods=[PeriodData(key=key, label=period, end_date=period)])
-    monkeypatch.setattr(financials, "_render_statement_frame", lambda _: (rendered, pd.DataFrame(columns=[period])))
+    monkeypatch.setattr(financials, "_derivation_balance_sheet",
+                        lambda: ("balance", rendered, pd.DataFrame(columns=[period])))
     monkeypatch.setattr(financials, "get_total_liabilities", lambda _: None)
     with pytest.raises(LiabilityDerivationError) as error:
         financials.derive_total_liabilities()
     assert error.value.reason == reason
+
+
+@pytest.fixture
+def derivation_statement():
+    """Synthetic boundary cases; real filing amounts are tested above."""
+    period = "2026-06-30"
+    key = f"instant_{period}"
+    combined = "us-gaap_LiabilitiesAndStockholdersEquity"
+    current = "us-gaap_LiabilitiesCurrent"
+    equity = "us-gaap_StockholdersEquity"
+    rows = [
+        {"concept": concept, "label": concept, "balance": "credit",
+         "values": {key: amount}, "units": {key: "usd"}}
+        for concept, amount in [("us-gaap_Assets", 200), (current, 90), (equity, 110), (combined, 200)]
+    ]
+    arcs = [CalculationArc(parent_id=combined, child_id=concept) for concept in (current, equity)]
+    role = "http://example.com/role/SelectedBalanceSheet"
+    tree = CalculationTree(role_uri=role, definition="", root_element_id=combined, all_arcs=arcs)
+    xb = SimpleNamespace(calculation_trees={role: tree},
+                         get_statement=lambda *args, **kwargs: rows,
+                         _currency_measure=lambda _: "iso4217:USD")
+    return xb, role, period, rows, tree
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize("value", [None, "", 0, 0.0, "0.00", "0E-6", 1, "invalid"])
+def test_commitments_missing_or_zero_only(derivation_statement, value):
+    from edgar._liability_derivation import derive_from_balance_sheet
+
+    xb, role, period, rows, tree = derivation_statement
+    concept = "us-gaap_CommitmentsAndContingencies"
+    rows.insert(-1, {"concept": concept, "values": {f"instant_{period}": value}})
+    tree.all_arcs.append(CalculationArc(parent_id="us-gaap_LiabilitiesAndStockholdersEquity", child_id=concept))
+    if value in (1, "invalid"):
+        with pytest.raises(LiabilityDerivationError, match="unclassified-component"):
+            derive_from_balance_sheet(xb, role, period, None)
+    else:
+        assert derive_from_balance_sheet(xb, role, period, None).value == 90
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize("current_value", [None, "", 0, 10])
+def test_nci_checks_selected_period(derivation_statement, current_value):
+    from edgar._liability_derivation import derive_from_balance_sheet
+
+    xb, role, period, rows, _ = derivation_statement
+    rows.insert(-1, {"concept": "us-gaap_MinorityInterest", "values": {
+        "instant_2025-06-30": 10, f"instant_{period}": current_value,
+    }})
+    if current_value in (None, ""):
+        assert derive_from_balance_sheet(xb, role, period, None).value == 90
+    else:
+        with pytest.raises(LiabilityDerivationError, match="ambiguous-noncontrolling-interest"):
+            derive_from_balance_sheet(xb, role, period, None)
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize("filed_total", [None, 90])
+def test_selected_role_and_frame_reused(monkeypatch, derivation_statement, filed_total):
+    from unittest.mock import Mock
+
+    xb, role, period, _, _ = derivation_statement
+    # The generic resolver deliberately selects another role: it must not be used.
+    xb.find_statement = Mock(return_value=([], "http://example.com/OtherBalance", "BalanceSheet"))
+    frame = pd.DataFrame({"concept": ["us-gaap_Liabilities" if filed_total else "us-gaap_Assets"],
+                          "label": ["Total Liabilities" if filed_total else "Assets"],
+                          period: [filed_total if filed_total else 200]})
+    rendered = SimpleNamespace(periods=[PeriodData(key=f"instant_{period}", label=period, end_date=period)],
+                               to_dataframe=Mock(return_value=frame))
+    xb.render_statement = Mock(return_value=rendered)
+    financials = Financials(xb)
+    monkeypatch.setattr(financials, "balance_sheet", lambda: SimpleNamespace(role_or_type=role))
+    previous_memo = {"income": (None, None)}
+    financials._statement_frame_memo = previous_memo
+    if filed_total is not None:
+        with pytest.raises(LiabilityDerivationError, match="already-reported"):
+            financials.derive_total_liabilities()
+    else:
+        assert financials.derive_total_liabilities().value == 90
+    xb.find_statement.assert_not_called()
+    xb.render_statement.assert_called_once_with(role, standard=True)
+    rendered.to_dataframe.assert_called_once_with(presentation=False)
+    assert financials._statement_frame_memo is previous_memo
+
+
+@pytest.mark.fast
+@pytest.mark.parametrize("stage", ["lookup", "render", "dataframe"])
+def test_render_errors_use_public_exception(monkeypatch, derivation_statement, stage):
+    from unittest.mock import Mock
+
+    xb, role, _, _, _ = derivation_statement
+    original = RuntimeError("broken render input")
+    financials = Financials(xb)
+    lookup = Mock(return_value=SimpleNamespace(role_or_type=role))
+    rendered = SimpleNamespace(to_dataframe=Mock(return_value=pd.DataFrame()))
+    xb.render_statement = Mock(return_value=rendered)
+    {"lookup": lookup, "render": xb.render_statement, "dataframe": rendered.to_dataframe}[stage].side_effect = original
+    monkeypatch.setattr(financials, "balance_sheet", lookup)
+    with pytest.raises(LiabilityDerivationError) as error:
+        financials.derive_total_liabilities()
+    assert error.value.reason == "render-failed"
+    assert error.value.__cause__ is original
