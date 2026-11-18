@@ -67,6 +67,13 @@ on:
 # main are never cancelled: PRs merge without being up to date with main, so the
 # post-merge run is the only check that the combination works, and back-to-back
 # merges used to cancel it before it finished.
+# Read-only by default. Jobs that write (the red-main `report` job) grant
+# their own job-level permissions; nothing else inherits the token's write scope.
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name != 'push' }}
