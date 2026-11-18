@@ -1,0 +1,13 @@
+# Keeps the commit-SHA-pinned GitHub Actions current. Pins stop a tag from being
+# repointed under us, but they also freeze security fixes unless something bumps
+# them. Dependabot PRs touch .github/, so the Agent config guard holds them
+# until a maintainer approves.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: ["*"]
