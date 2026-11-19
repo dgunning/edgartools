@@ -289,6 +289,17 @@ class Address:
         }
 
 
+def _validate_report_date(report_date: Optional[str]) -> None:
+    if report_date is None:
+        return
+    try:
+        parsed_report_date = datetime.date.fromisoformat(report_date).isoformat()
+    except (TypeError, ValueError) as exc:
+        raise ValueError("report_date must be a valid date in YYYY-MM-DD format") from exc
+    if parsed_report_date != report_date:
+        raise ValueError("report_date must be in YYYY-MM-DD format")
+
+
 class EntityData:
     """
     Container for entity data loaded from SEC submissions API.
@@ -420,13 +431,7 @@ class EntityData:
             Filtered filings
         """
 
-        if report_date is not None:
-            try:
-                parsed_report_date = datetime.date.fromisoformat(report_date).isoformat()
-            except (TypeError, ValueError) as exc:
-                raise ValueError("report_date must be a valid date in YYYY-MM-DD format") from exc
-            if parsed_report_date != report_date:
-                raise ValueError("report_date must be in YYYY-MM-DD format")
+        _validate_report_date(report_date)
 
         # Lazy loading behavior
         # Note: we don't gate on is_using_local_storage() here because when bulk
