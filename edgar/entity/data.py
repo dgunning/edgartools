@@ -4,6 +4,7 @@ Data classes for the Entity package.
 This module contains classes for working with entity data, including
 addresses, facts, and other structured data from SEC filings.
 """
+import datetime
 import re
 from functools import cached_property
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -393,7 +394,9 @@ class EntityData:
                     is_xbrl: Optional[bool] = None,
                     is_inline_xbrl: Optional[bool] = None,
                     sort_by: Optional[Union[str, List[Tuple[str, str]]]] = None,
-                    trigger_full_load: bool = True
+                    trigger_full_load: bool = True,
+                    *,
+                    report_date: Optional[str] = None,
                     ) -> Optional[EntityFilings]:
         """
         Get entity filings with lazy loading behavior.
@@ -406,6 +409,7 @@ class EntityData:
             file_number: Filter by file number(s)
             filing_date: Filter by filing date (YYYY-MM-DD or range)
             date: Alias for filing_date
+            report_date: Filter by exact period-of-report date (YYYY-MM-DD)
             amendments: Whether to include amendments (default: True)
             is_xbrl: Filter by XBRL status
             is_inline_xbrl: Filter by inline XBRL status
@@ -415,6 +419,14 @@ class EntityData:
         Returns:
             Filtered filings
         """
+
+        if report_date is not None:
+            try:
+                parsed_report_date = datetime.date.fromisoformat(report_date).isoformat()
+            except (TypeError, ValueError) as exc:
+                raise ValueError("report_date must be a valid date in YYYY-MM-DD format") from exc
+            if parsed_report_date != report_date:
+                raise ValueError("report_date must be in YYYY-MM-DD format")
 
         # Lazy loading behavior
         # Note: we don't gate on is_using_local_storage() here because when bulk
@@ -431,6 +443,9 @@ class EntityData:
         # Filter by year/quarter first (most selective)
         if year is not None:
             company_filings = filter_by_year_quarter(company_filings, year, quarter)
+
+        if report_date is not None:
+            company_filings = company_filings.filter(pc.field("reportDate") == report_date)
 
         # Filter by accession number
         if accession_number:

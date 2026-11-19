@@ -395,7 +395,8 @@ class Entity(SecFiler):
                    is_xbrl: Optional[bool] = None,
                    is_inline_xbrl: Optional[bool] = None,
                    sort_by: Optional[Union[str, List[Tuple[str, str]]]] = None,
-                   trigger_full_load: bool = True) -> 'EntityFilings':
+                   trigger_full_load: bool = True,
+                   report_date: Optional[str] = None) -> 'EntityFilings':
         """
         Get the entity's filings and optionally filter by multiple criteria.
 
@@ -412,6 +413,7 @@ class Entity(SecFiler):
             file_number: The file number e.g. 001-39504
             filing_date: Filter by filing date (YYYY-MM-DD or range)
             date: Alias for filing_date
+            report_date: Filter by exact period-of-report date (YYYY-MM-DD)
             amendments: Whether to include amendments (default: True)
             is_xbrl: Whether the filing is XBRL
             is_inline_xbrl: Whether the filing is Inline XBRL
@@ -434,7 +436,8 @@ class Entity(SecFiler):
             is_xbrl=is_xbrl,
             is_inline_xbrl=is_inline_xbrl,
             sort_by=sort_by,
-            trigger_full_load=trigger_full_load
+            trigger_full_load=trigger_full_load,
+            report_date=report_date,
         )
 
     def _empty_company_filings(self):
