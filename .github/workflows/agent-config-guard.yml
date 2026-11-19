@@ -13,7 +13,8 @@
 #      always fail. A maintainer makes those changes directly.
 #   2. SENSITIVE paths fail until a maintainer APPROVES the pull request at its
 #      current head commit. A new push makes the approval stale, and the check
-#      fails again. After approving, re-run this check from the PR's Checks tab.
+#      fails again. After approving, re-run this check from the PR's Checks tab
+#      or add any label to the PR (see `labeled` below).
 # Maintainer pull requests pass and list what they touched.
 #
 # WHY pull_request_target: a `pull_request` run from a fork uses the fork's
@@ -33,7 +34,11 @@ name: Agent config guard
 
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened, ready_for_review]
+    # `labeled` lets a maintainer run the guard on an existing PR by adding any
+    # label, without asking the author to push. Only users with triage access can
+    # label, and the run still uses main's copy of this file, so it adds no
+    # attacker-controlled path.
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
 
 permissions:
   contents: read
@@ -104,5 +109,5 @@ jobs:
           echo "::error::This PR touches agent-config, CI or shipped-skill paths:"
           printf '%s\n' "$sens" | sed 's/^/  /'
           echo "A maintainer must review these files in full and approve the PR at its"
-          echo "current head ($HEAD_SHA), then re-run this check."
+          echo "current head ($HEAD_SHA), then re-run this check or add any label."
           exit 1
