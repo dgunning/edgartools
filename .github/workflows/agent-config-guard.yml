@@ -33,7 +33,10 @@
 name: Agent config guard
 
 on:
-  pull_request_target:
+  # zizmor: dangerous-triggers flags every pull_request_target. Accepted here
+  # because this job never checks out or runs PR code, holds no secrets beyond a
+  # read-only token, and passes PR data to the script only through env (see header).
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
     # `labeled` lets a maintainer run the guard on an existing PR by adding any
     # label, without asking the author to push. Only users with triage access can
     # label, and the run still uses main's copy of this file, so it adds no
@@ -41,8 +44,8 @@ on:
     types: [opened, synchronize, reopened, ready_for_review, labeled]
 
 permissions:
-  contents: read
-  pull-requests: read
+  contents: read        # no checkout; kept explicit so nothing inherits more
+  pull-requests: read   # list the PR's changed files and reviews via the API
 
 concurrency:
   group: agent-config-guard-${{ github.event.pull_request.number }}
