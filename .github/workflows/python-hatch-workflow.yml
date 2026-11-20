@@ -13,10 +13,12 @@
 # to produce them — the few CI minutes a markdown-only run costs are cheaper than
 # a merge queue that deadlocks on documentation.
 #
-# REQUIRED CHECKS ARE PINNED TO JOB NAMES. `main` requires exactly two contexts:
+# REQUIRED CHECKS ARE PINNED TO JOB NAMES. `main` requires exactly three contexts,
+# two from this file and one from agent-config-guard.yml:
 #
 #     Cassette safety gate
 #     test-fast (3.13)
+#     Agent config guard     (agent-config-guard.yml: a security gate, never remove)
 #
 # The second name is generated from the matrix below, which is event-dependent —
 # a pull request builds only 3.13, so the context is literally "test-fast (3.13)".

@@ -25,7 +25,7 @@ on:
   #      (the deadlock documented at the top of python-hatch-workflow.yml).
   #   2. It is ~26 minutes against the live SEC, so it is far too slow and too
   #      network-dependent to sit in front of a merge.
-  # The required contexts stay exactly the two named in python-hatch-workflow.yml.
+  # The required contexts stay exactly the three listed in python-hatch-workflow.yml.
   # Making this one required is the fastest way to deadlock the repository.
   pull_request:
     branches: [ "main", "5.*.x" ]
