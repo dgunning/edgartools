@@ -1,0 +1,1 @@
+**Parsing an inline XBRL filing no longer re-scans nested TextBlocks node by node.** Removing ix: tags from escaped TextBlock values now runs inside lxml, cutting that step from 17.9 ms to 8.3 ms on Apple's FY2026 10-K and full parsing by about 2.5%. Extracted facts are unchanged across 247,860 facts in 86 fixtures.
