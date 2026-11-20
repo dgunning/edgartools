@@ -7,7 +7,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Mapping, Optional, Tuple
 
-from lxml.etree import tostring
+from lxml.etree import strip_elements, strip_tags, tostring
 from lxml.html import HtmlElement
 
 from edgar.dates import normalize_period_boundary
@@ -23,6 +23,22 @@ from edgar.documents.types import XBRLFact
 from edgar.xmltools import is_xsi_nil
 
 logger = logging.getLogger(__name__)
+
+_IX_CLARK_PREFIX = '{http://www.xbrl.org/2013/inlineXBRL}'
+
+
+def _is_ix_tag(tag: Any) -> bool:
+    """
+    Whether a tag names an Inline XBRL element.
+
+    The literal "ix:" prefix in any case (the lxml.html tree described in the
+    XBRLExtractor docstring keeps prefixes in the tag), or the Inline XBRL
+    namespace in Clark notation for a namespace-aware tree. Comments and
+    processing instructions carry a callable tag and are never ix: elements.
+    """
+    return isinstance(tag, str) and (
+        tag.startswith(_IX_CLARK_PREFIX) or tag.lower().startswith('ix:')
+    )
 
 
 class XBRLExtractor:
@@ -66,6 +82,9 @@ class XBRLExtractor:
         # Formats already reported, so a filing that uses an unsupported
         # transform 3,000 times warns once rather than 3,000 times.
         self._reported_formats: set = set()
+        # (root, exclude tags, other ix: tags) of the last tree _project_escaped
+        # saw. The root is held, so the `is` check cannot match a recycled proxy.
+        self._ix_tag_cache: Optional[Tuple[Any, Tuple[str, ...], Tuple[str, ...]]] = None
 
     def extract_context(self, element: HtmlElement) -> Optional[Dict[str, Any]]:
         """
@@ -217,17 +236,7 @@ class XBRLExtractor:
 
     def _is_xbrl_element(self, element: HtmlElement) -> bool:
         """Check if element is an XBRL element."""
-        tag = element.tag
-        if not isinstance(tag, str):
-            return False
-
-        # Handle both namespaced and non-namespaced tags
-        tag_lower = tag.lower()
-        return (
-            tag.startswith('{' + self.NAMESPACES['ix'] + '}') or
-            tag.startswith('ix:') or
-            tag_lower.startswith('ix:')
-        )
+        return _is_ix_tag(element.tag)
 
     def _get_local_name(self, tag: Any) -> str:
         """Get local name from qualified tag."""
@@ -569,16 +578,38 @@ class XBRLExtractor:
         detached copy, so the parsed tree other passes read is untouched; an
         element with no ``ix:`` descendant is returned as it is.
         """
-        if not any(self._is_xbrl_element(node) for node in element.iterdescendants()):
+        exclude_tags, other_tags = self._ix_tags(element)
+        ix_tags = exclude_tags + other_tags
+        # iterdescendants() with no tag names yields every descendant.
+        if not ix_tags or next(element.iterdescendants(*ix_tags), None) is None:
             return element
         projected = copy.deepcopy(element)
-        for node in list(projected.iterdescendants()):
-            if self._get_local_name(node.tag) == 'exclude' and self._is_xbrl_element(node):
-                node.drop_tree()
-        for node in list(projected.iterdescendants()):
-            if self._is_xbrl_element(node):
-                node.drop_tag()
+        # Both run in libxml2 by tag name, so no Python object is built for the
+        # XHTML nodes in between; the projected element itself is never removed.
+        if exclude_tags:
+            strip_elements(projected, *exclude_tags, with_tail=False)
+        if other_tags:
+            strip_tags(projected, *other_tags)
         return projected
+
+    def _ix_tags(self, element: HtmlElement) -> Tuple[Tuple[str, ...], Tuple[str, ...]]:
+        """
+        The ix: tag names used in ``element``'s document: (exclude, all others).
+
+        Computed once per tree. ``iterdescendants``, ``strip_elements`` and
+        ``strip_tags`` match by exact tag name, so the names come from the
+        document itself rather than a fixed list. One pass over the tree is a
+        few milliseconds; the per-node test it replaces ran over the same
+        nested TextBlock subtrees hundreds of times per filing.
+        """
+        root = element.getroottree().getroot()
+        cached = self._ix_tag_cache
+        if cached is None or cached[0] is not root:
+            tags = sorted(tag for tag in {node.tag for node in root.iter()} if _is_ix_tag(tag))
+            excludes = tuple(tag for tag in tags if self._get_local_name(tag) == 'exclude')
+            others = tuple(tag for tag in tags if tag not in excludes)
+            cached = self._ix_tag_cache = (root, excludes, others)
+        return cached[1], cached[2]
 
     def _relevant_content(self, element: HtmlElement, escape: bool = False) -> str:
         """

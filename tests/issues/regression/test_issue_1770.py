@@ -72,3 +72,28 @@ def test_microsoft_escaped_facts_match_the_sec_instance():
 
     policies = next(f for f in escaped if f.concept == 'us-gaap:SignificantAccountingPoliciesTextBlock')
     assert 'PART II' not in policies.value
+
+
+def test_projection_reads_each_documents_own_ix_tags():
+    """
+    _project_escaped strips ix: tags by name, learned once per tree. An extractor
+    that sees a second document must not reuse the first document's names:
+    here the first has no ix:exclude, the second does, and its exclude must
+    still be dropped with its tail kept.
+    """
+    from lxml import html as lhtml
+
+    from edgar.documents.strategies.xbrl_extraction import XBRLExtractor
+
+    def serialized(element):
+        return etree.tostring(element, encoding='unicode', method='html')
+
+    extractor = XBRLExtractor()
+    first = lhtml.fromstring('<div><p>a<ix:nonfraction>1</ix:nonfraction>b</p></div>')
+    second = lhtml.fromstring('<div><p>c<ix:exclude>Page 3</ix:exclude>d<ix:nonfraction>2</ix:nonfraction></p></div>')
+
+    assert serialized(extractor._project_escaped(first[0])) == '<p>a1b</p>'
+    assert serialized(extractor._project_escaped(second[0])) == '<p>cd2</p>'
+    # A child with no ix: descendant is returned as it is, not copied.
+    plain = lhtml.fromstring('<div><p>no inline tags</p></div>')[0]
+    assert extractor._project_escaped(plain) is plain
