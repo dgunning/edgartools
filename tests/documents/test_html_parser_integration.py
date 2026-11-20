@@ -244,21 +244,38 @@ class TestBackwardCompatibility:
 class TestPerformanceIntegration:
     """Test performance with real filings."""
 
+    # Apple's FY2026 10-K, pinned: `latest(1)` swapped in a new, larger filing
+    # every November. 1,650,002 bytes of HTML.
+    PARSE_SPEED_ACCESSION = "0000320193-26-000026"
+    # A ceiling for catching a gross regression (something quadratic), not a
+    # benchmark. A GitHub runner parses this filing in about 1.25 s and an Apple
+    # Silicon laptop in about 0.38 s. The old 1.2 s single-shot limit sat inside
+    # runner-to-runner noise and failed main from 2026-11-18.
+    PARSE_SPEED_LIMIT_SECONDS = 2.0
+
     @pytest.mark.network
     def test_parsing_speed(self):
-        """Parsing should be fast."""
+        """Parsing a large 10-K stays well clear of a gross slowdown."""
         import time
 
-        company = Company('AAPL')
-        filing = company.get_filings(form='10-K').latest(1)
-        html = filing.html()
+        from edgar import find
 
-        start = time.perf_counter()
-        doc = parse_html(html)
-        elapsed = time.perf_counter() - start
+        html = find(self.PARSE_SPEED_ACCESSION).html()
+        assert len(html) == 1_650_002  # the pinned filing, not a substitute
 
-        # Should parse in under 1 second for typical filing
-        assert elapsed < 1.2, f"Parse time {elapsed:.3f}s exceeds 1s threshold"
+        parse_html(html)  # warm imports and caches; time steady-state parsing
+        timings = []
+        for _ in range(3):
+            start = time.perf_counter()
+            parse_html(html)
+            timings.append(time.perf_counter() - start)
+
+        # The fastest of three discounts a run that a busy runner interrupted.
+        fastest = min(timings)
+        assert fastest < self.PARSE_SPEED_LIMIT_SECONDS, (
+            f"Fastest of 3 parses took {fastest:.3f}s, over the "
+            f"{self.PARSE_SPEED_LIMIT_SECONDS}s limit (all: {[round(t, 3) for t in timings]})"
+        )
 
     @pytest.mark.network
     def test_memory_efficiency(self):
