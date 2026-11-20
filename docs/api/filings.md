@@ -437,7 +437,10 @@ def download(
     compress: bool = True,
     compression_level: int = 6,
     upload_to_cloud: bool = False,
-    disable_progress: bool = False
+    disable_progress: bool = False,
+    source: str = "submission",
+    *,
+    max_workers: int = 1,
 )
 ```
 Download all filings in collection to local storage.
@@ -448,6 +451,8 @@ Download all filings in collection to local storage.
 - `compression_level`: gzip level 1-9 (default: 6)
 - `upload_to_cloud`: Upload to cloud after download
 - `disable_progress`: Disable progress display
+- `source`: Use `"submission"` (default) to fetch each selected filing individually, or `"feed"` to download the daily feed files containing them.
+- `max_workers`: Maximum concurrent downloads for the selected filings when `source="submission"`. Defaults to 1. For `source="feed"`, leave this at 1.
 
 **Example:**
 ```python

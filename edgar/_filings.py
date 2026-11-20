@@ -590,7 +590,9 @@ class Filings:
                  compression_level: int = 6,
                  upload_to_cloud: bool = False,
                  disable_progress: bool = False,
-                 source: str = 'submission'):
+                 source: str = 'submission',
+                 *,
+                 max_workers: int = 1):
         """
         Download the filings based on the accession numbers in this Filings object.
 
@@ -605,12 +607,14 @@ class Filings:
             disable_progress: If True, suppress progress bars. Useful for logging environments. Default is False.
             source: 'submission' (default) fetches each filing on its own; 'feed' downloads the
                 daily feed files that hold them. Filings already stored are not downloaded again.
+            max_workers: Maximum concurrent submission downloads. Defaults to 1.
         """
         from edgar.storage import download_filings
         download_filings(data_directory=data_directory,
                          overwrite_existing=False,
                          filings=self,
                          source=source,
+                         max_workers=max_workers,
                          compress=compress,
                          compression_level=compression_level,
                          upload_to_cloud=upload_to_cloud,
