@@ -295,9 +295,17 @@ def _validate_report_date(report_date: Optional[str]) -> None:
     try:
         parsed_report_date = datetime.date.fromisoformat(report_date).isoformat()
     except (TypeError, ValueError) as exc:
-        raise ValueError("report_date must be a valid date in YYYY-MM-DD format") from exc
+        raise InvalidDateError(
+            "report_date must be a valid date in YYYY-MM-DD format",
+            parameter="report_date",
+            invalid_value=report_date,
+        ) from exc
     if parsed_report_date != report_date:
-        raise ValueError("report_date must be in YYYY-MM-DD format")
+        raise InvalidDateError(
+            "report_date must be in YYYY-MM-DD format",
+            parameter="report_date",
+            invalid_value=report_date,
+        )
 
 
 class EntityData:
