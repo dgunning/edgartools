@@ -9,16 +9,22 @@ from lxml import etree, html
 from edgar.documents import ParserConfig, parse_html
 from edgar.documents.strategies.table_processing import TableProcessor
 from edgar.documents.table_nodes import Cell
-from tests.paths import FIXTURES_DIR
+from tests.paths import FIXTURES_DIR, REPO_ROOT
 
 pytestmark = pytest.mark.fast
 
-ORACLE_FIXTURE = FIXTURES_DIR / "html/orcl/orcl-20260831-emea-footnote.htm"
+# https://www.sec.gov/Archives/edgar/data/1341439/000095017024104905/orcl-20240831.htm
+ORACLE_FIXTURE = REPO_ROOT / "data/html/Oracle.10-Q.html"
 ORACLE_EMEA = {
-    "3,726": ("F_e5ad0eec-ea21-4999-af73-6f88d9d58b39", "3726000000"),
-    "3,481": ("F_cace6d6c-edc2-44eb-a621-7294332f6c6a", "3481000000"),
+    "3,228": ("F_b8604f4b-10f0-4509-8e6a-4b2044b63073", "3228000000"),
+    "3,005": ("F_6c2fb952-8c5e-4ea5-a1c3-e998c3f20684", "3005000000"),
 }
-EMEA_FOOTNOTE = "FNT_12dd46b5-2e60-4de4-841f-82be60a2a99e"
+EMEA_FOOTNOTE = "FNT_101dfb5e-8641-4a4f-a4a3-578450fa445b"
+
+
+@pytest.fixture(scope="module")
+def oracle_document():
+    return parse_html(ORACLE_FIXTURE.read_bytes(), ParserConfig(form="10-Q"))
 
 
 def find_cell(table, row_label, cell_text):
@@ -31,11 +37,10 @@ def find_cell(table, row_label, cell_text):
     )
 
 
-def test_oracle_emea_cells_lead_to_their_filed_footnote():
-    """Oracle Form 10-Q, accession 0001193125-26-389274, Note 9."""
-    doc = parse_html(ORACLE_FIXTURE.read_text(encoding="utf-8"))
-    note_table, _ = doc.tables
-    facts = {fact.fact_id: fact for fact in doc.xbrl_facts}
+def test_oracle_emea_cells_lead_to_their_filed_footnote(oracle_document):
+    """Oracle Form 10-Q, filed September 10, 2024, accession 0000950170-24-104905, Note 7."""
+    note_table = oracle_document.tables[17]
+    facts = {fact.fact_id: fact for fact in oracle_document.xbrl_facts}
 
     for display, (fact_id, value) in ORACLE_EMEA.items():
         cell = find_cell(note_table, "EMEA(1)", display)
@@ -45,14 +50,23 @@ def test_oracle_emea_cells_lead_to_their_filed_footnote():
         fact = facts[cell.xbrl_fact_ids[0]]
         assert fact.value == value
         assert fact.footnotes == [EMEA_FOOTNOTE]
-        assert doc.xbrl_footnotes[fact.footnotes[0]].text == (
-            "Comprises Europe, the Middle East and Africa"
+        assert oracle_document.xbrl_footnotes[fact.footnotes[0]].text == (
+            "Comprised of Europe, the Middle East and Africa"
         )
 
+        reverse_cell, = (
+            candidate
+            for table in oracle_document.tables
+            for row_cells in table.headers + [row.cells for row in table.rows + table.footer]
+            for candidate in row_cells
+            if fact_id in candidate.xbrl_fact_ids
+        )
+        assert reverse_cell is cell
 
-def test_oracle_markers_and_untagged_repeat_do_not_borrow_fact_ids():
-    doc = parse_html(ORACLE_FIXTURE.read_text(encoding="utf-8"))
-    note_table, mda_table = doc.tables
+
+def test_oracle_markers_and_untagged_repeat_do_not_borrow_fact_ids(oracle_document):
+    note_table = oracle_document.tables[17]
+    mda_table = oracle_document.tables[21]
 
     assert find_cell(note_table, "EMEA(1)", "EMEA(1)").xbrl_fact_ids == ()
     assert find_cell(mda_table, "EMEA(1)", "EMEA(1)").xbrl_fact_ids == ()
@@ -60,12 +74,12 @@ def test_oracle_markers_and_untagged_repeat_do_not_borrow_fact_ids():
         assert find_cell(mda_table, "EMEA(1)", display).xbrl_fact_ids == ()
 
     # A real fact can belong to a cell without having any filed footnote.
-    americas = find_cell(note_table, "Americas", "13,711")
+    americas = find_cell(note_table, "Americas", "8,372")
     assert len(americas.xbrl_fact_ids) == 1
     americas_fact, = (
-        fact for fact in doc.xbrl_facts if fact.fact_id == americas.xbrl_fact_ids[0]
+        fact for fact in oracle_document.xbrl_facts if fact.fact_id == americas.xbrl_fact_ids[0]
     )
-    assert americas_fact.value == "13711000000"
+    assert americas_fact.value == "8372000000"
     assert americas_fact.footnotes == []
 
 
