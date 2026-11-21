@@ -134,3 +134,61 @@ def test_cell_keeps_fact_in_namespace_aware_inline_child():
 
     parsed = TableProcessor(ParserConfig()).process(table)
     assert parsed.rows[0].cells[1].xbrl_fact_ids == ("visible",)
+
+
+@pytest.mark.parametrize("nested_tag", ["td", "th"])
+def test_basic_table_keeps_nested_cells_out_of_its_outer_grid(nested_tag):
+    markup = f"""<table><tbody><tr>
+      <td>Outer<ix:nonNumeric id="A" name="t:Label">a</ix:nonNumeric>
+        <table><caption>Nested caption</caption><tr>
+          <{nested_tag}>Inner<ix:nonNumeric id="B" name="t:Label">b</ix:nonNumeric></{nested_tag}>
+        </tr></table>
+      </td>
+      <td>After<ix:nonNumeric id="C" name="t:Label">c</ix:nonNumeric></td>
+    </tr></tbody></table>"""
+    doc = parse_html(markup, ParserConfig(table_extraction=False))
+    outer, = doc.tables
+
+    rows = [[cell.xbrl_fact_ids for cell in row.cells] for row in outer.rows]
+    reverse_matches = [
+        cell for cells in [*outer.headers, *(row.cells for row in outer.rows)]
+        for cell in cells if "B" in cell.xbrl_fact_ids
+    ]
+    assert (rows, len(reverse_matches)) == ([[("A",), ("C",)]], 0)
+    assert not outer.headers
+    assert outer.caption is None
+    assert [" ".join(cell.text().split()) for cell in outer.rows[0].cells] == [
+        "Outera Nested caption Innerb", "Afterc",
+    ]
+    assert [fact.fact_id for fact in doc.xbrl_facts] == ["A", "B", "C"]
+
+
+@pytest.mark.parametrize(
+    ("table_extraction", "expected_header", "rendered_header"),
+    [
+        (False, [("Period", ("period",)), ("Label", ("label",))],
+         "<tr><td>Period</td><th>Label</th></tr>"),
+        (True, [("Label", ("label",)), ("Period", ("period",))],
+         "<tr><th>Label</th><th>Period</th></tr>"),
+    ],
+    ids=["basic", "advanced"],
+)
+def test_table_preserves_mixed_header_fact_ownership(
+    table_extraction, expected_header, rendered_header
+):
+    markup = """<table><caption>Metrics</caption>
+      <thead><tr>
+        <th><ix:nonNumeric id="label" name="t:Label">Label</ix:nonNumeric></th>
+        <td><ix:nonNumeric id="period" name="t:Period">Period</ix:nonNumeric></td>
+      </tr></thead>
+      <tbody><tr><td>Example</td><td>42</td></tr></tbody>
+    </table>"""
+    doc = parse_html(markup, ParserConfig(table_extraction=table_extraction))
+    table, = doc.tables
+    header, = table.headers
+
+    assert table.caption == "Metrics"
+    assert [(cell.text(), cell.xbrl_fact_ids) for cell in header] == expected_header
+    assert table.rows[0].cells[1].numeric_value == 42
+    assert rendered_header in table.html()
+    assert "<tr><td>Example</td><td>42</td></tr>" in table.html()
