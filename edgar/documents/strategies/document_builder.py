@@ -792,6 +792,8 @@ class DocumentBuilder:
 
     def _process_table_basic(self, element: HtmlElement, style: Style) -> TableNode:
         """Basic table processing without advanced strategy."""
+        from edgar.documents.strategies.table_processing import _cell_xbrl_fact_ids
+
         table = TableNode(style=style)
 
         # Set config for rendering decisions
@@ -811,7 +813,8 @@ class DocumentBuilder:
                     colspan=int(td.get('colspan', '1')),
                     rowspan=int(td.get('rowspan', '1')),
                     is_header=(td.tag == 'th'),
-                    align=td.get('align')
+                    align=td.get('align'),
+                    xbrl_fact_ids=_cell_xbrl_fact_ids(td),
                 )
                 cells.append(cell)
 

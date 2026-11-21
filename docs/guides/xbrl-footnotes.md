@@ -230,6 +230,35 @@ the `fact-footnote` arcrole, or none) attach a footnote. A relationship with any
 arcrole, such as `fact-explanatoryFact` between two facts, is not an ordinary footnote and
 is not attached; EdgarTools does not yet model those relationships.
 
+### Follow an Inline XBRL Footnote from a Table Cell
+
+`Cell.xbrl_fact_ids` lists the filed IDs of Inline XBRL facts inside that HTML table
+cell, in document order. Use the IDs to join the cell to `Document.xbrl_facts`,
+then open the explicit links through `Document.xbrl_footnotes`.
+
+```python
+def footnotes_for_cell(doc, cell):
+    notes = {}
+    for fact_id in dict.fromkeys(cell.xbrl_fact_ids):
+        facts = [fact for fact in doc.xbrl_facts if fact.fact_id == fact_id]
+        if len(facts) != 1:
+            continue
+        for note_id in facts[0].footnotes:
+            note = doc.xbrl_footnotes.get(note_id)
+            if note is not None:
+                notes[note_id] = note
+    return list(notes.values())
+```
+
+For example, the $3,726 million and $3,481 million EMEA revenue cells in the
+[Oracle quarterly filing](https://www.sec.gov/Archives/edgar/data/1341439/000119312526389274/orcl-20260831.htm)
+carry different fact IDs, and both facts link to the filed EMEA definition.
+Printed note markers remain cell text. The tuple excludes IDs inside nested tables,
+`ix:header` and `ix:hidden` elements and uses markup ownership without evaluating CSS
+visibility. Cell IDs are available as markup metadata. Following an XBRL footnote
+requires extracting the document's Inline XBRL facts. The tuple preserves repeated
+IDs from the source, so the example checks for a unique fact before attributing a note.
+
 ### Facts in an Exhibit: Parse the Document Set
 
 The inline documents of one filing form a single Inline XBRL document set, and only one of
