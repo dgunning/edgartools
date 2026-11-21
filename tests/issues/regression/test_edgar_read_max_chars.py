@@ -7,6 +7,8 @@ it takes an integer of at least 1: integral floats are accepted, ``True`` and
 non-numbers are rejected with INVALID_ARGUMENTS.
 
 The tests use a fake filing, so they need no network.
+
+GitHub PR: https://github.com/dgunning/edgartools/pull/1874
 """
 
 import pandas as pd
