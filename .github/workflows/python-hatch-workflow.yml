@@ -120,10 +120,33 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python ${{ matrix.python-version }}
+      if: matrix.python-version != '3.15'
       uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+
+    # setup-python's 3.15 builds (3.15.0 to 3.15.2) ship without the C `_decimal`
+    # extension: CPython 3.15 no longer bundles libmpdec, and those builds were
+    # made without it. `decimal` then falls back to `_pydecimal`, which goes
+    # through int<->str and hits the 4300-digit limit, so the 10,000-digit
+    # fraction cases in test_issue_1766.py fail there and nowhere else. uv's
+    # Python builds include `_decimal`. The venv is seeded with pip so every
+    # later step runs the same `python -m pip` commands on all three legs.
+    - name: Set up Python 3.15 (uv build, with _decimal)
+      if: matrix.python-version == '3.15'
+      uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+    - name: Create the 3.15 venv
+      if: matrix.python-version == '3.15'
+      run: |
+        uv venv --seed --managed-python --python 3.15 "$RUNNER_TEMP/py315"
+        echo "$RUNNER_TEMP/py315/bin" >> "$GITHUB_PATH"
+
+    # Fails loudly instead of letting a build without the C decimal module turn
+    # into four "needs the SEC" findings in the offline audit below.
+    - name: Check the interpreter has the C decimal module
+      run: python -c "import sys, _decimal; print(sys.version)"
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
