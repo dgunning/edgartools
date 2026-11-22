@@ -225,9 +225,9 @@ jobs:
         # push), and --cov with branch coverage doubles this step: 273 s vs 577 s
         # locally at 4 workers (edgartools-07lk.26 step B).
         if [ "${{ github.event_name }}" = "pull_request" ]; then
-          pytest -n auto -m 'fast'
+          pytest -rs -n auto -m 'fast'
         else
-          pytest -n auto --cov --cov-report=xml -m 'fast'
+          pytest -rs -n auto --cov --cov-report=xml -m 'fast'
         fi
 
     # Section-boundary accuracy, gated on the pull requests that can move it
@@ -268,7 +268,7 @@ jobs:
         fi
         echo "Section-extraction inputs changed:"
         echo "$TRIGGERS"
-        pytest -m slow -n 2 --dist loadfile \
+        pytest -rs -m slow -n 2 --dist loadfile \
           tests/meta/test_boundary_truth.py \
           tests/meta/test_section_self_consistency_ratchet.py
 
@@ -326,7 +326,7 @@ jobs:
       run: |
         # Sequential - respects SEC rate limits. --enable-cache persists HTTP
         # responses to _tcache (immutable /Archives data cached forever).
-        pytest --cov --cov-report=xml -m 'network and not slow and not regression' --enable-cache
+        pytest -rs --cov --cov-report=xml -m 'network and not slow and not regression' --enable-cache
 
     - name: Upload coverage data
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -372,7 +372,7 @@ jobs:
     - name: Run slow tests
       run: |
         # Sequential - often network-heavy. --enable-cache persists HTTP responses.
-        pytest --cov --cov-report=xml -m 'slow and not regression' --enable-cache
+        pytest -rs --cov --cov-report=xml -m 'slow and not regression' --enable-cache
 
     - name: Upload coverage data
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
