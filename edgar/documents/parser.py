@@ -42,6 +42,22 @@ _COMMENT = re.compile(r'<!--.*?-->', re.DOTALL)
 _SGML_PAGE_MARKER = re.compile(r'</?page>', re.IGNORECASE)
 
 
+def parse_xbrl_tree(html: str) -> HtmlElement:
+    """
+    The tree inline XBRL is read from: the raw HTML, before any preprocessing,
+    so ix:hidden and ix:header content is still there.
+    """
+    parser = create_lxml_parser(
+        remove_blank_text=False,
+        remove_comments=False,
+        recover=True,
+        encoding='utf-8'
+    )
+    html = remove_xml_declaration(html)
+    html = terminate_unclosed_comments(html)
+    return lxml.html.fromstring(html, parser=parser)
+
+
 class HTMLParser:
     """
     Main HTML parser class.
@@ -59,6 +75,10 @@ class HTMLParser:
         """
         self.config = config or ParserConfig()
         self._validate_config()
+
+        # Set by parse_inline_xbrl_set for the duration of one parse: the
+        # document's pre-parsed tree and the document set's shared index.
+        self._xbrl_set_input = None
 
         # Initialize components
         self.cache_manager = get_cache_manager()
@@ -140,6 +160,8 @@ class HTMLParser:
         # already swallows its own errors, so it must not be able to surface as
         # a fatal HTMLParsingError.
         xbrl_facts = []
+        # Filled by _extract_xbrl_pre_process: {ix:footnote id: Footnote}
+        self._xbrl_footnotes = {}
         if self.config.extract_xbrl:
             xbrl_facts = self._extract_xbrl_pre_process(html)
 
@@ -176,6 +198,8 @@ class HTMLParser:
             # Add XBRL facts to metadata if found
             if xbrl_facts:
                 metadata.xbrl_data = xbrl_facts
+            if self._xbrl_footnotes:
+                metadata.xbrl_footnotes = self._xbrl_footnotes
 
             # Build document
             document = self._build_document(tree, metadata)
@@ -308,25 +332,22 @@ class HTMLParser:
         This ensures we capture XBRL data from ix:hidden elements.
         """
         try:
-            # Parse HTML without preprocessing to preserve all XBRL content
-            parser = create_lxml_parser(
-                remove_blank_text=False,
-                remove_comments=False,
-                recover=True,
-                encoding='utf-8'
-            )
-
-            # Remove XML declaration if present
-            html = remove_xml_declaration(html)
-            html = terminate_unclosed_comments(html)
-
-            tree = lxml.html.fromstring(html, parser=parser)
-
-            # Use XBRL extractor
             from edgar.documents.strategies.xbrl_extraction import XBRLExtractor
             extractor = XBRLExtractor()
 
+            if self._xbrl_set_input is None:
+                tree = parse_xbrl_tree(html)
+            else:
+                # One document of an Inline XBRL Document Set: its references
+                # resolve against the whole set (GH #1753).
+                tree, index = self._xbrl_set_input
+                if tree is None:
+                    return []
+                extractor.use_index(index)
+
             facts = []
+            # Resources, linked to the facts once every fact is known (GH #1756)
+            footnotes, relationships = [], []
 
             # Find all XBRL elements (including those in ix:hidden)
             # Simple approach: find all elements with ix: prefix
@@ -353,7 +374,17 @@ class HTMLParser:
                                         break
                                 parent = parent.getparent()
                             facts.append(fact)
+                    elif local_name == 'footnote':
+                        footnotes.append(element)
+                    elif local_name == 'relationship':
+                        relationships.append(element)
 
+            try:
+                self._xbrl_footnotes = extractor.link_footnotes(facts, footnotes, relationships)
+            except Exception as e:
+                # Footnotes are optional: a failure linking them must not
+                # lose the facts already extracted.
+                logger.warning("Failed to link inline XBRL footnotes (%s: %s)", type(e).__name__, e)
             return facts
 
         except etree.ParserError as e:

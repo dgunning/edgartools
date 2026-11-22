@@ -1,0 +1,15 @@
+{
+ "accession": "0001564590-22-016827",
+ "filer": "Chindata Group Holdings Ltd",
+ "form": "20-F",
+ "filing_date": "2022-04-29",
+ "role": "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets",
+ "page": "R2.htm",
+ "short_name": "Consolidated Balance Sheets",
+ "sic": "7370",
+ "period_of_report": "2021-12-31",
+ "menu_categories": {
+  "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheets": "Statements"
+ },
+ "access": "balance_sheet()"
+}

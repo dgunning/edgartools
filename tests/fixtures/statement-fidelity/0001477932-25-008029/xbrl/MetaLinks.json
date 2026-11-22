@@ -1,0 +1,586 @@
+{
+ "version": "2.2",
+ "instance": {
+  "scientist_10q.htm": {
+   "tag": {
+    "us-gaap_AccumulatedOtherComprehensiveIncomeMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "AccumulatedOtherComprehensiveIncomeMember",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Accumulated other comprehensive loss",
+        "documentation": "Accumulated increase (decrease) in equity from transactions and other events and circumstances from non-owner sources, attributable to the parent. Excludes net income (loss), and accumulated changes in equity from transactions resulting from investments by owners and distributions to owners."
+       }
+      }
+     }
+    },
+    "us-gaap_AdditionalPaidInCapitalMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "AdditionalPaidInCapitalMember",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Additional Paid-In Capital",
+        "documentation": "Excess of issue price over par or stated value of the entity's capital stock and amounts received from other transactions involving the entity's stock or stockholders."
+       }
+      }
+     }
+    },
+    "us-gaap_CommonStockMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "CommonStockMember",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Common Stock",
+        "documentation": "Stock that is subordinate to all other stock of the issuer."
+       }
+      }
+     }
+    },
+    "us-gaap_EquityComponentDomain": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "EquityComponentDomain",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Components of equity are the parts of the total Equity balance including that which is allocated to common, preferred, treasury stock, retained earnings, etc."
+       }
+      }
+     }
+    },
+    "scientist_HongKongMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://scientist.com/20250930",
+     "localname": "HongKongMember",
+     "presentation": [
+      "http://scientist.com/role/IncomeTaxDetails",
+      "http://scientist.com/role/IncomeTaxDetailsNarrative",
+      "http://scientist.com/role/SegmentInformationDetails1"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Hong Kong"
+       }
+      }
+     }
+    },
+    "us-gaap_IncomeTaxAuthorityNameAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "IncomeTaxAuthorityNameAxis",
+     "presentation": [
+      "http://scientist.com/role/IncomeTaxDetails",
+      "http://scientist.com/role/IncomeTaxDetails1",
+      "http://scientist.com/role/IncomeTaxDetailsNarrative",
+      "http://scientist.com/role/SegmentInformationDetails1"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Income Tax Authority, Name [Axis]",
+        "documentation": "Information by name of taxing authority."
+       }
+      }
+     }
+    },
+    "scientist_IssuanceOfShareCapitalFoundersSharesAmount": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://scientist.com/20250930",
+     "localname": "IssuanceOfShareCapitalFoundersSharesAmount",
+     "crdr": "credit",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of share capital - founder's shares, amount"
+       }
+      }
+     }
+    },
+    "scientist_IssuanceOfShareCapitalFoundersSharesShares": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://scientist.com/20250930",
+     "localname": "IssuanceOfShareCapitalFoundersSharesShares",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of share capital - founder's shares, shares"
+       }
+      }
+     }
+    },
+    "scientist_IssuanceOfShareCapitalPrivatePlacementAmount": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://scientist.com/20250930",
+     "localname": "IssuanceOfShareCapitalPrivatePlacementAmount",
+     "crdr": "credit",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of share capital - private placement, amount"
+       }
+      }
+     }
+    },
+    "scientist_IssuanceOfShareCapitalPrivatePlacementShares": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://scientist.com/20250930",
+     "localname": "IssuanceOfShareCapitalPrivatePlacementShares",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of share capital - private placement, shares"
+       }
+      }
+     }
+    },
+    "us-gaap_NetIncomeLoss": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "NetIncomeLoss",
+     "crdr": "credit",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited",
+      "http://scientist.com/role/SegmentInformationDetails",
+      "http://scientist.com/role/SegmentInformationDetails1"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Net income for the period",
+        "verboseLabel": "Segment net loss",
+        "terseLabel": "Segment net income (loss)",
+        "documentation": "The portion of profit or loss for the period, net of income taxes, which is attributable to the parent."
+       }
+      }
+     }
+    },
+    "scientist_NonHongKongMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://scientist.com/20250930",
+     "localname": "NonHongKongMember",
+     "presentation": [
+      "http://scientist.com/role/SegmentInformationDetails1"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Non-Hong Kong [Member]"
+       }
+      }
+     }
+    },
+    "us-gaap_OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax",
+     "crdr": "credit",
+     "calculation": {
+      "http://scientist.com/role/CondensedConsolidatedStatementOfOperationsAndComprehensiveIncomeUnaudited": {
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTax",
+       "weight": 1.0,
+       "order": 11.0
+      }
+     },
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfOperationsAndComprehensiveIncomeUnaudited",
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Foreign currency translation",
+        "verboseLabel": "Foreign currency translation",
+        "documentation": "Amount after tax and reclassification adjustments of gain (loss) on foreign currency translation adjustments, foreign currency transactions designated and effective as economic hedges of a net investment in a foreign entity and intra-entity foreign currency transactions that are of a long-term-investment nature."
+       }
+      }
+     }
+    },
+    "us-gaap_RelatedPartyTransactionsByRelatedPartyAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "RelatedPartyTransactionsByRelatedPartyAxis",
+     "presentation": [
+      "http://scientist.com/role/OrganizationAndBusinessBackgroundDetails",
+      "http://scientist.com/role/OrganizationAndBusinessBackgroundDetailsNarrative",
+      "http://scientist.com/role/RelatedPartyTransactionsDetailsNarrative",
+      "http://scientist.com/role/StockholdersEquityDetailsNarrative"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Related and Nonrelated Parties [Axis]",
+        "documentation": "Information by related and nonrelated parties. Related party includes, but is not limited to, affiliate, other entity for which investment is accounted for under equity method, trust for benefit of employee, principal owner, management, and member of immediate family, and other party that may be prevented from pursuing separate interests because of control, significant influence, or ownership interest."
+       }
+      }
+     }
+    },
+    "scientist_RetailTradingBusinessBMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://scientist.com/20250930",
+     "localname": "RetailTradingBusinessBMember",
+     "presentation": [
+      "http://scientist.com/role/SegmentInformationDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Retail Trading Business [Member]"
+       }
+      }
+     }
+    },
+    "us-gaap_RetainedEarningsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "RetainedEarningsMember",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Accumulated Deficit",
+        "documentation": "Accumulated undistributed earnings (deficit)."
+       }
+      }
+     }
+    },
+    "scientist_ScientistHomeFutureHealthHoldingLimitedMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://scientist.com/20250930",
+     "localname": "ScientistHomeFutureHealthHoldingLimitedMember",
+     "presentation": [
+      "http://scientist.com/role/OrganizationAndBusinessBackgroundDetails",
+      "http://scientist.com/role/OrganizationAndBusinessBackgroundDetailsNarrative"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Scientist Home Future Health Holding Limited [Member]"
+       }
+      }
+     }
+    },
+    "scientist_ScientistHomeFutureHealthLimitedMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://scientist.com/20250930",
+     "localname": "ScientistHomeFutureHealthLimitedMember",
+     "presentation": [
+      "http://scientist.com/role/OrganizationAndBusinessBackgroundDetails",
+      "http://scientist.com/role/OrganizationAndBusinessBackgroundDetailsNarrative"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Scientist Home Future Health Limited [Member]"
+       }
+      }
+     }
+    },
+    "us-gaap_SharesIssued": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "SharesIssued",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "periodStartLabel": "Balance, shares",
+        "label": "[Shares, Issued]",
+        "periodEndLabel": "Balance, shares",
+        "documentation": "Number of shares of stock issued as of the balance sheet date, including shares that had been issued and were previously outstanding but which are now held in the treasury."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementBusinessSegmentsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "StatementBusinessSegmentsAxis",
+     "presentation": [
+      "http://scientist.com/role/SegmentInformationDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement Business Segments Axis",
+        "documentation": "Information by business segments."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "StatementEquityComponentsAxis",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Equity Components [Axis]",
+        "documentation": "Information by component of equity."
+       }
+      }
+     }
+    },
+    "srt_StatementGeographicalAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/srt/2025",
+     "localname": "StatementGeographicalAxis",
+     "presentation": [
+      "http://scientist.com/role/SegmentInformationDetails1"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Geographical [Axis]",
+        "documentation": "Information by geographical components."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementLineItems": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "StatementLineItems",
+     "presentation": [
+      "http://scientist.com/role/AmountDueToADirectorDetailNarrative",
+      "http://scientist.com/role/ConcentrationOfRiskDetail",
+      "http://scientist.com/role/ConcentrationOfRiskDetailNarrative",
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited",
+      "http://scientist.com/role/IncomeTaxDetails",
+      "http://scientist.com/role/IncomeTaxDetails1",
+      "http://scientist.com/role/IncomeTaxDetailsNarrative",
+      "http://scientist.com/role/OrganizationAndBusinessBackgroundDetails",
+      "http://scientist.com/role/OrganizationAndBusinessBackgroundDetailsNarrative",
+      "http://scientist.com/role/RelatedPartyTransactionsDetails",
+      "http://scientist.com/role/RelatedPartyTransactionsDetailsNarrative",
+      "http://scientist.com/role/SegmentInformationDetails",
+      "http://scientist.com/role/SegmentInformationDetails1",
+      "http://scientist.com/role/StockholdersEquityDetailsNarrative",
+      "http://scientist.com/role/SummaryOfSignificantAccountingPoliciesDetails",
+      "http://scientist.com/role/SummaryOfSignificantAccountingPoliciesDetailsNarrative"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement [Line Items]",
+        "documentation": "Line items represent financial concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes to the table."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementOfStockholdersEquityAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "StatementOfStockholdersEquityAbstract",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "CONDENSED CONSOLIDATED STATEMENT OF STOCKHOLDERS EQUITY (Unaudited)"
+       }
+      }
+     }
+    },
+    "us-gaap_StatementTable": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "StatementTable",
+     "presentation": [
+      "http://scientist.com/role/AmountDueToADirectorDetailNarrative",
+      "http://scientist.com/role/ConcentrationOfRiskDetail",
+      "http://scientist.com/role/ConcentrationOfRiskDetailNarrative",
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited",
+      "http://scientist.com/role/IncomeTaxDetails",
+      "http://scientist.com/role/IncomeTaxDetails1",
+      "http://scientist.com/role/IncomeTaxDetailsNarrative",
+      "http://scientist.com/role/OrganizationAndBusinessBackgroundDetails",
+      "http://scientist.com/role/OrganizationAndBusinessBackgroundDetailsNarrative",
+      "http://scientist.com/role/RelatedPartyTransactionsDetails",
+      "http://scientist.com/role/RelatedPartyTransactionsDetailsNarrative",
+      "http://scientist.com/role/SegmentInformationDetails",
+      "http://scientist.com/role/SegmentInformationDetails1",
+      "http://scientist.com/role/StockholdersEquityDetailsNarrative",
+      "http://scientist.com/role/SummaryOfSignificantAccountingPoliciesDetails",
+      "http://scientist.com/role/SummaryOfSignificantAccountingPoliciesDetailsNarrative"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement [Table]",
+        "documentation": "Presentation of information about comprehensive income, income, other comprehensive income, financial position, cash flows, and shareholders' equity."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesNewIssues": {
+     "xbrltype": "sharesItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "StockIssuedDuringPeriodSharesNewIssues",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited",
+      "http://scientist.com/role/StockholdersEquityDetailsNarrative"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of shares, shares",
+        "verboseLabel": "Stock issued during period, shares, new issues",
+        "documentation": "Number of new stock issued during the period."
+       }
+      }
+     }
+    },
+    "us-gaap_StockIssuedDuringPeriodValueNewIssues": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "StockIssuedDuringPeriodValueNewIssues",
+     "crdr": "credit",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited",
+      "http://scientist.com/role/StockholdersEquityDetailsNarrative"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issuance of shares, amount",
+        "verboseLabel": "Stock issued during period, value, new issues",
+        "documentation": "Equity impact of the value of new stock issued during the period. Includes shares issued in an initial public offering or a secondary public offering."
+       }
+      }
+     }
+    },
+    "us-gaap_StockholdersEquity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "StockholdersEquity",
+     "crdr": "credit",
+     "calculation": {
+      "http://scientist.com/role/CondensedConsolidatedBalanceSheets": {
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0,
+       "order": 21.0
+      }
+     },
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedBalanceSheets",
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total stockholders' equity",
+        "label": "[Equity, Attributable to Parent]",
+        "periodStartLabel": "Balance, amount",
+        "periodEndLabel": "Balance, amount",
+        "documentation": "Amount of equity (deficit) attributable to parent. Excludes temporary equity and equity attributable to noncontrolling interest."
+       }
+      }
+     }
+    },
+    "scientist_SubcriptionReceivableMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://scientist.com/20250930",
+     "localname": "SubcriptionReceivableMember",
+     "presentation": [
+      "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Subcription Receivable [Member]"
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R5": {
+     "role": "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited",
+     "longName": "148600 - Statement - CONDENSED CONSOLIDATED STATEMENT OF STOCKHOLDERS EQUITY (Unaudited)",
+     "shortName": "CONDENSED CONSOLIDATED STATEMENT OF STOCKHOLDERS EQUITY (Unaudited)",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "5",
+     "firstAnchor": {
+      "contextRef": "AsOf2024-07-03_us-gaap_CommonStockMember",
+      "name": "us-gaap:SharesIssued",
+      "unitRef": "Shares",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "0",
+      "ancestors": [
+       "td",
+       "tr",
+       "tbody",
+       "table",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "scientist_10q.htm",
+      "first": true,
+      "unique": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "AsOf2024-07-03_us-gaap_CommonStockMember",
+      "name": "us-gaap:SharesIssued",
+      "unitRef": "Shares",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "0",
+      "ancestors": [
+       "td",
+       "tr",
+       "tbody",
+       "table",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "scientist_10q.htm",
+      "first": true,
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

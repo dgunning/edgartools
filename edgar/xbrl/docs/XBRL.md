@@ -390,6 +390,31 @@ print(f"Fiscal Year: {entity_info.get('fiscal_year')}")
 print(f"Fiscal Period: {entity_info.get('fiscal_period')}")
 ```
 
+Three keys hold dates, and they mean different things:
+
+| Key | Type | Meaning |
+|---|---|---|
+| `reporting_end_date` | `datetime.date` or None | the period the document reports on: `dei:DocumentPeriodEndDate` as a date |
+| `document_period_end_date` | str or None | the same fact as filed |
+| `max_instant_context_date` | `datetime.date` or None | the latest instant among all contexts, usually the cover's share-count date |
+
+Apple's FY2023 10-K reports to 2023-09-30 (`reporting_end_date`) and counts its shares on 2023-10-20 (`max_instant_context_date`). Before GH #1208, `reporting_end_date` held the second date.
+
+### Trading Symbols
+
+A cover can list several securities, each with its own `dei:TradingSymbol`. `entity_info['trading_symbols']` keeps all of them in document order, and `entity_info['ticker']` is the first of them, which is the security the cover lists first (usually the common stock). A co-registrant's symbols are used only when the filer reports none.
+
+```python
+# JPMorgan Chase FY2023 10-K (0000019617-24-000225) lists ten securities
+entity_info['ticker']                 # 'JPM'
+entity_info['trading_symbols'][0]
+# {'symbol': 'JPM', 'class_of_stock': 'us-gaap:CommonStockMember', 'context_ref': 'c-2'}
+[s['symbol'] for s in entity_info['trading_symbols']]
+# ['JPM', 'JPM PR D', 'JPM PR C', 'JPM PR J', 'JPM PR K', 'JPM PR L', 'JPM PR M', 'AMJ', 'JPM/32', 'AMJB']
+```
+
+`class_of_stock` is the member QName from the context's `us-gaap:StatementClassOfStockAxis` (or `us-gaap:CapitalUnitsByClassAxis`), or None. The same list is `filing.obj().trading_symbols` on a 10-K or 10-Q. `Company.tickers` is SEC's current ticker list. For the securities a filing registered, with their class of stock, use `filing.obj().trading_symbols`.
+
 ## Error Handling
 
 ### Missing Statements

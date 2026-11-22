@@ -188,14 +188,11 @@ class StatementTypeSelector:
 
     Period Selection Strategy for Quarterly Reports:
 
-    For quarterly 10-Q filings, we prioritize quarterly periods (~90 days) over
-    YTD periods (~180-270 days) to provide users with detailed quarterly breakdowns
-    rather than cumulative summaries. This matches the behavior of regular statement
-    period selection and aligns with investor expectations.
-
-    YTD periods are only used as a fallback when quarterly periods are unavailable.
-
-    See GitHub Issue #475 for background on this design decision.
+    By default a 10-Q contributes its year-to-date period (~90, ~180 or ~270 days),
+    which some companies (e.g. PYPL) tag in more detail than the quarter (Issue
+    #475). The discrete quarter is used only when the filing has no YTD period.
+    With ``include_quarterly=True`` the filing contributes both, quarter first
+    (GH #780, #1741).
     """
 
     def __init__(self, matcher: PeriodMatcher, classifier: FiscalPeriodClassifier):

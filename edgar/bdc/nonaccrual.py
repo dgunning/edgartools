@@ -8,6 +8,8 @@ Extracts non-accrual status data using three layered approaches:
 2. **Custom XBRL concepts** — 6/11 BDCs use proprietary taxonomy extensions
    (rate only, no investment-level detail).
 3. **Standard us-gaap aggregate** — single concept fallback (dollar amount only).
+4. **A tagged zero** — an amount or count of non-accruals tagged as 0, with no
+   non-accrual footnote, reads as a 0% rate (``extraction_method='tagged_zero'``).
 
 Usage::
 
@@ -33,7 +35,15 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
-from edgar.bdc.investments import _get_investment_member_candidates, _parse_investment_identifier
+from edgar.bdc.investments import (
+    PortfolioInvestment,
+    _exclude_restated_rows,
+    _get_investment_member_candidates,
+    _parse_investment_identifier,
+    _reported_total_fair_value,
+    _strip_footnote_marks,
+)
+from edgar.xbrl.core import catalog_entry
 
 if TYPE_CHECKING:
     from edgar._filings import Filing
@@ -53,17 +63,21 @@ CONCEPT_NONACCRUAL_LOANS_FV = (
     'us-gaap:FairValueOptionLoansHeldAsAssetsAggregateAmountInNonaccrualStatus'
 )
 
+# "Non-accrual", or the participle BlackRock's BDCs use: "Non-accruing debt
+# investment." (edgartools-tfhpl).
+_NA = r'non[- ]?accru(?:al|ing)'
+
 # Negation patterns — footnotes that explicitly deny non-accrual status.
 # These must be checked BEFORE affirmative patterns.
 # Examples: "there were no investments on non-accrual status",
 #           "the Company had no portfolio company investment on non-accrual"
 NEGATION_PATTERNS = [
-    r'\bno\s+(?:investments?|loans?|portfolio\s+company).{0,40}non[- ]?accrual',
-    r'\bnone\b.{0,40}non[- ]?accrual',
-    r'(?:were|was|is|are)\s+not\s+(?:on\s+)?non[- ]?accrual',
-    r'did\s+not\s+have\s+any.{0,40}non[- ]?accrual',
-    r'\bzero\b.{0,40}non[- ]?accrual',
-    r'there\s+were\s+no.{0,40}non[- ]?accrual',
+    rf'\bno\s+(?:investments?|loans?|portfolio\s+company).{{0,40}}{_NA}',
+    rf'\bnone\b.{{0,40}}{_NA}',
+    rf'(?:were|was|is|are)\s+not\s+(?:on\s+)?{_NA}',
+    rf'did\s+not\s+have\s+any.{{0,40}}{_NA}',
+    rf'\bzero\b.{{0,40}}{_NA}',
+    rf'there\s+were\s+no.{{0,40}}{_NA}',
 ]
 
 # Affirmative patterns — footnotes that directly state an investment is on non-accrual.
@@ -76,25 +90,70 @@ NEGATION_PATTERNS = [
 # sentence pattern (e.g. PSEC "Investment on non-accrual status as of the
 # reporting date"). See _classify_nonaccrual_footnote for the full decision.
 AFFIRMATIVE_PATTERNS = [
-    r'(?:was|were)\s+(?:on|placed\s+on)\s+non[- ]?accrual\s+status',
-    r'(?:was|were)\s+(?:on|placed\s+on)\s+non[- ]?accrual(?:\s|[,.])',
-    r'(?:is|are)\s+(?:on|currently\s+on)\s+non[- ]?accrual\s+status',
-    r'(?:is|are)\s+(?:on|currently\s+on)\s+non[- ]?accrual(?:\s|[,.])',
-    r'(?:loan|debt|investment)\s+was\s+(?:on|placed\s+on)\s+non[- ]?accrual',
-    r'(?:loan|debt|investment)\s+is\s+(?:on|currently\s+on)\s+non[- ]?accrual',
-    r'^non[- ]?accrual\s+(?:and|or)\s+non[- ]?income',
-    r'the\s+investment\s+is\s+on\s+non[- ]?accrual',
+    rf'(?:was|were)\s+(?:on|placed\s+on)\s+{_NA}\s+status',
+    rf'(?:was|were)\s+(?:on|placed\s+on)\s+{_NA}(?:\s|[,.])',
+    rf'(?:is|are)\s+(?:on|currently\s+on)\s+{_NA}\s+status',
+    rf'(?:is|are)\s+(?:on|currently\s+on)\s+{_NA}(?:\s|[,.])',
+    rf'(?:loan|debt|investment)\s+was\s+(?:on|placed\s+on)\s+{_NA}',
+    rf'(?:loan|debt|investment)\s+is\s+(?:on|currently\s+on)\s+{_NA}',
+    rf'^{_NA}\s+(?:and|or)\s+non[- ]?income',
+    rf'the\s+investment\s+is\s+on\s+{_NA}',
 ]
 
 # A bare non-accrual mention (adjacency required, so "non-cash ... accrual" in a
 # narrative paragraph does not count).
-_NONACCRUAL_RE = re.compile(r'non[- ]?accrual')
+_NONACCRUAL_RE = re.compile(_NA)
 
 # Schedule-of-investments non-accrual markers are short labels (observed range:
 # 5-25 words across ARCC/FSK/GBDC/MAIN/PSEC). Footnotes that merely *mention*
 # non-accrual in passing — rollforward tables, policy notes — run 100+ words.
 # This threshold separates label-shaped footnotes from narrative ones.
 _LABEL_MAX_WORDS = 30
+
+# What a flag looks like, beyond mentioning non-accrual (edgartools-t75ot).
+# A footnote that holds two or more numbered notes is a bundle: some filers put
+# their whole "(1) ... (22) Investment is on non-accrual status" list in one
+# footnote linked to every holding that carries any of them, and XBRL does not
+# say which holding carries which note.
+_NUMBERED_NOTE = re.compile(r'(?:^|[.;:]\s*|\s)\(\s*\d{1,2}\s*\)\s*[a-z]')
+# A leading footnote mark: "(14)", "[a]", "3."
+_LEADING_MARK = re.compile(r'^\s*(?:\(\s*[0-9a-z]{1,3}\s*\)|\[[0-9a-z]{1,3}\]|[0-9]{1,2}[.)]\s)\s*')
+# First sentences that mention non-accrual without saying the holding is on it:
+# policy notes and portfolio-level counts.
+_NOT_A_FLAG_PATTERNS = [
+    r'except\s+(?:for\s+)?non[- ]?accru',                                     # Logan Ridge
+    r'recogni[sz]ed\s+on\s+non[- ]?accru',                                    # Oxford Square
+    r'may\s+be\s+(?:placed\s+)?on\s+non[- ]?accru',
+    r'\bhad\s+(?:one|two|three|four|five|six|seven|eight|nine|ten|\d+)\b.{0,80}non[- ]?accru',  # AGL
+]
+# A later sentence about the holding itself ("Our debt investment in this
+# portfolio company is on non-accrual status", after a liquidation note).
+_THIS_INVESTMENT_ON_NONACCRUAL = re.compile(
+    r'\b(?:our|this|the)\s+(?:debt\s+)?(?:investment|loan)\b.{0,60}?'
+    r'\b(?:is|was)\s+(?:currently\s+)?(?:on|placed\s+on)\s+non[- ]?accru'
+)
+
+
+def _first_sentence(text: str) -> str:
+    lead = _LEADING_MARK.sub('', text, count=1)
+    m = re.match(r'^(.*?[.;])(?:\s|$)', lead)
+    return m.group(1) if m else lead
+
+
+def _is_about_the_linked_holding(text_lower: str) -> bool:
+    """Whether a non-accrual footnote says its own holding is on non-accrual.
+
+    It must not be a bundle of numbered notes, and its first sentence must
+    mention non-accrual without being a policy note or a portfolio-level count,
+    unless a later sentence names the investment itself.
+    """
+    text = re.sub(r'\s+', ' ', text_lower).strip()
+    if len(_NUMBERED_NOTE.findall(text)) >= 2:
+        return False
+    first = _first_sentence(text)
+    if _NONACCRUAL_RE.search(first) and not any(re.search(p, first) for p in _NOT_A_FLAG_PATTERNS):
+        return True
+    return bool(_THIS_INVESTMENT_ON_NONACCRUAL.search(text))
 
 
 def _classify_nonaccrual_footnote(text_lower: str, linked_to_investments: bool) -> bool:
@@ -120,10 +179,20 @@ def _classify_nonaccrual_footnote(text_lower: str, linked_to_investments: bool) 
     linkage: long rollforward/policy footnotes that mention non-accrual are
     excluded by length, and unlinked footnotes contribute nothing to Layer-1
     extraction anyway (it resolves investments by following the linkage).
+
+    Steps 3 and 4 also require the footnote to be about the holding it is
+    linked to (``_is_about_the_linked_holding``). Short policy notes ("All debt
+    investments are income producing except for non-accrual investments"),
+    portfolio-level counts ("the Company had one portfolio company investment
+    on non-accrual status") and bundles of numbered notes all passed 3 or 4 and
+    flagged every linked holding: Runway's FY2026 Q3 rate read 98.8%
+    (edgartools-t75ot).
     """
     if not _NONACCRUAL_RE.search(text_lower):
         return False
     if any(re.search(p, text_lower) for p in NEGATION_PATTERNS):
+        return False
+    if not _is_about_the_linked_holding(text_lower):
         return False
     if any(re.search(p, text_lower) for p in AFFIRMATIVE_PATTERNS):
         return True
@@ -161,7 +230,7 @@ class NonAccrualResult:
     total_portfolio_fair_value: Optional[Decimal]
 
     # Extraction metadata
-    extraction_method: str  # 'footnote' | 'custom_concept' | 'aggregate_concept' | 'none'
+    extraction_method: str  # 'footnote' | 'custom_concept' | 'aggregate_concept' | 'tagged_zero' | 'none'
     custom_concept_rate: Optional[float] = None
     aggregate_concept_value: Optional[Decimal] = None
 
@@ -170,6 +239,13 @@ class NonAccrualResult:
     # footnotes that resolved no investments). Lets callers distinguish
     # "genuinely zero non-accruals" from "we may have failed to parse".
     warnings: List[str] = field(default_factory=list)
+
+    # Where total_portfolio_fair_value came from: 'balance_sheet' (the filer's
+    # undimensioned total or its affiliation lines), 'identifier_total' (a
+    # grand-total row the filer tags as an identifier member), 'schedule_sum'
+    # (the schedule's identifier rows added up, which can count subtotals), or
+    # None when there is no total.
+    total_source: Optional[str] = None
 
     @property
     def has_warnings(self) -> bool:
@@ -190,13 +266,14 @@ class NonAccrualResult:
 
         * ``'investment'`` — footnotes resolved individual investments, so they can be counted.
         * ``'aggregate'`` — only a portfolio-level rate or amount (a custom or us-gaap
-          concept); nothing says which investments, or how many.
+          concept); nothing says which investments, or how many, unless the
+          filer tags its non-accruals as zero (``extraction_method`` ``'tagged_zero'``).
         * ``'none'`` — no signal at all. That means unknown, not zero: a BDC can
           disclose non-accruals only in prose.
         """
         if self.investments:
             return 'investment'
-        if self.extraction_method in ('custom_concept', 'aggregate_concept'):
+        if self.extraction_method in ('custom_concept', 'aggregate_concept', 'tagged_zero'):
             return 'aggregate'
         return 'none'
 
@@ -205,9 +282,13 @@ class NonAccrualResult:
         """Count of non-accrual investment rows, or None when the filing does not identify them.
 
         Counts rows as the schedule lists them, so a company with two non-accrual
-        loans counts twice. None when ``evidence_level`` is ``'aggregate'`` or ``'none'``:
-        an aggregate rate proves non-accruals exist without saying how many.
+        loans counts twice. 0 when the filer tags its non-accruals as zero
+        (``extraction_method`` ``'tagged_zero'``). None otherwise when
+        ``evidence_level`` is ``'aggregate'`` or ``'none'``: an aggregate rate
+        proves non-accruals exist without saying how many.
         """
+        if self.extraction_method == 'tagged_zero':
+            return 0
         if self.evidence_level != 'investment':
             return None
         return len(self.investments)
@@ -262,7 +343,8 @@ class NonAccrualResult:
         if self.nonaccrual_fair_value is not None:
             lines.append(f'Non-Accrual Fair Value: ${self.nonaccrual_fair_value:,.0f}')
         if self.total_portfolio_fair_value is not None:
-            lines.append(f'Total Portfolio Fair Value: ${self.total_portfolio_fair_value:,.0f}')
+            source = ' (sum of schedule rows)' if self.total_source == 'schedule_sum' else ''
+            lines.append(f'Total Portfolio Fair Value: ${self.total_portfolio_fair_value:,.0f}{source}')
         lines.append(f'Evidence Level: {self.evidence_level}')
         lines.append(f'Extraction Method: {self.extraction_method}')
 
@@ -358,13 +440,17 @@ def extract_nonaccrual(
        related_fact_ids to identify specific investments with their fair values.
     2. **Custom XBRL concepts** — searches facts for concepts containing "nonaccrual".
     3. **Standard us-gaap aggregate** — checks one standard concept.
+    4. **A tagged zero** — an amount or count of non-accruals tagged as 0, when no
+       footnote flags non-accrual, gives a 0% rate.
 
     All three results are captured in NonAccrualResult for cross-validation.
 
     Args:
         source: A Filing object or BDCEntity. If BDCEntity, fetches latest filing.
         form: Filing form type (default "10-K"). Only used with BDCEntity.
-        period: Reporting period (e.g., "2025-12-31"). If None, uses latest instant.
+        period: Reporting period (e.g., "2025-12-31"). If None, uses the filing's
+            period of report. Either is read as given: a filing with no investment
+            data at that period gives a result at that period with no rate.
 
     Returns:
         NonAccrualResult if the filing could be parsed, None if XBRL unavailable.
@@ -405,8 +491,8 @@ def _extract_nonaccrual_from_filing(filing, period: Optional[str] = None) -> Opt
     if xbrl is None:
         return None
 
-    # Use filing's reporting period as anchor when no explicit period given.
-    # This avoids resolving to filing dates or DEI dates instead of balance sheet dates.
+    # With no period given, read the filing's report date, never a filing or
+    # DEI date found among its facts.
     if period is None:
         period = getattr(filing, 'period_of_report', None)
 
@@ -450,18 +536,15 @@ def _extract_nonaccrual_from_xbrl(
         f['fact_id']: f for f in all_facts if f.get('fact_id')
     }
 
-    # Determine period — _determine_latest_instant is only reached when
-    # extract_nonaccrual couldn't provide a period_of_report anchor
+    # A known period is read as given, even when the filing has no investment
+    # data there; the result then has no rate (edgartools-a3m66).
     if period is None:
         period = _determine_latest_instant(all_facts)
-    else:
-        # Validate that the provided period has investment data, fall back if not
-        period = _determine_latest_instant(all_facts, anchor_period=period)
     if period is None:
         return None
 
     # Total portfolio fair value (rate denominator)
-    total_fv = _sum_portfolio_fair_value(all_facts, period)
+    total_fv, total_source = _portfolio_total_fair_value(all_facts, period)
 
     # --- Layer 1: Footnote extraction ---
     nonaccrual_investments, recognized_footnotes = _extract_from_footnotes(
@@ -491,6 +574,12 @@ def _extract_nonaccrual_from_xbrl(
     elif aggregate_value is not None:
         method = 'aggregate_concept'
         nonaccrual_fv = aggregate_value
+    elif recognized_footnotes == 0 and _tagged_zero(all_facts, period):
+        # A footnote flag outranks a tagged zero, even one that resolved no
+        # holdings: Antares Strategic Credit tags PortfolioCompaniesNonAccrual = 0
+        # beside "Position is on non-accrual status".
+        method = 'tagged_zero'
+        nonaccrual_fv = Decimal(0)
     else:
         method = 'none'
         nonaccrual_fv = None
@@ -502,6 +591,8 @@ def _extract_nonaccrual_from_xbrl(
         num_investments=len(nonaccrual_investments),
         period=period,
     )
+    if method == 'footnote':
+        warnings.extend(_reconcile_with_tagged(nonaccrual_investments, all_facts, period))
 
     return NonAccrualResult(
         cik=cik,
@@ -515,6 +606,7 @@ def _extract_nonaccrual_from_xbrl(
         custom_concept_rate=custom_concept_rate,
         aggregate_concept_value=aggregate_value,
         warnings=warnings,
+        total_source=total_source,
     )
 
 
@@ -555,26 +647,250 @@ def _build_warnings(
     return warnings
 
 
+# A share rather than a balance: "...Percent...", "...Rate" (CamelCase, so "Corporate" is not one)
+_A_RATE = re.compile(r'[Pp]ercent|Ratio|Rate(?=[A-Z]|$)|Of(?:Total|Net)Assets')
+# A total for one class of instrument rather than for every holding: GBDC tags its loans and its
+# preferred equity apart, us-gaap's aggregate covers loans held under the fair value option.
+_ONE_CLASS = re.compile(r'Loans?(?=[A-Z]|$)|Preferred|Equity|Debt')
+# A count of loans, read after "Number". Loans are rows of the schedule; borrowers and companies
+# are not, and neither are "investments": CCAP tags 11 while listing their pieces as 24 rows.
+_COUNTS_HOLDINGS = re.compile(r'(?:of)?(?:debt)?loans?')
+
+
+def _tagged_nonaccrual_balances(all_facts: List[dict], period: str) -> List[Tuple[str, str, Decimal]]:
+    """``(kind, concept, value)`` for each non-accrual total the filer tags at *period*.
+
+    *kind* is ``'cost'``, ``'fair_value'`` or ``'loans'``. Only undimensioned
+    facts count, at the instant or for a duration ending on it: Trinity Capital
+    tags ``trin:NonAccrualCost`` for the quarter rather than at its end.
+    Percentages, borrower counts and the concepts ``_tagged_zero`` sets aside
+    (income, thresholds, allowances) are not balances this can compare.
+    """
+    found: Dict[Tuple[str, str], Decimal] = {}
+    for fact in all_facts:
+        concept = fact.get('concept') or ''
+        kind = _nonaccrual_balance_kind(concept)
+        if kind is None or not _is_undimensioned_at(fact, period):
+            continue
+        value = fact.get('numeric_value')
+        if value is None or pd.isna(value):
+            continue
+        try:
+            found.setdefault((kind, concept), Decimal(str(value)))
+        except (ValueError, InvalidOperation):
+            continue
+    return [(kind, concept, value) for (kind, concept), value in found.items()]
+
+
+def _nonaccrual_balance_kind(concept: str) -> Optional[str]:
+    """``'cost'``, ``'fair_value'`` or ``'loans'`` for a non-accrual balance concept, else ``None``."""
+    lower = concept.lower()
+    if 'nonaccrual' not in lower and 'non_accrual' not in lower:
+        return None
+    if _NOT_A_NONACCRUAL_BALANCE.search(lower) or _A_RATE.search(concept):
+        return None
+    if 'number' in lower:
+        # What is counted follows "Number": BXSL tags ...NumberOfLoans = 8 beside
+        # ...NumberOfBorrowers = 5, and only loans compare with the rows read here.
+        return 'loans' if _COUNTS_HOLDINGS.match(lower.split('number', 1)[1]) else None
+    if 'cost' in lower:
+        return 'cost'
+    if 'fairvalue' in lower or concept == CONCEPT_NONACCRUAL_LOANS_FV:
+        return 'fair_value'
+    return None
+
+
+def _is_undimensioned_at(fact: dict, period: str) -> bool:
+    """An undimensioned fact at *period*, or for a duration ending on it."""
+    if _dims(fact):
+        return False
+    return fact.get('period_instant') == period or fact.get('period_end') == period
+
+
+def _reconcile_with_tagged(investments: List[NonAccrualInvestment], all_facts: List[dict],
+                           period: str) -> List[str]:
+    """Warn where the footnote-flagged holdings disagree with a total the filer tags (GH #1959).
+
+    A filer's footnote links can be looser than the marks in its printed
+    schedule. Sixth Street links its non-accrual footnote to a Varinem loan its
+    schedule marks (3)(4), not (14), in the same way as to an ASP Unifrax note
+    marked (14), so no rule over the links can tell them apart. Where the filer
+    also tags a total, the disagreement is visible, and the result says so
+    rather than returning a confident list.
+
+    A total for every holding, and a count of loans, must match. Totals for one
+    class of instrument are added together and only bound the holdings from
+    below: GBDC tags its loans ($73.3M) and its preferred equity ($85.3M) apart,
+    and they add up to the $158.6M read. Amounts are compared within 1% or
+    $150,000, since filers tag them rounded to $0.1M.
+    """
+    def close(found: Decimal, tagged: Decimal) -> bool:
+        return abs(found - tagged) <= max(abs(tagged) / 100, Decimal(150_000))
+
+    def disagree(concept: str, tagged: str, found: str) -> str:
+        return (f"The filer tags {concept} = {tagged} at {period}, but the holdings read from its "
+                f"non-accrual footnotes come to {found}; the list may include holdings its schedule "
+                f"does not mark, or miss some.")
+
+    warnings: List[str] = []
+    totals = {
+        'cost': sum((inv.cost for inv in investments if inv.cost), Decimal(0)),
+        'fair_value': sum((inv.fair_value for inv in investments if inv.fair_value), Decimal(0)),
+    }
+    one_class: Dict[str, List[Tuple[str, Decimal]]] = {}
+    for kind, concept, tagged in _tagged_nonaccrual_balances(all_facts, period):
+        if kind == 'loans':
+            if int(tagged) != len(investments):
+                warnings.append(disagree(concept, str(int(tagged)), f"{len(investments)} holding(s)"))
+        elif _ONE_CLASS.search(concept.split(':')[-1]):
+            one_class.setdefault(kind, []).append((concept, tagged))
+        elif not close(totals[kind], tagged):
+            basis = 'cost' if kind == 'cost' else 'fair value'
+            warnings.append(disagree(concept, f"${tagged:,.0f}", f"${totals[kind]:,.0f} at {basis}"))
+    for kind, tags in one_class.items():
+        floor = sum((tagged for _, tagged in tags), Decimal(0))
+        if totals[kind] < floor and not close(totals[kind], floor):
+            basis = 'cost' if kind == 'cost' else 'fair value'
+            names = ' + '.join(concept for concept, _ in tags)
+            warnings.append(disagree(names, f"${floor:,.0f}", f"${totals[kind]:,.0f} at {basis}"))
+    return warnings
+
+
 # ---------------------------------------------------------------------------
 # Layer 1: Footnote-based extraction
 # ---------------------------------------------------------------------------
 
+def _dims(fact: dict) -> Dict[str, str]:
+    """The fact's dimensions as ``{axis key: member}``."""
+    return {key: value for key, value in fact.items() if key.startswith('dim_') and value}
+
+
+def _position_key(fact: dict):
+    """What identifies one holding: its identifier member, or its whole dimension set."""
+    return fact.get(DIM_KEY) or frozenset(_dims(fact).items())
+
+
+def _schedule_on_identifier_axis(all_facts: List[dict], period: str) -> bool:
+    """Whether the filing tags its schedule of investments on InvestmentIdentifierAxis for *period*."""
+    return any(f.get(DIM_KEY) and f.get('concept') == CONCEPT_FAIR_VALUE
+               and f.get('period_instant') == period for f in all_facts)
+
+
+def _fair_values_by_position(all_facts: List[dict]) -> Dict[tuple, List[dict]]:
+    """Dimensioned InvestmentOwnedAtFairValue facts keyed by ``(_position_key, instant)``."""
+    index: Dict[tuple, List[dict]] = {}
+    for fact in all_facts:
+        if fact.get('concept') == CONCEPT_FAIR_VALUE and _dims(fact):
+            index.setdefault((_position_key(fact), fact.get('period_instant')), []).append(fact)
+    return index
+
+
 def _investment_fv_facts_for_footnote(
     footnote,
     fact_by_id: Dict[str, dict],
+    identifier_axis: bool = True,
+    fv_by_position: Optional[Dict[tuple, List[dict]]] = None,
 ) -> List[dict]:
-    """Enriched investment fair-value facts a footnote is linked to (any period)."""
+    """Enriched investment fair-value facts a footnote is linked to (any period).
+
+    With ``identifier_axis`` only facts on InvestmentIdentifierAxis count. Without
+    it, any dimensioned fact does: schedules tagged before the identifier axis
+    name a holding by a set of axes instead (TPVG FY2024: industry, instrument,
+    loan and a company axis of its own; edgartools-jv32z).
+
+    A footnote linked to another cell of a holding's row stands for that
+    holding's fair value at the same date. New Mountain Finance attaches its
+    non-accrual footnote to the PIK rate and spread, never the fair value, and
+    SuRo to the principal (edgartools-jv8b8); ``fv_by_position`` (from
+    ``_fair_values_by_position``) resolves them. Only instant facts resolve: a
+    flag on a duration fact is not a flag at its end date (Logan Ridge marks
+    its Q1 2025 industry name for a loan its schedule does not mark).
+    Undimensioned facts are never positions, so a footnote on a total pulls in
+    nothing.
+    """
     facts: List[dict] = []
+    seen: set = set()
     for fact_id in footnote.related_fact_ids:
         enriched = fact_by_id.get(fact_id)
         if enriched is None:
             continue
-        if enriched.get(DIM_KEY) is None:
+        if identifier_axis:
+            if enriched.get(DIM_KEY) is None:
+                continue
+        elif not _dims(enriched):
             continue
-        if enriched.get('concept', '') != CONCEPT_FAIR_VALUE:
+        if enriched.get('concept', '') == CONCEPT_FAIR_VALUE:
+            resolved = [enriched]
+        elif fv_by_position is not None and enriched.get('period_instant'):
+            resolved = fv_by_position.get((_position_key(enriched), enriched['period_instant']), [])
+        else:
             continue
-        facts.append(enriched)
+        for fact in resolved:
+            key = fact.get('fact_id') or (fact.get('concept'), _position_key(fact), fact.get('period_instant'))
+            if key not in seen:
+                seen.add(key)
+                facts.append(fact)
     return facts
+
+
+def _drop_subtotals(flagged: List[Tuple[dict, str]]) -> List[Tuple[dict, str]]:
+    """Drop facts that roll up other flagged facts.
+
+    Off the identifier axis a footnote can annotate a company's or an industry's
+    subtotal as well as its loans: TPVG links "Nakd.com One World AB" at $8.47M
+    (no loan member) beside its two loans of $3.18M and $5.29M, and a "Financial
+    Software" industry total. A fact whose dimensions are a proper subset of
+    another flagged fact's is such a roll-up.
+    """
+    dim_sets = [frozenset(_dims(fact).items()) for fact, _ in flagged]
+    return [pair for pair, dims in zip(flagged, dim_sets, strict=True)
+            if not any(dims < other for other in dim_sets)]
+
+
+# Axes that name the portfolio company when a schedule is not on the identifier
+# axis: tpvg:PortfolioCompaniesAxis, us-gaap:RelatedPartyTransactionsByRelatedPartyAxis (OXSQ).
+_COMPANY_AXIS_RE = re.compile(r'compan|relatedparty|investee|borrower|obligor', re.IGNORECASE)
+# Axes that name the instrument, most specific first
+_INSTRUMENT_AXES = (
+    'dim_us-gaap_InvestmentTypeAxis',
+    'dim_us-gaap_StatementClassOfStockAxis',
+    'dim_us-gaap_LienCategoryAxis',
+    'dim_us-gaap_LongtermDebtTypeAxis',
+    'dim_us-gaap_FinancialInstrumentAxis',
+)
+_LABEL_ROLES = (
+    'http://www.xbrl.org/2003/role/label',
+    'http://www.xbrl.org/2003/role/terseLabel',
+    'http://www.xbrl.org/2003/role/verboseLabel',
+)
+
+
+def _member_label(xbrl, member: str) -> str:
+    """A member's label without its "[Member]" suffix.
+
+    A label ending in "[Member]" is the one the filer wrote. OXSQ's standard
+    label is generated from the element name ("Uni Tek Global Services Inc
+    Member") while its terse label reads "UniTek Global Services, Inc. [Member]";
+    TPVG's terse label drops the loan's number that its standard label keeps.
+    """
+    element = catalog_entry(xbrl.element_catalog, member)
+    labels = getattr(element, 'labels', None) or {}
+    candidates = [labels[role] for role in _LABEL_ROLES if labels.get(role)]
+    written = [label for label in candidates if re.search(r'\[Member\]\s*$', label)]
+    label = (written or candidates or [member.split(':')[-1]])[0]
+    return re.sub(r'\s*(?:\[Member\]|Member)\s*$', '', label).strip()
+
+
+def _describe_dimensional_position(xbrl, fact: dict) -> Tuple[str, str, str]:
+    """``(identifier, company_name, investment_type)`` for a holding named by several axes."""
+    dims = _dims(fact)
+    company_axis = next((axis for axis in sorted(dims) if _COMPANY_AXIS_RE.search(axis)), None)
+    company = _member_label(xbrl, dims[company_axis]) if company_axis else ''
+    instrument_axis = next((axis for axis in _INSTRUMENT_AXES if axis in dims), None)
+    investment_type = _member_label(xbrl, dims[instrument_axis]) if instrument_axis else 'Unknown'
+    others = [_member_label(xbrl, dims[axis]) for axis in sorted(dims) if axis != company_axis]
+    identifier = ' | '.join(part for part in [company, *others] if part)
+    return identifier, company or identifier, investment_type
 
 
 def _extract_from_footnotes(
@@ -594,13 +910,12 @@ def _extract_from_footnotes(
     if not footnotes:
         return [], 0
 
-    seen_identifiers: set = set()
-    investments: List[NonAccrualInvestment] = []
+    identifier_axis = _schedule_on_identifier_axis(all_facts, period)
+    fv_by_position = _fair_values_by_position(all_facts)
+    flagged: List[Tuple[dict, str]] = []
     recognized = 0
-    # Bound company names by the filing's own members, as from_xbrl does; built on first use.
-    member_candidates = None
 
-    for fn_id, footnote in footnotes.items():
+    for footnote in footnotes.values():
         # Only process English footnotes
         lang = getattr(footnote, 'lang', 'en-US') or 'en-US'
         if not lang.startswith('en'):
@@ -610,7 +925,7 @@ def _extract_from_footnotes(
 
         # Pre-compute investment linkage so the classifier can use structure
         # as corroboration for wording it doesn't recognize.
-        linked_fv_facts = _investment_fv_facts_for_footnote(footnote, fact_by_id)
+        linked_fv_facts = _investment_fv_facts_for_footnote(footnote, fact_by_id, identifier_axis, fv_by_position)
         linked_to_investments = bool(linked_fv_facts)
 
         if not _classify_nonaccrual_footnote(text_lower, linked_to_investments):
@@ -619,41 +934,135 @@ def _extract_from_footnotes(
         recognized += 1
 
         # This footnote flags non-accrual status for its linked investments.
-        for enriched in linked_fv_facts:
-            inv_identifier = enriched.get(DIM_KEY)
+        flagged.extend((enriched, footnote.text) for enriched in linked_fv_facts
+                       if enriched.get('period_instant') == period)
 
-            # Check period
-            if enriched.get('period_instant') != period:
-                continue
+    if not identifier_axis:
+        flagged = _drop_subtotals(flagged)
 
-            # Deduplicate by identifier
-            if inv_identifier in seen_identifiers:
-                continue
-            seen_identifiers.add(inv_identifier)
+    seen_positions: set = set()
+    investments: List[NonAccrualInvestment] = []
+    # Bound company names by the filing's own members, as from_xbrl does; built on first use.
+    member_candidates = None
 
+    for enriched, footnote_text in flagged:
+        # Deduplicate by holding
+        position = _position_key(enriched)
+        if position in seen_positions:
+            continue
+        seen_positions.add(position)
+
+        inv_identifier = enriched.get(DIM_KEY)
+        if inv_identifier:
             if member_candidates is None:
                 member_candidates = _get_investment_member_candidates(xbrl)
             _id, company_name, investment_type = _parse_investment_identifier(inv_identifier, member_candidates)
-            cost = _find_cost_for_investment(all_facts, inv_identifier, period)
+        else:
+            inv_identifier, company_name, investment_type = _describe_dimensional_position(xbrl, enriched)
+        cost = _find_cost_for_investment(all_facts, position, period)
 
-            fv = None
-            numeric = enriched.get('numeric_value')
-            if numeric is not None and not pd.isna(numeric):
-                try:
-                    fv = Decimal(str(numeric))
-                except (ValueError, InvalidOperation):
-                    pass
+        fv = None
+        numeric = enriched.get('numeric_value')
+        if numeric is not None and not pd.isna(numeric):
+            try:
+                fv = Decimal(str(numeric))
+            except (ValueError, InvalidOperation):
+                pass
 
-            investments.append(NonAccrualInvestment(
-                identifier=inv_identifier,
-                company_name=company_name,
-                investment_type=investment_type,
-                fair_value=fv,
-                cost=cost,
-                footnote_text=footnote.text,
-            ))
+        investments.append(NonAccrualInvestment(
+            identifier=inv_identifier,
+            company_name=company_name,
+            investment_type=investment_type,
+            fair_value=fv,
+            cost=cost,
+            footnote_text=footnote_text,
+        ))
 
+    if identifier_axis:
+        investments = _drop_schedule_subtotals(investments, all_facts, period)
+        investments = _drop_restated(investments)
     return investments, recognized
+
+
+# A suffix that numbers a piece of the row rather than naming another holding:
+# MAIN's "... 1.1" and "... Secured Debt 1.4", ARCC's "... loan 1", GSBD's and CCAP's "... One".
+_PIECE_COUNTER = re.compile(
+    r'^[\s\-\u2013|]*(?:\.?\d+(?:\.\d+)*|one|two|three|four|five|six|seven|eight|nine|ten)$', re.IGNORECASE)
+# A company total listed under the same heading: Trinity's "... Transportation Technology Total Uveye, Inc."
+_TOTAL_WORD = re.compile(r'\bTotal\b')
+# How closely a subtotal's parts must add up to it. Trinity's two subtotals are 0.3% and
+# 1.8% from the rows under them (a few of its holdings are spelled with a doubled space and
+# fall outside the prefix); holdings whose pieces are listed under them sit 40% or more away.
+_SUBTOTAL_TOLERANCE = 0.05
+
+
+def _drop_schedule_subtotals(investments: List[NonAccrualInvestment], all_facts: List[dict],
+                             period: str) -> List[NonAccrualInvestment]:
+    """Leave out flagged rows that are subtotals of the schedule (GH #1959).
+
+    Identifier-axis members carry no hierarchy, so a subtotal is a member like
+    any loan. Trinity Capital names its subtotals by their heading,
+    "Portfolio Company Debt Securities- United States", and its holdings by the
+    heading followed by the company, and it links its non-accrual footnote to
+    the cost and principal of two such subtotals: its Q1 2025 non-accruals read
+    $1.85B at cost where it reports $49.7M. ``_drop_restated`` cannot see them,
+    because it compares flagged rows with each other and the subtotals' parts
+    are not flagged.
+
+    A flagged row is a subtotal when two or more of the schedule's rows extend
+    its identifier and the innermost of them add up to its fair value. Other
+    rows extend a holding too: New Mountain lists "LogRhythm, Inc. | First lien"
+    and then its "- Drawn" and "- Undrawn" pieces, Main Street a loan and its
+    ".1" to ".4", Goldman Sachs BDC a note and its "One" and "Two". None of them
+    adds up to the holding. Company totals ("Total Uveye, Inc.") restate rows
+    already counted and are left out of the sum, and a suffix that only numbers
+    a piece does not count as an extension, so a parent beside its own tranches
+    is left to ``_drop_restated``.
+    """
+    fair_values: Dict[str, float] = {}
+    for fact in all_facts:
+        member = fact.get(DIM_KEY)
+        value = fact.get('numeric_value')
+        if (member and fact.get('concept') == CONCEPT_FAIR_VALUE and fact.get('period_instant') == period
+                and value is not None and not pd.isna(value)):
+            fair_values.setdefault(_strip_footnote_marks(member).rstrip(), float(value))
+
+    def extends(member: str, head: str) -> bool:
+        return len(member) > len(head) and member.startswith(head) and not member[len(head)].isalnum()
+
+    def is_subtotal(inv: NonAccrualInvestment) -> bool:
+        head = _strip_footnote_marks(inv.identifier).rstrip()
+        total = fair_values.get(head)
+        if not head or not total:
+            return False
+        parts = [member for member in fair_values
+                 if extends(member, head) and not _PIECE_COUNTER.match(member[len(head):])
+                 and not _TOTAL_WORD.search(member[len(head):])]
+        innermost = [member for member in parts if not any(extends(other, member) for other in parts)]
+        if len(innermost) < 2:
+            return False
+        return abs(sum(fair_values[member] for member in innermost) - total) <= abs(total) * _SUBTOTAL_TOLERANCE
+
+    return [inv for inv in investments if not is_subtotal(inv)]
+
+
+def _drop_restated(investments: List[NonAccrualInvestment]) -> List[NonAccrualInvestment]:
+    """Leave out flagged rows that restate another flagged row.
+
+    Identifier-axis members carry no hierarchy, so a holding listed again in a
+    second schedule is a second row. Logan Ridge's FY2024 10-K flags MMI
+    Holdings in its schedule (with cost) and again under "Affiliate
+    investments" (without), so its non-accruals read $10.86M where the filing
+    states $7.9M (edgartools-wg5n8). The rule is the one
+    ``PortfolioInvestments.from_xbrl`` applies to the whole schedule, run over
+    the flagged rows only, so a row is dropped only when the row it restates is
+    flagged too.
+    """
+    rows = [PortfolioInvestment(identifier=inv.identifier, company_name=inv.company_name,
+                                investment_type=inv.investment_type, fair_value=inv.fair_value, cost=inv.cost)
+            for inv in investments]
+    kept, _excluded = _exclude_restated_rows(rows)
+    return [inv for inv, row in zip(investments, rows, strict=True) if any(row is k for k in kept)]
 
 
 # ---------------------------------------------------------------------------
@@ -743,6 +1152,46 @@ def _extract_aggregate_concept(
 
 
 # ---------------------------------------------------------------------------
+# Layer 4: a tagged zero
+# ---------------------------------------------------------------------------
+
+# Non-accrual concepts whose zero does not mean "no investments on non-accrual":
+# policy text, the days-past-due threshold, interest income recognized on
+# non-accrual loans, and the part of them with no allowance.
+_NOT_A_NONACCRUAL_BALANCE = re.compile(
+    r'textblock|policy|threshold|pastdue|income|allowance|writeoff|reversal|reversed|recover'
+)
+
+
+def _tagged_zero(all_facts: List[dict], period: str) -> bool:
+    """Whether the filer tags its non-accruals at *period* as zero, and nothing else.
+
+    Many BDCs with no non-accruals have no footnote to read but tag an amount or
+    count of zero: Stone Point Credit tags
+    us-gaap:FinancingReceivableRecordedInvestmentNonaccrualStatus = 0, AGL
+    NumberPortfolioCompanyInvestmentOnNonAccrualStatus = 0 (edgartools-rol2k).
+    Only undimensioned facts at the instant count, and all of them must be zero:
+    a non-zero amount or count, at cost or at fair value, rules it out.
+    """
+    found = False
+    for fact in all_facts:
+        concept = (fact.get('concept') or '').lower()
+        if 'nonaccrual' not in concept and 'non_accrual' not in concept:
+            continue
+        if _NOT_A_NONACCRUAL_BALANCE.search(concept):
+            continue
+        if fact.get('period_instant') != period or _dims(fact):
+            continue
+        value = fact.get('numeric_value')
+        if value is None or pd.isna(value):
+            continue
+        if float(value) != 0:
+            return False
+        found = True
+    return found
+
+
+# ---------------------------------------------------------------------------
 # Helper functions
 # ---------------------------------------------------------------------------
 
@@ -763,47 +1212,132 @@ def _resolve_filing(source, form: str = "10-K"):
         raise TypeError(f"Expected Filing or BDCEntity, got {type(source).__name__}")
 
 
-def _determine_latest_instant(facts: List[dict], anchor_period: Optional[str] = None) -> Optional[str]:
-    """Find the best period_instant for investment data extraction.
+def _determine_latest_instant(facts: List[dict]) -> Optional[str]:
+    """Find the period_instant to read when neither the caller nor the filing gives one.
 
-    When *anchor_period* is provided (typically from ``filing.period_of_report``),
-    it is used directly if investment facts exist on that date.  This avoids
-    resolving to filing dates, DEI dates, or other non-balance-sheet instants.
-
-    When no anchor is given or the anchor has no investment data, falls back to
-    the most common instant among investment facts (not max, which is susceptible
-    to outlier dates like filing dates).
+    The most common instant among investment facts (not max, which is
+    susceptible to outlier dates like filing dates), else the most common
+    instant of any fact. A known period is never replaced by this: a cover-page
+    10-K/A was labelled with its public-float date, and a 10-Q whose schedule
+    carries another quarter's dates with that quarter (edgartools-a3m66).
     """
-    # Collect instants that have investment data
     from collections import Counter
     investment_instants: Counter = Counter()
-    for f in facts:
-        pi = f.get('period_instant')
-        if pi and f.get(DIM_KEY):
-            investment_instants[pi] += 1
-
-    # If anchor period has investment data, use it directly
-    if anchor_period and anchor_period in investment_instants:
-        return anchor_period
-
-    # Pick the most common instant among investment facts
-    if investment_instants:
-        return investment_instants.most_common(1)[0][0]
-
-    # Fallback: no investment-dimensioned facts at all.
-    # Use anchor if it has any facts, otherwise pick the most common instant.
     all_instants: Counter = Counter()
     for f in facts:
         pi = f.get('period_instant')
-        if pi:
-            all_instants[pi] += 1
-    if not all_instants:
+        if not pi:
+            continue
+        all_instants[pi] += 1
+        if f.get(DIM_KEY):
+            investment_instants[pi] += 1
+
+    if investment_instants:
+        return investment_instants.most_common(1)[0][0]
+    if all_instants:
+        return all_instants.most_common(1)[0][0]
+    return None
+
+
+def _portfolio_total_fair_value(facts: List[dict], period: str) -> Tuple[Optional[Decimal], Optional[str]]:
+    """The rate denominator and where it came from.
+
+    The balance-sheet total comes first. Many filers also tag subtotals and
+    totals on ``InvestmentIdentifierAxis`` ("Total Investments", "Debt
+    Investments", country and lien subtotals), so adding up the identifier rows
+    counted GSCR's FY2024 portfolio as $45.4B against a $7.27B balance sheet
+    (edgartools-7vl3h). The sum is only a fallback for filers with no total.
+    """
+    reported, _unit = _reported_total_fair_value(facts, period)
+    if reported is not None:
+        return reported, 'balance_sheet'
+    split = _affiliation_split_total(facts, period)
+    if split is not None:
+        return split, 'balance_sheet'
+    tagged = _identifier_grand_total(facts, period)
+    if tagged is not None:
+        return tagged, 'identifier_total'
+    summed = _sum_portfolio_fair_value(facts, period)
+    return (summed, 'schedule_sum') if summed is not None else (None, None)
+
+
+_AFFILIATION_AXIS = 'dim_us-gaap_InvestmentIssuerAffiliationAxis'
+# us-gaap's affiliated member is the parent of its controlled and non-controlled members
+_AFFILIATED_PARENT = 'us-gaap:InvestmentAffiliatedIssuerMember'
+_AFFILIATED_CHILDREN = ('us-gaap:InvestmentAffiliatedIssuerControlledMember',
+                        'us-gaap:InvestmentAffiliatedIssuerNoncontrolledMember')
+
+
+def _affiliation_split_total(facts: List[dict], period: str) -> Optional[Decimal]:
+    """The balance sheet's investments added up from its affiliation lines, or None.
+
+    A balance sheet can carry only the split ("Non-affiliated/non-control
+    investments", "Affiliated investments") with no undimensioned total: OXSQ
+    FY2024 tags 256,238,759 + 4,614,100 = 260,852,859 this way
+    (edgartools-jv32z). Only facts on that axis alone count, the most precise
+    per member, and at least two members, so one line is never taken for the whole.
+    """
+    best: Dict[str, Tuple[float, Decimal]] = {}
+    for fact in facts:
+        if fact.get('concept') != CONCEPT_FAIR_VALUE or fact.get('period_instant') != period:
+            continue
+        dims = _dims(fact)
+        if list(dims) != [_AFFILIATION_AXIS]:
+            continue
+        value = fact.get('numeric_value')
+        if value is None or pd.isna(value):
+            continue
+        decimals = str(fact.get('decimals'))
+        try:
+            precision = float('inf') if decimals.upper() == 'INF' else float(decimals)
+        except ValueError:
+            precision = -99.0
+        member = dims[_AFFILIATION_AXIS]
+        if member not in best or precision > best[member][0]:
+            best[member] = (precision, Decimal(str(value)))
+    if _AFFILIATED_PARENT in best and any(child in best for child in _AFFILIATED_CHILDREN):
+        del best[_AFFILIATED_PARENT]
+    # A filer's own member restating a us-gaap line is one line, not two. SLR HC
+    # BDC tags its 96,665,000 of non-affiliated investments under both its
+    # custom member and us-gaap:InvestmentUnaffiliatedIssuerMember, which summed
+    # to twice its total (edgartools-m4qnb).
+    standard_values = {value for member, (_, value) in best.items() if member.startswith('us-gaap:')}
+    for member in [m for m, (_, value) in best.items()
+                   if not m.startswith('us-gaap:') and value in standard_values]:
+        del best[member]
+    if len(best) < 2:
         return None
+    return sum((value for _, value in best.values()), Decimal(0))
 
-    if anchor_period and anchor_period in all_instants:
-        return anchor_period
 
-    return all_instants.most_common(1)[0][0]
+# A grand-total row's member name: "Investments", "Investments in Securities",
+# "Total Investments - 148.3%". Not "... and Cash Equivalents" or "Net Assets".
+_GRAND_TOTAL_MEMBER = re.compile(
+    r'^\s*(?:total\s+)?investments(?:\s+in\s+securities)?(?:\s+at\s+fair\s+value)?'
+    r'(?:\s*[-\u2013]\s*[\d.,]+\s*%)?\s*$', re.IGNORECASE)
+
+
+def _identifier_grand_total(facts: List[dict], period: str) -> Optional[Decimal]:
+    """The filer's grand total when it is tagged as an identifier-axis member, or None.
+
+    With no balance-sheet total, the identifier rows were summed, subtotals and
+    totals included. Oxford Square's 10-Q for 2026-03-31 tags "Investments in
+    Securities" = $235,372,463 as a member and summed to $1.30B; Muzinich BDC
+    tags "Investments" = $214,085,177 against a $819M sum (edgartools-cpd1b).
+    Only a member named as the whole portfolio counts, and only when one value
+    is named so.
+    """
+    values = set()
+    for fact in facts:
+        if (fact.get('concept') != CONCEPT_FAIR_VALUE or fact.get('period_instant') != period
+                or list(_dims(fact)) != [DIM_KEY]):
+            continue
+        if not _GRAND_TOTAL_MEMBER.match(str(fact.get(DIM_KEY))):
+            continue
+        value = fact.get('numeric_value')
+        if value is not None and not pd.isna(value):
+            values.add(Decimal(str(value)))
+    return values.pop() if len(values) == 1 else None
 
 
 def _sum_portfolio_fair_value(facts: List[dict], period: str) -> Optional[Decimal]:
@@ -828,14 +1362,14 @@ def _sum_portfolio_fair_value(facts: List[dict], period: str) -> Optional[Decima
 
 def _find_cost_for_investment(
     facts: List[dict],
-    identifier: str,
+    position,
     period: str,
 ) -> Optional[Decimal]:
-    """Find the InvestmentOwnedAtCost fact for a specific investment and period."""
+    """Find the InvestmentOwnedAtCost fact for a holding (see ``_position_key``) and period."""
     for f in facts:
         if (f.get('concept') == CONCEPT_COST
                 and f.get('period_instant') == period
-                and f.get(DIM_KEY) == identifier):
+                and _position_key(f) == position):
             value = f.get('numeric_value')
             if value is not None and not pd.isna(value):
                 try:

@@ -549,6 +549,7 @@ class Prospectus497K:
     def from_filing(cls, filing) -> Optional['Prospectus497K']:
         """Create a Prospectus497K from a Filing object."""
         from edgar.funds._497k_tables import (
+            extract_cover_ticker,
             extract_fee_tables,
             extract_fund_metadata,
             extract_performance_table,
@@ -560,6 +561,11 @@ class Prospectus497K:
 
         # Extract SGML header data (series/class/ticker)
         header_data = _extract_header_data(filing)
+
+        # A single class the header gives no ticker: the cover may print it (GH #912)
+        class_info = header_data.get('class_info') or []
+        if len(class_info) == 1 and not class_info[0].get('ticker'):
+            class_info[0]['ticker'] = extract_cover_ticker(html)
 
         # Extract HTML tables
         fee_data = extract_fee_tables(html, class_info=header_data.get('class_info'))

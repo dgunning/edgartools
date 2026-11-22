@@ -21,6 +21,7 @@ Features:
 import json
 import logging
 import re
+from copy import deepcopy
 from dataclasses import dataclass, field
 from datetime import date, timedelta
 from enum import Enum
@@ -31,7 +32,9 @@ from typing import TYPE_CHECKING, Dict, List, Optional, Tuple, Union
 
 import pandas as pd
 
-from edgar.documents import parse_html
+from edgar.documents import HTMLParser
+from edgar.documents import parse_html as parse_html
+from edgar.documents.strategies.table_processing import TableProcessor
 
 logger = logging.getLogger(__name__)
 
@@ -238,6 +241,8 @@ def _classify_row_type(label: str, parent_context: str = '') -> RowType:
         for pattern in patterns:
             if pattern in label_lower:
                 return row_type
+    if re.search(r'\beps\b', label_lower):
+        return RowType.PER_SHARE
     # If no match but we have parent context, classify using parent
     # Check SHARES before PER_SHARE to handle parents like
     # "Shares used in computing earnings per share:" (contains both patterns)
@@ -446,6 +451,143 @@ def _label_to_concept(label: str) -> str:
 
 # ── Unit mapping from RowType ─────────────────────────────────────────────
 
+_CURRENCIES = {
+    'TWD': r'NT\$|\bTWD\b|New Taiwan [Dd]ollars',
+    'USD': r'US\$|\bUSD\b|U\.?S\.? [Dd]ollars',
+    'EUR': r'€|\bEUR\b|\beuros?\b',
+    'CNY': r'\bRMB\b|\bCNY\b|[Rr]enminbi',
+    'HKD': r'HK\$|\bHKD\b|Hong Kong [Dd]ollars',
+    'JPY': r'\bJPY\b|\byen\b|¥',
+}
+
+# A currency the table above does not map. A declaration naming one is reported
+# as unknown (None), never as the legacy USD default. Case-sensitive on purpose:
+# 'Canadian dollars' and 'GBP' are currencies, 'of dollars' and 'EPS' are not.
+_OTHER_CURRENCY = re.compile(
+    r'[£₩₹₣₽]|\b[A-Z]{1,2}\$|'
+    r'\b(?i:pounds?|sterling|francs?|won|rupees?|pesos?|reais|yuan|rand|zloty|lira|kron[aeo]r?)\b|'
+    r'\b(?!US\b)[A-Z][a-z]+ (?i:dollars?)\b|'
+    # ISO 4217 codes, listed rather than any three capitals: US notes name
+    # metrics like DAU, ARR or FTE in "except per share and DAU data".
+    r'\b(?:GBP|CAD|AUD|NZD|CHF|SGD|INR|KRW|BRL|MXN|ZAR|SEK|NOK|DKK|PLN|'
+    r'CZK|HUF|TRY|ILS|RUB|ARS|CLP|COP|PEN|IDR|MYR|THB|PHP|VND|SAR|AED)\b'
+)
+
+# '(in millions ...', '(Amounts in thousands ...', '(€ in millions ...', '(Unit: NT$ million ...'
+# The 'units:' branch starts at '(' or a word boundary, never inside a whitespace run:
+# an optional '(' followed by '\s*' made every space a start position, which is
+# quadratic on long runs (8,000 spaces took 218 ms).
+_UNIT_DECLARATION = re.compile(
+    r'(?:(?:\(\s*)?\bunits?\s*:\s*|\(\s*(?:(?P<lead>[^\s()]{1,8})\s+)?in\s+)[^)\n]+', re.I
+)
+
+
+def _currency(text):
+    matches = [code for code, pattern in _CURRENCIES.items() if re.search(pattern, text, re.I)]
+    return matches[0] if len(matches) == 1 else None
+
+
+def _names_currency(text):
+    return any(re.search(pattern, text, re.I) for pattern in _CURRENCIES.values())
+
+
+def _declared_currency(declaration, scale):
+    """Currency a unit declaration names: a code, None for unknown, USD when it names only a scale."""
+    if _names_currency(declaration):
+        return _currency(declaration)  # None when it names more than one
+    if scale is None or _OTHER_CURRENCY.search(declaration):
+        return None
+    return 'USD'  # Legacy default when only the scale is named.
+
+
+def _table_unit_cells(table_node):
+    """Short unit cells in a table's caption, header and first rows, e.g. 'Yen in millions'."""
+    texts = [getattr(table_node, 'caption', None) or '']
+    for row in getattr(table_node, 'headers', None) or []:
+        texts.extend(getattr(cell, 'content', '') for cell in row)
+    for row in (getattr(table_node, 'rows', None) or [])[:3]:
+        texts.extend(getattr(cell, 'content', '') for cell in getattr(row, 'cells', []))
+    return [t for t in texts
+            if isinstance(t, str) and 0 < len(t) <= 60 and Scale.detect(t) != Scale.UNITS]
+
+
+def _table_currency(table_node, context):
+    """Currency of one table: its own unit cells first, then the nearest declaration, else USD."""
+    for text in _table_unit_cells(table_node):
+        if _names_currency(text) or _OTHER_CURRENCY.search(text):
+            return _currency(text)
+    units = _declared_table_units(context)
+    return units[1] if units else 'USD'
+
+
+def _table_context(table_node, title=None):
+    """Read adjacent declarations/notes without assuming a text-only DOM node."""
+    node, parent = table_node, getattr(table_node, 'parent', None)
+    while (parent is not None and len(getattr(parent, 'children', None) or []) == 1
+           and getattr(parent, 'parent', None) is not None):
+        node, parent = parent, parent.parent
+    siblings = getattr(parent, 'children', None) or []
+    position = next((i for i, sibling in enumerate(siblings) if sibling is node), None)
+    if position is None:
+        return [title or ''], []
+
+    def text(sibling):
+        content = getattr(sibling, 'content', None)
+        if not isinstance(content, str) or not content.strip():
+            getter = getattr(sibling, 'text', None)
+            content = getter() if callable(getter) else ''
+        return content.strip() if isinstance(content, str) else ''
+
+    before = [text(s) for s in siblings[max(0, position - 3):position]]
+    after = [text(s) for s in siblings[position + 1:position + 5]]
+    return [title or '', *before], [s for s in after if s]
+
+
+def _declared_table_units(context):
+    """Nearest unit declaration, with currency and scale detected independently."""
+    for text in reversed(context):
+        for match in _UNIT_DECLARATION.finditer(text):
+            declaration, lead = match[0], match['lead']
+            if lead and not (re.fullmatch(r'amounts?|dollars?', lead, re.I)
+                             or _names_currency(lead) or _OTHER_CURRENCY.search(lead)):
+                continue  # '(Shares in thousands)', '(Decrease in ...)' declare no amount unit.
+            scale = Scale.detect(declaration)
+            scale = scale if scale != Scale.UNITS else None
+            if not _names_currency(declaration) and scale is None and not match[0].lstrip('( ').lower().startswith('unit'):
+                continue  # E.g. '(in constant currency)' is not an amount unit declaration.
+            return declaration, _declared_currency(declaration, scale), scale
+    return None
+
+
+class _EarningsTableProcessor(TableProcessor):
+    """Keep HTML footnote evidence until numeric earnings cells are extracted.
+
+    A plain suffix such as '1.2b' is ambiguous. Only raised single-letter
+    markers in an otherwise numeric cell are removed; the shared HTML parser
+    and the source document remain unchanged.
+    """
+
+    def _extract_cell_content(self, elem):
+        def is_footnote(node):
+            if not re.fullmatch(r'[a-zA-Z]', (node.text_content() or '').strip()):
+                return False
+            style = node.get('style', '')
+            return (node.tag == 'sup'
+                    or re.search(r'(?:^|;)\s*vertical-align\s*:\s*super\b', style, re.I)
+                    or (re.search(r'(?:^|;)\s*position\s*:\s*relative\b', style, re.I)
+                        and re.search(r'(?:^|;)\s*top\s*:\s*-\s*\d', style, re.I)))
+
+        if any(is_footnote(node) for node in elem.iterdescendants()):
+            cleaned = deepcopy(elem)
+            for node in list(cleaned.iterdescendants()):
+                if node.getparent() is not None and is_footnote(node):
+                    node.drop_tree()  # Preserve tails, including a closing parenthesis.
+            text = super()._extract_cell_content(cleaned)
+            if isinstance(_parse_numeric(text), float):
+                return text
+        return super()._extract_cell_content(elem)
+
+
 _ROW_TYPE_UNITS = {
     RowType.AMOUNT: 'USD',
     RowType.PER_SHARE: 'USD/shares',
@@ -480,6 +622,9 @@ class FinancialTable:
     row_types: Union[dict, list] = field(default_factory=list)
     """List of RowType by position, or legacy dict of label → RowType."""
 
+    currency: Optional[str] = 'USD'
+    """Reported currency. USD remains the legacy default; an explicit unknown is None."""
+
     def __bool__(self) -> bool:
         """FinancialTable is truthy if it has data."""
         return not self.dataframe.empty
@@ -511,7 +656,8 @@ class FinancialTable:
 
         Only AMOUNT rows are scaled. PER_SHARE, SHARES, and PERCENTAGE rows
         are left unchanged since they should not be multiplied by the table's
-        scale factor.
+        scale factor. Columns whose header contains '%' and names no scale
+        (YoY/QoQ change columns) are left unchanged too.
         """
         if self.scale == Scale.UNITS:
             return self.dataframe.copy()
@@ -523,6 +669,11 @@ class FinancialTable:
         skip_labels = {str(df.index[pos]) for pos in skip_positions}
 
         for col_idx in range(len(df.columns)):
+            header = str(df.columns[col_idx])
+            if '%' in header and Scale.detect(header) == Scale.UNITS:
+                # A percent-change column is not an amount. A header that also names a
+                # scale ('(% of change ...) - Sales revenues - Million yen') still is.
+                continue
             col_series = df.iloc[:, col_idx]
             numeric = pd.to_numeric(col_series, errors='coerce')
             mask = numeric.notna()
@@ -606,6 +757,7 @@ class FinancialTable:
                 "title": self.title,
                 "shape": list(self.dataframe.shape)
             }
+            result["metadata"]["currency"] = self.currency
 
         return json.dumps(result, indent=2, default=str)
 
@@ -660,12 +812,13 @@ class FinancialTable:
         lines.append(f"=== {title} ===")
 
         scale_hint = ""
+        currency_units = self.currency or 'currency units'
         if self.scale == Scale.MILLIONS:
-            scale_hint = " (multiply by 1,000,000 for actual USD)"
+            scale_hint = f" (multiply by 1,000,000 for actual {currency_units})"
         elif self.scale == Scale.THOUSANDS:
-            scale_hint = " (multiply by 1,000 for actual USD)"
+            scale_hint = f" (multiply by 1,000 for actual {currency_units})"
         elif self.scale == Scale.BILLIONS:
-            scale_hint = " (multiply by 1,000,000,000 for actual USD)"
+            scale_hint = f" (multiply by 1,000,000,000 for actual {currency_units})"
 
         if scale_hint:
             lines.append(f"Scale: {self.scale.name}{scale_hint}")
@@ -755,7 +908,10 @@ class FinancialTable:
                     'label': label,
                     'value': str(raw_val),
                     'numeric_value': numeric_val,
-                    'unit': _ROW_TYPE_UNITS.get(row_type, 'USD'),
+                    'unit': (f'{self.currency}/shares' if self.currency else None)
+                    if row_type == RowType.PER_SHARE else self.currency
+                    if row_type in (RowType.AMOUNT, RowType.OTHER)
+                    else _ROW_TYPE_UNITS[row_type],
                     'period_type': period_info['period_type'],
                     'period_start': period_info['period_start'],
                     'period_end': period_info['period_end'],
@@ -811,7 +967,9 @@ class FinancialTable:
             title=self.title,
             statement_type=self.statement_type,
             periods=self.periods,
-            raw_index=self.raw_index
+            raw_index=self.raw_index,
+            row_types=self.row_types.copy(),
+            currency=self.currency,
         )
 
     def with_clean_columns(self, column_names: Optional[List[str]] = None) -> 'FinancialTable':
@@ -860,7 +1018,9 @@ class FinancialTable:
             title=self.title,
             statement_type=self.statement_type,
             periods=self.periods,
-            raw_index=self.raw_index
+            raw_index=self.raw_index,
+            row_types=self.row_types.copy(),
+            currency=self.currency,
         )
 
     def _display_dataframe(self) -> pd.DataFrame:
@@ -1013,6 +1173,7 @@ class EarningsRelease:
         self._document = None
         self._tables: Optional[List[FinancialTable]] = None
         self._scale: Optional[Scale] = None
+        self._declared_scales: frozenset = frozenset()
 
     @classmethod
     def from_filing(cls, filing: 'Filing') -> Optional['EarningsRelease']:
@@ -1061,7 +1222,9 @@ class EarningsRelease:
                     return None
                 if isinstance(html_content, bytes):
                     html_content = html_content.decode('utf-8', errors='ignore')
-                self._document = parse_html(html_content)
+                parser = HTMLParser()
+                parser.strategies['table_processing'] = _EarningsTableProcessor(parser.config)
+                self._document = parser.parse(html_content)
             except (AttributeError, ValueError, TypeError) as e:
                 logger.error(f"Failed to parse attachment content: {e}")
                 return None
@@ -1081,14 +1244,13 @@ class EarningsRelease:
             _parens_millions = r'\((?:dollars |amounts |figures )?in\s+millions'
             _parens_thousands = r'\((?:dollars |amounts |figures )?in\s+thousands'
             _parens_billions = r'\((?:dollars |amounts |figures )?in\s+billions'
-            if re.search(_parens_millions, text):
-                self._scale = Scale.MILLIONS
-            elif re.search(_parens_thousands, text):
-                self._scale = Scale.THOUSANDS
-            elif re.search(_parens_billions, text):
-                self._scale = Scale.BILLIONS
-            else:
-                self._scale = Scale.UNITS
+            found = {scale for scale, pattern in ((Scale.MILLIONS, _parens_millions),
+                                                  (Scale.THOUSANDS, _parens_thousands),
+                                                  (Scale.BILLIONS, _parens_billions))
+                     if re.search(pattern, text)}
+            self._declared_scales = frozenset(found)
+            self._scale = next((scale for scale in (Scale.MILLIONS, Scale.THOUSANDS, Scale.BILLIONS)
+                                if scale in found), Scale.UNITS)
         return self._scale
 
     @property
@@ -1306,14 +1468,6 @@ class EarningsRelease:
                 logger.debug(f"Skipping table {idx}: empty or insufficient rows (shape={df.shape})")
                 continue
 
-            statement_type = _classify_statement(table_node, df)
-            scale = _detect_table_scale(table_node, df, doc_scale)
-            title = _extract_title(table_node)
-
-            # Detect periods using year pattern (handles any year from 1900-2099)
-            periods = [c for c in df.columns
-                      if c and str(c).strip() and _YEAR_PATTERN.search(str(c))]
-
             # Build row types as a positional list with parent context
             # (list avoids collisions when duplicate labels like "Basic" appear
             # in both EPS and share-count sections)
@@ -1323,6 +1477,16 @@ class EarningsRelease:
                 parent = parent_contexts[i] if i < len(parent_contexts) else ''
                 row_types.append(_classify_row_type(str(idx_label), parent))
 
+            statement_type = _classify_statement(table_node, df)
+            scale = _detect_table_scale(table_node, df, doc_scale, self._declared_scales, row_types)
+            title = _extract_title(table_node)
+            context, _ = _table_context(table_node, title)
+            currency = _table_currency(table_node, context)
+
+            # Detect periods using year pattern (handles any year from 1900-2099)
+            periods = [c for c in df.columns
+                      if c and str(c).strip() and _YEAR_PATTERN.search(str(c))]
+
             table = FinancialTable(
                 dataframe=df,
                 scale=scale,
@@ -1331,6 +1495,7 @@ class EarningsRelease:
                 periods=periods,
                 raw_index=idx,
                 row_types=row_types,
+                currency=currency,
             )
             tables.append(table)
 
@@ -1559,7 +1724,60 @@ def _classify_statement(table_node, df: pd.DataFrame) -> StatementType:
     return StatementType.UNKNOWN
 
 
-def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> Scale:
+# An amount cell: '431.5', '110,662', '(9,283)', '$ 22,185,750'. A bare year or a date
+# ('2025', '3/31/2025') is a period header, not an amount.
+_AMOUNT_CELL = re.compile(r'^\(?\$?\s*-?\d[\d,]*(?:\.\d+)?\s*\)?%?$')
+_YEAR_CELL = re.compile(r'^(?:19|20)\d\d$')
+_TITLE_ROW_LIMIT = 12
+
+
+def _title_rows(table_node):
+    """The rows before a table's first row of amounts, at most ``_TITLE_ROW_LIMIT``.
+
+    A row of amounts has a text label and at least one amount that is not a year.
+    """
+    for row in table_node.rows[:_TITLE_ROW_LIMIT]:
+        yield row
+        cells = [c.content.strip() for c in row.cells if c.content and c.content.strip()]
+        if (cells and not _AMOUNT_CELL.match(cells[0])
+                and any(_AMOUNT_CELL.match(c) and not _YEAR_CELL.match(c) for c in cells[1:])):
+            return
+
+
+# No filer reports an amount near $10 trillion (JPMorgan's total assets are about $4.5T).
+_IMPLAUSIBLE_AMOUNT = 1e13
+
+
+def _plausible_inherited_scale(df: pd.DataFrame, scale: Scale, declared=frozenset(),
+                               row_types: Optional[List[RowType]] = None) -> Scale:
+    """The document's scale for a table that declares none, unless it is impossible.
+
+    A table that declares no scale inherits the document's. That is right when one
+    declaration covers every table (AMD prints "(in millions)" once), and wrong when
+    the declaration belongs to another table: Snail's statement of operations prints
+    whole dollars, Revenues, net $ 22,185,750, and as millions that is $22 trillion.
+    Position cannot tell the two apart, so magnitude does: when the table's largest
+    amount, scaled, reaches ``_IMPLAUSIBLE_AMOUNT``, the next smaller scale the
+    document ``declared`` is tried (Netflix declares millions and thousands; its
+    statements are in thousands), and with none left the table is whole dollars
+    (GH #1779). Only amount rows are measured: a share count such as 33,239,620
+    weighted shares is not scaled (Alta Equipment).
+    """
+    if scale == Scale.UNITS or df.empty:
+        return scale
+    values = df.to_numpy()
+    if row_types is not None and len(row_types) == len(values):
+        values = values[[row_type == RowType.AMOUNT for row_type in row_types]]
+    largest = pd.to_numeric(pd.Series(values.ravel()), errors='coerce').abs().max()
+    if pd.isna(largest):
+        return scale
+    candidates = [scale, *sorted((s for s in declared if s.value < scale.value),
+                                 key=lambda s: s.value, reverse=True)]
+    return next((s for s in candidates if largest * s.value < _IMPLAUSIBLE_AMOUNT), Scale.UNITS)
+
+
+def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale,
+                        declared_scales=frozenset(), row_types: Optional[List[RowType]] = None) -> Scale:
     """Detect scale from table caption, headers, early content, footer, or index labels."""
     # 1. Check caption
     if table_node.caption:
@@ -1579,8 +1797,10 @@ def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> S
                 elif 'billion' in content:
                     return Scale.BILLIONS
 
-    # 3. Check first 3 data rows
-    for row in table_node.rows[:3]:
+    # 3. Check the title rows: a statement often prints its company name, title,
+    # "(Unaudited)" and period rows before "(in millions)" (Mueller Water: row 6;
+    # GH #1779). Scanning only the first 3 rows missed it.
+    for row in _title_rows(table_node):
         for cell in row.cells:
             content = cell.content.lower()
             if 'in millions' in content or '(millions)' in content:
@@ -1614,33 +1834,21 @@ def _detect_table_scale(table_node, df: pd.DataFrame, default_scale: Scale) -> S
                 return Scale.BILLIONS
 
     # 6. Check preceding sibling nodes (scale text often in a paragraph before the table).
-    # A table is often the only child of a wrapper <div>; its caption then precedes the
-    # wrapper, so climb through one-child wrappers first (GH #1779).
-    node = table_node
-    parent = getattr(node, 'parent', None)
-    while parent is not None and len(getattr(parent, 'children', None) or []) == 1 and parent.parent is not None:
-        node, parent = parent, parent.parent
-    if parent is not None and getattr(parent, 'children', None):
-        siblings = parent.children
-        for idx, child in enumerate(siblings):
-            if child is node:
-                # Check up to 3 preceding siblings, nearest first
-                for si in range(idx - 1, max(0, idx - 3) - 1, -1):
-                    sib = siblings[si]
-                    sib_text = sib.content or ''
-                    if not sib_text and hasattr(sib, 'text') and callable(sib.text):
-                        sib_text = sib.text() or ''
-                    if sib_text:
-                        sib_lower = sib_text.lower()
-                        if 'in thousands' in sib_lower or '(thousands)' in sib_lower:
-                            return Scale.THOUSANDS
-                        elif 'in millions' in sib_lower or '(millions)' in sib_lower:
-                            return Scale.MILLIONS
-                        elif 'in billions' in sib_lower or '(billions)' in sib_lower:
-                            return Scale.BILLIONS
-                break
+    # Share wrapper traversal with currency detection (GH #1779, GH #1824).
+    context, _ = _table_context(table_node)
+    for text in reversed(context):
+        declaration = _declared_table_units([text])
+        if declaration and declaration[2] is not None:
+            return declaration[2]
+        lower = text.lower()
+        if 'in thousands' in lower or '(thousands)' in lower:
+            return Scale.THOUSANDS
+        elif 'in millions' in lower or '(millions)' in lower:
+            return Scale.MILLIONS
+        elif 'in billions' in lower or '(billions)' in lower:
+            return Scale.BILLIONS
 
-    return default_scale
+    return _plausible_inherited_scale(df, default_scale, declared_scales, row_types)
 
 
 def _extract_title(table_node) -> Optional[str]:
@@ -2168,7 +2376,7 @@ def _parse_numeric(val) -> Union[float, str, None]:
 
     try:
         num = float(cleaned)
-        return -num if negative else num
+        return -abs(num) if negative else num
     except ValueError:
         # Return original string for non-numeric values (e.g., "N/A", "n/m")
         return s

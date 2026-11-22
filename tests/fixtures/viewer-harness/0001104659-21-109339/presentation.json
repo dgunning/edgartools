@@ -1,0 +1,223 @@
+{
+ "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity": {
+  "roots": [
+   "us-gaap_StatementOfStockholdersEquityAbstract"
+  ],
+  "nodes": {
+   "us-gaap_StatementOfStockholdersEquityAbstract": {
+    "children": [
+     "us-gaap_StatementTable"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "us-gaap_StatementTable": {
+    "children": [
+     "us-gaap_StatementClassOfStockAxis",
+     "us-gaap_StatementEquityComponentsAxis",
+     "us-gaap_StatementLineItems"
+    ],
+    "child_preferred_labels": [
+     null,
+     null,
+     null
+    ]
+   },
+   "us-gaap_StatementClassOfStockAxis": {
+    "children": [
+     "us-gaap_CommonClassAMember",
+     "us-gaap_ClassOfStockDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementEquityComponentsAxis": {
+    "children": [
+     "us-gaap_CommonStockMember",
+     "us-gaap_AdditionalPaidInCapitalMember",
+     "us-gaap_RetainedEarningsMember",
+     "us-gaap_EquityComponentDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementLineItems": {
+    "children": [
+     "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+    "children": [
+     "us-gaap_StockholdersEquity",
+     "us-gaap_SharesIssued",
+     "us-gaap_StockIssuedDuringPeriodValueNewIssues",
+     "us-gaap_StockIssuedDuringPeriodSharesNewIssues",
+     "rocru_UnitsIssuedDuringPeriodValueNewIssues",
+     "rocru_UnitsIssuedDuringPeriodSharesNewIssues",
+     "rocru_CommonStockSubjectToPossibleRedemptionValue",
+     "rocru_CommonStockSubjectToPossibleRedemptionShares",
+     "rocru_NetLoss",
+     "us-gaap_StockholdersEquity",
+     "us-gaap_SharesIssued"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/periodEndLabel",
+     "http://www.xbrl.org/2003/role/periodEndLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_StatementOfStockholdersEquityAbstract",
+    "us-gaap_StatementTable",
+    1.0,
+    null
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementClassOfStockAxis",
+    1.0,
+    null
+   ],
+   [
+    "us-gaap_StatementClassOfStockAxis",
+    "us-gaap_CommonClassAMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementClassOfStockAxis",
+    "us-gaap_ClassOfStockDomain",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementEquityComponentsAxis",
+    2.0,
+    null
+   ],
+   [
+    "us-gaap_StatementEquityComponentsAxis",
+    "us-gaap_CommonStockMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementEquityComponentsAxis",
+    "us-gaap_AdditionalPaidInCapitalMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementEquityComponentsAxis",
+    "us-gaap_RetainedEarningsMember",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementEquityComponentsAxis",
+    "us-gaap_EquityComponentDomain",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementLineItems",
+    3.0,
+    null
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    1.0,
+    null
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockholdersEquity",
+    1.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_SharesIssued",
+    2.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockIssuedDuringPeriodValueNewIssues",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockIssuedDuringPeriodSharesNewIssues",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "rocru_UnitsIssuedDuringPeriodValueNewIssues",
+    5.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "rocru_UnitsIssuedDuringPeriodSharesNewIssues",
+    6.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "rocru_CommonStockSubjectToPossibleRedemptionValue",
+    7.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "rocru_CommonStockSubjectToPossibleRedemptionShares",
+    8.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "rocru_NetLoss",
+    9.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockholdersEquity",
+    10.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_SharesIssued",
+    11.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ]
+  ]
+ }
+}

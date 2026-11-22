@@ -1,0 +1,111 @@
+{
+ "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical": {
+  "roots": [
+   "us-gaap_StatementOfFinancialPositionAbstract"
+  ],
+  "nodes": {
+   "us-gaap_StatementOfFinancialPositionAbstract": {
+    "children": [
+     "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/verboseLabel"
+    ]
+   },
+   "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract": {
+    "children": [
+     "us-gaap_PreferredStockParOrStatedValuePerShare",
+     "us-gaap_PreferredStockSharesAuthorized",
+     "us-gaap_PreferredStockDividendRatePercentage",
+     "us-gaap_PreferredStockLiquidationPreference",
+     "us-gaap_PreferredStockSharesIssued",
+     "us-gaap_PreferredStockSharesOutstanding",
+     "us-gaap_CommonStockParOrStatedValuePerShare",
+     "us-gaap_CommonStockSharesAuthorized",
+     "us-gaap_CommonStockSharesIssued",
+     "us-gaap_CommonStockSharesOutstanding"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_StatementOfFinancialPositionAbstract",
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    1.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    "us-gaap_PreferredStockParOrStatedValuePerShare",
+    1.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    "us-gaap_PreferredStockSharesAuthorized",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    "us-gaap_PreferredStockDividendRatePercentage",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    "us-gaap_PreferredStockLiquidationPreference",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    "us-gaap_PreferredStockSharesIssued",
+    5.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    "us-gaap_PreferredStockSharesOutstanding",
+    6.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    "us-gaap_CommonStockParOrStatedValuePerShare",
+    7.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    "us-gaap_CommonStockSharesAuthorized",
+    8.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    "us-gaap_CommonStockSharesIssued",
+    9.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterestAbstract",
+    "us-gaap_CommonStockSharesOutstanding",
+    10.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ]
+  ]
+ }
+}

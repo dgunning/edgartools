@@ -1,0 +1,1275 @@
+[
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "i5c1edda401da4bce89119a1482acc65a_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "1369072000",
+  "numeric_value": 1369072000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "i7ed2a5f0871d458584dd16dd92e13207_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "1117862000",
+  "numeric_value": 1117862000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "ie197c837fee64120b1a2621d30ad097d_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "7264160000",
+  "numeric_value": 7264160000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "i14d0705e47b744eb812dc0870b908c6c_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "1369072000",
+  "numeric_value": 1369072000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "i449c3dcd69994dd0a740a7cb17118071_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "-214130000",
+  "numeric_value": -214130000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "i5c1edda401da4bce89119a1482acc65a_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "-214130000",
+  "numeric_value": -214130000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "i14d0705e47b744eb812dc0870b908c6c_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "1369072000",
+  "numeric_value": 1369072000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "i449c3dcd69994dd0a740a7cb17118071_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "-214130000",
+  "numeric_value": -214130000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "i5c1edda401da4bce89119a1482acc65a_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "1154942000",
+  "numeric_value": 1154942000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "i9c76d878df554c3a932e6bad46a7e328_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "45592000",
+  "numeric_value": 45592000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "i5c1edda401da4bce89119a1482acc65a_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "45592000",
+  "numeric_value": 45592000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:DecreaseIncreaseThroughTaxOnSharebasedPaymentTransactions",
+  "context_ref": "i9c76d878df554c3a932e6bad46a7e328_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "-11114000",
+  "numeric_value": -11114000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DecreaseIncreaseThroughTaxOnSharebasedPaymentTransactions",
+  "context_ref": "i5c1edda401da4bce89119a1482acc65a_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "-11114000",
+  "numeric_value": -11114000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "i9c76d878df554c3a932e6bad46a7e328_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "-12773000",
+  "numeric_value": -12773000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "i5c1edda401da4bce89119a1482acc65a_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "61054000",
+  "numeric_value": 61054000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "gib:IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+  "context_ref": "i9c76d878df554c3a932e6bad46a7e328_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "-7150000",
+  "numeric_value": -7150000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "gib:IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+  "context_ref": "i5c1edda401da4bce89119a1482acc65a_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "gib:PurchaseOfTreasurySharesForCancellation",
+  "context_ref": "i14d0705e47b744eb812dc0870b908c6c_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "1340485000",
+  "numeric_value": 1340485000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "gib:PurchaseOfTreasurySharesForCancellation",
+  "context_ref": "i959d8f574ded4e8b86e8ed2fcc61deda_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "178741000",
+  "numeric_value": 178741000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "gib:PurchaseOfTreasurySharesForCancellation",
+  "context_ref": "i5c1edda401da4bce89119a1482acc65a_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "1519226000",
+  "numeric_value": 1519226000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:PurchaseOfTreasuryShares",
+  "context_ref": "i5c1edda401da4bce89119a1482acc65a_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "31404000",
+  "numeric_value": 31404000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "icf83bc817f624e1fa1e4bcd1f9aa0a6d_I20210930",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "4732229000",
+  "numeric_value": 4732229000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "ia69a2eb747fb419ea67c42e293ad3651_I20210930",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "331580000",
+  "numeric_value": 331580000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "if39e11531ffa477d8e94da9625e61e56_I20210930",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "289718000",
+  "numeric_value": 289718000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i80ca039c35fb4f53877480aabdcab1f4_I20210930",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "6986232000",
+  "numeric_value": 6986232000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "iaa6bd47083c34fe8be8b94ed95f3d8ab_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "4557855000",
+  "numeric_value": 4557855000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember",
+   "ifrs-full:RetrospectiveApplicationAndRetrospectiveRestatementAxis": "ifrs-full:PreviouslyStatedMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i0172621c7d82438d8738e86dbd6e88a2_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "176694000",
+  "numeric_value": 176694000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember",
+   "ifrs-full:RetrospectiveApplicationAndRetrospectiveRestatementAxis": "ifrs-full:PreviouslyStatedMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i59d27921e7fb4052ae8f34a7933a96ae_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "1903977000",
+  "numeric_value": 1903977000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember",
+   "ifrs-full:RetrospectiveApplicationAndRetrospectiveRestatementAxis": "ifrs-full:PreviouslyStatedMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "ie45889e64ad2418aaf088c4cda38e494_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "245577000",
+  "numeric_value": 245577000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember",
+   "ifrs-full:RetrospectiveApplicationAndRetrospectiveRestatementAxis": "ifrs-full:PreviouslyStatedMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "ia0d1017fa68a4a248420bac11553b9e8_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "6884103000",
+  "numeric_value": 6884103000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:RetrospectiveApplicationAndRetrospectiveRestatementAxis": "ifrs-full:PreviouslyStatedMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "ie2a3b638d0854002909cb7fc2019b2b7_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "-93873000",
+  "numeric_value": -93873000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember",
+   "ifrs-full:RetrospectiveApplicationAndRetrospectiveRestatementAxis": "ifrs-full:IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "iaae65daf94d94f9e9fece195aad07f45_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "-93873000",
+  "numeric_value": -93873000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:RetrospectiveApplicationAndRetrospectiveRestatementAxis": "ifrs-full:IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i14be963770b74ccbbc7d421499243532_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "4463982000",
+  "numeric_value": 4463982000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i9be55fc9ad9f4467972c4e5f9a6605bf_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "176694000",
+  "numeric_value": 176694000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i9ac40a7232f945ce8b3688ad25715805_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "245577000",
+  "numeric_value": 245577000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "idc963bce431e4f23955fb278285d8c3d_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "6790230000",
+  "numeric_value": 6790230000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "i55c8f262a189478291def02c3181f23d_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "1117862000",
+  "numeric_value": 1117862000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "id852e4996d624ea5b2526205e469d061_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "369016000",
+  "numeric_value": 369016000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "i7ed2a5f0871d458584dd16dd92e13207_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "369016000",
+  "numeric_value": 369016000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "i55c8f262a189478291def02c3181f23d_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "1117862000",
+  "numeric_value": 1117862000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "id852e4996d624ea5b2526205e469d061_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "369016000",
+  "numeric_value": 369016000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "i7ed2a5f0871d458584dd16dd92e13207_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "1486878000",
+  "numeric_value": 1486878000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "i6785ca2b7e0f48049855aa92a46030f0_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "37358000",
+  "numeric_value": 37358000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "i7ed2a5f0871d458584dd16dd92e13207_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "37358000",
+  "numeric_value": 37358000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:DecreaseIncreaseThroughTaxOnSharebasedPaymentTransactions",
+  "context_ref": "i6785ca2b7e0f48049855aa92a46030f0_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "8653000",
+  "numeric_value": 8653000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DecreaseIncreaseThroughTaxOnSharebasedPaymentTransactions",
+  "context_ref": "i7ed2a5f0871d458584dd16dd92e13207_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "8653000",
+  "numeric_value": 8653000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "i6785ca2b7e0f48049855aa92a46030f0_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "-12269000",
+  "numeric_value": -12269000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "i7ed2a5f0871d458584dd16dd92e13207_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "57151000",
+  "numeric_value": 57151000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "gib:IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+  "context_ref": "i6785ca2b7e0f48049855aa92a46030f0_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "-9078000",
+  "numeric_value": -9078000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "gib:IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+  "context_ref": "i7ed2a5f0871d458584dd16dd92e13207_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "gib:PurchaseOfTreasurySharesForCancellation",
+  "context_ref": "i55c8f262a189478291def02c3181f23d_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "878202000",
+  "numeric_value": 878202000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "gib:PurchaseOfTreasurySharesForCancellation",
+  "context_ref": "ib283627aaf6048bdb749166dbb3b7a97_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "165315000",
+  "numeric_value": 165315000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "gib:PurchaseOfTreasurySharesForCancellation",
+  "context_ref": "i7ed2a5f0871d458584dd16dd92e13207_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "1043517000",
+  "numeric_value": 1043517000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:PurchaseOfTreasuryShares",
+  "context_ref": "i7ed2a5f0871d458584dd16dd92e13207_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "55287000",
+  "numeric_value": 55287000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i39698450a2284520a3876da8a5fea911_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "4703642000",
+  "numeric_value": 4703642000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "ia4bf55796572442ab782727f6b488da0_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "545710000",
+  "numeric_value": 545710000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i28f73f6557314be6b720bebfcaac23f4_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "1761873000",
+  "numeric_value": 1761873000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i8050f1def5534e488953feb83a796551_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "252935000",
+  "numeric_value": 252935000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i1dba0eade6a54c89a744cd1f1a49caf6_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "1863595000",
+  "numeric_value": 1863595000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassASubordinateVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i8b1a34b318af468ca4b8e847272b6ada_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "40382000",
+  "numeric_value": 40382000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassBMultipleVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i8edf50f1fa874fd5a59322c35845fbf0_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "1903977000",
+  "numeric_value": 1903977000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "i7575fa2ba3694fba8a175fad7fce75d4_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "69420000",
+  "numeric_value": 69420000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassASubordinateVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "icde2e479576f4b17b59ff23c53ad1e7f_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassBMultipleVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "ib283627aaf6048bdb749166dbb3b7a97_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "69420000",
+  "numeric_value": 69420000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "gib:IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+  "context_ref": "icde2e479576f4b17b59ff23c53ad1e7f_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassBMultipleVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "gib:IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+  "context_ref": "ib283627aaf6048bdb749166dbb3b7a97_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "9078000",
+  "numeric_value": 9078000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PurchaseOfTreasuryShares",
+  "context_ref": "icde2e479576f4b17b59ff23c53ad1e7f_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassBMultipleVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PurchaseOfTreasuryShares",
+  "context_ref": "ib283627aaf6048bdb749166dbb3b7a97_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "55287000",
+  "numeric_value": 55287000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "iec8932f8e18c436a9862a465da413453_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "1721491000",
+  "numeric_value": 1721491000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassASubordinateVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i30ba529434234835805b1bed98c9c6b8_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "40382000",
+  "numeric_value": 40382000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassBMultipleVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "i06bba0b7e0e34104a7a688388d20c24c_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "73827000",
+  "numeric_value": 73827000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassASubordinateVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "i04c5bab0d0b14254ba835673e3c9705d_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassBMultipleVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "i959d8f574ded4e8b86e8ed2fcc61deda_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "73827000",
+  "numeric_value": 73827000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "gib:IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+  "context_ref": "i04c5bab0d0b14254ba835673e3c9705d_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassBMultipleVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "gib:IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+  "context_ref": "i959d8f574ded4e8b86e8ed2fcc61deda_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "7150000",
+  "numeric_value": 7150000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PurchaseOfTreasuryShares",
+  "context_ref": "i04c5bab0d0b14254ba835673e3c9705d_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassBMultipleVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PurchaseOfTreasuryShares",
+  "context_ref": "i959d8f574ded4e8b86e8ed2fcc61deda_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "31404000",
+  "numeric_value": 31404000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "ic71ee5e0831b46baaf4110dff66b945d_I20210930",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "1595811000",
+  "numeric_value": 1595811000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassASubordinateVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "ifb1a3622a70540c799f09bd9e1e9ff3d_I20210930",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "36894000",
+  "numeric_value": 36894000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassBMultipleVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "i79bd24462ad74fc5a2cd67ff24f32a13_I20210930",
+  "period_key": "instant_2021-09-30",
+  "period_type": "instant",
+  "value": "1632705000",
+  "numeric_value": 1632705000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "i5283049cc24a4dc58a7fb0c036d4221f_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "12773000",
+  "numeric_value": 12773000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassASubordinateVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "ifbbca372473d4ec981ac27fe99c6f0bb_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "12269000",
+  "numeric_value": 12269000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassASubordinateVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:AdditionalPaidinCapitalMember"
+  }
+ },
+ {
+  "concept": "gib:IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+  "context_ref": "i06bba0b7e0e34104a7a688388d20c24c_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "7150000",
+  "numeric_value": 7150000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassASubordinateVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "gib:IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+  "context_ref": "i7575fa2ba3694fba8a175fad7fce75d4_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "9078000",
+  "numeric_value": 9078000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassASubordinateVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PurchaseOfTreasuryShares",
+  "context_ref": "i06bba0b7e0e34104a7a688388d20c24c_D20201001-20210930",
+  "period_key": "duration_2020-10-01_2021-09-30",
+  "period_type": "duration",
+  "value": "31404000",
+  "numeric_value": 31404000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassASubordinateVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PurchaseOfTreasuryShares",
+  "context_ref": "i7575fa2ba3694fba8a175fad7fce75d4_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "55287000",
+  "numeric_value": 55287000.0,
+  "unit_ref": "cad",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfShareCapitalAxis": "gib:ClassASubordinateVotingSharesMember",
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ }
+]

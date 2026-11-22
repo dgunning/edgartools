@@ -38,7 +38,7 @@ hatch run check-regression-provenance     # CI runs this before tests
 - The `Filing.text()`, `Filing.html()` and `Attachment.empty` contracts are frozen. Fix text extraction in `FilingSGML` or `edgar/documents`, never by rerouting `Filing.*`.
 - Test cassettes are recorded from live SEC, against `main`, and never edited afterwards (CONTRIBUTING.md, "Test Cassettes").
 - Never edit `CHANGELOG.md`. Add a fragment instead: `changelog.d/<issue>.<section>.md` (see `changelog.d/README.md`).
-- A deprecation or breaking change needs an entry in `docs/upgrade/6.0.md`. CI fails the PR without one.
+- A deprecation or breaking change needs an entry in the current upgrade guide, `docs/upgrade/6.1.md`. CI fails the PR without one.
 
 ## Definition of done
 
@@ -63,6 +63,8 @@ hatch run check-regression-provenance     # CI runs this before tests
 - use `git stash` in a worktree: every worktree shares one `refs/stash`, so parallel agents pop each other's changes (save with `git diff > file` instead)
 - invent a filing value you did not read from SEC
 - open, comment on or merge GitHub issues or PRs without the human you work for reviewing them first
+
+**Best practice:** keep your own tracker's IDs (beads, Jira, Linear, a local TODO list) out of what you publish on GitHub: issues, PR titles and bodies, review comments, commit messages and changelog fragments. A reader can't open them. Refer to the GitHub issue number, or describe the problem in words.
 
 ## Before opening a pull request
 

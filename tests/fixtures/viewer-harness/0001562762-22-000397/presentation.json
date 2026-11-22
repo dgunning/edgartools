@@ -1,0 +1,257 @@
+{
+ "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY": {
+  "roots": [
+   "ifrs-full_StatementOfChangesInEquityAbstract"
+  ],
+  "nodes": {
+   "ifrs-full_StatementOfChangesInEquityAbstract": {
+    "children": [
+     "ifrs-full_StatementOfChangesInEquityTable"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "ifrs-full_StatementOfChangesInEquityTable": {
+    "children": [
+     "ifrs-full_ComponentsOfEquityAxis",
+     "ifrs-full_StatementOfChangesInEquityLineItems"
+    ],
+    "child_preferred_labels": [
+     null,
+     null
+    ]
+   },
+   "ifrs-full_ComponentsOfEquityAxis": {
+    "children": [
+     "ifrs-full_EquityMember"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "ifrs-full_EquityMember": {
+    "children": [
+     "ifrs-full_EquityAttributableToOwnersOfParentMember"
+    ],
+    "child_preferred_labels": [
+     null
+    ]
+   },
+   "ifrs-full_EquityAttributableToOwnersOfParentMember": {
+    "children": [
+     "ifrs-full_IssuedCapitalMember",
+     "ifrs-full_OtherReservesMember",
+     "ifrs-full_RetainedEarningsMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_StatementOfChangesInEquityLineItems": {
+    "children": [
+     "ifrs-full_Equity",
+     "ifrs-full_ComprehensiveIncomeAbstract",
+     "drd_TransactionsWithOwnersOfParentAbstract",
+     "ifrs-full_Equity"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     null,
+     null,
+     "http://www.xbrl.org/2003/role/periodEndLabel"
+    ]
+   },
+   "ifrs-full_ComprehensiveIncomeAbstract": {
+    "children": [
+     "ifrs-full_ProfitLoss",
+     "ifrs-full_OtherComprehensiveIncome",
+     "ifrs-full_ComprehensiveIncome"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "drd_TransactionsWithOwnersOfParentAbstract": {
+    "children": [
+     "ifrs-full_ChangesInEquityAbstract"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_ChangesInEquityAbstract": {
+    "children": [
+     "ifrs-full_IssueOfEquity",
+     "ifrs-full_IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+     "ifrs-full_ShareIssueRelatedCost",
+     "ifrs-full_IncreaseDecreaseThroughExerciseOfOptions",
+     "ifrs-full_DividendsPaid",
+     "ifrs-full_IncreaseDecreaseThroughTreasuryShareTransactions",
+     "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions",
+     "ifrs-full_ChangesInEquity"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedTerseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "ifrs-full_StatementOfChangesInEquityAbstract",
+    "ifrs-full_StatementOfChangesInEquityTable",
+    1.0,
+    null
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    2.0,
+    null
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_ComprehensiveIncomeAbstract",
+    2.0,
+    null
+   ],
+   [
+    "ifrs-full_ComprehensiveIncomeAbstract",
+    "ifrs-full_ProfitLoss",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ComprehensiveIncomeAbstract",
+    "ifrs-full_OtherComprehensiveIncome",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ComprehensiveIncomeAbstract",
+    "ifrs-full_ComprehensiveIncome",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "drd_TransactionsWithOwnersOfParentAbstract",
+    3.0,
+    null
+   ],
+   [
+    "drd_TransactionsWithOwnersOfParentAbstract",
+    "ifrs-full_ChangesInEquityAbstract",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ChangesInEquityAbstract",
+    "ifrs-full_IssueOfEquity",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ChangesInEquityAbstract",
+    "ifrs-full_IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ChangesInEquityAbstract",
+    "ifrs-full_ShareIssueRelatedCost",
+    3.0,
+    "http://www.xbrl.org/2009/role/negatedTerseLabel"
+   ],
+   [
+    "ifrs-full_ChangesInEquityAbstract",
+    "ifrs-full_IncreaseDecreaseThroughExerciseOfOptions",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ChangesInEquityAbstract",
+    "ifrs-full_DividendsPaid",
+    5.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "ifrs-full_ChangesInEquityAbstract",
+    "ifrs-full_IncreaseDecreaseThroughTreasuryShareTransactions",
+    6.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ChangesInEquityAbstract",
+    "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions",
+    7.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ChangesInEquityAbstract",
+    "ifrs-full_ChangesInEquity",
+    8.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_Equity",
+    1.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_Equity",
+    4.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_ComponentsOfEquityAxis",
+    1.0,
+    null
+   ],
+   [
+    "ifrs-full_ComponentsOfEquityAxis",
+    "ifrs-full_EquityMember",
+    1.0,
+    null
+   ],
+   [
+    "ifrs-full_EquityMember",
+    "ifrs-full_EquityAttributableToOwnersOfParentMember",
+    1.0,
+    null
+   ],
+   [
+    "ifrs-full_EquityAttributableToOwnersOfParentMember",
+    "ifrs-full_IssuedCapitalMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "ifrs-full_EquityAttributableToOwnersOfParentMember",
+    "ifrs-full_OtherReservesMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_EquityAttributableToOwnersOfParentMember",
+    "ifrs-full_RetainedEarningsMember",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ]
+  ]
+ }
+}

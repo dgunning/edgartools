@@ -27,10 +27,10 @@ def _bdc_preprocess(text: str) -> str:
 
     Removes common company suffixes and normalizes text.
     """
-    from unidecode import unidecode
+    from anyascii import anyascii
     import re
 
-    text = unidecode(text.lower())
+    text = anyascii(text.lower())
     text = re.sub(r'[^\w\s]', '', text)
     text = re.sub(r'\s+', ' ', text).strip()
 

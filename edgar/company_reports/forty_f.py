@@ -9,7 +9,7 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich.tree import Tree
 
-from edgar.company_reports._base import CompanyReport, report_lookup_miss
+from edgar.company_reports._base import CompanyReport, text_only_section
 from edgar.display.formatting import datefmt
 from edgar.richtools import repr_rich
 
@@ -622,32 +622,42 @@ class FortyF(CompanyReport):
         """
         if not isinstance(key, str):
             raise TypeError(f"Section key must be a string, got {type(key).__name__}")
+        if not key.strip():
+            return None
+        return super().__getitem__(key)
+
+    def _resolve_section(self, key: str):
+        """The AIF heading lookup behind `forty_f[name]` and `forty_f.section(name)`.
+
+        Returns `(section, text)` or None; see `CompanyReport._resolve_section`.
+        A 40-F has no Item structure, so the AIF text is cut at detected
+        headings rather than read from a detected section.
+        """
+        if not isinstance(key, str):
+            raise TypeError(f"Section key must be a string, got {type(key).__name__}")
 
         text = self.aif_text
         positions = self._section_positions
-        if not text or not positions:
+        key_lower = key.lower().strip()
+        if not text or not positions or not key_lower:
             # No AIF text or no detected headers: the named section is absent
             # just as surely as if it had been searched for and missed. The
             # error's own suggestion covers this shape ("no items were detected
             # in this filing at all").
-            report_lookup_miss(self, key)
             return None
 
-        key_lower = key.lower().strip()
-        if not key_lower:
-            return None
-
-        # Exact case-insensitive match
-        for idx, (_, name) in enumerate(positions):
-            if name.lower() == key_lower:
-                return _extract_section_text(text, positions, idx)
-
-        # Keyword containment: "business" matches "Description Of The Business"
-        for idx, (_, name) in enumerate(positions):
-            if key_lower in name.lower():
-                return _extract_section_text(text, positions, idx)
-
-        report_lookup_miss(self, key)
+        # Exact case-insensitive match first, then keyword containment
+        # ("business" matches "Description Of The Business").
+        for matches in (lambda name: name.lower() == key_lower,
+                        lambda name: key_lower in name.lower()):
+            for idx, (_, name) in enumerate(positions):
+                if matches(name):
+                    section_text = _extract_section_text(text, positions, idx)
+                    # Heading-scan evidence, the same kind the pattern
+                    # extractor uses, so it carries that tier's confidence.
+                    return text_only_section(
+                        name.lower().replace(' ', '_'), name, section_text,
+                        detection_method='aif_heading', confidence=0.7), section_text
         return None
 
     # -- LLM context ---------------------------------------------------------

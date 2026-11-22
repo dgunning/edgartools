@@ -51,6 +51,10 @@ RFILES = REPO / "tests" / "fixtures" / "attachments" / "aapl" / "20250329"
 # text ("Summary of Significant Accounting Policies", "Debt", "Shareholders'
 # Equity") precedes its <div>s, and TableProcessor used to keep only the divs'
 # text. Letters and digits are only gained; the rest of every render is unchanged.
+# R1 was re-captured for GH #1477: three cover-page facts were classified as
+# headers, so the header date "Apr. 18, 2025" printed on the "Document Period End
+# Date" row and the header rule sat below the facts. The same words render; the
+# date moves to the header line and the rule moves above "Document Type".
 BASELINE = REPO / "tests" / "fixtures" / "filing_summary" / "report_render_baseline.json"
 
 

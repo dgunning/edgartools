@@ -1,0 +1,19 @@
+{
+ "namespace_prefixes": {
+  "http://fasb.org/srt/2020-01-31": "srt",
+  "http://fasb.org/us-gaap/2020-01-31": "us-gaap",
+  "http://www.brixmor.com/20201231": "brx",
+  "http://www.w3.org/1999/xlink": "xlink",
+  "http://www.w3.org/2001/XMLSchema": "xs",
+  "http://www.xbrl.org/2003/instance": "xbrli",
+  "http://www.xbrl.org/2003/iso4217": "iso4217",
+  "http://www.xbrl.org/2003/linkbase": "link",
+  "http://www.xbrl.org/2009/utr": "utr",
+  "http://www.xbrl.org/dtr/type/non-numeric": "nonnum",
+  "http://www.xbrl.org/dtr/type/numeric": "num",
+  "http://xbrl.org/2005/xbrldt": "xbrldt",
+  "http://xbrl.org/2006/xbrldi": "xbrldi",
+  "http://xbrl.sec.gov/dei/2020-01-31": "dei"
+ },
+ "typed_dimensions": []
+}

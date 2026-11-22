@@ -385,8 +385,17 @@ class Notes:
         children_by_parent = {}       # parent_role → [report, ...]
         detail_reports = []           # Details without parent_role (need name-prefix matching)
 
+        # The corrected category, not SEC's raw one: a detail role titled without
+        # "(Details)" is filed under Notes or Cover by SEC's renderer (GH #1947).
+        menu_categories = getattr(xbrl, '_filing_summary_menu_categories', None)
+        if not isinstance(menu_categories, dict):
+            menu_categories = {}
+
+        def category_of(report):
+            return menu_categories.get(report.role, report.menu_category)
+
         for report in filing_summary.reports:
-            cat = report.menu_category
+            cat = category_of(report)
             if cat == 'Notes' and not report.parent_role:
                 note_reports.append(report)
             elif cat in ('Tables', 'Policies', 'Details') and report.parent_role:
@@ -414,18 +423,18 @@ class Notes:
                     continue
                 child_stmt = Statement(xbrl, child.role)
                 child_stmt._report = child  # Link to FilingSummary Report for HTML access
-                if child.menu_category == 'Tables':
+                if category_of(child) == 'Tables':
                     tables.append(child_stmt)
-                elif child.menu_category == 'Policies':
+                elif category_of(child) == 'Policies':
                     policies.append(child_stmt)
-                elif child.menu_category == 'Details':
+                elif category_of(child) == 'Details':
                     details.append(child_stmt)
 
             # Orphan Details matched by name prefix
             if report.short_name:
                 prefix = report.short_name.lower()
                 linked_roles = {c.role for c in children_by_parent.get(report.role, [])
-                                if c.menu_category == 'Details'}
+                                if category_of(c) == 'Details'}
                 for dr in detail_reports:
                     if (dr.role and dr.role not in linked_roles
                             and dr.short_name

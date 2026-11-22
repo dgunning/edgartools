@@ -7,9 +7,9 @@ GitHub Issue: https://github.com/dgunning/edgartools/issues/1325
 before starting any thread that imports a submodule. This pins that advice: if the
 documented pattern ever stops working, the documentation is wrong and this fails.
 
-The unsafe ordering is deliberately not asserted. It depends on thread interleaving,
-so asserting the failure would be a flaky test that says nothing useful; the
-structural fix is tracked for 6.0 (lazy submodule loading).
+The once-unsafe ordering is asserted in test_issue_1325.py: since `import edgar`
+stopped importing submodules, threads may import in any order. The documented
+pattern stays pinned here because it is still what users on 6.0.0 are told.
 """
 import os
 import subprocess

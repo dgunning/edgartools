@@ -21,8 +21,10 @@ Generated from: data/xbrl-mappings/gaap_taxonomy_mapping.csv
 import json
 import logging
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
+
+from edgar.exceptions import ValidationError
 
 from .exclusions import EXCLUDED_TAGS, should_exclude
 
@@ -57,7 +59,12 @@ def _denotes_total(display_name: Optional[str]) -> bool:
 
 @dataclass
 class MappingResult:
-    """Result of a reverse index lookup."""
+    """Result of a reverse index lookup.
+
+    Metadata annotates the effective mapping entry, not each surviving candidate.
+    Six-argument construction remains supported; dataclasses.asdict() includes
+    the appended metadata and provenance fields, extending its serialized shape.
+    """
 
     standard_concepts: List[str]
     """List of standard concept names (mpreiss9's taxonomy)."""
@@ -69,13 +76,57 @@ class MappingResult:
     """True if the tag maps to multiple concepts (needs context resolution)."""
 
     is_deprecated: bool
-    """True if the XBRL tag is deprecated."""
+    """Whether a positive deprecation annotation was supplied.
+
+    False does not establish that current taxonomy membership was verified.
+    """
 
     deprecated_year: Optional[str]
     """Year the tag was deprecated, if applicable."""
 
     comment: Optional[str]
     """Any comment about the mapping (e.g., 'Curr/NonCurr ambiguity')."""
+
+    confidence: Optional[float] = None
+    """Stored score of mixed origin, including generation and later corrections.
+
+    Not a uniform or comparable probability; must not be used to rank candidates.
+    """
+
+    section: Optional[str] = None
+    """Mapping section annotation, not the filing row's actual section."""
+
+    statement: Optional[str] = None
+    """Mapping statement annotation, not evidence of a fact's presentation role
+    or statement membership.
+    """
+
+    is_total: Optional[bool] = None
+    """Stored usage annotation, not the source element's meaning or proof that
+    it is a whole measure or belongs in a closed total family.
+    """
+
+    company_count: Optional[int] = None
+    """Stored generation count that may predate later candidate edits.
+
+    Missing means unknown. Zero with years_present 0 and null first_year/last_year
+    is a placeholder without a generation record, not observed zero-company usage.
+    This is not a live count or assurance of qualified-concept usage.
+    """
+
+    mapping_key: Optional[str] = None
+    """Exact stored key matched by lookup; opaque, without a namespace/version guarantee."""
+
+    applied_industry: Optional[str] = None
+    """Industry whose override actually matched, otherwise None."""
+
+    metadata_origins: dict[str, str] = field(default_factory=dict)
+    """Source of each of the five annotations: base, industry_override, or missing.
+
+    Explicit null retains its source. Base does not prove an annotation was
+    generated for the returned candidates. Manually constructed results may leave
+    provenance unspecified. Each result owns an independent dictionary.
+    """
 
     @property
     def primary_concept(self) -> Optional[str]:
@@ -260,7 +311,7 @@ class ReverseIndex:
 
         return None
 
-    def _apply_industry_override(self, entry: dict, industry: str) -> dict:
+    def _apply_industry_override(self, entry: dict, industry: Optional[str]) -> Tuple[dict, Optional[str], dict[str, str]]:
         """
         Apply industry-specific overrides to a mapping entry.
 
@@ -272,13 +323,18 @@ class ReverseIndex:
             industry: Fama-French 48 industry code (e.g., "Banks", "Chips")
 
         Returns:
-            Entry with overrides applied (may be the original if no override)
+            Effective entry, matched industry (or None), and annotation origins.
         """
+        metadata_fields = ("confidence", "section", "statement", "is_total", "company_count")
+        origins = {name: "base" if name in entry else "missing" for name in metadata_fields}
         overrides = entry.get("industry_overrides")
-        if not overrides or industry not in overrides:
-            return entry
+        if not industry or not overrides or industry not in overrides:
+            return entry, None, origins
 
         override = overrides[industry]
+        for name in metadata_fields:
+            if name in override:
+                origins[name] = "industry_override"
         # Merge: override fields take precedence over base entry
         merged = dict(entry)
         merged.pop("industry_overrides", None)  # Don't carry overrides into merged
@@ -292,7 +348,7 @@ class ReverseIndex:
         elif len(std_tags) > 1:
             merged["ambiguous"] = True
 
-        return merged
+        return merged, industry, origins
 
     def lookup(self, xbrl_tag: str, industry: Optional[str] = None) -> Optional[MappingResult]:
         """
@@ -304,7 +360,10 @@ class ReverseIndex:
                      industry-specific overrides
 
         Returns:
-            MappingResult with standard concepts and display names, or None if not found
+            MappingResult with surviving concepts, display names, and entry annotations.
+            Origins distinguish absent fields from explicit null values; inherited
+            annotations are not reassessed when an override changes candidates.
+            None if unknown, excluded, or all candidates are rejected by the total guard.
         """
         # Check if excluded first
         if should_exclude(xbrl_tag):
@@ -320,9 +379,8 @@ class ReverseIndex:
         if entry is None:
             return None
 
-        # Apply industry overrides if industry is known
-        if industry and isinstance(entry, dict):
-            entry = self._apply_industry_override(entry, industry)
+        # An empty industry preserves the base entry while still recording origins.
+        entry, applied_industry, metadata_origins = self._apply_industry_override(entry, industry)
 
         # Extract data from entry
         standard_tags = entry.get("standard_tags", [])
@@ -378,6 +436,14 @@ class ReverseIndex:
             is_deprecated=bool(deprecated),
             deprecated_year=deprecated if deprecated else None,
             comment=comment,
+            confidence=entry.get("confidence"),
+            section=entry.get("section"),
+            statement=entry.get("statement"),
+            is_total=entry.get("is_total"),
+            company_count=entry.get("company_count"),
+            mapping_key=normalized,
+            applied_industry=applied_industry,
+            metadata_origins=metadata_origins,
         )
 
     def _may_resolve_to(self, key: str, entry: dict, concept: str, display_name: str) -> bool:
@@ -412,7 +478,16 @@ class ReverseIndex:
 
         Returns:
             The standard concept name, or None if not found/excluded
+
+        Raises:
+            ValidationError: if xbrl_tag is not a string, or context is not a
+                dict for a tag with several candidates
         """
+        if not isinstance(xbrl_tag, str):
+            raise ValidationError(
+                f"xbrl_tag must be an XBRL concept name such as 'us-gaap:DividendsReceivable', "
+                f"not {type(xbrl_tag).__name__}",
+                parameter="xbrl_tag", invalid_value=xbrl_tag)
         result = self.lookup(xbrl_tag, industry=industry)
         if result is None:
             return None
@@ -420,6 +495,14 @@ class ReverseIndex:
         # Non-ambiguous tags: return primary concept
         if not result.is_ambiguous:
             return result.primary_concept
+
+        # Context is read only for a tag with several candidates, so only then
+        # is a context that is not a dict an error (an unread one never was).
+        if context is not None and not isinstance(context, dict):
+            raise ValidationError(
+                "context must be a dict such as {'section': 'Current Assets'} or "
+                f"{{'statement_type': 'IncomeStatement'}}, not {type(context).__name__}",
+                parameter="context", invalid_value=context)
 
         # Ambiguous tags: try to disambiguate using context
         resolution_method = "fallback"
@@ -529,6 +612,20 @@ class ReverseIndex:
                     )
                     if candidate_section and self._sections_match(section, candidate_section):
                         return candidate
+
+            # Then the statement, when the caller names it and the candidates
+            # sit on different statements: an element used on two statements
+            # keeps one candidate per statement (DividendsPreferredStock is a
+            # preferred dividend on the income statement and a dividend on the
+            # equity statement, GH #1452). Only a statement that exactly one
+            # candidate belongs to decides; otherwise the steps below do.
+            if context.get('statement_type'):
+                on_statement = [
+                    candidate for candidate in candidates
+                    if get_section_for_concept(candidate, statement_type)
+                ]
+                if len(on_statement) == 1:
+                    return on_statement[0]
 
             # Phase 3+: Use tag name hints for current/noncurrent disambiguation.
             # 'nonoperating' is not 'noncurrent': OtherNonOperatingCurrentAssets is current.

@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
 from edgar.core import log
+from edgar.xbrl.core import element_catalog_key
 from edgar.xbrl.models import (
     Axis,
     CalculationTree,
@@ -70,9 +71,11 @@ class XBRLParser:
         self.entity_info: Dict[str, Any] = {
             'entity_name': None,
             'ticker': None,
+            'trading_symbols': [],
             'identifier': None,
             'document_type': None,
             'reporting_end_date': None,
+            'max_instant_context_date': None,
             'document_period_end_date': None,
             'fiscal_year': None,
             'fiscal_period': None,
@@ -89,6 +92,10 @@ class XBRLParser:
 
         # Mapping of context IDs to period identifiers for easy lookup
         self.context_period_map: Dict[str, str] = {}
+
+        # Namespace URI -> prefix as the filing's instance and schema bind them
+        # (GH #1255). Shared by the schema and instance parsers.
+        self.namespace_prefixes: Dict[str, str] = {}
 
         # Initialize component parsers
         self._init_parsers()
@@ -116,7 +123,8 @@ class XBRLParser:
             calculation_roles=self.calculation_roles,
             calculation_trees=self.calculation_trees,
             element_catalog=self.element_catalog,
-            facts=self.facts
+            facts=self.facts,
+            role_types=self.role_types
         )
 
         self.definition_parser = DefinitionParser(
@@ -124,7 +132,8 @@ class XBRLParser:
             tables=self.tables,
             axes=self.axes,
             domains=self.domains,
-            element_catalog=self.element_catalog
+            element_catalog=self.element_catalog,
+            role_types=self.role_types
         )
 
         self.instance_parser = InstanceParser(
@@ -137,6 +146,18 @@ class XBRLParser:
             reporting_periods=self.reporting_periods,
             context_period_map=self.context_period_map
         )
+
+        # Dimension QNames the instance carries as xbrldi:typedMember. A typed
+        # value is not a member concept, so it is never rewritten or looked up
+        # as one (gh #1761). The definition parser reads the same set: a
+        # typedMember shows an axis is typed even when its declaration sits in
+        # an imported taxonomy that is never loaded (gh #1234).
+        self.typed_dimensions = self.instance_parser.typed_dimensions
+        self.instance_parser.namespace_prefixes = self.namespace_prefixes
+        self.schema_parser.namespace_prefixes = self.namespace_prefixes
+        # The us-gaap year a standard typed axis's domain reference is read for (gh #1234).
+        self.definition_parser.namespace_prefixes = self.namespace_prefixes
+        self.definition_parser.observed_typed_dimensions = self.typed_dimensions
 
         # Set up cross-references for embedded linkbase processing
         self.schema_parser.set_linkbase_parsers(
@@ -252,7 +273,7 @@ class XBRLParser:
             for instance_file in instance_files:
                 log.debug(f"Parsing instance: {instance_file}")
                 self.instance_parser.parse_instance(instance_file)
-            self._fill_period_types_from_facts()
+            self._after_instance()
 
             log.info(f"Successfully parsed XBRL directory with {len(self.facts)} facts")
 
@@ -321,12 +342,21 @@ class XBRLParser:
     def parse_instance(self, file_path: Union[str, Path]) -> None:
         """Parse instance document file and extract contexts, facts, and units."""
         self.instance_parser.parse_instance(file_path)
-        self._fill_period_types_from_facts()
+        self._after_instance()
 
     def parse_instance_content(self, content: str) -> None:
         """Parse instance document content and extract contexts, facts, and units."""
         self.instance_parser.parse_instance_content(content)
+        self._after_instance()
+
+    def parse_inline_footnotes_content(self, content: Union[str, bytes]) -> int:
+        """Read footnotes from an inline XBRL document when the instance had none."""
+        return self.instance_parser.extract_inline_footnotes(content)
+
+    def _after_instance(self) -> None:
+        """What every instance read is followed by."""
         self._fill_period_types_from_facts()
+        self.definition_parser.mark_observed_typed_dimensions()
 
     def _fill_period_types_from_facts(self) -> None:
         """
@@ -347,7 +377,7 @@ class XBRLParser:
                 period_type = 'duration'
             if period_type not in ('instant', 'duration'):
                 continue
-            element_id = fact.element_id.replace(':', '_', 1)
+            element_id = element_catalog_key(fact.element_id)
             if period_types.setdefault(element_id, period_type) != period_type:
                 period_types[element_id] = None
 

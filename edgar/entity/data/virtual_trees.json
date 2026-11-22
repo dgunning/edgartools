@@ -25,6 +25,8 @@
           "PropertyPlantAndEquipmentNet",
           "Goodwill",
           "IntangibleAssetsNetExcludingGoodwill",
+          "CryptoAssetFairValueNoncurrent",
+          "CryptoAssetFairValue",
           "AssetsCurrentAbstract",
           "OperatingLeaseRightOfUseAsset",
           "OtherAssetsNoncurrent"
@@ -240,7 +242,8 @@
           "AccountsReceivableNetCurrent",
           "InventoryNet",
           "AssetsCurrent",
-          "PrepaidExpenseAndOtherAssetsCurrent"
+          "PrepaidExpenseAndOtherAssetsCurrent",
+          "CryptoAssetFairValueCurrent"
         ],
         "occurrence_rate": 0.5166163141993958,
         "is_abstract": true,
@@ -379,6 +382,36 @@
         "occurrence_rate": 0.32326283987915405,
         "is_abstract": false,
         "is_total": false
+      },
+      "CryptoAssetFairValueCurrent": {
+        "concept": "CryptoAssetFairValueCurrent",
+        "label": "Crypto Assets, Current",
+        "parent": "AssetsCurrentAbstract",
+        "depth": 3.803809523809524,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CryptoAssetFairValueNoncurrent": {
+        "concept": "CryptoAssetFairValueNoncurrent",
+        "label": "Crypto Assets, Noncurrent",
+        "parent": "AssetsAbstract",
+        "depth": 3.5879396984924625,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CryptoAssetFairValue": {
+        "concept": "CryptoAssetFairValue",
+        "label": "Crypto Assets",
+        "parent": "AssetsAbstract",
+        "depth": 3.5879396984924625,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
       }
     },
     "roots": [
@@ -406,7 +439,11 @@
           "OperatingIncomeLoss",
           "RevenueFromContractWithCustomerExcludingAssessedTax",
           "SellingGeneralAndAdministrativeExpense",
-          "OtherNonoperatingIncomeExpense"
+          "OtherNonoperatingIncomeExpense",
+          "CryptoAssetUnrealizedGainLossOperatingAndNonoperating",
+          "CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating",
+          "GrossInvestmentIncomeOperating",
+          "InvestmentIncomeInvestmentExpense"
         ],
         "occurrence_rate": 0.8821752265861027,
         "is_abstract": true,
@@ -596,6 +633,46 @@
         "occurrence_rate": 0.4259818731117825,
         "is_abstract": false,
         "is_total": false
+      },
+      "CryptoAssetUnrealizedGainLossOperatingAndNonoperating": {
+        "concept": "CryptoAssetUnrealizedGainLossOperatingAndNonoperating",
+        "label": "Crypto Assets, Unrealized Gain (Loss)",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.6515679442508713,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating": {
+        "concept": "CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating",
+        "label": "Crypto Assets, Realized and Unrealized Gain (Loss)",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.6515679442508713,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "GrossInvestmentIncomeOperating": {
+        "concept": "GrossInvestmentIncomeOperating",
+        "label": "Total Investment Income",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.6515679442508713,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": true
+      },
+      "InvestmentIncomeInvestmentExpense": {
+        "concept": "InvestmentIncomeInvestmentExpense",
+        "label": "Total Investment Expenses",
+        "parent": "IncomeStatementAbstract",
+        "depth": 2.6515679442508713,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": true
       }
     },
     "roots": [
@@ -630,6 +707,10 @@
           "NetCashProvidedByUsedInInvestingActivitiesAbstract",
           "NetCashProvidedByUsedInFinancingActivitiesAbstract",
           "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectContinuingOperations",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations",
+          "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations",
           "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
           "SupplementalCashFlowInformationAbstract",
           "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
@@ -646,6 +727,7 @@
         "children": [
           "ProfitLoss",
           "AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+          "ProceedsFromCryptoAssetOperatingActivity",
           "NetCashProvidedByUsedInOperatingActivities"
         ],
         "occurrence_rate": 0.7915407854984894,
@@ -720,7 +802,9 @@
           "PaymentsToAcquireBusinessesNetOfCashAcquired",
           "NetCashProvidedByUsedInInvestingActivities",
           "PaymentsForProceedsFromOtherInvestingActivities",
-          "PaymentsToAcquirePropertyPlantAndEquipment"
+          "PaymentsToAcquirePropertyPlantAndEquipment",
+          "PaymentForAcquisitionCryptoAsset",
+          "ProceedsFromDisposalCryptoAsset"
         ],
         "occurrence_rate": 0.7522658610271903,
         "is_abstract": true,
@@ -803,6 +887,46 @@
         "is_abstract": false,
         "is_total": true
       },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations",
+        "label": "Net Change in Cash, Continuing Operations, Including FX Effect",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.8847184986595173,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectContinuingOperations": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectContinuingOperations",
+        "label": "Net Change in Cash, Continuing Operations, Excluding FX Effect",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.8847184986595173,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations",
+        "label": "Net Change in Cash, Discontinued Operations, Including FX Effect",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.8847184986595173,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations": {
+        "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations",
+        "label": "Net Change in Cash, Discontinued Operations, Excluding FX Effect",
+        "parent": "StatementOfCashFlowsAbstract",
+        "depth": 1.8847184986595173,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
       "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
         "concept": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
         "label": "Parent Company",
@@ -820,7 +944,16 @@
         "depth": 1.536231884057971,
         "children": [
           "InterestPaidNet",
-          "IncomeTaxesPaidNet"
+          "IncomeTaxesPaidNet",
+          "IncomeTaxPaidFederalAfterRefundReceived",
+          "IncomeTaxPaidStateAndLocalAfterRefundReceived",
+          "IncomeTaxPaidForeignAfterRefundReceived",
+          "IncomeTaxPaidFederalBeforeRefundReceived",
+          "IncomeTaxPaidStateAndLocalBeforeRefundReceived",
+          "IncomeTaxPaidForeignBeforeRefundReceived",
+          "ProceedsFromIncomeTaxRefundFederal",
+          "ProceedsFromIncomeTaxRefundStateAndLocal",
+          "ProceedsFromIncomeTaxRefundForeign"
         ],
         "occurrence_rate": 0.5619335347432024,
         "is_abstract": true,
@@ -943,6 +1076,126 @@
         "depth": 4.435714285714286,
         "children": [],
         "occurrence_rate": 0.311178247734139,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "PaymentForAcquisitionCryptoAsset": {
+        "concept": "PaymentForAcquisitionCryptoAsset",
+        "label": "Payments to Acquire Crypto Assets",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.829383886255924,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromDisposalCryptoAsset": {
+        "concept": "ProceedsFromDisposalCryptoAsset",
+        "label": "Proceeds from Disposal of Crypto Assets",
+        "parent": "NetCashProvidedByUsedInInvestingActivitiesAbstract",
+        "depth": 2.829383886255924,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromCryptoAssetOperatingActivity": {
+        "concept": "ProceedsFromCryptoAssetOperatingActivity",
+        "label": "Proceeds from Conversion of Crypto Consideration",
+        "parent": "NetCashProvidedByUsedInOperatingActivitiesAbstract",
+        "depth": 3.3286624203821655,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidFederalAfterRefundReceived": {
+        "concept": "IncomeTaxPaidFederalAfterRefundReceived",
+        "label": "Income Taxes Paid, Federal, Net of Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidStateAndLocalAfterRefundReceived": {
+        "concept": "IncomeTaxPaidStateAndLocalAfterRefundReceived",
+        "label": "Income Taxes Paid, State and Local, Net of Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidForeignAfterRefundReceived": {
+        "concept": "IncomeTaxPaidForeignAfterRefundReceived",
+        "label": "Income Taxes Paid, Foreign, Net of Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidFederalBeforeRefundReceived": {
+        "concept": "IncomeTaxPaidFederalBeforeRefundReceived",
+        "label": "Income Taxes Paid, Federal, Before Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidStateAndLocalBeforeRefundReceived": {
+        "concept": "IncomeTaxPaidStateAndLocalBeforeRefundReceived",
+        "label": "Income Taxes Paid, State and Local, Before Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "IncomeTaxPaidForeignBeforeRefundReceived": {
+        "concept": "IncomeTaxPaidForeignBeforeRefundReceived",
+        "label": "Income Taxes Paid, Foreign, Before Refunds",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromIncomeTaxRefundFederal": {
+        "concept": "ProceedsFromIncomeTaxRefundFederal",
+        "label": "Income Tax Refunds Received, Federal",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromIncomeTaxRefundStateAndLocal": {
+        "concept": "ProceedsFromIncomeTaxRefundStateAndLocal",
+        "label": "Income Tax Refunds Received, State and Local",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
+        "is_abstract": false,
+        "is_total": false
+      },
+      "ProceedsFromIncomeTaxRefundForeign": {
+        "concept": "ProceedsFromIncomeTaxRefundForeign",
+        "label": "Income Tax Refunds Received, Foreign",
+        "parent": "SupplementalCashFlowInformationAbstract",
+        "depth": 2.903409090909091,
+        "children": [],
+        "occurrence_rate": 0.01,
         "is_abstract": false,
         "is_total": false
       }

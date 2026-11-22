@@ -1,0 +1,1307 @@
+{
+ "version": "2.2",
+ "instance": {
+  "d886456d40f.htm d886456dex99b3b.htm d886456dex99b3c.htm": {
+   "tag": {
+    "cm_AvailableForSaleFinancialAssetsOtherComprehensiveIncomeNetOfTaxAfterReclassification": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.cibc.com/20241031",
+     "localname": "AvailableForSaleFinancialAssetsOtherComprehensiveIncomeNetOfTaxAfterReclassification",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Available For Sale Financial Assets Other Comprehensive Income Net Of Tax After Reclassification",
+        "terseLabel": "Net change in debt securities measured at FVOCI",
+        "documentation": "Available for sale financial assets other comprehensive income net of tax after reclassification."
+       }
+      }
+     }
+    },
+    "cm_IncreaseDecreaseThroughExerciseOfStockOptionsAndSettlementOfOtherEquitysettledSharebasedAwards": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.cibc.com/20241031",
+     "localname": "IncreaseDecreaseThroughExerciseOfStockOptionsAndSettlementOfOtherEquitysettledSharebasedAwards",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Increase (decrease) through exercise of stock options and settlement of other equity-settled share-based awards",
+        "terseLabel": "Exercise of stock options and settlement of other equity-settled share-based awards",
+        "documentation": "Increase (decrease) through exercise of stock options and settlement of other equity-settled share-based awards, equity."
+       }
+      }
+     }
+    },
+    "cm_PremiumOnPurchaseOfCommonSharesForCancellation": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.cibc.com/20241031",
+     "localname": "PremiumOnPurchaseOfCommonSharesForCancellation",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Premium On Purchase Of Common Shares For Cancellation",
+        "terseLabel": "Premium on purchase of common shares for cancellation",
+        "documentation": "Premium paid on purchase of common Shares for cancellation."
+       }
+      }
+     }
+    },
+    "cm_RedemptionOfPreferredSharesValue": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://www.cibc.com/20241031",
+     "localname": "RedemptionOfPreferredSharesValue",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Redemption Of Preferred Shares Value",
+        "terseLabel": "Redemption of preferred shares",
+        "documentation": "Redemption of preferred shares value."
+       }
+      }
+     }
+    },
+    "cm_ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.cibc.com/20241031",
+     "localname": "ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Reserve of equity securities designated at fair value of other comprehensive income [member]",
+        "terseLabel": "Reserve of equity securities designated at fair value of other comprehensive income [member]",
+        "documentation": "Reserve of equity securities designated at fair value of other comprehensive income [member]"
+       }
+      }
+     }
+    },
+    "ifrs-full_AccumulatedOtherComprehensiveIncomeMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "AccumulatedOtherComprehensiveIncomeMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Accumulated other comprehensive income [member]",
+        "terseLabel": "AOCI, net of tax [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for accumulated other comprehensive income. [Refer: Other comprehensive income]"
+       }
+      }
+     }
+    },
+    "ifrs-full_AdditionalPaidinCapitalMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "AdditionalPaidinCapitalMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Additional Paid-in Capital [Member]",
+        "terseLabel": "Additional paid-in capital [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for amounts received from issuance of the entity's shares in excess of nominal value and amounts received from other transactions involving the entity's stock or stockholders."
+       }
+      }
+     }
+    },
+    "ifrs-full_BusinessCombinationsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "BusinessCombinationsAxis",
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfCommonSharesIssuedDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfCommonSharesIssuedParentheticalDetail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/ShareBasedPaymentsAdditionalInformationDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Business combinations [axis]",
+        "terseLabel": "Business combinations [axis]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      }
+     }
+    },
+    "ifrs-full_CategoriesOfFinancialAssetsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "CategoriesOfFinancialAssetsAxis",
+     "presentation": [
+      "http://www.cibc.com/role/ConcentrationOfCreditRiskSummaryOfCreditExposureAssociatedWithOurOnAndOffBalanceSheetFinancialInstrumentsDetail",
+      "http://www.cibc.com/role/ConcentrationOfCreditRiskSummaryOfCreditExposureAssociatedWithOurOnAndOffBalanceSheetFinancialInstrumentsParentheticalDetail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/DerivativeInstrumentsSummaryOfCreditExposureArisingFromDerivativesDetail",
+      "http://www.cibc.com/role/DerivativeInstrumentsSummaryOfDerivativeInstrumentsDetail",
+      "http://www.cibc.com/role/DerivativeInstrumentsSummaryOfDetailedInformationAboutCreditRiskDetail",
+      "http://www.cibc.com/role/DerivativeInstrumentsSummaryOfNotionalAmountsDetail",
+      "http://www.cibc.com/role/DerivativeInstrumentsSummaryOfNotionalAmountsParentheticalDetail",
+      "http://www.cibc.com/role/FairValueMeasurementFairValueOfFinancialInstrumentsDetail",
+      "http://www.cibc.com/role/Ifrs7DisclosureCreditRiskSummaryOfExposureToCreditRiskDetail",
+      "http://www.cibc.com/role/LoansAdditionalInformationDetail",
+      "http://www.cibc.com/role/LoansDisclosureOfLoansAndReceivablesDetail",
+      "http://www.cibc.com/role/LoansSummaryOfAllowanceForCreditLossesDetail",
+      "http://www.cibc.com/role/LoansSummaryOfCarryingAmountOfLoansBasedOnInternalRiskRatingGradesDetail",
+      "http://www.cibc.com/role/LoansSummaryOfCarryingAmountOfLoansBasedOnInternalRiskRatingGradesParentheticalDetail",
+      "http://www.cibc.com/role/LoansSummaryOfUndrawnCreditFacilitiesAndOtherOffBalanceSheetExposuresDetail",
+      "http://www.cibc.com/role/PostEmploymentBenefitsSummaryOfMajorCategoriesOfDefinedBenefitPlanAssetsDetail",
+      "http://www.cibc.com/role/SecuritiesAdditionalInformationDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfAllowanceForCreditLossesMeasuredAtFvociAndAmortizedCostDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfResidualTermToContractualMaturityOfFinancialInstrumentsParentheticalDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfSecuritiesParentheticalDetail",
+      "http://www.cibc.com/role/StructuredEntitiesAndDerecognitionOfFinancialAssetsAdditionalInformationDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Categories of financial assets [axis]",
+        "terseLabel": "Categories of financial assets [axis]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      }
+     }
+    },
+    "ifrs-full_ClassesOfShareCapitalAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ClassesOfShareCapitalAxis",
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsAdditionalInformationDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfCommonSharesIssuedDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfTermsOfClassAPreferredSharesDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsSummaryOfOutstandingSharesAndDividendsPaidDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsSummaryOfOutstandingSharesAndDividendsPaidParentheticalDetail",
+      "http://www.cibc.com/role/ConsolidatedBalanceSheet",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Classes of share capital [axis]",
+        "terseLabel": "Classes of share capital [axis]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      }
+     }
+    },
+    "ifrs-full_ClassesOfShareCapitalMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ClassesOfShareCapitalMember",
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsAdditionalInformationDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfCommonSharesIssuedDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfTermsOfClassAPreferredSharesDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsSummaryOfOutstandingSharesAndDividendsPaidDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsSummaryOfOutstandingSharesAndDividendsPaidParentheticalDetail",
+      "http://www.cibc.com/role/ConsolidatedBalanceSheet",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Share capital [member]",
+        "terseLabel": "Share capital [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for share capital of the entity. It also represents the standard value for the 'Classes of share capital' axis if no other member is used."
+       }
+      }
+     }
+    },
+    "ifrs-full_ComponentsOfEquityAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ComponentsOfEquityAxis",
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsSummaryOfOutstandingSharesAndDividendsPaidDetail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/SecuritiesScheduleOfFairValueOfDebtSecuritiesMeasuredAndEquitySecuritiesDesignatedAtFvociDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Components of equity [axis]",
+        "terseLabel": "Components of equity [axis]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      }
+     }
+    },
+    "ifrs-full_DividendsPaid": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "DividendsPaid",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsSummaryOfOutstandingSharesAndDividendsPaidDetail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Dividends recognised as distributions to owners",
+        "negatedLabel": "Dividends and distributions",
+        "terseLabel": "Dividends and distributions paid"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The amount of dividends recognised as distributions to owners."
+       }
+      }
+     }
+    },
+    "ifrs-full_EntitysTotalForBusinessCombinationsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "EntitysTotalForBusinessCombinationsMember",
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfCommonSharesIssuedDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfCommonSharesIssuedParentheticalDetail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/ShareBasedPaymentsAdditionalInformationDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Entity's total for business combinations [member]",
+        "terseLabel": "Entity's total for business combinations [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for the standard value for the 'Business combinations' axis if no other member is used."
+       }
+      }
+     }
+    },
+    "ifrs-full_Equity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "Equity",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.cibc.com/role/ConsolidatedBalanceSheet": {
+       "parentTag": "ifrs-full_EquityAndLiabilities",
+       "weight": 1.0,
+       "order": 26.0
+      }
+     },
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfCommonSharesIssuedDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsSummaryOfOutstandingSharesAndDividendsPaidDetail",
+      "http://www.cibc.com/role/ConsolidatedBalanceSheet",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/Ifrs7DisclosureLiquidityRiskSummaryOfContractualMaturityProfileOfOnBalanceSheetAssetsLiabilitiesAndEquityAtTheirCarryingValuesDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Equity",
+        "totalLabel": "Total equity",
+        "periodStartLabel": "Balance at beginning of year",
+        "periodEndLabel": "Balance at end of year",
+        "verboseLabel": "Equity",
+        "terseLabel": "Amount"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The amount of residual interest in the assets of the entity after deducting all its liabilities."
+       }
+      }
+     }
+    },
+    "ifrs-full_EquityMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "EquityMember",
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsSummaryOfOutstandingSharesAndDividendsPaidDetail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/SecuritiesScheduleOfFairValueOfDebtSecuritiesMeasuredAndEquitySecuritiesDesignatedAtFvociDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Equity [member]",
+        "terseLabel": "Equity [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for the residual interest in the assets of the entity after deducting all its liabilities. It also represents the standard value for the 'Components of equity' axis if no other member is used."
+       }
+      }
+     }
+    },
+    "ifrs-full_FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/FairValueMeasurementFairValueOfFinancialInstrumentsDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Financial assets at fair value through other comprehensive income, category [member]",
+        "terseLabel": "Financial assets at fair value through OCI [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for the financial assets at fair value through other comprehensive income category. [Refer: Financial assets at fair value through other comprehensive income]"
+       }
+      }
+     }
+    },
+    "ifrs-full_FinancialAssetsCategoryMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "FinancialAssetsCategoryMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConcentrationOfCreditRiskSummaryOfCreditExposureAssociatedWithOurOnAndOffBalanceSheetFinancialInstrumentsDetail",
+      "http://www.cibc.com/role/ConcentrationOfCreditRiskSummaryOfCreditExposureAssociatedWithOurOnAndOffBalanceSheetFinancialInstrumentsParentheticalDetail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/DerivativeInstrumentsSummaryOfCreditExposureArisingFromDerivativesDetail",
+      "http://www.cibc.com/role/DerivativeInstrumentsSummaryOfDerivativeInstrumentsDetail",
+      "http://www.cibc.com/role/DerivativeInstrumentsSummaryOfDetailedInformationAboutCreditRiskDetail",
+      "http://www.cibc.com/role/DerivativeInstrumentsSummaryOfNotionalAmountsDetail",
+      "http://www.cibc.com/role/DerivativeInstrumentsSummaryOfNotionalAmountsParentheticalDetail",
+      "http://www.cibc.com/role/FairValueMeasurementFairValueOfFinancialInstrumentsDetail",
+      "http://www.cibc.com/role/Ifrs7DisclosureCreditRiskSummaryOfExposureToCreditRiskDetail",
+      "http://www.cibc.com/role/LoansAdditionalInformationDetail",
+      "http://www.cibc.com/role/LoansDisclosureOfLoansAndReceivablesDetail",
+      "http://www.cibc.com/role/LoansSummaryOfAllowanceForCreditLossesDetail",
+      "http://www.cibc.com/role/LoansSummaryOfCarryingAmountOfLoansBasedOnInternalRiskRatingGradesDetail",
+      "http://www.cibc.com/role/LoansSummaryOfCarryingAmountOfLoansBasedOnInternalRiskRatingGradesParentheticalDetail",
+      "http://www.cibc.com/role/LoansSummaryOfUndrawnCreditFacilitiesAndOtherOffBalanceSheetExposuresDetail",
+      "http://www.cibc.com/role/PostEmploymentBenefitsSummaryOfMajorCategoriesOfDefinedBenefitPlanAssetsDetail",
+      "http://www.cibc.com/role/SecuritiesAdditionalInformationDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfAllowanceForCreditLossesMeasuredAtFvociAndAmortizedCostDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfResidualTermToContractualMaturityOfFinancialInstrumentsParentheticalDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfSecuritiesParentheticalDetail",
+      "http://www.cibc.com/role/StructuredEntitiesAndDerecognitionOfFinancialAssetsAdditionalInformationDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Financial assets, category [member]",
+        "terseLabel": "Financial assets, category [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for aggregated categories of financial assets. It also represents the standard value for the 'Categories of financial assets' axis if no other member is used. [Refer: Financial assets]"
+       }
+      }
+     }
+    },
+    "ifrs-full_GainsLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "GainsLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Gains (losses) on financial assets measured at fair value through other comprehensive income, net of tax",
+        "terseLabel": "Net gains (losses) on equity securities designated at FVOCI"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The gains (losses) recognised in other comprehensive income on financial assets measured at fair value through other comprehensive income applying paragraph 4.1.2A of IFRS 9, net of tax, before reclassification adjustments. [Refer: Financial assets measured at fair value through other comprehensive income; Other comprehensive income]"
+       }
+      }
+     }
+    },
+    "ifrs-full_IFRS17Member": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "IFRS17Member",
+     "presentation": [
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesAdditionalInformation1Detail",
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesDisclosureOfTheBalanceSheetAsAResultOfTheRetrospectiveApplicationOfIfrs17Detail",
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesTables",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "IFRS 17 [member]",
+        "terseLabel": "IFRS 17 [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for IFRS 17 Insurance Contracts."
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Increase (decrease) due to changes in accounting policy required by IFRSs [member]",
+        "terseLabel": "Impact of adopting IFRS [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for the financial effect of changes in accounting policy required by IFRSs. [Refer: IFRSs [member]]"
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "IncreaseDecreaseThroughSharebasedPaymentTransactions",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Increase (decrease) through share-based payment transactions, equity",
+        "terseLabel": "Compensation expense arising from equity-settled share-based awards"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from share-based payment transactions. [Refer: Equity]"
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseThroughTransfersAndOtherChangesEquity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Increase (decrease) through other changes, equity",
+        "terseLabel": "Other"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from changes that the entity does not separately disclose in the same statement or note. [Refer: Equity]"
+       }
+      }
+     }
+    },
+    "ifrs-full_IncreaseDecreaseThroughTreasuryShareTransactions": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "IncreaseDecreaseThroughTreasuryShareTransactions",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfCommonSharesIssuedDetail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Increase (decrease) through treasury share transactions, equity",
+        "terseLabel": "Treasury shares",
+        "verboseLabel": "Treasury shares, Amount"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from treasury share transactions. [Refer: Equity; Treasury shares]"
+       }
+      }
+     }
+    },
+    "ifrs-full_InitiallyAppliedIFRSsAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "InitiallyAppliedIFRSsAxis",
+     "presentation": [
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesAdditionalInformation1Detail",
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesDisclosureOfTheBalanceSheetAsAResultOfTheRetrospectiveApplicationOfIfrs17Detail",
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesPolicies",
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesTables",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/IncomeTaxesSourcesAndMovementInDeferredTaxAssetsAndLiabilitiesDetail",
+      "http://www.cibc.com/role/InterestIncomeAndExpenseSummaryOfConsolidatedInterestIncomeAndExpenseForBothProductAndAccountingCategoryDetail",
+      "http://www.cibc.com/role/LoansDisclosureOfLoansAndReceivablesDetail",
+      "http://www.cibc.com/role/SecuritiesScheduleOfFairValueOfDebtSecuritiesMeasuredAndEquitySecuritiesDesignatedAtFvociDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfAllowanceForCreditLossesMeasuredAtFvociAndAmortizedCostDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfProfitOrLossRecognizedOnFvociSecuritiesDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfResidualTermToContractualMaturityOfFinancialInstrumentsParentheticalDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Initially applied IFRSs [axis]",
+        "terseLabel": "Effect of overlay approach reclassification [axis]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      }
+     }
+    },
+    "ifrs-full_InitiallyAppliedIFRSsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "InitiallyAppliedIFRSsMember",
+     "presentation": [
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesAdditionalInformation1Detail",
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesDisclosureOfTheBalanceSheetAsAResultOfTheRetrospectiveApplicationOfIfrs17Detail",
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesPolicies",
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesTables",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/IncomeTaxesSourcesAndMovementInDeferredTaxAssetsAndLiabilitiesDetail",
+      "http://www.cibc.com/role/InterestIncomeAndExpenseSummaryOfConsolidatedInterestIncomeAndExpenseForBothProductAndAccountingCategoryDetail",
+      "http://www.cibc.com/role/LoansDisclosureOfLoansAndReceivablesDetail",
+      "http://www.cibc.com/role/SecuritiesScheduleOfFairValueOfDebtSecuritiesMeasuredAndEquitySecuritiesDesignatedAtFvociDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfAllowanceForCreditLossesMeasuredAtFvociAndAmortizedCostDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfProfitOrLossRecognizedOnFvociSecuritiesDetail",
+      "http://www.cibc.com/role/SecuritiesSummaryOfResidualTermToContractualMaturityOfFinancialInstrumentsParentheticalDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Initially applied IFRSs [member]",
+        "terseLabel": "Initially applied IFRSs [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for IFRSs that have been initially applied by the entity. It also represents the standard value for the 'Initially applied IFRSs' axis if no other member is used. [Refer: IFRSs [member]]"
+       }
+      }
+     }
+    },
+    "ifrs-full_IssueOfEquity": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "IssueOfEquity",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Issue of equity",
+        "terseLabel": "Issue of equity"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The increase in equity through the issue of equity instruments."
+       }
+      }
+     }
+    },
+    "ifrs-full_NoncontrollingInterestsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "NoncontrollingInterestsMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Non-controlling interests [member]",
+        "terseLabel": "Non-controlling interests [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for equity in a subsidiary not attributable, directly or indirectly, to the parent."
+       }
+      }
+     }
+    },
+    "ifrs-full_OrdinarySharesMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "OrdinarySharesMember",
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsAdditionalInformationDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfCommonSharesIssuedDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsSummaryOfOutstandingSharesAndDividendsPaidDetail",
+      "http://www.cibc.com/role/ConsolidatedBalanceSheet",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Ordinary shares [member]",
+        "terseLabel": "Common shares [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for equity instruments that are subordinate to all other classes of equity instruments. It also represents the standard value for the 'Classes of ordinary shares' axis if no other member is used."
+       }
+      }
+     }
+    },
+    "ifrs-full_OtherComprehensiveIncomeNetOfTaxCashFlowHedges": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "OtherComprehensiveIncomeNetOfTaxCashFlowHedges",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.cibc.com/role/ConsolidatedStatementOfComprehensiveIncome": {
+       "parentTag": "ifrs-full_OtherComprehensiveIncome",
+       "weight": 1.0,
+       "order": 15.0
+      }
+     },
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/ConsolidatedStatementOfComprehensiveIncome"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive income, net of tax, cash flow hedges",
+        "totalLabel": "Other comprehensive income, net of tax, cash flow hedges",
+        "terseLabel": "Net change in cash flow hedges"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The amount of other comprehensive income, net of tax, after reclassification adjustments, related to cash flow hedges. [Refer: Cash flow hedges [member]; Other comprehensive income]"
+       }
+      }
+     }
+    },
+    "ifrs-full_OtherComprehensiveIncomeNetOfTaxChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiability": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "OtherComprehensiveIncomeNetOfTaxChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiability",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.cibc.com/role/ConsolidatedStatementOfComprehensiveIncome": {
+       "parentTag": "ifrs-full_OtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLossNetOfTax",
+       "weight": 1.0,
+       "order": 26.0
+      }
+     },
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/ConsolidatedStatementOfComprehensiveIncome"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive income, net of tax, change in fair value of financial liability attributable to change in credit risk of liability",
+        "verboseLabel": "Net gains (losses) due to fair value change of fair value option (FVO) liabilities attributable to changes in credit risk",
+        "terseLabel": "Net change attributable to changes in credit risk"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The amount of other comprehensive income, net of tax, related to changes in the fair value of financial liabilities attributable to the changes in the credit risk of those liabilities. [Refer: Other comprehensive income; Credit risk [member]; Financial liabilities]"
+       }
+      }
+     }
+    },
+    "ifrs-full_OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation",
+     "crdr": "credit",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive income, net of tax, exchange differences on translation",
+        "terseLabel": "Net change in foreign currency translation adjustments"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The amount of other comprehensive income, net of tax, after reclassification adjustments, related to exchange differences when financial statements of foreign operations are translated. [Refer: Other comprehensive income]"
+       }
+      }
+     }
+    },
+    "ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "OtherComprehensiveIncomeNetOfTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.cibc.com/role/ConsolidatedStatementOfComprehensiveIncome": {
+       "parentTag": "ifrs-full_OtherComprehensiveIncomeThatWillNotBeReclassifiedToProfitOrLossNetOfTax",
+       "weight": 1.0,
+       "order": 25.0
+      }
+     },
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/ConsolidatedStatementOfComprehensiveIncome"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive income, net of tax, gains (losses) on remeasurements of defined benefit plans",
+        "verboseLabel": "Net gains (losses) on post-employment defined benefit plans",
+        "terseLabel": "Net change in post-employment defined benefit plans"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The amount of other comprehensive income, net of tax, related to gains (losses) on remeasurements of defined benefit plans, which comprise actuarial gains and losses; the return on plan assets, excluding amounts included in net interest on the net defined benefit liability (asset); and any change in the effect of the asset ceiling, excluding amounts included in net interest on the net defined benefit liability (asset). [Refer: Other comprehensive income; Defined benefit plans [member]; Plan assets [member]; Net defined benefit liability (asset)] [Contrast: Decrease (increase) in net defined benefit liability (asset) resulting from gain (loss) on remeasurement in other comprehensive income]"
+       }
+      }
+     }
+    },
+    "ifrs-full_OtherReservesMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "OtherReservesMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Other reserves [member]",
+        "terseLabel": "Other reserves [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing reserves within equity, not including retained earnings. It also represents the standard value for the 'Reserves within equity' axis if no other member is used. [Refer: Retained earnings]"
+       }
+      }
+     }
+    },
+    "ifrs-full_PreferenceSharesMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "PreferenceSharesMember",
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsAdditionalInformationDetail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsSummaryOfOutstandingSharesAndDividendsPaidDetail",
+      "http://www.cibc.com/role/ConsolidatedBalanceSheet",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Preference shares [member]",
+        "verboseLabel": "Preferred shares and other equity instruments [member]",
+        "presentationGuidance": "Issue of preferred shares and limited recourse capital notes (LRCNs) [member]",
+        "terseLabel": "Preference shares [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for equity instruments that are senior in some aspects to ordinary shares, but subordinate to debt instruments in terms of claim. [Refer: Ordinary shares [member]]"
+       }
+      }
+     }
+    },
+    "ifrs-full_PreviouslyStatedMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "PreviouslyStatedMember",
+     "presentation": [
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesDisclosureOfTheBalanceSheetAsAResultOfTheRetrospectiveApplicationOfIfrs17Detail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Previously stated [member]",
+        "terseLabel": "Previously stated [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for the information previously stated in the financial statements (ie before retrospective application or retrospective restatement)."
+       }
+      }
+     }
+    },
+    "ifrs-full_ProfitLossAttributableToNoncontrollingInterests": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ProfitLossAttributableToNoncontrollingInterests",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.cibc.com/role/ConsolidatedStatementOfIncomeAlternate1": {
+       "parentTag": "ifrs-full_ProfitLoss",
+       "weight": 1.0,
+       "order": 40.0
+      }
+     },
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/ConsolidatedStatementOfIncome",
+      "http://www.cibc.com/role/SegmentedAndGeographicInformationDetailedReportOfSegmentsAndGeographicAreasDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Profit (loss), attributable to non-controlling interests",
+        "terseLabel": "Net income attributable to non-controlling interests",
+        "verboseLabel": "Non-controlling interests"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The profit (loss) from continuing and discontinued operations attributable to non-controlling interests. [Refer: Profit (loss); Non-controlling interests]"
+       }
+      }
+     }
+    },
+    "ifrs-full_ProfitLossAttributableToOwnersOfParent": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ProfitLossAttributableToOwnersOfParent",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.cibc.com/role/EarningsPerShareSummaryOfEarningsPerShareDetail": {
+       "parentTag": "ifrs-full_ProfitLossAttributableToOrdinaryEquityHoldersOfParentEntity",
+       "weight": 1.0,
+       "order": 1.0
+      },
+      "http://www.cibc.com/role/ConsolidatedStatementOfIncomeAlternate1": {
+       "parentTag": "ifrs-full_ProfitLoss",
+       "weight": 1.0,
+       "order": 41.0
+      }
+     },
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/ConsolidatedStatementOfIncome",
+      "http://www.cibc.com/role/EarningsPerShareSummaryOfEarningsPerShareDetail",
+      "http://www.cibc.com/role/SegmentedAndGeographicInformationDetailedReportOfSegmentsAndGeographicAreasDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Profit (loss), attributable to owners of parent",
+        "totalLabel": "Net income attributable to equity shareholders",
+        "verboseLabel": "Net income attributable to equity shareholders",
+        "terseLabel": "Equity shareholders"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The profit (loss) from continuing and discontinued operations attributable to owners of the parent. [Refer: Profit (loss)]"
+       }
+      }
+     }
+    },
+    "ifrs-full_ReclassificationAdjustmentsOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ReclassificationAdjustmentsOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Reclassification adjustments on financial assets measured at fair value through other comprehensive income, net of tax",
+        "terseLabel": "Realized (gains) losses on equity securities designated at FVOCI reclassified to retained earnings"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The amount of reclassification adjustments related to financial assets measured at fair value through other comprehensive income, net of tax. Reclassification adjustments are amounts reclassified to profit (loss) in the current period that were recognised in other comprehensive income in the current or previous periods. [Refer: Financial assets measured at fair value through other comprehensive income; Other comprehensive income]"
+       }
+      }
+     }
+    },
+    "ifrs-full_ReductionOfIssuedCapital": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ReductionOfIssuedCapital",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsScheduleOfCommonSharesIssuedDetail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Reduction of issued capital",
+        "negatedLabel": "Purchase of common shares for cancellation, Amount"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The decrease in equity resulting from a reduction in issued capital. [Refer: Issued capital]"
+       }
+      }
+     }
+    },
+    "ifrs-full_ReserveOfCashFlowHedgesMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ReserveOfCashFlowHedgesMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Reserve of cash flow hedges [member]",
+        "terseLabel": "Net gains (losses) on cash flow hedges [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing the accumulated portion of gain (loss) on a hedging instrument that is determined to be an effective hedge for cash flow hedges. [Refer: Cash flow hedges [member]]"
+       }
+      }
+     }
+    },
+    "ifrs-full_ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Reserve of change in fair value of financial liability attributable to change in credit risk of liability [member]",
+        "terseLabel": "Reserve of change in fair value of financial liability attributable to change in credit risk of liability [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing the accumulated change in fair value of financial liabilities attributable to change in the credit risk of the liabilities. [Refer: Credit risk [member]; Financial liabilities]"
+       }
+      }
+     }
+    },
+    "ifrs-full_ReserveOfExchangeDifferencesOnTranslationMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ReserveOfExchangeDifferencesOnTranslationMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Reserve of exchange differences on translation [member]",
+        "terseLabel": "Net foreign currency translation adjustments [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing accumulated exchange differences on the translation of financial statements recognised in other comprehensive income. [Refer: Other comprehensive income]"
+       }
+      }
+     }
+    },
+    "ifrs-full_ReserveOfRemeasurementsOfDefinedBenefitPlansMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ReserveOfRemeasurementsOfDefinedBenefitPlansMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Reserve of remeasurements of defined benefit plans [member]",
+        "terseLabel": "Reserve of remeasurements of defined benefit plans [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity resulting from remeasurements of defined benefit plans. [Refer: Other comprehensive income, net of tax, gains (losses) on remeasurements of defined benefit plans]"
+       }
+      }
+     }
+    },
+    "ifrs-full_ReservesWithinEquityAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "ReservesWithinEquityAxis",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Reserves within equity [axis]",
+        "terseLabel": "Reserves within equity [axis]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      }
+     }
+    },
+    "ifrs-full_RestatedMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "RestatedMember",
+     "presentation": [
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesAdditionalInformation1Detail",
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesDisclosureOfTheBalanceSheetAsAResultOfTheRetrospectiveApplicationOfIfrs17Detail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsAdditionalInformationDetail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/IncomeTaxesSourcesAndMovementInDeferredTaxAssetsAndLiabilitiesDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Currently stated [member]",
+        "terseLabel": "Currently stated [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for the information currently stated in the financial statements. It also represents the standard value for the 'Retrospective application and retrospective restatement' and 'Departure from requirement of IFRS' axes if no other member is used."
+       }
+      }
+     }
+    },
+    "ifrs-full_RetainedEarningsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "RetainedEarningsMember",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Retained earnings [member]",
+        "terseLabel": "Retained earnings [member]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing an entity's cumulative undistributed earnings or deficit."
+       }
+      }
+     }
+    },
+    "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "RetrospectiveApplicationAndRetrospectiveRestatementAxis",
+     "presentation": [
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesAdditionalInformation1Detail",
+      "http://www.cibc.com/role/BasisOfPreparationAndSummaryOfMaterialAccountingPoliciesDisclosureOfTheBalanceSheetAsAResultOfTheRetrospectiveApplicationOfIfrs17Detail",
+      "http://www.cibc.com/role/CommonAndPreferredSharesAndOtherEquityInstrumentsAdditionalInformationDetail",
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+      "http://www.cibc.com/role/IncomeTaxesSourcesAndMovementInDeferredTaxAssetsAndLiabilitiesDetail"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Retrospective application and retrospective restatement [axis]",
+        "terseLabel": "Retrospective application and retrospective restatement [axis]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      }
+     }
+    },
+    "ifrs-full_StatementOfChangesInEquityAbstract": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "StatementOfChangesInEquityAbstract",
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of changes in equity [abstract]",
+        "verboseLabel": "Statement of changes in equity [abstract]"
+       }
+      }
+     }
+    },
+    "ifrs-full_StatementOfChangesInEquityLineItems": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "StatementOfChangesInEquityLineItems",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of changes in equity [line items]",
+        "terseLabel": "Statement of changes in equity [line items]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "Line items represent concepts included in a table. These concepts are used to disclose reportable information associated with members defined in one or many axes of the table."
+       }
+      }
+     }
+    },
+    "ifrs-full_StatementOfChangesInEquityTable": {
+     "xbrltype": "stringItemType",
+     "nsuri": "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full",
+     "localname": "StatementOfChangesInEquityTable",
+     "presentation": [
+      "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of changes in equity [table]",
+        "terseLabel": "Statement of changes in equity [table]"
+       }
+      },
+      "en": {
+       "role": {
+        "documentation": "Schedule disclosing information related to changes in equity."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R7": {
+     "role": "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity",
+     "longName": "1007 - Statement - Consolidated statement of changes in equity",
+     "shortName": "Consolidated statement of changes in equity",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "7",
+     "firstAnchor": {
+      "contextRef": "PAsOn10_31_2022_PreviouslyStatedMemberifrsfullRetrospectiveApplicationAndRetrospectiveRestatementAxis_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+      "name": "ifrs-full:Equity",
+      "unitRef": "Unit_CAD",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-6",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "d886456dex99b3b.htm",
+      "first": true,
+      "unique": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "PAsOn10_31_2022_PreviouslyStatedMemberifrsfullRetrospectiveApplicationAndRetrospectiveRestatementAxis_RetainedEarningsMemberifrsfullComponentsOfEquityAxis",
+      "name": "ifrs-full:Equity",
+      "unitRef": "Unit_CAD",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-6",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "d886456dex99b3b.htm",
+      "first": true,
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

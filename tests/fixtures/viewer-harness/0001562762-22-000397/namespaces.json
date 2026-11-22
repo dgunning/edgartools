@@ -1,0 +1,21 @@
+{
+ "namespace_prefixes": {
+  "http://fasb.org/srt-types/2021-01-31": "srt-types",
+  "http://fasb.org/srt/2021-01-31": "srt",
+  "http://www.DRDGold.com/20220630": "drd",
+  "http://www.w3.org/1999/xhtml": "xhtml",
+  "http://www.w3.org/1999/xlink": "xlink",
+  "http://www.w3.org/2001/XMLSchema-instance": "xsi",
+  "http://www.xbrl.org/2003/instance": "xbrli",
+  "http://www.xbrl.org/2003/iso4217": "iso4217",
+  "http://www.xbrl.org/2003/linkbase": "link",
+  "http://www.xbrl.org/2009/utr": "utr",
+  "http://www.xbrl.org/dtr/type/non-numeric": "nonnum",
+  "http://www.xbrl.org/dtr/type/numeric": "num",
+  "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full": "ifrs-full",
+  "http://xbrl.org/2005/xbrldt": "xbrldt",
+  "http://xbrl.org/2006/xbrldi": "xbrldi",
+  "http://xbrl.sec.gov/dei/2021q4": "dei"
+ },
+ "typed_dimensions": []
+}

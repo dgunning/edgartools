@@ -1,0 +1,213 @@
+{
+ "http://www.wsj.com/role/StatementsOfOperations": {
+  "roots": [
+   "us-gaap_IncomeStatementAbstract"
+  ],
+  "nodes": {
+   "us-gaap_IncomeStatementAbstract": {
+    "children": [
+     "us-gaap_StatementTable"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "us-gaap_StatementTable": {
+    "children": [
+     "us-gaap_StatementClassOfStockAxis",
+     "ivcp_RedeemabilityClassificationOfCommonStockAxis",
+     "us-gaap_StatementLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label",
+     "http://www.xbrl.org/2003/role/label",
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "us-gaap_StatementClassOfStockAxis": {
+    "children": [
+     "us-gaap_ClassOfStockDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "us-gaap_ClassOfStockDomain": {
+    "children": [
+     "us-gaap_CommonClassAMember",
+     "us-gaap_CommonClassBMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label",
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "ivcp_RedeemabilityClassificationOfCommonStockAxis": {
+    "children": [
+     "ivcp_RedeemabilityClassificationOfCommonStockDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "ivcp_RedeemabilityClassificationOfCommonStockDomain": {
+    "children": [
+     "ivcp_RedeemableMember",
+     "ivcp_NonRedeemableMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label",
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "us-gaap_StatementLineItems": {
+    "children": [
+     "ivcp_FormationAndOperatingCosts",
+     "us-gaap_OperatingIncomeLoss",
+     "ivcp_LossOnSaleOfPrivatePlacementWarrants",
+     "us-gaap_UnrealizedGainLossOnInvestments",
+     "ivcp_GainOnWaiverOfDeferredUnderWritingFeePayable",
+     "us-gaap_NetIncomeLoss",
+     "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic",
+     "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding",
+     "us-gaap_EarningsPerShareBasic",
+     "us-gaap_EarningsPerShareDiluted"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_IncomeStatementAbstract",
+    "us-gaap_StatementTable",
+    1.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementClassOfStockAxis",
+    2.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_StatementClassOfStockAxis",
+    "us-gaap_ClassOfStockDomain",
+    3.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_ClassOfStockDomain",
+    "us-gaap_CommonClassAMember",
+    4.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_ClassOfStockDomain",
+    "us-gaap_CommonClassBMember",
+    5.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "ivcp_RedeemabilityClassificationOfCommonStockAxis",
+    6.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "ivcp_RedeemabilityClassificationOfCommonStockAxis",
+    "ivcp_RedeemabilityClassificationOfCommonStockDomain",
+    7.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "ivcp_RedeemabilityClassificationOfCommonStockDomain",
+    "ivcp_RedeemableMember",
+    8.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "ivcp_RedeemabilityClassificationOfCommonStockDomain",
+    "ivcp_NonRedeemableMember",
+    9.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementLineItems",
+    10.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "ivcp_FormationAndOperatingCosts",
+    11.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_OperatingIncomeLoss",
+    12.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "ivcp_LossOnSaleOfPrivatePlacementWarrants",
+    13.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_UnrealizedGainLossOnInvestments",
+    14.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "ivcp_GainOnWaiverOfDeferredUnderWritingFeePayable",
+    15.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_NetIncomeLoss",
+    16.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_WeightedAverageNumberOfSharesOutstandingBasic",
+    17.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_WeightedAverageNumberOfDilutedSharesOutstanding",
+    18.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_EarningsPerShareBasic",
+    19.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_EarningsPerShareDiluted",
+    20.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ]
+  ]
+ }
+}

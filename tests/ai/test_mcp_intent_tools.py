@@ -528,10 +528,28 @@ class TestEdgarOwnershipTool:
         result = await edgar_ownership(
             identifier="AAPL",
             analysis_type="insiders",
+            days=365,
             limit=5,
         )
         assert result.success is True
-        assert result.data["analysis"] == "insider_transactions"
+        data = result.data
+        assert data["analysis"] == "insider_transactions"
+        assert data["days"] == 365
+        # Apple insiders file Form 4s every quarter, so a year always has some (GH #1817).
+        assert 1 <= data["transaction_count"] == len(data["transactions"]) <= 5
+
+        for entry in data["transactions"]:
+            assert entry["filing_date"] >= data["since"]
+            assert "error" not in entry, entry
+            assert isinstance(entry["insider_name"], str) and entry["insider_name"]
+            assert "title" in entry
+            assert isinstance(entry["is_officer"], bool)
+            assert isinstance(entry["is_director"], bool)
+            assert isinstance(entry["transactions"], list)
+            for trade in entry["transactions"]:
+                assert trade["code"]
+                assert trade["shares"] is None or trade["shares"] >= 0
+        assert any(entry["transactions"] for entry in data["transactions"])
 
     @pytest.mark.asyncio
     async def test_institutional_holders_removed(self):

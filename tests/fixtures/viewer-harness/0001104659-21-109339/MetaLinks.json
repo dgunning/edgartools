@@ -1,0 +1,457 @@
+{
+ "version": "2.1",
+ "instance": {
+  "rocru-20210630x10q.htm": {
+   "tag": {
+    "rocru_CommonStockSubjectToPossibleRedemptionShares": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of the shares of common stock subject to possible redemption.",
+        "label": "Common Stock Subject To Possible Redemption, Shares",
+        "negatedLabel": "Common stock subject to possible redemption (in shares)"
+       }
+      }
+     },
+     "localname": "CommonStockSubjectToPossibleRedemptionShares",
+     "nsuri": "http://www.rothch.com/20210630",
+     "presentation": [
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "rocru_CommonStockSubjectToPossibleRedemptionValue": {
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Equity impact of the value of common stock subject to possible redemption.",
+        "label": "Common Stock Subject To Possible Redemption, Value",
+        "negatedLabel": "Common stock subject to possible redemption"
+       }
+      }
+     },
+     "localname": "CommonStockSubjectToPossibleRedemptionValue",
+     "nsuri": "http://www.rothch.com/20210630",
+     "presentation": [
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "rocru_NetLoss": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Represents the net loss.",
+        "label": "Net Loss",
+        "terseLabel": "Net loss"
+       }
+      }
+     },
+     "localname": "NetLoss",
+     "nsuri": "http://www.rothch.com/20210630",
+     "presentation": [
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "rocru_UnitsIssuedDuringPeriodSharesNewIssues": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of new units issued during the period.",
+        "label": "Units Issued During Period, Shares, New Issues",
+        "terseLabel": "Sale of 408,000 Private Placement Units Private Placement Shares (in shares)",
+        "verboseLabel": "Number of units sold"
+       }
+      }
+     },
+     "localname": "UnitsIssuedDuringPeriodSharesNewIssues",
+     "nsuri": "http://www.rothch.com/20210630",
+     "presentation": [
+      "http://www.rothch.com/role/DisclosureDescriptionOfOrganizationAndBusinessOperationsDetails",
+      "http://www.rothch.com/role/DisclosurePublicOfferingDetails",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquityParenthetical"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "rocru_UnitsIssuedDuringPeriodValueNewIssues": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Equity impact of the value of new unit issued during the period.",
+        "label": "Units Issued During Period, Value, New Issues",
+        "verboseLabel": "Sale of 408,000 Private Placement Units Private Placement Shares"
+       }
+      }
+     },
+     "localname": "UnitsIssuedDuringPeriodValueNewIssues",
+     "nsuri": "http://www.rothch.com/20210630",
+     "presentation": [
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AdditionalPaidInCapitalMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Excess of issue price over par or stated value of the entity's capital stock and amounts received from other transactions involving the entity's stock or stockholders.",
+        "label": "Additional Paid In Capital [Member]",
+        "terseLabel": "Additional Paid-in Capital"
+       }
+      }
+     },
+     "localname": "AdditionalPaidInCapitalMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_ClassOfStockDomain": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Share of stock differentiated by the voting rights the holder receives. Examples include, but are not limited to, common stock, redeemable preferred stock, nonredeemable preferred stock, and convertible stock.",
+        "label": "Class Of Stock [Domain]",
+        "terseLabel": "Class of Stock [Domain]"
+       }
+      }
+     },
+     "localname": "ClassOfStockDomain",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/DisclosureCommitmentsDetails",
+      "http://www.rothch.com/role/DisclosureSummaryOfSignificantAccountingPoliciesReconciliationOfNetLossPerCommonShareDetails",
+      "http://www.rothch.com/role/DocumentDocumentAndEntityInformation",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfOperations"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_CommonClassAMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Classification of common stock representing ownership interest in a corporation.",
+        "label": "Common Class A [Member]",
+        "terseLabel": "Common Stock A"
+       }
+      }
+     },
+     "localname": "CommonClassAMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/DisclosureCommitmentsDetails",
+      "http://www.rothch.com/role/DisclosureSummaryOfSignificantAccountingPoliciesReconciliationOfNetLossPerCommonShareDetails",
+      "http://www.rothch.com/role/DocumentDocumentAndEntityInformation",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfOperations"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_CommonStockMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Stock that is subordinate to all other stock of the issuer.",
+        "label": "Common Stock [Member]",
+        "terseLabel": "Non-redeemable common stock"
+       }
+      }
+     },
+     "localname": "CommonStockMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_EquityComponentDomain": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Components of equity are the parts of the total Equity balance including that which is allocated to common, preferred, treasury stock, retained earnings, etc.",
+        "label": "Equity Component [Domain]",
+        "terseLabel": "Equity Component [Domain]"
+       }
+      }
+     },
+     "localname": "EquityComponentDomain",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "A roll forward is a reconciliation of a concept from the beginning of a period to the end of a period.",
+        "label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInStockholdersEquityRollForward",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_RetainedEarningsMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cumulative amount of the reporting entity's undistributed earnings or deficit.",
+        "label": "Retained Earnings [Member]",
+        "terseLabel": "Accumulated Deficit"
+       }
+      }
+     },
+     "localname": "RetainedEarningsMember",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_SharesIssued": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of shares of stock issued as of the balance sheet date, including shares that had been issued and were previously outstanding but which are now held in the treasury.",
+        "label": "Shares, Issued",
+        "periodEndLabel": "Balance at the end (in shares)",
+        "periodStartLabel": "Balance at the beginning (in shares)",
+        "verboseLabel": "Shares issued"
+       }
+      }
+     },
+     "localname": "SharesIssued",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/DisclosureCommitmentsDetails",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StatementClassOfStockAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by the different classes of stock of the entity.",
+        "label": "Class of Stock [Axis]"
+       }
+      }
+     },
+     "localname": "StatementClassOfStockAxis",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/DisclosureCommitmentsDetails",
+      "http://www.rothch.com/role/DisclosureSummaryOfSignificantAccountingPoliciesReconciliationOfNetLossPerCommonShareDetails",
+      "http://www.rothch.com/role/DocumentDocumentAndEntityInformation",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfOperations"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by component of equity.",
+        "label": "Equity Components [Axis]"
+       }
+      }
+     },
+     "localname": "StatementEquityComponentsAxis",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementLineItems": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Line items represent financial concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes to the table.",
+        "label": "Statement [Line Items]"
+       }
+      }
+     },
+     "localname": "StatementLineItems",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/DisclosureSummaryOfSignificantAccountingPoliciesReconciliationOfNetLossPerCommonShareDetails",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquityParenthetical",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfOperations"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementOfStockholdersEquityAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "CONDENSED CONSOLIDATED STATEMENTS OF CHANGES IN STOCKHOLDERS' EQUITY"
+       }
+      }
+     },
+     "localname": "StatementOfStockholdersEquityAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementTable": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Schedule reflecting a Statement of Income, Statement of Cash Flows, Statement of Financial Position, Statement of Shareholders' Equity and Other Comprehensive Income, or other statement as needed.",
+        "label": "Statement [Table]"
+       }
+      }
+     },
+     "localname": "StatementTable",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/DisclosureSummaryOfSignificantAccountingPoliciesReconciliationOfNetLossPerCommonShareDetails",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquityParenthetical",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfOperations"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesNewIssues": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of new stock issued during the period.",
+        "label": "Stock Issued During Period, Shares, New Issues",
+        "terseLabel": "Sale of 11,500,000 Units, net of underwriting discount and offering expenses (in shares)",
+        "verboseLabel": "Number of shares issued"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodSharesNewIssues",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/DisclosureRelatedPartyTransactionsFounderSharesDetails",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodValueNewIssues": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Equity impact of the value of new stock issued during the period. Includes shares issued in an initial public offering or a secondary public offering.",
+        "label": "Stock Issued During Period, Value, New Issues",
+        "terseLabel": "Sale of 11,500,000 Units, net of underwriting discount and offering expenses",
+        "verboseLabel": "Aggregate cash amount for new issuances"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodValueNewIssues",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/DisclosureCommitmentsPipeSubscriptionAgreementsDetails",
+      "http://www.rothch.com/role/DisclosureRelatedPartyTransactionsFounderSharesDetails",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StockholdersEquity": {
+     "calculation": {
+      "http://www.rothch.com/role/StatementCondensedConsolidatedBalanceSheets": {
+       "order": 2.0,
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Total of all stockholders' equity (deficit) items, net of receivables from officers, directors, owners, and affiliates of the entity which are attributable to the parent. The amount of the economic entity's stockholders' equity attributable to the parent excludes the amount of stockholders' equity which is allocable to that ownership interest in subsidiary equity which is not attributable to the parent (noncontrolling interest, minority interest). This excludes temporary equity and is sometimes called permanent equity.",
+        "label": "Stockholders' Equity Attributable to Parent",
+        "periodEndLabel": "Balance at the end",
+        "periodStartLabel": "Balance at the beginning",
+        "totalLabel": "Total Stockholders' Equity"
+       }
+      }
+     },
+     "localname": "StockholdersEquity",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.rothch.com/role/StatementCondensedConsolidatedBalanceSheets",
+      "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    }
+   },
+   "report": {
+    "R5": {
+     "firstAnchor": {
+      "ancestors": [
+       "b",
+       "p",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "rocru-20210630x10q.htm",
+      "contextRef": "As_Of_12_31_2019_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_kIEYlyr9ykSAHqamcka4dA",
+      "decimals": "0",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:StockholdersEquity",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "00300 - Statement - CONDENSED CONSOLIDATED STATEMENTS OF CHANGES IN STOCKHOLDERS' EQUITY",
+     "role": "http://www.rothch.com/role/StatementCondensedConsolidatedStatementsOfChangesInStockholdersEquity",
+     "shortName": "CONDENSED CONSOLIDATED STATEMENTS OF CHANGES IN STOCKHOLDERS' EQUITY",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "b",
+       "p",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "rocru-20210630x10q.htm",
+      "contextRef": "As_Of_12_31_2019_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_kIEYlyr9ykSAHqamcka4dA",
+      "decimals": "0",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:StockholdersEquity",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

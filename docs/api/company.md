@@ -89,6 +89,8 @@ def tickers(self) -> List[str]
 ```
 List of all ticker symbols associated with the company.
 
+`Company.tickers` is SEC's current ticker list. For the securities a filing registered, with their class of stock, use `filing.obj().trading_symbols`.
+
 ```python
 berkshire = Company("BRK-A")
 print(berkshire.tickers)  # ["BRK-A", "BRK-B"]
@@ -328,19 +330,25 @@ if financials:
 
 ### get_quarterly_financials()
 
-Get financial statements from the latest 10-Q filing.
+Read the latest 10-Q or search recent unamended 6-Ks for quarterly results.
 
 ```python
-def get_quarterly_financials(self) -> Optional[Financials]
+def get_quarterly_financials(self, *, max_6k_filings: int = 10) -> Financials | QuarterlyIncome | None
 ```
 
-**Returns:** `Financials` object from latest quarterly report
+XBRL returns `Financials`. An eligible HTML earnings exhibit returns
+`QuarterlyIncome`, with income getters and an income table. The search
+examines at most `max_6k_filings` filings from the last 183 days and returns
+`None` if no supported quarterly result is available.
 
 **Example:**
 ```python
+from edgar import QuarterlyIncome
+
 quarterly = company.get_quarterly_financials()
-if quarterly:
-    q_income = quarterly.income_statement().to_dataframe()
+if quarterly is not None:
+    income = quarterly if isinstance(quarterly, QuarterlyIncome) else quarterly.income_statement()
+    q_income = income.to_dataframe()
     quarterly_revenue = quarterly.get_revenue()
 ```
 

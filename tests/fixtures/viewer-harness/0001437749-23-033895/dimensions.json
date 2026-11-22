@@ -1,0 +1,14 @@
+{
+ "http://www.lradx.com/20230930/role/statement-consolidated-statements-of-stockholders-equity": {
+  "us-gaap_StatementEquityComponentsAxis": {
+   "default_member_id": "us-gaap_EquityComponentDomain",
+   "is_typed_dimension": false
+  }
+ },
+ "merged": {
+  "us-gaap_StatementEquityComponentsAxis": {
+   "default_member_id": "us-gaap_EquityComponentDomain",
+   "is_typed_dimension": false
+  }
+ }
+}

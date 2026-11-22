@@ -1,0 +1,84 @@
+{
+ "version": "2.2",
+ "instance": {
+  "drh-20240331.htm": {
+   "tag": {
+    "us-gaap_PreferredStockDividendRatePercentage": {
+     "xbrltype": "percentItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "PreferredStockDividendRatePercentage",
+     "presentation": [
+      "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+      "http://www.drhc.com/role/EquityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Preferred stock, dividend rate (as a percent)",
+        "label": "Preferred Stock, Dividend Rate, Percentage",
+        "documentation": "The percentage rate used to calculate dividend payments on preferred stock."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R3": {
+     "role": "http://www.drhc.com/role/CONSOLIDATEDBALANCESHEETSParenthetical",
+     "longName": "0000003 - Statement - CONSOLIDATED BALANCE SHEETS (Parenthetical)",
+     "shortName": "CONSOLIDATED BALANCE SHEETS (Parenthetical)",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "parenthetical",
+     "menuCat": "Statements",
+     "order": "3",
+     "firstAnchor": {
+      "contextRef": "c-5",
+      "name": "us-gaap:PreferredStockParOrStatedValuePerShare",
+      "unitRef": "usdPerShare",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "INF",
+      "ancestors": [
+       "us-gaap:PreferredStockParOrStatedValuePerShare",
+       "span",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "drh-20240331.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c-5",
+      "name": "us-gaap:PreferredStockSharesIssued",
+      "unitRef": "shares",
+      "xsiNil": "false",
+      "lang": "en-US",
+      "decimals": "INF",
+      "ancestors": [
+       "us-gaap:PreferredStockSharesIssued",
+       "us-gaap:PreferredStockSharesOutstanding",
+       "span",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "drh-20240331.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

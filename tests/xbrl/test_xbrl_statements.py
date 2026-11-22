@@ -46,7 +46,9 @@ def test_xbrl_entity_info_and_dei(aapl_xbrl):
     # DEI entity info (5 exact values)
     assert aapl_xbrl.entity_info.get('entity_name') == 'Apple Inc.'
     assert aapl_xbrl.entity_info.get('identifier') == '320193'
-    assert aapl_xbrl.entity_info.get('reporting_end_date') == datetime.date(2023, 10, 20)
+    # The document period end; the latest instant (the cover share-count date) is its own key (GH #1208)
+    assert aapl_xbrl.entity_info.get('reporting_end_date') == datetime.date(2023, 9, 30)
+    assert aapl_xbrl.entity_info.get('max_instant_context_date') == datetime.date(2023, 10, 20)
     assert aapl_xbrl.entity_info.get('fiscal_year') == '2023'
     assert aapl_xbrl.entity_info.get('fiscal_period') == 'FY'
 

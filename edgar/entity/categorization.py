@@ -16,6 +16,7 @@ The classification uses a multi-signal approach with priority hierarchy:
 9. Default to Operating Company
 """
 
+import re
 from enum import Enum
 from typing import Optional, Set, Union
 
@@ -187,6 +188,17 @@ SPAC_NAME_PATTERNS: list[str] = [
 # Helper Functions
 # =============================================================================
 
+# "ETF" opening or closing a word: "ETF", "ETFS GOLD TRUST", "ETFIS SERIES TRUST",
+# "INNOVATOR ETFS TRUST". A plain substring test also matched NETFLIX, JETFLEET
+# and MARKETFIELD, which only have the letters mid-word.
+_ETF_IN_NAME = re.compile(r'\bETF|ETFS?\b')
+
+
+def _names_etf(name_upper: str) -> bool:
+    """Check if an upper-cased company name has ETF at the start or end of a word."""
+    return bool(_ETF_IN_NAME.search(name_upper))
+
+
 def _is_spac_by_name(name_upper: str) -> bool:
     """Check if company name matches known SPAC patterns."""
     return any(pattern in name_upper for pattern in SPAC_NAME_PATTERNS)
@@ -288,7 +300,7 @@ def classify_business_category(
     # Step 7: "ETF" in name — catches crypto/commodity ETFs
     # that don't file investment company forms (N-CSR, NPORT-P).
     # Placed after Investment Manager to avoid catching "ETF Managers Group" etc.
-    if 'ETF' in name_upper:
+    if _names_etf(name_upper):
         return BusinessCategory.ETF.value
 
     # Step 8: SIC 6200s + fund/trust name → ETF
@@ -337,7 +349,7 @@ def _classify_investment_company_type(
     name_upper = name.upper() if name else ''
 
     # ETF: Explicit in name
-    if 'ETF' in name_upper:
+    if _names_etf(name_upper):
         return BusinessCategory.ETF.value
 
     # ETF: Known fund families with "Trust" pattern
@@ -358,7 +370,7 @@ def _classify_investment_company_type(
     # Mutual Fund: entity_type='investment'
     if entity_type == 'investment':
         # Could be ETF or Mutual Fund
-        if 'FUND' in name_upper and 'ETF' not in name_upper:
+        if 'FUND' in name_upper and not _names_etf(name_upper):
             return BusinessCategory.MUTUAL_FUND.value
         # Default to ETF for ambiguous investment entities
         return BusinessCategory.ETF.value
@@ -484,7 +496,7 @@ def _is_investment_manager(
     if sic == 6211:
         if 'TRUST' in name_upper or 'FUND' in name_upper:
             return False  # Let commodity trust/ETF logic handle it
-        if 'ETF' in name_upper:
+        if _names_etf(name_upper):
             return False  # Let ETF-in-name logic handle it
         return True
 

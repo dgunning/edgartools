@@ -13,15 +13,10 @@ logger = logging.getLogger(__name__)
 # python/ tags — so a cassette on a branch you're reviewing executes as soon as
 # a test touches it. Raises rather than warning if it can't secure the loader
 # (beads edgartools-j1ui).
-from tests._vcr_compat import install_null_reason_phrase_fix  # noqa: E402
 from tests._vcr_safety import install_safe_yaml_deserializer  # noqa: E402
 from tests.paths import CASSETTES_DIR  # noqa: E402
 
 install_safe_yaml_deserializer()
-
-# vcrpy 8.2+ cannot replay a cassette with a null reason phrase until
-# kevin1024/vcrpy#1029 is released; 79 of ours have one.
-install_null_reason_phrase_fix()
 
 # VCR configuration for recording/replaying HTTP interactions.
 # CASSETTES_DIR comes from tests.paths so every reader of it agrees (edgartools-07lk.12.2).
@@ -194,6 +189,11 @@ def pytest_configure(config):
         )
 
 
+# While a @pytest.mark.vcr test runs, the submissions it has read from its cassette, by CIK;
+# None otherwise. Set by cassette_tests_read_their_own_company_facts.
+_cassette_submissions = None
+
+
 @pytest.fixture(scope="session", autouse=True)
 def cache_sec_submissions_for_session():
     """Memoize SEC *submissions* downloads for the whole test session.
@@ -211,19 +211,45 @@ def cache_sec_submissions_for_session():
     re-export are patched so the ``_filings.py`` caller is covered too.
 
     Set EDGAR_TEST_CACHE_STATS=1 to print hit/miss stats at session end.
+
+    A ``@pytest.mark.vcr`` test reads its submissions from its own cassette
+    first and falls back to the memo only when the cassette holds none (some
+    were recorded while the memo served submissions). Serving the memo first
+    handed a cassette test whatever an earlier live test had downloaded: with
+    NVIDIA's submissions fetched live on 2026-11-12, the 2026-11-02 cassette of
+    test_issue_1817's ``days`` test saw a Form 4 filed 2026-11-06 (bead
+    edgartools-k7mi8.18). Cassette reads are memoized for that test, as the
+    memo did while it was recorded (a cassette holds one copy, played once),
+    and kept apart from live downloads: a later cassette test that holds no
+    submissions may still fall back on them, as it did when it was recorded,
+    but a live test never sees a recording.
     """
     import os
+
+    from vcr.errors import CannotOverwriteExistingCassetteException
 
     import edgar.entity as _ent
     import edgar.entity.submissions as _subs
 
     cache = {}
-    stats = {"calls": 0, "downloads": 0}
+    recordings = {}  # submissions read from cassettes, by CIK
+    stats = {"calls": 0, "downloads": 0, "memo": cache}
     orig = _subs.download_entity_submissions_from_sec
     reexported = getattr(_ent, "download_entity_submissions_from_sec", None) is orig
 
     def cached_download(cik):
         stats["calls"] += 1
+        recorded = _cassette_submissions
+        if recorded is not None:
+            if cik in recorded:
+                return recorded[cik]
+            try:
+                recorded[cik] = recordings[cik] = orig(cik)
+                return recorded[cik]
+            except CannotOverwriteExistingCassetteException:
+                # Recorded while the memo served these submissions.
+                if cik in recordings:
+                    return recordings[cik]
         if cik not in cache:
             stats["downloads"] += 1
             cache[cik] = orig(cik)
@@ -242,6 +268,40 @@ def cache_sec_submissions_for_session():
             saved = stats["calls"] - stats["downloads"]
             print(f"\n[submissions cache] {stats['calls']} calls, "
                   f"{stats['downloads']} live downloads, {saved} saved")
+
+
+@pytest.fixture(autouse=True)
+def cassette_tests_read_their_own_company_facts(request):
+    """Keep a ``@pytest.mark.vcr`` test's company facts on its cassette.
+
+    ``get_company_facts`` keeps the last company's EntityFacts in a module-level
+    cache (edgar/entity/entity_facts.py) that outlives a test and does not go
+    through vcr. A cassette test that ran after a live test of the same company
+    in the same xdist worker was handed that test's live facts instead of its
+    recording. That made main red: tests/entity/test_bug_408_annual_periods.py
+    fetches GOOGL's company facts live, and test_issue_910_ttm_eps then saw
+    GOOGL's Q3 2026 10-Q, which its 2026-10-24 cassette predates. The cache is
+    emptied before a cassette test, and again after it so recorded facts do not
+    leak into the next test either.
+
+    The session submissions memo above has the same shape. It cannot be emptied
+    (some cassettes were recorded while it served submissions and hold none), so
+    this fixture gives the test its own memo instead, which the session memo
+    reads first.
+    """
+    global _cassette_submissions
+    if request.node.get_closest_marker("vcr") is None:
+        yield
+        return
+    from edgar.entity.entity_facts import clear_company_facts_cache
+
+    clear_company_facts_cache()
+    _cassette_submissions = {}
+    try:
+        yield
+    finally:
+        _cassette_submissions = None
+        clear_company_facts_cache()
 
 
 @pytest.hookimpl(hookwrapper=True)
@@ -300,7 +360,7 @@ def pytest_collection_modifyitems(config, items):
         'test_config', 'test_core', 'test_datatools',
         'test_auditor', 'test_beneficial_ownership', 'test_subsidiaries',
         'test_currency', 'test_thirteenf_rendering', 'test_sections_membership',
-        'test_standardization', 'test_abstract_detection', 'test_xbrl_validation',
+        'test_standardization', 'test_abstract_detection', 'test_element_metadata', 'test_enumerations', 'test_xbrl_validation',
         'test_urls', 'test_toc_filter', 'test_preprocessing',
         # Classified 2026-08-04 while closing the marker fall-through hole.
         # Each of these ran in NO CI job because its name matched no pattern

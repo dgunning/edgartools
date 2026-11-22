@@ -10,14 +10,17 @@
       "AllowanceForDoubtfulAccounts",
       "CashAndMarketableSecurities",
       "ContractAssets",
+      "CryptoAssetsCurrent",
       "DeferredTaxCurrentAssets",
       "IncomeTaxReceivable",
       "Inventories",
       "OtherNonOperatingCurrentAssets",
       "OtherOperatingCurrentAssets",
       "PrepaidExpenses",
+      "ResaleAgreementAssets",
       "RestrictedCashCurrent",
       "RetirementRelatedCurrentAssets",
+      "SecuritiesBorrowed",
       "ShortTermInvestments",
       "TradeReceivables"
     ],
@@ -58,6 +61,7 @@
       "AccumulatedAmortizationIntangibles",
       "AccumulatedDepreciation",
       "AssetsHeldForSale",
+      "CryptoAssetsNoncurrent",
       "DeferredPolicyAcquisitionCosts",
       "DeferredTaxNoncurrentAssets",
       "DefinedBenefitPlanAssets",
@@ -89,12 +93,14 @@
       "DeferredTaxNonCurrentLiabilities",
       "DefinedBenefitPlanObligations",
       "DefiniteLivedOperatingProvisions(DecommissioningEtc)",
+      "FuturePolicyBenefits",
       "LongTermDebt",
       "OngoingOperatingProvisions(WarrantiesEtc)",
       "OperatingLeaseNonCurrentDebtEquivalent",
       "OtherNonOperatingNonCurrentLiabilities",
       "OtherOperatingNonCurrentLiabilities",
       "PensionObligations",
+      "PolicyholderFunds",
       "RegulatedLiabilities",
       "RestructuringProvisions",
       "RetirementRelatedNonCurrentLiabilities"
@@ -117,11 +123,14 @@
       "ProvisionForCreditLosses"
     ],
     "Banking Revenue": [
+      "InterestIncomePaidInKind",
+      "InvestmentBankingRevenue",
       "NetInterestIncome",
       "NetInterestIncomeAfterProvision",
       "NonInterestIncome",
       "OtherNonInterestIncome",
-      "TotalInterestIncomeOperating"
+      "TotalInterestIncomeOperating",
+      "TradingGainsLosses"
     ],
     "Cost of Revenue": [
       "CostOfGoodsAndServicesSold"
@@ -202,14 +211,17 @@
       "HealthCareRevenue",
       "LicensingRevenue",
       "ManagementFeeRevenue",
+      "NetRevenueAfterInterestExpense",
       "OilAndGasRevenue",
       "ProductRevenue",
+      "RegulatedOperatingRevenue",
       "RentalAndLeasingRevenue",
       "Revenue",
       "RoyaltyRevenue",
       "SubscriptionRevenue",
       "TechnologyServicesRevenue",
-      "TenantReimbursementsRevenue"
+      "TenantReimbursementsRevenue",
+      "UnregulatedOperatingRevenue"
     ]
   },
   "CashFlowStatement": {
@@ -236,6 +248,8 @@
     "Investing Activities": [
       "AcquisitionsNet",
       "CapitalExpenses",
+      "CryptoPurchases",
+      "CryptoSaleProceeds",
       "DivestitureProceeds",
       "InvestmentProceeds",
       "InvestmentPurchases",
@@ -244,6 +258,7 @@
       "PurchaseOfIntangibleAssets"
     ],
     "Operating Activities": [
+      "CryptoConversionProceeds",
       "DeferredIncomeTaxCF",
       "DepreciationAmortizationCF",
       "GainLossOnAssetSalesCF",

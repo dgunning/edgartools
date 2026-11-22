@@ -6,7 +6,7 @@ import re
 import uuid
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Callable, Dict, Iterator, List, Optional
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple
 
 from edgar.documents.cache_mixin import CacheableMixin
 from edgar.documents.types import NodeType, SemanticType, Style
@@ -89,6 +89,82 @@ def _ends_with_tail_whitespace(node) -> bool:
         children = getattr(node, 'children', None)
         node = children[-1] if children else None
     return False
+
+
+def _is_abbreviation_ending(text: str) -> bool:
+    """Check if text ends with an abbreviation rather than a sentence boundary."""
+    stripped = text.rstrip()
+    if not stripped:
+        return False
+    # Single letter + period BUT NOT after SEC terms like "Class A.", "Series B.", "Exhibit A."
+    # where the letter is an identifier, not an abbreviation component
+    if re.search(r'\b[A-Za-z]\.$', stripped):
+        # Exclude SEC classification patterns where a single letter is a label, not abbreviation
+        if re.search(r'(?:Class|Series|Exhibit|Schedule|Part|Annex|Appendix|Grade|Tier|Type|Group|Tranche)\s+[A-Z]\.$', stripped):
+            return False
+        return True
+    # Common abbreviations that end with a period
+    if re.search(r'(?:Inc|Corp|Ltd|Jr|Sr|Dr|Mr|Mrs|Ms|vs|etc|approx|est|Vol|No|Dept)\.$', stripped):
+        return True
+    return False
+
+
+def inline_runs(children: List['Node']) -> List[Tuple[int, str, bool]]:
+    """Decide where a word gap falls between a paragraph's inline children.
+
+    Returns ``(index, text, spaced)`` for each child that has text: ``spaced`` says a
+    space goes before it, and ``text`` is the child's text with any leading space it
+    carried folded into that gap. ParagraphNode.text() and the markdown renderer both
+    join a paragraph from this list, so the two cannot disagree about where a word
+    ends — they did while the renderer space-joined every child, splitting words in
+    2,289 of 22,976 multi-child paragraphs across the HTML fixtures (edgartools-8n9an).
+
+    The default is no gap: adjacent inline elements are one run of text unless the
+    source says otherwise.
+    """
+    runs: List[Tuple[int, str, bool]] = []
+    last = None  # the run being extended: the text since the last inserted gap
+    for i, child in enumerate(children):
+        text = child.text()
+        if not text:
+            continue
+        spaced = False
+        if i > 0:
+            prev_child = children[i - 1]
+            # Whitespace after the previous child in the source
+            if _ends_with_tail_whitespace(prev_child):
+                spaced = True
+            # Text that starts with a space: keep it as the separation
+            elif text.startswith(' '):
+                spaced = True
+                text = text.lstrip()
+            # Sentence-ending punctuation, unless it closes an abbreviation
+            # (single letter + period, or Inc., Corp., etc.)
+            elif last is not None and last.rstrip()[-1:] in '.!?:;':
+                spaced = not _is_abbreviation_ending(last)
+            # The filer drew a word gap without using whitespace: a bullet
+            # glyph and its item text, a footnote marker and its note, a
+            # cover-page checkbox and its label. Three signals, each reading
+            # the boundary rather than guessing at it — a CSS gap on the text
+            # that follows, a fixed-width box around the marker before it, or
+            # a standalone marker glyph in the text itself.
+            #
+            # These replace a `original_tag in ['span','a','em',...]`
+            # allowlist that stood in for them until 2026-08-02, and that
+            # spaced any two adjacent inline elements whatever sat between
+            # them — inventing far more boundaries than it restored, notably
+            # inside Item headings ('Item 1A. RI SK FACTORS'). See the
+            # CHANGELOG and edgartools-jysx for the measurement.
+            elif (last and not last.endswith(' ')
+                  and (_has_left_gap(child) or _is_marker_box(prev_child)
+                       or _is_bare_marker(last, text))):
+                spaced = True
+        if spaced or last is None:
+            last = (' ' + text) if spaced else text
+        else:
+            last += text
+        runs.append((i, text, spaced))
+    return runs
 
 
 # eq=False on Node and every subclass: nodes compare by identity, as plain
@@ -299,83 +375,10 @@ class ParagraphNode(Node, CacheableMixin):
     def text(self) -> str:
         """Extract paragraph text with intelligent spacing and caching."""
         def _generate_text():
-            parts = []
-            for i, child in enumerate(self.children):
-                text = child.text()
-                if text:
-                    # For the first child, just add the text
-                    if i == 0:
-                        parts.append(text)
-                    else:
-                        # For subsequent children, check if previous child had tail whitespace
-                        prev_child = self.children[i - 1]
-                        should_add_space = False
-
-                        # Add space if previous child had tail whitespace
-                        if _ends_with_tail_whitespace(prev_child):
-                            should_add_space = True
-
-                        # Add space if current text starts with space (preserve intended spacing)
-                        elif text.startswith(' '):
-                            should_add_space = True
-                            # Remove the leading space from text since we're adding it as separation
-                            text = text.lstrip()
-
-                        # Add space if previous text ends with sentence-ending punctuation,
-                        # but NOT if it looks like an abbreviation (single letter + period,
-                        # or common abbreviation like Inc., Corp., etc.)
-                        elif parts and parts[-1].rstrip()[-1:] in '.!?:;':
-                            if not self._is_abbreviation_ending(parts[-1]):
-                                should_add_space = True
-
-                        # The filer drew a word gap without using whitespace: a bullet
-                        # glyph and its item text, a footnote marker and its note, a
-                        # cover-page checkbox and its label. Three signals, each reading
-                        # the boundary rather than guessing at it — a CSS gap on the text
-                        # that follows, a fixed-width box around the marker before it, or
-                        # a standalone marker glyph in the text itself.
-                        #
-                        # These replace a `original_tag in ['span','a','em',...]`
-                        # allowlist that stood in for them until 2026-08-02, and that
-                        # spaced any two adjacent inline elements whatever sat between
-                        # them — inventing far more boundaries than it restored, notably
-                        # inside Item headings ('Item 1A. RI SK FACTORS'). See the
-                        # CHANGELOG and edgartools-jysx for the measurement.
-                        elif (parts and parts[-1] and not parts[-1].endswith(' ')
-                              and (_has_left_gap(child) or _is_marker_box(prev_child)
-                                   or _is_bare_marker(parts[-1], text))):
-                            should_add_space = True
-
-                        if should_add_space:
-                            parts.append(' ' + text)
-                        else:
-                            # Concatenate directly without space
-                            if parts:
-                                parts[-1] += text
-                            else:
-                                parts.append(text)
-
-            return ''.join(parts)
+            return ''.join((' ' + text) if spaced else text
+                           for _, text, spaced in inline_runs(self.children))
 
         return self._get_cached_text(_generate_text)
-
-    @staticmethod
-    def _is_abbreviation_ending(text: str) -> bool:
-        """Check if text ends with an abbreviation rather than a sentence boundary."""
-        stripped = text.rstrip()
-        if not stripped:
-            return False
-        # Single letter + period BUT NOT after SEC terms like "Class A.", "Series B.", "Exhibit A."
-        # where the letter is an identifier, not an abbreviation component
-        if re.search(r'\b[A-Za-z]\.$', stripped):
-            # Exclude SEC classification patterns where a single letter is a label, not abbreviation
-            if re.search(r'(?:Class|Series|Exhibit|Schedule|Part|Annex|Appendix|Grade|Tier|Type|Group|Tranche)\s+[A-Z]\.$', stripped):
-                return False
-            return True
-        # Common abbreviations that end with a period
-        if re.search(r'(?:Inc|Corp|Ltd|Jr|Sr|Dr|Mr|Mrs|Ms|vs|etc|approx|est|Vol|No|Dept)\.$', stripped):
-            return True
-        return False
 
     def html(self) -> str:
         """Generate paragraph HTML."""

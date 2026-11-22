@@ -5,7 +5,8 @@ This module provides common functions used throughout the XBRL parser.
 """
 
 from datetime import date, datetime
-from typing import Any, Dict, Iterable, List, Optional, Tuple, Union
+from decimal import Decimal, InvalidOperation
+from typing import Any, Dict, Iterable, List, Mapping, NamedTuple, Optional, Tuple, Union
 
 # Constants for label roles
 STANDARD_LABEL = "http://www.xbrl.org/2003/role/label"
@@ -42,6 +43,82 @@ def is_period_end_label_role(role: Optional[str]) -> bool:
 def is_period_boundary_label_role(role: Optional[str]) -> bool:
     """Report whether a preferred-label role is a period start or period end role, negated or not."""
     return is_period_start_label_role(role) or is_period_end_label_role(role)
+
+
+def balance_cell_key(values: Mapping[str, Any], column_key: str, preferred_label: Optional[str],
+                     opening_by_position: bool = False) -> Optional[str]:
+    """The key of the value a statement row shows in a column, or None when it shows nothing.
+
+    This is the one rule for which instant a balance row shows under a duration
+    column; the DataFrame and the rendered table both use it (edgartools-auvk1.14).
+    The column's own key wins when the row has a value under it. Otherwise, under
+    a duration column, an instant concept shows:
+
+    - the opening balance (the instant the day before the period starts, else
+      the start date itself) when its presentation arc carries a period-start
+      label role;
+    - the closing balance (the instant at the period end) otherwise. This is
+      the SEC renderer's rule: a balance row with any other role (terse, total,
+      standard) shows the period-end instant (Entergy 0000065984-24-000112, cash
+      total on a terseLabel arc).
+
+    ``opening_by_position`` is the statement-of-equity fallback for a row whose
+    arc has no period-boundary role at all: the first of a repeated
+    (concept, label) pair is read as the opening balance, falling back to the
+    closing one (Issues #450, #572, #583).
+
+    ``preferred_label`` must be the role of this row's own arc; a dimension row
+    has its parent reference's role (Brixmor 0001581068-21-000012). A key
+    present with a None value does not count as present.
+    """
+    candidates = [column_key]
+    if column_key.startswith('duration_'):
+        parts = column_key.split('_')
+        start_date, end_date = (parts[1], parts[2]) if len(parts) >= 3 else (None, None)
+        if end_date:
+            opening = is_period_start_label_role(preferred_label) or (
+                opening_by_position and not is_period_end_label_role(preferred_label))
+            if opening and start_date:
+                try:
+                    prior_day = (datetime.strptime(start_date, '%Y-%m-%d').toordinal() - 1)
+                    candidates.append(f"instant_{date.fromordinal(prior_day).isoformat()}")
+                except ValueError:
+                    pass
+                if is_period_start_label_role(preferred_label):
+                    candidates.append(f"instant_{start_date}")
+                else:
+                    candidates.append(f"instant_{end_date}")
+            else:
+                candidates.append(f"instant_{end_date}")
+    for key in candidates:
+        if values.get(key) is not None:
+            return key
+    return None
+
+
+def balance_cell_keys(column_key: str) -> frozenset:
+    """Every key ``balance_cell_key`` can choose for ``column_key``, whatever the row's label role.
+
+    A statement requested for a single duration period must keep the instant
+    facts that column can show: the closing balance (the period end), the
+    opening balance (the day before the start, or the start itself). Without
+    them a balance row, such as a par value on a parenthetical page under
+    a "12 Months Ended" column, has no fact and drops out of the
+    statement (edgartools-auvk1.21, MindMed 0000950170-22-004724).
+    """
+    keys = {column_key}
+    if column_key.startswith('duration_'):
+        parts = column_key.split('_')
+        if len(parts) >= 3:
+            start_date, end_date = parts[1], parts[2]
+            keys.add(f"instant_{end_date}")
+            keys.add(f"instant_{start_date}")
+            try:
+                prior_day = datetime.strptime(start_date, '%Y-%m-%d').toordinal() - 1
+                keys.add(f"instant_{date.fromordinal(prior_day).isoformat()}")
+            except ValueError:
+                pass
+    return frozenset(keys)
 
 
 def iso4217_code(measure: Optional[str]) -> Optional[str]:
@@ -118,6 +195,38 @@ def split_element_id(element_id: str) -> Tuple[str, str]:
         return '', element_id or ''
     prefix, _, local = element_id.partition('_')
     return prefix, local
+
+
+def element_catalog_key(element_id: str) -> str:
+    """The element catalog's spelling of a concept id.
+
+    Facts and context dimensions name a concept by its QName ('us-gaap:Assets');
+    the catalog is keyed on the schema's element id ('us-gaap_Assets'). Only the
+    namespace separator, the first colon, changes: a local name keeps whatever
+    underscores the filer declared.
+    """
+    if element_id and ':' in element_id:
+        prefix, _, local = element_id.partition(':')
+        return f"{prefix}_{local}"
+    return element_id
+
+
+def catalog_entry(element_catalog: Mapping[str, Any], element_id: Optional[str]) -> Optional[Any]:
+    """An element catalog entry for a concept id in either spelling, or None.
+
+    The exact key wins, then the catalog spelling (``element_catalog_key``). A
+    bare local name is never searched on its own. Every lookup of a QName in
+    the catalog goes through here (edgartools-gtmsn): copies of the rule had
+    drifted, and the period data check looked up every fact by its QName and
+    found none.
+    """
+    if not element_id:
+        return None
+    entry = element_catalog.get(element_id)
+    if entry is not None:
+        return entry
+    key = element_catalog_key(element_id)
+    return element_catalog.get(key) if key != element_id else None
 
 # XML namespaces
 NAMESPACES = {
@@ -354,6 +463,45 @@ def determine_dominant_scale(statement_data: List[Dict[str, Any]],
     return -6
 
 
+# Common ISO 4217 currency measures and the symbol a statement displays for them.
+CURRENCY_SYMBOLS = {
+    'iso4217:USD': '$',
+    'iso4217:EUR': '€',
+    'iso4217:GBP': '£',
+    'iso4217:JPY': '¥',
+    'iso4217:CAD': 'C$',
+    'iso4217:AUD': 'A$',
+    'iso4217:CHF': 'CHF',
+    'iso4217:CNY': '¥',
+    'iso4217:INR': '₹',
+    'iso4217:KRW': '₩',
+    'iso4217:BRL': 'R$',
+    'iso4217:MXN': 'MX$',
+    'iso4217:SEK': 'kr',
+    'iso4217:NOK': 'kr',
+    'iso4217:DKK': 'kr',
+    'iso4217:PLN': 'zł',
+    'iso4217:CZK': 'Kč',
+    'iso4217:HUF': 'Ft',
+    'iso4217:RUB': '₽',
+    'iso4217:ZAR': 'R',
+    'iso4217:SGD': 'S$',
+    'iso4217:HKD': 'HK$',
+    'iso4217:TWD': 'NT$',
+    'iso4217:THB': '฿',
+    'iso4217:MYR': 'RM',
+    'iso4217:IDR': 'Rp',
+    'iso4217:PHP': '₱',
+    'iso4217:VND': '₫',
+    'iso4217:ILS': '₪',
+    'iso4217:TRY': '₺',
+    'iso4217:AED': 'AED',
+    'iso4217:SAR': 'SR',
+    'iso4217:EGP': 'E£',
+    'iso4217:NGN': '₦',
+}
+
+
 def get_currency_symbol(unit_measure: Optional[str]) -> str:
     """
     Get the appropriate currency symbol from a unit measure string.
@@ -367,45 +515,17 @@ def get_currency_symbol(unit_measure: Optional[str]) -> str:
     if not unit_measure:
         return "$"  # Default to USD
 
-    # Map common ISO 4217 currency codes to symbols
-    currency_symbols = {
-        'iso4217:USD': '$',
-        'iso4217:EUR': '€',
-        'iso4217:GBP': '£',
-        'iso4217:JPY': '¥',
-        'iso4217:CAD': 'C$',
-        'iso4217:AUD': 'A$',
-        'iso4217:CHF': 'CHF',
-        'iso4217:CNY': '¥',
-        'iso4217:INR': '₹',
-        'iso4217:KRW': '₩',
-        'iso4217:BRL': 'R$',
-        'iso4217:MXN': 'MX$',
-        'iso4217:SEK': 'kr',
-        'iso4217:NOK': 'kr',
-        'iso4217:DKK': 'kr',
-        'iso4217:PLN': 'zł',
-        'iso4217:CZK': 'Kč',
-        'iso4217:HUF': 'Ft',
-        'iso4217:RUB': '₽',
-        'iso4217:ZAR': 'R',
-        'iso4217:SGD': 'S$',
-        'iso4217:HKD': 'HK$',
-        'iso4217:TWD': 'NT$',
-        'iso4217:THB': '฿',
-        'iso4217:MYR': 'RM',
-        'iso4217:IDR': 'Rp',
-        'iso4217:PHP': '₱',
-        'iso4217:VND': '₫',
-        'iso4217:ILS': '₪',
-        'iso4217:TRY': '₺',
-        'iso4217:AED': 'AED',
-        'iso4217:SAR': 'SR',
-        'iso4217:EGP': 'E£',
-        'iso4217:NGN': '₦',
-    }
+    return CURRENCY_SYMBOLS.get(unit_measure, '$')  # Default to USD if unknown
 
-    return currency_symbols.get(unit_measure, '$')  # Default to USD if unknown
+
+def currency_display_symbol(code: str) -> str:
+    """The prefix a statement shows for an ISO 4217 currency code.
+
+    A configured symbol (``USD`` -> ``$``), else the code itself (``NZD`` ->
+    ``"NZD "``). Unlike :func:`get_currency_symbol` it never falls back to
+    dollars: the caller already knows the cell's currency from its unit.
+    """
+    return CURRENCY_SYMBOLS.get(f'iso4217:{code}') or f'{code} '
 
 
 def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
@@ -423,9 +543,11 @@ def format_value(value: Union[int, float, str], is_monetary: bool, scale: int,
     Returns:
         Formatted value string
     """
-    # Handle non-numeric or zero values
-    if not isinstance(value, (int, float)) or value == 0:
-        return "" if value == 0 else str(value)
+    # Non-numeric values pass through. Zero is formatted like any other number
+    # ("$0", "0.00"); it used to return the control character U+0014.
+    if not isinstance(value, (int, float)):
+        return str(value)
+    value += 0  # -0.0 + 0 is 0.0, so a negative zero cannot format as "-0"
 
     # Apply scaling
     scaled_value = value
@@ -513,9 +635,179 @@ def find_previous_fiscal_year_period(instant_periods: List[Dict[str, Any]],
     return None
 
 
-def get_unit_display_name(unit_ref: Optional[str]) -> Optional[str]:
+XBRLI_NAMESPACE = 'http://www.xbrl.org/2003/instance'
+ISO4217_NAMESPACE = 'http://www.xbrl.org/2003/iso4217'
+
+# Row unit summaries that are not a single unit (GH #1746)
+UNIT_UNAVAILABLE = 'unit unavailable'
+UNIT_MIXED = 'mixed'
+
+_OMITTED = object()
+
+
+def expanded_measure_name(measure: str, nsmap: Mapping[Optional[str], str]) -> Optional[str]:
+    """A measure's QName as ``{namespace}local``, resolved against in-scope namespaces.
+
+    ``nsmap`` is the measure element's own in-scope map (lxml's ``element.nsmap``),
+    so a local declaration and the default namespace both count: Microsoft files
+    ``shares`` unprefixed under the default XBRL instance namespace. An
+    unprefixed name with no default namespace has no namespace and is returned
+    bare. A prefix with no declaration cannot be resolved and returns ``None``.
     """
-    Convert unit_ref to human-readable unit name.
+    prefix, sep, local = measure.partition(':')
+    if not sep:
+        prefix, local = None, measure
+    if not local:
+        return None
+    namespace = nsmap.get(prefix)
+    if namespace is None:
+        return None if prefix else local
+    return f'{{{namespace}}}{local}'
+
+
+def unit_definition(numerator: List[str], denominator: List[str],
+                    lexical_numerator: List[str], lexical_denominator: List[str]) -> Dict[str, Any]:
+    """The common descriptor of a parsed unit (GH #1747, #1746).
+
+    ``numerator`` and ``denominator`` are expanded QNames in source order with
+    repeats kept; a simple or product unit has an empty denominator. They, not
+    the opaque unit id or the measures' prefixes, are what a unit means.
+    ``expression`` is the filed lexical form, for display only.
+    """
+    expression = '*'.join(lexical_numerator)
+    if lexical_denominator:
+        denominator_text = '*'.join(lexical_denominator)
+        if len(lexical_denominator) > 1:
+            denominator_text = f'({denominator_text})'
+        expression = f'{expression}/{denominator_text}'
+    return {'numerator': list(numerator), 'denominator': list(denominator), 'expression': expression}
+
+
+class UnitClass(NamedTuple):
+    """What a unit definition measures, and how a statement labels it.
+
+    ``kind`` is one of ``currency``, ``shares``, ``pure``,
+    ``currency_per_share`` or ``other``; ``currency`` is the ISO 4217 code for
+    the two monetary kinds and ``None`` otherwise.
+    """
+    kind: str
+    label: str
+    currency: Optional[str] = None
+
+
+def _split_expanded(name: str) -> Tuple[str, str]:
+    """``{namespace}local`` -> (namespace, local); a bare name has no namespace."""
+    if name.startswith('{') and '}' in name:
+        namespace, local = name[1:].split('}', 1)
+        return namespace, local
+    return '', name
+
+
+def _descriptor(definition: Any) -> Optional[Dict[str, Any]]:
+    """Accept a parsed unit (carrying ``definition``) or the descriptor itself."""
+    if not isinstance(definition, dict):
+        return None
+    if 'definition' in definition:
+        definition = definition['definition']
+        if not isinstance(definition, dict):
+            return None
+    numerator = definition.get('numerator')
+    denominator = definition.get('denominator')
+    if not isinstance(numerator, list) or not isinstance(denominator, list) or not numerator:
+        return None
+    return definition
+
+
+def _single_measure_class(namespace: str, local: str) -> Optional[UnitClass]:
+    """Classify a unit of one measure, or ``None`` when it is not a standard one."""
+    if namespace == ISO4217_NAMESPACE:
+        return UnitClass('currency', local.lower(), local)
+    if namespace == XBRLI_NAMESPACE and local == 'shares':
+        return UnitClass('shares', 'shares')
+    if namespace == XBRLI_NAMESPACE and local == 'pure':
+        return UnitClass('pure', 'number')
+    return None
+
+
+def classify_unit_definition(definition: Any) -> Optional[UnitClass]:
+    """Classify a unit from its definition (its measures), never from its id.
+
+    Only complete supported shapes get a short label: one ISO 4217 currency
+    (``usd``), one ``xbrli:shares`` (``shares``), one ``xbrli:pure``
+    (``number``, with no percentage inferred) and exactly one currency divided
+    by one ``xbrli:shares`` (``usdPerShare``). Anything else -- a custom
+    measure, a product, another quotient -- is labelled with its complete filed
+    expression, so USD x shares or USD / EUR never reads as cash. Measures are
+    compared by namespace, so an ``iso4217`` prefix bound to another namespace
+    confers no currency. Returns ``None`` when there is no usable definition.
+    """
+    descriptor = _descriptor(definition)
+    if descriptor is None:
+        return None
+    numerator = [_split_expanded(name) for name in descriptor['numerator']]
+    denominator = [_split_expanded(name) for name in descriptor['denominator']]
+    if len(numerator) == 1 and not denominator:
+        single = _single_measure_class(*numerator[0])
+        if single is not None:
+            return single
+    if (len(numerator) == 1 and len(denominator) == 1
+            and numerator[0][0] == ISO4217_NAMESPACE
+            and denominator[0] == (XBRLI_NAMESPACE, 'shares')):
+        code = numerator[0][1]
+        return UnitClass('currency_per_share', f'{code.lower()}PerShare', code)
+    expression = descriptor.get('expression') or _clark_expression(descriptor)
+    return UnitClass('other', expression)
+
+
+def _clark_expression(descriptor: Dict[str, Any]) -> str:
+    """A complete expression from expanded names, when no lexical form was kept."""
+    return unit_definition(descriptor['numerator'], descriptor['denominator'],
+                           descriptor['numerator'], descriptor['denominator'])['expression']
+
+
+def _unit_identity(descriptor: Dict[str, Any]) -> Tuple[Tuple[str, ...], Tuple[str, ...]]:
+    """Two units are equal when their measures are (XBRL 2.1 section 4.10), in any order."""
+    return tuple(sorted(descriptor['numerator'])), tuple(sorted(descriptor['denominator']))
+
+
+def summarize_unit_definitions(definitions: Iterable[Any]) -> Optional[str]:
+    """One unit label for a statement row from its selected numeric cells' units.
+
+    ``definitions`` holds one entry per selected numeric cell: a parsed unit or
+    its descriptor, or ``None`` when the cell's unit could not be resolved. The
+    summary is that unit's label when every cell has the same unit -- aliases
+    and different unit ids of one definition are the same unit -- ``mixed``
+    when they differ, and ``unit unavailable`` when any cell's unit is
+    unresolved. A row with no numeric cell has no unit (``None``).
+    """
+    labels: Dict[Tuple[Tuple[str, ...], Tuple[str, ...]], str] = {}
+    for definition in definitions:
+        unit_class = classify_unit_definition(definition)
+        if unit_class is None:
+            return UNIT_UNAVAILABLE
+        labels.setdefault(_unit_identity(_descriptor(definition)), unit_class.label)
+    if not labels:
+        return None
+    if len(labels) > 1:
+        return UNIT_MIXED
+    return next(iter(labels.values()))
+
+
+def get_unit_display_name(unit_ref: Optional[str], *, definition: Any = _OMITTED) -> Optional[str]:
+    """
+    Convert a unit to a human-readable unit name.
+
+    With ``definition=`` (a parsed unit from ``xbrl.units``, or its
+    ``definition`` descriptor), the name comes from the unit's measures and
+    the id is ignored: USD / shares is ``usdPerShare`` whatever its id says. An
+    explicit ``definition=None`` means the unit is known to be unresolved and
+    returns ``'unit unavailable'``; it never falls back to reading the id.
+    Statement DataFrames always take this path (GH #1746).
+
+    Called with the id alone, this is a legacy lexical heuristic kept for
+    compatibility: it guesses from substrings of the id and cannot establish
+    what a filing's unit is (``U_UnitedStatesOfAmericaDollarsShare`` reads as
+    ``shares``).
 
     Maps XBRL unit references to standard display names:
     - 'U-Monetary' / 'iso4217:USD' -> 'usd'
@@ -537,6 +829,9 @@ def get_unit_display_name(unit_ref: Optional[str]) -> Optional[str]:
         >>> get_unit_display_name('U-USD-per-shares')
         'usdPerShare'
     """
+    if definition is not _OMITTED:
+        unit_class = classify_unit_definition(definition)
+        return unit_class.label if unit_class is not None else UNIT_UNAVAILABLE
     if not unit_ref:
         return None
 
@@ -662,6 +957,40 @@ def normalize_decimals(decimals: Union[int, str, None]) -> Union[int, str, None]
         return 0
 
 
+def decimals_from_precision(precision: Optional[str], value: Optional[str]) -> Union[int, str, None]:
+    """The decimals a fact reported with ``@precision`` implies (XBRL 2.1 §4.6.6).
+
+    ``decimals = precision - floor(log10(abs(value))) - 1``: two significant
+    digits of 2,000,000 are accurate to the hundred-thousand, decimals -5. An
+    ``INF`` precision, or a zero value, is INF. ``precision="0"`` says nothing
+    is known about the value's accuracy (§4.6.4), so it implies nothing and
+    returns None, as does an unreadable precision or value.
+
+    ``Decimal.adjusted()`` is the exact ``floor(log10(abs(value)))`` of the
+    lexical value, so no float rounding or decimal context is involved.
+    """
+    if precision is None:
+        return None
+    text = str(precision).strip()
+    if text.upper() == INFINITE_PRECISION:
+        return INFINITE_PRECISION
+    try:
+        digits = int(text)
+    except ValueError:
+        return None
+    if digits <= 0:
+        return None
+    try:
+        number = Decimal(str(value).strip())
+    except (InvalidOperation, ValueError, TypeError):
+        return None
+    if not number.is_finite():
+        return None
+    if number.is_zero():
+        return INFINITE_PRECISION
+    return digits - number.adjusted() - 1
+
+
 def decimals_for_scaling(decimals: Union[int, str, None]) -> int:
     """The integer a scaling or formatting step can use.
 
@@ -672,6 +1001,56 @@ def decimals_for_scaling(decimals: Union[int, str, None]) -> int:
     if isinstance(decimals, bool) or not isinstance(decimals, int):
         return 0
     return decimals
+
+
+class SourceKeyLookup:
+    """A row's per-period values that remember which period key answered a lookup.
+
+    A statement column can show a value filed under another key -- a cash
+    balance's instant under a duration column -- so the unit that belongs to the
+    cell is the one filed under the key the value came from (GH #1655, #1746).
+    ``get`` returns exactly what ``dict.get`` would; it only records the key.
+    """
+
+    def __init__(self, values: Optional[Mapping[str, Any]]):
+        self._values = values or {}
+        self.source_key: Optional[str] = None
+
+    def get(self, key: str, default: Any = None) -> Any:
+        if self._values.get(key) is not None:
+            self.source_key = key
+        return self._values.get(key, default)
+
+
+def is_numeric_cell(value: Any) -> bool:
+    """Whether a statement cell holds a number (not text, a blank, a bool or NaN)."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        return False
+    return value == value  # NaN is the only value unequal to itself
+
+
+def cell_unit_definition(item_units: Optional[Mapping[str, Any]], source_key: Optional[str],
+                         units: Optional[Mapping[str, Any]]) -> Optional[Dict[str, Any]]:
+    """The unit definition of the fact a cell was read from, or ``None`` if unresolved.
+
+    ``item_units`` maps the row's period keys to unit ids, ``units`` is
+    ``xbrl.units``. Only the cell's own source key is read: no neighbouring
+    period or fact lends its unit.
+    """
+    unit_ref = (item_units or {}).get(source_key) if source_key else None
+    unit = (units or {}).get(unit_ref) if isinstance(unit_ref, str) else None
+    return unit.get('definition') if isinstance(unit, dict) else None
+
+
+def record_cell_unit(cell_units: Dict[str, Any], column_key: str, value: Any,
+                     item_units: Optional[Mapping[str, Any]], source_key: Optional[str],
+                     units: Optional[Mapping[str, Any]]) -> None:
+    """Record a shown cell's unit definition under its column, if the cell is a number.
+
+    The map feeds :func:`summarize_unit_definitions`; a blank or text cell asserts no unit.
+    """
+    if is_numeric_cell(value):
+        cell_units[column_key] = cell_unit_definition(item_units, source_key, units)
 
 
 def row_metadata_value(mapping: Optional[Dict[str, Any]],

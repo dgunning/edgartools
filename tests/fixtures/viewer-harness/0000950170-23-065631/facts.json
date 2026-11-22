@@ -1,0 +1,144 @@
+[
+ {
+  "concept": "gxlm:QuantityOfLumens",
+  "context_ref": "C_26b573ad-539b-4ab3-bb6e-8023b788d3fc",
+  "period_key": "instant_2023-09-30",
+  "period_type": "instant",
+  "value": "73100101.0441121",
+  "numeric_value": 73100101.0441121,
+  "unit_ref": "U_Xlm",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:InvestmentTypeAxis": "gxlm:InvestmentInLumensMember"
+  }
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedAtCost",
+  "context_ref": "C_26b573ad-539b-4ab3-bb6e-8023b788d3fc",
+  "period_key": "instant_2023-09-30",
+  "period_type": "instant",
+  "value": "18479000",
+  "numeric_value": 18479000.0,
+  "unit_ref": "U_USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:InvestmentTypeAxis": "gxlm:InvestmentInLumensMember"
+  }
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedPercentOfNetAssets",
+  "context_ref": "C_26b573ad-539b-4ab3-bb6e-8023b788d3fc",
+  "period_key": "instant_2023-09-30",
+  "period_type": "instant",
+  "value": "1",
+  "numeric_value": 1.0,
+  "unit_ref": "U_pure",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:InvestmentTypeAxis": "gxlm:InvestmentInLumensMember"
+  }
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedAtCost",
+  "context_ref": "C_51b22f1f-e6a6-4eae-ba22-81a13ffbfd18",
+  "period_key": "instant_2023-09-30",
+  "period_type": "instant",
+  "value": "18479000",
+  "numeric_value": 18479000.0,
+  "unit_ref": "U_USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedPercentOfNetAssets",
+  "context_ref": "C_51b22f1f-e6a6-4eae-ba22-81a13ffbfd18",
+  "period_key": "instant_2023-09-30",
+  "period_type": "instant",
+  "value": "1",
+  "numeric_value": 1.0,
+  "unit_ref": "U_pure",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "gxlm:QuantityOfLumens",
+  "context_ref": "C_f2ab3a72-48df-48c0-a3f6-7d635050cee7",
+  "period_key": "instant_2022-09-30",
+  "period_type": "instant",
+  "value": "74950703.0854167",
+  "numeric_value": 74950703.0854167,
+  "unit_ref": "U_Xlm",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:InvestmentTypeAxis": "gxlm:InvestmentInLumensMember"
+  }
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedAtCost",
+  "context_ref": "C_f2ab3a72-48df-48c0-a3f6-7d635050cee7",
+  "period_key": "instant_2022-09-30",
+  "period_type": "instant",
+  "value": "18947000",
+  "numeric_value": 18947000.0,
+  "unit_ref": "U_USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:InvestmentTypeAxis": "gxlm:InvestmentInLumensMember"
+  }
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedPercentOfNetAssets",
+  "context_ref": "C_f2ab3a72-48df-48c0-a3f6-7d635050cee7",
+  "period_key": "instant_2022-09-30",
+  "period_type": "instant",
+  "value": "1",
+  "numeric_value": 1.0,
+  "unit_ref": "U_pure",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:InvestmentTypeAxis": "gxlm:InvestmentInLumensMember"
+  }
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedAtCost",
+  "context_ref": "C_8f610820-3dcd-4b05-9b9e-f6e813b25734",
+  "period_key": "instant_2022-09-30",
+  "period_type": "instant",
+  "value": "18947000",
+  "numeric_value": 18947000.0,
+  "unit_ref": "U_USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:InvestmentOwnedPercentOfNetAssets",
+  "context_ref": "C_8f610820-3dcd-4b05-9b9e-f6e813b25734",
+  "period_key": "instant_2022-09-30",
+  "period_type": "instant",
+  "value": "1",
+  "numeric_value": 1.0,
+  "unit_ref": "U_pure",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ }
+]

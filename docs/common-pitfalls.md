@@ -322,36 +322,19 @@ revenue = company.get_financials().get_revenue()
 
 ## Threads and Imports
 
-### Import `edgar` once before starting threads
+### Importing `edgar` from several threads (fixed after 6.0.0)
 
-Import the package on the main thread before any thread imports a submodule. Warming imports on a background thread while another thread reaches into a submodule makes both imports fail.
+Through 6.0.0, a thread importing a submodule such as `edgar.reference` while another thread was still running `import edgar` made both imports fail, with `cannot import name ... from partially initialized module` or `_DeadlockError` (GH #1325). Since then `import edgar` imports no submodule: each top-level name, such as `edgar.Company`, loads its module on first use, so threads can import `edgar` and its submodules in any order.
 
 ```python
-# WRONG: a worker imports a submodule while the main thread is still importing edgar
 import threading
 
 def worker():
-    from edgar.reference import describe_form   # may raise ImportError
+    from edgar.reference import describe_form    # safe while the main thread imports edgar
     ...
 
 threading.Thread(target=worker).start()
-import edgar                                     # may raise ImportError
+import edgar
 ```
 
-```python
-# RIGHT: warm the package first, then start threads
-import edgar                                     # completes on the main thread
-import threading
-
-def worker():
-    from edgar.reference import describe_form    # safe
-    ...
-
-threading.Thread(target=worker).start()
-```
-
-The failure is deterministic rather than intermittent, and it is silent in the sense that it raises where the import happened, which on a daemon thread may be nowhere you are watching. The error reads `cannot import name ... from partially initialized module`, or on some versions `_DeadlockError`.
-
-Importing `edgar` at module scope, which is what most applications already do, is enough. The rule only matters if you defer the first import into a thread, such as warming caches in a background thread at web application startup.
-
-This applies to any submodule, not just `edgar.reference`.
+On 6.0.0 or earlier, import `edgar` once on the main thread before starting any thread that imports a submodule.

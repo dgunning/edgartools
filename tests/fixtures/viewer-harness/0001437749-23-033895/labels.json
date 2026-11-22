@@ -1,0 +1,108 @@
+{
+ "gnss_AdjustmentsRelatedToTaxWithholdingForCashlessShareBasedCompensation": {
+  "http://www.xbrl.org/2003/role/documentation": "Amount of decrease to equity for cashless grantee's tax withholding obligation for award under share-based payment arrangement.",
+  "http://www.xbrl.org/2003/role/label": "gnss_AdjustmentsRelatedToTaxWithholdingForCashlessShareBasedCompensation",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Adjustments Related To Tax Withholding For Cashless Share Based Compensation"
+ },
+ "gnss_SharesPaidForTaxWithholdingForShareBasedCompensationCashless": {
+  "http://www.xbrl.org/2003/role/documentation": "Number of shares used to settle cashless grantee's tax withholding obligation for award under share-based arrangement.",
+  "http://www.xbrl.org/2003/role/label": "gnss_SharesPaidForTaxWithholdingForShareBasedCompensationCashless",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Shares Paid For Tax Withholding For Share Based Compensation, Cashless (in shares)"
+ },
+ "gnss_StockIssuedDuringPeriodSharesStockOptionsExercisedCashless": {
+  "http://www.xbrl.org/2003/role/documentation": "Number of share options ( or share units exercised during the current period that are cashless.",
+  "http://www.xbrl.org/2003/role/label": "Stock Issued During Period Shares Stock Options Exercised, Cashless (in shares)"
+ },
+ "gnss_StockIssuedDuringPeriodValueStockOptionsExercisedCashless": {
+  "http://www.xbrl.org/2003/role/documentation": "The cashless value of stock issued as a result of the exercise of stock options",
+  "http://www.xbrl.org/2003/role/label": "Stock Issued During Period Value Stock Options Exercised, Cashless"
+ },
+ "gnss_StockReleasedFromObligationToIssueShares": {
+  "http://www.xbrl.org/2003/role/documentation": "The number of shares of stock released from the obligation to issue during the period.",
+  "http://www.xbrl.org/2003/role/label": "Release of obligation to issue common stock (in shares)"
+ },
+ "gnss_StockReleasedFromObligationToIssueValue": {
+  "http://www.xbrl.org/2003/role/documentation": "The value of stock released from the obligation to issue.",
+  "http://www.xbrl.org/2003/role/label": "Release of obligation to issue commons stock"
+ },
+ "us-gaap_AccumulatedOtherComprehensiveIncomeMember": {
+  "http://www.xbrl.org/2003/role/label": "AOCI Attributable to Parent [Member]"
+ },
+ "us-gaap_AdditionalPaidInCapitalMember": {
+  "http://www.xbrl.org/2003/role/label": "Additional Paid-in Capital [Member]"
+ },
+ "us-gaap_AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation": {
+  "http://www.xbrl.org/2003/role/label": "Shares retained for payment of taxes in connection with net share settlement of restricted stock units",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Shares retained for payment of taxes in connection with net share settlement of restricted stock units"
+ },
+ "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue": {
+  "http://www.xbrl.org/2003/role/label": "Share-based compensation expense"
+ },
+ "us-gaap_CommonStockMember": {
+  "http://www.xbrl.org/2003/role/label": "Common Stock [Member]"
+ },
+ "us-gaap_EquityComponentDomain": {
+  "http://www.xbrl.org/2003/role/label": "Equity Component [Domain]"
+ },
+ "us-gaap_NetIncomeLoss": {
+  "http://www.xbrl.org/2003/role/label": "Net (loss) income",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net income",
+  "http://www.xbrl.org/2003/role/totalLabel": "Net (loss) income",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Net loss"
+ },
+ "us-gaap_OtherComprehensiveIncomeLossNetOfTax": {
+  "http://www.xbrl.org/2003/role/label": "Accumulated other comprehensive income"
+ },
+ "us-gaap_RetainedEarningsMember": {
+  "http://www.xbrl.org/2003/role/label": "Retained Earnings [Member]"
+ },
+ "us-gaap_SharesOutstanding": {
+  "http://www.xbrl.org/2003/role/label": "us-gaap_SharesOutstanding",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Balance (in shares)",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Balance (in shares)"
+ },
+ "us-gaap_SharesPaidForTaxWithholdingForShareBasedCompensation": {
+  "http://www.xbrl.org/2003/role/label": "Shares retained for payment of taxes in connection with net share settlement of restricted stock units (in shares)",
+  "http://www.xbrl.org/2003/role/terseLabel": "Share-Based Payment Arrangement, Shares Withheld for Tax Withholding Obligation",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Shares retained for payment of taxes in connection with net share settlement of restricted stock units (in shares)"
+ },
+ "us-gaap_StatementEquityComponentsAxis": {
+  "http://www.xbrl.org/2003/role/label": "Equity Components [Axis]"
+ },
+ "us-gaap_StatementLineItems": {
+  "http://www.xbrl.org/2003/role/label": "Statement [Line Items]"
+ },
+ "us-gaap_StatementOfStockholdersEquityAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Statement of Stockholders' Equity [Abstract]"
+ },
+ "us-gaap_StatementTable": {
+  "http://www.xbrl.org/2003/role/label": "Statement [Table]"
+ },
+ "us-gaap_StockIssuedDuringPeriodSharesAcquisitions": {
+  "http://www.xbrl.org/2003/role/label": "Issuance of common stock in business combination (in shares)",
+  "http://www.xbrl.org/2003/role/terseLabel": "Stock Issued During Period, Shares, Acquisitions"
+ },
+ "us-gaap_StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures": {
+  "http://www.xbrl.org/2003/role/label": "Issuance of common stock upon vesting of restricted stock units (in shares)",
+  "http://www.xbrl.org/2003/role/terseLabel": "Stock Issued During Period, Shares, Restricted Stock Award, Net of Forfeitures"
+ },
+ "us-gaap_StockIssuedDuringPeriodSharesStockOptionsExercised": {
+  "http://www.xbrl.org/2003/role/label": "Issuance of common stock upon exercise of stock options, net (in shares)",
+  "http://www.xbrl.org/2003/role/terseLabel": "Share-Based Compensation Arrangement by Share-Based Payment Award, Options, Exercises in Period"
+ },
+ "us-gaap_StockIssuedDuringPeriodValueAcquisitions": {
+  "http://www.xbrl.org/2003/role/label": "Issuance of common stock in business combination"
+ },
+ "us-gaap_StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures": {
+  "http://www.xbrl.org/2003/role/label": "Issuance of common stock upon vesting of restricted stock units"
+ },
+ "us-gaap_StockIssuedDuringPeriodValueStockOptionsExercised": {
+  "http://www.xbrl.org/2003/role/label": "Issuance of common stock upon exercise of stock options, net"
+ },
+ "us-gaap_StockholdersEquity": {
+  "http://www.xbrl.org/2003/role/label": "us-gaap_StockholdersEquity",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Balance",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Balance",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total stockholders' equity"
+ }
+}

@@ -1,7 +1,7 @@
 """The upgrade-guide gate has to catch the PR it was written for, and stay quiet otherwise.
 
 ``scripts/check_upgrade_guide.py`` fails a pull request that stages a 6.0
-change without touching ``docs/upgrade/6.0.md``. It exists because #1200/#1201
+change without touching the current upgrade guide, ``docs/upgrade/6.1.md``. It exists because #1200/#1201
 shipped the edgar.files deprecations in 5.55.0 with no guide entry, and that PR
 warned through a module-local helper and the phrase "removed in edgartools 6.0"
 rather than a bare ``DeprecationWarning`` — so the first test is that shape,
@@ -38,7 +38,7 @@ def _load():
 
 gate = _load()
 
-GUIDE = {"filename": "docs/upgrade/6.0.md", "status": "modified", "patch": "@@ -1 +1 @@\n+a line\n"}
+GUIDE = {"filename": "docs/upgrade/6.1.md", "status": "modified", "patch": "@@ -1 +1 @@\n+a line\n"}
 
 # From #1201 (0878e3ce), edgar/files/markdown.py, trimmed to the lines that matter.
 PR_1201_MARKDOWN = (
@@ -144,7 +144,7 @@ def _run(tmp_path, files, monkeypatch, labels=""):
 def test_main_fails_names_the_lines_and_says_what_to_do(tmp_path, monkeypatch, capsys):
     assert _run(tmp_path, [_py(PR_1201_MARKDOWN)], monkeypatch) == 1
     out = capsys.readouterr().out
-    assert "does not touch docs/upgrade/6.0.md" in out
+    assert "does not touch docs/upgrade/6.1.md" in out
     assert "edgar/files/markdown.py: warn_legacy_html_usage(_MARKDOWN_DEPRECATION_MSG)" in out
     assert "no-upgrade-guide" in out
 

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="US-ASCII" standalone="no"?>
+    <!-- Field: Doc-Info; Name: Generator; Value: GoFiler Complete; Version: 6.3a -->
+    <!-- Field: Doc-Info; Name: VendorURI; Value: https://www.novaworks.com -->
+    <!-- Field: Doc-Info; Name: Status; Value: 0x00000000 -->
+<link:linkbase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xbrli="http://www.xbrl.org/2003/instance" xsi:schemaLocation="http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd">
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Cover" roleURI="http://EXDW/role/Cover" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#BalanceSheets" roleURI="http://EXDW/role/BalanceSheets" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#BalanceSheetsParenthetical" roleURI="http://EXDW/role/BalanceSheetsParenthetical" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#StatementsOfOperationsAndComprehensiveIncomeLoss" roleURI="http://EXDW/role/StatementsOfOperationsAndComprehensiveIncomeLoss" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#StatementsOfChangesInStockholdersEquity" roleURI="http://EXDW/role/StatementsOfChangesInStockholdersEquity" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#StatementsOfCashFlows" roleURI="http://EXDW/role/StatementsOfCashFlows" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#MembershipFees" roleURI="http://EXDW/role/MembershipFees" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#OtherCurrentAssets" roleURI="http://EXDW/role/OtherCurrentAssets" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#DeferredTaxAssetsAndDeferredTaxLiabilities" roleURI="http://EXDW/role/DeferredTaxAssetsAndDeferredTaxLiabilities" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#DeferredTaxLiabilities" roleURI="http://EXDW/role/DeferredTaxLiabilities" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#DeferredTaxAssetsTable" roleURI="http://EXDW/role/DeferredTaxAssetsTable" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#RelatedPartyTransactions" roleURI="http://EXDW/role/RelatedPartyTransactions" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Software" roleURI="http://EXDW/role/Software" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#LeaseExpenses" roleURI="http://EXDW/role/LeaseExpenses" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#SelectedFinancialInformation" roleURI="http://EXDW/role/SelectedFinancialInformation" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note1OrganizationDescriptionOfBusinessAndBasisOfPresentation" roleURI="http://EXDW/role/Note1OrganizationDescriptionOfBusinessAndBasisOfPresentation" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note2SignificantAccountingPolicies" roleURI="http://EXDW/role/Note2SignificantAccountingPolicies" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note3OtherCurrentAssets" roleURI="http://EXDW/role/Note3OtherCurrentAssets" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note4IncomeTaxes" roleURI="http://EXDW/role/Note4IncomeTaxes" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note5DeferredTaxAssetsAndDeferredTaxLiabilities" roleURI="http://EXDW/role/Note5DeferredTaxAssetsAndDeferredTaxLiabilities" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note6Related-partyTransactions" roleURI="http://EXDW/role/Note6Related-partyTransactions" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note7PropertyPlantAndEquipment" roleURI="http://EXDW/role/Note7PropertyPlantAndEquipment" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note8Software" roleURI="http://EXDW/role/Note8Software" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note9Borrowings" roleURI="http://EXDW/role/Note9Borrowings" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note10Commitments" roleURI="http://EXDW/role/Note10Commitments" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note11Contingencies" roleURI="http://EXDW/role/Note11Contingencies" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note12SegmentInformation" roleURI="http://EXDW/role/Note12SegmentInformation" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note13SubsequentEvents" roleURI="http://EXDW/role/Note13SubsequentEvents" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note2SignificantAccountingPoliciesPolicies" roleURI="http://EXDW/role/Note2SignificantAccountingPoliciesPolicies" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note2SignificantAccountingPoliciesTables" roleURI="http://EXDW/role/Note2SignificantAccountingPoliciesTables" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note3OtherCurrentAssetsTables" roleURI="http://EXDW/role/Note3OtherCurrentAssetsTables" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note4IncomeTaxesTables" roleURI="http://EXDW/role/Note4IncomeTaxesTables" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note5DeferredTaxAssetsAndDeferredTaxLiabilitiesTables" roleURI="http://EXDW/role/Note5DeferredTaxAssetsAndDeferredTaxLiabilitiesTables" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note6Related-partyTransactionsTables" roleURI="http://EXDW/role/Note6Related-partyTransactionsTables" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note7PropertyPlantAndEquipmentTables" roleURI="http://EXDW/role/Note7PropertyPlantAndEquipmentTables" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note8SoftwareTables" roleURI="http://EXDW/role/Note8SoftwareTables" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note9BorrowingsTables" roleURI="http://EXDW/role/Note9BorrowingsTables" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note10CommitmentsTables" roleURI="http://EXDW/role/Note10CommitmentsTables" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note12SegmentInformationTables" roleURI="http://EXDW/role/Note12SegmentInformationTables" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note2SignificantAccountingPoliciesDetailsNarrative" roleURI="http://EXDW/role/Note2SignificantAccountingPoliciesDetailsNarrative" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note4IncomeTaxesDetailsNarrative" roleURI="http://EXDW/role/Note4IncomeTaxesDetailsNarrative" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note5DeferredTaxAssetsAndDeferredTaxLiabilitiesDetailsNarrative" roleURI="http://EXDW/role/Note5DeferredTaxAssetsAndDeferredTaxLiabilitiesDetailsNarrative" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#PropertyPlantAndEquipmentDetails" roleURI="http://EXDW/role/PropertyPlantAndEquipmentDetails" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note7PropertyPlantAndEquipmentDetailsNarrative" roleURI="http://EXDW/role/Note7PropertyPlantAndEquipmentDetailsNarrative" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note9BorrowingsDetailsNarrative" roleURI="http://EXDW/role/Note9BorrowingsDetailsNarrative" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note10CommitmentsDetailsNarrative" roleURI="http://EXDW/role/Note10CommitmentsDetailsNarrative" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#CompanysSupplementalInformationRelatedToOperatingAndFinanceLeasesDetails" roleURI="http://EXDW/role/CompanysSupplementalInformationRelatedToOperatingAndFinanceLeasesDetails" />
+    <link:roleRef xlink:type="simple" xlink:href="exdw-20250930.xsd#Note11ContingenciesDetailsNarrative" roleURI="http://EXDW/role/Note11ContingenciesDetailsNarrative" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Cover" xlink:title="00000001 - Document - Cover" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/BalanceSheets" xlink:title="00000002 - Statement - Consolidated Balance Sheets">
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2024/elts/us-gaap-2024.xsd#us-gaap_LiabilitiesAndStockholdersEquity" xlink:label="loc_us-gaapLiabilitiesAndStockholdersEquity" />
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2024/elts/us-gaap-2024.xsd#us-gaap_Liabilities" xlink:label="loc_us-gaapLiabilities" />
+      <link:calculationArc order="1" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaapLiabilitiesAndStockholdersEquity" xlink:to="loc_us-gaapLiabilities" xlink:type="arc" weight="1" />
+      <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2024/elts/us-gaap-2024.xsd#us-gaap_StockholdersEquity" xlink:label="loc_us-gaapStockholdersEquity" />
+      <link:calculationArc order="2" xlink:arcrole="http://www.xbrl.org/2003/arcrole/summation-item" xlink:from="loc_us-gaapLiabilitiesAndStockholdersEquity" xlink:to="loc_us-gaapStockholdersEquity" xlink:type="arc" weight="1" />
+    </link:calculationLink>
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/BalanceSheetsParenthetical" xlink:title="00000003 - Statement - Consolidated Balance Sheets (Parenthetical)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/StatementsOfOperationsAndComprehensiveIncomeLoss" xlink:title="00000004 - Statement - Consolidated Statements of Operations and Comprehensive Income/ Loss" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/StatementsOfChangesInStockholdersEquity" xlink:title="00000005 - Statement - Consolidated Statements of Changes in Stockholders&apos; Equity" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/StatementsOfCashFlows" xlink:title="00000006 - Statement - Consolidated Statements of Cash Flows" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/MembershipFees" xlink:title="00000007 - Statement - Membership Fees" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/OtherCurrentAssets" xlink:title="00000008 - Statement - Other Current Assets" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/DeferredTaxAssetsAndDeferredTaxLiabilities" xlink:title="00000009 - Statement - Deferred Tax Assets and Deferred Tax Liabilities" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/DeferredTaxLiabilities" xlink:title="00000010 - Statement - Deferred Tax Liabilities" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/DeferredTaxAssetsTable" xlink:title="00000011 - Statement - Deferred Tax Assets Table" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/RelatedPartyTransactions" xlink:title="00000012 - Statement - Related Party Transactions" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Software" xlink:title="00000013 - Statement - Software" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/LeaseExpenses" xlink:title="00000014 - Statement - Lease Expenses" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/SelectedFinancialInformation" xlink:title="00000015 - Statement - Selected Financial Information" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note1OrganizationDescriptionOfBusinessAndBasisOfPresentation" xlink:title="999016 - Disclosure - NOTE 1 ORGANIZATION, DESCRIPTION OF BUSINESS AND BASIS OF PRESENTATION" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note2SignificantAccountingPolicies" xlink:title="999017 - Disclosure - NOTE 2 SIGNIFICANT ACCOUNTING POLICIES" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note3OtherCurrentAssets" xlink:title="999018 - Disclosure - NOTE 3 OTHER CURRENT ASSETS" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note4IncomeTaxes" xlink:title="999019 - Disclosure - NOTE 4 INCOME TAXES" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note5DeferredTaxAssetsAndDeferredTaxLiabilities" xlink:title="999020 - Disclosure - NOTE 5 DEFERRED TAX ASSETS AND DEFERRED TAX LIABILITIES" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note6Related-partyTransactions" xlink:title="999021 - Disclosure - NOTE 6 RELATED-PARTY TRANSACTIONS" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note7PropertyPlantAndEquipment" xlink:title="999022 - Disclosure - NOTE 7 PROPERTY, PLANT AND EQUIPMENT" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note8Software" xlink:title="999023 - Disclosure - NOTE 8 SOFTWARE" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note9Borrowings" xlink:title="999024 - Disclosure - NOTE 9 Borrowings" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note10Commitments" xlink:title="999025 - Disclosure - NOTE 10 COMMITMENTS" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note11Contingencies" xlink:title="999026 - Disclosure - NOTE 11 CONTINGENCIES" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note12SegmentInformation" xlink:title="999027 - Disclosure - NOTE 12 SEGMENT INFORMATION" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note13SubsequentEvents" xlink:title="999028 - Disclosure - NOTE 13 SUBSEQUENT EVENTS" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note2SignificantAccountingPoliciesPolicies" xlink:title="999029 - Disclosure - NOTE 2 SIGNIFICANT ACCOUNTING POLICIES (Policies)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note2SignificantAccountingPoliciesTables" xlink:title="999030 - Disclosure - NOTE 2 SIGNIFICANT ACCOUNTING POLICIES (Tables)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note3OtherCurrentAssetsTables" xlink:title="999031 - Disclosure - NOTE 3 OTHER CURRENT ASSETS (Tables)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note4IncomeTaxesTables" xlink:title="999032 - Disclosure - NOTE 4 INCOME TAXES (Tables)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note5DeferredTaxAssetsAndDeferredTaxLiabilitiesTables" xlink:title="999033 - Disclosure - NOTE 5 DEFERRED TAX ASSETS AND DEFERRED TAX LIABILITIES (Tables)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note6Related-partyTransactionsTables" xlink:title="999034 - Disclosure - NOTE 6 RELATED-PARTY TRANSACTIONS (Tables)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note7PropertyPlantAndEquipmentTables" xlink:title="999035 - Disclosure - NOTE 7 PROPERTY, PLANT AND EQUIPMENT (Tables)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note8SoftwareTables" xlink:title="999036 - Disclosure - NOTE 8 SOFTWARE (Tables)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note9BorrowingsTables" xlink:title="999037 - Disclosure - NOTE 9 Borrowings (Tables)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note10CommitmentsTables" xlink:title="999038 - Disclosure - NOTE 10 COMMITMENTS (Tables)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note12SegmentInformationTables" xlink:title="999039 - Disclosure - NOTE 12 SEGMENT INFORMATION (Tables)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note2SignificantAccountingPoliciesDetailsNarrative" xlink:title="999040 - Disclosure - NOTE 2 SIGNIFICANT ACCOUNTING POLICIES (Details Narrative)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note4IncomeTaxesDetailsNarrative" xlink:title="999041 - Disclosure - NOTE 4 INCOME TAXES (Details Narrative)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note5DeferredTaxAssetsAndDeferredTaxLiabilitiesDetailsNarrative" xlink:title="999042 - Disclosure - NOTE 5 DEFERRED TAX ASSETS AND DEFERRED TAX LIABILITIES (Details Narrative)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/PropertyPlantAndEquipmentDetails" xlink:title="999043 - Disclosure - Property, plant and equipment (Details)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note7PropertyPlantAndEquipmentDetailsNarrative" xlink:title="999044 - Disclosure - NOTE 7 PROPERTY, PLANT AND EQUIPMENT (Details Narrative)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note9BorrowingsDetailsNarrative" xlink:title="999045 - Disclosure - NOTE 9 Borrowings (Details Narrative)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note10CommitmentsDetailsNarrative" xlink:title="999046 - Disclosure - NOTE 10 COMMITMENTS (Details Narrative)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/CompanysSupplementalInformationRelatedToOperatingAndFinanceLeasesDetails" xlink:title="999047 - Disclosure - the Company&#8217;s supplemental information related to operating and finance leases (Details)" />
+    <link:calculationLink xlink:type="extended" xlink:role="http://EXDW/role/Note11ContingenciesDetailsNarrative" xlink:title="999048 - Disclosure - NOTE 11 CONTINGENCIES (Details Narrative)" />
+</link:linkbase>

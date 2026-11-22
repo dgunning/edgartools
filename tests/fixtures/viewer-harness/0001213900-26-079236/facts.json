@@ -1,0 +1,5810 @@
+[
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c0",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-128837000",
+  "numeric_value": -128837000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c7",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-39105000",
+  "numeric_value": -39105000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-87484000",
+  "numeric_value": -87484000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c6",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "-80817000",
+  "numeric_value": -80817000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c26",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-119787000",
+  "numeric_value": -119787000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c27",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-119787000",
+  "numeric_value": -119787000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c28",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-3000",
+  "numeric_value": -3000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c0",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-119790000",
+  "numeric_value": -119790000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c24",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "43000",
+  "numeric_value": 43000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c25",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-9089000",
+  "numeric_value": -9089000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c27",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-9046000",
+  "numeric_value": -9046000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c28",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-1000",
+  "numeric_value": -1000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c0",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-9047000",
+  "numeric_value": -9047000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c24",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "43000",
+  "numeric_value": 43000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c25",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-9089000",
+  "numeric_value": -9089000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c26",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-119787000",
+  "numeric_value": -119787000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c27",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-128833000",
+  "numeric_value": -128833000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c28",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "-4000",
+  "numeric_value": -4000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+  "context_ref": "c19",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "3130000",
+  "numeric_value": 3130000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+  "context_ref": "c27",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "3130000",
+  "numeric_value": 3130000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+  "context_ref": "c0",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "3130000",
+  "numeric_value": 3130000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c19",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "32348000",
+  "numeric_value": 32348000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c27",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "32348000",
+  "numeric_value": 32348000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c0",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "32348000",
+  "numeric_value": 32348000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+  "context_ref": "c19",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "10164000",
+  "numeric_value": 10164000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+  "context_ref": "c21",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "2628000",
+  "numeric_value": 2628000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+  "context_ref": "c27",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "12792000",
+  "numeric_value": 12792000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+  "context_ref": "c0",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "12792000",
+  "numeric_value": 12792000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "hubc:ReclassificationOfWarrantsFromLiabilityToEquity",
+  "context_ref": "c21",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "10529000",
+  "numeric_value": 10529000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "hubc:ReclassificationOfWarrantsFromLiabilityToEquity",
+  "context_ref": "c27",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "10529000",
+  "numeric_value": 10529000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "hubc:ReclassificationOfWarrantsFromLiabilityToEquity",
+  "context_ref": "c0",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "10529000",
+  "numeric_value": 10529000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+  "context_ref": "c19",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "2958000",
+  "numeric_value": 2958000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+  "context_ref": "c21",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "98000",
+  "numeric_value": 98000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+  "context_ref": "c27",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "3056000",
+  "numeric_value": 3056000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+  "context_ref": "c0",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "3056000",
+  "numeric_value": 3056000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+  "context_ref": "c19",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "23549000",
+  "numeric_value": 23549000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+  "context_ref": "c21",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "1765000",
+  "numeric_value": 1765000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+  "context_ref": "c27",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "25314000",
+  "numeric_value": 25314000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+  "context_ref": "c0",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "25314000",
+  "numeric_value": 25314000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughConversionOfConvertibleLoans",
+  "context_ref": "c19",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "275000",
+  "numeric_value": 275000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughConversionOfConvertibleLoans",
+  "context_ref": "c27",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "275000",
+  "numeric_value": 275000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughConversionOfConvertibleLoans",
+  "context_ref": "c0",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "275000",
+  "numeric_value": 275000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c19",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "3351000",
+  "numeric_value": 3351000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c23",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "3189000",
+  "numeric_value": 3189000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c27",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "6540000",
+  "numeric_value": 6540000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c0",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "6540000",
+  "numeric_value": 6540000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c29",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "193022000",
+  "numeric_value": 193022000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c30",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "-1230000",
+  "numeric_value": -1230000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c31",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "25938000",
+  "numeric_value": 25938000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c32",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "-3286000",
+  "numeric_value": -3286000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c33",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "29282000",
+  "numeric_value": 29282000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c34",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "-459000",
+  "numeric_value": -459000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c35",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "-12871000",
+  "numeric_value": -12871000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c36",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "-346032000",
+  "numeric_value": -346032000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c37",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "-115636000",
+  "numeric_value": -115636000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c38",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "-34000",
+  "numeric_value": -34000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c5",
+  "period_key": "instant_2025-12-31",
+  "period_type": "instant",
+  "value": "-115670000",
+  "numeric_value": -115670000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c57",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-39757000",
+  "numeric_value": -39757000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c58",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-39757000",
+  "numeric_value": -39757000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c59",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "726000",
+  "numeric_value": 726000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c7",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-39031000",
+  "numeric_value": -39031000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c55",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "168000",
+  "numeric_value": 168000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c56",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-192000",
+  "numeric_value": -192000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c58",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-24000",
+  "numeric_value": -24000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c59",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-50000",
+  "numeric_value": -50000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c7",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-74000",
+  "numeric_value": -74000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c55",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "168000",
+  "numeric_value": 168000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c56",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-192000",
+  "numeric_value": -192000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c57",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-39757000",
+  "numeric_value": -39757000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c58",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-39781000",
+  "numeric_value": -39781000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c59",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "676000",
+  "numeric_value": 676000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c50",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "3422000",
+  "numeric_value": 3422000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c58",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "3422000",
+  "numeric_value": 3422000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c7",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "3422000",
+  "numeric_value": 3422000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c50",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "143000",
+  "numeric_value": 143000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c54",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-142000",
+  "numeric_value": -142000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c58",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "1000",
+  "numeric_value": 1000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c7",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "1000",
+  "numeric_value": 1000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c50",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "7876000",
+  "numeric_value": 7876000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c58",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "7876000",
+  "numeric_value": 7876000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c7",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "7876000",
+  "numeric_value": 7876000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "c50",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "2420000",
+  "numeric_value": 2420000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "c58",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "2420000",
+  "numeric_value": 2420000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "c7",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "2420000",
+  "numeric_value": 2420000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+  "context_ref": "c53",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-3286000",
+  "numeric_value": -3286000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+  "context_ref": "c58",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-3286000",
+  "numeric_value": -3286000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+  "context_ref": "c59",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-3482000",
+  "numeric_value": -3482000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+  "context_ref": "c7",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "-6768000",
+  "numeric_value": -6768000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c54",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "2070000",
+  "numeric_value": 2070000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c58",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "2070000",
+  "numeric_value": 2070000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c7",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "2070000",
+  "numeric_value": 2070000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c9",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "117247000",
+  "numeric_value": 117247000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c10",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "-1230000",
+  "numeric_value": -1230000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c11",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "10918000",
+  "numeric_value": 10918000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c12",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "-3286000",
+  "numeric_value": -3286000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c13",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "26093000",
+  "numeric_value": 26093000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c14",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "-502000",
+  "numeric_value": -502000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c15",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "-3782000",
+  "numeric_value": -3782000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c16",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "-226245000",
+  "numeric_value": -226245000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c17",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "-80787000",
+  "numeric_value": -80787000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c18",
+  "period_key": "instant_2024-12-31",
+  "period_type": "instant",
+  "value": "-30000",
+  "numeric_value": -30000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c60",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "81620000",
+  "numeric_value": 81620000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c61",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "-1230000",
+  "numeric_value": -1230000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c62",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "10291000",
+  "numeric_value": 10291000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c63",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "76000",
+  "numeric_value": 76000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c64",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "18172000",
+  "numeric_value": 18172000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c65",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "-762000",
+  "numeric_value": -762000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c66",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "-2712000",
+  "numeric_value": -2712000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c67",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "-99042000",
+  "numeric_value": -99042000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c68",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "6413000",
+  "numeric_value": 6413000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c69",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "2397000",
+  "numeric_value": 2397000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c70",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "8810000",
+  "numeric_value": 8810000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-87446000",
+  "numeric_value": -87446000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-87446000",
+  "numeric_value": -87446000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "810000",
+  "numeric_value": 810000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-86636000",
+  "numeric_value": -86636000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "92000",
+  "numeric_value": 92000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-878000",
+  "numeric_value": -878000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-786000",
+  "numeric_value": -786000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-62000",
+  "numeric_value": -62000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-848000",
+  "numeric_value": -848000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "92000",
+  "numeric_value": 92000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-878000",
+  "numeric_value": -878000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-87446000",
+  "numeric_value": -87446000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-88232000",
+  "numeric_value": -88232000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "748000",
+  "numeric_value": 748000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "286000",
+  "numeric_value": 286000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-52000",
+  "numeric_value": -52000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "234000",
+  "numeric_value": 234000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "234000",
+  "numeric_value": 234000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "2893000",
+  "numeric_value": 2893000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c75",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-1122000",
+  "numeric_value": -1122000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "1771000",
+  "numeric_value": 1771000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "1771000",
+  "numeric_value": 1771000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "1570000",
+  "numeric_value": 1570000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "1570000",
+  "numeric_value": 1570000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "1570000",
+  "numeric_value": 1570000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "6143000",
+  "numeric_value": 6143000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "6143000",
+  "numeric_value": 6143000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "6143000",
+  "numeric_value": 6143000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "3557000",
+  "numeric_value": 3557000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "3557000",
+  "numeric_value": 3557000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "3557000",
+  "numeric_value": 3557000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "110000",
+  "numeric_value": 110000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "679000",
+  "numeric_value": 679000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "-76000",
+  "numeric_value": -76000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "712000",
+  "numeric_value": 712000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "712000",
+  "numeric_value": 712000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransactionsWithOwners",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "7208000",
+  "numeric_value": 7208000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransactionsWithOwners",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "7208000",
+  "numeric_value": 7208000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransactionsWithOwners",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "7208000",
+  "numeric_value": 7208000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:DividendsPaidToNoncontrollingInterests",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "369000",
+  "numeric_value": 369000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaidToNoncontrollingInterests",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "369000",
+  "numeric_value": 369000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c75",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "7115000",
+  "numeric_value": 7115000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "7115000",
+  "numeric_value": 7115000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c8",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "7115000",
+  "numeric_value": 7115000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c39",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "103386000",
+  "numeric_value": 103386000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c40",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "-1230000",
+  "numeric_value": -1230000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c41",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "10918000",
+  "numeric_value": 10918000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c43",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "24165000",
+  "numeric_value": 24165000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c44",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "-670000",
+  "numeric_value": -670000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c45",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "-3590000",
+  "numeric_value": -3590000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c46",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "-186488000",
+  "numeric_value": -186488000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c47",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "-53509000",
+  "numeric_value": -53509000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c48",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "2776000",
+  "numeric_value": 2776000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c49",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "-50733000",
+  "numeric_value": -50733000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c19",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c20",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c21",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c22",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c23",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c24",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c25",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c19",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c20",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c21",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c22",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c23",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c26",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c19",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c20",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c21",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c22",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c23",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+  "context_ref": "c20",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+  "context_ref": "c21",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+  "context_ref": "c22",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+  "context_ref": "c23",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+  "context_ref": "c24",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+  "context_ref": "c25",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+  "context_ref": "c26",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreasethroughCashlessExerciseOfLiabilityWarrants",
+  "context_ref": "c28",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c20",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c22",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c23",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c24",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c25",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c26",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c28",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+  "context_ref": "c20",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+  "context_ref": "c22",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+  "context_ref": "c23",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+  "context_ref": "c24",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+  "context_ref": "c25",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+  "context_ref": "c26",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfPrefundedWarrants",
+  "context_ref": "c28",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:ReclassificationOfWarrantsFromLiabilityToEquity",
+  "context_ref": "c20",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "hubc:ReclassificationOfWarrantsFromLiabilityToEquity",
+  "context_ref": "c22",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:ReclassificationOfWarrantsFromLiabilityToEquity",
+  "context_ref": "c23",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "hubc:ReclassificationOfWarrantsFromLiabilityToEquity",
+  "context_ref": "c24",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "hubc:ReclassificationOfWarrantsFromLiabilityToEquity",
+  "context_ref": "c25",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "hubc:ReclassificationOfWarrantsFromLiabilityToEquity",
+  "context_ref": "c26",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "hubc:ReclassificationOfWarrantsFromLiabilityToEquity",
+  "context_ref": "c28",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+  "context_ref": "c20",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+  "context_ref": "c22",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+  "context_ref": "c23",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+  "context_ref": "c24",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+  "context_ref": "c25",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+  "context_ref": "c26",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughSharebasedPaymentIssuedForServices",
+  "context_ref": "c28",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+  "context_ref": "c20",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+  "context_ref": "c22",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+  "context_ref": "c23",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+  "context_ref": "c24",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+  "context_ref": "c25",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+  "context_ref": "c26",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+  "context_ref": "c28",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughConversionOfConvertibleLoans",
+  "context_ref": "c20",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughConversionOfConvertibleLoans",
+  "context_ref": "c21",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughConversionOfConvertibleLoans",
+  "context_ref": "c22",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughConversionOfConvertibleLoans",
+  "context_ref": "c23",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughConversionOfConvertibleLoans",
+  "context_ref": "c24",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughConversionOfConvertibleLoans",
+  "context_ref": "c25",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughConversionOfConvertibleLoans",
+  "context_ref": "c26",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughConversionOfConvertibleLoans",
+  "context_ref": "c28",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c20",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c21",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c22",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c24",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c25",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c26",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c28",
+  "period_key": "duration_2025-01-01_2025-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c50",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c51",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c52",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c53",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c54",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c55",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c56",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c50",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c51",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c52",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c53",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c54",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c57",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c50",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c51",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c52",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c53",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c54",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c51",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c52",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c53",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c54",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c55",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c56",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c57",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c59",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c51",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c52",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c53",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c55",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c56",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c57",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c59",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c51",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c53",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c54",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c55",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c56",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c57",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c59",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "c51",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "c52",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "c53",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "c54",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "c55",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "c56",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "c57",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+  "context_ref": "c59",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+  "context_ref": "c50",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+  "context_ref": "c51",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+  "context_ref": "c52",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+  "context_ref": "c54",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+  "context_ref": "c55",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+  "context_ref": "c56",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughChangesInOwnershipInterestsInSubsidiariesThatDoNotResultInLossOfControl",
+  "context_ref": "c57",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c50",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c51",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c52",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c53",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c55",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c56",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c57",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c59",
+  "period_key": "duration_2024-01-01_2024-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c75",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ProfitLoss",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c75",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncome",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:ComprehensiveIncome",
+  "context_ref": "c75",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfWarrantsEquity",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughExerciseOfOptions",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+  "context_ref": "c75",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesToEquityLineOfCreditELOC",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c75",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughConversionOfConvertibleInstruments",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "c75",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IssueOfEquity",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+  "context_ref": "c75",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "hubc:IncreaseDecreaseThroughIssuanceOfSharesAndWarrants",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransactionsWithOwners",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransactionsWithOwners",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransactionsWithOwners",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransactionsWithOwners",
+  "context_ref": "c75",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransactionsWithOwners",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransactionsWithOwners",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransactionsWithOwners",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughTransactionsWithOwners",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaidToNoncontrollingInterests",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaidToNoncontrollingInterests",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaidToNoncontrollingInterests",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaidToNoncontrollingInterests",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaidToNoncontrollingInterests",
+  "context_ref": "c75",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfSharebasedPaymentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaidToNoncontrollingInterests",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaidToNoncontrollingInterests",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaidToNoncontrollingInterests",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:DividendsPaidToNoncontrollingInterests",
+  "context_ref": "c79",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ParentMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c71",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c72",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:TreasurySharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c73",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ShareOptionsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c74",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c76",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:ReserveOfRemeasurementsOfDefinedBenefitPlansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c77",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ForeignCurrencyTranslationAdjustmentsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c78",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:IncreaseDecreaseThroughSharebasedPaymentTransactions",
+  "context_ref": "c80",
+  "period_key": "duration_2023-01-01_2023-12-31",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:NoncontrollingInterestsMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "c42",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "hubc:ReserveForTransactionsWithNoncontrollingInterestsMember"
+  }
+ }
+]

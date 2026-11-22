@@ -1,0 +1,446 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--XBRL Document Created with Wdesk from Workiva-->
+<!--Copyright 2021 Workiva-->
+<!--r:0446c57d-73a4-46a4-864a-744132738f9d,g:056a3019-e83e-449e-a147-048a94db9bba-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:cost="http://www.costco.com/20210829" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2020-01-21" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.costco.com/20210829">
+  <xs:import namespace="http://fasb.org/srt/2021-01-31" schemaLocation="https://xbrl.fasb.org/srt/2021/elts/srt-2021-01-31.xsd"/>
+  <xs:import namespace="http://fasb.org/us-gaap/2021-01-31" schemaLocation="https://xbrl.fasb.org/us-gaap/2021/elts/us-gaap-2021-01-31.xsd"/>
+  <xs:import namespace="http://www.w3.org/1999/xlink" schemaLocation="http://www.xbrl.org/2003/xlink-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/2020-01-21" schemaLocation="https://www.xbrl.org/dtr/type/2020-01-21/types.xsd"/>
+  <xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/country/2021" schemaLocation="https://xbrl.sec.gov/country/2021/country-2021.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/dei/2021" schemaLocation="https://xbrl.sec.gov/dei/2021/dei-2021.xsd"/>
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="cost-20210829_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="cost-20210829_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="cost-20210829_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="cost-20210829_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:type="simple"/>
+      <link:roleType id="Cover" roleURI="http://www.costco.com/role/Cover">
+        <link:definition>0001001 - Document - Cover</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsOfIncome" roleURI="http://www.costco.com/role/ConsolidatedStatementsOfIncome">
+        <link:definition>1001002 - Statement - Consolidated Statements Of Income</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsOfComprehensiveIncome" roleURI="http://www.costco.com/role/ConsolidatedStatementsOfComprehensiveIncome">
+        <link:definition>1002003 - Statement - Consolidated Statements Of Comprehensive Income</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedBalanceSheets" roleURI="http://www.costco.com/role/ConsolidatedBalanceSheets">
+        <link:definition>1003004 - Statement - Consolidated Balance Sheets</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedBalanceSheetsParenthetical" roleURI="http://www.costco.com/role/ConsolidatedBalanceSheetsParenthetical">
+        <link:definition>1004005 - Statement - Consolidated Balance Sheets (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofEquity" roleURI="http://www.costco.com/role/ConsolidatedStatementsofEquity">
+        <link:definition>1005006 - Statement - Consolidated Statements of Equity</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsOfCashFlows" roleURI="http://www.costco.com/role/ConsolidatedStatementsOfCashFlows">
+        <link:definition>1006007 - Statement - Consolidated Statements Of Cash Flows</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsOfCashFlowsParenthetical" roleURI="http://www.costco.com/role/ConsolidatedStatementsOfCashFlowsParenthetical">
+        <link:definition>1007008 - Statement - Consolidated Statements Of Cash Flows (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPolicies" roleURI="http://www.costco.com/role/SummaryofSignificantAccountingPolicies">
+        <link:definition>2101101 - Disclosure - Summary of Significant Accounting Policies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesPolicies" roleURI="http://www.costco.com/role/SummaryofSignificantAccountingPoliciesPolicies">
+        <link:definition>2202201 - Disclosure - Summary of Significant Accounting Policies (Policies)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesTables" roleURI="http://www.costco.com/role/SummaryofSignificantAccountingPoliciesTables">
+        <link:definition>2303301 - Disclosure - Summary of Significant Accounting Policies (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesAdditionalInformationDetails" roleURI="http://www.costco.com/role/SummaryofSignificantAccountingPoliciesAdditionalInformationDetails">
+        <link:definition>2404401 - Disclosure - Summary of Significant Accounting Policies - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryOfSignificantAccountingPoliciesMerchandiseInventoriesDetails" roleURI="http://www.costco.com/role/SummaryOfSignificantAccountingPoliciesMerchandiseInventoriesDetails">
+        <link:definition>2405402 - Disclosure - Summary Of Significant Accounting Policies (Merchandise Inventories (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Acquisitions" roleURI="http://www.costco.com/role/Acquisitions">
+        <link:definition>2106102 - Disclosure - Acquisitions</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AcquisitionsTables" roleURI="http://www.costco.com/role/AcquisitionsTables">
+        <link:definition>2307302 - Disclosure - Acquisitions (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AcquisitionsDetails" roleURI="http://www.costco.com/role/AcquisitionsDetails">
+        <link:definition>2408403 - Disclosure - Acquisitions (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Investments" roleURI="http://www.costco.com/role/Investments">
+        <link:definition>2109103 - Disclosure - Investments</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InvestmentsTables" roleURI="http://www.costco.com/role/InvestmentsTables">
+        <link:definition>2310303 - Disclosure - Investments (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InvestmentsAvailableforSaleandHeldtoMaturityInvestmentsDetails" roleURI="http://www.costco.com/role/InvestmentsAvailableforSaleandHeldtoMaturityInvestmentsDetails">
+        <link:definition>2411404 - Disclosure - Investments - Available for Sale and Held to Maturity Investments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InvestmentsProceedsfromSalesofAvailableforSaleSecuritiesDetails" roleURI="http://www.costco.com/role/InvestmentsProceedsfromSalesofAvailableforSaleSecuritiesDetails">
+        <link:definition>2412405 - Disclosure - Investments - Proceeds from Sales of Available for Sale Securities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InvestmentsMaturitiesofAvailableforSaleandHeldtoMaturitySecuritiesDetails" roleURI="http://www.costco.com/role/InvestmentsMaturitiesofAvailableforSaleandHeldtoMaturitySecuritiesDetails">
+        <link:definition>2413406 - Disclosure - Investments - Maturities of Available for Sale and Held to Maturity Securities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FairValueMeasurement" roleURI="http://www.costco.com/role/FairValueMeasurement">
+        <link:definition>2114104 - Disclosure - Fair Value Measurement</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FairValueMeasurementTables" roleURI="http://www.costco.com/role/FairValueMeasurementTables">
+        <link:definition>2315304 - Disclosure - Fair Value Measurement (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="FairValueMeasurementFairValueofFinancialAssetsandFinancialLiabilitiesMeasuredonRecurringBasisDetails" roleURI="http://www.costco.com/role/FairValueMeasurementFairValueofFinancialAssetsandFinancialLiabilitiesMeasuredonRecurringBasisDetails">
+        <link:definition>2416407 - Disclosure - Fair Value Measurement - Fair Value of Financial Assets and Financial Liabilities Measured on Recurring Basis (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Debt" roleURI="http://www.costco.com/role/Debt">
+        <link:definition>2117105 - Disclosure - Debt</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtTables" roleURI="http://www.costco.com/role/DebtTables">
+        <link:definition>2318305 - Disclosure - Debt (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtScheduleOfShortTermDebtDetails" roleURI="http://www.costco.com/role/DebtScheduleOfShortTermDebtDetails">
+        <link:definition>2419408 - Disclosure - Debt (Schedule Of Short-Term Debt) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtScheduleOfLongTermDebtMaturitiesDetails" roleURI="http://www.costco.com/role/DebtScheduleOfLongTermDebtMaturitiesDetails">
+        <link:definition>2420409 - Disclosure - Debt (Schedule Of Long-Term Debt Maturities) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtAdditionalInformationDetails" roleURI="http://www.costco.com/role/DebtAdditionalInformationDetails">
+        <link:definition>2421410 - Disclosure - Debt (Additional Information) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Leases" roleURI="http://www.costco.com/role/Leases">
+        <link:definition>2122106 - Disclosure - Leases</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesTables" roleURI="http://www.costco.com/role/LeasesTables">
+        <link:definition>2323306 - Disclosure - Leases (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesSupplementalBalanceSheetInformation" roleURI="http://www.costco.com/role/LeasesSupplementalBalanceSheetInformation">
+        <link:definition>2424411 - Disclosure - Leases, Supplemental Balance Sheet Information</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesComponentsofLeaseExpense" roleURI="http://www.costco.com/role/LeasesComponentsofLeaseExpense">
+        <link:definition>2425412 - Disclosure - Leases, Components of Lease Expense</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesSupplementalCashFlowInformation" roleURI="http://www.costco.com/role/LeasesSupplementalCashFlowInformation">
+        <link:definition>2426413 - Disclosure - Leases, Supplemental Cash Flow Information</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesFutureMinimumPayments" roleURI="http://www.costco.com/role/LeasesFutureMinimumPayments">
+        <link:definition>2427414 - Disclosure - Leases, Future Minimum Payments</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquity" roleURI="http://www.costco.com/role/StockholdersEquity">
+        <link:definition>2128107 - Disclosure - Stockholders' Equity</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityTables" roleURI="http://www.costco.com/role/StockholdersEquityTables">
+        <link:definition>2329307 - Disclosure - Stockholders' Equity (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityAdditionalInformationDetails" roleURI="http://www.costco.com/role/StockholdersEquityAdditionalInformationDetails">
+        <link:definition>2430415 - Disclosure - Stockholders' Equity - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityStockRepurchasedDuringPeriodDetails" roleURI="http://www.costco.com/role/StockholdersEquityStockRepurchasedDuringPeriodDetails">
+        <link:definition>2431416 - Disclosure - Stockholders' Equity (Stock Repurchased During Period) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationPlans" roleURI="http://www.costco.com/role/StockBasedCompensationPlans">
+        <link:definition>2132108 - Disclosure - Stock-Based Compensation Plans</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationPlansTables" roleURI="http://www.costco.com/role/StockBasedCompensationPlansTables">
+        <link:definition>2333308 - Disclosure - Stock-Based Compensation Plans (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationPlansAdditionalInformationDetails" roleURI="http://www.costco.com/role/StockBasedCompensationPlansAdditionalInformationDetails">
+        <link:definition>2434417 - Disclosure - Stock-Based Compensation Plans - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationPlansSummaryofRSUTransactionsDetails" roleURI="http://www.costco.com/role/StockBasedCompensationPlansSummaryofRSUTransactionsDetails">
+        <link:definition>2435418 - Disclosure - Stock-Based Compensation Plans - Summary of RSU Transactions (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationPlansSummaryofStockBasedCompensationExpenseDetails" roleURI="http://www.costco.com/role/StockBasedCompensationPlansSummaryofStockBasedCompensationExpenseDetails">
+        <link:definition>2436419 - Disclosure - Stock-Based Compensation Plans - Summary of Stock-Based Compensation Expense (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxes" roleURI="http://www.costco.com/role/IncomeTaxes">
+        <link:definition>2137109 - Disclosure - Income Taxes</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesTables" roleURI="http://www.costco.com/role/IncomeTaxesTables">
+        <link:definition>2338309 - Disclosure - Income Taxes (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesAdditionalInformationDetails" roleURI="http://www.costco.com/role/IncomeTaxesAdditionalInformationDetails">
+        <link:definition>2439420 - Disclosure - Income Taxes - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesIncomeBeforeIncomeTaxesDetails" roleURI="http://www.costco.com/role/IncomeTaxesIncomeBeforeIncomeTaxesDetails">
+        <link:definition>2440421 - Disclosure - Income Taxes (Income Before Income Taxes) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesScheduleofForeignAndDomesticIncomeTaxesDetails" roleURI="http://www.costco.com/role/IncomeTaxesScheduleofForeignAndDomesticIncomeTaxesDetails">
+        <link:definition>2441422 - Disclosure - Income Taxes (Schedule of Foreign And Domestic Income Taxes) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesReconciliationBetweenStatutoryAndEffectiveRatesDetails" roleURI="http://www.costco.com/role/IncomeTaxesReconciliationBetweenStatutoryAndEffectiveRatesDetails">
+        <link:definition>2442423 - Disclosure - Income Taxes (Reconciliation Between Statutory And Effective Rates) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesComponentsofDeferredTaxAssetsAndLiabilitiesDetails" roleURI="http://www.costco.com/role/IncomeTaxesComponentsofDeferredTaxAssetsAndLiabilitiesDetails">
+        <link:definition>2443424 - Disclosure - Income Taxes (Components of Deferred Tax Assets And Liabilities) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesGrossUnrecognizedTaxBenefitsDetails" roleURI="http://www.costco.com/role/IncomeTaxesGrossUnrecognizedTaxBenefitsDetails">
+        <link:definition>2444425 - Disclosure - Income Taxes (Gross Unrecognized Tax Benefits) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetIncomeperCommonandCommonEquivalentShare" roleURI="http://www.costco.com/role/NetIncomeperCommonandCommonEquivalentShare">
+        <link:definition>2145110 - Disclosure - Net Income per Common and Common Equivalent Share</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetIncomeperCommonandCommonEquivalentShareNetIncomeperCommonandCommonEquivalentShareTables" roleURI="http://www.costco.com/role/NetIncomeperCommonandCommonEquivalentShareNetIncomeperCommonandCommonEquivalentShareTables">
+        <link:definition>2346310 - Disclosure - Net Income per Common and Common Equivalent Share Net Income per Common and Common Equivalent Share (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetIncomeperCommonandCommonEquivalentShareScheduleofEarningsperShareEffectonNetIncomeandWeightedAveregaeNumberofDilutivePotentialCommonStockDetails" roleURI="http://www.costco.com/role/NetIncomeperCommonandCommonEquivalentShareScheduleofEarningsperShareEffectonNetIncomeandWeightedAveregaeNumberofDilutivePotentialCommonStockDetails">
+        <link:definition>2447426 - Disclosure - Net Income per Common and Common Equivalent Share - Schedule of Earnings per Share Effect on Net Income and Weighted Averegae Number of Dilutive Potential Common Stock (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingencies" roleURI="http://www.costco.com/role/CommitmentsandContingencies">
+        <link:definition>2148111 - Disclosure - Commitments and Contingencies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesAdditionalInformationDetails" roleURI="http://www.costco.com/role/CommitmentsandContingenciesAdditionalInformationDetails">
+        <link:definition>2449427 - Disclosure - Commitments and Contingencies - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentReporting" roleURI="http://www.costco.com/role/SegmentReporting">
+        <link:definition>2150112 - Disclosure - Segment Reporting</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentReportingTables" roleURI="http://www.costco.com/role/SegmentReportingTables">
+        <link:definition>2351311 - Disclosure - Segment Reporting (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentReportingInformationbySegmentDetails" roleURI="http://www.costco.com/role/SegmentReportingInformationbySegmentDetails">
+        <link:definition>2452428 - Disclosure - Segment Reporting Information by Segment (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentReportingInformationbyItemCategoryDetails" roleURI="http://www.costco.com/role/SegmentReportingInformationbyItemCategoryDetails">
+        <link:definition>2453429 - Disclosure - Segment Reporting Information by Item Category (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element id="cost_DisclosureofSupplementalBalanceSheetInformationRelatedtoLeasesTableTextBlock" abstract="false" name="DisclosureofSupplementalBalanceSheetInformationRelatedtoLeasesTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="cost_ReductionInSales" abstract="false" name="ReductionInSales" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="cost_TaxCutsAndJobsActOf2017IncomeTaxRateReconciliation" abstract="false" name="TaxCutsAndJobsActOf2017IncomeTaxRateReconciliation" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="cost_DeferredTaxLiabilitiesRightOfUseAssets" abstract="false" name="DeferredTaxLiabilitiesRightOfUseAssets" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="cost_OtherThan2017TaxActAxis" abstract="true" name="OtherThan2017TaxActAxis" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType"/>
+  <xs:element id="cost_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsOutstandingTimeBased" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsOutstandingTimeBased" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="cost_SpecialDividendMember" abstract="true" name="SpecialDividendMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_MandatoryProportionalAdjustmenttoRestrictedStockUnits" abstract="false" name="MandatoryProportionalAdjustmenttoRestrictedStockUnits" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="cost_SeniorNotesTwoPointSevenFivePercentDueMayEighteenTwentyTwentyFourMemberMember" abstract="true" name="SeniorNotesTwoPointSevenFivePercentDueMayEighteenTwentyTwentyFourMemberMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_OperatingLeaseRightofUseAssetAmortization" abstract="false" name="OperatingLeaseRightofUseAssetAmortization" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="cost_SeniorNotesTwoPointOneFivePercentDueMayEighteenTwentyTwentyOneMember" abstract="true" name="SeniorNotesTwoPointOneFivePercentDueMayEighteenTwentyTwentyOneMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_ShareBasedCompensationArrangementByShareBasedPaymentNumberOfYearsOfService" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentNumberOfYearsOfService" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="cost_IncomeTaxesLineItems" abstract="true" name="IncomeTaxesLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="cost_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsOutstandingPerformanceBased" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsOutstandingPerformanceBased" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="cost_FoodandSundriesMember" abstract="true" name="FoodandSundriesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_OperatingLeaseandFinanceLeaseLiabilities" abstract="false" name="OperatingLeaseandFinanceLeaseLiabilities" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="cost_PreopeningExpensesPolicyPolicyTextBlock" abstract="false" name="PreopeningExpensesPolicyPolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="cost_SummaryOfSignificantAccountingPoliciesLineItems" abstract="true" name="SummaryOfSignificantAccountingPoliciesLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="cost_ProductTaxBenefit" abstract="false" name="ProductTaxBenefit" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="cost_RedemptionPriceCertainEvents" abstract="false" name="RedemptionPriceCertainEvents" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="cost_VendorAllowancesPolicyTextBlock" abstract="false" name="VendorAllowancesPolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="cost_NonFoodsMember" abstract="true" name="NonFoodsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_AvailableForSaleAndHeldToMaturityTable" abstract="true" name="AvailableForSaleAndHeldToMaturityTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="cost_AvailableForSaleAndHeldToMaturityLineItems" abstract="true" name="AvailableForSaleAndHeldToMaturityLineItems" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="cost_OtherInternationalOperationsMember" abstract="true" name="OtherInternationalOperationsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_LongTermOperatingAndFinanceLeaseLiabilitiesAbstract" abstract="true" name="LongTermOperatingAndFinanceLeaseLiabilitiesAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="cost_OtherMember" abstract="true" name="OtherMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_SeniorNotesOnePointSixZeroPercentDueAprilTwentyThirtyMember" abstract="true" name="SeniorNotesOnePointSixZeroPercentDueAprilTwentyThirtyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_OtherThan2017TaxActDomain" abstract="true" name="OtherThan2017TaxActDomain" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_MandatoryProportionalAdjustmentSharesAvailableToGrant" abstract="false" name="MandatoryProportionalAdjustmentSharesAvailableToGrant" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="cost_LesseeOperatingandFinancingLeasesNotYetCommenced" abstract="false" name="LesseeOperatingandFinancingLeasesNotYetCommenced" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="cost_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsOutstandingPerformanceBasedToBeGranted" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsOutstandingPerformanceBasedToBeGranted" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="cost_CurrentOperatingAndFinanceLeaseLiabilitiesAbstract" abstract="true" name="CurrentOperatingAndFinanceLeaseLiabilitiesAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="cost_EmployeesMember" abstract="true" name="EmployeesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_MinimumNumberOfDaysOfEmploymentToQualifyForRetirementPlan" abstract="false" name="MinimumNumberOfDaysOfEmploymentToQualifyForRetirementPlan" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="cost_OtherLongTermDebtMember" abstract="true" name="OtherLongTermDebtMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_ScheduleOfCommonStockRepurchasedAndAveragePricePaidPerShareTableTextBlock" abstract="false" name="ScheduleOfCommonStockRepurchasedAndAveragePricePaidPerShareTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="cost_OtherThan2017TaxReformMember" abstract="true" name="OtherThan2017TaxReformMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_SeniorNotesTwoPointThreeZeroPercentDueMayEighteenTwentyTwentyTwoMember" abstract="true" name="SeniorNotesTwoPointThreeZeroPercentDueMayEighteenTwentyTwentyTwoMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_SeniorNotesOnePointThreeSevenFivePercentDueJuneTwentyTwentySevenMember" abstract="true" name="SeniorNotesOnePointThreeSevenFivePercentDueJuneTwentyTwentySevenMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_SeniorNotesThreePercentDueMayEighteenTwentyTwentySevenMemberMember" abstract="true" name="SeniorNotesThreePercentDueMayEighteenTwentyTwentySevenMemberMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_OperatingLeaseAndFinanceLeaseLiabilitiesAbstract" abstract="true" name="OperatingLeaseAndFinanceLeaseLiabilitiesAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="cost_SeniorNotesOnePointSevenFivePercentDueAprilTwentyThirtyTwoMember" abstract="true" name="SeniorNotesOnePointSevenFivePercentDueAprilTwentyThirtyTwoMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_FreshFoodMember" abstract="true" name="FreshFoodMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_OperatingLeaseAnfFinanceLeaseRightOfUseAssetsAbstract" abstract="true" name="OperatingLeaseAnfFinanceLeaseRightOfUseAssetsAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="cost_OtherSupplementalBalanceSheetInformationAbstract" abstract="true" name="OtherSupplementalBalanceSheetInformationAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="cost_SummaryOfSignificantAccountingPoliciesTable" abstract="true" name="SummaryOfSignificantAccountingPoliciesTable" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:hypercubeItem" type="xbrli:stringItemType"/>
+  <xs:element id="cost_TaxCutsAndJobsAct2017ForeignTaxCreditsAndOther" abstract="false" name="TaxCutsAndJobsAct2017ForeignTaxCreditsAndOther" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="cost_NonEmployeeDirectorsMember" abstract="true" name="NonEmployeeDirectorsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_AvailableForSaleSecuritiesAndHeldToMaturitySecuritiesAtCostBasis" abstract="false" name="AvailableForSaleSecuritiesAndHeldToMaturitySecuritiesAtCostBasis" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="cost_OperatingLeaseandFinanceLeaserightofuseassets" abstract="false" name="OperatingLeaseandFinanceLeaserightofuseassets" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="cost_DeferredTaxAssetsOperatingLeaseLiabilities" abstract="false" name="DeferredTaxAssetsOperatingLeaseLiabilities" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="cost_A2019IncentivePlanMember" abstract="true" name="A2019IncentivePlanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_SeniorNotesTwoPointTwoFivePercentDueFebruaryTwentyTwentyTwoMember" abstract="true" name="SeniorNotesTwoPointTwoFivePercentDueFebruaryTwentyTwentyTwoMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_SeniorNotesZeroPercentDueJuneTwentyTwentyOneMember" abstract="true" name="SeniorNotesZeroPercentDueJuneTwentyTwentyOneMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="cost_SpecialCashDividendSharesAdjustment" abstract="false" name="SpecialCashDividendSharesAdjustment" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:decimalItemType"/>
+</xs:schema>

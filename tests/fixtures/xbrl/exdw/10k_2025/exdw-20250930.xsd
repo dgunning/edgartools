@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="US-ASCII" ?>
+    <!-- Field: Doc-Info; Name: Generator; Value: GoFiler Complete; Version: 6.3a -->
+    <!-- Field: Doc-Info; Name: VendorURI; Value: https://www.novaworks.com -->
+    <!-- Field: Doc-Info; Name: Status; Value: 0x00000000 -->
+    <!-- Field: Doc-Info; Name: Misc; Value: /aw5s7xRiXgOn8uFbX1MSaKG+cPtzJR7yZkxs2pyHbnqLy4lTa3VES98Cp42QUkH -->
+<schema xmlns="http://www.w3.org/2001/XMLSchema" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:dei="http://xbrl.sec.gov/dei/2024" xmlns:us-gaap="http://fasb.org/us-gaap/2024" xmlns:srt="http://fasb.org/srt/2024" xmlns:srt-types="http://fasb.org/srt-types/2024" xmlns:EXDW="http://EXDW/20250930" elementFormDefault="qualified" targetNamespace="http://EXDW/20250930">
+    <annotation>
+      <appinfo>
+        <link:roleType roleURI="http://EXDW/role/Cover" id="Cover">
+          <link:definition>00000001 - Document - Cover</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/BalanceSheets" id="BalanceSheets">
+          <link:definition>00000002 - Statement - Consolidated Balance Sheets</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/BalanceSheetsParenthetical" id="BalanceSheetsParenthetical">
+          <link:definition>00000003 - Statement - Consolidated Balance Sheets (Parenthetical)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/StatementsOfOperationsAndComprehensiveIncomeLoss" id="StatementsOfOperationsAndComprehensiveIncomeLoss">
+          <link:definition>00000004 - Statement - Consolidated Statements of Operations and Comprehensive Income/ Loss</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/StatementsOfChangesInStockholdersEquity" id="StatementsOfChangesInStockholdersEquity">
+          <link:definition>00000005 - Statement - Consolidated Statements of Changes in Stockholders' Equity</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/StatementsOfCashFlows" id="StatementsOfCashFlows">
+          <link:definition>00000006 - Statement - Consolidated Statements of Cash Flows</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/MembershipFees" id="MembershipFees">
+          <link:definition>00000007 - Statement - Membership Fees</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/OtherCurrentAssets" id="OtherCurrentAssets">
+          <link:definition>00000008 - Statement - Other Current Assets</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/DeferredTaxAssetsAndDeferredTaxLiabilities" id="DeferredTaxAssetsAndDeferredTaxLiabilities">
+          <link:definition>00000009 - Statement - Deferred Tax Assets and Deferred Tax Liabilities</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/DeferredTaxLiabilities" id="DeferredTaxLiabilities">
+          <link:definition>00000010 - Statement - Deferred Tax Liabilities</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/DeferredTaxAssetsTable" id="DeferredTaxAssetsTable">
+          <link:definition>00000011 - Statement - Deferred Tax Assets Table</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/RelatedPartyTransactions" id="RelatedPartyTransactions">
+          <link:definition>00000012 - Statement - Related Party Transactions</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Software" id="Software">
+          <link:definition>00000013 - Statement - Software</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/LeaseExpenses" id="LeaseExpenses">
+          <link:definition>00000014 - Statement - Lease Expenses</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/SelectedFinancialInformation" id="SelectedFinancialInformation">
+          <link:definition>00000015 - Statement - Selected Financial Information</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note1OrganizationDescriptionOfBusinessAndBasisOfPresentation" id="Note1OrganizationDescriptionOfBusinessAndBasisOfPresentation">
+          <link:definition>999016 - Disclosure - NOTE 1 ORGANIZATION, DESCRIPTION OF BUSINESS AND BASIS OF PRESENTATION</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note2SignificantAccountingPolicies" id="Note2SignificantAccountingPolicies">
+          <link:definition>999017 - Disclosure - NOTE 2 SIGNIFICANT ACCOUNTING POLICIES</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note3OtherCurrentAssets" id="Note3OtherCurrentAssets">
+          <link:definition>999018 - Disclosure - NOTE 3 OTHER CURRENT ASSETS</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note4IncomeTaxes" id="Note4IncomeTaxes">
+          <link:definition>999019 - Disclosure - NOTE 4 INCOME TAXES</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note5DeferredTaxAssetsAndDeferredTaxLiabilities" id="Note5DeferredTaxAssetsAndDeferredTaxLiabilities">
+          <link:definition>999020 - Disclosure - NOTE 5 DEFERRED TAX ASSETS AND DEFERRED TAX LIABILITIES</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note6Related-partyTransactions" id="Note6Related-partyTransactions">
+          <link:definition>999021 - Disclosure - NOTE 6 RELATED-PARTY TRANSACTIONS</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note7PropertyPlantAndEquipment" id="Note7PropertyPlantAndEquipment">
+          <link:definition>999022 - Disclosure - NOTE 7 PROPERTY, PLANT AND EQUIPMENT</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note8Software" id="Note8Software">
+          <link:definition>999023 - Disclosure - NOTE 8 SOFTWARE</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note9Borrowings" id="Note9Borrowings">
+          <link:definition>999024 - Disclosure - NOTE 9 Borrowings</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note10Commitments" id="Note10Commitments">
+          <link:definition>999025 - Disclosure - NOTE 10 COMMITMENTS</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note11Contingencies" id="Note11Contingencies">
+          <link:definition>999026 - Disclosure - NOTE 11 CONTINGENCIES</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note12SegmentInformation" id="Note12SegmentInformation">
+          <link:definition>999027 - Disclosure - NOTE 12 SEGMENT INFORMATION</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note13SubsequentEvents" id="Note13SubsequentEvents">
+          <link:definition>999028 - Disclosure - NOTE 13 SUBSEQUENT EVENTS</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note2SignificantAccountingPoliciesPolicies" id="Note2SignificantAccountingPoliciesPolicies">
+          <link:definition>999029 - Disclosure - NOTE 2 SIGNIFICANT ACCOUNTING POLICIES (Policies)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note2SignificantAccountingPoliciesTables" id="Note2SignificantAccountingPoliciesTables">
+          <link:definition>999030 - Disclosure - NOTE 2 SIGNIFICANT ACCOUNTING POLICIES (Tables)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note3OtherCurrentAssetsTables" id="Note3OtherCurrentAssetsTables">
+          <link:definition>999031 - Disclosure - NOTE 3 OTHER CURRENT ASSETS (Tables)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note4IncomeTaxesTables" id="Note4IncomeTaxesTables">
+          <link:definition>999032 - Disclosure - NOTE 4 INCOME TAXES (Tables)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note5DeferredTaxAssetsAndDeferredTaxLiabilitiesTables" id="Note5DeferredTaxAssetsAndDeferredTaxLiabilitiesTables">
+          <link:definition>999033 - Disclosure - NOTE 5 DEFERRED TAX ASSETS AND DEFERRED TAX LIABILITIES (Tables)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note6Related-partyTransactionsTables" id="Note6Related-partyTransactionsTables">
+          <link:definition>999034 - Disclosure - NOTE 6 RELATED-PARTY TRANSACTIONS (Tables)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note7PropertyPlantAndEquipmentTables" id="Note7PropertyPlantAndEquipmentTables">
+          <link:definition>999035 - Disclosure - NOTE 7 PROPERTY, PLANT AND EQUIPMENT (Tables)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note8SoftwareTables" id="Note8SoftwareTables">
+          <link:definition>999036 - Disclosure - NOTE 8 SOFTWARE (Tables)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note9BorrowingsTables" id="Note9BorrowingsTables">
+          <link:definition>999037 - Disclosure - NOTE 9 Borrowings (Tables)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note10CommitmentsTables" id="Note10CommitmentsTables">
+          <link:definition>999038 - Disclosure - NOTE 10 COMMITMENTS (Tables)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note12SegmentInformationTables" id="Note12SegmentInformationTables">
+          <link:definition>999039 - Disclosure - NOTE 12 SEGMENT INFORMATION (Tables)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note2SignificantAccountingPoliciesDetailsNarrative" id="Note2SignificantAccountingPoliciesDetailsNarrative">
+          <link:definition>999040 - Disclosure - NOTE 2 SIGNIFICANT ACCOUNTING POLICIES (Details Narrative)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note4IncomeTaxesDetailsNarrative" id="Note4IncomeTaxesDetailsNarrative">
+          <link:definition>999041 - Disclosure - NOTE 4 INCOME TAXES (Details Narrative)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note5DeferredTaxAssetsAndDeferredTaxLiabilitiesDetailsNarrative" id="Note5DeferredTaxAssetsAndDeferredTaxLiabilitiesDetailsNarrative">
+          <link:definition>999042 - Disclosure - NOTE 5 DEFERRED TAX ASSETS AND DEFERRED TAX LIABILITIES (Details Narrative)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/PropertyPlantAndEquipmentDetails" id="PropertyPlantAndEquipmentDetails">
+          <link:definition>999043 - Disclosure - Property, plant and equipment (Details)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note7PropertyPlantAndEquipmentDetailsNarrative" id="Note7PropertyPlantAndEquipmentDetailsNarrative">
+          <link:definition>999044 - Disclosure - NOTE 7 PROPERTY, PLANT AND EQUIPMENT (Details Narrative)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note9BorrowingsDetailsNarrative" id="Note9BorrowingsDetailsNarrative">
+          <link:definition>999045 - Disclosure - NOTE 9 Borrowings (Details Narrative)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note10CommitmentsDetailsNarrative" id="Note10CommitmentsDetailsNarrative">
+          <link:definition>999046 - Disclosure - NOTE 10 COMMITMENTS (Details Narrative)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/CompanysSupplementalInformationRelatedToOperatingAndFinanceLeasesDetails" id="CompanysSupplementalInformationRelatedToOperatingAndFinanceLeasesDetails">
+          <link:definition>999047 - Disclosure - the Company&#8217;s supplemental information related to operating and finance leases (Details)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:roleType roleURI="http://EXDW/role/Note11ContingenciesDetailsNarrative" id="Note11ContingenciesDetailsNarrative">
+          <link:definition>999048 - Disclosure - NOTE 11 CONTINGENCIES (Details Narrative)</link:definition>
+          <link:usedOn>link:presentationLink</link:usedOn>
+          <link:usedOn>link:calculationLink</link:usedOn>
+          <link:usedOn>link:definitionLink</link:usedOn>
+        </link:roleType>
+        <link:linkbaseRef xlink:type="simple" xlink:href="exdw-20250930_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:title="Presentation Links" />
+        <link:linkbaseRef xlink:type="simple" xlink:href="exdw-20250930_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:title="Label Links" />
+        <link:linkbaseRef xlink:type="simple" xlink:href="exdw-20250930_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:title="Calculation Links" />
+        <link:linkbaseRef xlink:type="simple" xlink:href="exdw-20250930_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:title="Definition Links" />
+      </appinfo>
+    </annotation>
+    <import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd" />
+    <import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd" />
+    <import namespace="http://xbrl.sec.gov/dei/2024" schemaLocation="https://xbrl.sec.gov/dei/2024/dei-2024.xsd" />
+    <import namespace="http://fasb.org/us-gaap/2024" schemaLocation="https://xbrl.fasb.org/us-gaap/2024/elts/us-gaap-2024.xsd" />
+    <import namespace="http://fasb.org/us-types/2024" schemaLocation="https://xbrl.fasb.org/us-gaap/2024/elts/us-types-2024.xsd" />
+    <import namespace="http://www.xbrl.org/dtr/type/2022-03-31" schemaLocation="https://www.xbrl.org/dtr/type/2022-03-31/types.xsd" />
+    <import namespace="http://xbrl.sec.gov/country/2024" schemaLocation="https://xbrl.sec.gov/country/2024/country-2024.xsd" />
+    <import namespace="http://fasb.org/srt/2024" schemaLocation="https://xbrl.fasb.org/srt/2024/elts/srt-2024.xsd" />
+    <import namespace="http://fasb.org/srt-types/2024" schemaLocation="https://xbrl.fasb.org/srt/2024/elts/srt-types-2024.xsd" />
+    <element id="EXDW_Incometaxrecoverable" name="Incometaxrecoverable" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Shortterminvestment" name="Shortterminvestment" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Longterminvestment" name="Longterminvestment" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Duetodirector" name="Duetodirector" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Longtermloanscurrentposition" name="Longtermloanscurrentposition" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Longtermloansnoncurrent" name="Longtermloansnoncurrent" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Accumulatedothercomprehensiveincomeloss" name="Accumulatedothercomprehensiveincomeloss" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_InterestAndDebtExpenseincreasedecrease" name="InterestAndDebtExpenseincreasedecrease" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_NetIncomeLossforperiod" name="NetIncomeLossforperiod" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Incometaxrecoverableperiod" name="Incometaxrecoverableperiod" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Contingencyliability" name="Contingencyliability" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_IncreaseDecreaseInTaxPayable" name="IncreaseDecreaseInTaxPayable" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Paymentsforinvestmentlongterm" name="Paymentsforinvestmentlongterm" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Paymentsforinvestmentsshortterm" name="Paymentsforinvestmentsshortterm" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Proceedsfromdisposalofproperty" name="Proceedsfromdisposalofproperty" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Purchasesoftware" name="Purchasesoftware" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Borrowingshorttermloan" name="Borrowingshorttermloan" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Borrowingslongterm" name="Borrowingslongterm" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Proceedsreltaedpartiesperiod" name="Proceedsreltaedpartiesperiod" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Operatingexpensepaidbydirector" name="Operatingexpensepaidbydirector" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Remeasureliabilities" name="Remeasureliabilities" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Propobtainedinlease" name="Propobtainedinlease" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_StatementMembershipFeesAbstract" name="StatementMembershipFeesAbstract" abstract="true" nillable="true" xbrli:periodType="duration" type="xbrli:stringItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Revenuefromforcemembershipfees" name="Revenuefromforcemembershipfees" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_RevenueConnectorplan" name="RevenueConnectorplan" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Otherplanrevenue" name="Otherplanrevenue" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Totalmembershipfees" name="Totalmembershipfees" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_StatementOtherCurrentAssetsAbstract" name="StatementOtherCurrentAssetsAbstract" abstract="true" nillable="true" xbrli:periodType="duration" type="xbrli:stringItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Consumptiontaxasof" name="Consumptiontaxasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Promotionalmaterials" name="Promotionalmaterials" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Othercurrentassetsasof" name="Othercurrentassetsasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Totalcurrentassets" name="Totalcurrentassets" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Inventoriesasof" name="Inventoriesasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Software" name="Software" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Expenseasof" name="Expenseasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Netlossoperatinglosscarryforwardasof" name="Netlossoperatinglosscarryforwardasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Valuationallowanceasof" name="Valuationallowanceasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_DeferredIncomeTaxAssetsNetasof" name="DeferredIncomeTaxAssetsNetasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_StatementDeferredTaxLiabilitiesAbstract" name="StatementDeferredTaxLiabilitiesAbstract" abstract="true" nillable="true" xbrli:periodType="duration" type="xbrli:stringItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Insurancefunds" name="Insurancefunds" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Deferredtaxliabilitiesnoncurrentasof" name="Deferredtaxliabilitiesnoncurrentasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_StatementDeferredTaxAssetsTableAbstract" name="StatementDeferredTaxAssetsTableAbstract" abstract="true" nillable="true" xbrli:periodType="duration" type="xbrli:stringItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Deferredtaxassetsasof" name="Deferredtaxassetsasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_StatementRelatedPartyTransactionsAbstract" name="StatementRelatedPartyTransactionsAbstract" abstract="true" nillable="true" xbrli:periodType="duration" type="xbrli:stringItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Totalduetodirectorasof" name="Totalduetodirectorasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Totalduetorelatedparties" name="Totalduetorelatedparties" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_StatementSoftwareAbstract" name="StatementSoftwareAbstract" abstract="true" nillable="true" xbrli:periodType="duration" type="xbrli:stringItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_AccumulatedAmortizationSoftware" name="AccumulatedAmortizationSoftware" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_FinanceLeaseCost" name="FinanceLeaseCost" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_IncomeLossFromContinuingOperationsBeforeIncomeTaxes" name="IncomeLossFromContinuingOperationsBeforeIncomeTaxes" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Membershipandland" name="Membershipandland" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Sharepurchaseininvesteecompanyvalueof" name="Sharepurchaseininvesteecompanyvalueof" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Deferredincomeasof" name="Deferredincomeasof" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Advertisingexpenses" name="Advertisingexpenses" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Researchdevelopmentexpenses" name="Researchdevelopmentexpenses" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_IncomeTaxExpenses" name="IncomeTaxExpenses" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Currentportionofincometaxexpenses" name="Currentportionofincometaxexpenses" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Deferredportionofincometaxexpenses" name="Deferredportionofincometaxexpenses" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Expensespaidbyforceinternationale" name="Expensespaidbyforceinternationale" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Accumulateddepreciationasof" name="Accumulateddepreciationasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Totalnetbookvalue" name="Totalnetbookvalue" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Borrowedfromsaningodo" name="Borrowedfromsaningodo" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Vehicleleaseone" name="Vehicleleaseone" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Vehicleleasetwo" name="Vehicleleasetwo" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Threefinanceleasesgrossvalue" name="Threefinanceleasesgrossvalue" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_OperatingCashFlowFromOperatingLeasesperiod" name="OperatingCashFlowFromOperatingLeasesperiod" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_OperatingCashFlowFromOperatingLeases" name="OperatingCashFlowFromOperatingLeases" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_FinancingCashFlowFromFinanceLeases" name="FinancingCashFlowFromFinanceLeases" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Legalcasessettledperiod" name="Legalcasessettledperiod" nillable="true" xbrli:periodType="duration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Pendinglegalcasesperiod" name="Pendinglegalcasesperiod" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+    <element id="EXDW_Probablesettlementamountasof" name="Probablesettlementamountasof" nillable="true" xbrli:periodType="instant" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" />
+</schema>

@@ -1,0 +1,189 @@
+{
+ "version": "2.2",
+ "instance": {
+  "ea0264791-10k_phenixfin.htm": {
+   "tag": {
+    "pfx_TotalInvestmentsMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.PhenixFIN.com/20250930",
+     "localname": "TotalInvestmentsMember",
+     "presentation": [
+      "http://www.PhenixFIN.com/role/ConsolidatedScheduleofInvestmentsUnauditedTable",
+      "http://www.PhenixFIN.com/role/ScheduleofPortfolioCompositionbyIndustryGroupingatFairValueTable"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Total Investments [Member]",
+        "label": "Total Investments Member"
+       }
+      }
+     }
+    },
+    "srt_OwnershipAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/srt/2025",
+     "localname": "OwnershipAxis",
+     "presentation": [
+      "http://www.PhenixFIN.com/role/ConsolidatedScheduleofInvestmentsUnauditedTable",
+      "http://www.PhenixFIN.com/role/ScheduleofBalanceSheetTable",
+      "http://www.PhenixFIN.com/role/ScheduleofIncomeStatementTable",
+      "http://www.PhenixFIN.com/role/ScheduleofPortfolioCompositionbyIndustryGroupingatFairValueTable"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Ownership [Axis]",
+        "documentation": "Information by name of entity in which ownership interest is disclosed. Excludes equity method investee and named security investment."
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentIdentifierAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "InvestmentIdentifierAxis",
+     "presentation": [
+      "http://www.PhenixFIN.com/role/ConsolidatedScheduleofInvestmentsUnauditedTable",
+      "http://www.PhenixFIN.com/role/ConsolidatedScheduleofInvestmentsUnauditedTable_Parentheticals"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Investment, Identifier [Axis]",
+        "verboseLabel": "Invesco Mortgage Capital, Inc. [Member]",
+        "label": "Investment, Identifier [Axis]",
+        "documentation": "Identification of investment in security, including, but not limited to, name, title, and other identifying information."
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentOwnedAtCost": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "InvestmentOwnedAtCost",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.PhenixFIN.com/role/ConsolidatedScheduleofInvestmentsUnauditedTable",
+      "http://www.PhenixFIN.com/role/ScheduleofCompositionoftheUnfundedCommitmentsTable",
+      "http://www.PhenixFIN.com/role/ScheduleofInvestmentsatAmortizedCostandFairValueTable"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Amortized Cost",
+        "verboseLabel": "Total unfunded commitments",
+        "label": "Investment Owned, Cost",
+        "documentation": "Cost of the investment."
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentOwnedAtFairValue": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "InvestmentOwnedAtFairValue",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.PhenixFIN.com/role/ConsolidatedScheduleofInvestmentsUnauditedTable",
+      "http://www.PhenixFIN.com/role/ScheduleofFairValueMeasurementsofInvestmentsTable",
+      "http://www.PhenixFIN.com/role/ScheduleofInvestmentsatAmortizedCostandFairValueTable",
+      "http://www.PhenixFIN.com/role/ScheduleofPortfolioCompositionbyIndustryGroupingatFairValueTable",
+      "http://www.PhenixFIN.com/role/ScheduleofQuantitativeInformationAboutLevel3FairValueMeasurementsofOurInvestmentsTable",
+      "http://www.PhenixFIN.com/role/ScheduleofTransactionswithAffiliatedInvestmentsandControlledInvestmentsTable"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "periodStartLabel": "Fair value as of beginning",
+        "periodEndLabel": "Fair value as of ending",
+        "terseLabel": "Fair Value",
+        "verboseLabel": "Investments total",
+        "label": "Investment Owned, Fair Value",
+        "documentation": "Fair value of investment in security owned."
+       }
+      }
+     }
+    },
+    "us-gaap_InvestmentOwnedBalancePrincipalAmount": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2025",
+     "localname": "InvestmentOwnedBalancePrincipalAmount",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.PhenixFIN.com/role/CommitmentsDetails",
+      "http://www.PhenixFIN.com/role/ConsolidatedBalanceSheet_Parentheticals",
+      "http://www.PhenixFIN.com/role/ConsolidatedScheduleofInvestmentsUnauditedTable"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Non-controlled, Non-affiliated Investments Owned, at Amortized Cost",
+        "verboseLabel": "Par Amount/ Shares/Units",
+        "netLabel": "Financing agreements to fund",
+        "label": "Investment Owned, Balance, Principal Amount",
+        "documentation": "Amount of principal of investment owned."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R8": {
+     "role": "http://www.PhenixFIN.com/role/ConsolidatedScheduleofInvestmentsUnauditedTable",
+     "longName": "995306 - Statement - Consolidated Schedule of Investments (Unaudited)",
+     "shortName": "Consolidated Schedule of Investments (Unaudited)",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "8",
+     "firstAnchor": {
+      "contextRef": "c138",
+      "name": "us-gaap:InvestmentOwnedBalancePrincipalAmount",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "0",
+      "ancestors": [
+       "b",
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "ea0264791-10k_phenixfin.htm",
+      "first": true,
+      "unique": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c138",
+      "name": "us-gaap:InvestmentOwnedBalancePrincipalAmount",
+      "unitRef": "usd",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "0",
+      "ancestors": [
+       "b",
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "ea0264791-10k_phenixfin.htm",
+      "first": true,
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

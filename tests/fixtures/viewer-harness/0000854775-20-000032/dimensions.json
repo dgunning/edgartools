@@ -1,0 +1,22 @@
+{
+ "http://www.digi.com/role/ConsolidatedStatementsofStockholdersEquity": {
+  "srt_CumulativeEffectPeriodOfAdoptionAxis": {
+   "default_member_id": "srt_CumulativeEffectPeriodOfAdoptionDomain",
+   "is_typed_dimension": false
+  },
+  "us-gaap_StatementEquityComponentsAxis": {
+   "default_member_id": "us-gaap_EquityComponentDomain",
+   "is_typed_dimension": false
+  }
+ },
+ "merged": {
+  "srt_CumulativeEffectPeriodOfAdoptionAxis": {
+   "default_member_id": "srt_CumulativeEffectPeriodOfAdoptionDomain",
+   "is_typed_dimension": false
+  },
+  "us-gaap_StatementEquityComponentsAxis": {
+   "default_member_id": "us-gaap_EquityComponentDomain",
+   "is_typed_dimension": false
+  }
+ }
+}

@@ -1,0 +1,202 @@
+{
+ "version": "2.2",
+ "instance": {
+  "d930276d20f.htm": {
+   "tag": {
+    "bili_CommonClassYMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.bilibili.com/20241231",
+     "localname": "CommonClassYMember",
+     "presentation": [
+      "http://www.bilibili.com/role/ConsolidatedBalanceSheets",
+      "http://www.bilibili.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.bilibili.com/role/ConsolidatedStatementsOfChangesInShareholdersEquity",
+      "http://www.bilibili.com/role/CoverPage"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Common Class Y [Member]",
+        "terseLabel": "Class Y Ordinary Shares",
+        "documentation": "Represents information pertaining to Class Y ordinary shares."
+       }
+      }
+     }
+    },
+    "bili_CommonClassZMember": {
+     "xbrltype": "domainItemType",
+     "nsuri": "http://www.bilibili.com/20241231",
+     "localname": "CommonClassZMember",
+     "presentation": [
+      "http://www.bilibili.com/role/ConsolidatedBalanceSheets",
+      "http://www.bilibili.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.bilibili.com/role/ConsolidatedStatementsOfChangesInShareholdersEquity",
+      "http://www.bilibili.com/role/CoverPage",
+      "http://www.bilibili.com/role/OrdinarySharesDetails",
+      "http://www.bilibili.com/role/ShareBasedCompensationDescriptionOfShareOptionPlansDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Common Class Z [Member]",
+        "terseLabel": "Class Z Ordinary Shares",
+        "documentation": "Represents information pertaining to Class Z ordinary shares."
+       }
+      }
+     }
+    },
+    "us-gaap_Liabilities": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "Liabilities",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.bilibili.com/role/ParentCompanyOnlyCondensedFinancialInformationCondensedBalanceSheetsDetails": {
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0,
+       "order": 7.0
+      },
+      "http://www.bilibili.com/role/OperationsRisksInRelationToTheVieStructureDetails": {
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0,
+       "order": 11.0
+      },
+      "http://www.bilibili.com/role/ConsolidatedBalanceSheets": {
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0,
+       "order": 17.0
+      }
+     },
+     "presentation": [
+      "http://www.bilibili.com/role/ConsolidatedBalanceSheets",
+      "http://www.bilibili.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.bilibili.com/role/OperationsRisksInRelationToTheVieStructureDetails",
+      "http://www.bilibili.com/role/ParentCompanyOnlyCondensedFinancialInformationCondensedBalanceSheetsDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Liabilities",
+        "totalLabel": "Total liabilities",
+        "terseLabel": "Liabilities",
+        "documentation": "Amount of liability recognized for present obligation requiring transfer or otherwise providing economic benefit to others."
+       }
+      }
+     }
+    },
+    "us-gaap_RetainedEarningsUnappropriated": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "RetainedEarningsUnappropriated",
+     "crdr": "credit",
+     "calculation": {
+      "http://www.bilibili.com/role/ConsolidatedBalanceSheets": {
+       "parentTag": "us-gaap_StockholdersEquity",
+       "weight": 1.0,
+       "order": 35.0
+      }
+     },
+     "presentation": [
+      "http://www.bilibili.com/role/ConsolidatedBalanceSheets",
+      "http://www.bilibili.com/role/OperationsLiquidityDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Retained Earnings, Unappropriated",
+        "terseLabel": "Accumulated deficit",
+        "verboseLabel": "Accumulated deficit",
+        "documentation": "Amount of accumulated undistributed earnings (deficit) available for dividend distribution. Includes, but is not limited to, retained earnings not appropriated for specific business purpose."
+       }
+      }
+     }
+    },
+    "us-gaap_StatementClassOfStockAxis": {
+     "xbrltype": "stringItemType",
+     "nsuri": "http://fasb.org/us-gaap/2024",
+     "localname": "StatementClassOfStockAxis",
+     "presentation": [
+      "http://www.bilibili.com/role/ConsolidatedBalanceSheets",
+      "http://www.bilibili.com/role/ConsolidatedBalanceSheetsParenthetical",
+      "http://www.bilibili.com/role/ConsolidatedStatementsOfChangesInShareholdersEquity",
+      "http://www.bilibili.com/role/ConsolidatedStatementsOfOperationsAndComprehensiveLoss",
+      "http://www.bilibili.com/role/CoverPage",
+      "http://www.bilibili.com/role/LongTermDebtAdditionalInformationDetails",
+      "http://www.bilibili.com/role/OperationsInitialPublicOfferingIpoAndFollowedOfferingsDetails",
+      "http://www.bilibili.com/role/OperationsLiquidityDetails",
+      "http://www.bilibili.com/role/OrdinarySharesDetails",
+      "http://www.bilibili.com/role/ShareBasedCompensationDescriptionOfShareOptionPlansDetails"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Class of Stock [Axis]",
+        "documentation": "Information by the different classes of stock of the entity."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R2": {
+     "role": "http://www.bilibili.com/role/ConsolidatedBalanceSheets",
+     "longName": "1002 - Statement - CONSOLIDATED BALANCE SHEETS",
+     "shortName": "CONSOLIDATED BALANCE SHEETS",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "2",
+     "firstAnchor": {
+      "contextRef": "PAsOn12_31_2024",
+      "name": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "unitRef": "Unit_CNY",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-3",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "d930276d20f.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "PAsOn12_31_2024",
+      "name": "us-gaap:AssetsCurrent",
+      "unitRef": "Unit_CNY",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-3",
+      "ancestors": [
+       "div",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "d930276d20f.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

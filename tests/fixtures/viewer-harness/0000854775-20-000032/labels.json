@@ -1,0 +1,111 @@
+{
+ "srt_CumulativeEffectPeriodOfAdoptionAdjustmentMember": {
+  "http://www.xbrl.org/2003/role/label": "Cumulative Effect, Period of Adoption, Adjustment [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Cumulative Effect, Period of Adoption, Adjustment [Member]"
+ },
+ "srt_CumulativeEffectPeriodOfAdoptionAxis": {
+  "http://www.xbrl.org/2003/role/label": "Cumulative Effect, Period of Adoption [Axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Cumulative Effect, Period of Adoption [Axis]"
+ },
+ "srt_CumulativeEffectPeriodOfAdoptionDomain": {
+  "http://www.xbrl.org/2003/role/label": "Cumulative Effect, Period of Adoption [Domain]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Cumulative Effect, Period of Adoption [Domain]"
+ },
+ "us-gaap_AccumulatedOtherComprehensiveIncomeMember": {
+  "http://www.xbrl.org/2003/role/label": "AOCI Attributable to Parent [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Accumulated Other Comprehensive Loss"
+ },
+ "us-gaap_AdditionalPaidInCapitalMember": {
+  "http://www.xbrl.org/2003/role/label": "Additional Paid-in Capital [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Additional Paid-in Capital"
+ },
+ "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue": {
+  "http://www.xbrl.org/2003/role/label": "APIC, Share-based Payment Arrangement, Increase for Cost Recognition",
+  "http://www.xbrl.org/2003/role/terseLabel": "Stock-based compensation expense"
+ },
+ "us-gaap_CommonStockMember": {
+  "http://www.xbrl.org/2003/role/label": "Common Stock [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Common Stock"
+ },
+ "us-gaap_EquityComponentDomain": {
+  "http://www.xbrl.org/2003/role/label": "Equity Component [Domain]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity Component [Domain]"
+ },
+ "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+  "http://www.xbrl.org/2003/role/label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Increase (Decrease) in Stockholders' Equity [Roll Forward]"
+ },
+ "us-gaap_NetIncomeLoss": {
+  "http://www.xbrl.org/2003/role/label": "Net Income (Loss) Attributable to Parent",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net income",
+  "http://www.xbrl.org/2003/role/totalLabel": "Net income",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Net (loss) income"
+ },
+ "us-gaap_OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent": {
+  "http://www.xbrl.org/2003/role/label": "Other Comprehensive Income (Loss), Net of Tax, Portion Attributable to Parent",
+  "http://www.xbrl.org/2003/role/terseLabel": "Other comprehensive income (loss)",
+  "http://www.xbrl.org/2003/role/totalLabel": "Other comprehensive income (loss), net of tax"
+ },
+ "us-gaap_RetainedEarningsMember": {
+  "http://www.xbrl.org/2003/role/label": "Retained Earnings [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Retained Earnings"
+ },
+ "us-gaap_SharesIssued": {
+  "http://www.xbrl.org/2003/role/label": "Shares, Issued",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Ending balance (in shares)",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Beginning balance (in shares)"
+ },
+ "us-gaap_StatementEquityComponentsAxis": {
+  "http://www.xbrl.org/2003/role/label": "Equity Components [Axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity Components [Axis]"
+ },
+ "us-gaap_StatementLineItems": {
+  "http://www.xbrl.org/2003/role/label": "Statement [Line Items]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement [Line Items]"
+ },
+ "us-gaap_StatementOfStockholdersEquityAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Statement of Stockholders' Equity [Abstract]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement of Stockholders' Equity [Abstract]"
+ },
+ "us-gaap_StatementTable": {
+  "http://www.xbrl.org/2003/role/label": "Statement [Table]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement [Table]"
+ },
+ "us-gaap_StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans": {
+  "http://www.xbrl.org/2003/role/label": "Stock Issued During Period, Shares, Employee Stock Purchase Plans",
+  "http://www.xbrl.org/2003/role/terseLabel": "Common shares issued to employees",
+  "http://www.xbrl.org/2009/role/negatedTerseLabel": "Employee stock purchase issuances (in shares)"
+ },
+ "us-gaap_StockIssuedDuringPeriodSharesShareBasedCompensation": {
+  "http://www.xbrl.org/2003/role/label": "Shares Issued, Shares, Share-based Payment Arrangement, after Forfeiture",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issuance of stock under stock award plans (in shares)"
+ },
+ "us-gaap_StockIssuedDuringPeriodValueEmployeeStockPurchasePlan": {
+  "http://www.xbrl.org/2003/role/label": "Stock Issued During Period, Value, Employee Stock Purchase Plan",
+  "http://www.xbrl.org/2003/role/terseLabel": "Employee stock purchase issuances"
+ },
+ "us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation": {
+  "http://www.xbrl.org/2003/role/label": "Shares Issued, Value, Share-based Payment Arrangement, after Forfeiture",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issuance of stock under stock award plans"
+ },
+ "us-gaap_StockholdersEquity": {
+  "http://www.xbrl.org/2003/role/label": "Stockholders' Equity Attributable to Parent",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Ending balance",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Beginning balance",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total stockholders’ equity",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Cumulative-effect adjustment from adoption of ASU 2016-09"
+ },
+ "us-gaap_TreasuryStockMember": {
+  "http://www.xbrl.org/2003/role/label": "Treasury Stock [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Treasury Stock"
+ },
+ "us-gaap_TreasuryStockSharesAcquired": {
+  "http://www.xbrl.org/2003/role/label": "Treasury Stock, Shares, Acquired",
+  "http://www.xbrl.org/2003/role/terseLabel": "Repurchase of common stock (in shares)",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Shares repurchased"
+ },
+ "us-gaap_TreasuryStockValueAcquiredCostMethod": {
+  "http://www.xbrl.org/2003/role/label": "Treasury Stock, Value, Acquired, Cost Method",
+  "http://www.xbrl.org/2009/role/negatedTerseLabel": "Repurchase of common stock"
+ }
+}

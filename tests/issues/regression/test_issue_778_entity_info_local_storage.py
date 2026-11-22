@@ -34,8 +34,8 @@ from edgar.storage._local import is_network_fallback_allowed
 
 
 EXPECTED_ENTITY_INFO_KEYS = [
-    'entity_name', 'ticker', 'identifier', 'document_type',
-    'reporting_end_date', 'document_period_end_date',
+    'entity_name', 'ticker', 'trading_symbols', 'identifier', 'document_type',
+    'reporting_end_date', 'max_instant_context_date', 'document_period_end_date',
     'fiscal_year', 'fiscal_period',
     'fiscal_year_end_month', 'fiscal_year_end_day',
     'annual_report', 'quarterly_report', 'amendment',

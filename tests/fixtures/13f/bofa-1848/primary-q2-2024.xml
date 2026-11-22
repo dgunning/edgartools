@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<edgarSubmission xmlns="http://www.sec.gov/edgar/thirteenffiler" xmlns:com="http://www.sec.gov/edgar/common">
+  <schemaVersion>X0202</schemaVersion>
+  <headerData>
+    <submissionType>13F-HR</submissionType>
+    <filerInfo>
+      <liveTestFlag>LIVE</liveTestFlag>
+      <flags>
+        <confirmingCopyFlag>false</confirmingCopyFlag>
+        <returnCopyFlag>false</returnCopyFlag>
+        <overrideInternetFlag>false</overrideInternetFlag>
+      </flags>
+      <filer>
+        <credentials>
+          <cik>0000070858</cik>
+          <ccc>XXXXXXXX</ccc>
+        </credentials>
+      </filer>
+      <periodOfReport>06-30-2024</periodOfReport>
+    </filerInfo>
+  </headerData>
+  <formData>
+    <coverPage>
+      <reportCalendarOrQuarter>06-30-2024</reportCalendarOrQuarter>
+      <filingManager>
+        <name>BANK OF AMERICA CORP /DE/</name>
+        <address>
+          <com:street1>BANK OF AMERICA CORPORATE CENTER</com:street1>
+          <com:street2>100 N TRYON ST</com:street2>
+          <com:city>CHARLOTTE</com:city>
+          <com:stateOrCountry>NC</com:stateOrCountry>
+          <com:zipCode>28255</com:zipCode>
+        </address>
+      </filingManager>
+      <reportType>13F HOLDINGS REPORT</reportType>
+      <form13FFileNumber>028-00158</form13FFileNumber>
+      <secFileNumber>001-06523</secFileNumber>
+      <provideInfoForInstruction5>N</provideInfoForInstruction5>
+    </coverPage>
+    <signatureBlock>
+      <name>Andres Ortiz</name>
+      <title>Authorized Signatory</title>
+      <phone>980-388-3188</phone>
+      <signature>Andres Ortiz</signature>
+      <city>Charlotte</city>
+      <stateOrCountry>NC</stateOrCountry>
+      <signatureDate>08-14-2024</signatureDate>
+    </signatureBlock>
+    <summaryPage>
+      <otherIncludedManagersCount>8</otherIncludedManagersCount>
+      <tableEntryTotal>26600</tableEntryTotal>
+      <tableValueTotal>1131669012850</tableValueTotal>
+      <isConfidentialOmitted>false</isConfidentialOmitted>
+      <otherManagers2Info>
+        <otherManager2>
+          <sequenceNumber>1</sequenceNumber>
+          <otherManager>
+            <cik>0001102113</cik>
+            <form13FFileNumber>028-10264</form13FFileNumber>
+            <secFileNumber>812-11442-03</secFileNumber>
+            <name>BANK OF AMERICA NA</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>2</sequenceNumber>
+          <otherManager>
+            <cik>0000728612</cik>
+            <form13FFileNumber>028-00962</form13FFileNumber>
+            <crdNumber>000007691</crdNumber>
+            <secFileNumber>001-15299</secFileNumber>
+            <name>MERRILL LYNCH, PIERCE, FENNER &amp; SMITH INC.</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>3</sequenceNumber>
+          <otherManager>
+            <cik>0001675365</cik>
+            <form13FFileNumber>028-19575</form13FFileNumber>
+            <crdNumber>000283942</crdNumber>
+            <secFileNumber>008-69787</secFileNumber>
+            <name>BOFA SECURITIES, INC.</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>5</sequenceNumber>
+          <otherManager>
+            <cik>0001143718</cik>
+            <form13FFileNumber>028-14408</form13FFileNumber>
+            <secFileNumber>001-16683</secFileNumber>
+            <name>MERRILL LYNCH CANADA INC.</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>6</sequenceNumber>
+          <otherManager>
+            <cik>0001062577</cik>
+            <form13FFileNumber>028-07178</form13FFileNumber>
+            <crdNumber>000162416</crdNumber>
+            <name>MERRILL LYNCH INTERNATIONAL</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>28</sequenceNumber>
+          <otherManager>
+            <cik>0001185372</cik>
+            <form13FFileNumber>028-10270</form13FFileNumber>
+            <name>U.S. TRUST Co OF DELAWARE</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>43</sequenceNumber>
+          <otherManager>
+            <cik>0001418660</cik>
+            <form13FFileNumber>028-12631</form13FFileNumber>
+            <crdNumber>000142558</crdNumber>
+            <name>MANAGED ACCOUNT ADVISORS LLC</name>
+          </otherManager>
+        </otherManager2>
+        <otherManager2>
+          <sequenceNumber>88</sequenceNumber>
+          <otherManager>
+            <cik>0001803522</cik>
+            <form13FFileNumber>028-20099</form13FFileNumber>
+            <name>BofA Securities Europe SA</name>
+          </otherManager>
+        </otherManager2>
+      </otherManagers2Info>
+    </summaryPage>
+  </formData>
+</edgarSubmission>

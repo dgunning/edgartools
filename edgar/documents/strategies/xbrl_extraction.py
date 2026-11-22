@@ -2,22 +2,43 @@
 XBRL extraction strategy for inline XBRL documents.
 """
 
+import copy
 import logging
-from decimal import Decimal, InvalidOperation
-from typing import Any, Dict, List, Optional, Tuple
+from dataclasses import dataclass, field
+from typing import Any, Dict, List, Mapping, Optional, Tuple
 
-from lxml.etree import tostring
+from lxml.etree import strip_elements, strip_tags, tostring
 from lxml.html import HtmlElement
 
+from edgar.dates import normalize_period_boundary
 from edgar.documents.strategies.ixbrl_transforms import (
     TransformError,
     UnknownTransformError,
     apply_scale,
     apply_transform,
+    expand_format,
+    negate_exactly,
 )
 from edgar.documents.types import XBRLFact
+from edgar.xmltools import is_xsi_nil
 
 logger = logging.getLogger(__name__)
+
+_IX_CLARK_PREFIX = '{http://www.xbrl.org/2013/inlineXBRL}'
+
+
+def _is_ix_tag(tag: Any) -> bool:
+    """
+    Whether a tag names an Inline XBRL element.
+
+    The literal "ix:" prefix in any case (the lxml.html tree described in the
+    XBRLExtractor docstring keeps prefixes in the tag), or the Inline XBRL
+    namespace in Clark notation for a namespace-aware tree. Comments and
+    processing instructions carry a callable tag and are never ix: elements.
+    """
+    return isinstance(tag, str) and (
+        tag.startswith(_IX_CLARK_PREFIX) or tag.lower().startswith('ix:')
+    )
 
 
 class XBRLExtractor:
@@ -61,6 +82,9 @@ class XBRLExtractor:
         # Formats already reported, so a filing that uses an unsupported
         # transform 3,000 times warns once rather than 3,000 times.
         self._reported_formats: set = set()
+        # (root, exclude tags, other ix: tags) of the last tree _project_escaped
+        # saw. The root is held, so the `is` check cannot match a recycled proxy.
+        self._ix_tag_cache: Optional[Tuple[Any, Tuple[str, ...], Tuple[str, ...]]] = None
 
     def extract_context(self, element: HtmlElement) -> Optional[Dict[str, Any]]:
         """
@@ -113,8 +137,13 @@ class XBRLExtractor:
         if not context:
             return None
 
-        # Get fact value
-        value, issue = self._get_fact_value(element, escape=bool(context.get('escape')))
+        # Get fact value. Nil is read first: a nil fact's content is not a value
+        # to transform, scale or sign (Inline XBRL 1.1 section 11.2.3).
+        is_nil = is_xsi_nil(element)
+        if is_nil:
+            value, issue = self._relevant_content(element, escape=bool(context.get('escape'))).strip(), None
+        else:
+            value, issue = self._get_fact_value(element, escape=bool(context.get('escape')))
 
         # Create fact
         fact = XBRLFact(
@@ -126,8 +155,11 @@ class XBRLExtractor:
             scale=context.get('scale'),
             format=context.get('format'),
             sign=context.get('sign'),
+            precision=context.get('precision'),
             escape=bool(context.get('escape')),
-            continued_at=context.get('continuedAt')
+            continued_at=context.get('continuedAt'),
+            fact_id=element.get('id'),
+            is_nil=is_nil,
         )
 
         # Resolve references
@@ -143,19 +175,68 @@ class XBRLExtractor:
 
         return fact
 
+    def link_footnotes(self, facts: List[XBRLFact], footnotes: List[HtmlElement],
+                       relationships: List[HtmlElement]) -> Dict[str, Any]:
+        """
+        Read each ix:footnote and attach it to the facts its ix:relationships name.
+
+        Returns ``{footnote id: Footnote}``, the lookup ``XBRL.footnotes`` gives
+        on the instance path, and fills each linked fact's ``footnotes`` with
+        footnote ids, as the instance path's ``Fact.footnotes`` does (GH #1756).
+        Which relationship is a footnote link and how a footnote's text and
+        language are read are the instance parser's rules, shared through
+        ``edgar.xbrl.footnote_links``. Only fact-footnote relationships link;
+        any other arcrole relates facts in another way and is not a footnote.
+        """
+        if not footnotes:
+            return {}
+        if not self._initialized:
+            self._initialize_context(footnotes[0])
+        from edgar.xbrl.footnote_links import (
+            FOOTNOTE_ROLE,
+            fact_footnote_links,
+            inherited_lang,
+            inline_footnote_text,
+        )
+        from edgar.xbrl.models import Footnote
+
+        # The tree is lxml.html: attribute names are lower-cased and xml:lang
+        # is a literal attribute name (see the class docstring).
+        by_id: Dict[str, Footnote] = {}
+        for element in footnotes:
+            footnote_id = element.get('id')
+            if not footnote_id or footnote_id in by_id:
+                continue
+            by_id[footnote_id] = Footnote(
+                footnote_id=footnote_id,
+                text=inline_footnote_text(element, self.continuations, ('continuedAt', 'continuedat')),
+                lang=inherited_lang(element, 'xml:lang'),
+                role=element.get('footnoteRole') or element.get('footnoterole') or FOOTNOTE_ROLE,
+            )
+
+        links = fact_footnote_links(
+            ((rel.get('arcrole'),
+              rel.get('fromRefs') or rel.get('fromrefs'),
+              rel.get('toRefs') or rel.get('torefs'))
+             for rel in relationships),
+            by_id)
+
+        first_fact_by_id: Dict[str, XBRLFact] = {}
+        for fact in facts:
+            if fact.fact_id:
+                first_fact_by_id.setdefault(fact.fact_id, fact)
+        for from_ids, to_ids in links:
+            for footnote_id in to_ids:
+                for fact_id in from_ids:
+                    by_id[footnote_id].related_fact_ids.append(fact_id)
+                    fact = first_fact_by_id.get(fact_id)
+                    if fact is not None and footnote_id not in fact.footnotes:
+                        fact.footnotes.append(footnote_id)
+        return by_id
+
     def _is_xbrl_element(self, element: HtmlElement) -> bool:
         """Check if element is an XBRL element."""
-        tag = element.tag
-        if not isinstance(tag, str):
-            return False
-
-        # Handle both namespaced and non-namespaced tags
-        tag_lower = tag.lower()
-        return (
-            tag.startswith('{' + self.NAMESPACES['ix'] + '}') or
-            tag.startswith('ix:') or
-            tag_lower.startswith('ix:')
-        )
+        return _is_ix_tag(element.tag)
 
     def _get_local_name(self, tag: Any) -> str:
         """Get local name from qualified tag."""
@@ -185,11 +266,22 @@ class XBRLExtractor:
                 return node
         return None
 
-    def _initialize_context(self, element: HtmlElement):
-        """Initialize context, unit and continuation information from document."""
-        # Find root element
-        root = element.getroottree().getroot()
+    def use_index(self, index: 'InlineXBRLSetIndex') -> None:
+        """
+        Resolve references against a document set's shared index.
 
+        An Inline XBRL Document Set (Inline XBRL 1.1, section 3) lets a fact in
+        one document use a context, unit or continuation defined in another, so
+        the definitions in the document being read are not enough. The index
+        replaces them; nothing is read from the document's own tree.
+        """
+        self.contexts = index.contexts
+        self.units = index.units
+        self.continuations = index.continuations
+        self._initialized = True
+
+    def _collect_definitions(self, root: HtmlElement) -> Tuple[List[HtmlElement], ...]:
+        """The context, unit and continuation elements under ``root``."""
         # One pass over the tree, bucketed by local name. Three separate
         # full-tree scans on a 20MB filing is the kind of cost that shows up.
         contexts, units, continuations = [], [], []
@@ -201,6 +293,12 @@ class XBRLExtractor:
                 units.append(node)
             elif local_name == 'continuation':
                 continuations.append(node)
+        return contexts, units, continuations
+
+    def _initialize_context(self, element: HtmlElement):
+        """Initialize context, unit and continuation information from document."""
+        root = element.getroottree().getroot()
+        contexts, units, continuations = self._collect_definitions(root)
 
         self._extract_contexts(contexts)
         self._extract_units(units)
@@ -235,9 +333,12 @@ class XBRLExtractor:
             context_data.update(self._extract_period(context))
 
             # Extract dimensions
-            dimensions = self._extract_dimensions(context)
+            nil_dimensions: List[str] = []
+            dimensions = self._extract_dimensions(context, nil_dimensions)
             if dimensions:
                 context_data['dimensions'] = dimensions
+            if nil_dimensions:
+                context_data['nil_dimensions'] = nil_dimensions
 
             self.contexts[context_id] = context_data
 
@@ -247,26 +348,32 @@ class XBRLExtractor:
         if period is None:
             return {}
 
+        # The same reading as the instance parser: whitespace collapsed and a
+        # whole-day dateTime folded onto its date (GH #1762).
         instant = self._find_first(period, 'instant')
         if instant is not None:
-            return {'instant': (instant.text or '').strip(), 'period_type': 'instant'}
+            return {'instant': normalize_period_boundary(instant.text or '', is_end=True),
+                    'period_type': 'instant'}
 
         start = self._find_first(period, 'startdate')
         end = self._find_first(period, 'enddate')
         if start is not None and end is not None:
             return {
-                'start_date': (start.text or '').strip(),
-                'end_date': (end.text or '').strip(),
+                'start_date': normalize_period_boundary(start.text or '', is_end=False),
+                'end_date': normalize_period_boundary(end.text or '', is_end=True),
                 'period_type': 'duration',
             }
         return {}
 
-    def _extract_dimensions(self, context: HtmlElement) -> Dict[str, str]:
+    def _extract_dimensions(self, context: HtmlElement,
+                            nil_dimensions: Optional[List[str]] = None) -> Dict[str, str]:
         """
         A context's dimensional members, keyed by axis.
 
         Members are carried in a segment or a scenario; the spec allows either
-        and filers use both.
+        and filers use both. A typed member the filer marked xsi:nil is '' and
+        its axis is appended to ``nil_dimensions``, as the instance parser
+        records it in ``Context.nil_dimensions`` (GH #1751).
         """
         dimensions: Dict[str, str] = {}
         for container_name in ('segment', 'scenario'):
@@ -281,7 +388,10 @@ class XBRLExtractor:
                 dim = member.get('dimension')
                 if dim:
                     child = next((c for c in member if isinstance(c.tag, str)), None)
-                    dimensions[dim] = (child.text or '').strip() if child is not None else ''
+                    nil = child is not None and is_xsi_nil(child)
+                    dimensions[dim] = (child.text or '').strip() if child is not None and not nil else ''
+                    if nil and nil_dimensions is not None and dim not in nil_dimensions:
+                        nil_dimensions.append(dim)
         return dimensions
 
     def _extract_units(self, units: List[HtmlElement]):
@@ -342,6 +452,7 @@ class XBRLExtractor:
             'contextRef': element.get('contextRef') or element.get('contextref'),
             'unitRef': element.get('unitRef') or element.get('unitref'),
             'decimals': element.get('decimals'),
+            'precision': element.get('precision'),
             'scale': element.get('scale'),
             'format': element.get('format'),
             'sign': element.get('sign')
@@ -389,8 +500,8 @@ class XBRLExtractor:
         """Extract ix:footnote element."""
         return {
             'type': 'footnote',
-            'footnoteRole': element.get('footnoteRole'),
-            'footnoteID': element.get('footnoteID')
+            'id': element.get('id'),
+            'footnoteRole': element.get('footnoteRole') or element.get('footnoterole'),
         }
 
     def _extract_fraction(self, element: HtmlElement) -> Dict[str, Any]:
@@ -447,7 +558,7 @@ class XBRLExtractor:
 
             if escape and not self._is_xbrl_element(child):
                 # tostring() already includes the child's tail.
-                parts.append(tostring(child, encoding='unicode', method='html'))
+                parts.append(tostring(self._project_escaped(child), encoding='unicode', method='html'))
             else:
                 # An ix: element is not XHTML, so escaped content unwraps it:
                 # its own content contributes, its start and end tags do not.
@@ -455,6 +566,50 @@ class XBRLExtractor:
                 # "<ix:nonnumeric ...>" wrappers embedded in the markup.
                 self._collect_content(child, parts, escape)
                 parts.append(child.tail or '')
+
+    def _project_escaped(self, element: HtmlElement) -> HtmlElement:
+        """
+        The XHTML an escaped fact's child contributes, with the Inline XBRL removed.
+
+        The rules of ``_collect_content`` apply at every depth, not just to the
+        fact's direct children (Inline XBRL 1.1 section 11.1, GH #1770): an
+        ``ix:exclude`` subtree is dropped with its tail kept, and any other
+        ``ix:`` element is replaced by its content. The work happens on a
+        detached copy, so the parsed tree other passes read is untouched; an
+        element with no ``ix:`` descendant is returned as it is.
+        """
+        exclude_tags, other_tags = self._ix_tags(element)
+        ix_tags = exclude_tags + other_tags
+        # iterdescendants() with no tag names yields every descendant.
+        if not ix_tags or next(element.iterdescendants(*ix_tags), None) is None:
+            return element
+        projected = copy.deepcopy(element)
+        # Both run in libxml2 by tag name, so no Python object is built for the
+        # XHTML nodes in between; the projected element itself is never removed.
+        if exclude_tags:
+            strip_elements(projected, *exclude_tags, with_tail=False)
+        if other_tags:
+            strip_tags(projected, *other_tags)
+        return projected
+
+    def _ix_tags(self, element: HtmlElement) -> Tuple[Tuple[str, ...], Tuple[str, ...]]:
+        """
+        The ix: tag names used in ``element``'s document: (exclude, all others).
+
+        Computed once per tree. ``iterdescendants``, ``strip_elements`` and
+        ``strip_tags`` match by exact tag name, so the names come from the
+        document itself rather than a fixed list. One pass over the tree is a
+        few milliseconds; the per-node test it replaces ran over the same
+        nested TextBlock subtrees hundreds of times per filing.
+        """
+        root = element.getroottree().getroot()
+        cached = self._ix_tag_cache
+        if cached is None or cached[0] is not root:
+            tags = sorted(tag for tag in {node.tag for node in root.iter()} if _is_ix_tag(tag))
+            excludes = tuple(tag for tag in tags if self._get_local_name(tag) == 'exclude')
+            others = tuple(tag for tag in tags if tag not in excludes)
+            cached = self._ix_tag_cache = (root, excludes, others)
+        return cached[1], cached[2]
 
     def _relevant_content(self, element: HtmlElement, escape: bool = False) -> str:
         """
@@ -479,12 +634,10 @@ class XBRLExtractor:
             if continuation is None:
                 logger.debug("iXBRL continuation %r referenced but not found", next_id)
                 break
-            # The whitespace between an origin element and its continuation
-            # lives outside both, so concatenating strictly would glue the last
-            # word of one to the first of the next. Escaped content is markup
-            # and is joined verbatim.
-            if not escape:
-                parts.append(' ')
+            # The chain's content is concatenated with nothing in between
+            # (Inline XBRL 1.1, section 4.1.1): the filer decides where the
+            # split falls, and it can fall inside a word or a number, as in
+            # Cooper's "6" + "101 Bollinger Canyon Road" (GH #1748).
             self._collect_content(continuation, parts, escape)
             next_id = continuation.get('continuedAt') or continuation.get('continuedat')
 
@@ -509,7 +662,9 @@ class XBRLExtractor:
         format_attr = element.get('format')
         if format_attr:
             try:
-                value = apply_transform(format_attr, value)
+                # The format resolves in the registry its prefix is declared
+                # for, not by local name under any namespace (GH #1743).
+                value = apply_transform(expand_format(element, format_attr), value)
             except UnknownTransformError:
                 issue = f"unsupported format {format_attr}"
                 self._report_format_issue(format_attr, issue)
@@ -529,11 +684,11 @@ class XBRLExtractor:
 
         # Apply sign if specified
         if element.get('sign') == '-' and value:
-            try:
-                value = f"{-Decimal(value):f}"
-            except (InvalidOperation, ValueError):
-                if not value.startswith('-'):
-                    value = '-' + value
+            negated = negate_exactly(value)
+            if negated is not None:
+                value = negated
+            elif not value.startswith('-'):
+                value = '-' + value
 
         return value.strip(), issue
 
@@ -542,3 +697,60 @@ class XBRLExtractor:
         if format_attr not in self._reported_formats:
             self._reported_formats.add(format_attr)
             logger.warning("Inline XBRL: %s; the raw display text is used instead", message)
+
+
+@dataclass(frozen=True)
+class InlineXBRLSetIndex:
+    """
+    The contexts, units and continuations of an Inline XBRL Document Set.
+
+    Inline XBRL 1.1 treats the documents of one submission as a single set:
+    only one of them needs an ix:header, and a fact in an exhibit can name a
+    context, unit or continuation defined in the primary document (IBM's FY2024
+    EX-13 defines none of its own). This index pools the definitions of every
+    supplied document so each document's facts resolve against the whole set.
+
+    An ID defined more than once, in one document or across several, is
+    ambiguous. It is left out of the lookups, so references to it resolve to
+    None, and recorded in ``ambiguous`` with the documents that define it. No
+    definition wins over another, so the result never depends on input order.
+    """
+
+    contexts: Dict[str, Dict[str, Any]]
+    units: Dict[str, str]
+    continuations: Dict[str, HtmlElement]
+    # kind ('context', 'unit', 'continuation') -> id -> defining documents,
+    # sorted and repeated once per definition.
+    ambiguous: Dict[str, Dict[str, Tuple[str, ...]]] = field(default_factory=dict)
+
+    KINDS = ('context', 'unit', 'continuation')
+
+    @classmethod
+    def build(cls, roots: Mapping[str, Optional[HtmlElement]]) -> 'InlineXBRLSetIndex':
+        """
+        Index the definitions under each named root (None for a document with
+        no parseable tree). Definitions are read by the same code a single
+        document uses, so a context means the same thing on either path.
+        """
+        reader = XBRLExtractor()
+        found: Dict[str, Dict[str, List[Tuple[str, HtmlElement]]]] = {kind: {} for kind in cls.KINDS}
+        for name, root in roots.items():
+            if root is None:
+                continue
+            for kind, nodes in zip(cls.KINDS, reader._collect_definitions(root), strict=True):
+                for node in nodes:
+                    node_id = node.get('id')
+                    if node_id:
+                        found[kind].setdefault(node_id, []).append((name, node))
+
+        unique = {kind: {node_id: defs[0][1] for node_id, defs in by_id.items() if len(defs) == 1}
+                  for kind, by_id in found.items()}
+        ambiguous = {kind: {node_id: tuple(sorted(name for name, _ in defs))
+                            for node_id, defs in by_id.items() if len(defs) > 1}
+                     for kind, by_id in found.items()}
+
+        reader._extract_contexts(list(unique['context'].values()))
+        reader._extract_units(list(unique['unit'].values()))
+        return cls(contexts=reader.contexts, units=reader.units,
+                   continuations=unique['continuation'],
+                   ambiguous={kind: ids for kind, ids in ambiguous.items() if ids})

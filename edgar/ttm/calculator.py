@@ -13,8 +13,8 @@ Example:
 
 """
 import re
-from dataclasses import dataclass
-from datetime import date, timedelta
+from dataclasses import dataclass, replace
+from datetime import date, datetime, timedelta
 from typing import Callable, List, Optional, Tuple
 
 import pandas as pd
@@ -111,15 +111,26 @@ EPS_NUMERATOR_CONCEPTS = {
     ),
 }
 
+# How far apart the filer's own preferred and substitute EPS numerators may be
+# (relative to the preferred value) before the substitute is refused. GH #1692
+# refuses a substitute the filer shows differing materially, such as net income
+# where preferred dividends separate it from income available to common (10% in
+# that issue's case). A gap within 0.5% bounds the EPS error at 0.5%: GOOGL's
+# Q3 2026 10-Q (0001652044-26-000084) tags 9M diluted 201,239M against basic
+# 200,855M (0.19%), which left TTM diluted EPS NaN wherever a diluted quarter
+# was missing (bead edgartools-91gqw).
+EPS_NUMERATOR_REL_TOLERANCE = 0.005
+
 
 def numerator_agrees_within(preferred: List[FinancialFact], substitute: List[FinancialFact],
                             start: date, end: date) -> bool:
     """May ``substitute`` stand in for the ``preferred`` EPS numerator over [start, end]?
 
     Yes unless the filer's own facts say they differ: some period overlapping the
-    span is tagged with both concepts and the latest-filed values disagree (a
-    preferred dividend, say, separates income available to common from net
-    income). Periods tagged with only one of them are no evidence either way.
+    span is tagged with both concepts and the latest-filed values disagree by
+    more than ``EPS_NUMERATOR_REL_TOLERANCE`` of the preferred value (a preferred
+    dividend, say, separates income available to common from net income).
+    Periods tagged with only one of them are no evidence either way.
     """
     def latest_by_period(facts):
         best = {}
@@ -136,9 +147,24 @@ def numerator_agrees_within(preferred: List[FinancialFact], substitute: List[Fin
     substitutes = latest_by_period(substitute)
     for key, fact in latest_by_period(preferred).items():
         other = substitutes.get(key)
-        if other is not None and abs(fact.numeric_value - other.numeric_value) > max(1.0, 1e-6 * abs(other.numeric_value)):
+        if other is None:
+            continue
+        allowed = max(1.0, EPS_NUMERATOR_REL_TOLERANCE * abs(fact.numeric_value))
+        if abs(fact.numeric_value - other.numeric_value) > allowed:
             return False
     return True
+
+
+def facts_filed_by(facts: List[FinancialFact], filed_by: date) -> List[FinancialFact]:
+    """The original facts an SEC filing made on or before ``filed_by`` reported (GH #1699).
+
+    Inclusive by filing date. A fact with no filing date cannot be shown to have
+    been filed by the cutoff, so it is left out. This runs on the original facts,
+    before deduplication or quarter derivation: those keep the latest-filed fact
+    for a period, so filtering their output would lose the earlier filings, and a
+    derived quarter carries only one of its operands' filing dates.
+    """
+    return [f for f in facts if f.filing_date is not None and f.filing_date <= filed_by]
 
 
 class DurationBucket:
@@ -169,6 +195,11 @@ class TTMMetric:
             today) by more than one reporting cycle — the window does not track
             "now" and the value may be years out of date (GH #893)
         warning: Optional warning message about data quality
+        period_end_cutoff: The requested reporting-period cutoff (``as_of``, or
+            ``filed_by`` when only that was given); None when neither was. The
+            window's own end is ``as_of_date``, which may be earlier.
+        filed_by: The requested filing-date cutoff, or None. When set, every
+            fact the value rests on was filed on or before it (GH #1699).
 
     """
 
@@ -183,6 +214,8 @@ class TTMMetric:
     has_calculated_q4: bool = False
     is_stale: bool = False
     warning: Optional[str] = None
+    period_end_cutoff: Optional[date] = None
+    filed_by: Optional[date] = None
 
     def __repr__(self):
         """String representation."""
@@ -218,7 +251,8 @@ class TTMCalculator:
         """
         self.facts = facts
 
-    def calculate_ttm(self, as_of: Optional[date] = None) -> TTMMetric:
+    def calculate_ttm(self, as_of: Optional[date] = None, *,
+                      filed_by: Optional[date] = None) -> TTMMetric:
         """Calculate TTM value as of a specific date.
 
         Selects the 4 most recent consecutive quarters ending on or before
@@ -228,13 +262,25 @@ class TTMCalculator:
         when discrete quarterly filings are not available.
 
         Args:
-            as_of: Date to calculate TTM as of (uses most recent if None)
+            as_of: Reporting-period cutoff: quarters ending on or before this date
+                (uses most recent if None). It does not limit which filings the
+                facts come from, so a quarter may be read from a later filing's
+                comparative.
+            filed_by: Filing-date cutoff (keyword-only, GH #1699). Only facts from
+                filings made on or before this date (inclusive, by SEC filing date)
+                are used, and they are chosen before any quarter is derived, so
+                every operand of a derived quarter passes too. A fact with no
+                filing date is left out. Given alone it is also the reporting
+                cutoff. In this mode the window is the latest one of four
+                gap-free quarters, which may end before the cutoff (see
+                ``as_of_date`` and ``is_stale``).
 
         Returns:
             TTMMetric with value and metadata
 
         Raises:
-            ValueError: If insufficient data (<4 quarters available after quarterization)
+            ValueError: If insufficient data (<4 quarters available after quarterization),
+                or with ``filed_by``, no gap-free four-quarter window
 
         Example:
             >>> ttm = calculator.calculate_ttm(as_of=date(2024, 3, 30))
@@ -242,11 +288,13 @@ class TTMCalculator:
             [(2023, 'Q3'), (2023, 'Q4'), (2024, 'Q1'), (2024, 'Q2')]
 
         """
+        if filed_by is not None:
+            return self._calculate_ttm_filed_by(as_of, filed_by)
 
         # Per-share earnings: quarters do not add up to a year, so the value is
         # a filed fiscal-year amount or there is none (GH #1695).
         if self.facts and self._is_per_share_earnings_concept(self.facts[0]):
-            return self._per_share_earnings_ttm(as_of)
+            return replace(self._per_share_earnings_ttm(as_of), period_end_cutoff=as_of)
 
         # 1. Get quarterized facts (includes derived Q2, Q3, Q4 from YTD/annual)
         quarterly = self._filter_quarterly_facts()
@@ -262,39 +310,97 @@ class TTMCalculator:
                 f"Quarterization requires Q1, YTD_6M, YTD_9M, and FY facts to derive all quarters."
             )
 
-        # 4. Check for gaps in quarterly data
+        # Staleness is measured against as_of when given (the caller asked for
+        # that point in time), otherwise against today (GH #893).
+        reference_date = as_of if as_of is not None else date.today()
+        return self._metric_for_window(quarterly, ttm_quarters, reference_date, period_end_cutoff=as_of)
+
+    def _calculate_ttm_filed_by(self, as_of: Optional[date], filed_by: date) -> TTMMetric:
+        """TTM from filings made on or before ``filed_by`` (GH #1699).
+
+        The cutoff applies to the original facts, so quarter derivation and the
+        latest-filing preference only ever see eligible filings. Only gap-free
+        windows qualify, before the latest is chosen.
+        """
+        from edgar.exceptions import ValidationError
+
+        if isinstance(filed_by, datetime):
+            filed_by = filed_by.date()
+        if not isinstance(filed_by, date):
+            raise TypeError(f"filed_by must be a date, got {type(filed_by).__name__}")
+        cutoff = as_of if as_of is not None else filed_by
+        concept = self.facts[0].concept if self.facts else 'this concept'
+        eligible = TTMCalculator(facts_filed_by(self.facts, filed_by))
+
+        if self.facts and self._is_per_share_earnings_concept(self.facts[0]):
+            if not eligible.facts:
+                raise ValidationError(
+                    f"No {concept} facts were filed on or before {filed_by}.",
+                    parameter="filed_by", invalid_value=filed_by)
+            return replace(eligible._per_share_earnings_ttm(cutoff),
+                           period_end_cutoff=cutoff, filed_by=filed_by)
+
+        quarterly = eligible._filter_quarterly_facts()
+        window = eligible._latest_gap_free_window(quarterly, cutoff)
+        if window is None:
+            in_range = sum(1 for q in quarterly if q.period_end <= cutoff)
+            raise ValidationError(
+                f"Insufficient data for a TTM of {concept}: filings made on or before "
+                f"{filed_by} give {in_range} quarters ending on or before {cutoff}, and no "
+                f"four of them are consecutive without a gap.",
+                parameter="filed_by", invalid_value=filed_by,
+                suggestions=["Pass a later filed_by date"])
+        return eligible._metric_for_window(quarterly, window, cutoff,
+                                           period_end_cutoff=cutoff, filed_by=filed_by)
+
+    def _latest_gap_free_window(self, quarterly: List[FinancialFact],
+                                cutoff: date) -> Optional[List[FinancialFact]]:
+        """The latest four consecutive quarters ending on or before ``cutoff`` with no gap.
+
+        Gaps are judged by `_check_for_gaps` (with its 52/53-week tolerance)
+        before the latest window is chosen, so a newer gapped sum is never
+        preferred to an older complete year.
+        """
+        candidates = sorted((q for q in quarterly if q.period_end <= cutoff), key=lambda q: q.period_end)
+        for end in range(len(candidates), MIN_QUARTERS_FOR_TTM - 1, -1):
+            window = candidates[end - MIN_QUARTERS_FOR_TTM:end]
+            if not self._check_for_gaps(window):
+                return window
+        return None
+
+    def _metric_for_window(self, quarterly: List[FinancialFact], ttm_quarters: List[FinancialFact],
+                           reference_date: date, period_end_cutoff: Optional[date] = None,
+                           filed_by: Optional[date] = None) -> TTMMetric:
+        """Build the TTMMetric for a selected four-quarter window."""
+        # Check for gaps in quarterly data
         has_gaps = self._check_for_gaps(ttm_quarters)
 
-        # 5. Aggregate the window: flows are summed, levels (share counts, rates)
-        #    are averaged -- the same rule calculate_ttm_trend applies (GH #1698)
+        # Aggregate the window: flows are summed, levels (share counts, rates)
+        # are averaged -- the same rule calculate_ttm_trend applies (GH #1698)
         ttm_value = self._aggregate_window(ttm_quarters)
 
-        # 6. Check if any quarters were derived (vs. reported)
+        # Check if any quarters were derived (vs. reported)
         has_calculated_q4 = any(
             q.calculation_context and 'derived' in q.calculation_context
             for q in ttm_quarters
         )
 
-        # 7. Detect staleness: does the newest quarter track the reference date,
-        #    or does it lag by more than a reporting cycle? When as_of is given,
-        #    the caller asked for that point in time, so measure against it;
-        #    otherwise measure against today. (GH #893)
+        # Detect staleness: does the newest quarter track the reference date, or
+        # does it lag by more than a reporting cycle? (GH #893)
         window_end = ttm_quarters[-1].period_end
-        reference_date = as_of if as_of is not None else date.today()
         stale_days = (reference_date - window_end).days
         is_stale = stale_days > STALE_THRESHOLD_DAYS
 
-        # 8. Generate warning if data quality issues exist
+        # Generate warning if data quality issues exist
         warning = self._generate_warning(
             quarterly, ttm_quarters, has_calculated_q4,
             is_stale=is_stale, window_end=window_end, reference_date=reference_date
         )
 
-        # 9. Build and return result. Label each quarter's fiscal year from its
-        #    period_end and the fiscal year-end month, as calculate_ttm_trend does
-        #    (GH #793): a quarter re-filed as a comparative carries the LATER
-        #    filing's fiscal_year, so AAPL's quarter ending 2022-12-31 read as
-        #    (2024, 'Q1') (GH #1699).
+        # Label each quarter's fiscal year from its period_end and the fiscal
+        # year-end month, as calculate_ttm_trend does (GH #793): a quarter re-filed
+        # as a comparative carries the LATER filing's fiscal_year, so AAPL's quarter
+        # ending 2022-12-31 read as (2024, 'Q1') (GH #1699).
         from edgar.entity.enhanced_statement import (
             calculate_fiscal_year_for_label,
             detect_fiscal_year_end,
@@ -312,7 +418,9 @@ class TTMCalculator:
             has_gaps=has_gaps,
             has_calculated_q4=has_calculated_q4,
             is_stale=is_stale,
-            warning=warning
+            warning=warning,
+            period_end_cutoff=period_end_cutoff,
+            filed_by=filed_by,
         )
 
     def _per_share_earnings_ttm(self, as_of: Optional[date]) -> TTMMetric:

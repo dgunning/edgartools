@@ -1,0 +1,434 @@
+{
+ "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfOperations": {
+  "roots": [
+   "us-gaap_IncomeStatementAbstract"
+  ],
+  "nodes": {
+   "us-gaap_IncomeStatementAbstract": {
+    "children": [
+     "us-gaap_StatementTable"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "us-gaap_StatementTable": {
+    "children": [
+     "us-gaap_StatementClassOfStockAxis",
+     "us-gaap_StatementLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label",
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "us-gaap_StatementClassOfStockAxis": {
+    "children": [
+     "us-gaap_ClassOfStockDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "us-gaap_ClassOfStockDomain": {
+    "children": [
+     "us-gaap_CommonClassAMember",
+     "us-gaap_CommonClassBMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementLineItems": {
+    "children": [
+     "vgii_FormationAndOperatingCosts",
+     "us-gaap_OperatingIncomeLoss",
+     "us-gaap_NonoperatingIncomeExpenseAbstract",
+     "us-gaap_NetIncomeLoss",
+     "us-gaap_WeightedAverageNumberOfShareOutstandingBasicAndDiluted",
+     "us-gaap_EarningsPerShareBasicAndDiluted"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel"
+    ]
+   },
+   "us-gaap_NonoperatingIncomeExpenseAbstract": {
+    "children": [
+     "us-gaap_InvestmentIncomeNonoperating",
+     "vgii_OfferingExpensesRelatedToWarrantIssuance",
+     "us-gaap_FairValueAdjustmentOfWarrants",
+     "us-gaap_NonoperatingIncomeExpense"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_IncomeStatementAbstract",
+    "us-gaap_StatementTable",
+    1.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementClassOfStockAxis",
+    2.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_StatementClassOfStockAxis",
+    "us-gaap_ClassOfStockDomain",
+    3.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_ClassOfStockDomain",
+    "us-gaap_CommonClassAMember",
+    4.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_ClassOfStockDomain",
+    "us-gaap_CommonClassBMember",
+    5.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementLineItems",
+    6.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "vgii_FormationAndOperatingCosts",
+    7.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_OperatingIncomeLoss",
+    8.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_NonoperatingIncomeExpenseAbstract",
+    9.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_NonoperatingIncomeExpenseAbstract",
+    "us-gaap_InvestmentIncomeNonoperating",
+    10.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_NonoperatingIncomeExpenseAbstract",
+    "vgii_OfferingExpensesRelatedToWarrantIssuance",
+    11.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_NonoperatingIncomeExpenseAbstract",
+    "us-gaap_FairValueAdjustmentOfWarrants",
+    12.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_NonoperatingIncomeExpenseAbstract",
+    "us-gaap_NonoperatingIncomeExpense",
+    13.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_NetIncomeLoss",
+    14.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_WeightedAverageNumberOfShareOutstandingBasicAndDiluted",
+    15.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_EarningsPerShareBasicAndDiluted",
+    16.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ]
+  ]
+ },
+ "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfCashFlows": {
+  "roots": [
+   "us-gaap_StatementOfCashFlowsAbstract"
+  ],
+  "nodes": {
+   "us-gaap_StatementOfCashFlowsAbstract": {
+    "children": [
+     "us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract",
+     "us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract",
+     "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract",
+     "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease",
+     "us-gaap_CashAndCashEquivalentsAtCarryingValue",
+     "us-gaap_CashAndCashEquivalentsAtCarryingValue",
+     "us-gaap_SupplementalCashFlowElementsAbstract"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel",
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     "http://www.xbrl.org/2003/role/periodEndLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel"
+    ]
+   },
+   "us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract": {
+    "children": [
+     "us-gaap_NetIncomeLoss",
+     "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+     "us-gaap_NetCashProvidedByUsedInOperatingActivities"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/definitionGuidance",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   },
+   "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract": {
+    "children": [
+     "us-gaap_InvestmentIncomeNonoperating",
+     "vgii_OfferingCostsAllocatedToWarrantLiability",
+     "us-gaap_FairValueAdjustmentOfWarrants",
+     "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel"
+    ]
+   },
+   "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract": {
+    "children": [
+     "us-gaap_IncreaseDecreaseInPrepaidExpense",
+     "us-gaap_IncreaseDecreaseInAccruedLiabilities",
+     "us-gaap_IncreaseDecreaseInDueToRelatedPartiesCurrent"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract": {
+    "children": [
+     "us-gaap_PaymentsToAcquireRestrictedInvestments",
+     "us-gaap_NetCashProvidedByUsedInInvestingActivities"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   },
+   "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract": {
+    "children": [
+     "us-gaap_ProceedsFromIssuanceOfCommonStock",
+     "us-gaap_SaleOfStockConsiderationReceivedOnTransaction",
+     "us-gaap_ProceedsFromDerivativeInstrumentFinancingActivities",
+     "us-gaap_ProceedsFromNotesPayable",
+     "us-gaap_PaymentsOfStockIssuanceCosts",
+     "us-gaap_NetCashProvidedByUsedInFinancingActivities"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/totalLabel"
+    ]
+   },
+   "us-gaap_SupplementalCashFlowElementsAbstract": {
+    "children": [
+     "vgii_Deferredunderwritingcommissionschargedtotemporaryequity"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_StatementOfCashFlowsAbstract",
+    "us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract",
+    1.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract",
+    "us-gaap_NetIncomeLoss",
+    2.0,
+    "http://www.xbrl.org/2003/role/definitionGuidance"
+   ],
+   [
+    "us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract",
+    "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+    3.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+    "us-gaap_InvestmentIncomeNonoperating",
+    4.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+    "vgii_OfferingCostsAllocatedToWarrantLiability",
+    5.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+    "us-gaap_FairValueAdjustmentOfWarrants",
+    6.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract",
+    "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
+    7.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
+    "us-gaap_IncreaseDecreaseInPrepaidExpense",
+    8.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
+    "us-gaap_IncreaseDecreaseInAccruedLiabilities",
+    9.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInOperatingCapitalAbstract",
+    "us-gaap_IncreaseDecreaseInDueToRelatedPartiesCurrent",
+    10.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract",
+    "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+    11.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_StatementOfCashFlowsAbstract",
+    "us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract",
+    12.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract",
+    "us-gaap_PaymentsToAcquireRestrictedInvestments",
+    13.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract",
+    "us-gaap_NetCashProvidedByUsedInInvestingActivities",
+    14.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_StatementOfCashFlowsAbstract",
+    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    15.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "us-gaap_ProceedsFromIssuanceOfCommonStock",
+    16.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "us-gaap_SaleOfStockConsiderationReceivedOnTransaction",
+    17.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "us-gaap_ProceedsFromDerivativeInstrumentFinancingActivities",
+    18.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "us-gaap_ProceedsFromNotesPayable",
+    19.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "us-gaap_PaymentsOfStockIssuanceCosts",
+    20.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract",
+    "us-gaap_NetCashProvidedByUsedInFinancingActivities",
+    21.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_StatementOfCashFlowsAbstract",
+    "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease",
+    22.0,
+    "http://www.xbrl.org/2003/role/totalLabel"
+   ],
+   [
+    "us-gaap_StatementOfCashFlowsAbstract",
+    "us-gaap_CashAndCashEquivalentsAtCarryingValue",
+    23.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "us-gaap_StatementOfCashFlowsAbstract",
+    "us-gaap_CashAndCashEquivalentsAtCarryingValue",
+    24.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ],
+   [
+    "us-gaap_StatementOfCashFlowsAbstract",
+    "us-gaap_SupplementalCashFlowElementsAbstract",
+    25.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_SupplementalCashFlowElementsAbstract",
+    "vgii_Deferredunderwritingcommissionschargedtotemporaryequity",
+    26.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ]
+  ]
+ }
+}

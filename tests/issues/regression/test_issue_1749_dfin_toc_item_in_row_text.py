@@ -53,3 +53,32 @@ def test_thin_row_text_result_does_not_suppress_generic_scan():
     via_dfin = TOCAnalyzer(form="10-Q").analyze_toc_structure(html, agent="Donnelley")
     assert len(generic) == 11
     assert via_dfin == generic
+
+
+@pytest.mark.network
+@pytest.mark.vcr
+def test_tesla_10q_2023q1_part_i_item_1_is_not_the_contents_page():
+    """Tesla's previous 10-Q, 0000950170-23-013890 (quarter ended 2023-03-31), returned the same
+    4,395-character contents page for Part I, Item 1."""
+    from edgar import find
+    tenq = find("0000950170-23-013890").obj()
+    item1 = tenq["Part I, Item 1"]
+    assert len(item1) == 59229
+    assert item1.startswith("ITEM 1.\tFINANCIAL STATEMENTS")
+    assert len(tenq["Part I, Item 2"]) == 30355
+    assert len(tenq["Part I, Item 3"]) == 1710
+    assert len(tenq["Part I, Item 4"]) == 1886
+
+
+@pytest.mark.network
+@pytest.mark.vcr
+def test_broad_street_realty_10q_part_i_item_1_is_not_the_contents_page():
+    """Broad Street Realty's 10-Q 0000950170-23-026097 (quarter ended 2023-03-31) returned a
+    1,980-character contents page for Part I, Item 1."""
+    from edgar import find
+    tenq = find("0000950170-23-026097").obj()
+    item1 = tenq["Part I, Item 1"]
+    assert len(item1) == 79179
+    assert item1.startswith("Item 1. Financial Statements")
+    assert len(tenq["Part I, Item 3"]) == 200
+    assert len(tenq["Part I, Item 4"]) == 3389

@@ -141,6 +141,12 @@ class ElementCatalog:
         typed_domain_ref: The xbrldt:typedDomainRef of a TYPED dimension. Its
             presence is what makes a dimension typed rather than explicit, so
             None here means "declared without one", not "we never looked"
+        enum_domain: The enum2:domain (or enum 1.0 enum:domain) attribute of an
+            extensible-enumeration element, verbatim, e.g. 'us-gaap:AssetsAbstract';
+            None when the declaration carries none
+        enum_linkrole: The enum2:linkrole (or enum:linkrole) attribute, verbatim
+        enum_head_usable: The enum2:headUsable (or enum:headUsable) attribute,
+            verbatim ('true'/'false'); None when absent
     """
 
     def __init__(self,
@@ -151,7 +157,10 @@ class ElementCatalog:
                  abstract: bool = False,
                  labels: Optional[Dict[str, str]] = None,
                  substitution_group: Optional[str] = None,
-                 typed_domain_ref: Optional[str] = None
+                 typed_domain_ref: Optional[str] = None,
+                 enum_domain: Optional[str] = None,
+                 enum_linkrole: Optional[str] = None,
+                 enum_head_usable: Optional[str] = None
                  ):
         self.name = name
         self.data_type = data_type
@@ -161,9 +170,17 @@ class ElementCatalog:
         self.labels = labels if labels is not None else {}
         self.substitution_group = substitution_group
         self.typed_domain_ref = typed_domain_ref
+        self.enum_domain = enum_domain
+        self.enum_linkrole = enum_linkrole
+        self.enum_head_usable = enum_head_usable
 
     def __str__(self) -> str:
         return self.name
+
+
+# How a typed member the filer marked xsi:nil is shown: the SEC's own rendering
+# prints "(nil)" (GH #1751). The member's value is ''.
+NIL_MEMBER_LABEL = "(nil)"
 
 
 class Context(BaseModel):
@@ -176,6 +193,9 @@ class Context(BaseModel):
     entity: Dict[str, Any] = Field(default_factory=dict)
     period: Dict[str, Any] = Field(default_factory=dict)
     dimensions: Dict[str, str] = Field(default_factory=dict)
+    # Typed axes whose member the filer marked xsi:nil. The axis stays in
+    # `dimensions` with the value '' (GH #1751).
+    nil_dimensions: List[str] = Field(default_factory=list)
 
     @property
     def period_string(self) -> str:
@@ -200,16 +220,26 @@ class Fact(BaseModel):
 
     The fact_id field preserves the original id attribute from the XML element,
     enabling linkage with footnotes.
+
+    The is_nil field records that the source element carried
+    xsi:nil="true" (or "1"), telling a filed nil item apart from an element
+    with empty content; both have value '' and numeric_value None.
     """
     element_id: str
     context_ref: str
     value: str
     unit_ref: Optional[str] = None
     decimals: Optional[Union[int, str]] = None  # int or "INF"
+    # The @precision attribute as filed. decimals holds what it implies (XBRL 2.1 §4.6.6).
+    precision: Optional[str] = None
     numeric_value: Optional[float] = None
     footnotes: List[str] = Field(default_factory=list)
     instance_id: Optional[int] = None
     fact_id: Optional[str] = None  # Original id attribute from the XML
+    # Whether the filer marked the item xsi:nil. Source metadata only: it does
+    # not mean zero, not-applicable or a retraction, and a nil item still has
+    # value '' and numeric_value None (GH #1254).
+    is_nil: bool = False
 
 
 class Footnote(BaseModel):
@@ -300,6 +330,22 @@ class PresentationNode(BaseModel):
         return False
 
 
+class PresentationRelationship(BaseModel):
+    """
+    One parent-child presentation relationship, as filed.
+
+    Every relationship in the role's network is one of these, after prohibition
+    and overriding (XBRL 2.1 section 3.5.3.9.7). A parent may present the same
+    child twice with a different `order` or `preferred_label` (Bank of America
+    shows a receivable as a terse total and again as a verbose detail); both
+    are kept here, although `PresentationNode.children` lists the child once.
+    """
+    parent_id: str
+    child_id: str
+    order: float = 0.0
+    preferred_label: Optional[str] = None
+
+
 class PresentationTree(BaseModel):
     """
     A presentation tree for a specific role.
@@ -326,6 +372,11 @@ class PresentationTree(BaseModel):
     # path, which is what `XBRL._generate_line_items` does (edgartools-f07v).
     all_nodes: Dict[str, PresentationNode] = Field(default_factory=dict)
     order: int = 0
+    # Every relationship in the role's network, in filed order. `all_nodes` is
+    # the statement view and lists a child concept once per parent (GH #825),
+    # except a period start/end pair; this keeps each reference whose order or
+    # preferred label differs (GH #1758).
+    relationships: List[PresentationRelationship] = Field(default_factory=list)
 
     def model_post_init(self, __context) -> None:
         # A tree built by an older caller that only set the scalar still has a
@@ -364,6 +415,10 @@ class CalculationArc(BaseModel):
     child_id: str
     weight: float = 1.0
     order: float = 0.0
+    # The summation-item arcrole: XBRL 2.1's (http://www.xbrl.org/2003/...) or
+    # Calculations 1.1's (https://xbrl.org/2023/...). The two are separate
+    # networks with different validation rules; None for an arc built by hand.
+    arcrole: Optional[str] = None
 
 
 class CalculationTree(BaseModel):

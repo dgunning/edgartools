@@ -1,0 +1,15 @@
+{
+ "accession": "0001562762-22-000397",
+ "filer": "DRDGOLD LTD",
+ "form": "20-F",
+ "filing_date": "2022-10-28",
+ "role": "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+ "page": "R2.htm",
+ "short_name": "CONSOLIDATED STATEMENT OF PROFIT OR LOSS AND OTHER COMPREHENSIVE INCOME",
+ "sic": "1040",
+ "period_of_report": "2022-06-30",
+ "menu_categories": {
+  "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": "Statements"
+ },
+ "access": "income_statement()"
+}

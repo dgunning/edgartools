@@ -135,6 +135,7 @@ nav:
       - Standardization: xbrl/concepts/standardization.md
       - Footnotes: guides/xbrl-footnotes.md
       - SEC Interactive Viewer: guides/sec-viewer-guide.md
+      - Fidelity Scorecard: xbrl/fidelity-scorecard.md
 
   # ==========================================
   # AI - MCP server & skills for AI agents
@@ -179,6 +180,7 @@ nav:
     - SEC Compliance: resources/sec-compliance.md
     - Troubleshooting: resources/troubleshooting.md
     - Performance: resources/performance.md
+    - Upgrading to 6.1: upgrade/6.1.md
     - Upgrading to 6.0: upgrade/6.0.md
     - Contributing: contributing.md
     - About the Creator: about.md

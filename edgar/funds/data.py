@@ -577,10 +577,17 @@ def _resolve_company_cik(identifier: str) -> Optional[tuple]:
 
     Returns:
         Tuple of (cik, company_name) or None if not found
+
+    Raises:
+        A TRANSPORT_ERRORS exception when SEC cannot be reached or refuses the
+        request: that is not an answer, and None would read as "no such fund".
     """
+    # browse-edgar accepts count only from {10, 20, ..., 100, 500} since
+    # 2026-11-16; count=1 gets HTTP 400 "Invalid count", which made every
+    # Fund("C...") and Fund("S...") lookup return None (edgartools-pjlj5.4).
     resolve_url = (
         f"https://www.sec.gov/cgi-bin/browse-edgar?"
-        f"company=&CIK={identifier}&type=&dateb=&owner=include&count=1"
+        f"company=&CIK={identifier}&type=&dateb=&owner=include&count=10"
         f"&search_text=&action=getcompany"
     )
     try:
@@ -608,6 +615,10 @@ def _resolve_company_cik(identifier: str) -> Optional[tuple]:
             return None
         cik = _text(cik_link).split(' ')[0].strip()
         return cik, company_name
+    except TRANSPORT_ERRORS:
+        # SEC's 400 for count=1 was logged as a warning and returned None, so
+        # the lookup failed silently for days; see _get_fund_object.
+        raise
     except Exception as e:
         log.warning("Error resolving fund identifier %s: %s", identifier, e)
         return None

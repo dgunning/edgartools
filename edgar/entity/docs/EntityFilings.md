@@ -233,6 +233,16 @@ df = filings.to_pandas('form', 'filing_date', 'accession_number')
 # fileNumber, items, size, isXBRL, isInlineXBRL, etc.
 ```
 
+The camelCase columns keep the field names of SEC's submissions JSON.
+`acceptanceDateTime` is the acceptance time as that JSON reports it (tz-aware UTC,
+the same value as `filing.reported_acceptance_datetime`). SEC has served it hours
+off for whole companies at a time, so when the exact moment matters, such as
+before or after the 16:00 close, use the filing's own header instead:
+
+```python
+times = filings.accepted_at()   # Series indexed by accession number, America/New_York
+```
+
 ### save_parquet()
 
 Save to Parquet file:

@@ -1,0 +1,515 @@
+{
+ "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity": {
+  "roots": [
+   "ifrs-full_StatementOfChangesInEquityAbstract"
+  ],
+  "nodes": {
+   "ifrs-full_StatementOfChangesInEquityAbstract": {
+    "children": [
+     "ifrs-full_StatementOfChangesInEquityTable"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_StatementOfChangesInEquityTable": {
+    "children": [
+     "ifrs-full_ComponentsOfEquityAxis",
+     "ifrs-full_CategoriesOfFinancialAssetsAxis",
+     "ifrs-full_ReservesWithinEquityAxis",
+     "ifrs-full_ClassesOfShareCapitalAxis",
+     "ifrs-full_BusinessCombinationsAxis",
+     "ifrs-full_InitiallyAppliedIFRSsAxis",
+     "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis",
+     "ifrs-full_StatementOfChangesInEquityLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_ComponentsOfEquityAxis": {
+    "children": [
+     "ifrs-full_EquityMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_EquityMember": {
+    "children": [
+     "ifrs-full_AdditionalPaidinCapitalMember",
+     "ifrs-full_RetainedEarningsMember",
+     "ifrs-full_AccumulatedOtherComprehensiveIncomeMember",
+     "ifrs-full_NoncontrollingInterestsMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_CategoriesOfFinancialAssetsAxis": {
+    "children": [
+     "ifrs-full_FinancialAssetsCategoryMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_FinancialAssetsCategoryMember": {
+    "children": [
+     "ifrs-full_FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_ReservesWithinEquityAxis": {
+    "children": [
+     "ifrs-full_OtherReservesMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_OtherReservesMember": {
+    "children": [
+     "ifrs-full_ReserveOfExchangeDifferencesOnTranslationMember",
+     "ifrs-full_ReserveOfCashFlowHedgesMember",
+     "ifrs-full_ReserveOfRemeasurementsOfDefinedBenefitPlansMember",
+     "ifrs-full_ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMember",
+     "cm_ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_ClassesOfShareCapitalAxis": {
+    "children": [
+     "ifrs-full_ClassesOfShareCapitalMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_ClassesOfShareCapitalMember": {
+    "children": [
+     "ifrs-full_PreferenceSharesMember",
+     "ifrs-full_OrdinarySharesMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/presentationGuidance",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_BusinessCombinationsAxis": {
+    "children": [
+     "ifrs-full_EntitysTotalForBusinessCombinationsMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_InitiallyAppliedIFRSsAxis": {
+    "children": [
+     "ifrs-full_InitiallyAppliedIFRSsMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_InitiallyAppliedIFRSsMember": {
+    "children": [
+     "ifrs-full_IFRS17Member"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis": {
+    "children": [
+     "ifrs-full_RestatedMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_RestatedMember": {
+    "children": [
+     "ifrs-full_PreviouslyStatedMember",
+     "ifrs-full_IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "ifrs-full_StatementOfChangesInEquityLineItems": {
+    "children": [
+     "ifrs-full_Equity",
+     "ifrs-full_ProfitLossAttributableToOwnersOfParent",
+     "ifrs-full_ProfitLossAttributableToNoncontrollingInterests",
+     "ifrs-full_GainsLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax",
+     "cm_AvailableForSaleFinancialAssetsOtherComprehensiveIncomeNetOfTaxAfterReclassification",
+     "ifrs-full_OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation",
+     "ifrs-full_OtherComprehensiveIncomeNetOfTaxCashFlowHedges",
+     "ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans",
+     "ifrs-full_OtherComprehensiveIncomeNetOfTaxChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiability",
+     "ifrs-full_DividendsPaid",
+     "cm_PremiumOnPurchaseOfCommonSharesForCancellation",
+     "ifrs-full_ReclassificationAdjustmentsOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax",
+     "ifrs-full_IssueOfEquity",
+     "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions",
+     "ifrs-full_ReductionOfIssuedCapital",
+     "cm_IncreaseDecreaseThroughExerciseOfStockOptionsAndSettlementOfOtherEquitysettledSharebasedAwards",
+     "ifrs-full_IncreaseDecreaseThroughTreasuryShareTransactions",
+     "cm_RedemptionOfPreferredSharesValue",
+     "ifrs-full_IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+     "ifrs-full_Equity"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/periodEndLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "ifrs-full_StatementOfChangesInEquityAbstract",
+    "ifrs-full_StatementOfChangesInEquityTable",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_ComponentsOfEquityAxis",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ComponentsOfEquityAxis",
+    "ifrs-full_EquityMember",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_EquityMember",
+    "ifrs-full_AdditionalPaidinCapitalMember",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_EquityMember",
+    "ifrs-full_RetainedEarningsMember",
+    5.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_EquityMember",
+    "ifrs-full_AccumulatedOtherComprehensiveIncomeMember",
+    6.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_EquityMember",
+    "ifrs-full_NoncontrollingInterestsMember",
+    7.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_CategoriesOfFinancialAssetsAxis",
+    8.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_CategoriesOfFinancialAssetsAxis",
+    "ifrs-full_FinancialAssetsCategoryMember",
+    9.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_FinancialAssetsCategoryMember",
+    "ifrs-full_FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMember",
+    10.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_ReservesWithinEquityAxis",
+    11.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ReservesWithinEquityAxis",
+    "ifrs-full_OtherReservesMember",
+    12.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_OtherReservesMember",
+    "ifrs-full_ReserveOfExchangeDifferencesOnTranslationMember",
+    13.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_OtherReservesMember",
+    "ifrs-full_ReserveOfCashFlowHedgesMember",
+    14.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_OtherReservesMember",
+    "ifrs-full_ReserveOfRemeasurementsOfDefinedBenefitPlansMember",
+    15.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_OtherReservesMember",
+    "ifrs-full_ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMember",
+    16.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_OtherReservesMember",
+    "cm_ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMember",
+    17.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_ClassesOfShareCapitalAxis",
+    18.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ClassesOfShareCapitalAxis",
+    "ifrs-full_ClassesOfShareCapitalMember",
+    19.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_ClassesOfShareCapitalMember",
+    "ifrs-full_PreferenceSharesMember",
+    20.0,
+    "http://www.xbrl.org/2003/role/presentationGuidance"
+   ],
+   [
+    "ifrs-full_ClassesOfShareCapitalMember",
+    "ifrs-full_OrdinarySharesMember",
+    21.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_BusinessCombinationsAxis",
+    22.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_BusinessCombinationsAxis",
+    "ifrs-full_EntitysTotalForBusinessCombinationsMember",
+    23.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_InitiallyAppliedIFRSsAxis",
+    24.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_InitiallyAppliedIFRSsAxis",
+    "ifrs-full_InitiallyAppliedIFRSsMember",
+    25.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_InitiallyAppliedIFRSsMember",
+    "ifrs-full_IFRS17Member",
+    26.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis",
+    27.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis",
+    "ifrs-full_RestatedMember",
+    28.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_RestatedMember",
+    "ifrs-full_PreviouslyStatedMember",
+    29.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_RestatedMember",
+    "ifrs-full_IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember",
+    30.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityTable",
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    31.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_Equity",
+    32.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_ProfitLossAttributableToOwnersOfParent",
+    33.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_ProfitLossAttributableToNoncontrollingInterests",
+    34.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_GainsLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax",
+    35.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "cm_AvailableForSaleFinancialAssetsOtherComprehensiveIncomeNetOfTaxAfterReclassification",
+    36.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation",
+    37.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_OtherComprehensiveIncomeNetOfTaxCashFlowHedges",
+    38.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans",
+    39.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_OtherComprehensiveIncomeNetOfTaxChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiability",
+    40.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_DividendsPaid",
+    41.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "cm_PremiumOnPurchaseOfCommonSharesForCancellation",
+    42.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_ReclassificationAdjustmentsOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax",
+    43.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_IssueOfEquity",
+    44.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions",
+    45.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_ReductionOfIssuedCapital",
+    46.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "cm_IncreaseDecreaseThroughExerciseOfStockOptionsAndSettlementOfOtherEquitysettledSharebasedAwards",
+    47.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_IncreaseDecreaseThroughTreasuryShareTransactions",
+    48.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "cm_RedemptionOfPreferredSharesValue",
+    49.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_IncreaseDecreaseThroughTransfersAndOtherChangesEquity",
+    50.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "ifrs-full_StatementOfChangesInEquityLineItems",
+    "ifrs-full_Equity",
+    51.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ]
+  ]
+ }
+}

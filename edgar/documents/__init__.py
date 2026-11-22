@@ -16,6 +16,7 @@ from edgar.documents.cross_reference_index import (
 )
 from edgar.documents.document import Document
 from edgar.documents.exceptions import ParsingError
+from edgar.documents.inline_xbrl_set import parse_inline_xbrl_set
 from edgar.documents.parser import HTMLParser
 from edgar.documents.renderers import MarkdownRenderer, TextRenderer
 from edgar.documents.search import DocumentSearch, SearchMode, SearchResult
@@ -36,6 +37,7 @@ __all__ = [
     'MarkdownRenderer',
     'TextRenderer',
     'parse_html',
+    'parse_inline_xbrl_set',
     'CrossReferenceIndex',
     'PageRange',
     'IndexEntry',

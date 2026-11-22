@@ -38,6 +38,9 @@ __all__ = [
     'get_footnote_ids',
     'local_name',
     'optional_decimal',
+    'parse_xml_boolean',
+    'is_xsi_nil',
+    'prefix_namespace',
     'parse_xml',
     'xml_parser',
     'add_safe_resolver',
@@ -424,6 +427,68 @@ def optional_decimal(parent: XmlNode,
         if text == "N/A":
             return None
         return Decimal(text)
+
+
+def parse_xml_boolean(value: Optional[str]) -> Optional[bool]:
+    """Read an XML Schema boolean (``xs:boolean``).
+
+    The lexical space is ``true``, ``false``, ``1`` and ``0``, after collapsing
+    whitespace. Comparing against the word ``true`` alone reads a valid ``1`` as
+    False (GH #1724). Case is folded because SEC data is not always strict
+    about it.
+
+    Returns None for a missing, empty or non-boolean value, so callers can tell
+    "false" from "not stated".
+    """
+    if value is None:
+        return None
+    normalized = str(value).strip().lower()
+    if normalized in ('true', '1'):
+        return True
+    if normalized in ('false', '0'):
+        return False
+    return None
+
+
+XSI_NAMESPACE = 'http://www.w3.org/2001/XMLSchema-instance'
+
+
+def prefix_namespace(element, prefix: str) -> Optional[str]:
+    """The namespace URI ``prefix`` is bound to where ``element`` sits, or None."""
+    nsmap = getattr(element, 'nsmap', None)
+    if nsmap and prefix in nsmap:          # a namespace-aware (XML) tree
+        return nsmap[prefix]
+    # An lxml.html tree keeps xmlns declarations as ordinary attributes; the
+    # nearest declaration wins, as it would in XML.
+    attribute = f'xmlns:{prefix}'
+    node = element
+    while node is not None:
+        uri = node.get(attribute)
+        if uri is not None:
+            return uri.strip()
+        node = node.getparent()
+    return None
+
+
+def is_xsi_nil(element) -> bool:
+    """
+    Whether ``element`` is marked nil (``xsi:nil`` true or 1).
+
+    The attribute is found by its namespace, not its prefix: AAR binds the
+    XML Schema instance namespace to ``xs`` as well as ``xsi`` (GH #1757). On
+    an XML tree that is the expanded name; on an lxml.html tree, which keeps
+    ``prefix:nil`` as a literal attribute name, the prefix is resolved against
+    the in-scope ``xmlns`` declarations. One rule for the instance parser and
+    the inline extractor.
+    """
+    value = element.get(f'{{{XSI_NAMESPACE}}}nil')
+    if value is None:
+        for name, attr_value in element.attrib.items():
+            prefix, colon, local = name.partition(':')
+            if colon and local == 'nil' and prefix_namespace(element, prefix) == XSI_NAMESPACE:
+                value = attr_value
+                break
+    return parse_xml_boolean(value) is True
 
 
 def extract_child_text(tag: XmlNode,

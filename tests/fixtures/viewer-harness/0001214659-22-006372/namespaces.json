@@ -1,0 +1,20 @@
+{
+ "namespace_prefixes": {
+  "http://fasb.org/srt-types/2022": "srt-types",
+  "http://fasb.org/srt/2022": "pf0",
+  "http://fasb.org/us-gaap/2022": "us-gaap",
+  "http://fasb.org/us-types/2022": "us-types",
+  "http://goodtimesburgers.com/20220329": "gtim",
+  "http://www.w3.org/1999/xlink": "xlink",
+  "http://www.w3.org/2001/XMLSchema": "xs",
+  "http://www.w3.org/2001/XMLSchema-instance": "xsi",
+  "http://www.xbrl.org/2003/instance": "xbrli",
+  "http://www.xbrl.org/2003/iso4217": "iso4217",
+  "http://www.xbrl.org/2003/linkbase": "link",
+  "http://www.xbrl.org/dtr/type/2020-01-21": "dtr",
+  "http://xbrl.org/2005/xbrldt": "xbrldt",
+  "http://xbrl.org/2006/xbrldi": "xbrldi",
+  "http://xbrl.sec.gov/dei/2022": "dei"
+ },
+ "typed_dimensions": []
+}

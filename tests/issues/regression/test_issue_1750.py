@@ -44,7 +44,13 @@ def test_precision_ordering_otherwise_unchanged():
             self.decimals, self.value, self.numeric_value = decimals, value, numeric_value
 
     assert XBRL._get_fact_precision(F('INF')) == 1_000_000
-    assert XBRL._get_fact_precision(F(None)) == 0
+    # Unknown accuracy (no decimals, or an unreadable one) ranks below every
+    # stated accuracy and above nil. It scored 0 until GH #1765, which let it
+    # beat any negative decimals.
+    assert XBRL._get_fact_precision(F(None)) == -1_000_000
     assert XBRL._get_fact_precision(F('-3')) == -3
-    assert XBRL._get_fact_precision(F('bad')) == 0
+    assert XBRL._get_fact_precision(F('bad')) == -1_000_000
+    assert (XBRL._get_fact_precision(F(None, value='', numeric_value=None))
+            < XBRL._get_fact_precision(F(None))
+            < XBRL._get_fact_precision(F('-12')))
     assert XBRL._select_most_precise_fact([F('-6'), F('INF'), F(0)]).decimals == 'INF'

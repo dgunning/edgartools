@@ -18,6 +18,8 @@ from typing import TYPE_CHECKING, Optional
 
 from lxml import etree
 
+from edgar.xmltools import parse_xml_boolean
+
 if TYPE_CHECKING:
     from edgar._filings import Filing
 
@@ -27,6 +29,9 @@ __all__ = ['extract_filing_fees_xbrl']
 # ix:nonNumeric / ix:nonFraction source casing and the libxml2-lowercased
 # parse survive.
 _IX_FACT_TAGS = ('nonnumeric', 'nonfraction')
+
+# Flags whose value is an xs:boolean, read from the transformed value.
+_BOOLEAN_FACTS = frozenset({'ffd:FnlPrspctsFlg'})
 
 
 def _get_filing_fees_attachment(filing: 'Filing'):
@@ -45,6 +50,24 @@ def _local_name(tag) -> str:
     return tag.rsplit('}', 1)[-1].rsplit(':', 1)[-1].lower()
 
 
+def _transformed_value(elem, display: str) -> Optional[str]:
+    """The fact value its inline-XBRL ``format`` gives the display text.
+
+    None when there is no format, or the registry does not implement it or
+    rejects the text; the caller then keeps the display text.
+    """
+    format_attr = elem.get('format')
+    if not format_attr:
+        return None
+    # Imported here: the registry lives in edgar.documents, whose package
+    # import is not needed by the rest of this module.
+    from edgar.documents.strategies.ixbrl_transforms import TransformError, apply_transform, expand_format
+    try:
+        return apply_transform(expand_format(elem, format_attr), display)
+    except TransformError:
+        return None
+
+
 def _get_row_num(ctx: str) -> Optional[int]:
     """Extract 1-based row number from iXBRL context ID."""
     m = re.search(r'offrl_(\d+)', ctx)
@@ -54,6 +77,105 @@ def _get_row_num(ctx: str) -> Optional[int]:
     if m:
         return int(m.group(1))
     return None
+
+
+_ROW_CONTEXT_PATTERNS = ('TypedMemberffdOfferingAxis', 'offrl_', 'offt_')
+_SUMMARY_PREFIXES = ('ffd:Ttl', 'ffd:Net', 'ffd:Nrrtv')
+
+
+def _parse_exhibit(fee_att):
+    """Parse the exhibit's HTML, or None when it cannot be read."""
+    try:
+        content = fee_att.download()
+        if isinstance(content, str):
+            # lxml rejects unicode strings carrying an XML encoding
+            # declaration, which iXBRL exhibits routinely include.
+            content = content.encode('utf-8', 'replace')
+        parser = etree.HTMLParser(recover=True, huge_tree=True)
+        return etree.fromstring(content, parser)
+    except Exception:
+        return None
+
+
+def _fact_value(elem, name: str, boolean_values: dict[str, str]) -> str:
+    """The value of one inline fact, recording boolean flags as a side effect."""
+    # itertext() preserves whitespace between nested inline elements;
+    # the prior get_text(strip=True) mashed multi-span titles together
+    # (e.g. "Series APerpetual Stride" -> "Series A Perpetual Stride").
+    value = ''.join(elem.itertext()).strip()
+
+    # The ``format`` attribute turns display text into the fact value
+    # (GH #1681). Amounts keep their display text ("4,200,000,000"), which
+    # callers parse, unless it has no digits to parse: ixt:fixed-zero over
+    # an em dash means 0. Booleans are read from the transformed value,
+    # because ixt:booleantrue may sit over any sentence.
+    transformed = _transformed_value(elem, value)
+    if transformed is None:
+        return value
+    if name in _BOOLEAN_FACTS:
+        boolean_values.setdefault(name, transformed)
+    if _local_name(elem.tag) == 'nonfraction' and not any(ch.isdigit() for ch in value):
+        return transformed
+    return value
+
+
+def _collect_facts(root):
+    """Sort the exhibit's facts into metadata, summary and per-row values."""
+    metadata: dict[str, str] = {}
+    summary: dict[str, str] = {}
+    rows: dict[str, dict[str, str]] = {}
+    boolean_values: dict[str, str] = {}
+    seen_keys: set = set()
+
+    for elem in root.iter():
+        if _local_name(elem.tag) not in _IX_FACT_TAGS:
+            continue
+        name = elem.get('name', '')
+        # The HTML parser lowercases attribute names, so contextRef -> contextref.
+        ctx = elem.get('contextref') or ''
+        if not name or parse_xml_boolean(elem.get('xsi:nil')):
+            continue
+
+        value = _fact_value(elem, name, boolean_values)
+
+        key = (name, ctx)
+        if key in seen_keys:
+            continue
+        seen_keys.add(key)
+
+        if any(p in ctx for p in _ROW_CONTEXT_PATTERNS):
+            row_num = _get_row_num(ctx)
+            row_key = str(row_num) if row_num is not None else ctx
+            rows.setdefault(row_key, {})[name] = value
+        elif name.startswith(_SUMMARY_PREFIXES):
+            summary[name] = value
+        else:
+            metadata[name] = value
+
+    return metadata, summary, rows, boolean_values
+
+
+def _row_sort_key(k):
+    try:
+        return (0, int(k))
+    except ValueError:
+        return (1, k)
+
+
+def _build_offering_rows(rows: dict[str, dict[str, str]]) -> list[dict]:
+    offering_rows = []
+    for row_key in sorted(rows.keys(), key=_row_sort_key):
+        row = rows[row_key]
+        offering_rows.append({
+            'security_type': row.get('ffd:OfferingSctyTp'),
+            'security_title': row.get('ffd:OfferingSctyTitl'),
+            'max_aggregate_offering_price': row.get('ffd:MaxAggtOfferingPric'),
+            'fee_rate': row.get('ffd:FeeRate'),
+            'fee_amount': row.get('ffd:FeeAmt'),
+            'fee_rule': row.get('ffd:Rule457rFlg') or row.get('ffd:Rule457oFlg')
+                        or row.get('ffd:FeesOthrRuleFlg'),
+        })
+    return offering_rows
 
 
 def extract_filing_fees_xbrl(filing: 'Filing') -> dict:
@@ -74,87 +196,14 @@ def extract_filing_fees_xbrl(filing: 'Filing') -> dict:
     if not fee_att:
         return {'has_exhibit': False}
 
-    try:
-        content = fee_att.download()
-        if isinstance(content, str):
-            # lxml rejects unicode strings carrying an XML encoding
-            # declaration, which iXBRL exhibits routinely include.
-            content = content.encode('utf-8', 'replace')
-        parser = etree.HTMLParser(recover=True, huge_tree=True)
-        root = etree.fromstring(content, parser)
-    except Exception:
-        return {'has_exhibit': False}
-
+    root = _parse_exhibit(fee_att)
     if root is None:
         return {'has_exhibit': False}
 
-    metadata: dict[str, str] = {}
-    summary: dict[str, str] = {}
-    rows: dict[str, dict[str, str]] = {}
-    seen_keys: set = set()
+    metadata, summary, rows, boolean_values = _collect_facts(root)
 
-    ROW_CONTEXT_PATTERNS = ['TypedMemberffdOfferingAxis', 'offrl_', 'offt_']
-    SUMMARY_PREFIXES = ('ffd:Ttl', 'ffd:Net', 'ffd:Nrrtv')
-
-    for elem in root.iter():
-        if _local_name(elem.tag) not in _IX_FACT_TAGS:
-            continue
-
-        name = elem.get('name', '')
-        if not name:
-            continue
-
-        # The HTML parser lowercases attribute names, so contextRef -> contextref.
-        ctx = elem.get('contextref') or ''
-
-        if elem.get('xsi:nil') == 'true':
-            continue
-
-        # itertext() preserves whitespace between nested inline elements;
-        # the prior get_text(strip=True) mashed multi-span titles together
-        # (e.g. "Series APerpetual Stride" -> "Series A Perpetual Stride").
-        value = ''.join(elem.itertext()).strip()
-
-        key = (name, ctx)
-        if key in seen_keys:
-            continue
-        seen_keys.add(key)
-
-        is_row_ctx = any(p in ctx for p in ROW_CONTEXT_PATTERNS)
-
-        if is_row_ctx:
-            row_num = _get_row_num(ctx)
-            row_key = str(row_num) if row_num is not None else ctx
-            if row_key not in rows:
-                rows[row_key] = {}
-            rows[row_key][name] = value
-        elif name.startswith(SUMMARY_PREFIXES):
-            summary[name] = value
-        else:
-            metadata[name] = value
-
-    # Build offering_rows list
-    offering_rows = []
-    def _row_sort_key(k):
-        try:
-            return (0, int(k))
-        except ValueError:
-            return (1, k)
-
-    for row_key in sorted(rows.keys(), key=_row_sort_key):
-        row = rows[row_key]
-        offering_rows.append({
-            'security_type': row.get('ffd:OfferingSctyTp'),
-            'security_title': row.get('ffd:OfferingSctyTitl'),
-            'max_aggregate_offering_price': row.get('ffd:MaxAggtOfferingPric'),
-            'fee_rate': row.get('ffd:FeeRate'),
-            'fee_amount': row.get('ffd:FeeAmt'),
-            'fee_rule': row.get('ffd:Rule457rFlg') or row.get('ffd:Rule457oFlg')
-                        or row.get('ffd:FeesOthrRuleFlg'),
-        })
-
-    # Check final prospectus flag
-    is_final = metadata.get('ffd:FnlPrspctsFlg', '').lower() == 'true'
+    is_final = parse_xml_boolean(
+        boolean_values.get('ffd:FnlPrspctsFlg', metadata.get('ffd:FnlPrspctsFlg'))) is True
 
     return {
         'has_exhibit': True,
@@ -164,6 +213,6 @@ def extract_filing_fees_xbrl(filing: 'Filing') -> dict:
         'total_offering_amount': summary.get('ffd:TtlOfferingAmt')
                                  or summary.get('ffd:NrrtvMaxAggtOfferingPric'),
         'total_fee_amount': summary.get('ffd:TtlFeeAmt'),
-        'offering_rows': offering_rows,
+        'offering_rows': _build_offering_rows(rows),
         'is_final_prospectus': is_final,
     }

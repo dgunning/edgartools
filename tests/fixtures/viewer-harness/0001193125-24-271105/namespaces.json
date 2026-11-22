@@ -1,0 +1,24 @@
+{
+ "namespace_prefixes": {
+  "http://fasb.org/srt-types/2023": "srt-types",
+  "http://fasb.org/srt/2023": "srt",
+  "http://fasb.org/us-types/2023": "us-types",
+  "http://www.cibc.com/20241031": "cm",
+  "http://www.w3.org/1999/xlink": "xlink",
+  "http://www.w3.org/2001/XMLSchema-instance": "xsi",
+  "http://www.xbrl.org/2003/XLink": "xl",
+  "http://www.xbrl.org/2003/instance": "xbrli",
+  "http://www.xbrl.org/2003/iso4217": "iso4217",
+  "http://www.xbrl.org/2003/linkbase": "link",
+  "http://www.xbrl.org/2009/arcrole/fact-explanatoryFact": "deprecated",
+  "http://www.xbrl.org/2009/utr": "utr",
+  "http://www.xbrl.org/dtr/type/2020-01-21": "dtr-types",
+  "http://xbrl.org/2005/xbrldt": "xbrldt",
+  "http://xbrl.org/2006/xbrldi": "xbrldi",
+  "http://xbrl.sec.gov/country/2023": "country",
+  "http://xbrl.sec.gov/currency/2023": "currency",
+  "http://xbrl.sec.gov/dei/2023": "dei",
+  "https://xbrl.ifrs.org/taxonomy/2023-03-23/ifrs-full": "ifrs-full"
+ },
+ "typed_dimensions": []
+}

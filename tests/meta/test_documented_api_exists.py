@@ -343,5 +343,5 @@ def test_names_the_checker_cannot_see_are_not_reported(snippet):
 @pytest.mark.fast
 def test_a_local_binding_is_still_checked():
     """A name the snippet assigns is checked as the type of its right-hand side."""
-    problems, _ = check("```python\nquarterly = company.get_quarterly_financials()\nq = quarterly.income\n```\n")
-    assert problems == ["quarterly.income: Financials has no 'income'"]
+    problems, _ = check("```python\nannual = company.get_financials()\nq = annual.income\n```\n")
+    assert problems == ["annual.income: Financials has no 'income'"]

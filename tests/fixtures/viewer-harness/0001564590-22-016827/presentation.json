@@ -1,0 +1,217 @@
+{
+ "http://www.chindatagroup.com/20211231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical": {
+  "roots": [
+   "us-gaap_StatementOfFinancialPositionAbstract"
+  ],
+  "nodes": {
+   "us-gaap_StatementOfFinancialPositionAbstract": {
+    "children": [
+     "us-gaap_StatementTable"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementTable": {
+    "children": [
+     "us-gaap_StatementClassOfStockAxis",
+     "srt_ConsolidatedEntitiesAxis",
+     "us-gaap_RecourseStatusAxis",
+     "us-gaap_StatementLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementClassOfStockAxis": {
+    "children": [
+     "us-gaap_ClassOfStockDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_ClassOfStockDomain": {
+    "children": [
+     "us-gaap_CommonClassAMember",
+     "us-gaap_CommonClassBMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel"
+    ]
+   },
+   "srt_ConsolidatedEntitiesAxis": {
+    "children": [
+     "srt_ConsolidatedEntitiesDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "srt_ConsolidatedEntitiesDomain": {
+    "children": [
+     "us-gaap_VariableInterestEntityPrimaryBeneficiaryMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_RecourseStatusAxis": {
+    "children": [
+     "us-gaap_RecourseStatusDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_RecourseStatusDomain": {
+    "children": [
+     "us-gaap_NonrecourseMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementLineItems": {
+    "children": [
+     "us-gaap_AllowanceForDoubtfulAccountsReceivable",
+     "us-gaap_LiabilitiesCurrent",
+     "us-gaap_LiabilitiesNoncurrent",
+     "us-gaap_CommonStockParOrStatedValuePerShare",
+     "us-gaap_CommonStockSharesAuthorized",
+     "us-gaap_CommonStockSharesIssued",
+     "us-gaap_CommonStockSharesOutstanding"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_StatementOfFinancialPositionAbstract",
+    "us-gaap_StatementTable",
+    10020.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementClassOfStockAxis",
+    10030.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementClassOfStockAxis",
+    "us-gaap_ClassOfStockDomain",
+    10060.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ClassOfStockDomain",
+    "us-gaap_CommonClassAMember",
+    10080.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_ClassOfStockDomain",
+    "us-gaap_CommonClassBMember",
+    10140.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "srt_ConsolidatedEntitiesAxis",
+    10030.02,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "srt_ConsolidatedEntitiesAxis",
+    "srt_ConsolidatedEntitiesDomain",
+    10220.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "srt_ConsolidatedEntitiesDomain",
+    "us-gaap_VariableInterestEntityPrimaryBeneficiaryMember",
+    10240.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_RecourseStatusAxis",
+    10030.04,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_RecourseStatusAxis",
+    "us-gaap_RecourseStatusDomain",
+    10300.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_RecourseStatusDomain",
+    "us-gaap_NonrecourseMember",
+    10320.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementLineItems",
+    10360.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_AllowanceForDoubtfulAccountsReceivable",
+    10370.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_LiabilitiesCurrent",
+    10450.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_LiabilitiesNoncurrent",
+    10530.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_CommonStockParOrStatedValuePerShare",
+    10610.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_CommonStockSharesAuthorized",
+    10690.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_CommonStockSharesIssued",
+    10770.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_CommonStockSharesOutstanding",
+    10850.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ]
+  ]
+ }
+}

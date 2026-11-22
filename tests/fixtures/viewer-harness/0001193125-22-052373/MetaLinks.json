@@ -1,0 +1,281 @@
+{
+ "version": "2.1",
+ "instance": {
+  "d233558d10k.htm": {
+   "tag": {
+    "us-gaap_Cash": {
+     "calculation": {
+      "http://virgingroupacquisitionCorpii.com/role/CondensedBalanceSheet": {
+       "order": 2.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of currency on hand as well as demand deposits with banks or financial institutions. Includes other kinds of accounts that have the general characteristics of demand deposits. Excludes cash and cash equivalents within disposal group and discontinued operation.",
+        "label": "Cash",
+        "terseLabel": "Cash",
+        "verboseLabel": "Cash"
+       }
+      }
+     },
+     "localname": "Cash",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://virgingroupacquisitionCorpii.com/role/CondensedBalanceSheet",
+      "http://virgingroupacquisitionCorpii.com/role/OrganizationAndBusinessOperationsAdditionalInformationDetail"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_CommonClassAMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "definitionGuidance": "Class A ordinary shares",
+        "documentation": "Classification of common stock representing ownership interest in a corporation.",
+        "label": "Common Class A [Member]",
+        "terseLabel": "Class A Ordinary Shares",
+        "verboseLabel": "Common Class A"
+       }
+      }
+     },
+     "localname": "CommonClassAMember",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://virgingroupacquisitionCorpii.com/role/CondensedBalanceSheetParenthetical",
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfOperations",
+      "http://virgingroupacquisitionCorpii.com/role/CoverPage",
+      "http://virgingroupacquisitionCorpii.com/role/DerivativeWarrantLiabilitiesAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/InitialPublicOfferingAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/InitialPublicOfferingScheduleOfReconciliationOfClassAOrdinarySharesReflectedInTheCondensedBalanceSheetsDetail",
+      "http://virgingroupacquisitionCorpii.com/role/OrganizationAndBusinessOperationsAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/ShareholdersEquityAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/SignificantAccountingPoliciesReconciliationOfNetLossPerOrdinaryShareDetail"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_CommonClassBMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Classification of common stock that has different rights than Common Class A, representing ownership interest in a corporation.",
+        "label": "Common Class B [Member]",
+        "terseLabel": "Common Class B",
+        "verboseLabel": "Class B Ordinary Shares"
+       }
+      }
+     },
+     "localname": "CommonClassBMember",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://virgingroupacquisitionCorpii.com/role/CondensedBalanceSheet",
+      "http://virgingroupacquisitionCorpii.com/role/CondensedBalanceSheetParenthetical",
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfOperations",
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementsOfChangesInShareholdersDeficit",
+      "http://virgingroupacquisitionCorpii.com/role/CoverPage",
+      "http://virgingroupacquisitionCorpii.com/role/RelatedPartyTransactionsAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/ShareholdersEquityAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/SignificantAccountingPoliciesReconciliationOfNetLossPerOrdinaryShareDetail"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_NetCashProvidedByUsedInOperatingActivities": {
+     "calculation": {
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfCashFlows": {
+       "order": 3.0,
+       "parentTag": "us-gaap_CashAndCashEquivalentsPeriodIncreaseDecrease",
+       "weight": 1.0
+      }
+     },
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of cash inflow (outflow) from operating activities, including discontinued operations. Operating activity cash flows include transactions, adjustments, and changes in value not defined as investing or financing activities.",
+        "label": "Net Cash Provided by (Used in) Operating Activities",
+        "totalLabel": "Net cash used in operating activities"
+       }
+      }
+     },
+     "localname": "NetCashProvidedByUsedInOperatingActivities",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfCashFlows"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NetIncomeLoss": {
+     "calculation": {
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfCashFlows": {
+       "order": 10.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      },
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfOperations": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "definitionGuidance": "Net income",
+        "documentation": "The portion of profit or loss for the period, net of income taxes, which is attributable to the parent.",
+        "label": "Net Income (Loss) Attributable to Parent",
+        "terseLabel": "Net income",
+        "totalLabel": "Net income"
+       }
+      }
+     },
+     "localname": "NetIncomeLoss",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfCashFlows",
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfOperations",
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementsOfChangesInShareholdersDeficit"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StatementClassOfStockAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by the different classes of stock of the entity.",
+        "label": "Class of Stock [Axis]"
+       }
+      }
+     },
+     "localname": "StatementClassOfStockAxis",
+     "nsuri": "http://fasb.org/us-gaap/2021-01-31",
+     "presentation": [
+      "http://virgingroupacquisitionCorpii.com/role/CondensedBalanceSheet",
+      "http://virgingroupacquisitionCorpii.com/role/CondensedBalanceSheetParenthetical",
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfOperations",
+      "http://virgingroupacquisitionCorpii.com/role/CondensedStatementsOfChangesInShareholdersDeficit",
+      "http://virgingroupacquisitionCorpii.com/role/CoverPage",
+      "http://virgingroupacquisitionCorpii.com/role/DerivativeWarrantLiabilitiesAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/InitialPublicOfferingAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/InitialPublicOfferingScheduleOfReconciliationOfClassAOrdinarySharesReflectedInTheCondensedBalanceSheetsDetail",
+      "http://virgingroupacquisitionCorpii.com/role/OrganizationAndBusinessOperationsAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/RelatedPartyTransactionsAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/ShareholdersEquityAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/SignificantAccountingPoliciesAdditionalInformationDetail",
+      "http://virgingroupacquisitionCorpii.com/role/SignificantAccountingPoliciesReconciliationOfNetLossPerOrdinaryShareDetail"
+     ],
+     "xbrltype": "stringItemType"
+    }
+   },
+   "report": {
+    "R4": {
+     "firstAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "d233558d10k.htm",
+      "contextRef": "P01_13_2021To12_31_2021",
+      "decimals": "0",
+      "first": true,
+      "lang": null,
+      "name": "vgii:FormationAndOperatingCosts",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "Unit_USD",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "1004 - Statement - Condensed Statement Of Operations",
+     "role": "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfOperations",
+     "shortName": "Condensed Statement Of Operations",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "d233558d10k.htm",
+      "contextRef": "P01_13_2021To12_31_2021",
+      "decimals": "0",
+      "first": true,
+      "lang": null,
+      "name": "vgii:FormationAndOperatingCosts",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "Unit_USD",
+      "xsiNil": "false"
+     }
+    },
+    "R6": {
+     "firstAnchor": {
+      "ancestors": [
+       "div",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "d233558d10k.htm",
+      "contextRef": "P01_13_2021To12_31_2021",
+      "decimals": "0",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:NetIncomeLoss",
+      "reportCount": 1,
+      "unitRef": "Unit_USD",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "1006 - Statement - Condensed Statement Of Cash Flows",
+     "role": "http://virgingroupacquisitionCorpii.com/role/CondensedStatementOfCashFlows",
+     "shortName": "Condensed Statement Of Cash Flows",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "d233558d10k.htm",
+      "contextRef": "P01_13_2021To12_31_2021",
+      "decimals": "0",
+      "lang": null,
+      "name": "us-gaap:IncreaseDecreaseInPrepaidExpense",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "Unit_USD",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

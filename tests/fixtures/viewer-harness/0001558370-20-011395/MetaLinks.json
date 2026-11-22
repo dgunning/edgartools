@@ -1,0 +1,125 @@
+{
+ "version": "2.1",
+ "instance": {
+  "tmq-20200831x10q.htm": {
+   "tag": {
+    "us-gaap_CashAndCashEquivalentsAtCarryingValue": {
+     "calculation": {
+      "http://trilogy.com/role/StatementInterimConsolidatedBalanceSheets": {
+       "order": 1.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Amount of currency on hand as well as demand deposits with banks or financial institutions. Includes other kinds of accounts that have the general characteristics of demand deposits. Also includes short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates. Excludes cash and cash equivalents within disposal group and discontinued operation.",
+        "label": "Cash and Cash Equivalents, at Carrying Value",
+        "periodEndLabel": "Cash and cash equivalents - end of period",
+        "periodStartLabel": "Cash and cash equivalents - beginning of period",
+        "verboseLabel": "Cash and cash equivalents"
+       }
+      }
+     },
+     "localname": "CashAndCashEquivalentsAtCarryingValue",
+     "nsuri": "http://fasb.org/us-gaap/2019-01-31",
+     "presentation": [
+      "http://trilogy.com/role/StatementInterimConsolidatedBalanceSheets",
+      "http://trilogy.com/role/StatementInterimConsolidatedStatementsOfCashFlows"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_NetIncomeLoss": {
+     "calculation": {
+      "http://trilogy.com/role/StatementInterimConsolidatedStatementsOfCashFlows": {
+       "order": 1.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      },
+      "http://trilogy.com/role/StatementInterimConsolidatedStatementsOfIncomeLossAndComprehensiveIncomeLoss": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "The portion of profit or loss for the period, net of income taxes, which is attributable to the parent.",
+        "label": "Net Income (Loss) Attributable to Parent",
+        "terseLabel": "Earnings (loss) for the period",
+        "totalLabel": "Comprehensive (loss) earnings for the period",
+        "verboseLabel": "Comprehensive loss"
+       }
+      }
+     },
+     "localname": "NetIncomeLoss",
+     "nsuri": "http://fasb.org/us-gaap/2019-01-31",
+     "presentation": [
+      "http://trilogy.com/role/DisclosureEquityMethodInvestmentFinancialInformationDetails",
+      "http://trilogy.com/role/StatementInterimConsolidatedStatementsOfCashFlows",
+      "http://trilogy.com/role/StatementInterimConsolidatedStatementsOfChangesInShareholdersEquity",
+      "http://trilogy.com/role/StatementInterimConsolidatedStatementsOfIncomeLossAndComprehensiveIncomeLoss"
+     ],
+     "xbrltype": "monetaryItemType"
+    }
+   },
+   "report": {
+    "R6": {
+     "firstAnchor": {
+      "ancestors": [
+       "p",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "tmq-20200831x10q.htm",
+      "contextRef": "Duration_12_1_2019_To_8_31_2020_RUQKVzfu40agfvt9BldZpQ",
+      "decimals": "-3",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:NetIncomeLoss",
+      "reportCount": 1,
+      "unitRef": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "00400 - Statement - Interim Consolidated Statements of Cash Flows",
+     "role": "http://trilogy.com/role/StatementInterimConsolidatedStatementsOfCashFlows",
+     "shortName": "Interim Consolidated Statements of Cash Flows",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "p",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "tmq-20200831x10q.htm",
+      "contextRef": "Duration_12_1_2019_To_8_31_2020_RUQKVzfu40agfvt9BldZpQ",
+      "decimals": "-3",
+      "lang": null,
+      "name": "tmq:LossOnWorkingCapitalWrittenOffUponJointVentureFormation",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "Unit_Standard_USD_F6syLzFHe0Kpax8GP26RPQ",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

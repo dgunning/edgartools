@@ -1,0 +1,1414 @@
+[
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "ib89457d584b1465d979a274b4a891bbd_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "8411000",
+  "numeric_value": 8411000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i2ed175250c3849e5be1f55375fe92fae_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "9958000",
+  "numeric_value": 9958000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i1f01c46e01f24b58b68444d58ae8b81a_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "1631000",
+  "numeric_value": 1631000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "i5f328841f29c4109a3b48afc611ecda3_I20170930",
+  "period_key": "instant_2017-09-30",
+  "period_type": "instant",
+  "value": "33008000",
+  "numeric_value": 33008000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i5f328841f29c4109a3b48afc611ecda3_I20170930",
+  "period_key": "instant_2017-09-30",
+  "period_type": "instant",
+  "value": "330000",
+  "numeric_value": 330000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "ib4a9006638f748ca96a1e072cae9c093_I20170930",
+  "period_key": "instant_2017-09-30",
+  "period_type": "instant",
+  "value": "6437000",
+  "numeric_value": 6437000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "ib4a9006638f748ca96a1e072cae9c093_I20170930",
+  "period_key": "instant_2017-09-30",
+  "period_type": "instant",
+  "value": "-54533000",
+  "numeric_value": -54533000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i4138b8c432264790a89c2de2849052f4_I20170930",
+  "period_key": "instant_2017-09-30",
+  "period_type": "instant",
+  "value": "245528000",
+  "numeric_value": 245528000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i59a2e65c3b884da19a5d6fd9985662f6_I20170930",
+  "period_key": "instant_2017-09-30",
+  "period_type": "instant",
+  "value": "150363000",
+  "numeric_value": 150363000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i087575d89e984eaea50dc157777fa358_I20170930",
+  "period_key": "instant_2017-09-30",
+  "period_type": "instant",
+  "value": "-22659000",
+  "numeric_value": -22659000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i0be83db7f65a4e1abda61ab046abb42e_I20170930",
+  "period_key": "instant_2017-09-30",
+  "period_type": "instant",
+  "value": "319029000",
+  "numeric_value": 319029000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "ibeb9300774104f09935fd9d81926b6d2_I20170930",
+  "period_key": "instant_2017-09-30",
+  "period_type": "instant",
+  "value": "52000",
+  "numeric_value": 52000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:CumulativeEffectPeriodOfAdoptionAxis": "srt:CumulativeEffectPeriodOfAdoptionAdjustmentMember",
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i59b9e23280a34e6f9776adbe4e21f289_I20170930",
+  "period_key": "instant_2017-09-30",
+  "period_type": "instant",
+  "value": "-33000",
+  "numeric_value": -33000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:CumulativeEffectPeriodOfAdoptionAxis": "srt:CumulativeEffectPeriodOfAdoptionAdjustmentMember",
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "iff4671d28a67490f97dc499996082f50_I20170930",
+  "period_key": "instant_2017-09-30",
+  "period_type": "instant",
+  "value": "19000",
+  "numeric_value": 19000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:CumulativeEffectPeriodOfAdoptionAxis": "srt:CumulativeEffectPeriodOfAdoptionAdjustmentMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i394e8c3e816d4542bb14122db6c141c0_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "1631000",
+  "numeric_value": 1631000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+  "context_ref": "iaca0ea2c7ee94616b2bc8a8b0106c421_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "-867000",
+  "numeric_value": -867000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+  "context_ref": "i1f01c46e01f24b58b68444d58ae8b81a_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "-867000",
+  "numeric_value": -867000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans",
+  "context_ref": "icf7846f73af74a7f97467dac27bc7ed2_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "126000",
+  "numeric_value": 126000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+  "context_ref": "icf7846f73af74a7f97467dac27bc7ed2_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "1065000",
+  "numeric_value": 1065000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+  "context_ref": "i1dbab9d9b98c4389b8ec2304327a5947_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "50000",
+  "numeric_value": 50000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+  "context_ref": "i1f01c46e01f24b58b68444d58ae8b81a_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "1115000",
+  "numeric_value": 1115000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:TreasuryStockSharesAcquired",
+  "context_ref": "icf7846f73af74a7f97467dac27bc7ed2_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "74000",
+  "numeric_value": 74000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockValueAcquiredCostMethod",
+  "context_ref": "icf7846f73af74a7f97467dac27bc7ed2_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "748000",
+  "numeric_value": 748000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockValueAcquiredCostMethod",
+  "context_ref": "i1f01c46e01f24b58b68444d58ae8b81a_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "748000",
+  "numeric_value": 748000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation",
+  "context_ref": "i5a1a9f4ad88347559fdd8c8fb4e9f5fd_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "805000",
+  "numeric_value": 805000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "i5a1a9f4ad88347559fdd8c8fb4e9f5fd_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "8000",
+  "numeric_value": 8000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "i1dbab9d9b98c4389b8ec2304327a5947_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "5452000",
+  "numeric_value": 5452000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "i1f01c46e01f24b58b68444d58ae8b81a_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "5460000",
+  "numeric_value": 5460000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+  "context_ref": "i1dbab9d9b98c4389b8ec2304327a5947_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "4854000",
+  "numeric_value": 4854000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+  "context_ref": "i1f01c46e01f24b58b68444d58ae8b81a_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "4854000",
+  "numeric_value": 4854000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "i2b234a80f371460b91482fb4845d34b1_I20180930",
+  "period_key": "instant_2018-09-30",
+  "period_type": "instant",
+  "value": "33813000",
+  "numeric_value": 33813000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i2b234a80f371460b91482fb4845d34b1_I20180930",
+  "period_key": "instant_2018-09-30",
+  "period_type": "instant",
+  "value": "338000",
+  "numeric_value": 338000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "i9759f611814f4a0f976dcb6f974be958_I20180930",
+  "period_key": "instant_2018-09-30",
+  "period_type": "instant",
+  "value": "6385000",
+  "numeric_value": 6385000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i9759f611814f4a0f976dcb6f974be958_I20180930",
+  "period_key": "instant_2018-09-30",
+  "period_type": "instant",
+  "value": "-54216000",
+  "numeric_value": -54216000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "id8daa6d0a8994d389f36dd4cbf1bfbbd_I20180930",
+  "period_key": "instant_2018-09-30",
+  "period_type": "instant",
+  "value": "255936000",
+  "numeric_value": 255936000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i98aa1435640b4b94baa8d9568d88836e_I20180930",
+  "period_key": "instant_2018-09-30",
+  "period_type": "instant",
+  "value": "151961000",
+  "numeric_value": 151961000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i7262734f017d4615b8a1d083d9d9d8f7_I20180930",
+  "period_key": "instant_2018-09-30",
+  "period_type": "instant",
+  "value": "-23526000",
+  "numeric_value": -23526000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i15fa5d523bff46f5a64f00ef0da14ea1_I20180930",
+  "period_key": "instant_2018-09-30",
+  "period_type": "instant",
+  "value": "330493000",
+  "numeric_value": 330493000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i815d7584982448889c37af066fc5b3be_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "9958000",
+  "numeric_value": 9958000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+  "context_ref": "i4d28a7a09084401b8c77b704bb4d9c69_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "-1989000",
+  "numeric_value": -1989000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+  "context_ref": "i2ed175250c3849e5be1f55375fe92fae_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "-1989000",
+  "numeric_value": -1989000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans",
+  "context_ref": "i5ce9b243703243d4af27c9df093963f7_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "111000",
+  "numeric_value": 111000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+  "context_ref": "i5ce9b243703243d4af27c9df093963f7_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "948000",
+  "numeric_value": 948000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+  "context_ref": "i16850bf50d5f42529d65a693480b5d4a_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "110000",
+  "numeric_value": 110000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+  "context_ref": "i2ed175250c3849e5be1f55375fe92fae_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "1058000",
+  "numeric_value": 1058000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:TreasuryStockSharesAcquired",
+  "context_ref": "i5ce9b243703243d4af27c9df093963f7_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "93000",
+  "numeric_value": 93000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockValueAcquiredCostMethod",
+  "context_ref": "i5ce9b243703243d4af27c9df093963f7_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "1071000",
+  "numeric_value": 1071000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockValueAcquiredCostMethod",
+  "context_ref": "i2ed175250c3849e5be1f55375fe92fae_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "1071000",
+  "numeric_value": 1071000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation",
+  "context_ref": "id79a7c089a1f4e3eade89d2da32483e3_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "795000",
+  "numeric_value": 795000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "id79a7c089a1f4e3eade89d2da32483e3_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "8000",
+  "numeric_value": 8000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "i16850bf50d5f42529d65a693480b5d4a_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "4866000",
+  "numeric_value": 4866000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "i2ed175250c3849e5be1f55375fe92fae_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "4874000",
+  "numeric_value": 4874000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+  "context_ref": "i16850bf50d5f42529d65a693480b5d4a_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "5655000",
+  "numeric_value": 5655000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+  "context_ref": "i2ed175250c3849e5be1f55375fe92fae_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "5655000",
+  "numeric_value": 5655000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "i83d5132f8bfc4a1f9788e65026c3ecc0_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "34608000",
+  "numeric_value": 34608000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i83d5132f8bfc4a1f9788e65026c3ecc0_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "346000",
+  "numeric_value": 346000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "i111144e2f7f1427ab3e9b5709864c569_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "6367000",
+  "numeric_value": 6367000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i111144e2f7f1427ab3e9b5709864c569_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "-54339000",
+  "numeric_value": -54339000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i21a8ab77192040bc8b9e26cf62cbeb86_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "266567000",
+  "numeric_value": 266567000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i333bcd32e98e4d39bbdbd7694b1cbf88_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "161919000",
+  "numeric_value": 161919000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "ic6eb7c7ed99a434d9b8661a6b8e5810c_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "-25515000",
+  "numeric_value": -25515000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i1261f81317794cdeaeaf8f4d676dc6e2_I20190930",
+  "period_key": "instant_2019-09-30",
+  "period_type": "instant",
+  "value": "348978000",
+  "numeric_value": 348978000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "ic581741904a24dd69482e185b87721ac_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "8411000",
+  "numeric_value": 8411000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+  "context_ref": "i543ded17fb0d45a5b61b494f4724d174_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "1698000",
+  "numeric_value": 1698000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+  "context_ref": "ib89457d584b1465d979a274b4a891bbd_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "1698000",
+  "numeric_value": 1698000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans",
+  "context_ref": "iacf2411a54dd403f947925216e0d81cb_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "118000",
+  "numeric_value": 118000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+  "context_ref": "iacf2411a54dd403f947925216e0d81cb_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "1021000",
+  "numeric_value": 1021000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+  "context_ref": "if5fbe274f9034b71ba4c65f7b5cb10cc_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "44000",
+  "numeric_value": 44000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueEmployeeStockPurchasePlan",
+  "context_ref": "ib89457d584b1465d979a274b4a891bbd_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "1065000",
+  "numeric_value": 1065000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:TreasuryStockSharesAcquired",
+  "context_ref": "iacf2411a54dd403f947925216e0d81cb_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "104000",
+  "numeric_value": 104000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockValueAcquiredCostMethod",
+  "context_ref": "iacf2411a54dd403f947925216e0d81cb_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "1791000",
+  "numeric_value": 1791000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockValueAcquiredCostMethod",
+  "context_ref": "ib89457d584b1465d979a274b4a891bbd_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "1791000",
+  "numeric_value": 1791000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesShareBasedCompensation",
+  "context_ref": "i5b22df8d2d8d433b9f4190ec7fc2a1a6_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "905000",
+  "numeric_value": 905000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "i5b22df8d2d8d433b9f4190ec7fc2a1a6_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "9000",
+  "numeric_value": 9000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "if5fbe274f9034b71ba4c65f7b5cb10cc_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "5893000",
+  "numeric_value": 5893000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueShareBasedCompensation",
+  "context_ref": "ib89457d584b1465d979a274b4a891bbd_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "5902000",
+  "numeric_value": 5902000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+  "context_ref": "if5fbe274f9034b71ba4c65f7b5cb10cc_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "7237000",
+  "numeric_value": 7237000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+  "context_ref": "ib89457d584b1465d979a274b4a891bbd_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "7237000",
+  "numeric_value": 7237000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "i99eef213c4b14a6f91810c343d5bb66d_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "35513000",
+  "numeric_value": 35513000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i99eef213c4b14a6f91810c343d5bb66d_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "355000",
+  "numeric_value": 355000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "i940c79f9c86c48c3b40cac3943151aee_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "6353000",
+  "numeric_value": 6353000.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i940c79f9c86c48c3b40cac3943151aee_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "-55109000",
+  "numeric_value": -55109000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:TreasuryStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i34f858d34d3a40efa09493400a20cf45_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "279741000",
+  "numeric_value": 279741000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i4991c077b3384bb9ac194886b7618041_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "170330000",
+  "numeric_value": 170330000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "i9390751d094f4b92926eb6ee7f5190b3_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "-23817000",
+  "numeric_value": -23817000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AccumulatedOtherComprehensiveIncomeMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "ic16847684eda4029b57fbf0d385c8586_I20200930",
+  "period_key": "instant_2020-09-30",
+  "period_type": "instant",
+  "value": "371500000",
+  "numeric_value": 371500000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans",
+  "context_ref": "ic72ed6ccead747e7a9757bf32f34ca56_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "117826",
+  "numeric_value": 117826.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:AwardTypeAxis": "us-gaap:EmployeeStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans",
+  "context_ref": "ia9acc78262b04958bbb78679e08c8fb1_D20181001-20190930",
+  "period_key": "duration_2018-10-01_2019-09-30",
+  "period_type": "duration",
+  "value": "111036",
+  "numeric_value": 111036.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:AwardTypeAxis": "us-gaap:EmployeeStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesEmployeeStockPurchasePlans",
+  "context_ref": "i44a8fbeb08d04f1ab95f862755649a9b_D20171001-20180930",
+  "period_key": "duration_2017-10-01_2018-09-30",
+  "period_type": "duration",
+  "value": "125446",
+  "numeric_value": 125446.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:AwardTypeAxis": "us-gaap:EmployeeStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:TreasuryStockSharesAcquired",
+  "context_ref": "ifbf2d8bc7aa14e28b36b714f7e48ca1f_D20191001-20200930",
+  "period_key": "duration_2019-10-01_2020-09-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "shares",
+  "currency": null,
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:ShareRepurchaseProgramAxis": "dgii:May2018RepurchaseprogramMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i41b464638ef1413b8cb6bf3a341a07b0_D20191001-20191231",
+  "period_key": "duration_2019-10-01_2019-12-31",
+  "period_type": "duration",
+  "value": "208000",
+  "numeric_value": 208000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i3235537104204be19bf873a4b64ba7a4_D20200101-20200331",
+  "period_key": "duration_2020-01-01_2020-03-31",
+  "period_type": "duration",
+  "value": "2004000",
+  "numeric_value": 2004000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i03f1daf0c1d4429387ba44c2fcbc83dc_D20200401-20200630",
+  "period_key": "duration_2020-04-01_2020-06-30",
+  "period_type": "duration",
+  "value": "1766000",
+  "numeric_value": 1766000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i95bd0a8b558d4bfcaf79c3775c8ec44e_D20200701-20200930",
+  "period_key": "duration_2020-07-01_2020-09-30",
+  "period_type": "duration",
+  "value": "4433000",
+  "numeric_value": 4433000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i1110d3393234421a9c3b1d06de1f0d6e_D20181001-20181231",
+  "period_key": "duration_2018-10-01_2018-12-31",
+  "period_type": "duration",
+  "value": "4682000",
+  "numeric_value": 4682000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i0b85f3c8b2954502b9dc079ca5af0d61_D20190101-20190331",
+  "period_key": "duration_2019-01-01_2019-03-31",
+  "period_type": "duration",
+  "value": "1342000",
+  "numeric_value": 1342000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i44444991ef654bf081db0452b610bd48_D20190401-20190630",
+  "period_key": "duration_2019-04-01_2019-06-30",
+  "period_type": "duration",
+  "value": "1648000",
+  "numeric_value": 1648000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetIncomeLoss",
+  "context_ref": "i1ae1e9ad689f49f0a75e15e9376f30a7_D20190701-20190930",
+  "period_key": "duration_2019-07-01_2019-09-30",
+  "period_type": "duration",
+  "value": "2286000",
+  "numeric_value": 2286000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ }
+]

@@ -1,0 +1,198 @@
+[
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "i649d8343095f438387c3f6db5bf51e5a_D20200101-20201231",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "443101000",
+  "numeric_value": 443101000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "ibb90ef6c3ff247f5a27b9f8f5ad18650_D20190101-20191231",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "528672000",
+  "numeric_value": 528672000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "i16f7ab4199e248b398160f4b6e7d2269_D20180101-20181231",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "541689000",
+  "numeric_value": 541689000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "i08ca16391d2b4dbf9bf792bcd9099eb5_I20171231",
+  "period_key": "instant_2017-12-31",
+  "period_type": "instant",
+  "value": "110777000",
+  "numeric_value": 110777000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "ia2ba48f20ad24393a56b300839768a44_I20191231",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "21523000",
+  "numeric_value": 21523000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "ifdd592f254894c06ad7175f2cf1208c2_I20181231",
+  "period_key": "instant_2018-12-31",
+  "period_type": "instant",
+  "value": "50765000",
+  "numeric_value": 50765000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "i625ace8834964054bdd38bbfe4eb0dd2_I20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "370087000",
+  "numeric_value": 370087000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "i6d0ca93abbc0476ab91cda1dc5a6e3ba_D20200101-20201231",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "443101000",
+  "numeric_value": 443101000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "icdb3c46c75d747a8bc275c54f8db9728_D20190101-20191231",
+  "period_key": "duration_2019-01-01_2019-12-31",
+  "period_type": "duration",
+  "value": "528672000",
+  "numeric_value": 528672000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:NetCashProvidedByUsedInOperatingActivities",
+  "context_ref": "ie9c61004a71b473db834d6db72e6fae9_D20180101-20181231",
+  "period_key": "duration_2018-01-01_2018-12-31",
+  "period_type": "duration",
+  "value": "541689000",
+  "numeric_value": 541689000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "i0462a50837f342baa1652d896dc36e3d_I20171231",
+  "period_key": "instant_2017-12-31",
+  "period_type": "instant",
+  "value": "110747000",
+  "numeric_value": 110747000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "i30c0b1e131b04b8b866cf22c18b8215a_I20191231",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "21507000",
+  "numeric_value": 21507000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "i2c299a06852a4cd3a5995c79eb5b1ece_I20181231",
+  "period_key": "instant_2018-12-31",
+  "period_type": "instant",
+  "value": "50639000",
+  "numeric_value": 50639000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+  "context_ref": "ib0486466e2be46f6b8b49d44d89dd1db_I20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "360073000",
+  "numeric_value": 360073000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:SubsidiariesMember"
+  }
+ }
+]

@@ -1,0 +1,221 @@
+{
+ "version": "2.2",
+ "instance": {
+  "ea0201625-20f_azurepower.htm": {
+   "tag": {
+    "us-gaap_AssetsCurrent": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "AssetsCurrent",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.azurepower.com/role/ConsolidatedBalanceSheet": {
+       "parentTag": "us-gaap_Assets",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.azurepower.com/role/ConsolidatedBalanceSheet"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Total current assets",
+        "label": "Assets, Current",
+        "documentation": "Sum of the carrying amounts as of the balance sheet date of all assets that are expected to be realized in cash, sold, or consumed within one year (or the normal operating cycle, if longer). Assets are probable future economic benefits obtained or controlled by an entity as a result of past transactions or events."
+       }
+      }
+     }
+    },
+    "us-gaap_CashAndCashEquivalentsAtCarryingValue": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CashAndCashEquivalentsAtCarryingValue",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.azurepower.com/role/ConsolidatedBalanceSheet": {
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0,
+       "order": 1.0
+      }
+     },
+     "presentation": [
+      "http://www.azurepower.com/role/ConsolidatedBalanceSheet",
+      "http://www.azurepower.com/role/ScheduleofCashandCashEquivalentsTable"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Cash and cash equivalents",
+        "label": "Cash and Cash Equivalents, at Carrying Value",
+        "documentation": "Amount of currency on hand as well as demand deposits with banks or financial institutions. Includes other kinds of accounts that have the general characteristics of demand deposits. Also includes short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates. Excludes cash and cash equivalents within disposal group and discontinued operation."
+       }
+      }
+     }
+    },
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.azurepower.com/role/ConsolidatedCashFlow"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "periodStartLabel": "Cash and cash equivalents and restricted cash at the beginning of the period",
+        "periodEndLabel": "Cash and cash equivalents and restricted cash at the end of the period",
+        "label": "Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents",
+        "documentation": "Amount of cash and cash equivalents, and cash and cash equivalents restricted to withdrawal or usage. Excludes amount for disposal group and discontinued operations. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates."
+       }
+      }
+     }
+    },
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffect",
+     "crdr": "debit",
+     "calculation": {
+      "http://www.azurepower.com/role/ConsolidatedCashFlow": {
+       "parentTag": null,
+       "weight": null,
+       "order": null,
+       "root": true
+      }
+     },
+     "presentation": [
+      "http://www.azurepower.com/role/ConsolidatedCashFlow"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "totalLabel": "Net increase in cash and cash equivalents, and restricted cash (refer note 2 (f))",
+        "label": "Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents, Period Increase (Decrease), Excluding Exchange Rate Effect",
+        "documentation": "Amount of increase (decrease) in cash and cash equivalents, and cash and cash equivalents restricted to withdrawal or usage; excluding effect from exchange rate change. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates."
+       }
+      }
+     }
+    },
+    "us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
+     "xbrltype": "monetaryItemType",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "localname": "EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+     "crdr": "debit",
+     "presentation": [
+      "http://www.azurepower.com/role/ConsolidatedCashFlow"
+     ],
+     "lang": {
+      "en-us": {
+       "role": {
+        "terseLabel": "Effect of exchange rate changes on cash and cash equivalents, and restricted cash",
+        "label": "Effect of Exchange Rate on Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents, Continuing Operations",
+        "documentation": "Amount of increase (decrease) from effect of exchange rate changes on cash and cash equivalents, and cash and cash equivalents restricted to withdrawal or usage; held in foreign currencies. Excludes amounts for disposal group and discontinued operations. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates."
+       }
+      }
+     }
+    }
+   },
+   "report": {
+    "R2": {
+     "role": "http://www.azurepower.com/role/ConsolidatedBalanceSheet",
+     "longName": "001 - Statement - Consolidated Balance Sheets",
+     "shortName": "Consolidated Balance Sheets",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "2",
+     "firstAnchor": {
+      "contextRef": "c2",
+      "name": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "unitRef": "inr",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-6",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "ea0201625-20f_azurepower.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c2",
+      "name": "us-gaap:RestrictedCashAndCashEquivalentsAtCarryingValue",
+      "unitRef": "inr",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-6",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "ea0201625-20f_azurepower.htm",
+      "unique": true
+     }
+    },
+    "R7": {
+     "role": "http://www.azurepower.com/role/ConsolidatedCashFlow",
+     "longName": "006 - Statement - Consolidated Statements of Cash Flows",
+     "shortName": "Consolidated Statements of Cash Flows",
+     "isDefault": "false",
+     "groupType": "statement",
+     "subGroupType": "",
+     "menuCat": "Statements",
+     "order": "7",
+     "firstAnchor": {
+      "contextRef": "c0",
+      "name": "us-gaap:ProfitLoss",
+      "unitRef": "inr",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-6",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "ea0201625-20f_azurepower.htm",
+      "first": true
+     },
+     "uniqueAnchor": {
+      "contextRef": "c0",
+      "name": "us-gaap:DeferredIncomeTaxExpenseBenefit",
+      "unitRef": "inr",
+      "xsiNil": "false",
+      "lang": null,
+      "decimals": "-6",
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "reportCount": 1,
+      "baseRef": "ea0201625-20f_azurepower.htm",
+      "unique": true
+     }
+    }
+   }
+  }
+ }
+}

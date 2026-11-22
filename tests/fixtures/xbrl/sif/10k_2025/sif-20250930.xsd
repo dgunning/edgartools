@@ -1,0 +1,666 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--XBRL Document Created with the Workiva Platform-->
+<!--Copyright 2025 Workiva-->
+<!--r:57c38859-1b22-4c99-9800-80e2fa4bd6ba,g:17c2bc6d-5999-48fc-8708-69d738ce809b-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:sif="http://www.sifco.com/20250930" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2024-01-31" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.sifco.com/20250930">
+  <xs:import namespace="http://fasb.org/srt/2025" schemaLocation="https://xbrl.fasb.org/srt/2025/elts/srt-2025.xsd"/>
+  <xs:import namespace="http://fasb.org/us-gaap/2025" schemaLocation="https://xbrl.fasb.org/us-gaap/2025/elts/us-gaap-2025.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/2024-01-31" schemaLocation="https://www.xbrl.org/dtr/type/2024-01-31/types.xsd"/>
+  <xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/country/2025" schemaLocation="https://xbrl.sec.gov/country/2025/country-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/cyd-af-sub/2025" schemaLocation="https://xbrl.sec.gov/cyd/2025/cyd-af-sub-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/dei/2025" schemaLocation="https://xbrl.sec.gov/dei/2025/dei-2025.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/ecd/2025" schemaLocation="https://xbrl.sec.gov/ecd/2025/ecd-2025.xsd"/>
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="sif-20250930_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="sif-20250930_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="sif-20250930_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="sif-20250930_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:type="simple"/>
+      <link:roleType id="CoverPage" roleURI="http://www.sifco.com/role/CoverPage">
+        <link:definition>0000001 - Document - Cover Page</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AuditInformation" roleURI="http://www.sifco.com/role/AuditInformation">
+        <link:definition>0000002 - Document - Audit Information</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofOperations" roleURI="http://www.sifco.com/role/ConsolidatedStatementsofOperations">
+        <link:definition>9952151 - Statement - Consolidated Statements of Operations</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofComprehensiveIncomeLoss" roleURI="http://www.sifco.com/role/ConsolidatedStatementsofComprehensiveIncomeLoss">
+        <link:definition>9952152 - Statement - Consolidated Statements of Comprehensive Income (Loss)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedBalanceSheets" roleURI="http://www.sifco.com/role/ConsolidatedBalanceSheets">
+        <link:definition>9952153 - Statement - Consolidated Balance Sheets</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedBalanceSheetsParenthetical" roleURI="http://www.sifco.com/role/ConsolidatedBalanceSheetsParenthetical">
+        <link:definition>9952154 - Statement - Consolidated Balance Sheets (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofCashFlows" roleURI="http://www.sifco.com/role/ConsolidatedStatementsofCashFlows">
+        <link:definition>9952155 - Statement - Consolidated Statements of Cash Flows</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ConsolidatedStatementsofShareholdersEquity" roleURI="http://www.sifco.com/role/ConsolidatedStatementsofShareholdersEquity">
+        <link:definition>9952156 - Statement - Consolidated Statements of Shareholders' Equity</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPolicies" roleURI="http://www.sifco.com/role/SummaryofSignificantAccountingPolicies">
+        <link:definition>9952157 - Disclosure - Summary of Significant Accounting Policies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DiscontinuedOperations" roleURI="http://www.sifco.com/role/DiscontinuedOperations">
+        <link:definition>9952158 - Disclosure - Discontinued Operations</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Inventoriesnet" roleURI="http://www.sifco.com/role/Inventoriesnet">
+        <link:definition>9952159 - Disclosure - Inventories, net</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Goodwill" roleURI="http://www.sifco.com/role/Goodwill">
+        <link:definition>9952160 - Disclosure - Goodwill</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AccruedLiabilities" roleURI="http://www.sifco.com/role/AccruedLiabilities">
+        <link:definition>9952161 - Disclosure - Accrued Liabilities</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Debt" roleURI="http://www.sifco.com/role/Debt">
+        <link:definition>9952162 - Disclosure - Debt</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Revenue" roleURI="http://www.sifco.com/role/Revenue">
+        <link:definition>9952163 - Disclosure - Revenue</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxes" roleURI="http://www.sifco.com/role/IncomeTaxes">
+        <link:definition>9952164 - Disclosure - Income Taxes</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlans" roleURI="http://www.sifco.com/role/RetirementBenefitPlans">
+        <link:definition>9952165 - Disclosure - Retirement Benefit Plans</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensation" roleURI="http://www.sifco.com/role/StockBasedCompensation">
+        <link:definition>9952166 - Disclosure - Stock-Based Compensation</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Leases" roleURI="http://www.sifco.com/role/Leases">
+        <link:definition>9952167 - Disclosure - Leases</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingencies" roleURI="http://www.sifco.com/role/CommitmentsandContingencies">
+        <link:definition>9952168 - Disclosure - Commitments and Contingencies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformation" roleURI="http://www.sifco.com/role/SegmentInformation">
+        <link:definition>9952169 - Disclosure - Segment Information</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RelatedPartyTransactions" roleURI="http://www.sifco.com/role/RelatedPartyTransactions">
+        <link:definition>9952170 - Disclosure - Related Party Transactions</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SubsequentEvents" roleURI="http://www.sifco.com/role/SubsequentEvents">
+        <link:definition>9952171 - Disclosure - Subsequent Events</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ValuationandQualifyingAccounts" roleURI="http://www.sifco.com/role/ValuationandQualifyingAccounts">
+        <link:definition>9952172 - Disclosure - Valuation and Qualifying Accounts</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesPolicies" roleURI="http://www.sifco.com/role/SummaryofSignificantAccountingPoliciesPolicies">
+        <link:definition>9955511 - Disclosure - Summary of Significant Accounting Policies (Policies)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesTables" roleURI="http://www.sifco.com/role/SummaryofSignificantAccountingPoliciesTables">
+        <link:definition>9955512 - Disclosure - Summary of Significant Accounting Policies (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DiscontinuedOperationsTables" roleURI="http://www.sifco.com/role/DiscontinuedOperationsTables">
+        <link:definition>9955513 - Disclosure - Discontinued Operations (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InventoriesnetTables" roleURI="http://www.sifco.com/role/InventoriesnetTables">
+        <link:definition>9955514 - Disclosure - Inventories, net (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AccruedLiabilitiesTables" roleURI="http://www.sifco.com/role/AccruedLiabilitiesTables">
+        <link:definition>9955515 - Disclosure - Accrued Liabilities (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtTables" roleURI="http://www.sifco.com/role/DebtTables">
+        <link:definition>9955516 - Disclosure - Debt (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevenueTables" roleURI="http://www.sifco.com/role/RevenueTables">
+        <link:definition>9955517 - Disclosure - Revenue (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesTables" roleURI="http://www.sifco.com/role/IncomeTaxesTables">
+        <link:definition>9955518 - Disclosure - Income Taxes (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlansTables" roleURI="http://www.sifco.com/role/RetirementBenefitPlansTables">
+        <link:definition>9955519 - Disclosure - Retirement Benefit Plans (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationTables" roleURI="http://www.sifco.com/role/StockBasedCompensationTables">
+        <link:definition>9955520 - Disclosure - Stock-Based Compensation (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesTables" roleURI="http://www.sifco.com/role/LeasesTables">
+        <link:definition>9955521 - Disclosure - Leases (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformationTables" roleURI="http://www.sifco.com/role/SegmentInformationTables">
+        <link:definition>9955522 - Disclosure - Segment Information (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesNarrativeDetails" roleURI="http://www.sifco.com/role/SummaryofSignificantAccountingPoliciesNarrativeDetails">
+        <link:definition>9955523 - Disclosure - Summary of Significant Accounting Policies - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesScheduleofPropertyPlantandEquipmentbyMajorAssetClassDetails" roleURI="http://www.sifco.com/role/SummaryofSignificantAccountingPoliciesScheduleofPropertyPlantandEquipmentbyMajorAssetClassDetails">
+        <link:definition>9955524 - Disclosure - Summary of Significant Accounting Policies - Schedule of Property, Plant and Equipment by Major Asset Class (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesDilutiveEffectDetails" roleURI="http://www.sifco.com/role/SummaryofSignificantAccountingPoliciesDilutiveEffectDetails">
+        <link:definition>9955525 - Disclosure - Summary of Significant Accounting Policies - Dilutive Effect (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesComponentsofAccumulatedOtherComprehensiveIncomeLossDetails" roleURI="http://www.sifco.com/role/SummaryofSignificantAccountingPoliciesComponentsofAccumulatedOtherComprehensiveIncomeLossDetails">
+        <link:definition>9955526 - Disclosure - Summary of Significant Accounting Policies - Components of Accumulated Other Comprehensive Income (Loss) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SignificantAccountingPoliciesReclassificationOutofAccumulatedOtherComprehensiveIncomeLossDetails" roleURI="http://www.sifco.com/role/SignificantAccountingPoliciesReclassificationOutofAccumulatedOtherComprehensiveIncomeLossDetails">
+        <link:definition>9955527 - Disclosure - Significant Accounting Policies - Reclassification Out of Accumulated Other Comprehensive Income (Loss) (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DiscontinuedOperationsNarrativeDetails" roleURI="http://www.sifco.com/role/DiscontinuedOperationsNarrativeDetails">
+        <link:definition>9955528 - Disclosure - Discontinued Operations - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DiscontinuedOperationsAssetsandLiabilitiesHeldforSaleDetails" roleURI="http://www.sifco.com/role/DiscontinuedOperationsAssetsandLiabilitiesHeldforSaleDetails">
+        <link:definition>9955529 - Disclosure - Discontinued Operations - Assets and Liabilities Held for Sale (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DiscontinuedOperationsSummaryofOperatingDiscontinuedOperationsDetails" roleURI="http://www.sifco.com/role/DiscontinuedOperationsSummaryofOperatingDiscontinuedOperationsDetails">
+        <link:definition>9955530 - Disclosure - Discontinued Operations - Summary of Operating Discontinued Operations (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DiscontinuedOperationsCashFlowsfromDiscontinuedOperationsDetails" roleURI="http://www.sifco.com/role/DiscontinuedOperationsCashFlowsfromDiscontinuedOperationsDetails">
+        <link:definition>9955531 - Disclosure - Discontinued Operations - Cash Flows from Discontinued Operations (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InventoriesnetScheduleofInventoriesDetails" roleURI="http://www.sifco.com/role/InventoriesnetScheduleofInventoriesDetails">
+        <link:definition>9955532 - Disclosure - Inventories, net - Schedule of Inventories (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="InventoriesnetNarrativeDetails" roleURI="http://www.sifco.com/role/InventoriesnetNarrativeDetails">
+        <link:definition>9955533 - Disclosure - Inventories, net - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GoodwillNarrativeDetails" roleURI="http://www.sifco.com/role/GoodwillNarrativeDetails">
+        <link:definition>9955534 - Disclosure - Goodwill - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="AccruedLiabilitiesDetails" roleURI="http://www.sifco.com/role/AccruedLiabilitiesDetails">
+        <link:definition>9955535 - Disclosure - Accrued Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtScheduleofDebtDetails" roleURI="http://www.sifco.com/role/DebtScheduleofDebtDetails">
+        <link:definition>9955536 - Disclosure - Debt - Schedule of Debt (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtScheduleofDebtDetails_1" roleURI="http://www.sifco.com/role/DebtScheduleofDebtDetails_1">
+        <link:definition>9955536 - Disclosure - Debt - Schedule of Debt (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="DebtNarrativeDetails" roleURI="http://www.sifco.com/role/DebtNarrativeDetails">
+        <link:definition>9955537 - Disclosure - Debt - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevenueDisaggregationofRevenueDetails" roleURI="http://www.sifco.com/role/RevenueDisaggregationofRevenueDetails">
+        <link:definition>9955538 - Disclosure - Revenue - Disaggregation of Revenue (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevenueNarrativeDetails" roleURI="http://www.sifco.com/role/RevenueNarrativeDetails">
+        <link:definition>9955539 - Disclosure - Revenue - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevenueContractBalancesDetails" roleURI="http://www.sifco.com/role/RevenueContractBalancesDetails">
+        <link:definition>9955540 - Disclosure - Revenue - Contract Balances (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevenuePerformanceObligationDetails" roleURI="http://www.sifco.com/role/RevenuePerformanceObligationDetails">
+        <link:definition>9955541 - Disclosure - Revenue - Performance Obligation (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RevenuePerformanceObligationDetails_1" roleURI="http://www.sifco.com/role/RevenuePerformanceObligationDetails_1">
+        <link:definition>9955541 - Disclosure - Revenue - Performance Obligation (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesScheduleofComponentsofLossfromContinuingOperationsBeforeIncomeTaxProvisionDetails" roleURI="http://www.sifco.com/role/IncomeTaxesScheduleofComponentsofLossfromContinuingOperationsBeforeIncomeTaxProvisionDetails">
+        <link:definition>9955542 - Disclosure - Income Taxes - Schedule of Components of Loss from Continuing Operations Before Income Tax Provision (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesScheduleofIncomeTaxesfromContinuingOperationsBeforeIncomeTaxProvisionDetails" roleURI="http://www.sifco.com/role/IncomeTaxesScheduleofIncomeTaxesfromContinuingOperationsBeforeIncomeTaxProvisionDetails">
+        <link:definition>9955543 - Disclosure - Income Taxes - Schedule of Income Taxes from Continuing Operations Before Income Tax Provision (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesIncomeTaxProvisionfromContinuingOperationsDetails" roleURI="http://www.sifco.com/role/IncomeTaxesIncomeTaxProvisionfromContinuingOperationsDetails">
+        <link:definition>9955544 - Disclosure - Income Taxes - Income Tax Provision from Continuing Operations (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesSummaryofDeferredTaxAssetsandLiabilitiesDetails" roleURI="http://www.sifco.com/role/IncomeTaxesSummaryofDeferredTaxAssetsandLiabilitiesDetails">
+        <link:definition>9955545 - Disclosure - Income Taxes - Summary of Deferred Tax Assets and Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesNarrativeDetails" roleURI="http://www.sifco.com/role/IncomeTaxesNarrativeDetails">
+        <link:definition>9955546 - Disclosure - Income Taxes - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="IncomeTaxesSummaryofActivityRelatedtoUncertainTaxPositionDetails" roleURI="http://www.sifco.com/role/IncomeTaxesSummaryofActivityRelatedtoUncertainTaxPositionDetails">
+        <link:definition>9955547 - Disclosure - Income Taxes - Summary of Activity Related to Uncertain Tax Position (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlansNarrativeDetails" roleURI="http://www.sifco.com/role/RetirementBenefitPlansNarrativeDetails">
+        <link:definition>9955548 - Disclosure - Retirement Benefit Plans - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlansNetPensionExpenseforDefinedBenefitPlansDetails" roleURI="http://www.sifco.com/role/RetirementBenefitPlansNetPensionExpenseforDefinedBenefitPlansDetails">
+        <link:definition>9955549 - Disclosure - Retirement Benefit Plans - Net Pension Expense for Defined Benefit Plans (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlansRollForwardofDefinedBenefitPensionPlanObligationsandAssetsDetails" roleURI="http://www.sifco.com/role/RetirementBenefitPlansRollForwardofDefinedBenefitPensionPlanObligationsandAssetsDetails">
+        <link:definition>9955550 - Disclosure - Retirement Benefit Plans - Roll Forward of Defined Benefit Pension Plan Obligations and Assets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlansNetPlanAssetsRecognizedintheConsolidatedBalanceSheetsDetails" roleURI="http://www.sifco.com/role/RetirementBenefitPlansNetPlanAssetsRecognizedintheConsolidatedBalanceSheetsDetails">
+        <link:definition>9955551 - Disclosure - Retirement Benefit Plans - Net Plan Assets Recognized in the Consolidated Balance Sheets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlansNetPlanAssetsRecognizedintheConsolidatedBalanceSheetsDetails_1" roleURI="http://www.sifco.com/role/RetirementBenefitPlansNetPlanAssetsRecognizedintheConsolidatedBalanceSheetsDetails_1">
+        <link:definition>9955551 - Disclosure - Retirement Benefit Plans - Net Plan Assets Recognized in the Consolidated Balance Sheets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlansNetPlanAssetsRecognizedintheConsolidatedBalanceSheetsDetails_2" roleURI="http://www.sifco.com/role/RetirementBenefitPlansNetPlanAssetsRecognizedintheConsolidatedBalanceSheetsDetails_2">
+        <link:definition>9955551 - Disclosure - Retirement Benefit Plans - Net Plan Assets Recognized in the Consolidated Balance Sheets (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlansWeightedAverageAssumptionsUsedinDevelopingBenefitObligationandNetPensionExpenseDetails" roleURI="http://www.sifco.com/role/RetirementBenefitPlansWeightedAverageAssumptionsUsedinDevelopingBenefitObligationandNetPensionExpenseDetails">
+        <link:definition>9955552 - Disclosure - Retirement Benefit Plans - Weighted-Average Assumptions Used in Developing Benefit Obligation and Net Pension Expense (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlansAssetAllocationofDefinedBenefitPensionPlanAssetsandFairValuesandLevelsinFairValueHierarchyDetails" roleURI="http://www.sifco.com/role/RetirementBenefitPlansAssetAllocationofDefinedBenefitPensionPlanAssetsandFairValuesandLevelsinFairValueHierarchyDetails">
+        <link:definition>9955553 - Disclosure - Retirement Benefit Plans - Asset Allocation of Defined Benefit Pension Plan Assets and Fair Values and Levels in Fair Value Hierarchy (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlansAssetAllocationRangesofDefinedBenefitPlanInvestmentsDetails" roleURI="http://www.sifco.com/role/RetirementBenefitPlansAssetAllocationRangesofDefinedBenefitPlanInvestmentsDetails">
+        <link:definition>9955554 - Disclosure - Retirement Benefit Plans - Asset Allocation Ranges of Defined Benefit Plan Investments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RetirementBenefitPlansScheduleofProjectedFutureDefinedBenefitPlanPaymentsDetails" roleURI="http://www.sifco.com/role/RetirementBenefitPlansScheduleofProjectedFutureDefinedBenefitPlanPaymentsDetails">
+        <link:definition>9955555 - Disclosure - Retirement Benefit Plans - Schedule of Projected Future Defined Benefit Plan Payments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationNarrativeDetails" roleURI="http://www.sifco.com/role/StockBasedCompensationNarrativeDetails">
+        <link:definition>9955556 - Disclosure - Stock-Based Compensation - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockBasedCompensationScheduleofActivityRelatedtoPerformanceSharesDetails" roleURI="http://www.sifco.com/role/StockBasedCompensationScheduleofActivityRelatedtoPerformanceSharesDetails">
+        <link:definition>9955557 - Disclosure - Stock-Based Compensation - Schedule of Activity Related to Performance Shares (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesLeasesCostComponentsScheduleDetails" roleURI="http://www.sifco.com/role/LeasesLeasesCostComponentsScheduleDetails">
+        <link:definition>9955558 - Disclosure - Leases- Leases Cost Components Schedule (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesSupplementalBalanceSheetInformationScheduleDetails" roleURI="http://www.sifco.com/role/LeasesSupplementalBalanceSheetInformationScheduleDetails">
+        <link:definition>9955559 - Disclosure - Leases - Supplemental Balance Sheet Information Schedule (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesSupplementalCashFlowInformationandNonCashActivityScheduleDetails" roleURI="http://www.sifco.com/role/LeasesSupplementalCashFlowInformationandNonCashActivityScheduleDetails">
+        <link:definition>9955560 - Disclosure - Leases - Supplemental Cash Flow Information and Non-Cash Activity Schedule (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesWeightedAverageRemainingLeaseTermandDiscountRateScheduleDetails" roleURI="http://www.sifco.com/role/LeasesWeightedAverageRemainingLeaseTermandDiscountRateScheduleDetails">
+        <link:definition>9955561 - Disclosure - Leases - Weighted-Average Remaining Lease Term and Discount Rate Schedule (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesMaturitiesofLeaseLiabilitiesbyFiscalYearScheduleDetails" roleURI="http://www.sifco.com/role/LeasesMaturitiesofLeaseLiabilitiesbyFiscalYearScheduleDetails">
+        <link:definition>9955562 - Disclosure - Leases - Maturities of Lease Liabilities by Fiscal Year Schedule (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesMaturitiesofLeaseLiabilitiesbyFiscalYearScheduleDetails_1" roleURI="http://www.sifco.com/role/LeasesMaturitiesofLeaseLiabilitiesbyFiscalYearScheduleDetails_1">
+        <link:definition>9955562 - Disclosure - Leases - Maturities of Lease Liabilities by Fiscal Year Schedule (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesDetails" roleURI="http://www.sifco.com/role/CommitmentsandContingenciesDetails">
+        <link:definition>9955563 - Disclosure - Commitments and Contingencies (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformationNarrativeDetails" roleURI="http://www.sifco.com/role/SegmentInformationNarrativeDetails">
+        <link:definition>9955564 - Disclosure - Segment Information - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformationDetails" roleURI="http://www.sifco.com/role/SegmentInformationDetails">
+        <link:definition>9955565 - Disclosure - Segment Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SegmentInformationLonglivedAssetsbyGeographicAreasDetails" roleURI="http://www.sifco.com/role/SegmentInformationLonglivedAssetsbyGeographicAreasDetails">
+        <link:definition>9955566 - Disclosure - Segment Information - Long-lived Assets by Geographic Areas (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RelatedPartyTransactionsDetails" roleURI="http://www.sifco.com/role/RelatedPartyTransactionsDetails">
+        <link:definition>9955567 - Disclosure - Related Party Transactions (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ValuationandQualifyingAccountsDetails" roleURI="http://www.sifco.com/role/ValuationandQualifyingAccountsDetails">
+        <link:definition>9955568 - Disclosure - Valuation and Qualifying Accounts (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element id="sif_AuditInformationAbstract" abstract="true" name="AuditInformationAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_LossPerShareFromContinuingOperationsAbstract" abstract="true" name="LossPerShareFromContinuingOperationsAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_IncomePerShareFromDiscontinuedOperationsNetOfTaxAbstract" abstract="true" name="IncomePerShareFromDiscontinuedOperationsNetOfTaxAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_AmortizationAndWriteOffOfDebtIssuanceCost" abstract="false" name="AmortizationAndWriteOffOfDebtIssuanceCost" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_ShareTransactionsUnderCompanyStockPlan" abstract="false" name="ShareTransactionsUnderCompanyStockPlan" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_IncreaseDecreaseInInterestIncurredButNotYetPaid" abstract="false" name="IncreaseDecreaseInInterestIncurredButNotYetPaid" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_ProceedsFromIssuanceOfTermLoan" abstract="false" name="ProceedsFromIssuanceOfTermLoan" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_NetCashProvidedByUsedInDiscontinuedOperationsIncludingEffectOfExchangeRateChanges" abstract="false" name="NetCashProvidedByUsedInDiscontinuedOperationsIncludingEffectOfExchangeRateChanges" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_GuarantyFeesPayable" abstract="false" name="GuarantyFeesPayable" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_OriginationFeesCapitalizedToPromissoryNotePrincipal" abstract="false" name="OriginationFeesCapitalizedToPromissoryNotePrincipal" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DescriptionOfBusinessPolicyTextBlock" abstract="false" name="DescriptionOfBusinessPolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="sif_AssetsAndLiabilitiesLesseeTableTextBlock" abstract="false" name="AssetsAndLiabilitiesLesseeTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="sif_CBladeMember" abstract="true" name="CBladeMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_CustomerOneMember" abstract="true" name="CustomerOneMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_ThreeCustomersAndTheirDirectSubcontractorsMember" abstract="true" name="ThreeCustomersAndTheirDirectSubcontractorsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_TwoCustomersAndTheirDirectSubcontractorsMember" abstract="true" name="TwoCustomersAndTheirDirectSubcontractorsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_MajorCustomerOneAndTheirSubcontractorsMember" abstract="true" name="MajorCustomerOneAndTheirSubcontractorsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_MajorCustomerTwoAndTheirSubcontractorsMember" abstract="true" name="MajorCustomerTwoAndTheirSubcontractorsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_MajorCustomerThreeAndTheirSubcontractorsMember" abstract="true" name="MajorCustomerThreeAndTheirSubcontractorsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_EmployeeRetentionCreditProgramMember" abstract="true" name="EmployeeRetentionCreditProgramMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_DisposalGroupIncludingDiscontinuedOperationPercentageDivested" abstract="false" name="DisposalGroupIncludingDiscontinuedOperationPercentageDivested" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="sif_NumberOfMajorCustomers" abstract="false" name="NumberOfMajorCustomers" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="sif_InventoryValuationReservesNetOfWritedown" abstract="false" name="InventoryValuationReservesNetOfWritedown" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_InventoryObsoleteAndExcessInventoryValuationReserves" abstract="false" name="InventoryObsoleteAndExcessInventoryValuationReserves" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_ProceedsFromEmployeeRetentionCreditRefund" abstract="false" name="ProceedsFromEmployeeRetentionCreditRefund" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_GovernmentAssistanceInterestIncomeIncreaseDecrease" abstract="false" name="GovernmentAssistanceInterestIncomeIncreaseDecrease" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_GovernmentAssistanceProfessionalFeesExpenseDecreaseIncrease" abstract="false" name="GovernmentAssistanceProfessionalFeesExpenseDecreaseIncrease" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_AccumulatedDefinedBenefitPlansSettlementsAndCurtailmentsAttributableToParentMember" abstract="true" name="AccumulatedDefinedBenefitPlansSettlementsAndCurtailmentsAttributableToParentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_DisposalGroupIncludingDiscontinuedOperationEnterpriseValue" abstract="false" name="DisposalGroupIncludingDiscontinuedOperationEnterpriseValue" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DisposalGroupIncludingDiscontinuedOperationTransactionExpense" abstract="false" name="DisposalGroupIncludingDiscontinuedOperationTransactionExpense" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_TranslationAdjustmentFunctionalToReportingCurrencyPercentageOfExcessAssets" abstract="false" name="TranslationAdjustmentFunctionalToReportingCurrencyPercentageOfExcessAssets" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="sif_DisposalGroupIncludingDiscontinuedOperationShortTermInvestmentsCurrent" abstract="false" name="DisposalGroupIncludingDiscontinuedOperationShortTermInvestmentsCurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DisposalGroupIncludingDiscontinuedOperationOperatingLeaseRightOfUseAssetsNetNoncurrent" abstract="false" name="DisposalGroupIncludingDiscontinuedOperationOperatingLeaseRightOfUseAssetsNetNoncurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DisposalGroupIncludingDiscontinuedOperationLongTermDebtCurrent" abstract="false" name="DisposalGroupIncludingDiscontinuedOperationLongTermDebtCurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DisposalGroupIncludingDiscontinuedOperationOperatingLeaseLiabilitiesCurrent" abstract="false" name="DisposalGroupIncludingDiscontinuedOperationOperatingLeaseLiabilitiesCurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DisposalGroupIncludingDiscontinuedOperationLongTermDebtNoncurrent" abstract="false" name="DisposalGroupIncludingDiscontinuedOperationLongTermDebtNoncurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DisposalGroupIncludingDiscontinuedOperationOperatingLeaseLiabilitiesNoncurrent" abstract="false" name="DisposalGroupIncludingDiscontinuedOperationOperatingLeaseLiabilitiesNoncurrent" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_InventoryIdleCosts" abstract="false" name="InventoryIdleCosts" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_ClevelandReportingUnitMember" abstract="true" name="ClevelandReportingUnitMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_OtherTermLoanMember" abstract="true" name="OtherTermLoanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_LoanAgreementMember" abstract="true" name="LoanAgreementMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_SubordinatedPromissoryNoteMember" abstract="true" name="SubordinatedPromissoryNoteMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_CreditAgreementMember" abstract="true" name="CreditAgreementMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_EDLoanMember" abstract="true" name="EDLoanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_VPILoanMember" abstract="true" name="VPILoanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_DebtCovenantPeriodAxis" abstract="true" name="DebtCovenantPeriodAxis" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrldt:dimensionItem" type="xbrli:stringItemType"/>
+  <xs:element id="sif_DebtCovenantPeriodDomain" abstract="true" name="DebtCovenantPeriodDomain" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_DebtCovenantPeriodOneMember" abstract="true" name="DebtCovenantPeriodOneMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_DebtCovenantPeriodTwoMember" abstract="true" name="DebtCovenantPeriodTwoMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_PaidInKindInterestPayable" abstract="false" name="PaidInKindInterestPayable" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DebtInstrumentFeePaid" abstract="false" name="DebtInstrumentFeePaid" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DebtInstrumentFeePayable" abstract="false" name="DebtInstrumentFeePayable" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DebtInstrumentCollateralFeeInstallmentAmount" abstract="false" name="DebtInstrumentCollateralFeeInstallmentAmount" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DebtInstrumentCovenantAvailabilityBlock" abstract="false" name="DebtInstrumentCovenantAvailabilityBlock" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DebtInstrumentCovenantFixedChargeCoverageRatio" abstract="false" name="DebtInstrumentCovenantFixedChargeCoverageRatio" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="sif_LineOfCreditFacilityStockPledgedNonU.S.SubsidiariesPercentage" abstract="false" name="LineOfCreditFacilityStockPledgedNonU.S.SubsidiariesPercentage" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="sif_CommercialRevenueMember" abstract="true" name="CommercialRevenueMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_MilitaryRevenueMember" abstract="true" name="MilitaryRevenueMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_FixedWingAircraftRevenueMember" abstract="true" name="FixedWingAircraftRevenueMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_RotocraftRevenueMember" abstract="true" name="RotocraftRevenueMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_CommercialSpaceMember" abstract="true" name="CommercialSpaceMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_EnergyComponentsForPowerGenerationUnitsMember" abstract="true" name="EnergyComponentsForPowerGenerationUnitsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_CommercialProductsAndOtherRevenueMember" abstract="true" name="CommercialProductsAndOtherRevenueMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_ChangeInContractWithCustomerAssetsRollForward" abstract="true" name="ChangeInContractWithCustomerAssetsRollForward" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_ContractWithCustomerAssetAdditionalRevenueRecognized" abstract="false" name="ContractWithCustomerAssetAdditionalRevenueRecognized" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_ContractWithCustomerAssetAmountsBilledToCustomers" abstract="false" name="ContractWithCustomerAssetAmountsBilledToCustomers" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_ChangeInContractWithCustomerLiabilityRollForward" abstract="true" name="ChangeInContractWithCustomerLiabilityRollForward" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_ContractWithCustomerLiabilityPaymentsReceivedInAdvanceOfPerformanceObligations" abstract="false" name="ContractWithCustomerLiabilityPaymentsReceivedInAdvanceOfPerformanceObligations" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_ContractWithCustomerLiabilityLiabilityIncludingNewContractRevenueRecognized" abstract="false" name="ContractWithCustomerLiabilityLiabilityIncludingNewContractRevenueRecognized" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_TaxEffectOfAbstract" abstract="true" name="TaxEffectOfAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_NetDeferredTaxAssetsAndLiabilitiesBeforeValuationAllowance" abstract="false" name="NetDeferredTaxAssetsAndLiabilitiesBeforeValuationAllowance" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_InterestExpenseCarryforwardAmount" abstract="false" name="InterestExpenseCarryforwardAmount" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_TaxCreditCarryforwardAmountSubjectToExpiration" abstract="false" name="TaxCreditCarryforwardAmountSubjectToExpiration" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_TaxCreditCarryforwardAmountNotSubjectToExpiration" abstract="false" name="TaxCreditCarryforwardAmountNotSubjectToExpiration" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_ValuationAllowanceDeferredTaxAssetDeduction" abstract="false" name="ValuationAllowanceDeferredTaxAssetDeduction" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_IAMNationalPensionFundMember" abstract="true" name="IAMNationalPensionFundMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_DefinedBenefitPlanNumberOfDefinedBenefitPensionPlans" abstract="false" name="DefinedBenefitPlanNumberOfDefinedBenefitPensionPlans" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="sif_MultiemployerPlansWithdrawalObligationPaymentPeriod" abstract="false" name="MultiemployerPlansWithdrawalObligationPaymentPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="sif_PercentageOfEligibleCompensationOfDeferralContributionMinimum" abstract="false" name="PercentageOfEligibleCompensationOfDeferralContributionMinimum" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="sif_PercentageOfDeferralParticipantContribution" abstract="false" name="PercentageOfDeferralParticipantContribution" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="sif_PercentageOfEligibleCompensationOfDeferralContributionMaximum" abstract="false" name="PercentageOfEligibleCompensationOfDeferralContributionMaximum" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="sif_DefinedBenefitPlanNumberOfCompanySponsoredDefinedBenefitPensionPlans" abstract="false" name="DefinedBenefitPlanNumberOfCompanySponsoredDefinedBenefitPensionPlans" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="sif_DefinedContributionPlanNonElectiveContributionPerHourAmount" abstract="false" name="DefinedContributionPlanNonElectiveContributionPerHourAmount" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DefinedContributionPlanNonElectiveContributionExpense" abstract="false" name="DefinedContributionPlanNonElectiveContributionExpense" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DefinedBenefitPlanNetPeriodicBenefitCostCreditInterestCostStatementOfIncomeOrComprehensiveIncomeExtensibleListNotDisclosedFlag" abstract="false" name="DefinedBenefitPlanNetPeriodicBenefitCostCreditInterestCostStatementOfIncomeOrComprehensiveIncomeExtensibleListNotDisclosedFlag" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_DefinedBenefitPlanNetPeriodicBenefitCostCreditExpectedReturnLossStatementOfIncomeOrComprehensiveIncomeExtensibleListNotDisclosedFlag" abstract="false" name="DefinedBenefitPlanNetPeriodicBenefitCostCreditExpectedReturnLossStatementOfIncomeOrComprehensiveIncomeExtensibleListNotDisclosedFlag" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_DefinedBenefitPlanNetPeriodicBenefitCostCreditAmortizationOfGainLossStatementOfIncomeOrComprehensiveIncomeExtensibleListNotDisclosedFlag" abstract="false" name="DefinedBenefitPlanNetPeriodicBenefitCostCreditAmortizationOfGainLossStatementOfIncomeOrComprehensiveIncomeExtensibleListNotDisclosedFlag" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_DefinedBenefitPlanNetPeriodicBenefitCostCreditSettlementGainLossStatementOfIncomeOrComprehensiveIncomeExtensibleListNotDisclosedFlag" abstract="false" name="DefinedBenefitPlanNetPeriodicBenefitCostCreditSettlementGainLossStatementOfIncomeOrComprehensiveIncomeExtensibleListNotDisclosedFlag" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_DefinedBenefitPlanPensionPlansWithAccumulatedBenefitObligationsInExcessOfPlanAggregateBenefitObligationAccumulatedOtherComprehensiveIncomeNetGainsLossesAfterTax" abstract="false" name="DefinedBenefitPlanPensionPlansWithAccumulatedBenefitObligationsInExcessOfPlanAggregateBenefitObligationAccumulatedOtherComprehensiveIncomeNetGainsLossesAfterTax" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_DefinedBenefitPlansWithBenefitObligationsInExcessOfPlanAssetsAggregateBenefitObligationAccumulatedOtherComprehensiveIncomeBeforeTax" abstract="false" name="DefinedBenefitPlansWithBenefitObligationsInExcessOfPlanAssetsAggregateBenefitObligationAccumulatedOtherComprehensiveIncomeBeforeTax" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_UsEquityLargeGrowthMember" abstract="true" name="UsEquityLargeGrowthMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_NonUsEquitySecuritiesForeignLargeBlendMember" abstract="true" name="NonUsEquitySecuritiesForeignLargeBlendMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_NonUsEquitySecuritiesDiversifiedEmergingMarketMember" abstract="true" name="NonUsEquitySecuritiesDiversifiedEmergingMarketMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_NonUSEquitySecuritiesGlobalEquitySecuritiesMember" abstract="true" name="NonUSEquitySecuritiesGlobalEquitySecuritiesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_UsDebtSecuritiesIntermediateTermBondMember" abstract="true" name="UsDebtSecuritiesIntermediateTermBondMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_USDebtSecuritiesMultiSectorBondMember" abstract="true" name="USDebtSecuritiesMultiSectorBondMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_CashOrMoneyMarketMember" abstract="true" name="CashOrMoneyMarketMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_UnitedStatesEquitySecuritiesMember" abstract="true" name="UnitedStatesEquitySecuritiesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_NonUnitedStatesEquitySecuritiesMember" abstract="true" name="NonUnitedStatesEquitySecuritiesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_OtherSecuritiesMember" abstract="true" name="OtherSecuritiesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_TwoThousandAndSixteenLongTermIncentivePlanMember" abstract="true" name="TwoThousandAndSixteenLongTermIncentivePlanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_ShareBasedCompensationArrangementBySharebasedPaymentAwardQualifyingForTheAwardPeriod" abstract="false" name="ShareBasedCompensationArrangementBySharebasedPaymentAwardQualifyingForTheAwardPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="sif_CommonSharesEarnedPursuantToAward" abstract="false" name="CommonSharesEarnedPursuantToAward" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="sif_CommonSharesEarnedPercentageOfInitialTargetNumberSharesAwarded" abstract="false" name="CommonSharesEarnedPercentageOfInitialTargetNumberSharesAwarded" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="sif_CommonSharesEarnedPercentageOfInitialTargetNumberSharesAwardedNextFiscalYear" abstract="false" name="CommonSharesEarnedPercentageOfInitialTargetNumberSharesAwardedNextFiscalYear" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="sif_OutstandingShareAwardsEarnedAndIssuedAtGreaterThanTargetNumberOfShares" abstract="false" name="OutstandingShareAwardsEarnedAndIssuedAtGreaterThanTargetNumberOfShares" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="sif_OutstandingShareAwardsEarnedAndIssuedAtGreaterThanTargetNumberOfSharesNextFiscalYear" abstract="false" name="OutstandingShareAwardsEarnedAndIssuedAtGreaterThanTargetNumberOfSharesNextFiscalYear" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="sif_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsEarnedInPeriod" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsEarnedInPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="sif_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsEarnedWeightedAverageGrantDateFairValue" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionsEarnedWeightedAverageGrantDateFairValue" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:perShareItemType"/>
+  <xs:element id="sif_LeaseRightOfUseAsset" abstract="false" name="LeaseRightOfUseAsset" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_LeaseLiability" abstract="false" name="LeaseLiability" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_CashFlowLesseeAbstractAbstract" abstract="true" name="CashFlowLesseeAbstractAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_WeightedAverageRemainingLeaseTermAbstractAbstract" abstract="true" name="WeightedAverageRemainingLeaseTermAbstractAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_LeasesWeightedAverageDiscountRateAbstractAbstract" abstract="true" name="LeasesWeightedAverageDiscountRateAbstractAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_NonUSNorthAmericanCountriesMember" abstract="true" name="NonUSNorthAmericanCountriesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_NumberOfReportableSegmentsNotDisclosedFlag" abstract="false" name="NumberOfReportableSegmentsNotDisclosedFlag" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="sif_ReportableSegmentMember" abstract="true" name="ReportableSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="sif_GuarantyFee" abstract="false" name="GuarantyFee" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="sif_InventoryObsolescenceReserveMember" abstract="true" name="InventoryObsolescenceReserveMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+</xs:schema>

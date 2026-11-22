@@ -510,7 +510,9 @@ def _parse_hit(hit: dict) -> EFTSResult:
         accession_number=_format_accession(source.get("adsh", "")),
         form=source.get("form", ""),
         filed=source.get("file_date", ""),
-        company=names[0] if names else None,
+        # The same cleaner as resolve_accession(): EFTS appends "  (TICKER)  (CIK ...)"
+        # to the name, and the CIK already has its own field (GH #1708).
+        company=_clean_display_name(names[0]) if names else None,
         cik=str(ciks[0]) if ciks else None,
         period=source.get("period_ending"),
         score=hit.get("_score", 0.0) or 0.0,

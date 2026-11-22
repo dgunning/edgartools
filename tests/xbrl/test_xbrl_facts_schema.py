@@ -27,7 +27,7 @@ EXPECTED_COLUMNS = [
     'period_instant', 'is_dimensioned', 'decimals', 'statement_type',
     'statement_name', 'fact_id', 'context_ref', 'unit_ref', 'currency',
     'period_type', 'entity_identifier', 'entity_scheme', 'fiscal_period',
-    'fiscal_year',
+    'fiscal_year', 'is_nil',
 ]
 
 
@@ -55,7 +55,7 @@ def _queries(xbrl):
 
 
 def test_declared_columns_ground_truth(xbrl):
-    """A default query emits exactly these 24 columns, in this order."""
+    """A default query emits exactly these 25 columns, in this order."""
     df = xbrl.facts.query().to_dataframe()
     assert list(df.columns) == EXPECTED_COLUMNS
     assert len(df) == 1059
@@ -222,7 +222,7 @@ def test_repeated_calls_return_the_same_shape(xbrl):
 
 
 def test_declared_schema_covers_the_documented_column_list():
-    """The spec and the ground-truth list are the same 24 columns."""
+    """The spec and the ground-truth list are the same 25 columns."""
     assert list(_CORE_COLUMNS) == EXPECTED_COLUMNS
     assert _CONTEXT_COLUMNS <= set(_CORE_COLUMNS)
     assert not set(_DIMENSION_COLUMNS) & set(_CORE_COLUMNS)

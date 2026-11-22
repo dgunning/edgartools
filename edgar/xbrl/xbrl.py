@@ -16,7 +16,7 @@ import itertools
 import re
 from pathlib import Path
 from textwrap import dedent
-from typing import TYPE_CHECKING, Any, Dict, Iterable, List, Optional, Set, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Iterable, List, Optional, Set, Tuple, Union
 
 if TYPE_CHECKING:
     from edgar.xbrl.facts import FactQuery
@@ -32,18 +32,31 @@ from edgar.config import VERBOSE_EXCEPTIONS
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl.core import (
+    balance_cell_keys,
+    catalog_entry,
+    element_catalog_key,
     STANDARD_LABEL,
     STANDARD_TAXONOMIES,
     normalize_decimals,
     split_element_id,
     unit_currency_measure,
 )
-from edgar.xbrl.models import Axis, Domain, PresentationNode, is_negated_label_role
+from edgar.xbrl.models import NIL_MEMBER_LABEL, Axis, Domain, PresentationNode, is_negated_label_role
+from edgar.xbrl.abstract_detection import element_is_abstract
+from edgar.xbrl.element_metadata import (
+    ElementMetadata,
+    build_element_metadata,
+    concept_id,
+    directory_metalinks_source,
+    filing_metalinks_source,
+)
+from edgar.xbrl.enumerations import EnumerationMember, parse_enumeration_value
 from edgar.xbrl.parsers import XBRLParser
+from edgar.xbrl.parsers.concepts import resolve_balance
 from edgar.xbrl.periods import get_period_views
 from edgar.xbrl.rendering import RenderedStatement, generate_rich_representation, render_statement
 from edgar.exceptions import NotFoundError
-from edgar.xbrl.statement_resolver import StatementResolver
+from edgar.xbrl.statement_resolver import StatementResolver, declares_statement
 from edgar.xbrl.statements import statement_to_concepts
 
 
@@ -62,6 +75,30 @@ _ROLE_CATEGORY_MARKER = 'disclosure'
 # The concept a disclosure role hangs from, e.g. us-gaap_DebtDisclosureAbstract.
 # Matches the Disclosures concept patterns in statement_resolver.py.
 _DISCLOSURE_CONCEPT_RE = re.compile(r"disclosures?abstract$", re.IGNORECASE)
+
+# A prefixed QName (prefix:local, both NCNames). A typed dimension value that is
+# one names a concept; any other typed value ('10:30') is data, kept as filed.
+_QNAME = re.compile(r"^[A-Za-z_][\w.-]*:[A-Za-z_][\w.-]*$")
+
+# Display-label roles, preferred in this order when a concept has no standard label.
+_FALLBACK_LABEL_ROLES = (
+    'http://www.xbrl.org/2003/role/terseLabel',
+    'http://www.xbrl.org/2003/role/verboseLabel',
+)
+_DOCUMENTATION_ROLE = 'http://www.xbrl.org/2003/role/documentation'
+
+
+def _element_label(labels: Optional[Dict[str, str]]) -> Optional[str]:
+    """A concept's display label: the standard label, else terse or verbose,
+    else any other label role. Documentation is a definition, not a label, so
+    it is never used (edgartools-gtmsn: a documentation-only concept exported
+    its definition as ``element_label``)."""
+    if not labels:
+        return None
+    for role in (STANDARD_LABEL, *_FALLBACK_LABEL_ROLES):
+        if labels.get(role):
+            return labels[role]
+    return next((text for role, text in labels.items() if role != _DOCUMENTATION_ROLE and text), None)
 
 # The section sense of the word, kept deliberately generous: a definition that
 # matches here keeps the classification it already had, so a false positive
@@ -87,6 +124,80 @@ def _declares_disclosure(role_def: str, primary_concept: str) -> bool:
     if any(part.strip() == _ROLE_CATEGORY_MARKER for part in role_def.split(' - ')):
         return True
     return role_def.startswith(_ROLE_CATEGORY_MARKER)
+
+
+# FilingSummary menu categories that SEC's renderer assigns by guessing, and
+# that a role's own content can overrule. Statements, Tables, Policies and
+# Details are taken at their word.
+_GUESSED_MENU_CATEGORIES = ('Notes', 'Cover', 'Uncategorized')
+_NARRATIVE_TYPES = ('textBlockItemType', 'stringItemType')
+
+
+def _effective_menu_category(menu_category: Optional[str], tree,
+                             data_type_of: Callable[[str], Optional[str]]) -> Optional[str]:
+    """The FilingSummary menu category, corrected where the role's content contradicts it.
+
+    SEC's renderer files a role under Details mostly from its title. A detail
+    role titled without the "(Details)" suffix is filed under Notes, Cover or
+    Uncategorized instead: Costco's FY2021 10-K (0000909832-21-000014) puts
+    "Leases, Future Minimum Payments" under Notes and "Leases, Components of
+    Lease Expense" under Cover (GH #1947).
+
+    Only a role whose definition declares the Disclosure category is
+    reconsidered. Statements and Document roles are left alone: SEC also files
+    primary statements under Uncategorized and balance sheet parentheticals
+    under Cover, and Audit Information roles under Notes, and none of those is
+    a detail. A disclosure role is a detail when it holds a value-typed line
+    item (monetary, shares, a date) and no text block. Types come from the
+    filing's schema and the bundled FASB element table: a note's text block is
+    not always named ``...TextBlock`` (``us-gaap_NatureOfOperations``,
+    ``us-gaap_LossContingencyDisclosures``).
+
+    Measured over 111 10-Ks from 37 filers, 2020-2022: the four Costco FY2021
+    lease roles are the only roles this moves.
+    """
+    if menu_category not in _GUESSED_MENU_CATEGORIES or tree is None:
+        return menu_category
+    if not any(part.strip().lower() == _ROLE_CATEGORY_MARKER for part in (tree.definition or '').split(' - ')):
+        return menu_category
+    has_value_item = False
+    for element_id, node in tree.all_nodes.items():
+        if node.is_abstract:
+            continue
+        data_type = data_type_of(element_id)
+        if data_type is None:
+            continue
+        if data_type.endswith('textBlockItemType'):
+            return menu_category
+        if not data_type.endswith(_NARRATIVE_TYPES):
+            has_value_item = True
+    return 'Details' if has_value_item else menu_category
+
+
+def _statement_typing_concept(tree, menu_category: Optional[str]) -> str:
+    """The presentation node that says what kind of statement a role is.
+
+    That is the first node, except where a declared statement opens with its
+    hypercube: STERIS presents its income statement as StatementTable ->
+    StatementLineItems -> IncomeStatementAbstract (GH #1838). Only the filing's
+    own presentation path is followed, and only for a role the filing declares
+    a statement, since a standard abstract inside a disclosure says nothing
+    about the role.
+
+    Args:
+        tree: The role's presentation tree.
+        menu_category: The role's FilingSummary menu category, or None.
+    """
+    first = next(iter(tree.all_nodes))
+    if not first.endswith('Table') or not declares_statement(tree.definition, menu_category):
+        return first
+    table = tree.all_nodes[first]
+    for child in table.children:
+        if child.endswith('LineItems'):
+            line_items = tree.all_nodes.get(child)
+            if line_items is not None and line_items.children:
+                return line_items.children[0]
+    return first
 
 
 def _names_notes_section(role_def: str) -> bool:
@@ -487,6 +598,7 @@ class XBRLAttachments:
         # does not read it again. An attachment without an in-memory SGML copy
         # downloads on every .content access (edgartools-vk270.1).
         self._contents = dict()
+        self._attachments = attachments
         if attachments.data_files:
             for attachment in attachments.data_files:
                 if attachment.document_type in ["XML", 'EX-101.INS'] and attachment.extension.endswith(
@@ -527,6 +639,23 @@ class XBRLAttachments:
             return self._contents[doc_type]
         attachment = self._documents.get(doc_type)
         return attachment.content if attachment is not None else None
+
+    def inline_document(self):
+        """The inline XBRL document SEC extracted the instance from, or None.
+
+        SEC names an extracted instance after its source: `gecc-20241231.htm`
+        becomes `gecc-20241231_htm.xml`. Nothing is read here; the caller reads
+        `.content` only if it needs the document.
+        """
+        instance = self._documents.get('instance')
+        name = getattr(instance, 'document', None) or ''
+        if not name.lower().endswith('_htm.xml'):
+            return None
+        source = (name[:-len('_htm.xml')] + '.htm').lower()
+        for attachment in getattr(self._attachments, 'documents', None) or []:
+            if (getattr(attachment, 'document', None) or '').lower() == source:
+                return attachment
+        return None
 
     def prefetch(self) -> None:
         """Read every XBRL document now, so a failed download surfaces before parsing starts."""
@@ -577,11 +706,16 @@ class XBRL:
         self._sgml_period_of_report: Optional[str] = None
         self._validated_period_of_report_cache: Optional[str] = None
         self._period_of_report_warning_logged: bool = False
+        # The inline XBRL document to read footnotes from on first use, set only
+        # when the extracted instance had none (bead edgartools-s21p2).
+        self._inline_footnote_document = None
         # Set when the SGML date could not be read at all, which turns the
         # discrepancy check off rather than making it disagree. Carried so that
         # "the dates agreed" and "we never had a second date" are distinguishable
         # (bead edgartools-35jj).
         self._period_validation_unavailable: Optional[str] = None
+        # Where element_metadata() reads MetaLinks.json from, on first use (GH #1426)
+        self._metalinks_source = None
 
         # Standardization cache for this XBRL instance (lazy-initialized)
         self._standardization_cache = None
@@ -678,7 +812,32 @@ class XBRL:
     @property
     def footnotes(self):
         """Access to XBRL footnotes."""
+        self._load_inline_footnotes()
         return self.parser.footnotes
+
+    def _load_inline_footnotes(self) -> None:
+        """Fill footnotes from the inline XBRL document when the instance had none.
+
+        Some SEC-extracted instances drop every footnoteLink that the inline
+        document carries as ix:footnote/ix:relationship (bead edgartools-s21p2).
+        Runs at most once, and only when from_filing found the instance empty of
+        footnotes; the document is read on first use, not at parse time.
+        """
+        document = getattr(self, '_inline_footnote_document', None)
+        if document is None:
+            return
+        self._inline_footnote_document = None
+        try:
+            content = document.content
+        except Exception as e:
+            log.warning(f"Could not read inline XBRL document {getattr(document, 'document', '')} "
+                        f"for its footnotes: {e}")
+            return
+        if not content:
+            return
+        marker = b'relationship' if isinstance(content, bytes) else 'relationship'
+        if marker in content:
+            self.parser.parse_inline_footnotes_content(content)
 
     @property
     def standardization(self):
@@ -798,11 +957,82 @@ class XBRL:
 
     @property
     def entity_info(self):
+        """Cover-page facts: entity_name, identifier, document_type, fiscal_year, and so on.
+
+        ``reporting_end_date`` is dei:DocumentPeriodEndDate as a ``datetime.date``;
+        ``document_period_end_date`` is the same fact as filed; and
+        ``max_instant_context_date`` is the latest instant among all contexts,
+        usually the cover's share-count date (GH #1208).
+        """
         return self.parser.entity_info
 
     @property
     def reporting_periods(self):
         return self.parser.reporting_periods
+
+    def element_metadata(self, concept: str) -> Optional[ElementMetadata]:
+        """
+        What a concept is: its type, balance, period type, abstract status,
+        definition and ASC references.
+
+        Accepts 'us-gaap:Assets' or 'us-gaap_Assets'. The filing's own schema
+        answers for its extension concepts and the bundled FASB element table
+        for imported us-gaap and srt ones; the definition and the Accounting
+        Standards Codification references come from the filing's MetaLinks.json,
+        which the first call downloads (one small file) when the XBRL came from
+        a filing. A field no source states is None, never a guess. For an
+        extensible-enumeration concept, ``enumeration`` holds its domain and
+        linkrole as published in the FASB release whose us-gaap (or srt)
+        namespace this filing binds.
+
+        Args:
+            concept: A prefixed concept name.
+
+        Returns:
+            ElementMetadata, or None when no source knows the concept.
+
+        Raises:
+            ValueError: the concept has no namespace prefix.
+
+        Example:
+            >>> meta = xbrl.element_metadata("us-gaap:Assets")
+            >>> meta.balance, meta.period_type
+            ('debit', 'instant')
+            >>> [f"{r.topic}-{r.sub_topic}-{r.section}-{r.paragraph}" for r in meta.references][:1]
+            ['942-210-S99-1']
+        """
+        element_id = concept_id(concept)
+        metalinks = self._metalinks_source.get() if self._metalinks_source is not None else None
+        return build_element_metadata(element_id, self.element_catalog.get(element_id), metalinks,
+                                      self.parser.namespace_prefixes)
+
+    def enumeration_members(self, value: Optional[str]) -> Tuple[EnumerationMember, ...]:
+        """
+        The members an extensible-enumeration fact value names.
+
+        The value is one or more whitespace-separated expanded names
+        ('namespace#LocalName'). Each member carries its namespace URI, local
+        name and concept id, the id built from the prefix this filing binds to
+        the namespace (None when the filing binds none). The members are not
+        checked against the concept's domain (see
+        ``element_metadata(concept).enumeration``).
+
+        Args:
+            value: An enumeration fact's value. None or '' (a nil fact) gives ().
+
+        Returns:
+            A tuple of ``EnumerationMember``, in the order the value lists them.
+
+        Raises:
+            ValidationError: a token is not a 'namespace#LocalName' expanded name.
+
+        Example:
+            >>> fact = xbrl.facts.query().by_concept(
+            ...     "us-gaap:HedgedAssetStatementOfFinancialPositionExtensibleEnumeration").to_dataframe().iloc[0]
+            >>> [m.concept for m in xbrl.enumeration_members(fact['value'])]
+            ['us-gaap_MarketableSecuritiesCurrent', 'us-gaap_MarketableSecuritiesNoncurrent']
+        """
+        return parse_enumeration_value(value, self.parser.namespace_prefixes)
 
     def calculation_linkbase(self, include_abstract: bool = False) -> pd.DataFrame:
         """Return the filing's calculation linkbase as a DataFrame of arcs.
@@ -872,7 +1102,7 @@ class XBRL:
                 parent_tax, parent_local = split_element_id(arc.parent_id)
 
                 elem = self.element_catalog.get(element_id)
-                is_abstract = bool(elem.abstract) if elem else False
+                is_abstract = element_is_abstract(element_id, elem)
                 if is_abstract and not include_abstract:
                     continue
 
@@ -1075,6 +1305,7 @@ class XBRL:
         """
         xbrl = cls()
         xbrl.parser.parse_directory(directory_path)
+        xbrl._metalinks_source = directory_metalinks_source(Path(directory_path))
 
         # Try to create legacy instance as well for compatibility
         directory = Path(directory_path)
@@ -1155,6 +1386,7 @@ class XBRL:
         # A large submission is mostly exhibits and PDFs; fetch just its XBRL files
         # when that is possible, else read the whole submission (edgartools-vk270.1).
         selective = _selective_xbrl_sources(filing)
+        xbrl._metalinks_source = filing_metalinks_source(filing)
         xbrl_attachments = selective.attachments if selective else XBRLAttachments(filing.attachments)
 
         if xbrl_attachments.empty:
@@ -1184,6 +1416,10 @@ class XBRL:
 
         if xbrl_attachments.get('instance'):
             xbrl.parser.parse_instance_content(xbrl_attachments.content('instance'))
+            if not xbrl.parser.footnotes:
+                # Read lazily: most filings with no footnoteLink have no footnotes,
+                # and the inline document can be a large download (edgartools-s21p2).
+                xbrl._inline_footnote_document = xbrl_attachments.inline_document()
         elif not xbrl_attachments.empty:
             # Filing bundle is in local storage AND has linkbases, but the XBRL
             # instance document itself is missing. This is typical for iXBRL filings
@@ -1201,6 +1437,8 @@ class XBRL:
                         f"Fetching just the instance from the SEC homepage (network fallback)."
                     )
                     xbrl.parser.parse_instance_content(homepage_xbrl.get('instance').content)
+                    if not xbrl.parser.footnotes:
+                        xbrl._inline_footnote_document = homepage_xbrl.inline_document()
                 else:
                     log.warning(
                         f"XBRL instance document not found for {filing.accession_no} — "
@@ -1253,24 +1491,43 @@ class XBRL:
                 sgml = filing.sgml()
                 filing_summary = sgml.filing_summary if sgml else None
             if filing_summary:
-                _MENU_CATEGORY_TO_CLASSIFICATION = {
-                    'Notes': 'note',
-                    'Tables': 'note',
-                    'Policies': 'note',
-                    'Details': 'disclosure',
-                    'Cover': 'document',
-                }
-                for report in filing_summary.reports:
-                    if report.role and report.menu_category:
-                        classification = _MENU_CATEGORY_TO_CLASSIFICATION.get(report.menu_category)
-                        if classification:
-                            xbrl._filing_summary_categories[report.role] = classification
-                        xbrl._filing_summary_menu_categories[report.role] = report.menu_category
-                xbrl._filing_summary = filing_summary
+                xbrl._apply_filing_summary(filing_summary)
         except Exception:
             pass
 
         return xbrl
+
+    _MENU_CATEGORY_TO_CLASSIFICATION = {
+        'Notes': 'note',
+        'Tables': 'note',
+        'Policies': 'note',
+        'Details': 'disclosure',
+        'Cover': 'document',
+    }
+
+    def _declared_data_type(self, element_id: str) -> Optional[str]:
+        """A concept's declared XBRL type from the schema or the bundled FASB table, offline."""
+        meta = build_element_metadata(element_id, self.element_catalog.get(element_id), None,
+                                      self.parser.namespace_prefixes)
+        return meta.data_type if meta else None
+
+    def _apply_filing_summary(self, filing_summary) -> None:
+        """Take each role's category from FilingSummary.xml, corrected by its content.
+
+        The menu category is SEC's renderer's call and is mostly right, but it is
+        guessed from the role title; `_effective_menu_category` overrules it where
+        the role's own concepts say otherwise (GH #1947). Both get_all_statements()
+        and Notes read the corrected value from here.
+        """
+        for report in filing_summary.reports:
+            if report.role and report.menu_category:
+                menu_category = _effective_menu_category(
+                    report.menu_category, self.presentation_trees.get(report.role), self._declared_data_type)
+                classification = self._MENU_CATEGORY_TO_CLASSIFICATION.get(menu_category)
+                if classification:
+                    self._filing_summary_categories[report.role] = classification
+                self._filing_summary_menu_categories[report.role] = menu_category
+        self._filing_summary = filing_summary
 
     @property
     def statements(self):
@@ -1483,11 +1740,14 @@ class XBRL:
             role_def = tree.definition.lower()
             statement_type = None
             primary_concept = next(iter(tree.all_nodes))
+            # Typed by the abstract under a declared statement's line items when
+            # it opens with a table (GH #1838); primary_concept stays literal.
+            typing_concept = _statement_typing_concept(tree, self._filing_summary_menu_categories.get(role))
             statement_category = None
 
             # First try to match using statement_to_concepts (for backward compatibility)
             for statement_alias, statement_info in statement_to_concepts.items():
-                if primary_concept == statement_info.concept:
+                if typing_concept == statement_info.concept:
                     if 'parenthetical' in role_def:
                         statement_type = f"{statement_alias}Parenthetical"
                     else:
@@ -1506,7 +1766,7 @@ class XBRL:
                     "ifrs-full_StatementOfComprehensiveIncomeAbstract": "ComprehensiveIncome",
                     "ifrs-full_StatementOfProfitOrLossAndOtherComprehensiveIncomeAbstract": "ComprehensiveIncome",
                 }
-                matched_type = _IFRS_CONCEPT_TO_TYPE.get(primary_concept)
+                matched_type = _IFRS_CONCEPT_TO_TYPE.get(typing_concept)
                 if matched_type:
                     if 'parenthetical' in role_def:
                         statement_type = f"{matched_type}Parenthetical"
@@ -1975,14 +2235,10 @@ class XBRL:
         weight = None   # Calculation weight from calculation linkbase
 
         # Get balance from element catalog
-        element_id_normalized = element_id.replace(':', '_')
+        element_id_normalized = element_catalog_key(element_id)
         if element_id_normalized in self.element_catalog:
             element = self.element_catalog[element_id_normalized]
-            balance = element.balance
-            if balance is None:
-                # Fallback to static US-GAAP mapping
-                from edgar.xbrl.parsers.concepts import get_balance_type
-                balance = get_balance_type(element_id)
+            balance = resolve_balance(element.balance, element_id)
 
         # Get weight and calculation parent from calculation trees (Issue #463, #514, GH-712)
         # A calculation relationship belongs to its own role (XBRL 2.1 section
@@ -2019,8 +2275,19 @@ class XBRL:
             # two surfaces cannot disagree about a sign.
             preferred_sign_value = -1 if is_negated_label_role(effective_preferred_label) else 1
 
-        # Find facts for any of these concept names
-        all_relevant_facts = self._find_facts_for_element(node.element_name, period_filter)
+        # Find facts for any of these concept names. A single requested period
+        # keeps every fact its column can show: under a duration column that
+        # includes the opening and closing instants (edgartools-auvk1.21), which
+        # balance_cell_key then chooses between per row, as in the default view.
+        if period_filter:
+            keep = balance_cell_keys(period_filter)
+            all_relevant_facts = {
+                context_id: fact
+                for context_id, fact in self._find_facts_for_element(node.element_name).items()
+                if self.context_period_map.get(context_id) in keep
+            }
+        else:
+            all_relevant_facts = self._find_facts_for_element(node.element_name)
 
         # GH #1468: a co-registrant's own face statement reads that registrant's facts
         coregistrant_member = self._coregistrant_member(statement_role)
@@ -2365,7 +2632,10 @@ class XBRL:
                     'period_types': dim_period_types,  # Include period_type for each period
                     'preferred_signs': dim_preferred_signs,  # Include preferred_sign for display (Issue #463)
                     'level': occurrence_depth + 1,  # Increase depth by 1
-                    'preferred_label': node.preferred_label,
+                    # edgartools-auvk1.14: this reference's own arc role, not the
+                    # node's last one, so a member row under a beginning balance
+                    # is read as the opening balance
+                    'preferred_label': effective_preferred_label,
                     'is_abstract': False,
                     'children': [],
                     'has_values': len(dim_values) > 0,
@@ -2970,7 +3240,10 @@ class XBRL:
         Higher return value = more precise:
         - INF (infinite precision) returns 1_000_000
         - Numeric decimals return their value (e.g., -6 for millions, 2 for hundredths)
-        - None or invalid returns 0 (default/unknown precision)
+        - None or invalid returns -1_000_000: unknown accuracy, below any stated
+          one. It used to score 0, above every negative decimals, so a fact with
+          no stated accuracy beat one rounded to thousands (GH #1765). A fact
+          filed with @precision has its decimals inferred at parse time.
         - A valueless (nil) fact returns -2_000_000, below any valued fact, because
           its missing decimals says nothing about precision (GH #1750)
 
@@ -2988,8 +3261,8 @@ class XBRL:
             try:
                 return int(fact.decimals)
             except (ValueError, TypeError):
-                return 0
-        return 0  # Default/unknown precision
+                return -1_000_000
+        return -1_000_000  # Unknown accuracy: below any stated one, above nil
 
     @staticmethod
     def _select_most_precise_fact(facts: list):
@@ -3154,6 +3427,58 @@ class XBRL:
                 coregistrant_members[role] = member
         return coregistrant_members
 
+    def _describe_dimension(self, dim_name: str, dim_value: str, typed: bool,
+                            nil: bool = False) -> Dict[str, Any]:
+        """One context dimension with display labels, for `_find_facts_for_element`."""
+        # An explicit member is a QName naming a concept, keyed in the catalog
+        # with '_'. A typed value is data: it is rewritten only when it too is a
+        # QName (a QName.domain typed axis names concepts), so '10:30' stays as
+        # filed (gh #1761).
+        if not typed or _QNAME.match(dim_value):
+            dim_value = dim_value.replace(":", "_")
+        dim_label = dim_name
+        mem_label = dim_value
+        # The axis is looked up raw on purpose, so it keeps its QName: a statement
+        # row's dimension_label reads 'srt:ProductOrServiceAxis: Products', and
+        # callers filter on that (bdc/investments.py, GH #574, GH #1682). The
+        # axis label is in the facts frame; dimension_axis holds the QName.
+        dim_element = self.element_catalog.get(dim_name)
+        mem_element = self.element_catalog.get(dim_value)
+
+        # Try to get human-readable dimension name
+        if dim_element is not None:
+            for role in ['http://www.xbrl.org/2003/role/terseLabel',
+                         'http://www.xbrl.org/2003/role/label',
+                         'http://www.xbrl.org/2003/role/verboseLabel']:
+                if role in dim_element.labels:
+                    dim_label = dim_element.labels[role]
+                    break
+
+        # Try to get human-readable member name. Prefer verboseLabel, which
+        # provides full accounting terms (e.g., "Rental equipment, net" vs
+        # "Sales of rental equipment")
+        if mem_element is not None:
+            for role in ['http://www.xbrl.org/2003/role/verboseLabel',
+                         'http://www.xbrl.org/2003/role/terseLabel',
+                         'http://www.xbrl.org/2003/role/label']:
+                if role in mem_element.labels:
+                    mem_label = mem_element.labels[role]
+                    break
+
+        # Clean up labels (remove [Axis], [Member], etc.)
+        dim_label = dim_label.replace('[Axis]', '').replace('[Domain]', '').strip()
+        mem_label = NIL_MEMBER_LABEL if nil else mem_label.replace('[Member]', '').strip()
+        format_key = f"{dim_label}: {mem_label}"
+        return {
+            'dimension': dim_name,
+            'member': dim_value,
+            'dimension_label': dim_label,
+            'member_label': mem_label,
+            'format_key': format_key,
+            'dimension_element': dim_element,
+            'member_element': mem_element
+        }
+
     def _find_facts_for_element(self, element_name: str, period_filter: Optional[str] = None,
                                 dimensions: Optional[Dict[str, str]] = None) -> Dict[str, Any]:
         """
@@ -3221,58 +3546,12 @@ class XBRL:
                     dimension_info = []
                     dim_keys = []
 
+                    typed_dimensions = getattr(self.parser, 'typed_dimensions', ())
                     for dim_name, dim_value in sorted(context.dimensions.items()):
-                        dim_value = dim_value.replace(":", "_")
-                        # Initialize with technical names
-                        dim_label = dim_name
-                        mem_label = dim_value
-
-                        # Get richer label information from element catalog
-                        dim_element = None
-                        mem_element = None
-
-                        # Try to get human-readable dimension name
-                        if dim_name in self.element_catalog:
-                            dim_element = self.element_catalog[dim_name]
-                            # Try different label roles in order of preference
-                            for role in ['http://www.xbrl.org/2003/role/terseLabel',
-                                         'http://www.xbrl.org/2003/role/label',
-                                         'http://www.xbrl.org/2003/role/verboseLabel']:
-                                if role in dim_element.labels:
-                                    dim_label = dim_element.labels[role]
-                                    break
-
-                        # Try to get human-readable member name
-                        if dim_value in self.element_catalog:
-                            mem_element = self.element_catalog[dim_value]
-                            # Try different label roles in order of preference
-                            # Prefer verboseLabel which provides full accounting terms
-                            # (e.g., "Rental equipment, net" vs "Sales of rental equipment")
-                            for role in ['http://www.xbrl.org/2003/role/verboseLabel',
-                                         'http://www.xbrl.org/2003/role/terseLabel',
-                                         'http://www.xbrl.org/2003/role/label']:
-                                if role in mem_element.labels:
-                                    mem_label = mem_element.labels[role]
-                                    break
-
-                        # Clean up labels (remove [Axis], [Member], etc.)
-                        dim_label = dim_label.replace('[Axis]', '').replace('[Domain]', '').strip()
-                        mem_label = mem_label.replace('[Member]', '').strip()
-
-                        # Format key for display
-                        format_key = f"{dim_label}: {mem_label}"
-                        dim_keys.append(format_key)
-
-                        # Store rich dimension information
-                        dimension_info.append({
-                            'dimension': dim_name,
-                            'member': dim_value,
-                            'dimension_label': dim_label,
-                            'member_label': mem_label,
-                            'format_key': format_key,
-                            'dimension_element': dim_element,
-                            'member_element': mem_element
-                        })
+                        info = self._describe_dimension(dim_name, dim_value, dim_name in typed_dimensions,
+                                                        nil=dim_name in context.nil_dimensions)
+                        dim_keys.append(info['format_key'])
+                        dimension_info.append(info)
 
                     # Store dimension information in the wrapper
                     wrapped_fact['dimension_info'] = dimension_info
@@ -3534,9 +3813,18 @@ class XBRL:
             view=view
         )
 
+    def _element_catalog_entry(self, element_id: Optional[str]):
+        """Catalog entry for a concept id in either spelling (GH #1711); see ``core.catalog_entry``."""
+        return catalog_entry(self.element_catalog, element_id)
+
     def to_pandas(self, statement_role: Optional[str] = None, standard: bool = True) -> Dict[str, pd.DataFrame]:
         """
         Convert XBRL data to pandas DataFrames.
+
+        Facts include element_name, element_type, element_period_type,
+        element_balance and element_label when the concept is in the catalog.
+        Lookup tries the stored id, then only its namespace ``:`` changed to ``_``.
+
         Args:
             statement_role: Optional role URI to convert only a specific statement
             standard: Whether to use standardized concept labels (default: True)
@@ -3588,7 +3876,7 @@ class XBRL:
                 context = self.contexts[fact.context_ref]
 
                 # Add period information
-                if 'period' in context.model_dump() and context.period:
+                if context.period:
                     fact_dict['period_type'] = context.period.get('type')
                     if fact_dict['period_type'] == 'instant':
                         fact_dict['period_instant'] = context.period.get('instant')
@@ -3597,33 +3885,25 @@ class XBRL:
                         fact_dict['period_end'] = context.period.get('endDate')
 
                 # Add entity information
-                if 'entity' in context.model_dump() and context.entity:
+                if context.entity:
                     fact_dict['entity_identifier'] = context.entity.get('identifier')
 
                 # Add dimensions
-                if 'dimensions' in context.model_dump() and context.dimensions:
+                if context.dimensions:
                     for dim_name, dim_value in context.dimensions.items():
                         dim_key = f"dim_{dim_name.replace(':', '_')}"
                         fact_dict[dim_key] = dim_value
 
-            # Try to get element information
-            element_id = fact.element_id
-            if element_id in self.element_catalog:
-                element = self.element_catalog[element_id]
+            # GH #1711: catalog keys use prefix_LocalName; facts keep prefix:LocalName.
+            element = self._element_catalog_entry(fact.element_id)
+            if element is not None:
                 fact_dict['element_name'] = element.name
                 fact_dict['element_type'] = element.data_type
                 fact_dict['element_period_type'] = element.period_type
                 fact_dict['element_balance'] = element.balance
 
                 # Add label
-                label = None
-                if element.labels:
-                    # Try standard label first
-                    label = element.labels.get(STANDARD_LABEL)
-                    if not label:
-                        # Take first available label
-                        label = next(iter(element.labels.values()), None)
-                fact_dict['element_label'] = label
+                fact_dict['element_label'] = _element_label(element.labels)
 
             fact_data.append(fact_dict)
 
@@ -3720,6 +4000,7 @@ class XBRL:
         Returns:
             List of Footnote objects associated with the fact
         """
+        self._load_inline_footnotes()
         footnotes = []
 
         # First check if any fact has this ID and get its footnote references
@@ -3738,6 +4019,7 @@ class XBRL:
         Returns:
             Dictionary of fact_key -> Fact for all facts with footnotes
         """
+        self._load_inline_footnotes()
         facts_with_footnotes = {}
         for key, fact in self.parser.facts.items():
             if fact.footnotes:

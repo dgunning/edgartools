@@ -238,6 +238,10 @@ class TableProcessor:
         # Process tbody (or direct rows)
         tbody = self._own_section(element, 'tbody')
         rows_container = tbody if tbody is not None else element
+        # Without a tbody the rows container is the table itself, which also holds
+        # the tfoot rows; they belong to table.footer only (edgartools-niru).
+        tfoot = self._own_section(element, 'tfoot')
+        tfoot_rows = list(self._own_rows(tfoot)) if tfoot is not None else []
 
         # Track if we've seen headers and data rows
         headers_found = bool(table.headers)
@@ -248,6 +252,8 @@ class TableProcessor:
             # Skip if already processed in thead (identity, never id() - see above)
             if any(tr is head_row for head_row in thead_rows):
                 continue
+            if any(tr is foot_row for foot_row in tfoot_rows):
+                continue
 
             # Check if this might be a header row
             is_header_row = False
@@ -255,7 +261,7 @@ class TableProcessor:
             # Continue checking for headers if:
             # 1. We haven't found any headers yet, OR
             # 2. We've found headers but haven't seen data rows yet (multi-row headers)
-            if not data_rows_started:
+            if not data_rows_started and not self._is_report_fact_row(tr):
                 is_header_row = self._is_header_row(tr)
 
                 # Additional check for multi-row headers in financial tables
@@ -347,27 +353,69 @@ class TableProcessor:
             )
 
         # Process tfoot
-        tfoot = self._own_section(element, 'tfoot')
-        if tfoot is not None:
-            for tr in self._own_rows(tfoot):
-                cells = self._process_row(tr, is_header=False)
-                if cells:
-                    row = Row(cells=cells, is_header=False)
-                    table.footer.append(row)
+        for tr in tfoot_rows:
+            cells = self._process_row(tr, is_header=False)
+            if cells:
+                table.footer.append(Row(cells=cells, is_header=False))
 
     def _process_row(self, tr: HtmlElement, is_header: bool) -> List[Cell]:
         """Process table row into cells."""
         cells = []
 
-        # Process both td and th elements, td first (preserves the ordering the
-        # previous ``findall('.//td') + findall('.//th')`` produced)
+        # Cells in document order: a row like <th>A</th><td>B</td> is [A, B]
+        # (edgartools-j99a; the old td-then-th order made it [B, A]).
         own_cells = self._own_cells(tr)
-        for cell_elem in [c for c in own_cells if c.tag != 'th'] + [c for c in own_cells if c.tag == 'th']:
+        visible_cells = [c for c in own_cells if not self._is_hidden_spacer(c)]
+        # A row made only of hidden spacers keeps them: emptying it would drop the
+        # row, which the matrix's leading-row heuristics count.
+        if visible_cells:
+            own_cells = visible_cells
+        for cell_elem in own_cells:
             cell = self._process_cell(cell_elem, is_header or cell_elem.tag == 'th')
             if cell:
                 cells.append(cell)
 
         return cells
+
+    @classmethod
+    def _is_report_fact_row(cls, tr: HtmlElement) -> bool:
+        """
+        True for a body row of an SEC XBRL viewer report (R1.htm, R2.htm, ...).
+
+        The viewer renders every header row with ``th`` cells and every fact row
+        with a ``td class="pl"`` label cell. Fact rows such as "Document Period End
+        Date | Mar. 29, 2025" read like period headers to the generic heuristics,
+        which moved Apple's cover-page facts into ``table.headers`` (GH #1477).
+        The markup states the row's role, so a row that carries a value is a body
+        row. Label-only abstract rows ("[Line Items]", "[Roll Forward]") are left
+        to the generic heuristics as before.
+        """
+        own_cells = cls._own_cells(tr)
+        if not own_cells:
+            return False
+        first = own_cells[0]
+        if first.tag != 'td' or 'pl' not in (first.get('class') or '').split():
+            return False
+        return any(_text_content(cell).replace('\xa0', ' ').strip() for cell in own_cells[1:])
+
+    _DISPLAY_NONE = re.compile(r'(?:^|;)\s*display\s*:\s*none\s*(?:!important\s*)?(?:;|$)', re.IGNORECASE)
+
+    @classmethod
+    def _is_hidden_spacer(cls, elem: HtmlElement) -> bool:
+        """
+        True for an empty cell whose inline style is ``display:none``.
+
+        Browsers give such a cell no grid slot, but its colspan still counted
+        here, so rows carrying them (Workiva emits trailing colspan-3 spacers on
+        every non-header row) were wider than the header and their values were
+        shifted under the wrong period (GH #1847, JPM overhead ratios).
+        ``visibility:hidden`` keeps its layout slot and is not matched. A hidden
+        cell that holds text is kept, so no filed content is dropped.
+        """
+        style = elem.get('style')
+        if not style or not cls._DISPLAY_NONE.search(style):
+            return False
+        return not _text_content(elem).replace('\xa0', ' ').strip()
 
     def _process_cell(self, elem: HtmlElement, is_header: bool) -> Optional[Cell]:
         """Process table cell."""

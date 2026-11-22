@@ -132,7 +132,7 @@ class FastTableRenderer:
         # Build matrix to handle colspan/rowspan properly
         # This ensures cells are expanded to fill their full colspan/rowspan
         matrix = TableMatrix()
-        matrix.build_from_rows(table_node.headers, table_node.rows)
+        matrix.build_from_rows(table_node.headers, [*table_node.rows, *table_node.footer])
 
         # Extract headers from expanded matrix
         headers = []

@@ -1,0 +1,23 @@
+{
+ "namespace_prefixes": {
+  "http://fasb.org/srt/2024": "srt",
+  "http://fasb.org/us-gaap/2024": "us-gaap",
+  "http://www.brkenergy.com/20240630": "bhe",
+  "http://www.w3.org/1999/xlink": "xlink",
+  "http://www.w3.org/2001/XMLSchema": "xs",
+  "http://www.w3.org/2001/XMLSchema-instance": "xsi",
+  "http://www.xbrl.org/2003/instance": "xbrli",
+  "http://www.xbrl.org/2003/iso4217": "iso4217",
+  "http://www.xbrl.org/2003/linkbase": "link",
+  "http://www.xbrl.org/2009/utr": "utr",
+  "http://www.xbrl.org/dtr/type/2020-01-21": "dtr-types1",
+  "http://www.xbrl.org/dtr/type/2022-03-31": "dtr-types",
+  "http://xbrl.org/2005/xbrldt": "xbrldt",
+  "http://xbrl.org/2006/xbrldi": "xbrldi",
+  "http://xbrl.sec.gov/country/2024": "country",
+  "http://xbrl.sec.gov/dei/2024": "dei"
+ },
+ "typed_dimensions": [
+  "us-gaap:RevenueRemainingPerformanceObligationExpectedTimingOfSatisfactionStartDateAxis"
+ ]
+}

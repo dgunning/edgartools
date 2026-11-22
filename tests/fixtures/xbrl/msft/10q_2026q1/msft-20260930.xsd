@@ -1,0 +1,1076 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xsd:schema xmlns:dtr-types="http://www.xbrl.org/dtr/type/2024-01-31" xmlns:country="http://xbrl.sec.gov/country/2026" xmlns:ecd-sub="http://xbrl.sec.gov/ecd-sub/2026" xmlns:ecd="http://xbrl.sec.gov/ecd/2026" xmlns:msft="http://www.microsoft.com/20260930" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:dei="http://xbrl.sec.gov/dei/2026" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:enum2="http://xbrl.org/2020/extensible-enumerations-2.0" xmlns:srt="http://fasb.org/srt/2026" xmlns:us-gaap="http://fasb.org/us-gaap/2026" xmlns:xlink="http://www.w3.org/1999/xlink" targetNamespace="http://www.microsoft.com/20260930" attributeFormDefault="unqualified" elementFormDefault="qualified">
+  <xsd:import schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd" namespace="http://www.xbrl.org/2003/instance"/>
+  <xsd:import schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd" namespace="http://www.xbrl.org/2003/linkbase"/>
+  <xsd:import schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd" namespace="http://xbrl.org/2005/xbrldt"/>
+  <xsd:import schemaLocation="https://www.xbrl.org/2020/extensible-enumerations-2.0.xsd" namespace="http://xbrl.org/2020/extensible-enumerations-2.0"/>
+  <xsd:import schemaLocation="https://xbrl.sec.gov/ecd/2026/ecd-sub-2026.xsd" namespace="http://xbrl.sec.gov/ecd-sub/2026"/>
+  <xsd:import schemaLocation="https://www.xbrl.org/dtr/type/2024-01-31/types.xsd" namespace="http://www.xbrl.org/dtr/type/2024-01-31"/>
+  <xsd:import schemaLocation="https://xbrl.fasb.org/srt/2026/elts/srt-2026.xsd" namespace="http://fasb.org/srt/2026"/>
+  <xsd:import schemaLocation="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd" namespace="http://fasb.org/us-gaap/2026"/>
+  <xsd:import schemaLocation="https://xbrl.sec.gov/ecd/2026/ecd-2026.xsd" namespace="http://xbrl.sec.gov/ecd/2026"/>
+  <xsd:import schemaLocation="https://xbrl.sec.gov/country/2026/country-2026.xsd" namespace="http://xbrl.sec.gov/country/2026"/>
+  <xsd:import schemaLocation="https://xbrl.sec.gov/dei/2026/dei-2026.xsd" namespace="http://xbrl.sec.gov/dei/2026"/>
+  <xsd:import schemaLocation="https://www.xbrl.org/2023/calculation-1.1.xsd" namespace="https://xbrl.org/2023/calculation-1.1"/>
+  <xsd:annotation>
+    <xsd:appinfo>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DocumentDocumentAndEntityInformation" id="Role_DocumentDocumentAndEntityInformation">
+        <link:definition>75000 - Document - Document and Entity Information</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementINCOMESTATEMENTS" id="Role_StatementINCOMESTATEMENTS">
+        <link:definition>75010 - Statement - INCOME STATEMENTS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementCOMPREHENSIVEINCOMESTATEMENTS" id="Role_StatementCOMPREHENSIVEINCOMESTATEMENTS">
+        <link:definition>75020 - Statement - COMPREHENSIVE INCOME STATEMENTS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementBALANCESHEETS" id="Role_StatementBALANCESHEETS">
+        <link:definition>75030 - Statement - BALANCE SHEETS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementBALANCESHEETSParenthetical" id="Role_StatementBALANCESHEETSParenthetical">
+        <link:definition>75040 - Statement - BALANCE SHEETS (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementCASHFLOWSSTATEMENTS" id="Role_StatementCASHFLOWSSTATEMENTS">
+        <link:definition>75050 - Statement - CASH FLOWS STATEMENTS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementSTOCKHOLDERSEQUITYSTATEMENTS" id="Role_StatementSTOCKHOLDERSEQUITYSTATEMENTS">
+        <link:definition>75060 - Statement - STOCKHOLDERS' EQUITY STATEMENTS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureACCOUNTINGPOLICIES" id="Role_DisclosureACCOUNTINGPOLICIES">
+        <link:definition>995455 - Disclosure - ACCOUNTING POLICIES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureEARNINGSPERSHARE" id="Role_DisclosureEARNINGSPERSHARE">
+        <link:definition>995465 - Disclosure - EARNINGS PER SHARE</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureOTHERINCOMEEXPENSENET" id="Role_DisclosureOTHERINCOMEEXPENSENET">
+        <link:definition>995475 - Disclosure - OTHER INCOME (EXPENSE), NET</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureINVESTMENTS" id="Role_DisclosureINVESTMENTS">
+        <link:definition>995485 - Disclosure - INVESTMENTS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDERIVATIVES" id="Role_DisclosureDERIVATIVES">
+        <link:definition>995495 - Disclosure - DERIVATIVES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosurePropertyAndEquipment" id="DisclosurePropertyAndEquipment">
+        <link:definition>995505 - Disclosure - PROPERTY AND EQUIPMENT</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureGOODWILL" id="Role_DisclosureGOODWILL">
+        <link:definition>995515 - Disclosure - GOODWILL</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureINTANGIBLEASSETS" id="Role_DisclosureINTANGIBLEASSETS">
+        <link:definition>995525 - Disclosure - INTANGIBLE ASSETS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDEBT" id="Role_DisclosureDEBT">
+        <link:definition>995535 - Disclosure - DEBT</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureINCOMETAXES" id="Role_DisclosureINCOMETAXES">
+        <link:definition>995545 - Disclosure - INCOME TAXES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUNEARNEDREVENUE" id="Role_DisclosureUNEARNEDREVENUE">
+        <link:definition>995555 - Disclosure - UNEARNED REVENUE</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureLEASES" id="Role_DisclosureLEASES">
+        <link:definition>995565 - Disclosure - LEASES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureCONTINGENCIES" id="Role_DisclosureCONTINGENCIES">
+        <link:definition>995575 - Disclosure - CONTINGENCIES</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSTOCKHOLDERSEQUITY" id="Role_DisclosureSTOCKHOLDERSEQUITY">
+        <link:definition>995585 - Disclosure - STOCKHOLDERS' EQUITY</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSS" id="Role_DisclosureACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSS">
+        <link:definition>995595 - Disclosure - ACCUMULATED OTHER COMPREHENSIVE INCOME (LOSS)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATA" id="Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATA">
+        <link:definition>995605 - Disclosure - SEGMENT INFORMATION AND GEOGRAPHIC DATA</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureACCOUNTINGPOLICIESPolicies" id="Role_DisclosureACCOUNTINGPOLICIESPolicies">
+        <link:definition>995615 - Disclosure - ACCOUNTING POLICIES (Policies)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureEARNINGSPERSHARETables" id="Role_DisclosureEARNINGSPERSHARETables">
+        <link:definition>995625 - Disclosure - EARNINGS PER SHARE (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureOTHERINCOMEEXPENSENETTables" id="Role_DisclosureOTHERINCOMEEXPENSENETTables">
+        <link:definition>995635 - Disclosure - OTHER INCOME (EXPENSE), NET (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureINVESTMENTSTables" id="Role_DisclosureINVESTMENTSTables">
+        <link:definition>995645 - Disclosure - INVESTMENTS (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDERIVATIVESTables" id="Role_DisclosureDERIVATIVESTables">
+        <link:definition>995655 - Disclosure - DERIVATIVES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDERIVATIVESTablesDefault" id="Role_DisclosureDERIVATIVESTablesDefault">
+        <link:definition>995655 - Disclosure - DERIVATIVES (Tables) [Default]</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosurePropertyAndEquipmentTables" id="DisclosurePropertyAndEquipmentTables">
+        <link:definition>995665 - Disclosure - PROPERTY AND EQUIPMENT (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureGOODWILLTables" id="Role_DisclosureGOODWILLTables">
+        <link:definition>995675 - Disclosure - GOODWILL (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureINTANGIBLEASSETSTables" id="Role_DisclosureINTANGIBLEASSETSTables">
+        <link:definition>995685 - Disclosure - INTANGIBLE ASSETS (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDEBTTables" id="Role_DisclosureDEBTTables">
+        <link:definition>995695 - Disclosure - DEBT (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUNEARNEDREVENUETables" id="Role_DisclosureUNEARNEDREVENUETables">
+        <link:definition>995705 - Disclosure - UNEARNED REVENUE (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureLEASESTables" id="Role_DisclosureLEASESTables">
+        <link:definition>995715 - Disclosure - LEASES (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSTOCKHOLDERSEQUITYTables" id="Role_DisclosureSTOCKHOLDERSEQUITYTables">
+        <link:definition>995725 - Disclosure - STOCKHOLDERS' EQUITY (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureAccumulatedOtherComprehensiveIncomeLossTables" id="DisclosureAccumulatedOtherComprehensiveIncomeLossTables">
+        <link:definition>995735 - Disclosure - ACCUMULATED OTHER COMPREHENSIVE INCOME (LOSS) (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables" id="Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables">
+        <link:definition>995745 - Disclosure - SEGMENT INFORMATION AND GEOGRAPHIC DATA (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureAccountingPoliciesAdditionalInformationDetail" id="Role_DisclosureAccountingPoliciesAdditionalInformationDetail">
+        <link:definition>995755 - Disclosure - Accounting Policies - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureAccountingPoliciesAdditionalInformationDetailDefault" id="Role_DisclosureAccountingPoliciesAdditionalInformationDetailDefault">
+        <link:definition>995755 - Disclosure - Accounting Policies - Additional Information (Detail) [Default]</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureBasicAndDilutedEarningsPerShareDetail" id="Role_DisclosureBasicAndDilutedEarningsPerShareDetail">
+        <link:definition>995765 - Disclosure - Basic and Diluted Earnings Per Share (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureComponentsOfOtherIncomeExpenseNetDetail" id="Role_DisclosureComponentsOfOtherIncomeExpenseNetDetail">
+        <link:definition>995775 - Disclosure - Components of Other Income (Expense), Net (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureOtherIncomeExpenseNetAdditionalInformationDetails" id="DisclosureOtherIncomeExpenseNetAdditionalInformationDetails">
+        <link:definition>995785 - Disclosure - Other Income (Expense), Net - Additional Information (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureNetRecognizedGainsLossesOnDebtInvestmentsDetail" id="Role_DisclosureNetRecognizedGainsLossesOnDebtInvestmentsDetail">
+        <link:definition>995795 - Disclosure - Net Recognized Gains (Losses) on Debt Investments (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureNetRecognizedGainsLossesOnEquityInvestmentsDetail" id="Role_DisclosureNetRecognizedGainsLossesOnEquityInvestmentsDetail">
+        <link:definition>995805 - Disclosure - Net Recognized Gains (Losses) on Equity Investments (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureInvestmentComponentsDetail" id="Role_DisclosureInvestmentComponentsDetail">
+        <link:definition>995815 - Disclosure - Investment Components (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureInvestmentsAdditionalInformationDetail" id="Role_DisclosureInvestmentsAdditionalInformationDetail">
+        <link:definition>995825 - Disclosure - Investments - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUnrealizedLossesOnDebtInvestmentsDetail" id="Role_DisclosureUnrealizedLossesOnDebtInvestmentsDetail">
+        <link:definition>995835 - Disclosure - Unrealized Losses on Debt Investments (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDebtInvestmentMaturitiesDetail" id="Role_DisclosureDebtInvestmentMaturitiesDetail">
+        <link:definition>995845 - Disclosure - Debt Investment Maturities (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDerivativesAdditionalInformationDetail" id="Role_DisclosureDerivativesAdditionalInformationDetail">
+        <link:definition>995855 - Disclosure - Derivatives - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureNotionalAmountsOfOutstandingDerivativeInstrumentsMeasuredInUsDollarEquivalentsDetail" id="DisclosureNotionalAmountsOfOutstandingDerivativeInstrumentsMeasuredInUsDollarEquivalentsDetail">
+        <link:definition>995865 - Disclosure - Notional Amounts of Outstanding Derivative Instruments Measured in U.S. Dollar Equivalents (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureFairValuesOfDerivativeInstrumentsDetail" id="DisclosureFairValuesOfDerivativeInstrumentsDetail">
+        <link:definition>995875 - Disclosure - Fair Values of Derivative Instruments (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureFairValuesOfDerivativeInstrumentsDetailDefault" id="DisclosureFairValuesOfDerivativeInstrumentsDetailDefault">
+        <link:definition>995875 - Disclosure - Fair Values of Derivative Instruments (Detail) [Default]</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureGainsLossesOnDerivativeInstrumentsRecognizedInOtherIncomeExpenseNetDetail" id="DisclosureGainsLossesOnDerivativeInstrumentsRecognizedInOtherIncomeExpenseNetDetail">
+        <link:definition>995885 - Disclosure - Gains (Losses) on Derivative Instruments Recognized in Other Income (Expense), Net (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureGainsLossesOnDerivativeInstrumentsRecognizedInOtherIncomeExpenseNetDetailDefault" id="DisclosureGainsLossesOnDerivativeInstrumentsRecognizedInOtherIncomeExpenseNetDetailDefault">
+        <link:definition>995885 - Disclosure - Gains (Losses) on Derivative Instruments Recognized in Other Income (Expense), Net (Detail) [Default]</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureGainsLossesNetOfTaxOnDerivativeInstrumentsRecognizedInConsolidatedComprehensiveIncomeStatementsDetail" id="DisclosureGainsLossesNetOfTaxOnDerivativeInstrumentsRecognizedInConsolidatedComprehensiveIncomeStatementsDetail">
+        <link:definition>995895 - Disclosure - Gains (Losses), Net of Tax, on Derivative Instruments Recognized in Consolidated Comprehensive Income Statements (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureComponentsOfPropertyAndEquipmentDetail" id="DisclosureComponentsOfPropertyAndEquipmentDetail">
+        <link:definition>995905 - Disclosure - Components of Property and Equipment (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosurePropertyAndEquipmentAdditionalInformationDetail" id="DisclosurePropertyAndEquipmentAdditionalInformationDetail">
+        <link:definition>995915 - Disclosure - Property and Equipment - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureCarryingAmountOfGoodwillDetail" id="Role_DisclosureCarryingAmountOfGoodwillDetail">
+        <link:definition>995925 - Disclosure - Carrying Amount of Goodwill (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureFiniteLivedIntangibleAssetsDetail" id="Role_DisclosureFiniteLivedIntangibleAssetsDetail">
+        <link:definition>995935 - Disclosure - Finite-Lived Intangible Assets (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureIntangibleAssetsAdditionalInformationDetail" id="Role_DisclosureIntangibleAssetsAdditionalInformationDetail">
+        <link:definition>995945 - Disclosure - Intangible Assets - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureEstimatedFutureAmortizationExpenseRelatedToIntangibleAssetsDetail" id="Role_DisclosureEstimatedFutureAmortizationExpenseRelatedToIntangibleAssetsDetail">
+        <link:definition>995955 - Disclosure - Estimated Future Amortization Expense Related to Intangible Assets (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureComponentsOfLongtermDebtDetail" id="DisclosureComponentsOfLongtermDebtDetail">
+        <link:definition>995965 - Disclosure - Components of Long-term Debt (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureComponentsOfLongtermDebtDetail2" id="DisclosureComponentsOfLongtermDebtDetail2">
+        <link:definition>995975 - Disclosure - Components of Long-term Debt (Detail) 2</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureComponentsOfLongtermDebtParentheticalDetail" id="DisclosureComponentsOfLongtermDebtParentheticalDetail">
+        <link:definition>995985 - Disclosure - Components of Long-term Debt (Parenthetical) (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDebtAdditionalInformationDetail" id="Role_DisclosureDebtAdditionalInformationDetail">
+        <link:definition>995995 - Disclosure - Debt - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureMaturitiesOfLongtermDebtIncludingCurrentPortionDetail" id="DisclosureMaturitiesOfLongtermDebtIncludingCurrentPortionDetail">
+        <link:definition>996005 - Disclosure - Maturities of Long-term Debt Including Current Portion (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureIncomeTaxesAdditionalInformationDetail" id="Role_DisclosureIncomeTaxesAdditionalInformationDetail">
+        <link:definition>996015 - Disclosure - Income Taxes - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureIncomeTaxesAdditionalInformationRegardingExaminationsDetail" id="Role_DisclosureIncomeTaxesAdditionalInformationRegardingExaminationsDetail">
+        <link:definition>996025 - Disclosure - Income Taxes - Additional Information Regarding Examinations (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureChangesInUnearnedRevenueDetail" id="Role_DisclosureChangesInUnearnedRevenueDetail">
+        <link:definition>996035 - Disclosure - Changes in Unearned Revenue (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUnearnedRevenueAdditionalInformationDetail" id="Role_DisclosureUnearnedRevenueAdditionalInformationDetail">
+        <link:definition>996045 - Disclosure - Unearned Revenue - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUnearnedRevenueRemainingPerformanceObligationAdditionalInformationDetail" id="Role_DisclosureUnearnedRevenueRemainingPerformanceObligationAdditionalInformationDetail">
+        <link:definition>996055 - Disclosure - Unearned Revenue - Remaining Performance Obligation - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUnearnedRevenueRemainingPerformanceObligationAdditionalInformationDetailDefault" id="Role_DisclosureUnearnedRevenueRemainingPerformanceObligationAdditionalInformationDetailDefault">
+        <link:definition>996055 - Disclosure - Unearned Revenue - Remaining Performance Obligation - Additional Information (Detail) [Default]</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureLeasesAdditionalInformationDetail" id="Role_DisclosureLeasesAdditionalInformationDetail">
+        <link:definition>996065 - Disclosure - Leases - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureComponentsOfLeaseExpenseDetail" id="Role_DisclosureComponentsOfLeaseExpenseDetail">
+        <link:definition>996075 - Disclosure - Components of Lease Expense (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSupplementalCashFlowInformationRelatedToLeasesDetail" id="Role_DisclosureSupplementalCashFlowInformationRelatedToLeasesDetail">
+        <link:definition>996085 - Disclosure - Supplemental Cash Flow Information Related to Leases (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSupplementalBalanceSheetInformationRelatedToLeasesDetail" id="Role_DisclosureSupplementalBalanceSheetInformationRelatedToLeasesDetail">
+        <link:definition>996095 - Disclosure - Supplemental Balance Sheet Information Related to Leases (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSupplementalBalanceSheetInformationRelatedToLeasesDetailDefault" id="Role_DisclosureSupplementalBalanceSheetInformationRelatedToLeasesDetailDefault">
+        <link:definition>996095 - Disclosure - Supplemental Balance Sheet Information Related to Leases (Detail) [Default]</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureMaturitiesOfLeaseLiabilitiesDetail" id="Role_DisclosureMaturitiesOfLeaseLiabilitiesDetail">
+        <link:definition>996105 - Disclosure - Maturities of Lease Liabilities (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureMaturitiesOfLeaseLiabilitiesDetail2" id="DisclosureMaturitiesOfLeaseLiabilitiesDetail2">
+        <link:definition>996115 - Disclosure - Maturities of Lease Liabilities (Detail) 2</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureContingenciesAdditionalInformationDetail" id="Role_DisclosureContingenciesAdditionalInformationDetail">
+        <link:definition>996125 - Disclosure - Contingencies - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureStockholdersEquityAdditionalInformationDetail" id="Role_DisclosureStockholdersEquityAdditionalInformationDetail">
+        <link:definition>996135 - Disclosure - Stockholders' Equity - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureShareRepurchasesDetail" id="DisclosureShareRepurchasesDetail">
+        <link:definition>996145 - Disclosure - Share Repurchases (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureDividendsDeclaredDetail" id="DisclosureDividendsDeclaredDetail">
+        <link:definition>996155 - Disclosure - Dividends Declared (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentDetail" id="Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentDetail">
+        <link:definition>996165 - Disclosure - Summary of Changes in Accumulated Other Comprehensive Income (Loss) by Component (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentDetailDefault" id="Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentDetailDefault">
+        <link:definition>996165 - Disclosure - Summary of Changes in Accumulated Other Comprehensive Income (Loss) by Component (Detail) [Default]</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentParentheticalDetail" id="Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentParentheticalDetail">
+        <link:definition>996175 - Disclosure - Summary of Changes in Accumulated Other Comprehensive Income (Loss) by Component (Parenthetical) (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureSegmentRevenueCostOfRevenueOperatingExpensesAndOperatingIncomeDetail" id="DisclosureSegmentRevenueCostOfRevenueOperatingExpensesAndOperatingIncomeDetail">
+        <link:definition>996185 - Disclosure - Segment Revenue, Cost of Revenue, Operating Expenses and Operating Income (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSegmentInformationAndGeographicDataAdditionalInformationDetail" id="Role_DisclosureSegmentInformationAndGeographicDataAdditionalInformationDetail">
+        <link:definition>996195 - Disclosure - Segment Information and Geographic Data - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureRevenueClassifiedByMajorGeographicAreasDetail" id="Role_DisclosureRevenueClassifiedByMajorGeographicAreasDetail">
+        <link:definition>996205 - Disclosure - Revenue Classified by Major Geographic Areas (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureRevenueClassifiedBySignificantProductAndServiceOfferingsDetail" id="Role_DisclosureRevenueClassifiedBySignificantProductAndServiceOfferingsDetail">
+        <link:definition>996215 - Disclosure - Revenue Classified by Significant Product and Service Offerings (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureRevenueClassifiedBySignificantProductAndServiceOfferingsParentheticalDetail" id="DisclosureRevenueClassifiedBySignificantProductAndServiceOfferingsParentheticalDetail">
+        <link:definition>996225 - Disclosure - Revenue Classified by Significant Product and Service Offerings (Parenthetical) (Detail)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:linkbase id="lnk">
+        <link:arcroleRef arcroleURI="http://xbrl.org/int/dim/arcrole/all" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#all" xlink:type="simple"/>
+        <link:arcroleRef arcroleURI="http://xbrl.org/int/dim/arcrole/dimension-default" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-default" xlink:type="simple"/>
+        <link:arcroleRef arcroleURI="http://xbrl.org/int/dim/arcrole/dimension-domain" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#dimension-domain" xlink:type="simple"/>
+        <link:arcroleRef arcroleURI="http://xbrl.org/int/dim/arcrole/domain-member" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#domain-member" xlink:type="simple"/>
+        <link:arcroleRef arcroleURI="http://xbrl.org/int/dim/arcrole/hypercube-dimension" xlink:href="http://www.xbrl.org/2005/xbrldt-2005.xsd#hypercube-dimension" xlink:type="simple"/>
+        <link:arcroleRef arcroleURI="http://www.esma.europa.eu/xbrl/esef/arcrole/wider-narrower" xlink:href="http://www.xbrl.org/lrr/arcrole/esma-arcrole-2018-11-21.xsd#wider-narrower" xlink:type="simple"/>
+        <link:arcroleRef arcroleURI="https://xbrl.org/2023/arcrole/summation-item" xlink:href="https://www.xbrl.org/2023/calculation-1.1.xsd#summation-item" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DocumentDocumentAndEntityInformation" xlink:href="msft-20260930.xsd#Role_DocumentDocumentAndEntityInformation" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementINCOMESTATEMENTS" xlink:href="msft-20260930.xsd#Role_StatementINCOMESTATEMENTS" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementSTOCKHOLDERSEQUITYSTATEMENTS" xlink:href="msft-20260930.xsd#Role_StatementSTOCKHOLDERSEQUITYSTATEMENTS" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureOTHERINCOMEEXPENSENETTables" xlink:href="msft-20260930.xsd#Role_DisclosureOTHERINCOMEEXPENSENETTables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDERIVATIVESTables" xlink:href="msft-20260930.xsd#Role_DisclosureDERIVATIVESTables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDERIVATIVESTablesDefault" xlink:href="msft-20260930.xsd#Role_DisclosureDERIVATIVESTablesDefault" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureAccountingPoliciesAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureAccountingPoliciesAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureAccountingPoliciesAdditionalInformationDetailDefault" xlink:href="msft-20260930.xsd#Role_DisclosureAccountingPoliciesAdditionalInformationDetailDefault" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureOtherIncomeExpenseNetAdditionalInformationDetails" xlink:href="msft-20260930.xsd#DisclosureOtherIncomeExpenseNetAdditionalInformationDetails" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureNetRecognizedGainsLossesOnDebtInvestmentsDetail" xlink:href="msft-20260930.xsd#Role_DisclosureNetRecognizedGainsLossesOnDebtInvestmentsDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureNetRecognizedGainsLossesOnEquityInvestmentsDetail" xlink:href="msft-20260930.xsd#Role_DisclosureNetRecognizedGainsLossesOnEquityInvestmentsDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureInvestmentComponentsDetail" xlink:href="msft-20260930.xsd#Role_DisclosureInvestmentComponentsDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUnrealizedLossesOnDebtInvestmentsDetail" xlink:href="msft-20260930.xsd#Role_DisclosureUnrealizedLossesOnDebtInvestmentsDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDerivativesAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureDerivativesAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureNotionalAmountsOfOutstandingDerivativeInstrumentsMeasuredInUsDollarEquivalentsDetail" xlink:href="msft-20260930.xsd#DisclosureNotionalAmountsOfOutstandingDerivativeInstrumentsMeasuredInUsDollarEquivalentsDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureFairValuesOfDerivativeInstrumentsDetail" xlink:href="msft-20260930.xsd#DisclosureFairValuesOfDerivativeInstrumentsDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureFairValuesOfDerivativeInstrumentsDetailDefault" xlink:href="msft-20260930.xsd#DisclosureFairValuesOfDerivativeInstrumentsDetailDefault" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureGainsLossesOnDerivativeInstrumentsRecognizedInOtherIncomeExpenseNetDetail" xlink:href="msft-20260930.xsd#DisclosureGainsLossesOnDerivativeInstrumentsRecognizedInOtherIncomeExpenseNetDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureGainsLossesOnDerivativeInstrumentsRecognizedInOtherIncomeExpenseNetDetailDefault" xlink:href="msft-20260930.xsd#DisclosureGainsLossesOnDerivativeInstrumentsRecognizedInOtherIncomeExpenseNetDetailDefault" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureGainsLossesNetOfTaxOnDerivativeInstrumentsRecognizedInConsolidatedComprehensiveIncomeStatementsDetail" xlink:href="msft-20260930.xsd#DisclosureGainsLossesNetOfTaxOnDerivativeInstrumentsRecognizedInConsolidatedComprehensiveIncomeStatementsDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureCarryingAmountOfGoodwillDetail" xlink:href="msft-20260930.xsd#Role_DisclosureCarryingAmountOfGoodwillDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureFiniteLivedIntangibleAssetsDetail" xlink:href="msft-20260930.xsd#Role_DisclosureFiniteLivedIntangibleAssetsDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureComponentsOfLongtermDebtDetail" xlink:href="msft-20260930.xsd#DisclosureComponentsOfLongtermDebtDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureComponentsOfLongtermDebtParentheticalDetail" xlink:href="msft-20260930.xsd#DisclosureComponentsOfLongtermDebtParentheticalDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureIncomeTaxesAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureIncomeTaxesAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureIncomeTaxesAdditionalInformationRegardingExaminationsDetail" xlink:href="msft-20260930.xsd#Role_DisclosureIncomeTaxesAdditionalInformationRegardingExaminationsDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUnearnedRevenueAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureUnearnedRevenueAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUnearnedRevenueRemainingPerformanceObligationAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureUnearnedRevenueRemainingPerformanceObligationAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUnearnedRevenueRemainingPerformanceObligationAdditionalInformationDetailDefault" xlink:href="msft-20260930.xsd#Role_DisclosureUnearnedRevenueRemainingPerformanceObligationAdditionalInformationDetailDefault" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureLeasesAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureLeasesAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSupplementalBalanceSheetInformationRelatedToLeasesDetail" xlink:href="msft-20260930.xsd#Role_DisclosureSupplementalBalanceSheetInformationRelatedToLeasesDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSupplementalBalanceSheetInformationRelatedToLeasesDetailDefault" xlink:href="msft-20260930.xsd#Role_DisclosureSupplementalBalanceSheetInformationRelatedToLeasesDetailDefault" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureStockholdersEquityAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureStockholdersEquityAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureShareRepurchasesDetail" xlink:href="msft-20260930.xsd#DisclosureShareRepurchasesDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureDividendsDeclaredDetail" xlink:href="msft-20260930.xsd#DisclosureDividendsDeclaredDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentDetail" xlink:href="msft-20260930.xsd#Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentDetailDefault" xlink:href="msft-20260930.xsd#Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentDetailDefault" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentParentheticalDetail" xlink:href="msft-20260930.xsd#Role_DisclosureSummaryOfChangesInAccumulatedOtherComprehensiveIncomeLossByComponentParentheticalDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureSegmentRevenueCostOfRevenueOperatingExpensesAndOperatingIncomeDetail" xlink:href="msft-20260930.xsd#DisclosureSegmentRevenueCostOfRevenueOperatingExpensesAndOperatingIncomeDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureRevenueClassifiedByMajorGeographicAreasDetail" xlink:href="msft-20260930.xsd#Role_DisclosureRevenueClassifiedByMajorGeographicAreasDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureRevenueClassifiedBySignificantProductAndServiceOfferingsDetail" xlink:href="msft-20260930.xsd#Role_DisclosureRevenueClassifiedBySignificantProductAndServiceOfferingsDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureRevenueClassifiedBySignificantProductAndServiceOfferingsParentheticalDetail" xlink:href="msft-20260930.xsd#DisclosureRevenueClassifiedBySignificantProductAndServiceOfferingsParentheticalDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://fasb.org/us-gaap/role/eedm/ExtensibleEnumerationLists" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-roles-2026.xsd#eedm" xlink:type="simple"/>
+        <link:roleRef roleURI="http://fasb.org/srt/role/srt-eedm/ExtensibleEnumerationLists" xlink:href="https://xbrl.fasb.org/srt/2026/elts/srt-roles-2026.xsd#eedm1" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.xbrl.org/2009/role/negatedLabel" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedLabel" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.xbrl.org/2009/role/netLabel" xlink:href="http://www.xbrl.org/lrr/role/net-2009-12-16.xsd#netLabel" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.xbrl.org/2009/role/negatedTerseLabel" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedTerseLabel" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.xbrl.org/2009/role/negatedTotalLabel" xlink:href="http://www.xbrl.org/lrr/role/negated-2009-12-16.xsd#negatedTotalLabel" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureComponentsOfLongtermDebtDetail2" xlink:href="msft-20260930.xsd#DisclosureComponentsOfLongtermDebtDetail2" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureMaturitiesOfLeaseLiabilitiesDetail2" xlink:href="msft-20260930.xsd#DisclosureMaturitiesOfLeaseLiabilitiesDetail2" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementCOMPREHENSIVEINCOMESTATEMENTS" xlink:href="msft-20260930.xsd#Role_StatementCOMPREHENSIVEINCOMESTATEMENTS" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementBALANCESHEETS" xlink:href="msft-20260930.xsd#Role_StatementBALANCESHEETS" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementCASHFLOWSSTATEMENTS" xlink:href="msft-20260930.xsd#Role_StatementCASHFLOWSSTATEMENTS" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureBasicAndDilutedEarningsPerShareDetail" xlink:href="msft-20260930.xsd#Role_DisclosureBasicAndDilutedEarningsPerShareDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureComponentsOfOtherIncomeExpenseNetDetail" xlink:href="msft-20260930.xsd#Role_DisclosureComponentsOfOtherIncomeExpenseNetDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDebtInvestmentMaturitiesDetail" xlink:href="msft-20260930.xsd#Role_DisclosureDebtInvestmentMaturitiesDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureComponentsOfPropertyAndEquipmentDetail" xlink:href="msft-20260930.xsd#DisclosureComponentsOfPropertyAndEquipmentDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureEstimatedFutureAmortizationExpenseRelatedToIntangibleAssetsDetail" xlink:href="msft-20260930.xsd#Role_DisclosureEstimatedFutureAmortizationExpenseRelatedToIntangibleAssetsDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureMaturitiesOfLongtermDebtIncludingCurrentPortionDetail" xlink:href="msft-20260930.xsd#DisclosureMaturitiesOfLongtermDebtIncludingCurrentPortionDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureComponentsOfLeaseExpenseDetail" xlink:href="msft-20260930.xsd#Role_DisclosureComponentsOfLeaseExpenseDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureMaturitiesOfLeaseLiabilitiesDetail" xlink:href="msft-20260930.xsd#Role_DisclosureMaturitiesOfLeaseLiabilitiesDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementBALANCESHEETSParenthetical" xlink:href="msft-20260930.xsd#Role_StatementBALANCESHEETSParenthetical" xlink:type="simple"/>
+        <link:roleRef roleURI="http://xbrl.sec.gov/ecd/role/InsiderTradingArrangements" xlink:href="https://xbrl.sec.gov/ecd/2026/ecd-2026.xsd#InsiderTradingArrangements" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureACCOUNTINGPOLICIES" xlink:href="msft-20260930.xsd#Role_DisclosureACCOUNTINGPOLICIES" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureEARNINGSPERSHARE" xlink:href="msft-20260930.xsd#Role_DisclosureEARNINGSPERSHARE" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureOTHERINCOMEEXPENSENET" xlink:href="msft-20260930.xsd#Role_DisclosureOTHERINCOMEEXPENSENET" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureINVESTMENTS" xlink:href="msft-20260930.xsd#Role_DisclosureINVESTMENTS" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDERIVATIVES" xlink:href="msft-20260930.xsd#Role_DisclosureDERIVATIVES" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosurePropertyAndEquipment" xlink:href="msft-20260930.xsd#DisclosurePropertyAndEquipment" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureGOODWILL" xlink:href="msft-20260930.xsd#Role_DisclosureGOODWILL" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureINTANGIBLEASSETS" xlink:href="msft-20260930.xsd#Role_DisclosureINTANGIBLEASSETS" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDEBT" xlink:href="msft-20260930.xsd#Role_DisclosureDEBT" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureINCOMETAXES" xlink:href="msft-20260930.xsd#Role_DisclosureINCOMETAXES" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUNEARNEDREVENUE" xlink:href="msft-20260930.xsd#Role_DisclosureUNEARNEDREVENUE" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureLEASES" xlink:href="msft-20260930.xsd#Role_DisclosureLEASES" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureCONTINGENCIES" xlink:href="msft-20260930.xsd#Role_DisclosureCONTINGENCIES" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSTOCKHOLDERSEQUITY" xlink:href="msft-20260930.xsd#Role_DisclosureSTOCKHOLDERSEQUITY" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSS" xlink:href="msft-20260930.xsd#Role_DisclosureACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSS" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATA" xlink:href="msft-20260930.xsd#Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATA" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureACCOUNTINGPOLICIESPolicies" xlink:href="msft-20260930.xsd#Role_DisclosureACCOUNTINGPOLICIESPolicies" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureEARNINGSPERSHARETables" xlink:href="msft-20260930.xsd#Role_DisclosureEARNINGSPERSHARETables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureINVESTMENTSTables" xlink:href="msft-20260930.xsd#Role_DisclosureINVESTMENTSTables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosurePropertyAndEquipmentTables" xlink:href="msft-20260930.xsd#DisclosurePropertyAndEquipmentTables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureGOODWILLTables" xlink:href="msft-20260930.xsd#Role_DisclosureGOODWILLTables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureINTANGIBLEASSETSTables" xlink:href="msft-20260930.xsd#Role_DisclosureINTANGIBLEASSETSTables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDEBTTables" xlink:href="msft-20260930.xsd#Role_DisclosureDEBTTables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureUNEARNEDREVENUETables" xlink:href="msft-20260930.xsd#Role_DisclosureUNEARNEDREVENUETables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureLEASESTables" xlink:href="msft-20260930.xsd#Role_DisclosureLEASESTables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSTOCKHOLDERSEQUITYTables" xlink:href="msft-20260930.xsd#Role_DisclosureSTOCKHOLDERSEQUITYTables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosureAccumulatedOtherComprehensiveIncomeLossTables" xlink:href="msft-20260930.xsd#DisclosureAccumulatedOtherComprehensiveIncomeLossTables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables" xlink:href="msft-20260930.xsd#Role_DisclosureSEGMENTINFORMATIONANDGEOGRAPHICDATATables" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureInvestmentsAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureInvestmentsAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/DisclosurePropertyAndEquipmentAdditionalInformationDetail" xlink:href="msft-20260930.xsd#DisclosurePropertyAndEquipmentAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureIntangibleAssetsAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureIntangibleAssetsAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureDebtAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureDebtAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureChangesInUnearnedRevenueDetail" xlink:href="msft-20260930.xsd#Role_DisclosureChangesInUnearnedRevenueDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSupplementalCashFlowInformationRelatedToLeasesDetail" xlink:href="msft-20260930.xsd#Role_DisclosureSupplementalCashFlowInformationRelatedToLeasesDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureContingenciesAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureContingenciesAdditionalInformationDetail" xlink:type="simple"/>
+        <link:roleRef roleURI="http://www.microsoft.com/20260930/taxonomy/role/Role_DisclosureSegmentInformationAndGeographicDataAdditionalInformationDetail" xlink:href="msft-20260930.xsd#Role_DisclosureSegmentInformationAndGeographicDataAdditionalInformationDetail" xlink:type="simple"/>
+        <link:labelLink xlink:role="http://www.xbrl.org/2003/role/link" xlink:title="labelLink" xlink:type="extended">
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsOfDividendsCommonStock" xlink:label="us-gaap_PaymentsOfDividendsCommonStock"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_DeferredIncomeTaxesAndTaxCredits" xlink:label="us-gaap_DeferredIncomeTaxesAndTaxCredits"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherCurrentLiabilities" xlink:label="us-gaap_IncreaseDecreaseInOtherCurrentLiabilities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsForProceedsFromOtherInvestingActivities" xlink:label="us-gaap_PaymentsForProceedsFromOtherInvestingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherCurrentAssets" xlink:label="us-gaap_IncreaseDecreaseInOtherCurrentAssets"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsToAcquirePropertyPlantAndEquipment" xlink:label="us-gaap_PaymentsToAcquirePropertyPlantAndEquipment"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable" xlink:label="us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_ProceedsFromInvestments" xlink:label="msft_ProceedsFromInvestments"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsForRepurchaseOfCommonStock" xlink:label="us-gaap_PaymentsForRepurchaseOfCommonStock"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_GainLossOnInvestmentsAndDerivativeInstruments" xlink:label="msft_GainLossOnInvestmentsAndDerivativeInstruments"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInAccountsPayable" xlink:label="us-gaap_IncreaseDecreaseInAccountsPayable"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:label="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations" xlink:label="us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherNoncurrentAssets" xlink:label="us-gaap_IncreaseDecreaseInOtherNoncurrentAssets"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInInventories" xlink:label="us-gaap_IncreaseDecreaseInInventories"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities" xlink:label="us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:label="us-gaap_NetCashProvidedByUsedInOperatingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetIncomeLoss" xlink:label="us-gaap_NetIncomeLoss"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths" xlink:label="us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_DepreciationAmortizationAndOther" xlink:label="msft_DepreciationAmortizationAndOther"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract" xlink:label="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_StatementOfCashFlowsAbstract" xlink:label="us-gaap_StatementOfCashFlowsAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract" xlink:label="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ProceedsFromPaymentsForOtherFinancingActivities" xlink:label="us-gaap_ProceedsFromPaymentsForOtherFinancingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets" xlink:label="msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract" xlink:label="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInContractWithCustomerLiability" xlink:label="us-gaap_IncreaseDecreaseInContractWithCustomerLiability"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities" xlink:label="us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInInvestingActivities" xlink:label="us-gaap_NetCashProvidedByUsedInInvestingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ProceedsFromIssuanceOfCommonStock" xlink:label="us-gaap_ProceedsFromIssuanceOfCommonStock"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsToAcquireInvestments" xlink:label="us-gaap_PaymentsToAcquireInvestments"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ShareBasedCompensation" xlink:label="us-gaap_ShareBasedCompensation"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract" xlink:label="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInFinancingActivities" xlink:label="us-gaap_NetCashProvidedByUsedInFinancingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInAccountsReceivable" xlink:label="us-gaap_IncreaseDecreaseInAccountsReceivable"/>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsOfDividendsCommonStock_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Payments of Ordinary Dividends, Common Stock</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsOfDividendsCommonStock_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Common stock cash dividends paid</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_DeferredIncomeTaxesAndTaxCredits_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Deferred Income Taxes and Tax Credits</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_DeferredIncomeTaxesAndTaxCredits_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Deferred Income Taxes and Tax Credits, Total</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_DeferredIncomeTaxesAndTaxCredits_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Deferred income taxes</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInOtherCurrentLiabilities_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Increase (Decrease) in Other Current Liabilities</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInOtherCurrentLiabilities_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Other current liabilities</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsForProceedsFromOtherInvestingActivities_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Payment for (Proceeds from) Other Investing Activity</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsForProceedsFromOtherInvestingActivities_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Other, net</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInOtherCurrentAssets_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Increase (Decrease) in Other Current Assets</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInOtherCurrentAssets_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Other current assets</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsToAcquirePropertyPlantAndEquipment_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Payments to Acquire Property, Plant, and Equipment</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsToAcquirePropertyPlantAndEquipment_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Additions to property and equipment</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsToAcquirePropertyPlantAndEquipment_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Payments to Acquire Property, Plant, and Equipment, Total</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Increase (Decrease) in Income Taxes Payable</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Income taxes</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_ProceedsFromInvestments_lbl" xlink:role="http://www.xbrl.org/2003/role/documentation">The cash inflow associated with the sale of all investments during the period.</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_ProceedsFromInvestments_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Proceeds From Investments</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_ProceedsFromInvestments_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Sales of investments</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsForRepurchaseOfCommonStock_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Payments for Repurchase of Common Stock</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsForRepurchaseOfCommonStock_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Common stock repurchased</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_GainLossOnInvestmentsAndDerivativeInstruments_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Net recognized losses (gains) on investments and derivatives</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_GainLossOnInvestmentsAndDerivativeInstruments_lbl" xlink:role="http://www.xbrl.org/2003/role/documentation">Represents losses (gains) included in earnings for the period as a result of selling or holding securities and derivatives.</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_GainLossOnInvestmentsAndDerivativeInstruments_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Gain Loss On Investments And Derivative Instruments</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInAccountsPayable_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Increase (Decrease) in Accounts Payable</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInAccountsPayable_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Accounts payable</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInAccountsPayable_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Increase (Decrease) in Accounts Payable, Total</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Adjustment to Reconcile Net Income to Cash Provided by (Used in) Operating Activity, Increase (Decrease) in Operating Capital [Abstract]</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Changes in operating assets and liabilities:</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Effect of Exchange Rate on Cash, Cash Equivalent, Restricted Cash, and Restricted Cash Equivalent, Including Discontinued Operation</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Effect of foreign exchange rates on cash and cash equivalents</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Effect of Exchange Rate on Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents, Including Disposal Group and Discontinued Operations, Total</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Cash, Cash Equivalent, Restricted Cash, and Restricted Cash Equivalent, Period Increase (Decrease), Including Exchange Rate Effect and Discontinued Operation</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Net change in cash and cash equivalents</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInOtherNoncurrentAssets_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Increase (Decrease) in Other Noncurrent Assets</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInOtherNoncurrentAssets_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Other long-term assets</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInInventories_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Increase (Decrease) in Inventories</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInInventories_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Inventories</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInInventories_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Increase (Decrease) in Inventories, Total</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Proceeds from Maturities, Prepayments and Calls of Debt Securities, Available-for-Sale</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Maturities of investments</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInOperatingActivities_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Cash Provided by (Used in) Operating Activity, Including Discontinued Operation</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInOperatingActivities_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Net cash from operations</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetIncomeLoss_lbl" xlink:role="http://www.xbrl.org/2009/role/netLabel">Net income</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetIncomeLoss_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Net income</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetIncomeLoss_lbl" xlink:role="http://www.xbrl.org/2003/role/verboseLabel">Net income available for common shareholders (A)</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Repayments of Debt, Maturing in More than Three Months</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Repayments of debt</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_DepreciationAmortizationAndOther_lbl" xlink:role="http://www.xbrl.org/2003/role/documentation">The aggregate net amount of depreciation, amortization, and accretion recognized during an accounting period, and other operating transactions that are not included elsewhere in the statement of cash flows.</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_DepreciationAmortizationAndOther_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Depreciation Amortization And Other</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_DepreciationAmortizationAndOther_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Depreciation, amortization, and other</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Cash Provided by (Used in) Investing Activity, Including Discontinued Operation [Abstract]</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Investing</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_StatementOfCashFlowsAbstract_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Statement of Cash Flows [Abstract]</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Cash Provided by (Used in) Operating Activity, Including Discontinued Operation [Abstract]</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Operations</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_ProceedsFromPaymentsForOtherFinancingActivities_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Proceeds from (Payment for) Other Financing Activity</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_ProceedsFromPaymentsForOtherFinancingActivities_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Other, net</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets_lbl" xlink:role="http://www.xbrl.org/2003/role/documentation">The cash outflow associated with the acquisitions of businesses, net of the cash acquired from the purchases, and purchases of intangible and other assets.</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Acquisitions Net Of Cash Acquired And Purchases Of Intangible And Other Assets</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Acquisition of companies, net of cash acquired and divestitures, and purchases of intangible and other assets</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Cash Provided by (Used in) Financing Activity, Including Discontinued Operation [Abstract]</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Financing</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInContractWithCustomerLiability_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Increase (Decrease) in Contract with Customer, Liability</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInContractWithCustomerLiability_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Unearned revenue</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Increase (Decrease) in Other Noncurrent Liabilities</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Other long-term liabilities</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInInvestingActivities_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Cash Provided by (Used in) Investing Activity, Including Discontinued Operation</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInInvestingActivities_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Net cash used in investing</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Cash, Cash Equivalent, Restricted Cash, and Restricted Cash Equivalent, Continuing Operation</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents_lbl" xlink:role="http://www.xbrl.org/2003/role/periodEndLabel">Cash and cash equivalents, end of period</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents_lbl" xlink:role="http://www.xbrl.org/2003/role/periodStartLabel">Cash and cash equivalents, beginning of period</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Cash, Cash Equivalents, Restricted Cash, and Restricted Cash Equivalents, Total</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_ProceedsFromIssuanceOfCommonStock_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Proceeds from Issuance of Common Stock</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_ProceedsFromIssuanceOfCommonStock_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Common stock issued</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsToAcquireInvestments_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Payments to Acquire Investments</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsToAcquireInvestments_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Purchases of investments</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_PaymentsToAcquireInvestments_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Payments to Acquire Investments, Total</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_ShareBasedCompensation_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Share-Based Payment Arrangement, Noncash Expense</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_ShareBasedCompensation_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Stock-based compensation expense</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_ShareBasedCompensation_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Share-Based Payment Arrangement, Noncash Expense, Total</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Adjustment to Reconcile Net Income to Cash Provided by (Used in) Operating Activity [Abstract]</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract_lbl" xlink:role="http://www.xbrl.org/2003/role/terseLabel">Adjustments to reconcile net income to net cash from operations:</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInFinancingActivities_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Cash Provided by (Used in) Financing Activity, Including Discontinued Operation</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_NetCashProvidedByUsedInFinancingActivities_lbl" xlink:role="http://www.xbrl.org/2003/role/totalLabel">Net cash used in financing</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInAccountsReceivable_lbl" xlink:role="http://www.xbrl.org/2003/role/label">Increase (Decrease) in Accounts Receivable</link:label>
+          <link:label xml:lang="en-US" xlink:type="resource" xlink:label="us-gaap_IncreaseDecreaseInAccountsReceivable_lbl" xlink:role="http://www.xbrl.org/2009/role/negatedLabel">Accounts receivable</link:label>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_PaymentsOfDividendsCommonStock" xlink:to="us-gaap_PaymentsOfDividendsCommonStock_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_DeferredIncomeTaxesAndTaxCredits" xlink:to="us-gaap_DeferredIncomeTaxesAndTaxCredits_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_IncreaseDecreaseInOtherCurrentLiabilities" xlink:to="us-gaap_IncreaseDecreaseInOtherCurrentLiabilities_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_PaymentsForProceedsFromOtherInvestingActivities" xlink:to="us-gaap_PaymentsForProceedsFromOtherInvestingActivities_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_IncreaseDecreaseInOtherCurrentAssets" xlink:to="us-gaap_IncreaseDecreaseInOtherCurrentAssets_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_PaymentsToAcquirePropertyPlantAndEquipment" xlink:to="us-gaap_PaymentsToAcquirePropertyPlantAndEquipment_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable" xlink:to="us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="msft_ProceedsFromInvestments" xlink:to="msft_ProceedsFromInvestments_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_PaymentsForRepurchaseOfCommonStock" xlink:to="us-gaap_PaymentsForRepurchaseOfCommonStock_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="msft_GainLossOnInvestmentsAndDerivativeInstruments" xlink:to="msft_GainLossOnInvestmentsAndDerivativeInstruments_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_IncreaseDecreaseInAccountsPayable" xlink:to="us-gaap_IncreaseDecreaseInAccountsPayable_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:to="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations" xlink:to="us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect" xlink:to="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_IncreaseDecreaseInOtherNoncurrentAssets" xlink:to="us-gaap_IncreaseDecreaseInOtherNoncurrentAssets_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_IncreaseDecreaseInInventories" xlink:to="us-gaap_IncreaseDecreaseInInventories_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities" xlink:to="us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_NetCashProvidedByUsedInOperatingActivities_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_NetIncomeLoss" xlink:to="us-gaap_NetIncomeLoss_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths" xlink:to="us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="msft_DepreciationAmortizationAndOther" xlink:to="msft_DepreciationAmortizationAndOther_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract" xlink:to="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_StatementOfCashFlowsAbstract" xlink:to="us-gaap_StatementOfCashFlowsAbstract_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract" xlink:to="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_ProceedsFromPaymentsForOtherFinancingActivities" xlink:to="us-gaap_ProceedsFromPaymentsForOtherFinancingActivities_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets" xlink:to="msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract" xlink:to="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_IncreaseDecreaseInContractWithCustomerLiability" xlink:to="us-gaap_IncreaseDecreaseInContractWithCustomerLiability_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities" xlink:to="us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivities" xlink:to="us-gaap_NetCashProvidedByUsedInInvestingActivities_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents" xlink:to="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_ProceedsFromIssuanceOfCommonStock" xlink:to="us-gaap_ProceedsFromIssuanceOfCommonStock_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_PaymentsToAcquireInvestments" xlink:to="us-gaap_PaymentsToAcquireInvestments_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_ShareBasedCompensation" xlink:to="us-gaap_ShareBasedCompensation_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract" xlink:to="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivities" xlink:to="us-gaap_NetCashProvidedByUsedInFinancingActivities_lbl"/>
+          <link:labelArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/concept-label" xlink:from="us-gaap_IncreaseDecreaseInAccountsReceivable" xlink:to="us-gaap_IncreaseDecreaseInAccountsReceivable_lbl"/>
+          </link:labelLink>
+        <link:presentationLink xlink:role="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementCASHFLOWSSTATEMENTS" xlink:title="presentationLink" xlink:type="extended">
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:label="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInAccountsReceivable" xlink:label="us-gaap_IncreaseDecreaseInAccountsReceivable"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract" xlink:label="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsToAcquirePropertyPlantAndEquipment" xlink:label="us-gaap_PaymentsToAcquirePropertyPlantAndEquipment"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_StatementOfCashFlowsAbstract" xlink:label="us-gaap_StatementOfCashFlowsAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract" xlink:label="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetIncomeLoss" xlink:label="us-gaap_NetIncomeLoss"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract" xlink:label="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths" xlink:label="us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract" xlink:label="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_DepreciationAmortizationAndOther" xlink:label="msft_DepreciationAmortizationAndOther"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInInventories" xlink:label="us-gaap_IncreaseDecreaseInInventories"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets" xlink:label="msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ProceedsFromIssuanceOfCommonStock" xlink:label="us-gaap_ProceedsFromIssuanceOfCommonStock"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ShareBasedCompensation" xlink:label="us-gaap_ShareBasedCompensation"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherCurrentAssets" xlink:label="us-gaap_IncreaseDecreaseInOtherCurrentAssets"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsToAcquireInvestments" xlink:label="us-gaap_PaymentsToAcquireInvestments"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsForRepurchaseOfCommonStock" xlink:label="us-gaap_PaymentsForRepurchaseOfCommonStock"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_GainLossOnInvestmentsAndDerivativeInstruments" xlink:label="msft_GainLossOnInvestmentsAndDerivativeInstruments"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherNoncurrentAssets" xlink:label="us-gaap_IncreaseDecreaseInOtherNoncurrentAssets"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities" xlink:label="us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations" xlink:label="us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:label="us-gaap_NetCashProvidedByUsedInOperatingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsOfDividendsCommonStock" xlink:label="us-gaap_PaymentsOfDividendsCommonStock"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_DeferredIncomeTaxesAndTaxCredits" xlink:label="us-gaap_DeferredIncomeTaxesAndTaxCredits"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInAccountsPayable" xlink:label="us-gaap_IncreaseDecreaseInAccountsPayable"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_ProceedsFromInvestments" xlink:label="msft_ProceedsFromInvestments"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ProceedsFromPaymentsForOtherFinancingActivities" xlink:label="us-gaap_ProceedsFromPaymentsForOtherFinancingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInContractWithCustomerLiability" xlink:label="us-gaap_IncreaseDecreaseInContractWithCustomerLiability"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsForProceedsFromOtherInvestingActivities" xlink:label="us-gaap_PaymentsForProceedsFromOtherInvestingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInFinancingActivities" xlink:label="us-gaap_NetCashProvidedByUsedInFinancingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable" xlink:label="us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInInvestingActivities" xlink:label="us-gaap_NetCashProvidedByUsedInInvestingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents_6"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherCurrentLiabilities" xlink:label="us-gaap_IncreaseDecreaseInOtherCurrentLiabilities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities" xlink:label="us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:to="us-gaap_IncreaseDecreaseInAccountsReceivable" order="0" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract" xlink:to="us-gaap_PaymentsToAcquirePropertyPlantAndEquipment" order="0" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_StatementOfCashFlowsAbstract" xlink:to="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract" order="0" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract" xlink:to="us-gaap_NetIncomeLoss" order="0" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/netLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract" xlink:to="us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths" order="0" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract" xlink:to="msft_DepreciationAmortizationAndOther" order="0" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:to="us-gaap_IncreaseDecreaseInInventories" order="1" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract" xlink:to="msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets" order="1" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_StatementOfCashFlowsAbstract" xlink:to="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract" order="1" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract" xlink:to="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract" order="1" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract" xlink:to="us-gaap_ProceedsFromIssuanceOfCommonStock" order="1" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract" xlink:to="us-gaap_ShareBasedCompensation" order="1" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:to="us-gaap_IncreaseDecreaseInOtherCurrentAssets" order="2" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract" xlink:to="us-gaap_PaymentsToAcquireInvestments" order="2" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_StatementOfCashFlowsAbstract" xlink:to="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract" order="2" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract" xlink:to="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" order="2" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract" xlink:to="us-gaap_PaymentsForRepurchaseOfCommonStock" order="2" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract" xlink:to="msft_GainLossOnInvestmentsAndDerivativeInstruments" order="2" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:to="us-gaap_IncreaseDecreaseInOtherNoncurrentAssets" order="3" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract" xlink:to="us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities" order="3" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_StatementOfCashFlowsAbstract" xlink:to="us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations" order="3" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivitiesAbstract" xlink:to="us-gaap_NetCashProvidedByUsedInOperatingActivities" order="3" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/totalLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract" xlink:to="us-gaap_PaymentsOfDividendsCommonStock" order="3" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_AdjustmentsToReconcileNetIncomeLossToCashProvidedByUsedInOperatingActivitiesAbstract" xlink:to="us-gaap_DeferredIncomeTaxesAndTaxCredits" order="3" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:to="us-gaap_IncreaseDecreaseInAccountsPayable" order="4" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract" xlink:to="msft_ProceedsFromInvestments" order="4" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_StatementOfCashFlowsAbstract" xlink:to="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect" order="4" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/totalLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract" xlink:to="us-gaap_ProceedsFromPaymentsForOtherFinancingActivities" order="4" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:to="us-gaap_IncreaseDecreaseInContractWithCustomerLiability" order="5" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract" xlink:to="us-gaap_PaymentsForProceedsFromOtherInvestingActivities" order="5" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2009/role/negatedLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_StatementOfCashFlowsAbstract" xlink:to="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents" order="5" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/periodStartLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivitiesAbstract" xlink:to="us-gaap_NetCashProvidedByUsedInFinancingActivities" order="5" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/totalLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:to="us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable" order="6" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivitiesAbstract" xlink:to="us-gaap_NetCashProvidedByUsedInInvestingActivities" order="6" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/totalLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_StatementOfCashFlowsAbstract" xlink:to="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents_6" order="6" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/periodEndLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:to="us-gaap_IncreaseDecreaseInOtherCurrentLiabilities" order="7" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+          <link:presentationArc xlink:type="arc" xlink:arcrole="http://www.xbrl.org/2003/arcrole/parent-child" xlink:from="us-gaap_IncreaseDecreaseInOperatingCapitalAbstract" xlink:to="us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities" order="8" priority="2" use="optional" preferredLabel="http://www.xbrl.org/2003/role/terseLabel"/>
+        </link:presentationLink>
+        <link:calculationLink xlink:type="extended" xlink:role="http://www.microsoft.com/20260930/taxonomy/role/Role_StatementCASHFLOWSSTATEMENTS">
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect" xlink:to="us-gaap_NetCashProvidedByUsedInOperatingActivities" order="0" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_NetIncomeLoss" order="0" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivities" xlink:to="us-gaap_PaymentsToAcquirePropertyPlantAndEquipment" order="0" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect" xlink:to="us-gaap_NetCashProvidedByUsedInFinancingActivities" order="1" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="msft_DepreciationAmortizationAndOther" order="1" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivities" xlink:to="msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets" order="1" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect" xlink:to="us-gaap_NetCashProvidedByUsedInInvestingActivities" order="2" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_ShareBasedCompensation" order="2" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivities" xlink:to="us-gaap_PaymentsToAcquireInvestments" order="2" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect" xlink:to="us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations" order="3" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="msft_GainLossOnInvestmentsAndDerivativeInstruments" order="3" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivities" xlink:to="us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities" order="3" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_DeferredIncomeTaxesAndTaxCredits" order="4" weight="1" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivities" xlink:to="msft_ProceedsFromInvestments" order="4" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInInvestingActivities" xlink:to="us-gaap_PaymentsForProceedsFromOtherInvestingActivities" order="5" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivities" xlink:to="us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths" order="5" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_IncreaseDecreaseInAccountsReceivable" order="6" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivities" xlink:to="us-gaap_ProceedsFromIssuanceOfCommonStock" order="6" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_IncreaseDecreaseInInventories" order="7" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivities" xlink:to="us-gaap_PaymentsForRepurchaseOfCommonStock" order="7" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_IncreaseDecreaseInOtherCurrentAssets" order="8" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivities" xlink:to="us-gaap_PaymentsOfDividendsCommonStock" order="8" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_IncreaseDecreaseInOtherNoncurrentAssets" order="9" weight="-1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInFinancingActivities" xlink:to="us-gaap_ProceedsFromPaymentsForOtherFinancingActivities" order="9" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_IncreaseDecreaseInAccountsPayable" order="10" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_IncreaseDecreaseInContractWithCustomerLiability" order="11" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable" order="12" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_IncreaseDecreaseInOtherCurrentLiabilities" order="13" weight="1.00" use="optional"/>
+          <link:calculationArc xlink:type="arc" xlink:arcrole="https://xbrl.org/2023/arcrole/summation-item" xlink:from="us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:to="us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities" order="14" weight="1.00" use="optional"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect" xlink:label="us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInOperatingActivities" xlink:label="us-gaap_NetCashProvidedByUsedInOperatingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetIncomeLoss" xlink:label="us-gaap_NetIncomeLoss"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInInvestingActivities" xlink:label="us-gaap_NetCashProvidedByUsedInInvestingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsToAcquirePropertyPlantAndEquipment" xlink:label="us-gaap_PaymentsToAcquirePropertyPlantAndEquipment"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_NetCashProvidedByUsedInFinancingActivities" xlink:label="us-gaap_NetCashProvidedByUsedInFinancingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_DepreciationAmortizationAndOther" xlink:label="msft_DepreciationAmortizationAndOther"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets" xlink:label="msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ShareBasedCompensation" xlink:label="us-gaap_ShareBasedCompensation"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsToAcquireInvestments" xlink:label="us-gaap_PaymentsToAcquireInvestments"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations" xlink:label="us-gaap_EffectOfExchangeRateOnCashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsIncludingDisposalGroupAndDiscontinuedOperations"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_GainLossOnInvestmentsAndDerivativeInstruments" xlink:label="msft_GainLossOnInvestmentsAndDerivativeInstruments"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities" xlink:label="us-gaap_ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_DeferredIncomeTaxesAndTaxCredits" xlink:label="us-gaap_DeferredIncomeTaxesAndTaxCredits"/>
+          <link:loc xlink:type="locator" xlink:href="msft-20260930.xsd#msft_ProceedsFromInvestments" xlink:label="msft_ProceedsFromInvestments"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsForProceedsFromOtherInvestingActivities" xlink:label="us-gaap_PaymentsForProceedsFromOtherInvestingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths" xlink:label="us-gaap_RepaymentsOfDebtMaturingInMoreThanThreeMonths"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInAccountsReceivable" xlink:label="us-gaap_IncreaseDecreaseInAccountsReceivable"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ProceedsFromIssuanceOfCommonStock" xlink:label="us-gaap_ProceedsFromIssuanceOfCommonStock"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInInventories" xlink:label="us-gaap_IncreaseDecreaseInInventories"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsForRepurchaseOfCommonStock" xlink:label="us-gaap_PaymentsForRepurchaseOfCommonStock"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherCurrentAssets" xlink:label="us-gaap_IncreaseDecreaseInOtherCurrentAssets"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_PaymentsOfDividendsCommonStock" xlink:label="us-gaap_PaymentsOfDividendsCommonStock"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherNoncurrentAssets" xlink:label="us-gaap_IncreaseDecreaseInOtherNoncurrentAssets"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_ProceedsFromPaymentsForOtherFinancingActivities" xlink:label="us-gaap_ProceedsFromPaymentsForOtherFinancingActivities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInAccountsPayable" xlink:label="us-gaap_IncreaseDecreaseInAccountsPayable"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInContractWithCustomerLiability" xlink:label="us-gaap_IncreaseDecreaseInContractWithCustomerLiability"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable" xlink:label="us-gaap_IncreaseDecreaseInAccruedIncomeTaxesPayable"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherCurrentLiabilities" xlink:label="us-gaap_IncreaseDecreaseInOtherCurrentLiabilities"/>
+          <link:loc xlink:type="locator" xlink:href="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd#us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities" xlink:label="us-gaap_IncreaseDecreaseInOtherNoncurrentLiabilities"/>
+        </link:calculationLink>
+        </link:linkbase>
+    </xsd:appinfo>
+  </xsd:annotation>
+  <xsd:element id="msft_OtherReceivablesCurrentRelatedToPurchaseOfComponents" name="OtherReceivablesCurrentRelatedToPurchaseOfComponents" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_ProductsOrServicesNameSecondaryCategorizationDomain" name="ProductsOrServicesNameSecondaryCategorizationDomain" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_ShareRepurchaseProgramTwentyTwentyFourMember" name="ShareRepurchaseProgramTwentyTwentyFourMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_WindowsOEMAndDevicesMember" name="WindowsOEMAndDevicesMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_CreditLossAllowanceAndImpairmentOfInvestments" name="CreditLossAllowanceAndImpairmentOfInvestments" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_RevenueRemainingPerformanceObligationWeightedAverageDuration" name="RevenueRemainingPerformanceObligationWeightedAverageDuration" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false"/>
+  <xsd:element id="msft_FrontierAndSupportServicesMember" name="FrontierAndSupportServicesMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_CashPaidForAmountsIncludedInMeasurementOfLeaseLiabilitiesAbstract" name="CashPaidForAmountsIncludedInMeasurementOfLeaseLiabilitiesAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_HedgeAccountingFairValueAdjustments" name="HedgeAccountingFairValueAdjustments" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit"/>
+  <xsd:element id="msft_WeightedAverageRemainingLeaseTermAbstract" name="WeightedAverageRemainingLeaseTermAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_RecastingOfCertainPriorPeriodInformationPolicyTextBlock" name="RecastingOfCertainPriorPeriodInformationPolicyTextBlock" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_EquityMethodInvestmentsFunded" name="EquityMethodInvestmentsFunded" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtSevenMember" name="IssuanceOfLongTermDebtSevenMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_SignificantAccountingPoliciesTable" name="SignificantAccountingPoliciesTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets" name="AcquisitionsNetOfCashAcquiredAndPurchasesOfIntangibleAndOtherAssets" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit"/>
+  <xsd:element id="msft_FinancialInstrumentCovenantMinimumLiquidityRequirement" name="FinancialInstrumentCovenantMinimumLiquidityRequirement" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_MicrosoftCloudMember" name="MicrosoftCloudMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_LeasesLineItems" name="LeasesLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_ScheduleOfCashCashEquivalentsAndInvestmentsTableTextBlock" name="ScheduleOfCashCashEquivalentsAndInvestmentsTableTextBlock" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_AccumulatedTranslationAdjustmentAndOtherMember" name="AccumulatedTranslationAdjustmentAndOtherMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtSixMember" name="IssuanceOfLongTermDebtSixMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_SignificantAccountingPoliciesLineItems" name="SignificantAccountingPoliciesLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtTwelveMember" name="IssuanceOfLongTermDebtTwelveMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_PurchasesOfPropertyAndEquipmentRemainingInAccountsPayable" name="PurchasesOfPropertyAndEquipmentRemainingInAccountsPayable" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit"/>
+  <xsd:element id="msft_DerivativeLiabilityStatementOfFinancialPositionExtensibleEnumerationNotDisclosedFlag" name="DerivativeLiabilityStatementOfFinancialPositionExtensibleEnumerationNotDisclosedFlag" type="enum2:enumerationSetItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" enum2:domain="us-gaap:LiabilitiesAbstract" enum2:headUsable="false" enum2:linkrole="http://fasb.org/us-gaap/role/eedm/ExtensibleEnumerationLists"/>
+  <xsd:element id="msft_O2027Q1DividendsMember" name="O2027Q1DividendsMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_XBOXMember" name="XBOXMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_LeasesTable" name="LeasesTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_ContractWithCustomerLiabilityRevenueRecognizedIncludingAdditions" name="ContractWithCustomerLiabilityRevenueRecognizedIncludingAdditions" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit"/>
+  <xsd:element id="msft_Rule10B51ArrModifiedFlag" name="Rule10B51ArrModifiedFlag" type="xbrli:booleanItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_WeightedAverageDiscountRateAbstract" name="WeightedAverageDiscountRateAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_DerivativeAssetStatementOfFinancialPositionExtensibleEnumerationNotDisclosedFlag" name="DerivativeAssetStatementOfFinancialPositionExtensibleEnumerationNotDisclosedFlag" type="enum2:enumerationSetItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" enum2:domain="us-gaap:AssetsAbstract" enum2:headUsable="false" enum2:linkrole="http://fasb.org/us-gaap/role/eedm/ExtensibleEnumerationLists"/>
+  <xsd:element id="msft_FinanceLeaseLiabilityPaymentsDueAfterYearFour" name="FinanceLeaseLiabilityPaymentsDueAfterYearFour" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit"/>
+  <xsd:element id="msft_OpenAIGlobalLlcMember" name="OpenAIGlobalLlcMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_AzureMember" name="AzureMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtOneMember" name="IssuanceOfLongTermDebtOneMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_ContractWithCustomerLiabilityTable" name="ContractWithCustomerLiabilityTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtFourMember" name="IssuanceOfLongTermDebtFourMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_ContractWithCustomerLiabilityRevenueDeferred" name="ContractWithCustomerLiabilityRevenueDeferred" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit"/>
+  <xsd:element id="msft_AgentsAndInfraMember" name="AgentsAndInfraMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_MicrosoftThreeSixFiveCloudMember" name="MicrosoftThreeSixFiveCloudMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_CashCashEquivalentsAndInvestmentsTable" name="CashCashEquivalentsAndInvestmentsTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_IRSAuditNoticesOfProposedAdjustmentAmount" name="IRSAuditNoticesOfProposedAdjustmentAmount" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_ScheduleOfMaturitiesOfOperatingAndFinanceLeasesLiabilitiesTableTextBlock" name="ScheduleOfMaturitiesOfOperatingAndFinanceLeasesLiabilitiesTableTextBlock" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_ComputerHardwareAndSoftware" name="ComputerHardwareAndSoftware" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_O2026Q1DividendsMember" name="O2026Q1DividendsMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_CommercialCustomersMember" name="CommercialCustomersMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_RightOfUseAssetsObtainedInExchangeForLeaseObligationsAbstract" name="RightOfUseAssetsObtainedInExchangeForLeaseObligationsAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_CashCashEquivalentsAndInvestmentsLineItems" name="CashCashEquivalentsAndInvestmentsLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_ScheduleOfSupplementalBalanceSheetInformationRelatedToLeasesTableTextBlock" name="ScheduleOfSupplementalBalanceSheetInformationRelatedToLeasesTableTextBlock" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtFiveMember" name="IssuanceOfLongTermDebtFiveMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_ShareRepurchaseProgramDisclosureTableTextBlock" name="ShareRepurchaseProgramDisclosureTableTextBlock" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_FinancialInstrumentCovenantMinimumLiquidity" name="FinancialInstrumentCovenantMinimumLiquidity" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtTenMember" name="IssuanceOfLongTermDebtTenMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_IndustrySolutionsMember" name="IndustrySolutionsMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_OperatingLeaseMember" name="OperatingLeaseMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_OtherMeasurementMember" name="OtherMeasurementMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_LesseeOperatingAndFinanceLeasesOptionsToTerminateLeasesTerm" name="LesseeOperatingAndFinanceLeasesOptionsToTerminateLeasesTerm" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_ScheduleOfUnrealizedLossOnDebtInvestmentsTableTextBlock" name="ScheduleOfUnrealizedLossOnDebtInvestmentsTableTextBlock" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_EquityMethodInvestmentsTotalFundingCommitments" name="EquityMethodInvestmentsTotalFundingCommitments" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit"/>
+  <xsd:element id="msft_IncomeTaxesLineItems" name="IncomeTaxesLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_PremiumOnDebtExchange1" name="PremiumOnDebtExchange1" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_ProceedsFromInvestments" name="ProceedsFromInvestments" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_GainLossOnInvestmentsAndDerivativeInstruments" name="GainLossOnInvestmentsAndDerivativeInstruments" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit"/>
+  <xsd:element id="msft_ImpairmentOfEquityInvestments" name="ImpairmentOfEquityInvestments" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtThirteenMember" name="IssuanceOfLongTermDebtThirteenMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_FinanceLeaseCost" name="FinanceLeaseCost" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_DepreciationAmortizationAndOther" name="DepreciationAmortizationAndOther" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_LongTermDebtMaturitiesRepaymentsOfPrincipalAfterYearFour" name="LongTermDebtMaturitiesRepaymentsOfPrincipalAfterYearFour" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit"/>
+  <xsd:element id="msft_DevicesAndConsumerMember" name="DevicesAndConsumerMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_NonRule10B51ArrModifiedFlag" name="NonRule10B51ArrModifiedFlag" type="xbrli:booleanItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_LesseeOperatingAndFinanceLeasesRemainingLeaseTerm" name="LesseeOperatingAndFinanceLeasesRemainingLeaseTerm" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_DebtInstrumentIssuanceYear" name="DebtInstrumentIssuanceYear" type="xbrli:gYearItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_FinanceLeaseMember" name="FinanceLeaseMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_ContractWithCustomerLiabilityLineItems" name="ContractWithCustomerLiabilityLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_LesseeOperatingLeaseLiabilityPaymentsDueAfterYearFour" name="LesseeOperatingLeaseLiabilityPaymentsDueAfterYearFour" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit"/>
+  <xsd:element id="msft_IncomeTaxesTable" name="IncomeTaxesTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtThreeMember" name="IssuanceOfLongTermDebtThreeMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_NotesThreePointOneTwoFivePercentDueDecemberSixTwentyTwentyEightMember" name="NotesThreePointOneTwoFivePercentDueDecemberSixTwentyTwentyEightMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_FiniteLivedIntangibleAssetsAmortizationExpenseAfterYearFour" name="FiniteLivedIntangibleAssetsAmortizationExpenseAfterYearFour" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_ProductivityAndServerLicensingMember" name="ProductivityAndServerLicensingMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtTwoMember" name="IssuanceOfLongTermDebtTwoMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_EarningPerShareBasicAndDilutedAbstract" name="EarningPerShareBasicAndDilutedAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_FinanceLeaseAbstract" name="FinanceLeaseAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtNineMember" name="IssuanceOfLongTermDebtNineMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_FinanceReceivablesNet" name="FinanceReceivablesNet" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_SearchAndAdvertisingMember" name="SearchAndAdvertisingMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_DebtInstrumentMaturityYear" name="DebtInstrumentMaturityYear" type="xbrli:gYearItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtEightMember" name="IssuanceOfLongTermDebtEightMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_ScheduleOfSupplementalCashFlowInformationRelatedToLeasesTableTextBlock" name="ScheduleOfSupplementalCashFlowInformationRelatedToLeasesTableTextBlock" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_ProductsOrServicesSecondaryCategorizationAxis" name="ProductsOrServicesSecondaryCategorizationAxis" type="xbrli:stringItemType" substitutionGroup="xbrldt:dimensionItem" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_CashCashEquivalentsAndInvestments" name="CashCashEquivalentsAndInvestments" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit"/>
+  <xsd:element id="msft_LesseeOperatingAndFinanceLeasesTextBlock" name="LesseeOperatingAndFinanceLeasesTextBlock" type="dtr-types:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false"/>
+  <xsd:element id="msft_IssuanceOfLongTermDebtElevenMember" name="IssuanceOfLongTermDebtElevenMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_NotesTwoPointSixTwoFivePercentDueMayTwoTwentyThirtyThreeMember" name="NotesTwoPointSixTwoFivePercentDueMayTwoTwentyThirtyThreeMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+  <xsd:element id="msft_UnrecognizedTaxBenefitsAndOtherIncomeTaxLiabilitiesMember" name="UnrecognizedTaxBenefitsAndOtherIncomeTaxLiabilitiesMember" type="dtr-types:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true"/>
+</xsd:schema>

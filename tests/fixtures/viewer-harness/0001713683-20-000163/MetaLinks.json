@@ -1,0 +1,89 @@
+{
+ "version": "2.1",
+ "instance": {
+  "zs-20200731.htm": {
+   "tag": {
+    "us-gaap_CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents": {
+     "calculation": {
+      "http://www.zscaler.com/role/ConsolidatedStatementofCashFlows": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Amount of cash and cash equivalents, and cash and cash equivalents restricted to withdrawal or usage. Excludes amount for disposal group and discontinued operations. Cash includes, but is not limited to, currency on hand, demand deposits with banks or financial institutions, and other accounts with general characteristics of demand deposits. Cash equivalents include, but are not limited to, short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates.",
+        "label": "Cash, Cash Equivalents, Restricted Cash and Restricted Cash Equivalents",
+        "periodEndLabel": "Cash, cash equivalents and restricted cash at end of period",
+        "periodStartLabel": "Cash, cash equivalents and restricted cash at beginning of period",
+        "totalLabel": "Total cash, cash equivalents and restricted cash"
+       }
+      }
+     },
+     "localname": "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents",
+     "nsuri": "http://fasb.org/us-gaap/2020-01-31",
+     "presentation": [
+      "http://www.zscaler.com/role/ConsolidatedStatementofCashFlows"
+     ],
+     "xbrltype": "monetaryItemType"
+    }
+   },
+   "report": {
+    "R8": {
+     "firstAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "us-gaap:ScheduleOfEarningsPerShareBasicAndDilutedTableTextBlock",
+       "ix:continuation",
+       "body",
+       "html"
+      ],
+      "baseRef": "zs-20200731.htm",
+      "contextRef": "i23793b8e8e334deb90799bc9fd1a7d6c_D20190801-20200731",
+      "decimals": "-3",
+      "first": true,
+      "lang": "en-US",
+      "name": "us-gaap:NetIncomeLoss",
+      "reportCount": 1,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "1007008 - Statement - Consolidated Statement of Cash Flows",
+     "role": "http://www.zscaler.com/role/ConsolidatedStatementofCashFlows",
+     "shortName": "Consolidated Statement of Cash Flows",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "zs-20200731.htm",
+      "contextRef": "i23793b8e8e334deb90799bc9fd1a7d6c_D20190801-20200731",
+      "decimals": "-3",
+      "lang": "en-US",
+      "name": "us-gaap:AmortizationOfFinancingCostsAndDiscounts",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

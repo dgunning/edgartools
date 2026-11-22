@@ -14,6 +14,7 @@ shim. The implementation lives HERE, not there -- aliasing the other way would
 leave the real code at the path 6.0 deletes (the edgartools-07lk.23 rename trap).
 """
 import datetime
+import re
 from datetime import date
 from typing import List, Optional, Sequence, Tuple, Union
 from zoneinfo import ZoneInfo
@@ -22,12 +23,19 @@ from pandas.tseries.offsets import BDay
 
 from edgar.exceptions import InvalidDateError
 
+# SEC's own clock: EDGAR acceptance times and market sessions are Eastern time.
+SEC_TIMEZONE = ZoneInfo("America/New_York")
+
 __all__ = [
+    "calculate_fiscal_year_for_label",
+    "fiscal_year_end_month",
     "extract_dates",
     "filing_date_to_year_quarters",
     "current_year_and_quarter",
     "is_start_of_quarter",
     "parse_acceptance_datetime",
+    "normalize_period_boundary",
+    "SEC_TIMEZONE",
     "InvalidDateError",
 ]
 
@@ -164,7 +172,7 @@ def filing_date_to_year_quarters(filing_date: str) -> List[Tuple[int, int]]:
 
 def current_year_and_quarter() -> Tuple[int, int]:
     # Define the Eastern timezone
-    eastern = ZoneInfo('America/New_York')
+    eastern = SEC_TIMEZONE
 
     # Get the current time in Eastern timezone
     now_eastern = datetime.datetime.now(eastern)
@@ -193,5 +201,123 @@ def is_start_of_quarter():
     return False
 
 
+_WHOLE_DAY_DATETIME_RE = re.compile(r'(\d{4}-\d{2}-\d{2})T(00|24):00:00(?:\.0+)?')
+
+
+def normalize_period_boundary(text: Optional[str], is_end: bool) -> Optional[str]:
+    """An XBRL context period boundary (``xbrli:dateUnion``) in its date-only form.
+
+    The type collapses whitespace, so `` 2024-06-30 `` is 2024-06-30. A
+    date-only instant or ``endDate`` means the end of that day (XBRL 2.1
+    §4.7.2), so for an end boundary ``2025-01-01T00:00:00`` is the same point
+    as ``2024-12-31``. A ``startDate`` means the start of its day, so
+    ``2024-01-01T00:00:00`` is ``2024-01-01``. ``T24:00:00`` is the end of the
+    day it names. Both are folded onto the date-only spelling, so equal periods
+    share one key (GH #1762).
+
+    A dateTime that is not a whole-day boundary, or that carries a timezone,
+    has no date-only equivalent and comes back with only its whitespace
+    collapsed. The XBRL instance parser and the inline (edgar.documents) context
+    reader both use this, so the two readings cannot drift apart.
+    """
+    if text is None:
+        return None
+    value = ' '.join(text.split())
+    match = _WHOLE_DAY_DATETIME_RE.fullmatch(value)
+    if match is None:
+        return value
+    try:
+        day = date.fromisoformat(match.group(1))
+    except ValueError:
+        return value
+    midnight = match.group(2) == '00'
+    if is_end and midnight:
+        day -= datetime.timedelta(days=1)
+    elif not is_end and not midnight:
+        day += datetime.timedelta(days=1)
+    return day.isoformat()
+
+
 def parse_acceptance_datetime(acceptance_datetime: str) -> datetime.datetime:
     return datetime.datetime.fromisoformat(acceptance_datetime.replace('Z', '+00:00'))
+
+
+def fiscal_year_end_month(month: int, day: int) -> int:
+    """The month a fiscal year that ends on ``month``/``day`` belongs to.
+
+    A 52/53-week year closes on the weekday nearest a month end, which can land
+    in the first week of the next month: Sprouts' and Krispy Kreme's December
+    years close on 2023-01-01, Costco's August year on 2023-09-03. Those dates
+    belong to the previous month, so a year end on day 1-7 counts as that month.
+    """
+    if day <= 7:
+        return 12 if month == 1 else month - 1
+    return month
+
+
+def calculate_fiscal_year_for_label(period_end: date, fiscal_year_end_month: int) -> int:
+    """
+    Calculate the fiscal year label for a period based on the dominant convention:
+    fiscal years are named by the calendar year in which they end.
+
+    This matches how companies, the SEC, Bloomberg, S&P Capital IQ, and other
+    financial data providers label fiscal years. For example, Autodesk's fiscal
+    year ending Jan 31, 2026 is "FY2026", and Q1 (Feb-Apr 2025) is "Q1 2026".
+
+    Args:
+        period_end: The period end date
+        fiscal_year_end_month: Company's fiscal year end month (1-12)
+
+    Returns:
+        The fiscal year number (the calendar year in which the fiscal year ends)
+
+    Examples:
+        >>> # NVIDIA (fiscal year ends in January)
+        >>> # Q3 ending October 26, 2025 → FY2026 (ends Jan 2026)
+        >>> calculate_fiscal_year_for_label(date(2025, 10, 26), 1)
+        2026
+
+        >>> # NVIDIA Q4 ending January 26, 2026 → FY2026
+        >>> calculate_fiscal_year_for_label(date(2026, 1, 26), 1)
+        2026
+
+        >>> # Apple (fiscal year ends in September)
+        >>> # Q1 ending December 30, 2023 → FY2024 (ends Sept 2024)
+        >>> calculate_fiscal_year_for_label(date(2023, 12, 30), 9)
+        2024
+
+        >>> # Apple Q3 ending June 28, 2024 → FY2024
+        >>> calculate_fiscal_year_for_label(date(2024, 6, 28), 9)
+        2024
+
+        >>> # Early January period (52/53-week calendar edge case)
+        >>> # Period ending Jan 1, 2023 for a Dec FYE company → FY2022
+        >>> calculate_fiscal_year_for_label(date(2023, 1, 1), 12)
+        2022
+
+        >>> # Costco (August FYE) year ending September 3, 2023 → FY2023
+        >>> calculate_fiscal_year_for_label(date(2023, 9, 3), 8)
+        2023
+    """
+    # Early January (Jan 1-7): Use prior year (52/53-week calendar convention)
+    # Companies with 52/53-week calendars can have fiscal year end dates
+    # fall in the first week of January (e.g., Jan 1 belongs to prior FY)
+    if period_end.month == 1 and period_end.day <= 7:
+        return period_end.year - 1
+
+    # The same drift for any fiscal year-end month: a 52/53-week year closes on
+    # the weekday nearest the month end, which can be a few days into the next
+    # month (Costco, August FYE: 2023-09-03; Home Depot, January FYE:
+    # 2026-02-01). That period closes the fiscal year, it does not open the next.
+    if period_end.month == fiscal_year_end_month % 12 + 1 and period_end.day <= 7:
+        return period_end.year
+
+    # Fiscal year convention: if the period ends after the FYE month,
+    # it belongs to the next fiscal year (which ends in FYE month of the following year)
+    # Example: Apple (Sept FYE) Q1 ends in Dec 2023 → FY2024 (ends Sept 2024)
+    # Example: NVIDIA (Jan FYE) Q1 ends in Apr 2025 → FY2026 (ends Jan 2026)
+    if period_end.month > fiscal_year_end_month:
+        return period_end.year + 1
+
+    # Period ends at or before FYE month — belongs to fiscal year ending this calendar year
+    return period_end.year

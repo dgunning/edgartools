@@ -1,0 +1,250 @@
+{
+ "version": "2.1",
+ "instance": {
+  "spr-20191231x10k.htm": {
+   "tag": {
+    "us-gaap_CommonStockSharesOutstanding": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Number of shares of common stock outstanding. Common stock represent the ownership interest in a corporation.",
+        "label": "Common Stock, Shares, Outstanding",
+        "periodEndLabel": "Balance, shares",
+        "periodStartLabel": "Balance, shares",
+        "terseLabel": "Common Stock, Shares, Outstanding"
+       }
+      }
+     },
+     "localname": "CommonStockSharesOutstanding",
+     "nsuri": "http://fasb.org/us-gaap/2019-01-31",
+     "presentation": [
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfChangesInShareholdersEquity",
+      "http://www.spiritaerosystems.com/role/EquityDetails"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_CostOfGoodsAndServicesSold": {
+     "calculation": {
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfOperations": {
+       "order": 1.0,
+       "parentTag": "us-gaap_CostsAndExpenses",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "The aggregate costs related to goods produced and sold and services rendered by an entity during the reporting period. This excludes costs incurred during the reporting period related to financial services rendered and other revenue generating activities.",
+        "label": "Cost of Goods and Services Sold",
+        "terseLabel": "Cost of Goods and Services Sold",
+        "verboseLabel": "Cost of sales"
+       }
+      }
+     },
+     "localname": "CostOfGoodsAndServicesSold",
+     "nsuri": "http://fasb.org/us-gaap/2019-01-31",
+     "presentation": [
+      "http://www.spiritaerosystems.com/role/AccountingChangesAndErrorCorrectionsDetails",
+      "http://www.spiritaerosystems.com/role/CondensedConsolidatingFinancialInformationDetails",
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfOperations",
+      "http://www.spiritaerosystems.com/role/SegmentInformationDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_EarningsPerShareBasic": {
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "The amount of net income (loss) for the period per each share of common stock or unit outstanding during the reporting period.",
+        "label": "Earnings Per Share, Basic",
+        "terseLabel": "Earnings Per Share, Basic",
+        "verboseLabel": "Basic (in dollars per share)"
+       }
+      }
+     },
+     "localname": "EarningsPerShareBasic",
+     "nsuri": "http://fasb.org/us-gaap/2019-01-31",
+     "presentation": [
+      "http://www.spiritaerosystems.com/role/AccountingChangesAndErrorCorrectionsDetails",
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfOperations",
+      "http://www.spiritaerosystems.com/role/EquityDetails",
+      "http://www.spiritaerosystems.com/role/QuarterlyFinancialDataUnauditedDetails"
+     ],
+     "xbrltype": "perShareItemType"
+    },
+    "us-gaap_NetIncomeLoss": {
+     "calculation": {
+      "http://www.spiritaerosystems.com/role/CondensedConsolidatingFinancialInformationDetails": {
+       "order": 1.0,
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTax",
+       "weight": 1.0
+      },
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfCashFlows": {
+       "order": 24.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      },
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfComprehensiveIncome": {
+       "order": 1.0,
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTax",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "The portion of profit or loss for the period, net of income taxes, which is attributable to the parent.",
+        "label": "Net Income (Loss) Attributable to Parent",
+        "terseLabel": "Net income",
+        "totalLabel": "Net income",
+        "verboseLabel": "Net income"
+       }
+      }
+     },
+     "localname": "NetIncomeLoss",
+     "nsuri": "http://fasb.org/us-gaap/2019-01-31",
+     "presentation": [
+      "http://www.spiritaerosystems.com/role/AccountingChangesAndErrorCorrectionsDetails",
+      "http://www.spiritaerosystems.com/role/CondensedConsolidatingFinancialInformationDetails",
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfCashFlows",
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfChangesInShareholdersEquity",
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfComprehensiveIncome",
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfOperations",
+      "http://www.spiritaerosystems.com/role/EquityDetails",
+      "http://www.spiritaerosystems.com/role/QuarterlyFinancialDataUnauditedDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_Revenues": {
+     "calculation": {
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfOperations": {
+       "order": 2.0,
+       "parentTag": "us-gaap_OperatingIncomeLoss",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-US": {
+       "role": {
+        "documentation": "Amount of revenue recognized from goods sold, services rendered, insurance premiums, or other activities that constitute an earning process. Includes, but is not limited to, investment and interest income before deduction of interest expense when recognized as a component of revenue, and sales and trading gain (loss).",
+        "label": "Revenues",
+        "terseLabel": "Revenues",
+        "verboseLabel": "Net revenues"
+       }
+      }
+     },
+     "localname": "Revenues",
+     "nsuri": "http://fasb.org/us-gaap/2019-01-31",
+     "presentation": [
+      "http://www.spiritaerosystems.com/role/AccountingChangesAndErrorCorrectionsDetails",
+      "http://www.spiritaerosystems.com/role/CondensedConsolidatingFinancialInformationDetails",
+      "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfOperations",
+      "http://www.spiritaerosystems.com/role/QuarterlyFinancialDataUnauditedDetails",
+      "http://www.spiritaerosystems.com/role/RevenueDisaggregationAndOutstandingPerformanceObligationsDetails",
+      "http://www.spiritaerosystems.com/role/SegmentInformationDetails",
+      "http://www.spiritaerosystems.com/role/SegmentInformationDetails1"
+     ],
+     "xbrltype": "monetaryItemType"
+    }
+   },
+   "report": {
+    "R2": {
+     "firstAnchor": {
+      "ancestors": [
+       "span",
+       "span",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "ix:continuation",
+       "ix:continuation",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "spr-20191231x10k.htm",
+      "contextRef": "FD2019Q4QTD",
+      "decimals": "-5",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:Revenues",
+      "reportCount": 1,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "1001000 - Statement - Consolidated Statements of Operations",
+     "role": "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfOperations",
+     "shortName": "Consolidated Statements of Operations",
+     "subGroupType": "",
+     "uniqueAnchor": null
+    },
+    "R7": {
+     "firstAnchor": {
+      "ancestors": [
+       "span",
+       "span",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "spr-20191231x10k.htm",
+      "contextRef": "FI2016Q4",
+      "decimals": "-5",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:TreasuryStockValue",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "1004000 - Statement - Consolidated Statements of Changes in Shareholders Equity",
+     "role": "http://www.spiritaerosystems.com/role/ConsolidatedStatementsOfChangesInShareholdersEquity",
+     "shortName": "Consolidated Statements of Changes in Shareholders Equity",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "span",
+       "span",
+       "div",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "spr-20191231x10k.htm",
+      "contextRef": "FI2016Q4",
+      "decimals": "-5",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:TreasuryStockValue",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

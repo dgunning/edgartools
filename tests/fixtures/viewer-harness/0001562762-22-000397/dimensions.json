@@ -1,0 +1,14 @@
+{
+ "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY": {
+  "ifrs-full_ComponentsOfEquityAxis": {
+   "default_member_id": "ifrs-full_EquityMember",
+   "is_typed_dimension": false
+  }
+ },
+ "merged": {
+  "ifrs-full_ComponentsOfEquityAxis": {
+   "default_member_id": "ifrs-full_EquityMember",
+   "is_typed_dimension": false
+  }
+ }
+}

@@ -1,0 +1,73 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--XBRL Document Created with Wdesk from Workiva--><!--Copyright 2021 Workiva--><!--r:829cb9c2-419d-48aa-908a-8815d5c98ec8,g:16fdf36b-15fb-4007-9f34-cb60a6893f5d--><xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:brx="http://www.brixmor.com/20201231" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:nonnum="http://www.xbrl.org/dtr/type/non-numeric" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.brixmor.com/20201231">
+  <xs:import namespace="http://fasb.org/srt/2020-01-31" schemaLocation="http://xbrl.fasb.org/srt/2020/elts/srt-2020-01-31.xsd"/>
+  <xs:import namespace="http://fasb.org/us-gaap/2020-01-31" schemaLocation="http://xbrl.fasb.org/us-gaap/2020/elts/us-gaap-2020-01-31.xsd"/>
+  <xs:import namespace="http://www.w3.org/1999/xlink" schemaLocation="http://www.xbrl.org/2003/xlink-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/non-numeric" schemaLocation="http://www.xbrl.org/dtr/type/nonNumeric-2009-12-16.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/numeric" schemaLocation="http://www.xbrl.org/dtr/type/numeric-2009-12-16.xsd"/>
+  <xs:import namespace="http://xbrl.org/2005/xbrldt" schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/dei/2020-01-31" schemaLocation="https://xbrl.sec.gov/dei/2020/dei-2020-01-31.xsd"/>
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="brx-20201231_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="brx-20201231_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="brx-20201231_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="brx-20201231_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:type="simple"/>
+      <link:roleType id="CONSOLIDATEDSTATEMENTSOFCASHFLOWS" roleURI="http://www.brixmor.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS">
+        <link:definition>1007008 - Statement - CONSOLIDATED STATEMENTS OF CASH FLOWS</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      </xs:appinfo>
+  </xs:annotation>
+  <xs:element id="brx_DoverParkPlazaYardvilleNJMember" abstract="true" name="DoverParkPlazaYardvilleNJMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_NorthHillsVillageHaltomCityTxMember" abstract="true" name="NorthHillsVillageHaltomCityTxMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_PreviouslyDisposedAssetsMember" abstract="true" name="PreviouslyDisposedAssetsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_WadsworthCrossingWadsworthOHMember" abstract="true" name="WadsworthCrossingWadsworthOHMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_SmithsSocorroNmMember" abstract="true" name="SmithsSocorroNmMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_MohawkAcresRomeNyMember" abstract="true" name="MohawkAcresRomeNyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_NorthmallCentreTucsonAZMember" abstract="true" name="NorthmallCentreTucsonAZMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_PlantationPlazaCluteTXMember" abstract="true" name="PlantationPlazaCluteTXMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_SterlingBazaarPeoriaILMember" abstract="true" name="SterlingBazaarPeoriaILMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_FryRoadCrossingKatyTXMember" abstract="true" name="FryRoadCrossingKatyTXMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_MarwoodPlazaIndianapolisINMember" abstract="true" name="MarwoodPlazaIndianapolisINMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_ParcelAtLakesCrossingMuskegonMIMember" abstract="true" name="ParcelAtLakesCrossingMuskegonMIMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_LincolnPlazaNewHavenINMember" abstract="true" name="LincolnPlazaNewHavenINMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_TowneSquareNorthOwensboroKyMember" abstract="true" name="TowneSquareNorthOwensboroKyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_ShopsofRiverdaleRiverdaleGAMember" abstract="true" name="ShopsofRiverdaleRiverdaleGAMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_PensacolaSquarePensacolaFlMember" abstract="true" name="PensacolaSquarePensacolaFlMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_ElkGroveTownCenterElkGroveVillageILMember" abstract="true" name="ElkGroveTownCenterElkGroveVillageILMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_WestviewCenterHanoverParkILMember" abstract="true" name="WestviewCenterHanoverParkILMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_MountCarmelPlazaGlensidePAMember" abstract="true" name="MountCarmelPlazaGlensidePAMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_CountyLinePlazaJacksonMSMember" abstract="true" name="CountyLinePlazaJacksonMSMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_CrossroadsCenterFairviewHeightsILMember" abstract="true" name="CrossroadsCenterFairviewHeightsILMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_ProceedsFromSalesOfRealEstateAssets" abstract="false" name="ProceedsFromSalesOfRealEstateAssets" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="brx_ValleyCommonsSalemVAMember" abstract="true" name="ValleyCommonsSalemVAMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_GlendaleGalleriaGlendaleAZMember" abstract="true" name="GlendaleGalleriaGlendaleAZMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_KlinePlazaHarrisburgPAMember" abstract="true" name="KlinePlazaHarrisburgPAMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_A30thStreetPlazaCantonOHMember" abstract="true" name="A30thStreetPlazaCantonOHMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_KleinSquareSpringTxMember" abstract="true" name="KleinSquareSpringTxMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_RoundtreePlaceYpsilantiMIMember" abstract="true" name="RoundtreePlaceYpsilantiMIMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_CovingtonGalleryCovingtonGaMember" abstract="true" name="CovingtonGalleryCovingtonGaMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_BrixmorOperatingPartnershipLPMember" abstract="true" name="BrixmorOperatingPartnershipLPMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_BriceParkReynoldsburgOHMember" abstract="true" name="BriceParkReynoldsburgOHMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_GainsLossesonExtinguishmentofDebtIncludingDiscontinuedOperations" abstract="false" name="GainsLossesonExtinguishmentofDebtIncludingDiscontinuedOperations" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="brx_BrooksvilleSquareBrooksvilleFLMember" abstract="true" name="BrooksvilleSquareBrooksvilleFLMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_ProceedsFromUnsecuredDebt" abstract="false" name="ProceedsFromUnsecuredDebt" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="brx_PrincipalPaymentsOfMortgagesCapitalLeasesAndNotesPayable" abstract="false" name="PrincipalPaymentsOfMortgagesCapitalLeasesAndNotesPayable" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="brx_ElkhartPlazaWestElkhartINMember" abstract="true" name="ElkhartPlazaWestElkhartINMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_IncreaseDecreaseInOtherLiabilitiesAndDueToRelatedParties" abstract="false" name="IncreaseDecreaseInOtherLiabilitiesAndDueToRelatedParties" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="brx_SpringMallGreenfieldWIMember" abstract="true" name="SpringMallGreenfieldWIMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_ParcelatMansellCrossingAlpharettaGAMember" abstract="true" name="ParcelatMansellCrossingAlpharettaGAMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_ReconciliationtoconsolidatedbalancesheetsAbstract" abstract="true" name="ReconciliationtoconsolidatedbalancesheetsAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="brx_IncreaseDecreaseInDeferredChargesAndPrepaidExpensesNet" abstract="false" name="IncreaseDecreaseInDeferredChargesAndPrepaidExpensesNet" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="brx_ChamberlainPlazaMeridenCTMember" abstract="true" name="ChamberlainPlazaMeridenCTMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_SkywayPlazaSt.PetersburgFLMember" abstract="true" name="SkywayPlazaSt.PetersburgFLMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_SouthlandShoppingPlazaToledoOHMember" abstract="true" name="SouthlandShoppingPlazaToledoOHMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_ThePinesShoppingCenterPinevilleLAMember" abstract="true" name="ThePinesShoppingCenterPinevilleLAMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  <xs:element id="brx_Partnersdistributions" abstract="false" name="Partnersdistributions" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="brx_BartonvilleSquareBartonvilleILMember" abstract="true" name="BartonvilleSquareBartonvilleILMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="nonnum:domainItemType"/>
+  </xs:schema>

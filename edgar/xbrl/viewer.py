@@ -140,10 +140,17 @@ class ViewerReport:
         ``1_000_000_000`` = billions. Multiplying a display value by this
         factor yields the raw amount in dollars (or the reporting currency).
 
-        Derived from the XBRL ``decimals`` attribute on monetary facts mapped
-        to this statement's role in the presentation linkbase (GH #807). The
-        R*.htm header text-match value on ``concept_report.currency_scaling``
-        is used as a fallback when XBRL is unavailable.
+        This is the scale the R*.htm page itself declares under its title
+        (``$ in Millions``, ``₨ in Millions``; no statement means whole
+        units), because that is the scale the displayed numbers are in. The
+        page is the only reliable source: XBRL ``decimals`` states rounding,
+        not display scale, and a page can show ``decimals=-5`` facts in
+        millions or ``decimals=-3`` facts in whole dollars.
+
+        Only when the report has no title cell to read (a ConceptReport built
+        without one) is the scale inferred from the XBRL ``decimals`` of the
+        statement's monetary facts (GH #807), with the ConceptReport's own
+        value as the last fallback.
         """
         # ConceptReport is falsy when rows is empty (it defines __len__), so we
         # must distinguish "no concept report" from "empty rows" via ``is None``.
@@ -151,7 +158,9 @@ class ViewerReport:
             return 1
         if not self._scaling_resolved:
             self._scaling_resolved = True
-            if self._viewer is not None:
+            if self._concept_report.header_found:
+                self._scaling = self._concept_report.currency_scaling
+            elif self._viewer is not None:
                 self._scaling = self._viewer._resolve_currency_scaling(
                     self._concept_report, self._report.role
                 )
@@ -338,7 +347,7 @@ class FilingViewer:
         """Validate calculation trees sum correctly."""
         return self.concepts.validate(tolerance=tolerance)
 
-    def compare(self, xbrl, tolerance: float = 1.0):
+    def compare(self, xbrl, tolerance: Optional[float] = None):
         """
         Compare viewer values against XBRL parser output.
 
@@ -348,14 +357,36 @@ class FilingViewer:
 
         Args:
             xbrl: XBRL object from filing.xbrl()
-            tolerance: Maximum allowed difference in display units
-                       (default 1.0 = ±$1M for filings in millions)
+            tolerance: Maximum allowed difference in display units. None
+                       (the default) allows half a unit in the last digit
+                       each cell displays.
 
         Returns:
             ComparisonResults with match rate, mismatches, and to_dataframe()
         """
         from edgar.xbrl.viewer_validation import compare_viewer_to_xbrl
         return compare_viewer_to_xbrl(self, xbrl, tolerance=tolerance)
+
+    def compare_statements(self, xbrl, tolerance: Optional[float] = None):
+        """
+        Compare the library's statements with these statement pages, row by row and cell by cell.
+
+        Runs ``compare()`` once (available as ``.facts`` on the result) and
+        compares the statements a user gets (``xbrl.statements.balance_sheet()``
+        and the other typed getters, else the statement by role) with each
+        page: rows, labels, order, and each cell's value and sign in
+        ``Statement.to_dataframe()`` and in the rendered table.
+
+        Args:
+            xbrl: XBRL object from filing.xbrl()
+            tolerance: passed to ``compare()``
+
+        Returns:
+            StatementFidelityResults with ``value_rate(surface)``,
+            ``coverage(surface)``, ``counts()`` and ``to_dataframe()``
+        """
+        from edgar.xbrl.statement_fidelity import compare_statements_to_viewer
+        return compare_statements_to_viewer(self, xbrl, tolerance=tolerance)
 
     def compare_context(self, xbrl, statement: str = 'balance_sheet') -> str:
         """
@@ -616,14 +647,14 @@ class FilingViewer:
         return self._xbrl
 
     def _resolve_currency_scaling(self, cr: ConceptReport, role: Optional[str]) -> int:
-        """Resolve a report's currency-scale multiplier from XBRL decimals (GH #807).
+        """Infer a report's currency-scale multiplier from XBRL decimals (GH #807).
 
-        Mirrors the GH #799 pattern for level enrichment: XBRL is the canonical
-        source. The ``decimals`` attribute on each monetary fact is filer-mandated
-        and uniform (``-6`` → millions, ``-3`` → thousands, ``0`` → units), unlike
-        the R*.htm ``<th class='tl'>`` header which only matches Apple-style
-        ``$ in Millions`` formatting and silently misses common variations
-        (``In Millions``, ``USD ($) in Millions``, ``(in millions)``, …).
+        Used only for a ConceptReport that has no title cell, so no declared
+        scale (see ``ViewerReport.currency_scaling``). ``decimals`` states a
+        fact's rounding, not the page's display scale, so this is an estimate:
+        Spirit AeroSystems 0001628280-20-002543 files ``decimals=-5`` facts on a
+        page shown in millions, and IREN 0001878848-25-000063 files
+        ``decimals=-3`` facts on a page shown in whole dollars.
 
         Falls back to ``cr.currency_scaling`` (the R*.htm header match value)
         when no XBRL is available, when the role is missing from the presentation

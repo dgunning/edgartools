@@ -10,16 +10,20 @@ The latest 6-K 0001046179-26-000728 is a monthly notice, not this release.
 """
 import inspect
 import json
-from datetime import date
+from datetime import date, timedelta
 from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
 import pytest
-from bs4 import BeautifulSoup
+from lxml import html
 
-from edgar._html_financials import _extract_6k_income_statement
-from edgar.earnings import RowType, Scale
+from edgar import QuarterlyIncome
+from edgar._html_financials import (
+    _extract_6k_income_statement,
+    _quarter_column_positions,
+)
+from edgar.earnings import FinancialTable, RowType, Scale
 from edgar.entity import Company
 from edgar.financials import Financials
 from edgar.xbrl import XBRL
@@ -44,12 +48,24 @@ class Attachment:
 
 
 class Filings(list):
-    def head(self, count):
-        return self[:count]
+    def latest(self, count=1):
+        recent = sorted(self, key=lambda f: f.filing_date, reverse=True)[:count]
+        return recent[0] if len(recent) == 1 else recent or None
 
 
-def filing(accession, attachments):
-    return SimpleNamespace(form='6-K', accession_no=accession, filing_date=date(2026, 10, 22),
+class SearchDate(date):
+    @classmethod
+    def today(cls):
+        return cls(2026, 11, 3)
+
+
+@pytest.fixture(autouse=True)
+def stable_search_date(monkeypatch):
+    monkeypatch.setattr('edgar._html_financials.date', SearchDate)
+
+
+def filing(accession, attachments, filed=date(2026, 10, 22)):
+    return SimpleNamespace(form='6-K', accession_no=accession, filing_date=filed,
                            attachments=attachments)
 
 
@@ -67,11 +83,11 @@ def company(filings):
 @pytest.fixture
 def release():
     # Discover the exhibit through the actual primary document's links.
-    primary = BeautifulSoup((FIXTURES / 'tsm-20261015x6k.htm').read_text(), 'lxml')
-    links = {a['href'] for a in primary.select('a[href]')}
+    primary = html.fromstring((FIXTURES / 'tsm-20261015x6k.htm').read_bytes())
+    links = set(primary.xpath('//a/@href'))
     exhibit = 'a3q26e_withguidancexfinal.htm'
     assert exhibit in links
-    return filing(EARNINGS, [Attachment(exhibit, (FIXTURES / exhibit).read_text())])
+    return filing(EARNINGS, [Attachment(exhibit, (FIXTURES / exhibit).read_text())], date(2026, 10, 15))
 
 
 @pytest.fixture
@@ -88,11 +104,10 @@ def no_xbrl(monkeypatch):
 
 def test_tsm_reported_values_periods_units_and_caveat(release):
     result = _extract_6k_income_statement(release)
-    assert isinstance(result, Financials)
-    assert result.xb is None
+    assert isinstance(result, QuarterlyIncome)
+    assert not isinstance(result, Financials)
     assert result.source_filing.accession_no == EARNINGS
     assert result.currency == 'TWD'
-    assert result.get_currency_symbol() == 'NT$'
     assert result.get_net_income() == 763_064_000_000
     assert result.get_net_income(1) == 706_562_000_000
     assert result.get_net_income(2) == 452_302_000_000
@@ -100,7 +115,7 @@ def test_tsm_reported_values_periods_units_and_caveat(release):
     assert result.get_revenue() == 1_494_243_000_000
     assert result.get_gross_profit() == 992_379_000_000
     assert result.get_operating_income() == 876_445_000_000
-    statement = result.income_statement()
+    statement = result
     assert statement.scale is Scale.MILLIONS
     assert list(statement.dataframe.columns) == ['3Q26\nAmounta', '2Q26\nAmount', '3Q25\nAmount']
     assert statement.dataframe.loc['EPS (NT$)'].tolist() == [29.43, 27.25, 17.44]
@@ -117,14 +132,12 @@ def test_tsm_reported_values_periods_units_and_caveat(release):
         statement.to_facts_dataframe()
     assert any('not been approved by Board of Directors' in note for note in result.notes)
     assert any('25,932 million' in note for note in result.notes)
-    assert 'HTML' in str(result) and 'HTML' in result.to_context()
     assert 'actual USD' not in statement.to_context()
-    assert 'not been approved by Board of Directors' in statement.to_context()
+    assert 'TWD' in statement.to_context()
     assert result.source_url.endswith('a3q26e_withguidancexfinal.htm')
-    assert result.balance_sheet() is None
-    assert result.cash_flow_statement() is None
-    assert result.get_total_assets() is None
-    assert result.get_financial_metrics()['net_income'] == 763_064_000_000
+    assert isinstance(result, FinancialTable)
+    assert not hasattr(result, 'balance_sheet')
+    assert not hasattr(result, 'cash_flow_statement')
 
 
 def test_monthly_notice_is_not_a_quarterly_income_statement(monthly):
@@ -232,7 +245,7 @@ def nvda_statement():
 
 
 def test_html_and_xbrl_share_dataframe_parameters(release):
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     html_params = inspect.signature(type(statement).to_dataframe).parameters
     xbrl_params = inspect.signature(Statement.to_dataframe).parameters
     assert list(html_params) == list(xbrl_params)
@@ -248,7 +261,7 @@ def test_html_and_xbrl_share_dataframe_parameters(release):
     {'standard': False, 'include_standardization': True},
 ])
 def test_real_tsm_and_nvda_share_columns_and_standard_flag(release, nvda_statement, options):
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     html = statement.to_dataframe(**options)
     xbrl = nvda_statement.to_dataframe(**options)
     html_periods = set(statement.periods)
@@ -268,7 +281,7 @@ def test_real_tsm_and_nvda_share_columns_and_standard_flag(release, nvda_stateme
 
 
 def test_html_units_provenance_and_missing_xbrl_metadata(release):
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     frame = statement.to_dataframe(include_unit=True, include_point_in_time=True).set_index('label')
     assert frame['unit'].tolist() == ['twd'] * 5 + ['twdPerShare']
     assert frame['point_in_time'].tolist() == [False] * 6
@@ -293,7 +306,7 @@ def test_html_units_provenance_and_missing_xbrl_metadata(release):
 
 
 def test_period_filter_selects_reported_comparative_column_without_mutation(release):
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     original = statement.dataframe.copy(deep=True)
     periods = list(statement.periods)
     frame = statement.to_dataframe(period_filter='3Q25\nAmount', include_unit=True).set_index('label')
@@ -309,7 +322,7 @@ def test_period_filter_selects_reported_comparative_column_without_mutation(rele
 
 @pytest.mark.parametrize('value', ['', 'Q3 2025', 'duration_2025-07-01_2025-09-30', 1, True])
 def test_invalid_html_period_filter_is_not_silently_ignored(release, value):
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     with pytest.raises(ValueError, match='period_filter.*reported columns'):
         statement.to_dataframe(period_filter=value)
 
@@ -322,18 +335,15 @@ def test_invalid_html_period_filter_is_not_silently_ignored(release, value):
     ({'matrix': True}, 'matrix=True'),
 ])
 def test_unavailable_xbrl_operations_raise_explicitly(release, options, message):
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     with pytest.raises(NotImplementedError, match=message):
         statement.to_dataframe(**options)
 
 
-def test_html_income_accessor_and_converter_agree_about_views(release):
+def test_html_table_rejects_misspelled_view(release):
     result = _extract_6k_income_statement(release)
-    with pytest.raises(NotImplementedError, match='view.*XBRL dimensions'):
-        result.income_statement(view='summary')
-    for call in (result.income_statement, result.income_statement().to_dataframe):
-        with pytest.raises(ValueError, match='Invalid view'):
-            call(view='misspelled')
+    with pytest.raises(ValueError, match='Invalid view'):
+        result.to_dataframe(view='misspelled')
 
 
 @pytest.mark.parametrize('name', [
@@ -341,13 +351,13 @@ def test_html_income_accessor_and_converter_agree_about_views(release):
     'include_standardization', 'presentation', 'matrix',
 ])
 def test_html_boolean_parameters_reject_non_booleans(release, name):
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     with pytest.raises(ValueError, match=f'{name} must be a boolean'):
         statement.to_dataframe(**{name: 1})
 
 
 def test_html_period_view_type_and_unknown_keywords_raise(release):
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     with pytest.raises(ValueError, match='period_view must be a string'):
         statement.to_dataframe(period_view=1)
     with pytest.raises(TypeError, match='unexpected keyword argument.*include_unt'):
@@ -356,7 +366,7 @@ def test_html_period_view_type_and_unknown_keywords_raise(release):
 
 def test_explicit_concept_labels_map_but_ambiguous_and_adjusted_labels_do_not(release):
     # In-memory mutations test the inference boundary; SEC fixture bytes stay intact.
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     statement.dataframe.index = [
         'Adjusted revenue', 'Revenue growth', 'Net income attributable to owners of the parent',
         'Unrecognized income', 'Profit (loss)', 'Diluted EPS (NT$)',
@@ -371,7 +381,7 @@ def test_explicit_concept_labels_map_but_ambiguous_and_adjusted_labels_do_not(re
 
 
 def test_row_types_and_explicit_row_currency_determine_units(release):
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     statement.row_types = [RowType.AMOUNT, RowType.SHARES, RowType.PERCENTAGE,
                            RowType.OTHER, RowType.AMOUNT, RowType.PER_SHARE]
     statement.dataframe.index = [*statement.dataframe.index[:-1], 'EPS (US$)']
@@ -383,7 +393,7 @@ def test_row_types_and_explicit_row_currency_determine_units(release):
 
 @pytest.mark.parametrize('label', ['Basic EPS (non-GAAP)', 'Diluted EPS (adjusted)', 'Adjusted diluted EPS (NT$)'])
 def test_adjusted_eps_qualifiers_do_not_become_standard_gaap_eps(release, label):
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     statement.dataframe.index = [*statement.dataframe.index[:-1], label]
     frame = statement.to_dataframe()
     assert pd.isna(frame['standard_concept'].iloc[-1])
@@ -392,8 +402,169 @@ def test_adjusted_eps_qualifiers_do_not_become_standard_gaap_eps(release, label)
 
 @pytest.mark.parametrize('label', ['EPS (NT$ / US$)', 'EPS (GBP)', 'EPS ($)'])
 def test_uncertain_row_currency_stays_null(release, label):
-    statement = _extract_6k_income_statement(release).income_statement()
+    statement = _extract_6k_income_statement(release)
     statement.dataframe.index = [*statement.dataframe.index[:-1], label]
     frame = statement.to_dataframe(include_unit=True)
     assert pd.isna(frame['unit'].iloc[-1])
     assert frame['3Q26\nAmounta'].iloc[-1] == 29.43
+
+
+def test_newest_earnings_wins_even_when_filings_are_unsorted(release, monkeypatch):
+    older = filing('older', [], date(2026, 9, 1))
+    probed = []
+
+    def extract(candidate):
+        probed.append(candidate.accession_no)
+        return Financials(object())
+
+    monkeypatch.setattr(Financials, 'extract', extract)
+    assert Company.get_quarterly_financials(company([older, release]), max_6k_filings=1) is not None
+    assert probed == [EARNINGS]
+
+
+def test_single_filing_return_from_latest_is_supported(release, no_xbrl):
+    c = company([])
+    c.get_filings = lambda **kwargs: SimpleNamespace(latest=lambda n=1: release)
+    assert Company.get_quarterly_financials(c, max_6k_filings=1).get_net_income() == 763_064_000_000
+
+
+@pytest.mark.parametrize('age, expected_probes', [(183, 1), (184, 0), (550, 0), (-1, 0)])
+def test_search_age_boundary_before_any_download(release, monkeypatch, age, expected_probes):
+    release.filing_date = SearchDate.today() - timedelta(days=age)
+    probed = []
+    monkeypatch.setattr(Financials, 'extract', lambda candidate: probed.append(candidate))
+    # No attachments can be inspected for expired/future filings.
+    release.attachments = [] if expected_probes else None
+    assert Company.get_quarterly_financials(company([release])) is None
+    assert len(probed) == expected_probes
+
+
+def test_known_untagged_monthly_notice_is_screened_using_index(release, monthly, monkeypatch):
+    monthly.is_xbrl = False
+    monthly.attachments = []
+    probed = []
+
+    def extract(candidate):
+        probed.append(candidate.accession_no)
+        return None
+
+    monkeypatch.setattr(Financials, 'extract', extract)
+    result = Company.get_quarterly_financials(company([release, monthly]))
+    assert result.get_net_income() == 763_064_000_000
+    assert probed == [EARNINGS]
+
+
+def test_attachment_index_can_skip_monthly_notice_without_loading_submission(release, monkeypatch):
+    class IndexedNotice:
+        form = '6-K'
+        accession_no = MONTHLY
+        filing_date = date(2026, 10, 22)
+        is_xbrl = False
+        homepage = SimpleNamespace(attachments=[])
+
+        @property
+        def attachments(self):
+            raise AssertionError('Monthly notice must not download the full SGML submission')
+
+    probed = []
+    monkeypatch.setattr(Financials, 'extract', lambda candidate: probed.append(candidate.accession_no))
+    result = Company.get_quarterly_financials(company([release, IndexedNotice()]))
+    assert result.get_net_income() == 763_064_000_000
+    assert probed == [EARNINGS]
+
+
+def test_attachment_index_download_error_is_not_swallowed():
+    class UnavailableIndex:
+        accession_no = MONTHLY
+        filing_date = date(2026, 10, 22)
+        is_xbrl = False
+
+        @property
+        def homepage(self):
+            raise ConnectionError('attachment index unavailable')
+
+    with pytest.raises(ConnectionError, match='attachment index unavailable'):
+        Company.get_quarterly_financials(company([UnavailableIndex()]))
+
+
+def test_xbrl_data_files_are_not_screened_out_by_negative_flag(release, monkeypatch):
+    class Index(list):
+        data_files = ['instance.xml']
+
+    release.is_xbrl = '0'
+    release.attachments = Index()
+    expected = Financials(object())
+    monkeypatch.setattr(Financials, 'extract', lambda candidate: expected)
+    assert Company.get_quarterly_financials(company([release])) is expected
+
+
+@pytest.mark.parametrize('flag', [False, True, None])
+def test_earnings_exhibit_still_probes_xbrl_before_html(release, monkeypatch, flag):
+    release.is_xbrl = flag
+    expected = Financials(object())
+    monkeypatch.setattr(Financials, 'extract', lambda candidate: expected)
+    assert Company.get_quarterly_financials(company([release])) is expected
+
+
+@pytest.mark.parametrize('printed', [5000, -5000])
+def test_explicit_losses_have_negative_values_in_every_view(release, printed):
+    original = pd.DataFrame({'3Q26': [10000, printed, printed]},
+                            index=['Revenue', 'Operating loss', 'Net loss'])
+    before = original.copy(deep=True)
+    statement = QuarterlyIncome(
+        source_filing=release, dataframe=original, scale=Scale.MILLIONS, currency='TWD', periods=['3Q26'],
+        row_types=[RowType.AMOUNT] * 3)
+    assert statement.get_operating_income() == -5_000_000_000
+    assert statement.get_net_income() == -5_000_000_000
+    assert statement.dataframe['3Q26'].tolist() == [10000, -5000, -5000]
+    exported = statement.to_dataframe().set_index('label')
+    assert exported.loc['Operating loss', '3Q26'] == -5_000_000_000
+    assert exported.loc['Operating loss', 'standard_concept'] == 'OperatingIncomeLoss'
+    pd.testing.assert_frame_equal(original, before)
+
+
+def test_income_loss_label_does_not_imply_negative_sign(release):
+    table = QuarterlyIncome(pd.DataFrame({'3Q26': [50]}, index=['Net income (loss)']), periods=['3Q26'])
+    assert table.get_net_income() == 50
+
+
+def test_whitespace_normalization_is_shared_by_getters_and_mapping(release):
+    original = release.attachments[0].content
+    release.attachments[0].content = original.replace('Net sales', 'Net&#160;  sales').replace(
+        'Gross profit', 'Gross&#160;  profit')
+    result = _extract_6k_income_statement(release)
+    assert result.get_revenue() == 1_494_243_000_000
+    assert result.get_gross_profit() == 992_379_000_000
+    frame = result.to_dataframe()
+    assert frame['standard_concept'].iloc[:2].tolist() == ['Revenue', 'GrossProfit']
+
+
+@pytest.mark.parametrize('fiscal_end, compact', [('1231', '3Q26'), ('0630', '1Q27')])
+def test_dated_and_compact_headers_for_one_quarter_are_deduplicated(fiscal_end, compact):
+    table = FinancialTable(pd.DataFrame(
+        [[10, 10, 8], [2, 2, 1]], index=['Revenue', 'Net income'],
+        columns=['Three Months Ended September 30, 2026', compact, '2Q26']))
+    assert _quarter_column_positions(table, 2026, fiscal_end) == [0, 2]
+    table.dataframe.iloc[1, 1] = 3
+    assert _quarter_column_positions(table, 2026, fiscal_end) == []
+
+
+def test_mixed_headers_without_fiscal_calendar_are_not_guessed():
+    table = FinancialTable(pd.DataFrame([[10, 10]], columns=[
+        'Three Months Ended September 30, 2026', '3Q26']))
+    assert _quarter_column_positions(table, 2026) == []
+
+
+@pytest.mark.parametrize('fiscal_end', ['', 1231, '1331', '0230', '123'])
+def test_malformed_fiscal_calendar_does_not_abort_search(fiscal_end):
+    table = FinancialTable(pd.DataFrame([[10]], columns=['3Q26']))
+    assert _quarter_column_positions(table, 2026, fiscal_end) == []
+
+
+def test_missing_table_index_is_not_a_search_error(release, monkeypatch):
+    from edgar.earnings import EarningsRelease
+
+    real = EarningsRelease(release.attachments[0]).income_statement
+    real.raw_index = 10000
+    monkeypatch.setattr(EarningsRelease, 'income_statement', property(lambda self: real))
+    assert _extract_6k_income_statement(release) is None

@@ -1,0 +1,664 @@
+{
+ "version": "2.1",
+ "instance": {
+  "drd20220630.htm": {
+   "tag": {
+    "drd_TransactionsWithOwnersOfParentAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Transactions with owners of parent [abstract]"
+       }
+      }
+     },
+     "localname": "TransactionsWithOwnersOfParentAbstract",
+     "nsuri": "http://www.DRDGold.com/20220630",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_ChangesInEquity": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity. [Refer: Equity]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Increase (decrease) in equity",
+        "totalLabel": "Total contributions and distributions"
+       }
+      }
+     },
+     "localname": "ChangesInEquity",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_ChangesInEquityAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Changes in equity [abstract]",
+        "terseLabel": "Contributions and distributions"
+       }
+      }
+     },
+     "localname": "ChangesInEquityAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_ComponentsOfEquityAxis": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the members in the table and the line items or concepts that complete the table."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Components of equity [axis]"
+       }
+      }
+     },
+     "localname": "ComponentsOfEquityAxis",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_ComprehensiveIncome": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of change in equity resulting from transactions and other events, other than those changes resulting from transactions with owners in their capacity as owners."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Comprehensive income",
+        "terseLabel": "Total comprehensive income",
+        "totalLabel": "Total comprehensive income for the year"
+       }
+      }
+     },
+     "localname": "ComprehensiveIncome",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY",
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_ComprehensiveIncomeAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Total comprehensive income [abstract]"
+       }
+      }
+     },
+     "localname": "ComprehensiveIncomeAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_DividendsPaid": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY": {
+       "order": 13.0,
+       "parentTag": "ifrs-full_ChangesInEquity",
+       "weight": -1.0
+      },
+      "http://www.DRDGold.com/role/EQUITYDividendsDetails": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of dividends recognised as distributions to owners."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Dividends recognised as distributions to owners",
+        "negatedLabel": "Dividend on ordinary shares",
+        "terseLabel": "Total dividends",
+        "totalLabel": "Total dividends",
+        "verboseLabel": "Dividends paid"
+       }
+      }
+     },
+     "localname": "DividendsPaid",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY",
+      "http://www.DRDGold.com/role/EQUITYDividendsDetails",
+      "http://www.DRDGold.com/role/SUBSEQUENTEVENTSDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_Equity": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFFINANCIALPOSITION": {
+       "order": 15.0,
+       "parentTag": "ifrs-full_EquityAndLiabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of residual interest in the assets of the entity after deducting all its liabilities."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Equity",
+        "periodEndLabel": "Ending balance",
+        "periodStartLabel": "Beginning balance",
+        "totalLabel": "Equity"
+       }
+      }
+     },
+     "localname": "Equity",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY",
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFFINANCIALPOSITION"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_EquityAttributableToOwnersOfParentMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for equity attributable to the owners of the parent."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Equity attributable to owners of parent [member]"
+       }
+      }
+     },
+     "localname": "EquityAttributableToOwnersOfParentMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_EquityMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for the residual interest in the assets of the entity after deducting all its liabilities. It also represents the standard value for the 'Components of equity' axis if no other member is used."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Equity [member]"
+       }
+      }
+     },
+     "localname": "EquityMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_IncreaseDecreaseThroughAcquisitionOfSubsidiary": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY": {
+       "order": 10.0,
+       "parentTag": "ifrs-full_ChangesInEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from the acquisition of subsidiaries. [Refer: Subsidiaries [member]]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Increase (decrease) through acquisition of subsidiary, equity",
+        "terseLabel": "Equity instruments issued as purchase consideration for the FWGR Acquisition"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseThroughAcquisitionOfSubsidiary",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_IncreaseDecreaseThroughExerciseOfOptions": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY": {
+       "order": 12.0,
+       "parentTag": "ifrs-full_ChangesInEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from the exercise of options."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Increase (decrease) through exercise of options, equity",
+        "terseLabel": "Reallocation of the equity instruments on exercise of the Sibanye-Stillwater option"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseThroughExerciseOfOptions",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY": {
+       "order": 15.0,
+       "parentTag": "ifrs-full_ChangesInEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from share-based payment transactions. [Refer: Equity]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Increase Decrease Through Share based Payment Transactions",
+        "negatedLabel": "Equity settled Long-Term Incentive (\"LTI\") scheme",
+        "negatedTerseLabel": "Equity-settled share-based payment",
+        "terseLabel": "Equity settled share-based payment"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseThroughSharebasedPaymentTransactions",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_IncreaseDecreaseThroughTreasuryShareTransactions": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY": {
+       "order": 14.0,
+       "parentTag": "ifrs-full_ChangesInEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from treasury share transactions. [Refer: Equity; Treasury shares]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Increase Decrease Through Treasury Share Transactions",
+        "terseLabel": "Treasury shares disposed of for the vesting of the equitty-settled share-based payment"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseThroughTreasuryShareTransactions",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_IssueOfEquity": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY": {
+       "order": 9.0,
+       "parentTag": "ifrs-full_ChangesInEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The increase in equity through the issue of equity instruments."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Issue Of Equity",
+        "terseLabel": "Issue of ordinary shares"
+       }
+      }
+     },
+     "localname": "IssueOfEquity",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_IssuedCapitalMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing issued capital."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Issued capital [member]",
+        "terseLabel": "Share capital [member]",
+        "verboseLabel": "Stated share capital [member]"
+       }
+      }
+     },
+     "localname": "IssuedCapitalMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_OtherComprehensiveIncome": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 17.0,
+       "parentTag": "ifrs-full_ComprehensiveIncome",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of income and expense (including reclassification adjustments) that is not recognised in profit or loss as required or permitted by IFRSs. [Refer: IFRSs [member]]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive income",
+        "terseLabel": "Other comprehensive income",
+        "totalLabel": "Total other comprehensive income for the year"
+       }
+      }
+     },
+     "localname": "OtherComprehensiveIncome",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY",
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_OtherReservesMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing reserves within equity, not including retained earnings. It also represents the standard value for the 'Reserves within equity' axis if no other member is used. [Refer: Retained earnings]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Other reserves [member]",
+        "terseLabel": "Other reserves [member]"
+       }
+      }
+     },
+     "localname": "OtherReservesMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_ProfitLoss": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CASHGENERATEDFROMOPERATIONSDetails": {
+       "order": 1.0,
+       "parentTag": "ifrs-full_CashFlowsFromUsedInOperationsBeforeChangesInWorkingCapital",
+       "weight": 1.0
+      },
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME": {
+       "order": 11.0,
+       "parentTag": "ifrs-full_ComprehensiveIncome",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The total of income less expenses from continuing and discontinued operations, excluding the components of other comprehensive income. [Refer: Other comprehensive income]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Profit (loss)",
+        "terseLabel": "Profit for the year",
+        "totalLabel": "Profit for the year",
+        "verboseLabel": "Basic Earnings",
+        "zeroTerseLabel": "Profit (loss) after tax"
+       }
+      }
+     },
+     "localname": "ProfitLoss",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CASHGENERATEDFROMOPERATIONSDetails",
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY",
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFPROFITORLOSSANDOTHERCOMPREHENSIVEINCOME",
+      "http://www.DRDGold.com/role/EARNINGSPERSHAREDetails",
+      "http://www.DRDGold.com/role/OPERATINGSEGMENTSDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_RetainedEarningsMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing an entity's cumulative undistributed earnings or deficit."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Retained earnings [member]",
+        "terseLabel": "Retained earnings [member]"
+       }
+      }
+     },
+     "localname": "RetainedEarningsMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_ShareIssueRelatedCost": {
+     "calculation": {
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY": {
+       "order": 11.0,
+       "parentTag": "ifrs-full_ChangesInEquity",
+       "weight": -1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of cost related to the issuance of shares."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Share issue related cost",
+        "negatedLabel": "Share issue expenses",
+        "negatedTerseLabel": "Expenses incurred on issue of ordinary shares"
+       }
+      }
+     },
+     "localname": "ShareIssueRelatedCost",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_StatementOfChangesInEquityAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of changes in equity [abstract]"
+       }
+      }
+     },
+     "localname": "StatementOfChangesInEquityAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_StatementOfChangesInEquityLineItems": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "Line items represent concepts included in a table. These concepts are used to disclose reportable information associated with members defined in one or many axes of the table."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Statement of changes in equity [line items]"
+       }
+      }
+     },
+     "localname": "StatementOfChangesInEquityLineItems",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_StatementOfChangesInEquityTable": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "Schedule disclosing information related to changes in equity."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Statement of changes in equity [table]"
+       }
+      }
+     },
+     "localname": "StatementOfChangesInEquityTable",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2021-03-24/ifrs-full",
+     "presentation": [
+      "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY"
+     ],
+     "xbrltype": "stringItemType"
+    }
+   },
+   "report": {
+    "R4": {
+     "firstAnchor": {
+      "ancestors": [
+       "div",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "drd20220630.htm",
+      "contextRef": "AS_OF_Jun30_2019_Entity_0001023512",
+      "decimals": "-5",
+      "first": true,
+      "lang": "en-US",
+      "name": "ifrs-full:Equity",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "ZAR",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "000400 - Statement - CONSOLIDATED STATEMENT OF CHANGES IN EQUITY",
+     "role": "http://www.DRDGold.com/role/CONSOLIDATEDSTATEMENTOFCHANGESINEQUITY",
+     "shortName": "CONSOLIDATED STATEMENT OF CHANGES IN EQUITY",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "div",
+       "div",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "drd20220630.htm",
+      "contextRef": "AS_OF_Jun30_2019_Entity_0001023512",
+      "decimals": "-5",
+      "first": true,
+      "lang": "en-US",
+      "name": "ifrs-full:Equity",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "ZAR",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

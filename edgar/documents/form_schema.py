@@ -371,6 +371,24 @@ _TEN_Q_SIZE_BANDS = (
 # pattern requires next already rules that out independently.
 _ITEM_SEP = r'(?:\s*\([A-Za-z]\))?\s*[.:;\-–—]?\s*[-–—.]?\s*'
 
+# Between an item's number and its letter: nothing ('Item 16A'), or a period
+# that splits them into two tokens ('Item 16. A. Audit Committee').
+_ITEM_LETTER_SEP = r'(?:\s*\.\s*)?'
+
+
+def _item_no(number: str) -> str:
+    """Regex for a lettered item number ('16A') and the separator after it.
+
+    The letter may be its own token, and the label may be stated twice. Both come
+    from 20-F 0001062993-16-008650 (edgartools-ga4a), whose 16-series matched no
+    pattern at all: it writes 'Item 16. A. Audit Committee Financial Expert', and
+    in two rows its title cell repeats the label of the cell before it, so the row
+    reads 'Item 16.B. Item 16.B. Code of Ethics.' or 'Item 16.H. H. Mine Safety'.
+    """
+    digits, letter = re.fullmatch(r'(\d+)([A-Z])', number).groups()
+    restated = rf'(?:(?:(?:Item|ITEM)\s+)?(?:{digits}{_ITEM_LETTER_SEP})?{letter}\b{_ITEM_SEP})?'
+    return rf'{digits}{_ITEM_LETTER_SEP}{letter}{_ITEM_SEP}{restated}'
+
 # Per-form section/title vocabulary for the regex pattern extractor (moved here
 # from SectionExtractor.SECTION_PATTERNS — FormSchema is the single home of form
 # knowledge, edgartools-llmp.2 / D2). Item-based forms key on "Item N" headers;
@@ -420,16 +438,16 @@ _TEN_K_SECTION_PATTERNS = {
         (f'^(Item|ITEM)\\s+1{_ITEM_SEP}Description\\s+of\\s+Business', 'Item 1 - Business'),
     ),
     'risk_factors': (
-        (f'^(Item|ITEM)\\s+1A{_ITEM_SEP}Risk\\s+Factors', 'Item 1A - Risk Factors'),
+        (f'^(Item|ITEM)\\s+{_item_no("1A")}Risk\\s+Factors', 'Item 1A - Risk Factors'),
         ('^Risk\\s+Factors', 'Risk Factors'),
         ('^Factors\\s+That\\s+May\\s+Affect', 'Risk Factors'),
     ),
     'unresolved_staff_comments': (
-        (f'^(Item|ITEM)\\s+1B{_ITEM_SEP}Unresolved\\s+Staff\\s+Comments', 'Item 1B - Unresolved Staff Comments'),
+        (f'^(Item|ITEM)\\s+{_item_no("1B")}Unresolved\\s+Staff\\s+Comments', 'Item 1B - Unresolved Staff Comments'),
         ('^Unresolved\\s+Staff\\s+Comments', 'Unresolved Staff Comments'),
     ),
     'cybersecurity': (
-        (f'^(Item|ITEM)\\s+1C{_ITEM_SEP}Cybersecurity', 'Item 1C - Cybersecurity'),
+        (f'^(Item|ITEM)\\s+{_item_no("1C")}Cybersecurity', 'Item 1C - Cybersecurity'),
         ('^Cybersecurity\\s+Risk\\s+Management', 'Cybersecurity'),
         ('^Cybersecurity', 'Cybersecurity'),
     ),
@@ -445,7 +463,7 @@ _TEN_K_SECTION_PATTERNS = {
         ('^Litigation', 'Litigation'),
     ),
     'market_risk': (
-        (f'^(Item|ITEM)\\s+7A{_ITEM_SEP}Quantitative.*Disclosures', 'Item 7A - Market Risk'),
+        (f'^(Item|ITEM)\\s+{_item_no("7A")}Quantitative.*Disclosures', 'Item 7A - Market Risk'),
         ('^Market\\s+Risk', 'Market Risk'),
         ('^Quantitative.*Qualitative.*Market\\s+Risk', 'Market Risk'),
     ),
@@ -460,7 +478,7 @@ _TEN_K_SECTION_PATTERNS = {
         ('^Consolidated\\s+Financial\\s+Statements', 'Consolidated Financial Statements'),
     ),
     'controls_procedures': (
-        (f'^(Item|ITEM)\\s+9A{_ITEM_SEP}Controls.*Procedures', 'Item 9A - Controls and Procedures'),
+        (f'^(Item|ITEM)\\s+{_item_no("9A")}Controls.*Procedures', 'Item 9A - Controls and Procedures'),
         ('^Controls.*Procedures', 'Controls and Procedures'),
         ('^Internal\\s+Control', 'Internal Controls'),
     ),
@@ -501,10 +519,10 @@ _TEN_K_SECTION_PATTERNS = {
         (f'^(Item|ITEM)\\s+9{_ITEM_SEP}Changes\\s+in\\s+and\\s+Disagreements', 'Item 9 - Changes in and Disagreements with Accountants'),
     ),
     'part_ii_item_9b': (
-        (f'^(Item|ITEM)\\s+9B{_ITEM_SEP}Other\\s+Information', 'Item 9B - Other Information'),
+        (f'^(Item|ITEM)\\s+{_item_no("9B")}Other\\s+Information', 'Item 9B - Other Information'),
     ),
     'part_ii_item_9c': (
-        (f'^(Item|ITEM)\\s+9C{_ITEM_SEP}Disclosure\\s+Regarding\\s+Foreign', 'Item 9C - Disclosure Regarding Foreign Jurisdictions'),
+        (f'^(Item|ITEM)\\s+{_item_no("9C")}Disclosure\\s+Regarding\\s+Foreign', 'Item 9C - Disclosure Regarding Foreign Jurisdictions'),
     ),
     'part_iv_item_15': (
         (f'^(Item|ITEM)\\s+15{_ITEM_SEP}Exhibits?', 'Item 15 - Exhibits and Financial Statement Schedules'),
@@ -577,7 +595,7 @@ _TEN_Q_SECTION_PATTERNS = {
         ('^Legal\\s+Proceedings', 'Legal Proceedings'),
     ),
     'part_ii_item_1a': (
-        (f'^(Item|ITEM)\\s+1A{_ITEM_SEP}Risk\\s+Factors', 'Item 1A - Risk Factors'),
+        (f'^(Item|ITEM)\\s+{_item_no("1A")}Risk\\s+Factors', 'Item 1A - Risk Factors'),
         ('^Risk\\s+Factors', 'Risk Factors'),
     ),
     'part_ii_item_2': (
@@ -622,7 +640,7 @@ _TWENTY_F_SECTION_PATTERNS = {
         ('^Business\\s+Overview', 'Business Overview'),
     ),
     'item_4a': (
-        (f'^(Item|ITEM)\\s+4A{_ITEM_SEP}Unresolved\\s+Staff', 'Item 4A - Unresolved Staff Comments'),
+        (f'^(Item|ITEM)\\s+{_item_no("4A")}Unresolved\\s+Staff', 'Item 4A - Unresolved Staff Comments'),
         ('^Unresolved\\s+Staff\\s+Comments', 'Unresolved Staff Comments'),
     ),
     'item_5': (
@@ -674,51 +692,51 @@ _TWENTY_F_SECTION_PATTERNS = {
         (f'^(Item|ITEM)\\s+16{_ITEM_SEP}\\[?Reserved\\]?', 'Item 16 - [Reserved]'),
     ),
     'item_16a': (
-        (f'^(Item|ITEM)\\s+16A{_ITEM_SEP}Audit\\s+Committee', 'Item 16A - Audit Committee Financial Expert'),
+        (f'^(Item|ITEM)\\s+{_item_no("16A")}Audit\\s+Committee', 'Item 16A - Audit Committee Financial Expert'),
         ('^Audit\\s+Committee\\s+Financial\\s+Expert', 'Audit Committee Expert'),
     ),
     'item_16b': (
-        (f'^(Item|ITEM)\\s+16B{_ITEM_SEP}Code\\s+of\\s+Ethics', 'Item 16B - Code of Ethics'),
+        (f'^(Item|ITEM)\\s+{_item_no("16B")}Code\\s+of\\s+Ethics', 'Item 16B - Code of Ethics'),
         ('^Code\\s+of\\s+Ethics', 'Code of Ethics'),
     ),
     'item_16c': (
-        (f'^(Item|ITEM)\\s+16C{_ITEM_SEP}Principal\\s+Accountant', 'Item 16C - Principal Accountant Fees and Services'),
+        (f'^(Item|ITEM)\\s+{_item_no("16C")}Principal\\s+Accountant', 'Item 16C - Principal Accountant Fees and Services'),
         ('^Principal\\s+Accountant\\s+Fees', 'Accountant Fees'),
     ),
     'item_16d': (
-        (f'^(Item|ITEM)\\s+16D{_ITEM_SEP}Exemptions.*Audit\\s+Committees', 'Item 16D - Exemptions from the Listing Standards for Audit Committees'),
+        (f'^(Item|ITEM)\\s+{_item_no("16D")}Exemptions.*Audit\\s+Committees', 'Item 16D - Exemptions from the Listing Standards for Audit Committees'),
         ('^Exemptions.*Listing\\s+Standards', 'Audit Committee Exemptions'),
     ),
     'item_16e': (
-        (f'^(Item|ITEM)\\s+16E{_ITEM_SEP}Purchases.*Equity\\s+Securities', 'Item 16E - Purchases of Equity Securities by the Issuer'),
-        ('^Purchases.*Equity\\s+Securities.*Issuer', 'Equity Purchases'),
+        (f'^(Item|ITEM)\\s+{_item_no("16E")}Purchases?.*Equity\\s+Securities', 'Item 16E - Purchases of Equity Securities by the Issuer'),
+        ('^Purchases?.*Equity\\s+Securities.*Issuer', 'Equity Purchases'),
     ),
     'item_16f': (
-        (f'^(Item|ITEM)\\s+16F{_ITEM_SEP}Change.*Certifying\\s+Accountant', "Item 16F - Change in Registrant's Certifying Accountant"),
+        (f'^(Item|ITEM)\\s+{_item_no("16F")}Change.*Certifying\\s+Accountant', "Item 16F - Change in Registrant's Certifying Accountant"),
         ('^Change.*Certifying\\s+Accountant', 'Accountant Change'),
     ),
     'item_16g': (
-        (f'^(Item|ITEM)\\s+16G{_ITEM_SEP}Corporate\\s+Governance', 'Item 16G - Corporate Governance'),
+        (f'^(Item|ITEM)\\s+{_item_no("16G")}Corporate\\s+Governance', 'Item 16G - Corporate Governance'),
         ('^Corporate\\s+Governance', 'Corporate Governance'),
     ),
     'item_16h': (
-        (f'^(Item|ITEM)\\s+16H{_ITEM_SEP}Mine\\s+Safety', 'Item 16H - Mine Safety Disclosure'),
+        (f'^(Item|ITEM)\\s+{_item_no("16H")}Mine\\s+Safety', 'Item 16H - Mine Safety Disclosure'),
         ('^Mine\\s+Safety\\s+Disclosure', 'Mine Safety'),
     ),
     'item_16i': (
-        (f'^(Item|ITEM)\\s+16I{_ITEM_SEP}Disclosure.*Foreign\\s+Jurisdictions', 'Item 16I - Disclosure Regarding Foreign Jurisdictions That Prevent Inspections'),
+        (f'^(Item|ITEM)\\s+{_item_no("16I")}Disclosure.*Foreign\\s+Jurisdictions', 'Item 16I - Disclosure Regarding Foreign Jurisdictions That Prevent Inspections'),
         ('^Disclosure.*Foreign\\s+Jurisdictions.*Inspections', 'Foreign Jurisdiction Disclosure'),
-        (f'^(Item|ITEM)\\s+16I{_ITEM_SEP}$', 'Item 16I'),
+        (f'^(Item|ITEM)\\s+{_item_no("16I")}$', 'Item 16I'),
     ),
     'item_16j': (
-        (f'^(Item|ITEM)\\s+16J{_ITEM_SEP}Insider\\s+Trading', 'Item 16J - Insider Trading Policies'),
+        (f'^(Item|ITEM)\\s+{_item_no("16J")}Insider\\s+Trading', 'Item 16J - Insider Trading Policies'),
         ('^Insider\\s+Trading\\s+Policies', 'Insider Trading Policies'),
-        (f'^(Item|ITEM)\\s+16J{_ITEM_SEP}$', 'Item 16J'),
+        (f'^(Item|ITEM)\\s+{_item_no("16J")}$', 'Item 16J'),
     ),
     'item_16k': (
-        (f'^(Item|ITEM)\\s+16K{_ITEM_SEP}Cybersecurity', 'Item 16K - Cybersecurity'),
+        (f'^(Item|ITEM)\\s+{_item_no("16K")}Cybersecurity', 'Item 16K - Cybersecurity'),
         ('^Cybersecurity', 'Cybersecurity'),
-        (f'^(Item|ITEM)\\s+16K{_ITEM_SEP}$', 'Item 16K'),
+        (f'^(Item|ITEM)\\s+{_item_no("16K")}$', 'Item 16K'),
     ),
     'item_17': (
         (f'^(Item|ITEM)\\s+17{_ITEM_SEP}Financial\\s+Statements', 'Item 17 - Financial Statements'),

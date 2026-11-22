@@ -93,6 +93,7 @@ class Fact(BaseModel):
     footnotes: List[str] = Field(default_factory=list)  # Footnote IDs
     instance_id: Optional[int] = None
     fact_id: Optional[str] = None  # Original XML id attribute
+    is_nil: bool = False  # The filer marked the item xsi:nil
 ```
 
 ### Footnote Model
@@ -205,6 +206,59 @@ for fact, footnote in revenue_footnotes:
     print(f"Revenue fact {fact.fact_id}: {footnote.text}")
 ```
 
+## Footnotes in a Parsed HTML Document
+
+`parse_html()` reads the inline XBRL in a filing's HTML, and its facts carry the same
+`fact_id` and `footnotes` (footnote ids) as the XBRL path. `Document.xbrl_footnotes` maps
+each id to the same `Footnote` model `XBRL.footnotes` uses:
+
+```python
+from edgar import find
+from edgar.documents import parse_html
+
+doc = parse_html(find("0000014272-26-000010").html())   # BMY 10-Q, Q1 2026
+for fact in doc.xbrl_facts:
+    if fact.fact_id == "f-57":
+        print(fact.concept, fact.value, fact.footnotes)
+        # us-gaap:CostOfGoodsAndServicesSold 3421000000 ['fn-1']
+        print(doc.xbrl_footnotes["fn-1"].text)
+        # Excludes amortization of acquired intangible assets
+```
+
+On both paths only fact-footnote relationships (an `ix:relationship` or `footnoteArc` with
+the `fact-footnote` arcrole, or none) attach a footnote. A relationship with any other
+arcrole, such as `fact-explanatoryFact` between two facts, is not an ordinary footnote and
+is not attached; EdgarTools does not yet model those relationships.
+
+### Facts in an Exhibit: Parse the Document Set
+
+The inline documents of one filing form a single Inline XBRL document set, and only one of
+them needs the `ix:header` that defines contexts and units. An exhibit such as an inline
+EX-13 annual report can therefore use contexts that only the primary document defines, and
+`parse_html()` on the exhibit alone returns its facts with `context` and `unit` set to `None`.
+`parse_inline_xbrl_set()` takes every document of the set, keyed by attachment name, and
+resolves each document's facts against all of them:
+
+```python
+from edgar import find
+from edgar.documents import parse_inline_xbrl_set
+
+filing = find("0000051143-25-000015")                    # IBM 10-K, fiscal 2024
+names = ["ibm-20241231.htm", "ibm-20241231_d2.htm"]      # primary document + EX-13
+docs = parse_inline_xbrl_set({name: filing.attachments[name].content for name in names})
+
+exhibit = docs["ibm-20241231_d2.htm"]
+fact = next(f for f in exhibit.xbrl_facts if f.fact_id == "f-204")
+print(fact.concept, fact.value, fact.unit, fact.context["dimensions"])
+# us-gaap:Revenues 29813000000 USD {'srt:ProductOrServiceAxis': 'us-gaap:TechnologyServiceMember'}
+```
+
+Each returned `Document` keeps only its own facts. Nothing is fetched for you, so supply
+every document the facts depend on. An ID defined more than once across the documents is
+ambiguous: references to it resolve to `None` and a warning names the ID and its documents.
+`filing.xbrl()` is not affected by any of this, because it reads the instance SEC extracts
+from the whole set.
+
 ## XBRL Technical Details
 
 ### Footnote Structure in XBRL
@@ -312,6 +366,14 @@ footnotes = parser.footnotes  # Ready to use!
 ### Fact.fact_id
 - **Type**: `Optional[str]`
 - **Description**: Original `id` attribute from the XML element
+
+### Document.xbrl_footnotes
+- **Type**: `Dict[str, Footnote]`
+- **Description**: Inline XBRL footnotes of a parsed HTML document, keyed by `ix:footnote` id; `{}` when it has none
+
+### XBRLFact.fact_id / XBRLFact.footnotes
+- **Type**: `Optional[str]` / `List[str]`
+- **Description**: An inline fact's filed `id` (`None` when none is filed) and the ids of the footnotes linked to it
 
 ---
 

@@ -1,0 +1,90 @@
+{
+ "accession_no": "0001396440-26-000016",
+ "cik": 1396440,
+ "company": "Main Street Capital CORP",
+ "form": "10-K",
+ "filing_date": "2026-02-27",
+ "period_of_report": "2025-12-31",
+ "fetched": "2026-11-11",
+ "extracted_by": "see README.md in this directory",
+ "facts": [
+  {
+   "concept": "us-gaap:InvestmentOwnedPercentOfNetAssets",
+   "context_ref": "c-42",
+   "value": "1.843",
+   "numeric_value": 1.843,
+   "unit_ref": "number",
+   "decimals": "3",
+   "period_instant": "2025-12-31"
+  },
+  {
+   "concept": "us-gaap:InvestmentOwnedAtFairValue",
+   "context_ref": "c-42",
+   "value": "5518117000",
+   "numeric_value": 5518117000.0,
+   "unit_ref": "usd",
+   "currency": "USD",
+   "decimals": "-3",
+   "period_instant": "2025-12-31"
+  },
+  {
+   "concept": "us-gaap:InvestmentOwnedAtFairValue",
+   "context_ref": "c-42",
+   "value": "5518117000",
+   "numeric_value": 5518117000.0,
+   "unit_ref": "usd",
+   "currency": "USD",
+   "decimals": "-3",
+   "period_instant": "2025-12-31"
+  },
+  {
+   "concept": "us-gaap:InvestmentOwnedPercentOfNetAssets",
+   "context_ref": "c-41",
+   "value": "1.763",
+   "numeric_value": 1.763,
+   "unit_ref": "number",
+   "decimals": "3",
+   "period_instant": "2024-12-31"
+  },
+  {
+   "concept": "us-gaap:InvestmentOwnedAtFairValue",
+   "context_ref": "c-41",
+   "value": "4932669000",
+   "numeric_value": 4932669000.0,
+   "unit_ref": "usd",
+   "currency": "USD",
+   "decimals": "-3",
+   "period_instant": "2024-12-31"
+  },
+  {
+   "concept": "us-gaap:InvestmentOwnedAtFairValue",
+   "context_ref": "c-41",
+   "value": "4932669000",
+   "numeric_value": 4932669000.0,
+   "unit_ref": "usd",
+   "currency": "USD",
+   "decimals": "-3",
+   "period_instant": "2024-12-31"
+  },
+  {
+   "concept": "us-gaap:InvestmentOwnedAtFairValue",
+   "context_ref": "c-42",
+   "value": "5518117000",
+   "numeric_value": 5518117000.0,
+   "unit_ref": "usd",
+   "currency": "USD",
+   "decimals": "-3",
+   "period_instant": "2025-12-31"
+  },
+  {
+   "concept": "us-gaap:InvestmentOwnedAtFairValue",
+   "context_ref": "c-41",
+   "value": "4932669000",
+   "numeric_value": 4932669000.0,
+   "unit_ref": "usd",
+   "currency": "USD",
+   "decimals": "-3",
+   "period_instant": "2024-12-31"
+  }
+ ]
+}

@@ -21,7 +21,16 @@ from rich.text import Text
 from edgar.datatools import apply_declared_schema, empty_declared_frame
 from edgar.entity.dataframe_schema import FACT_QUERY_COLUMNS, PINNED
 from edgar.entity.models import DataQuality, FinancialFact
-from edgar.ttm.calculator import ANNUAL_MAX_DAYS, ANNUAL_MIN_DAYS
+from edgar.ttm.calculator import (
+    ANNUAL_MAX_DAYS,
+    ANNUAL_MIN_DAYS,
+    QUARTER_MAX_DAYS,
+    QUARTER_MIN_DAYS,
+    YTD_6M_MAX_DAYS,
+    YTD_6M_MIN_DAYS,
+    YTD_9M_MAX_DAYS,
+    YTD_9M_MIN_DAYS,
+)
 
 if TYPE_CHECKING:
     from edgar.entity.statement import FinancialStatement
@@ -774,6 +783,8 @@ class FactQuery:
                 'unit': fact.unit,
                 'numeric_value': fact.numeric_value,
                 'period_key': period_label,
+                'period_length': self._period_length(fact),
+                'period_start': fact.period_start if fact.period_type == 'duration' else None,
                 'period_end': fact.period_end,
                 'fiscal_period': fact.fiscal_period
             })
@@ -783,6 +794,7 @@ class FactQuery:
         if df.empty:
             return df
 
+        df['period_key'] = self._distinct_period_keys(df)
         df['row_key'] = self._pivot_row_keys(df)
 
         # Pivot table
@@ -793,6 +805,10 @@ class FactQuery:
             aggfunc='first'
         )
         pivot.index.name = 'label'
+        # The unit of each row, where it has one, so the statement can tell a pure
+        # ratio (0.156 = 15.6%) from a dollar amount labelled 'margin' (GH #1850).
+        row_units = df.groupby('row_key')['unit'].agg(lambda u: u.iloc[0] if (u == u.iloc[0]).all() else None)
+        pivot.attrs['units'] = {k: v for k, v in row_units.items() if v}
 
         # Sort columns by period (newest first)
         # Create a mapping of column names to sort keys
@@ -818,26 +834,11 @@ class FactQuery:
                               reverse=True)
         pivot = pivot[sorted_columns]
 
-        # Check for period consistency based on ACTUAL displayed periods, not all facts
-        displayed_period_types = set()
-        for col in pivot.columns:
-            if 'FY' in col:
-                displayed_period_types.add('12M')
-            elif any(q in col for q in ['Q1', 'Q2', 'Q3', 'Q4']):
-                displayed_period_types.add('3M')
-            elif '9M' in col:
-                displayed_period_types.add('9M')
-            elif '6M' in col:
-                displayed_period_types.add('6M')
-            else:
-                # Try to infer from the fiscal_period in the original data
-                matching_rows = df[df['period_key'] == col]
-                if not matching_rows.empty:
-                    fp = matching_rows.iloc[0]['fiscal_period']
-                    if fp == 'FY':
-                        displayed_period_types.add('12M')
-                    elif fp in ['Q1', 'Q2', 'Q3', 'Q4']:
-                        displayed_period_types.add('3M')
+        # Check for period consistency based on ACTUAL displayed periods, not all facts.
+        # The length comes from the fact's own dates, not from parsing the column label.
+        displayed_period_types = set(
+            df.loc[df['period_key'].isin(pivot.columns), 'period_length'].dropna()
+        )
 
         # Only warn if there are actually mixed period types in the displayed data
         if len(displayed_period_types) > 1:
@@ -868,6 +869,68 @@ class FactQuery:
         else:
             return pivot
 
+    @staticmethod
+    def _period_length(fact: FinancialFact) -> Optional[str]:
+        """The period length of a fact as '3M', '6M', '9M', '12M' or '<n>M'.
+
+        Durations are classified by days with the same ranges the TTM calculator
+        uses, so 13-week quarters and 52/53-week years land in the right bucket.
+        Facts without a start date fall back to their fiscal period.
+        """
+        if fact.period_type == 'duration' and fact.period_start and fact.period_end:
+            days = (fact.period_end - fact.period_start).days
+            if QUARTER_MIN_DAYS <= days <= QUARTER_MAX_DAYS:
+                return '3M'
+            if YTD_6M_MIN_DAYS <= days <= YTD_6M_MAX_DAYS:
+                return '6M'
+            if YTD_9M_MIN_DAYS <= days <= YTD_9M_MAX_DAYS:
+                return '9M'
+            if ANNUAL_MIN_DAYS <= days <= ANNUAL_MAX_DAYS:
+                return '12M'
+            return f"{max(1, round(days / 30.44))}M"
+        if fact.fiscal_period == 'FY':
+            return '12M'
+        if fact.fiscal_period in ('Q1', 'Q2', 'Q3', 'Q4'):
+            return '3M'
+        return None
+
+    @staticmethod
+    def _distinct_period_keys(df: pd.DataFrame) -> pd.Series:
+        """Make sure two different periods of one fact never share a pivot cell.
+
+        A column label is a summary of a period, so two periods can summarise to
+        the same text — instants on two dates of one fiscal year are both
+        'FY <year>', for example. ``pivot_table(aggfunc='first')`` would then keep
+        one value and drop the other with nothing to say which (GH #1851).
+
+        Only facts that would actually share a cell — same concept and unit, same
+        label, different (start, end) — are moved: the label's most common period
+        keeps the plain column and the others get a column qualified with their
+        dates. A balance-sheet instant and an income-statement duration sharing
+        'FY 2024' are different rows, so they keep sharing the column.
+        """
+        def span(row) -> str:
+            end = row['period_end']
+            start = row['period_start']
+            if start is None or pd.isna(start):
+                return f"{end}"
+            return f"{start} to {end}"
+
+        spans = df.apply(span, axis=1)
+        fact_key = [df['concept'].fillna(''), df['unit'].fillna(''), df['period_key']]
+        clash = spans.groupby(fact_key).transform('nunique') > 1
+        if not clash.any():
+            return df['period_key']
+
+        # The most common period behind each label keeps the unqualified column,
+        # counted separately for instants and durations so a year's balance-sheet
+        # date and its income-statement year both stay in 'FY <year>'.
+        instant = df['period_start'].isna()
+        dominant = spans.groupby([df['period_key'], instant]).transform(
+            lambda x: x.value_counts().index[0])
+        move = clash & (spans != dominant)
+        return df['period_key'].mask(move, df['period_key'] + ' (' + spans + ')')
+
     def _format_period_label(self, fact: FinancialFact) -> str:
         """
         Format period label for professional investors.
@@ -891,47 +954,32 @@ class FactQuery:
         end_date = fact.period_end
         year = end_date.year
 
-        # PRIORITY: If the fiscal_period is explicitly "FY", trust it
+        # Classify a duration by its length in days. Counting the calendar months a
+        # period touches mislabels 52/53-week filers: Apple's 13-week quarter from
+        # 2024-12-29 to 2025-03-29 touches four months and was labelled '6M' (GH #1851).
+        length = self._period_length(fact) if fact.period_start and fact.period_type == 'duration' else None
+        if length == '3M':
+            # Standard quarterly period
+            end_month = end_date.month
+            if end_month in [1, 2, 3]:
+                quarter = 'Q1'
+            elif end_month in [4, 5, 6]:
+                quarter = 'Q2'
+            elif end_month in [7, 8, 9]:
+                quarter = 'Q3'
+            else:
+                quarter = 'Q4'
+            return f"{quarter} {year}"
+        elif length == '12M':
+            return f"FY {year}"
+        elif length is not None:
+            # 6M, 9M, or a non-standard length shown in months
+            return f"{length} {year}"
+
+        # Instant facts or no start date: fall back to the fiscal period. A duration's
+        # own dates outrank its 'FY' tag, which a 10-K also puts on its quarters.
         if fact.fiscal_period == 'FY':
             return f"FY {year}"
-
-        # Calculate period length in months if we have start date for duration periods
-        if fact.period_start and fact.period_type == 'duration':
-            # Calculate the number of months in the period
-            months_diff = (fact.period_end.year - fact.period_start.year) * 12
-            months_diff += fact.period_end.month - fact.period_start.month
-            # Add 1 to include both start and end months
-            months_diff += 1
-
-            # Determine period type based on length
-            if months_diff <= 3:
-                # Standard quarterly period (3 months)
-                end_month = end_date.month
-                if end_month in [1, 2, 3]:
-                    quarter = 'Q1'
-                elif end_month in [4, 5, 6]:
-                    quarter = 'Q2'
-                elif end_month in [7, 8, 9]:
-                    quarter = 'Q3'
-                else:
-                    quarter = 'Q4'
-                return f"{quarter} {year}"
-
-            elif months_diff <= 6:
-                # Half-year period
-                return f"6M {year}"
-
-            elif months_diff <= 9:
-                # Year-to-date through Q3 (9 months)
-                return f"9M {year}"
-
-            elif months_diff >= 11:
-                # Full year (allow 11-13 months for fiscal year variations)
-                return f"FY {year}"
-
-            else:
-                # Non-standard period - show actual months
-                return f"{months_diff}M {year}"
 
         # Fallback for instant facts or when no start date - use calendar-based quarters
         if fact.fiscal_period in ['Q1', 'Q2', 'Q3', 'Q4']:

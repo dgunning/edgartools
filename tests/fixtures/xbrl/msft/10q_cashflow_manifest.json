@@ -1,0 +1,68 @@
+{
+  "10q_2026q1": {
+    "accession": "0001193125-26-436133",
+    "cash_flow_role": "http://www.microsoft.com/20260930/taxonomy/role/Role_StatementCASHFLOWSSTATEMENTS",
+    "files": [
+      {
+        "document": "msft-20260930.xsd",
+        "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526436133/msft-20260930.xsd",
+        "original_bytes": 1500127,
+        "original_sha256": "8e0e9c9c97cc16d4f0fd225d5e8b6a20b39b3090b626d7bcd728814d2364215a",
+        "trimmed_bytes": 172109,
+        "trimmed_sha256": "720abdd75004433b12536d0beafb73f581828e2a26f30c57e1f1de8162d5763b"
+      },
+      {
+        "document": "msft-20260930_htm.xml",
+        "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526436133/msft-20260930_htm.xml",
+        "original_bytes": 7251916,
+        "original_sha256": "12c4dc9e8b1f6859dba65b3d0c4610dfdad224f249f2fd152505380b87bac761",
+        "trimmed_bytes": 29346,
+        "trimmed_sha256": "c88c4b7b864c3c1cb59c77f3c43eafa45f9ac25339aaaa14ab28e8831c0b6fa4"
+      }
+    ]
+  },
+  "10q_2025q2": {
+    "accession": "0001193125-26-027207",
+    "cash_flow_role": "http://www.microsoft.com/20251231/taxonomy/role/Role_StatementCASHFLOWSSTATEMENTS",
+    "files": [
+      {
+        "document": "msft-20251231.xsd",
+        "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526027207/msft-20251231.xsd",
+        "original_bytes": 1488682,
+        "original_sha256": "2e71225f5d0f1d897d234ce32a9146ecbab7e01582bf12f2bb9bf94fae07388e",
+        "trimmed_bytes": 171796,
+        "trimmed_sha256": "21151401197d5347d9d3e124d90d52316ccabac2a988a5db72611842efbb0cdc"
+      },
+      {
+        "document": "msft-20251231_htm.xml",
+        "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312526027207/msft-20251231_htm.xml",
+        "original_bytes": 9346789,
+        "original_sha256": "a3529d66dee33e0f71e459c66c6be05569b0d6e887df2d3d021123933e1e31b7",
+        "trimmed_bytes": 50161,
+        "trimmed_sha256": "9a87ebe2e9a70570ec22b48c5e5f20cae1f6247e659a12057b630c3558640223"
+      }
+    ]
+  },
+  "10q_2025q1": {
+    "accession": "0001193125-25-256321",
+    "cash_flow_role": "http://www.microsoft.com/20250930/taxonomy/role/Role_StatementCASHFLOWSSTATEMENTS",
+    "files": [
+      {
+        "document": "msft-20250930.xsd",
+        "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312525256321/msft-20250930.xsd",
+        "original_bytes": 1492189,
+        "original_sha256": "98d537e39e3ea20da5541c468e986d5c984e1f518dcc00bbed4dcb01d6b6ccc1",
+        "trimmed_bytes": 172659,
+        "trimmed_sha256": "af0bc8f0ca8ea4b084dcfee0a7abb8fb3a36e1571f072dfb4e9105c05ded95ac"
+      },
+      {
+        "document": "msft-20250930_htm.xml",
+        "url": "https://www.sec.gov/Archives/edgar/data/789019/000119312525256321/msft-20250930_htm.xml",
+        "original_bytes": 7440319,
+        "original_sha256": "2ca8a57a5cf0d9b2c3d5ec66a97a5d94d929368fd844959bdebea4e91e18ffaa",
+        "trimmed_bytes": 29908,
+        "trimmed_sha256": "6fa9ebf12a4313464ccb85d219426a4aec32fb81d8b0314fa60bce8742f85d5f"
+      }
+    ]
+  }
+}

@@ -4933,6 +4933,30 @@
     "first_year": 2015,
     "last_year": 2025
   },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectContinuingOperations": {
+    "standard_tags": [
+      "NetChangeInCashContinuingOpsExFX"
+    ],
+    "display_name": "Net Change in Cash, Continuing Operations, Excluding FX Effect",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 2,
+    "comment": "Increase (decrease) in cash, cash equivalents, restricted cash and restricted cash equivalents, excluding the effect of exchange rate changes, attributable to continuing operations. A component of the period's change in cash, not the whole: it is never the entity's total change in cash (NetChangeInCash), even when no discontinued-operations row is reported."
+  },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations": {
+    "standard_tags": [
+      "NetChangeInCashDiscontinuedOpsExFX"
+    ],
+    "display_name": "Net Change in Cash, Discontinued Operations, Excluding FX Effect",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 4,
+    "comment": "Increase (decrease) in cash, cash equivalents, restricted cash and restricted cash equivalents, excluding the effect of exchange rate changes, attributable to discontinued operations, as FASB defines the element (2025 and 2026 taxonomies). A component of the period's change in cash, not the whole (NetChangeInCash). Some filers use it for a held-for-sale disposal group that is not a discontinued operation; check the filed caption."
+  },
   "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffect": {
     "standard_tags": [
       "NetChangeInCash"
@@ -4948,6 +4972,30 @@
     "years_present": 12,
     "first_year": 2012,
     "last_year": 2025
+  },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations": {
+    "standard_tags": [
+      "NetChangeInCashContinuingOps"
+    ],
+    "display_name": "Net Change in Cash, Continuing Operations, Including FX Effect",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 22,
+    "comment": "Increase (decrease) in cash, cash equivalents, restricted cash and restricted cash equivalents, including the effect of exchange rate changes, attributable to continuing operations. A component of the period's change in cash, not the whole: it is never the entity's total change in cash (NetChangeInCash), even when no discontinued-operations row is reported."
+  },
+  "CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations": {
+    "standard_tags": [
+      "NetChangeInCashDiscontinuedOps"
+    ],
+    "display_name": "Net Change in Cash, Discontinued Operations, Including FX Effect",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 15,
+    "comment": "Increase (decrease) in cash, cash equivalents, restricted cash and restricted cash equivalents, including the effect of exchange rate changes, attributable to discontinued operations, as FASB defines the element (2025 and 2026 taxonomies). A component of the period's change in cash, not the whole (NetChangeInCash). Some filers use it for a held-for-sale disposal group that is not a discontinued operation; check the filed caption."
   },
   "CashDivestedFromDeconsolidation": {
     "standard_tags": [
@@ -7892,6 +7940,66 @@
     "years_present": 2,
     "first_year": 2023,
     "last_year": 2024
+  },
+  "CryptoAssetFairValue": {
+    "standard_tags": [
+      "CryptoAssets"
+    ],
+    "display_name": "Crypto Assets",
+    "statement": "BalanceSheet",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 122,
+    "comment": "Fair value of crypto assets (ASC 350-60) with no current or noncurrent classification; when a filer reports both, this is their total. Excludes crypto assets held for platform users."
+  },
+  "CryptoAssetFairValueCurrent": {
+    "standard_tags": [
+      "CryptoAssetsCurrent"
+    ],
+    "display_name": "Crypto Assets, Current",
+    "statement": "BalanceSheet",
+    "section": "Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 53,
+    "comment": "Fair value of crypto assets (ASC 350-60) classified as current. Excludes crypto assets held for platform users."
+  },
+  "CryptoAssetFairValueNoncurrent": {
+    "standard_tags": [
+      "CryptoAssetsNoncurrent"
+    ],
+    "display_name": "Crypto Assets, Noncurrent",
+    "statement": "BalanceSheet",
+    "section": "Non-Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 54,
+    "comment": "Fair value of crypto assets (ASC 350-60) classified as noncurrent. Excludes crypto assets held for platform users."
+  },
+  "CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating": {
+    "standard_tags": [
+      "CryptoGainLoss"
+    ],
+    "display_name": "Crypto Assets, Realized and Unrealized Gain (Loss)",
+    "statement": "IncomeStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 7,
+    "comment": "Realized and unrealized gain (loss) from remeasuring crypto assets, operating and nonoperating combined. Excludes crypto assets held for platform users."
+  },
+  "CryptoAssetUnrealizedGainLossOperatingAndNonoperating": {
+    "standard_tags": [
+      "CryptoUnrealizedGainLoss"
+    ],
+    "display_name": "Crypto Assets, Unrealized Gain (Loss)",
+    "statement": "IncomeStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 5,
+    "comment": "Unrealized gain (loss) from remeasuring crypto assets to fair value, operating and nonoperating combined; realized gains are not included. Excludes crypto assets held for platform users."
   },
   "CurrentAssets": {
     "standard_tags": [
@@ -14281,7 +14389,8 @@
   },
   "DividendsPreferredStock": {
     "standard_tags": [
-      "PreferredDividendExpense"
+      "PreferredDividendExpense",
+      "DividendsEquity"
     ],
     "display_name": "Preferred Dividends",
     "statement": "IncomeStatement",
@@ -14293,7 +14402,8 @@
     "temporal_consistency": 0.5,
     "years_present": 6,
     "first_year": 2020,
-    "last_year": 2025
+    "last_year": 2025,
+    "ambiguous": true
   },
   "DividendsPreferredStockCash": {
     "standard_tags": [
@@ -14329,11 +14439,12 @@
   },
   "DividendsReceivable": {
     "standard_tags": [
+      "OtherNonOperatingCurrentAssets",
       "OtherNonOperatingNonCurrentAssets"
     ],
-    "display_name": "Other Non-Operating Non-Current Assets",
+    "display_name": "Other Non-Operating Current Assets",
     "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
+    "section": "Current Assets",
     "is_total": false,
     "confidence": 0.5,
     "company_count": 39,
@@ -14341,7 +14452,8 @@
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025
+    "last_year": 2025,
+    "ambiguous": true
   },
   "DividendsRecognisedAsDistributionsToOwnersOfParentPerShare": {
     "standard_tags": [
@@ -14877,70 +14989,6 @@
     "years_present": 9,
     "first_year": 2012,
     "last_year": 2025
-  },
-  "EffectiveIncomeTaxRateReconciliationFdiiAmount": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "EffectiveIncomeTaxRateReconciliationGiltiAmount": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "EffectiveIncomeTaxRateReconciliationTaxCutsAndJobsActOf2017Amount": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "EffectiveIncomeTaxRateReconciliationTaxCutsAndJobsActOf2017TransitionTaxOnAccumulatedForeignEarningsAmount": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2021,
-    "last_year": 2021
   },
   "ElectricBundledRevenue": {
     "standard_tags": [
@@ -16678,21 +16726,17 @@
     "first_year": 2021,
     "last_year": 2025
   },
-  "FinanceLeaseRightOfUseAssetBeforeAccumulatedAmortization": {
+  "FinancialAssetPurchasedUnderAgreementToResell": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "ResaleAgreementAssets"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Assets Purchased Under Agreements to Resell",
     "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 18,
-    "occurrence_rate": 0.002,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
+    "section": "Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 0,
+    "comment": "Financial assets purchased under agreements to resell, the asset side; the newer, wider element beside SecuritiesPurchasedUnderAgreementsToResell. Not repurchase obligations, and not the combined federal funds sold and resale measure. No CY2025 frame exists for it, so its count is 0 here; that is not evidence nobody files it. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
   },
   "FinancialInstrumentsOwnedPrincipalInvestmentsAtFairValue": {
     "standard_tags": [
@@ -19018,19 +19062,15 @@
   },
   "GrossInvestmentIncomeOperating": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "Revenue"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Revenue",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": "Revenue",
     "is_total": true,
-    "confidence": 0.31,
-    "company_count": 150,
-    "occurrence_rate": 0.017,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
+    "confidence": 0.9,
+    "company_count": 203,
+    "comment": "Total investment income of an investment company (BDC, closed-end fund): interest, dividends and fees earned on the portfolio, before expenses; its statement of operations' top line. An insurer can file it for gross investment income, which then sits inside Revenues and NetInvestmentIncome."
   },
   "GrossProfit": {
     "standard_tags": [
@@ -19500,7 +19540,8 @@
   },
   "ImpairmentOfInvestments": {
     "standard_tags": [
-      "ImpairmentChargesCF"
+      "ImpairmentChargesCF",
+      "AssetImpairmentChargesIS"
     ],
     "display_name": "Impairment Charges (CF)",
     "statement": "CashFlowStatement",
@@ -19512,7 +19553,8 @@
     "temporal_consistency": 0.417,
     "years_present": 5,
     "first_year": 2021,
-    "last_year": 2025
+    "last_year": 2025,
+    "ambiguous": true
   },
   "ImpairmentOfLeasehold": {
     "standard_tags": [
@@ -20058,6 +20100,78 @@
     "first_year": 2017,
     "last_year": 2025
   },
+  "IncomeTaxPaidFederalAfterRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidFederal"
+    ],
+    "display_name": "Income Taxes Paid, Federal, Net of Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 277,
+    "comment": "Cash paid for income taxes to the federal or national tax jurisdiction (not only the United States), after refunds received; negative when refunds exceed payments. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
+  "IncomeTaxPaidFederalBeforeRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidFederalGross"
+    ],
+    "display_name": "Income Taxes Paid, Federal, Before Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 9,
+    "comment": "Cash paid for income taxes to the federal or national tax jurisdiction (not only the United States), before refunds received. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
+  "IncomeTaxPaidForeignAfterRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidForeign"
+    ],
+    "display_name": "Income Taxes Paid, Foreign, Net of Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 127,
+    "comment": "Cash paid for income taxes to foreign tax jurisdictions, after refunds received; negative when refunds exceed payments. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
+  "IncomeTaxPaidForeignBeforeRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidForeignGross"
+    ],
+    "display_name": "Income Taxes Paid, Foreign, Before Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 5,
+    "comment": "Cash paid for income taxes to foreign tax jurisdictions, before refunds received. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
+  "IncomeTaxPaidStateAndLocalAfterRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidStateLocal"
+    ],
+    "display_name": "Income Taxes Paid, State and Local, Net of Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 200,
+    "comment": "Cash paid for income taxes to state and local tax jurisdictions, after refunds received; negative when refunds exceed payments. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
+  "IncomeTaxPaidStateAndLocalBeforeRefundReceived": {
+    "standard_tags": [
+      "IncomeTaxesPaidStateLocalGross"
+    ],
+    "display_name": "Income Taxes Paid, State and Local, Before Refunds",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 6,
+    "comment": "Cash paid for income taxes to state and local tax jurisdictions, before refunds received. A component of total cash income taxes paid, not income tax expense; jurisdiction details on IncomeTaxAuthorityAxis are already inside this amount."
+  },
   "IncomeTaxReceivable": {
     "standard_tags": [
       "IncomeTaxReceivable"
@@ -20073,710 +20187,6 @@
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025
-  },
-  "IncomeTaxReconciliationChangeInDeferredTaxAssetsValuationAllowance": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationChangeInEnactedTaxRate": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDeductions": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDeductionsDividends": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDeductionsExtraterritorialIncomeExclusion": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDeductionsOther": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDeductionsQualifiedProductionActivities": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationDispositionOfAssets": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.25,
-    "years_present": 3,
-    "first_year": 2020,
-    "last_year": 2022
-  },
-  "IncomeTaxReconciliationDispositionOfBusiness": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationEquityInEarningsLossesOfUnconsolidatedSubsidiary": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.167,
-    "years_present": 2,
-    "first_year": 2020,
-    "last_year": 2021
-  },
-  "IncomeTaxReconciliationForeignIncomeTaxRateDifferential": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationIncomeTaxExpenseBenefitAtFederalStatutoryIncomeTaxRate": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationMinorityInterestIncomeExpense": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpense": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseAmortization": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseDepletion": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseImpairmentLosses": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseMealsAndEntertainment": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseOther": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseResearchAndDevelopment": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseRestructuringCharges": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationNondeductibleExpenseShareBasedCompensationCost": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2024,
-    "last_year": 2024
-  },
-  "IncomeTaxReconciliationOtherAdjustments": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationOtherReconcilingItems": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.167,
-    "years_present": 2,
-    "first_year": 2023,
-    "last_year": 2024
-  },
-  "IncomeTaxReconciliationPriorYearIncomeTaxes": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationRepatriationOfForeignEarnings": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationRepatriationOfForeignEarningsJobsCreationActOf2004": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationStateAndLocalIncomeTaxes": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxContingencies": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2021,
-    "last_year": 2021
-  },
-  "IncomeTaxReconciliationTaxContingenciesDomestic": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxContingenciesForeign": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxContingenciesOther": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxContingenciesStateAndLocal": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxCredits": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxCreditsForeign": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxCreditsInvestment": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxCreditsOther": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2023,
-    "last_year": 2023
-  },
-  "IncomeTaxReconciliationTaxCreditsResearch": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 2,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.25,
-    "years_present": 3,
-    "first_year": 2021,
-    "last_year": 2024
-  },
-  "IncomeTaxReconciliationTaxExemptIncome": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxHolidays": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxSettlements": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.5,
-    "company_count": 1,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.083,
-    "years_present": 1,
-    "first_year": 2022,
-    "last_year": 2022
-  },
-  "IncomeTaxReconciliationTaxSettlementsDomestic": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": true,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxSettlementsForeign": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
-  },
-  "IncomeTaxReconciliationTaxSettlementsStateAndLocal": {
-    "standard_tags": [
-      "IncomeTaxes"
-    ],
-    "display_name": "Income Tax Expense",
-    "statement": "IncomeStatement",
-    "section": "Income Tax",
-    "is_total": false,
-    "confidence": 0.4,
-    "company_count": 0,
-    "occurrence_rate": 0.0,
-    "temporal_consistency": 0.0,
-    "years_present": 0,
-    "first_year": null,
-    "last_year": null
   },
   "IncomeTaxesReceivable": {
     "standard_tags": [
@@ -22620,13 +22030,13 @@
   },
   "InterestExpenseOnLeaseLiabilities": {
     "standard_tags": [
-      "OperatingLeaseExpense"
+      "InterestExpense"
     ],
-    "display_name": "Operating Lease Expense",
+    "display_name": "Interest Expense",
     "statement": "IncomeStatement",
-    "section": "Operating Expenses",
+    "section": "Non-Operating Items",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 39,
     "occurrence_rate": 0.004,
     "temporal_consistency": 0.417,
@@ -22841,6 +22251,18 @@
     "years_present": 1,
     "first_year": 2024,
     "last_year": 2024
+  },
+  "InterestIncomeOperatingPaidInKind": {
+    "standard_tags": [
+      "InterestIncomePaidInKind"
+    ],
+    "display_name": "Interest Income, Paid in Kind",
+    "statement": "IncomeStatement",
+    "section": "Banking Revenue",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 8,
+    "comment": "Operating interest income received in kind (noncash), as reported by BDCs and other investment companies. Not cash interest, and not combined interest-and-dividend PIK income. The frame count understates use: BDCs often report PIK per investment, with dimensions. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
   },
   "InterestIncomeOther": {
     "standard_tags": [
@@ -23762,6 +23184,18 @@
     "first_year": null,
     "last_year": null
   },
+  "InvestmentBankingRevenue": {
+    "standard_tags": [
+      "InvestmentBankingRevenue"
+    ],
+    "display_name": "Investment Banking Revenue",
+    "statement": "IncomeStatement",
+    "section": "Banking Revenue",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 27,
+    "comment": "Advisory and underwriting revenue. A component of a broker-dealer's net revenue, never the entity's total revenue. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "InvestmentInPhysicalCommodities": {
     "standard_tags": [
       "LongtermInvestments"
@@ -23844,19 +23278,15 @@
   },
   "InvestmentIncomeInvestmentExpense": {
     "standard_tags": [
-      "NonoperatingIncomeExpense"
+      "InvestmentExpenses"
     ],
-    "display_name": "Non-Operating Income (Expense)",
+    "display_name": "Investment Expenses",
     "statement": "IncomeStatement",
-    "section": "Non-Operating Items",
+    "section": null,
     "is_total": true,
-    "confidence": 0.312,
-    "company_count": 182,
-    "occurrence_rate": 0.02,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
+    "confidence": 0.9,
+    "company_count": 250,
+    "comment": "Expenses of earning investment income. For a BDC, its total expenses (management and incentive fees, interest, administration) deducted from total investment income; for an insurer, the investment expenses netted inside net investment income. Never nonoperating."
   },
   "InvestmentIncomeNet": {
     "standard_tags": [
@@ -24871,6 +24301,18 @@
     "years_present": 4,
     "first_year": 2021,
     "last_year": 2024
+  },
+  "LiabilityForFuturePolicyBenefits": {
+    "standard_tags": [
+      "FuturePolicyBenefits"
+    ],
+    "display_name": "Liability for Future Policy Benefits",
+    "statement": "BalanceSheet",
+    "section": "Non-Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 51,
+    "comment": "Present value of an insurer's future benefits and related expenses less the present value of future net premiums, before reinsurance. Not a net-of-reinsurance balance, policyholder funds, or claims payable. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
   },
   "LiabilityForUncertainTaxPositionsCurrent": {
     "standard_tags": [
@@ -27400,19 +26842,15 @@
   },
   "NetInvestmentIncome": {
     "standard_tags": [
-      "Revenue"
+      "NetInvestmentIncome"
     ],
-    "display_name": "Revenue",
+    "display_name": "Net Investment Income",
     "statement": "IncomeStatement",
-    "section": "Revenue",
+    "section": null,
     "is_total": true,
-    "confidence": 0.321,
-    "company_count": 308,
-    "occurrence_rate": 0.034,
-    "temporal_consistency": 0.417,
-    "years_present": 5,
-    "first_year": 2021,
-    "last_year": 2025
+    "confidence": 0.9,
+    "company_count": 300,
+    "comment": "Investment income less investment expenses. For a BDC, the result before gains and losses on investments, not its revenue (that is GrossInvestmentIncomeOperating); for an insurer, one line inside Revenues."
   },
   "NetPeriodicDefinedBenefitsExpenseReversalOfExpenseExcludingServiceCostComponent": {
     "standard_tags": [
@@ -31910,6 +31348,18 @@
     "first_year": 2021,
     "last_year": 2025
   },
+  "PaymentForAcquisitionCryptoAsset": {
+    "standard_tags": [
+      "CryptoPurchases"
+    ],
+    "display_name": "Payments to Acquire Crypto Assets",
+    "statement": "CashFlowStatement",
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 28,
+    "comment": "Cash paid to acquire crypto assets. Excludes crypto assets held for platform users."
+  },
   "PaymentOfFinancingAndStockIssuanceCosts": {
     "standard_tags": [
       "PaymentsOfDebtIssuanceCosts"
@@ -33130,6 +32580,18 @@
     "first_year": 2021,
     "last_year": 2024
   },
+  "PolicyholderFunds": {
+    "standard_tags": [
+      "PolicyholderFunds"
+    ],
+    "display_name": "Policyholder Funds",
+    "statement": "BalanceSheet",
+    "section": "Non-Current Liabilities",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 36,
+    "comment": "Amounts due to policyholders, such as unpaid policy dividends, retrospective refunds and undistributed participating earnings. Excludes future policy benefits and claim expense, which are separate liabilities. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "PostconfirmationDeferredIncomeTaxAssetsCurrent": {
     "standard_tags": [
       "DeferredTaxCurrentAssets"
@@ -33854,6 +33316,18 @@
     "first_year": 2015,
     "last_year": 2025
   },
+  "ProceedsFromCryptoAssetOperatingActivity": {
+    "standard_tags": [
+      "CryptoConversionProceeds"
+    ],
+    "display_name": "Proceeds from Conversion of Crypto Consideration",
+    "statement": "CashFlowStatement",
+    "section": "Operating Activities",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 1,
+    "comment": "Cash from the nearly immediate conversion of crypto assets received as noncash consideration in the ordinary course of business (ASC 230-10-45-27A). Excludes crypto assets held for platform users."
+  },
   "ProceedsFromDebtNetOfIssuanceCosts": {
     "standard_tags": [
       "DebtProceeds"
@@ -33869,6 +33343,18 @@
     "years_present": 6,
     "first_year": 2020,
     "last_year": 2025
+  },
+  "ProceedsFromDisposalCryptoAsset": {
+    "standard_tags": [
+      "CryptoSaleProceeds"
+    ],
+    "display_name": "Proceeds from Disposal of Crypto Assets",
+    "statement": "CashFlowStatement",
+    "section": "Investing Activities",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 15,
+    "comment": "Cash received from disposing of crypto assets. Excludes crypto assets held for platform users."
   },
   "ProceedsFromDivestitureOfBusinesses": {
     "standard_tags": [
@@ -33981,6 +33467,42 @@
     "years_present": 5,
     "first_year": 2021,
     "last_year": 2025
+  },
+  "ProceedsFromIncomeTaxRefundFederal": {
+    "standard_tags": [
+      "IncomeTaxRefundsFederal"
+    ],
+    "display_name": "Income Tax Refunds Received, Federal",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 1,
+    "comment": "Cash refunds of income taxes received from the federal or national tax jurisdiction (not only the United States). A component of cash income taxes (gross payments less refunds), not a tax benefit or negative tax expense."
+  },
+  "ProceedsFromIncomeTaxRefundForeign": {
+    "standard_tags": [
+      "IncomeTaxRefundsForeign"
+    ],
+    "display_name": "Income Tax Refunds Received, Foreign",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 1,
+    "comment": "Cash refunds of income taxes received from foreign tax jurisdictions. A component of cash income taxes (gross payments less refunds), not a tax benefit or negative tax expense."
+  },
+  "ProceedsFromIncomeTaxRefundStateAndLocal": {
+    "standard_tags": [
+      "IncomeTaxRefundsStateLocal"
+    ],
+    "display_name": "Income Tax Refunds Received, State and Local",
+    "statement": "CashFlowStatement",
+    "section": null,
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 1,
+    "comment": "Cash refunds of income taxes received from state and local tax jurisdictions. A component of cash income taxes (gross payments less refunds), not a tax benefit or negative tax expense."
   },
   "ProceedsFromInsuranceSettlementInvestingActivities": {
     "standard_tags": [
@@ -35506,13 +35028,13 @@
   },
   "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetAccumulatedDepreciationAndAmortization": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "AccumulatedDepreciation"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Accumulated Depreciation",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": true,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 118,
     "occurrence_rate": 0.013,
     "temporal_consistency": 0.417,
@@ -35538,13 +35060,13 @@
   },
   "PropertyPlantAndEquipmentAndFinanceLeaseRightOfUseAssetBeforeAccumulatedDepreciationAndAmortization": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "GrossPropertyPlantEquipment"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Property, Plant & Equipment, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": true,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 62,
     "occurrence_rate": 0.007,
     "temporal_consistency": 0.417,
@@ -35570,13 +35092,13 @@
   },
   "PropertyPlantAndEquipmentExcludingLessorAssetUnderOperatingLeaseAccumulatedDepreciation": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "AccumulatedDepreciation"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Accumulated Depreciation",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 2,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.333,
@@ -35602,13 +35124,13 @@
   },
   "PropertyPlantAndEquipmentExcludingLessorAssetUnderOperatingLeaseBeforeAccumulatedDepreciation": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "GrossPropertyPlantEquipment"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Property, Plant & Equipment, Gross",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": true,
-    "confidence": 0.4,
+    "confidence": 0.9,
     "company_count": 0,
     "occurrence_rate": 0.0,
     "temporal_consistency": 0.0,
@@ -35680,22 +35202,6 @@
     "first_year": 2020,
     "last_year": 2025
   },
-  "PropertyPlantAndEquipmentOtherAccumulatedDepreciation": {
-    "standard_tags": [
-      "PlantPropertyEquipmentNet"
-    ],
-    "display_name": "Property, Plant and Equipment",
-    "statement": "BalanceSheet",
-    "section": "Non-Current Assets",
-    "is_total": false,
-    "confidence": 0.5,
-    "company_count": 9,
-    "occurrence_rate": 0.001,
-    "temporal_consistency": 0.333,
-    "years_present": 4,
-    "first_year": 2021,
-    "last_year": 2024
-  },
   "PropertyPlantAndEquipmentOtherNet": {
     "standard_tags": [
       "PlantPropertyEquipmentNet"
@@ -35714,13 +35220,13 @@
   },
   "PropertyPlantAndEquipmentOwnedAccumulatedDepreciation": {
     "standard_tags": [
-      "PlantPropertyEquipmentNet"
+      "AccumulatedDepreciation"
     ],
-    "display_name": "Property, Plant and Equipment",
+    "display_name": "Accumulated Depreciation",
     "statement": "BalanceSheet",
     "section": "Non-Current Assets",
     "is_total": false,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 10,
     "occurrence_rate": 0.001,
     "temporal_consistency": 0.417,
@@ -36660,13 +36166,13 @@
   },
   "RegulatedAndUnregulatedOperatingRevenue": {
     "standard_tags": [
-      "ElectricUtilityRevenue"
+      "Revenue"
     ],
-    "display_name": "Electric Utility Revenue",
+    "display_name": "Revenue",
     "statement": "IncomeStatement",
     "section": "Revenue",
     "is_total": true,
-    "confidence": 0.5,
+    "confidence": 0.9,
     "company_count": 18,
     "occurrence_rate": 0.002,
     "temporal_consistency": 0.417,
@@ -36689,6 +36195,18 @@
     "years_present": 4,
     "first_year": 2021,
     "last_year": 2024
+  },
+  "RegulatedOperatingRevenue": {
+    "standard_tags": [
+      "RegulatedOperatingRevenue"
+    ],
+    "display_name": "Regulated Operating Revenue",
+    "statement": "IncomeStatement",
+    "section": "Revenue",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 14,
+    "comment": "Revenue from rate-regulated operations. A component of RegulatedAndUnregulatedOperatingRevenue (Revenue), never the total, and not necessarily electric. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
   },
   "RegulatoryAssets": {
     "standard_tags": [
@@ -38652,6 +38170,18 @@
     "first_year": 2012,
     "last_year": 2025
   },
+  "RevenuesNetOfInterestExpense": {
+    "standard_tags": [
+      "NetRevenueAfterInterestExpense"
+    ],
+    "display_name": "Net Revenue (Net of Interest Expense)",
+    "statement": "IncomeStatement",
+    "section": "Revenue",
+    "is_total": true,
+    "confidence": 0.9,
+    "company_count": 43,
+    "comment": "Revenues less operating interest expense: the top line of a broker-dealer's income statement (FASB role 140400), e.g. Goldman Sachs' total net revenues. Not gross revenue (Revenue) and not interest income alone. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "RightofuseAssets": {
     "standard_tags": [
       "OperatingLeaseRightOfUseAsset"
@@ -39278,6 +38808,18 @@
     "first_year": 2021,
     "last_year": 2025
   },
+  "SecuritiesBorrowed": {
+    "standard_tags": [
+      "SecuritiesBorrowed"
+    ],
+    "display_name": "Securities Borrowed",
+    "statement": "BalanceSheet",
+    "section": "Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 27,
+    "comment": "Securities borrowed, after the effects of master netting arrangements. An asset: not owned investments, collateral received, or a securities-lending liability. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "SecuritiesForReverseRepurchaseAgreements": {
     "standard_tags": [
       "OtherNonOperatingCurrentAssets"
@@ -39325,6 +38867,18 @@
     "years_present": 0,
     "first_year": null,
     "last_year": null
+  },
+  "SecuritiesPurchasedUnderAgreementsToResell": {
+    "standard_tags": [
+      "ResaleAgreementAssets"
+    ],
+    "display_name": "Assets Purchased Under Agreements to Resell",
+    "statement": "BalanceSheet",
+    "section": "Current Assets",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 58,
+    "comment": "Securities purchased under agreements to resell (reverse repos), the asset side. Not repurchase obligations (SecuritiesSoldUnderAgreementsToRepurchase maps to ShortTermDebt), and not the combined federal funds sold and resale measure. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
   },
   "SecuritiesSoldUnderAgreementsToRepurchase": {
     "standard_tags": [
@@ -41074,6 +40628,18 @@
     "first_year": null,
     "last_year": null
   },
+  "TradingGainsLosses": {
+    "standard_tags": [
+      "TradingGainsLosses"
+    ],
+    "display_name": "Trading Gains (Losses)",
+    "statement": "IncomeStatement",
+    "section": "Banking Revenue",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 29,
+    "comment": "Gains and losses on trading assets and liabilities, including fair-value changes, separate from customer trading activity. A net result: a loss keeps its filed sign. Not gross proceeds, fees or a cash-flow amount. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
+  },
   "TradingSecurities": {
     "standard_tags": [
       "ShortTermInvestments",
@@ -41671,6 +41237,18 @@
     "years_present": 0,
     "first_year": null,
     "last_year": null
+  },
+  "UnregulatedOperatingRevenue": {
+    "standard_tags": [
+      "UnregulatedOperatingRevenue"
+    ],
+    "display_name": "Unregulated Operating Revenue",
+    "statement": "IncomeStatement",
+    "section": "Revenue",
+    "is_total": false,
+    "confidence": 0.9,
+    "company_count": 19,
+    "comment": "Revenue from operations not subject to rate regulation. A component of RegulatedAndUnregulatedOperatingRevenue (Revenue), never the total. Counted on SEC's CY2025 XBRL frames (consolidated, undimensioned facts), 2026-11-13."
   },
   "UnsecuredDebt": {
     "standard_tags": [
@@ -42646,7 +42224,7 @@
   },
   "ifrs-full_InterestExpenseOnLeaseLiabilities": {
     "standard_tags": [
-      "OperatingLeaseExpense"
+      "InterestExpense"
     ]
   },
   "ifrs-full_Inventories": {

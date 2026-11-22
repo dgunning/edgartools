@@ -1,0 +1,435 @@
+{
+ "version": "2.2",
+ "instance": {
+  "playtika-20230331.htm": {
+   "tag": {
+    "us-gaap_AccumulatedOtherComprehensiveIncomeMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Accumulated increase (decrease) in equity from transactions and other events and circumstances from non-owner sources, attributable to the parent. Excludes net income (loss), and accumulated changes in equity from transactions resulting from investments by owners and distributions to owners.",
+        "label": "AOCI Attributable to Parent [Member]",
+        "terseLabel": "Accumulated other comprehensive income (loss)"
+       }
+      }
+     },
+     "localname": "AccumulatedOtherComprehensiveIncomeMember",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/ACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSSDetails",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_AdditionalPaidInCapitalMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Excess of issue price over par or stated value of the entity's capital stock and amounts received from other transactions involving the entity's stock or stockholders.",
+        "label": "Additional Paid-in Capital [Member]",
+        "terseLabel": "Additional paid-in capital"
+       }
+      }
+     },
+     "localname": "AdditionalPaidInCapitalMember",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICITParenthetical"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation": {
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of decrease to equity for grantee's tax withholding obligation for award under share-based payment arrangement.",
+        "label": "Share-Based Payment Arrangement, Decrease for Tax Withholding Obligation",
+        "negatedTerseLabel": "Income tax withholding related to vesting of restricted stock units and other"
+       }
+      }
+     },
+     "localname": "AdjustmentsRelatedToTaxWithholdingForShareBasedCompensation",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of increase to additional paid-in capital (APIC) for recognition of cost for award under share-based payment arrangement.",
+        "label": "APIC, Share-Based Payment Arrangement, Increase for Cost Recognition",
+        "terseLabel": "Stock-based compensation"
+       }
+      }
+     },
+     "localname": "AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_CommonStockMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Stock that is subordinate to all other stock of the issuer.",
+        "label": "Common Stock [Member]",
+        "terseLabel": "Share capital"
+       }
+      }
+     },
+     "localname": "CommonStockMember",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICITParenthetical"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_EquityComponentDomain": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Components of equity are the parts of the total Equity balance including that which is allocated to common, preferred, treasury stock, retained earnings, etc.",
+        "label": "Equity Component [Domain]",
+        "terseLabel": "Equity Component [Domain]"
+       }
+      }
+     },
+     "localname": "EquityComponentDomain",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/ACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSSDetails",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICITParenthetical"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "A roll forward is a reconciliation of a concept from the beginning of a period to the end of a period.",
+        "label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]",
+        "terseLabel": "Increase (Decrease) in Stockholders' Equity [Roll Forward]"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseInStockholdersEquityRollForward",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_NetIncomeLoss": {
+     "calculation": {
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS": {
+       "order": 12.0,
+       "parentTag": "us-gaap_NetCashProvidedByUsedInOperatingActivities",
+       "weight": 1.0
+      },
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME": {
+       "order": 1.0,
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTax",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The portion of profit or loss for the period, net of income taxes, which is attributable to the parent.",
+        "label": "Net Income (Loss) Attributable to Parent",
+        "terseLabel": "Net income",
+        "totalLabel": "Net income"
+       }
+      }
+     },
+     "localname": "NetIncomeLoss",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFCASHFLOWS",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT",
+      "http://www.playtika.com/role/NETINCOMEATTRIBUTABLETOCOMMONSTOCKHOLDERSBasicandDilutiveNetIncomePerShareDetails"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent": {
+     "calculation": {
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME": {
+       "order": 2.0,
+       "parentTag": "us-gaap_ComprehensiveIncomeNetOfTax",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount after tax of other comprehensive income (loss) attributable to parent entity.",
+        "label": "Other Comprehensive Income (Loss), Net of Tax, Portion Attributable to Parent",
+        "totalLabel": "Total other comprehensive income (loss)",
+        "verboseLabel": "Other comprehensive income (loss)"
+       }
+      }
+     },
+     "localname": "OtherComprehensiveIncomeLossNetOfTaxPortionAttributableToParent",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFCOMPREHENSIVEINCOME",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_RetainedEarningsMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "The cumulative amount of the reporting entity's undistributed earnings or deficit.",
+        "label": "Retained Earnings [Member]",
+        "terseLabel": "Retained earnings (Accumulated deficit)"
+       }
+      }
+     },
+     "localname": "RetainedEarningsMember",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_SharesOutstanding": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of shares issued which are neither cancelled nor held in the treasury.",
+        "label": "Shares, Outstanding",
+        "periodEndLabel": "Ending balance (in shares)",
+        "periodStartLabel": "Beginning balance (in shares)"
+       }
+      }
+     },
+     "localname": "SharesOutstanding",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StatementEquityComponentsAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Information by component of equity.",
+        "label": "Equity Components [Axis]",
+        "terseLabel": "Equity Components [Axis]"
+       }
+      }
+     },
+     "localname": "StatementEquityComponentsAxis",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/ACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSSDetails",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICITParenthetical"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementLineItems": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Line items represent financial concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes to the table.",
+        "label": "Statement [Line Items]",
+        "terseLabel": "Statement [Line Items]"
+       }
+      }
+     },
+     "localname": "StatementLineItems",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICITParenthetical"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementOfStockholdersEquityAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of Stockholders' Equity [Abstract]"
+       }
+      }
+     },
+     "localname": "StatementOfStockholdersEquityAbstract",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StatementTable": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Schedule reflecting a Statement of Income, Statement of Cash Flows, Statement of Financial Position, Statement of Shareholders' Equity and Other Comprehensive Income, or other statement as needed.",
+        "label": "Statement [Table]",
+        "terseLabel": "Statement [Table]"
+       }
+      }
+     },
+     "localname": "StatementTable",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICITParenthetical"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Number of shares issued during the period related to Restricted Stock Awards, net of any shares forfeited.",
+        "label": "Stock Issued During Period, Shares, Restricted Stock Award, Net of Forfeitures",
+        "terseLabel": "Issuance of shares upon vesting of RSUs and PSUs (in shares)"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodSharesRestrictedStockAwardNetOfForfeitures",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT"
+     ],
+     "xbrltype": "sharesItemType"
+    },
+    "us-gaap_StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Value of stock related to Restricted Stock Awards issued during the period, net of the stock value of such awards forfeited.",
+        "label": "Stock Issued During Period, Value, Restricted Stock Award, Net of Forfeitures",
+        "terseLabel": "Issuance of shares upon vesting of RSUs and PSUs (less than)",
+        "verboseLabel": "Issuance of shares upon vesting of RSUs and PSUs"
+       }
+      }
+     },
+     "localname": "StockIssuedDuringPeriodValueRestrictedStockAwardNetOfForfeitures",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICITParenthetical"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_StockholdersEquity": {
+     "calculation": {
+      "http://www.playtika.com/role/CONSOLIDATEDBALANCESHEETS": {
+       "order": 1.0,
+       "parentTag": "us-gaap_LiabilitiesAndStockholdersEquity",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Total of all stockholders' equity (deficit) items, net of receivables from officers, directors, owners, and affiliates of the entity which are attributable to the parent. The amount of the economic entity's stockholders' equity attributable to the parent excludes the amount of stockholders' equity which is allocable to that ownership interest in subsidiary equity which is not attributable to the parent (noncontrolling interest, minority interest). This excludes temporary equity and is sometimes called permanent equity.",
+        "label": "Stockholders' Equity Attributable to Parent",
+        "periodEndLabel": "Ending balance",
+        "periodStartLabel": "Beginning balance",
+        "totalLabel": "Total stockholders' deficit"
+       }
+      }
+     },
+     "localname": "StockholdersEquity",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/ACCUMULATEDOTHERCOMPREHENSIVEINCOMELOSSDetails",
+      "http://www.playtika.com/role/CONSOLIDATEDBALANCESHEETS",
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_TreasuryStockCommonMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Previously issued common shares repurchased by the issuing entity and held in treasury.",
+        "label": "Treasury Stock, Common [Member]",
+        "terseLabel": "Treasury stock"
+       }
+      }
+     },
+     "localname": "TreasuryStockCommonMember",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT"
+     ],
+     "xbrltype": "domainItemType"
+    }
+   },
+   "report": {
+    "R5": {
+     "firstAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "playtika-20230331.htm",
+      "contextRef": "i6a166f3698564451bf3d5f0177d8b485_I20211231",
+      "decimals": "-5",
+      "first": true,
+      "lang": "en-US",
+      "name": "us-gaap:SharesOutstanding",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "shares",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "0000005 - Statement - CONSOLIDATED STATEMENTS OF STOCKHOLDERS’ DEFICIT",
+     "menuCat": "Statements",
+     "order": "5",
+     "role": "http://www.playtika.com/role/CONSOLIDATEDSTATEMENTSOFSTOCKHOLDERSDEFICIT",
+     "shortName": "CONSOLIDATED STATEMENTS OF STOCKHOLDERS’ DEFICIT",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "playtika-20230331.htm",
+      "contextRef": "i6a166f3698564451bf3d5f0177d8b485_I20211231",
+      "decimals": "-5",
+      "first": true,
+      "lang": "en-US",
+      "name": "us-gaap:SharesOutstanding",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "shares",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

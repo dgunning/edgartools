@@ -1,0 +1,586 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:cd="http://www.chindatagroup.com/20211231" xmlns:country="http://xbrl.sec.gov/country/2021" xmlns:dei="http://xbrl.sec.gov/dei/2021q4" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:srt="http://fasb.org/srt/2021-01-31" xmlns:us-gaap="http://fasb.org/us-gaap/2021-01-31" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <link:schemaRef xlink:href="cd-20211231.xsd" xlink:type="simple"/>
+    <context id="C_0001807192_20210101_20211231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+        </entity>
+        <period>
+            <startDate>2021-01-01</startDate>
+            <endDate>2021-12-31</endDate>
+        </period>
+    </context>
+    <context id="C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_20211231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">us-gaap:CommonClassAMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2021-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassBMember_20211231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">us-gaap:CommonClassBMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2021-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_us-gaapStatementClassOfStockAxis_cdAmericanDepositarySharesCommonClassAOneMember_20210101_20211231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">cd:AmericanDepositarySharesCommonClassAOneMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-01-01</startDate>
+            <endDate>2021-12-31</endDate>
+        </period>
+    </context>
+    <context id="C_0001807192_us-gaapStatementClassOfStockAxis_cdAmericanDepositarySharesCommonClassATwoMember_20210101_20211231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementClassOfStockAxis">cd:AmericanDepositarySharesCommonClassATwoMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-01-01</startDate>
+            <endDate>2021-12-31</endDate>
+        </period>
+    </context>
+    <context id="C_0001807192_deiEntityAddressesAddressTypeAxis_deiBusinessContactMember_20210101_20211231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:EntityAddressesAddressTypeAxis">dei:BusinessContactMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2021-01-01</startDate>
+            <endDate>2021-12-31</endDate>
+        </period>
+    </context>
+    <context id="C_0001807192_20201231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+        </entity>
+        <period>
+            <instant>2020-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_20211231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+        </entity>
+        <period>
+            <instant>2021-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20201231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ConsolidatedEntitiesAxis">us-gaap:VariableInterestEntityPrimaryBeneficiaryMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:RecourseStatusAxis">us-gaap:NonrecourseMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2020-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20211231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ConsolidatedEntitiesAxis">us-gaap:VariableInterestEntityPrimaryBeneficiaryMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:RecourseStatusAxis">us-gaap:NonrecourseMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2021-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_20181231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+        </entity>
+        <period>
+            <instant>2018-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_20191231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+        </entity>
+        <period>
+            <instant>2019-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ConsolidatedEntitiesAxis">us-gaap:VariableInterestEntityPrimaryBeneficiaryMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2020-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ConsolidatedEntitiesAxis">us-gaap:VariableInterestEntityPrimaryBeneficiaryMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2021-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_srtCumulativeEffectPeriodOfAdoptionAxis_srtCumulativeEffectPeriodOfAdoptionAdjustmentMember_us-gaapAdjustmentsForNewAccountingPronouncementsAxis_us-gaapAccountingStandardsUpdate201613Member_20210101">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:CumulativeEffectPeriodOfAdoptionAxis">srt:CumulativeEffectPeriodOfAdoptionAdjustmentMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:AdjustmentsForNewAccountingPronouncementsAxis">us-gaap:AccountingStandardsUpdate201613Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2021-01-01</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_srtOwnershipAxis_cdStackGroupMember_20191231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:OwnershipAxis">cd:StackGroupMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2019-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_srtOwnershipAxis_cdStackGroupMember_20201231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:OwnershipAxis">cd:StackGroupMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2020-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_srtOwnershipAxis_cdStackGroupMember_20211231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:OwnershipAxis">cd:StackGroupMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2021-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_us-gaapBusinessAcquisitionAxis_cdPRCSubsidiaryMember_20190426">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:BusinessAcquisitionAxis">cd:PRCSubsidiaryMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2019-04-26</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_us-gaapBusinessAcquisitionAxis_cdHuailaiHuizhiConstructionCoLtdMember_20201101">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:BusinessAcquisitionAxis">cd:HuailaiHuizhiConstructionCoLtdMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2020-11-01</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ConsolidatedEntitiesAxis">srt:ParentCompanyMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2020-12-31</instant>
+        </period>
+    </context>
+    <context id="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001807192</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="srt:ConsolidatedEntitiesAxis">srt:ParentCompanyMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2021-12-31</instant>
+        </period>
+    </context>
+    <unit id="U_xbrlishares">
+        <measure>shares</measure>
+    </unit>
+    <unit id="U_iso4217CNY">
+        <measure>iso4217:CNY</measure>
+    </unit>
+    <unit id="U_iso4217USD">
+        <measure>iso4217:USD</measure>
+    </unit>
+    <dei:EntityCentralIndexKey contextRef="C_0001807192_20210101_20211231" id="F_000001">0001807192</dei:EntityCentralIndexKey>
+    <dei:CurrentFiscalYearEndDate contextRef="C_0001807192_20210101_20211231" id="F_000004">--12-31</dei:CurrentFiscalYearEndDate>
+    <dei:AmendmentFlag contextRef="C_0001807192_20210101_20211231" id="F_000011">false</dei:AmendmentFlag>
+    <dei:DocumentFiscalPeriodFocus contextRef="C_0001807192_20210101_20211231" id="F_000013">FY</dei:DocumentFiscalPeriodFocus>
+    <dei:NoTradingSymbolFlag contextRef="C_0001807192_us-gaapStatementClassOfStockAxis_cdAmericanDepositarySharesCommonClassATwoMember_20210101_20211231" id="F_000021">true</dei:NoTradingSymbolFlag>
+    <dei:DocumentType contextRef="C_0001807192_20210101_20211231" id="F_000009">20-F</dei:DocumentType>
+    <dei:DocumentRegistrationStatement contextRef="C_0001807192_20210101_20211231" id="F_000039">false</dei:DocumentRegistrationStatement>
+    <dei:DocumentAnnualReport contextRef="C_0001807192_20210101_20211231" id="F_000040">true</dei:DocumentAnnualReport>
+    <dei:DocumentPeriodEndDate contextRef="C_0001807192_20210101_20211231" id="F_000010">2021-12-31</dei:DocumentPeriodEndDate>
+    <dei:DocumentFiscalYearFocus contextRef="C_0001807192_20210101_20211231" id="F_000012">2021</dei:DocumentFiscalYearFocus>
+    <dei:DocumentTransitionReport contextRef="C_0001807192_20210101_20211231" id="F_000041">false</dei:DocumentTransitionReport>
+    <dei:DocumentShellCompanyReport contextRef="C_0001807192_20210101_20211231" id="F_000042">false</dei:DocumentShellCompanyReport>
+    <dei:EntityFileNumber contextRef="C_0001807192_20210101_20211231" id="F_000023">001-39556</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="C_0001807192_20210101_20211231" id="F_000000">Chindata Group Holdings Limited</dei:EntityRegistrantName>
+    <dei:EntityIncorporationStateCountryCode contextRef="C_0001807192_20210101_20211231" id="F_000024">E9</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityAddressAddressLine1 contextRef="C_0001807192_20210101_20211231" id="F_000025">No. 47 Laiguangying East Road</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressAddressLine2 contextRef="C_0001807192_20210101_20211231" id="F_000026">Chaoyang District,</dei:EntityAddressAddressLine2>
+    <dei:EntityAddressCityOrTown contextRef="C_0001807192_20210101_20211231" id="F_000027">Beijing</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressPostalZipCode contextRef="C_0001807192_20210101_20211231" id="F_000028">100012</dei:EntityAddressPostalZipCode>
+    <dei:EntityAddressCountry contextRef="C_0001807192_20210101_20211231" id="F_000029">CN</dei:EntityAddressCountry>
+    <dei:ContactPersonnelName contextRef="C_0001807192_deiEntityAddressesAddressTypeAxis_deiBusinessContactMember_20210101_20211231" id="F_000030">Dongning Wang</dei:ContactPersonnelName>
+    <dei:CityAreaCode contextRef="C_0001807192_deiEntityAddressesAddressTypeAxis_deiBusinessContactMember_20210101_20211231" id="F_000036">400</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="C_0001807192_deiEntityAddressesAddressTypeAxis_deiBusinessContactMember_20210101_20211231" id="F_000037">879-7679</dei:LocalPhoneNumber>
+    <dei:ContactPersonnelEmailAddress contextRef="C_0001807192_deiEntityAddressesAddressTypeAxis_deiBusinessContactMember_20210101_20211231" id="F_000038">ir@chindatagroup.com</dei:ContactPersonnelEmailAddress>
+    <dei:EntityAddressAddressLine1 contextRef="C_0001807192_deiEntityAddressesAddressTypeAxis_deiBusinessContactMember_20210101_20211231" id="F_000031">No. 47 Laiguangying East Road</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressAddressLine2 contextRef="C_0001807192_deiEntityAddressesAddressTypeAxis_deiBusinessContactMember_20210101_20211231" id="F_000032">Chaoyang District, </dei:EntityAddressAddressLine2>
+    <dei:EntityAddressCityOrTown contextRef="C_0001807192_deiEntityAddressesAddressTypeAxis_deiBusinessContactMember_20210101_20211231" id="F_000033">Beijing</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressPostalZipCode contextRef="C_0001807192_deiEntityAddressesAddressTypeAxis_deiBusinessContactMember_20210101_20211231" id="F_000035">100012</dei:EntityAddressPostalZipCode>
+    <dei:EntityAddressCountry contextRef="C_0001807192_deiEntityAddressesAddressTypeAxis_deiBusinessContactMember_20210101_20211231" id="F_000034">CN</dei:EntityAddressCountry>
+    <dei:Security12bTitle contextRef="C_0001807192_us-gaapStatementClassOfStockAxis_cdAmericanDepositarySharesCommonClassAOneMember_20210101_20211231" id="F_000018">American Depositary Shares, each representing two Class A ordinary shares, par value US$0.00001 per share</dei:Security12bTitle>
+    <dei:Security12bTitle contextRef="C_0001807192_us-gaapStatementClassOfStockAxis_cdAmericanDepositarySharesCommonClassATwoMember_20210101_20211231" id="F_000020"> Class A ordinary shares, par value US$0.00001 per share</dei:Security12bTitle>
+    <dei:TradingSymbol contextRef="C_0001807192_us-gaapStatementClassOfStockAxis_cdAmericanDepositarySharesCommonClassAOneMember_20210101_20211231" id="F_000017">CD</dei:TradingSymbol>
+    <dei:SecurityExchangeName contextRef="C_0001807192_us-gaapStatementClassOfStockAxis_cdAmericanDepositarySharesCommonClassAOneMember_20210101_20211231" id="F_000019">NASDAQ</dei:SecurityExchangeName>
+    <dei:SecurityExchangeName contextRef="C_0001807192_us-gaapStatementClassOfStockAxis_cdAmericanDepositarySharesCommonClassATwoMember_20210101_20211231" id="F_000022">NASDAQ</dei:SecurityExchangeName>
+    <dei:EntityCommonStockSharesOutstanding contextRef="C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_20211231" decimals="INF" id="F_000007" unitRef="U_xbrlishares">359099633</dei:EntityCommonStockSharesOutstanding>
+    <dei:EntityCommonStockSharesOutstanding contextRef="C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassBMember_20211231" decimals="INF" id="F_000008" unitRef="U_xbrlishares">373459748</dei:EntityCommonStockSharesOutstanding>
+    <dei:EntityWellKnownSeasonedIssuer contextRef="C_0001807192_20210101_20211231" id="F_000006">Yes</dei:EntityWellKnownSeasonedIssuer>
+    <dei:EntityVoluntaryFilers contextRef="C_0001807192_20210101_20211231" id="F_000003">No</dei:EntityVoluntaryFilers>
+    <dei:EntityCurrentReportingStatus contextRef="C_0001807192_20210101_20211231" id="F_000002">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityInteractiveDataCurrent contextRef="C_0001807192_20210101_20211231" id="F_000016">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityFilerCategory contextRef="C_0001807192_20210101_20211231" id="F_000005">Large Accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntityEmergingGrowthCompany contextRef="C_0001807192_20210101_20211231" id="F_000015">false</dei:EntityEmergingGrowthCompany>
+    <dei:IcfrAuditorAttestationFlag contextRef="C_0001807192_20210101_20211231" id="F_000044">true</dei:IcfrAuditorAttestationFlag>
+    <dei:DocumentAccountingStandard contextRef="C_0001807192_20210101_20211231" id="F_000043">U.S. GAAP</dei:DocumentAccountingStandard>
+    <dei:EntityShellCompany contextRef="C_0001807192_20210101_20211231" id="F_000014">false</dei:EntityShellCompany>
+    <dei:AuditorFirmId contextRef="C_0001807192_20210101_20211231" id="F_000047">1408</dei:AuditorFirmId>
+    <dei:AuditorName contextRef="C_0001807192_20210101_20211231" id="F_000045">Ernst &amp; Young Hua Ming LLP</dei:AuditorName>
+    <dei:AuditorLocation contextRef="C_0001807192_20210101_20211231" id="F_000046">Beijing, the People’s Republic of China</dei:AuditorLocation>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_20201231" decimals="-3" id="F_000048" unitRef="U_iso4217CNY">6705612000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_20211231" decimals="-3" id="F_000049" unitRef="U_iso4217CNY">4390293000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_20211231" decimals="-3" id="F_000050" unitRef="U_iso4217USD">688933000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:RestrictedCashCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000051" unitRef="U_iso4217CNY">102598000</us-gaap:RestrictedCashCurrent>
+    <us-gaap:RestrictedCashCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000052" unitRef="U_iso4217CNY">460174000</us-gaap:RestrictedCashCurrent>
+    <us-gaap:RestrictedCashCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000053" unitRef="U_iso4217USD">72211000</us-gaap:RestrictedCashCurrent>
+    <us-gaap:ShortTermInvestments contextRef="C_0001807192_20201231" decimals="-3" id="F_000054" unitRef="U_iso4217CNY">0</us-gaap:ShortTermInvestments>
+    <us-gaap:ShortTermInvestments contextRef="C_0001807192_20211231" decimals="-3" id="F_000055" unitRef="U_iso4217CNY">193672000</us-gaap:ShortTermInvestments>
+    <us-gaap:ShortTermInvestments contextRef="C_0001807192_20211231" decimals="-3" id="F_000056" unitRef="U_iso4217USD">30391000</us-gaap:ShortTermInvestments>
+    <us-gaap:AccountsReceivableNetCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000057" unitRef="U_iso4217CNY">422224000</us-gaap:AccountsReceivableNetCurrent>
+    <us-gaap:AccountsReceivableNetCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000058" unitRef="U_iso4217CNY">661027000</us-gaap:AccountsReceivableNetCurrent>
+    <us-gaap:AccountsReceivableNetCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000059" unitRef="U_iso4217USD">103730000</us-gaap:AccountsReceivableNetCurrent>
+    <us-gaap:ValueAddedTaxReceivableCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000060" unitRef="U_iso4217CNY">182982000</us-gaap:ValueAddedTaxReceivableCurrent>
+    <us-gaap:ValueAddedTaxReceivableCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000061" unitRef="U_iso4217CNY">327553000</us-gaap:ValueAddedTaxReceivableCurrent>
+    <us-gaap:ValueAddedTaxReceivableCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000062" unitRef="U_iso4217USD">51400000</us-gaap:ValueAddedTaxReceivableCurrent>
+    <us-gaap:DueFromRelatedPartiesCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000063" unitRef="U_iso4217CNY">64093000</us-gaap:DueFromRelatedPartiesCurrent>
+    <us-gaap:DueFromRelatedPartiesCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000064" unitRef="U_iso4217CNY">0</us-gaap:DueFromRelatedPartiesCurrent>
+    <us-gaap:DueFromRelatedPartiesCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000065" unitRef="U_iso4217USD">0</us-gaap:DueFromRelatedPartiesCurrent>
+    <us-gaap:PrepaidExpenseAndOtherAssetsCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000066" unitRef="U_iso4217CNY">112467000</us-gaap:PrepaidExpenseAndOtherAssetsCurrent>
+    <us-gaap:PrepaidExpenseAndOtherAssetsCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000067" unitRef="U_iso4217CNY">314604000</us-gaap:PrepaidExpenseAndOtherAssetsCurrent>
+    <us-gaap:PrepaidExpenseAndOtherAssetsCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000068" unitRef="U_iso4217USD">49368000</us-gaap:PrepaidExpenseAndOtherAssetsCurrent>
+    <us-gaap:AssetsCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000069" unitRef="U_iso4217CNY">7589976000</us-gaap:AssetsCurrent>
+    <us-gaap:AssetsCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000070" unitRef="U_iso4217CNY">6347323000</us-gaap:AssetsCurrent>
+    <us-gaap:AssetsCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000071" unitRef="U_iso4217USD">996033000</us-gaap:AssetsCurrent>
+    <us-gaap:PropertyPlantAndEquipmentNet contextRef="C_0001807192_20201231" decimals="-3" id="F_000072" unitRef="U_iso4217CNY">6423830000</us-gaap:PropertyPlantAndEquipmentNet>
+    <us-gaap:PropertyPlantAndEquipmentNet contextRef="C_0001807192_20211231" decimals="-3" id="F_000073" unitRef="U_iso4217CNY">9427591000</us-gaap:PropertyPlantAndEquipmentNet>
+    <us-gaap:PropertyPlantAndEquipmentNet contextRef="C_0001807192_20211231" decimals="-3" id="F_000074" unitRef="U_iso4217USD">1479395000</us-gaap:PropertyPlantAndEquipmentNet>
+    <us-gaap:OperatingLeaseRightOfUseAsset contextRef="C_0001807192_20201231" decimals="-3" id="F_000075" unitRef="U_iso4217CNY">635683000</us-gaap:OperatingLeaseRightOfUseAsset>
+    <us-gaap:OperatingLeaseRightOfUseAsset contextRef="C_0001807192_20211231" decimals="-3" id="F_000076" unitRef="U_iso4217CNY">803544000</us-gaap:OperatingLeaseRightOfUseAsset>
+    <us-gaap:OperatingLeaseRightOfUseAsset contextRef="C_0001807192_20211231" decimals="-3" id="F_000077" unitRef="U_iso4217USD">126094000</us-gaap:OperatingLeaseRightOfUseAsset>
+    <us-gaap:FinanceLeaseRightOfUseAsset contextRef="C_0001807192_20201231" decimals="-3" id="F_000078" unitRef="U_iso4217CNY">144615000</us-gaap:FinanceLeaseRightOfUseAsset>
+    <us-gaap:FinanceLeaseRightOfUseAsset contextRef="C_0001807192_20211231" decimals="-3" id="F_000079" unitRef="U_iso4217CNY">136825000</us-gaap:FinanceLeaseRightOfUseAsset>
+    <us-gaap:FinanceLeaseRightOfUseAsset contextRef="C_0001807192_20211231" decimals="-3" id="F_000080" unitRef="U_iso4217USD">21471000</us-gaap:FinanceLeaseRightOfUseAsset>
+    <us-gaap:IntangibleAssetsNetExcludingGoodwill contextRef="C_0001807192_20201231" decimals="-3" id="F_000081" unitRef="U_iso4217CNY">320299000</us-gaap:IntangibleAssetsNetExcludingGoodwill>
+    <us-gaap:IntangibleAssetsNetExcludingGoodwill contextRef="C_0001807192_20211231" decimals="-3" id="F_000082" unitRef="U_iso4217CNY">305800000</us-gaap:IntangibleAssetsNetExcludingGoodwill>
+    <us-gaap:IntangibleAssetsNetExcludingGoodwill contextRef="C_0001807192_20211231" decimals="-3" id="F_000083" unitRef="U_iso4217USD">47987000</us-gaap:IntangibleAssetsNetExcludingGoodwill>
+    <us-gaap:Goodwill contextRef="C_0001807192_20201231" decimals="-3" id="F_000084" unitRef="U_iso4217CNY">472883000</us-gaap:Goodwill>
+    <us-gaap:Goodwill contextRef="C_0001807192_20211231" decimals="-3" id="F_000085" unitRef="U_iso4217CNY">472883000</us-gaap:Goodwill>
+    <us-gaap:Goodwill contextRef="C_0001807192_20211231" decimals="-3" id="F_000086" unitRef="U_iso4217USD">74206000</us-gaap:Goodwill>
+    <us-gaap:DeferredIncomeTaxAssetsNet contextRef="C_0001807192_20201231" decimals="-3" id="F_000087" unitRef="U_iso4217CNY">18789000</us-gaap:DeferredIncomeTaxAssetsNet>
+    <us-gaap:DeferredIncomeTaxAssetsNet contextRef="C_0001807192_20211231" decimals="-3" id="F_000088" unitRef="U_iso4217CNY">30866000</us-gaap:DeferredIncomeTaxAssetsNet>
+    <us-gaap:DeferredIncomeTaxAssetsNet contextRef="C_0001807192_20211231" decimals="-3" id="F_000089" unitRef="U_iso4217USD">4844000</us-gaap:DeferredIncomeTaxAssetsNet>
+    <us-gaap:RestrictedCashNoncurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000090" unitRef="U_iso4217CNY">103253000</us-gaap:RestrictedCashNoncurrent>
+    <us-gaap:RestrictedCashNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000091" unitRef="U_iso4217CNY">390535000</us-gaap:RestrictedCashNoncurrent>
+    <us-gaap:RestrictedCashNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000092" unitRef="U_iso4217USD">61283000</us-gaap:RestrictedCashNoncurrent>
+    <us-gaap:ValueAddedTaxReceivableNoncurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000093" unitRef="U_iso4217CNY">357125000</us-gaap:ValueAddedTaxReceivableNoncurrent>
+    <us-gaap:ValueAddedTaxReceivableNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000094" unitRef="U_iso4217CNY">424011000</us-gaap:ValueAddedTaxReceivableNoncurrent>
+    <us-gaap:ValueAddedTaxReceivableNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000095" unitRef="U_iso4217USD">66537000</us-gaap:ValueAddedTaxReceivableNoncurrent>
+    <us-gaap:OtherAssetsNoncurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000096" unitRef="U_iso4217CNY">193145000</us-gaap:OtherAssetsNoncurrent>
+    <us-gaap:OtherAssetsNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000097" unitRef="U_iso4217CNY">342573000</us-gaap:OtherAssetsNoncurrent>
+    <us-gaap:OtherAssetsNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000098" unitRef="U_iso4217USD">53755000</us-gaap:OtherAssetsNoncurrent>
+    <us-gaap:AssetsNoncurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000099" unitRef="U_iso4217CNY">8669622000</us-gaap:AssetsNoncurrent>
+    <us-gaap:AssetsNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000100" unitRef="U_iso4217CNY">12334628000</us-gaap:AssetsNoncurrent>
+    <us-gaap:AssetsNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000101" unitRef="U_iso4217USD">1935572000</us-gaap:AssetsNoncurrent>
+    <us-gaap:Assets contextRef="C_0001807192_20201231" decimals="-3" id="F_000102" unitRef="U_iso4217CNY">16259598000</us-gaap:Assets>
+    <us-gaap:Assets contextRef="C_0001807192_20211231" decimals="-3" id="F_000103" unitRef="U_iso4217CNY">18681951000</us-gaap:Assets>
+    <us-gaap:Assets contextRef="C_0001807192_20211231" decimals="-3" id="F_000104" unitRef="U_iso4217USD">2931605000</us-gaap:Assets>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20201231" decimals="-3" id="F_000136" unitRef="U_iso4217CNY">102267000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20211231" decimals="-3" id="F_000137" unitRef="U_iso4217CNY">114478000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20211231" decimals="-3" id="F_000138" unitRef="U_iso4217USD">17965000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:ShortTermBorrowings contextRef="C_0001807192_20201231" decimals="-3" id="F_000105" unitRef="U_iso4217CNY">66135000</us-gaap:ShortTermBorrowings>
+    <us-gaap:ShortTermBorrowings contextRef="C_0001807192_20211231" decimals="-3" id="F_000106" unitRef="U_iso4217CNY">260980000</us-gaap:ShortTermBorrowings>
+    <us-gaap:ShortTermBorrowings contextRef="C_0001807192_20211231" decimals="-3" id="F_000107" unitRef="U_iso4217USD">40953000</us-gaap:ShortTermBorrowings>
+    <us-gaap:LoansPayableToBankCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000108" unitRef="U_iso4217CNY">230778000</us-gaap:LoansPayableToBankCurrent>
+    <us-gaap:LoansPayableToBankCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000109" unitRef="U_iso4217CNY">1689545000</us-gaap:LoansPayableToBankCurrent>
+    <us-gaap:LoansPayableToBankCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000110" unitRef="U_iso4217USD">265126000</us-gaap:LoansPayableToBankCurrent>
+    <us-gaap:AccountsPayableCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000111" unitRef="U_iso4217CNY">1186030000</us-gaap:AccountsPayableCurrent>
+    <us-gaap:AccountsPayableCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000112" unitRef="U_iso4217CNY">1701299000</us-gaap:AccountsPayableCurrent>
+    <us-gaap:AccountsPayableCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000113" unitRef="U_iso4217USD">266971000</us-gaap:AccountsPayableCurrent>
+    <us-gaap:DueToRelatedPartiesCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000114" unitRef="U_iso4217CNY">37468000</us-gaap:DueToRelatedPartiesCurrent>
+    <us-gaap:DueToRelatedPartiesCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000115" unitRef="U_iso4217CNY">38832000</us-gaap:DueToRelatedPartiesCurrent>
+    <us-gaap:DueToRelatedPartiesCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000116" unitRef="U_iso4217USD">6094000</us-gaap:DueToRelatedPartiesCurrent>
+    <us-gaap:TaxesPayableCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000117" unitRef="U_iso4217CNY">47272000</us-gaap:TaxesPayableCurrent>
+    <us-gaap:TaxesPayableCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000118" unitRef="U_iso4217CNY">49168000</us-gaap:TaxesPayableCurrent>
+    <us-gaap:TaxesPayableCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000119" unitRef="U_iso4217USD">7716000</us-gaap:TaxesPayableCurrent>
+    <us-gaap:OperatingLeaseLiabilityCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000120" unitRef="U_iso4217CNY">40131000</us-gaap:OperatingLeaseLiabilityCurrent>
+    <us-gaap:OperatingLeaseLiabilityCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000121" unitRef="U_iso4217CNY">45501000</us-gaap:OperatingLeaseLiabilityCurrent>
+    <us-gaap:OperatingLeaseLiabilityCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000122" unitRef="U_iso4217USD">7140000</us-gaap:OperatingLeaseLiabilityCurrent>
+    <us-gaap:FinanceLeaseLiabilityCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000123" unitRef="U_iso4217CNY">4906000</us-gaap:FinanceLeaseLiabilityCurrent>
+    <us-gaap:FinanceLeaseLiabilityCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000124" unitRef="U_iso4217CNY">4765000</us-gaap:FinanceLeaseLiabilityCurrent>
+    <us-gaap:FinanceLeaseLiabilityCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000125" unitRef="U_iso4217USD">748000</us-gaap:FinanceLeaseLiabilityCurrent>
+    <us-gaap:DerivativeLiabilitiesCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000126" unitRef="U_iso4217CNY">8671000</us-gaap:DerivativeLiabilitiesCurrent>
+    <us-gaap:AccruedLiabilitiesAndOtherLiabilities contextRef="C_0001807192_20201231" decimals="-3" id="F_000127" unitRef="U_iso4217CNY">211549000</us-gaap:AccruedLiabilitiesAndOtherLiabilities>
+    <us-gaap:AccruedLiabilitiesAndOtherLiabilities contextRef="C_0001807192_20211231" decimals="-3" id="F_000128" unitRef="U_iso4217CNY">511257000</us-gaap:AccruedLiabilitiesAndOtherLiabilities>
+    <us-gaap:AccruedLiabilitiesAndOtherLiabilities contextRef="C_0001807192_20211231" decimals="-3" id="F_000129" unitRef="U_iso4217USD">80227000</us-gaap:AccruedLiabilitiesAndOtherLiabilities>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000130" unitRef="U_iso4217CNY">1832940000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000131" unitRef="U_iso4217CNY">4301347000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000132" unitRef="U_iso4217USD">674975000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20201231" decimals="-3" id="F_000139" unitRef="U_iso4217CNY">212413000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20211231" decimals="-3" id="F_000140" unitRef="U_iso4217CNY">196730000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20211231" decimals="-3" id="F_000141" unitRef="U_iso4217USD">30871000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:LongTermLoansPayable contextRef="C_0001807192_20201231" decimals="-3" id="F_000161" unitRef="U_iso4217CNY">3892120000</us-gaap:LongTermLoansPayable>
+    <us-gaap:LongTermLoansPayable contextRef="C_0001807192_20211231" decimals="-3" id="F_000162" unitRef="U_iso4217CNY">3526460000</us-gaap:LongTermLoansPayable>
+    <us-gaap:LongTermLoansPayable contextRef="C_0001807192_20211231" decimals="-3" id="F_000163" unitRef="U_iso4217USD">553379000</us-gaap:LongTermLoansPayable>
+    <us-gaap:OperatingLeaseLiabilityNoncurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000164" unitRef="U_iso4217CNY">204305000</us-gaap:OperatingLeaseLiabilityNoncurrent>
+    <us-gaap:OperatingLeaseLiabilityNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000165" unitRef="U_iso4217CNY">198806000</us-gaap:OperatingLeaseLiabilityNoncurrent>
+    <us-gaap:OperatingLeaseLiabilityNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000166" unitRef="U_iso4217USD">31197000</us-gaap:OperatingLeaseLiabilityNoncurrent>
+    <us-gaap:FinanceLeaseLiabilityNoncurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000167" unitRef="U_iso4217CNY">59986000</us-gaap:FinanceLeaseLiabilityNoncurrent>
+    <us-gaap:FinanceLeaseLiabilityNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000168" unitRef="U_iso4217CNY">57002000</us-gaap:FinanceLeaseLiabilityNoncurrent>
+    <us-gaap:FinanceLeaseLiabilityNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000169" unitRef="U_iso4217USD">8945000</us-gaap:FinanceLeaseLiabilityNoncurrent>
+    <us-gaap:DeferredIncomeTaxLiabilitiesNet contextRef="C_0001807192_20201231" decimals="-3" id="F_000170" unitRef="U_iso4217CNY">254431000</us-gaap:DeferredIncomeTaxLiabilitiesNet>
+    <us-gaap:DeferredIncomeTaxLiabilitiesNet contextRef="C_0001807192_20211231" decimals="-3" id="F_000171" unitRef="U_iso4217CNY">270950000</us-gaap:DeferredIncomeTaxLiabilitiesNet>
+    <us-gaap:DeferredIncomeTaxLiabilitiesNet contextRef="C_0001807192_20211231" decimals="-3" id="F_000172" unitRef="U_iso4217USD">42518000</us-gaap:DeferredIncomeTaxLiabilitiesNet>
+    <us-gaap:DerivativeLiabilitiesNoncurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000173" unitRef="U_iso4217CNY">16123000</us-gaap:DerivativeLiabilitiesNoncurrent>
+    <us-gaap:DerivativeLiabilitiesNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000174" unitRef="U_iso4217CNY">16354000</us-gaap:DerivativeLiabilitiesNoncurrent>
+    <us-gaap:DerivativeLiabilitiesNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000175" unitRef="U_iso4217USD">2566000</us-gaap:DerivativeLiabilitiesNoncurrent>
+    <us-gaap:OtherLiabilitiesNoncurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000176" unitRef="U_iso4217CNY">260225000</us-gaap:OtherLiabilitiesNoncurrent>
+    <us-gaap:OtherLiabilitiesNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000177" unitRef="U_iso4217CNY">196400000</us-gaap:OtherLiabilitiesNoncurrent>
+    <us-gaap:OtherLiabilitiesNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000178" unitRef="U_iso4217USD">30819000</us-gaap:OtherLiabilitiesNoncurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_000179" unitRef="U_iso4217CNY">4687190000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000180" unitRef="U_iso4217CNY">4265972000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_000181" unitRef="U_iso4217USD">669424000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:Liabilities contextRef="C_0001807192_20201231" decimals="-3" id="F_000182" unitRef="U_iso4217CNY">6520130000</us-gaap:Liabilities>
+    <us-gaap:Liabilities contextRef="C_0001807192_20211231" decimals="-3" id="F_000183" unitRef="U_iso4217CNY">8567319000</us-gaap:Liabilities>
+    <us-gaap:Liabilities contextRef="C_0001807192_20211231" decimals="-3" id="F_000184" unitRef="U_iso4217USD">1344399000</us-gaap:Liabilities>
+    <us-gaap:CommonStockValue contextRef="C_0001807192_20201231" decimals="-3" id="F_000185" unitRef="U_iso4217CNY">46000</us-gaap:CommonStockValue>
+    <us-gaap:CommonStockValue contextRef="C_0001807192_20211231" decimals="-3" id="F_000186" unitRef="U_iso4217CNY">46000</us-gaap:CommonStockValue>
+    <us-gaap:CommonStockValue contextRef="C_0001807192_20211231" decimals="-3" id="F_000187" unitRef="U_iso4217USD">7000</us-gaap:CommonStockValue>
+    <us-gaap:AdditionalPaidInCapitalCommonStock contextRef="C_0001807192_20201231" decimals="-3" id="F_000188" unitRef="U_iso4217CNY">10510516000</us-gaap:AdditionalPaidInCapitalCommonStock>
+    <us-gaap:AdditionalPaidInCapitalCommonStock contextRef="C_0001807192_20211231" decimals="-3" id="F_000189" unitRef="U_iso4217CNY">10646328000</us-gaap:AdditionalPaidInCapitalCommonStock>
+    <us-gaap:AdditionalPaidInCapitalCommonStock contextRef="C_0001807192_20211231" decimals="-3" id="F_000190" unitRef="U_iso4217USD">1670641000</us-gaap:AdditionalPaidInCapitalCommonStock>
+    <cd:StatutoryReserves contextRef="C_0001807192_20201231" decimals="-3" id="F_000191" unitRef="U_iso4217CNY">82792000</cd:StatutoryReserves>
+    <cd:StatutoryReserves contextRef="C_0001807192_20211231" decimals="-3" id="F_000192" unitRef="U_iso4217CNY">189700000</cd:StatutoryReserves>
+    <cd:StatutoryReserves contextRef="C_0001807192_20211231" decimals="-3" id="F_000193" unitRef="U_iso4217USD">29768000</cd:StatutoryReserves>
+    <us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="C_0001807192_20201231" decimals="-3" id="F_000194" unitRef="U_iso4217CNY">-172586000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="C_0001807192_20211231" decimals="-3" id="F_000195" unitRef="U_iso4217CNY">-257977000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="C_0001807192_20211231" decimals="-3" id="F_000196" unitRef="U_iso4217USD">-40482000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:RetainedEarningsAccumulatedDeficit contextRef="C_0001807192_20201231" decimals="-3" id="F_000197" unitRef="U_iso4217CNY">-681300000</us-gaap:RetainedEarningsAccumulatedDeficit>
+    <us-gaap:RetainedEarningsAccumulatedDeficit contextRef="C_0001807192_20211231" decimals="-3" id="F_000198" unitRef="U_iso4217CNY">-463465000</us-gaap:RetainedEarningsAccumulatedDeficit>
+    <us-gaap:RetainedEarningsAccumulatedDeficit contextRef="C_0001807192_20211231" decimals="-3" id="F_000199" unitRef="U_iso4217USD">-72728000</us-gaap:RetainedEarningsAccumulatedDeficit>
+    <us-gaap:StockholdersEquity contextRef="C_0001807192_20201231" decimals="-3" id="F_000200" unitRef="U_iso4217CNY">9739468000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="C_0001807192_20211231" decimals="-3" id="F_000201" unitRef="U_iso4217CNY">10114632000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="C_0001807192_20211231" decimals="-3" id="F_000202" unitRef="U_iso4217USD">1587206000</us-gaap:StockholdersEquity>
+    <us-gaap:LiabilitiesAndStockholdersEquity contextRef="C_0001807192_20201231" decimals="-3" id="F_000203" unitRef="U_iso4217CNY">16259598000</us-gaap:LiabilitiesAndStockholdersEquity>
+    <us-gaap:LiabilitiesAndStockholdersEquity contextRef="C_0001807192_20211231" decimals="-3" id="F_000204" unitRef="U_iso4217CNY">18681951000</us-gaap:LiabilitiesAndStockholdersEquity>
+    <us-gaap:LiabilitiesAndStockholdersEquity contextRef="C_0001807192_20211231" decimals="-3" id="F_000205" unitRef="U_iso4217USD">2931605000</us-gaap:LiabilitiesAndStockholdersEquity>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_20191231" decimals="-3" id="F_000601" unitRef="U_iso4217CNY">1038897000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_20201231" decimals="-3" id="F_000602" unitRef="U_iso4217CNY">6705612000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_20211231" decimals="-3" id="F_000603" unitRef="U_iso4217CNY">4390293000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_20211231" decimals="-3" id="F_000604" unitRef="U_iso4217USD">688933000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000779" unitRef="U_iso4217CNY">251589000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000780" unitRef="U_iso4217CNY">577753000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000781" unitRef="U_iso4217USD">90662000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:ShortTermInvestments contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000782" unitRef="U_iso4217CNY">0</us-gaap:ShortTermInvestments>
+    <us-gaap:ShortTermInvestments contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000783" unitRef="U_iso4217CNY">129946000</us-gaap:ShortTermInvestments>
+    <us-gaap:ShortTermInvestments contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000784" unitRef="U_iso4217USD">20391000</us-gaap:ShortTermInvestments>
+    <us-gaap:AccountsReceivableNetCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000785" unitRef="U_iso4217CNY">399451000</us-gaap:AccountsReceivableNetCurrent>
+    <us-gaap:AccountsReceivableNetCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000786" unitRef="U_iso4217CNY">588518000</us-gaap:AccountsReceivableNetCurrent>
+    <us-gaap:AccountsReceivableNetCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000787" unitRef="U_iso4217USD">92351000</us-gaap:AccountsReceivableNetCurrent>
+    <us-gaap:ValueAddedTaxReceivableCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000791" unitRef="U_iso4217CNY">3367000</us-gaap:ValueAddedTaxReceivableCurrent>
+    <us-gaap:ValueAddedTaxReceivableCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000792" unitRef="U_iso4217CNY">4273000</us-gaap:ValueAddedTaxReceivableCurrent>
+    <us-gaap:ValueAddedTaxReceivableCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000793" unitRef="U_iso4217USD">671000</us-gaap:ValueAddedTaxReceivableCurrent>
+    <us-gaap:DueFromRelatedPartiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000794" unitRef="U_iso4217CNY">35000</us-gaap:DueFromRelatedPartiesCurrent>
+    <us-gaap:DueFromRelatedPartiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000795" unitRef="U_iso4217CNY">0</us-gaap:DueFromRelatedPartiesCurrent>
+    <us-gaap:DueFromRelatedPartiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000796" unitRef="U_iso4217USD">0</us-gaap:DueFromRelatedPartiesCurrent>
+    <us-gaap:PrepaidExpenseAndOtherAssetsCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000797" unitRef="U_iso4217CNY">5715000</us-gaap:PrepaidExpenseAndOtherAssetsCurrent>
+    <us-gaap:PrepaidExpenseAndOtherAssetsCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000798" unitRef="U_iso4217CNY">5931000</us-gaap:PrepaidExpenseAndOtherAssetsCurrent>
+    <us-gaap:PrepaidExpenseAndOtherAssetsCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000799" unitRef="U_iso4217USD">931000</us-gaap:PrepaidExpenseAndOtherAssetsCurrent>
+    <us-gaap:AssetsCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000800" unitRef="U_iso4217CNY">890002000</us-gaap:AssetsCurrent>
+    <us-gaap:AssetsCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000801" unitRef="U_iso4217CNY">1927697000</us-gaap:AssetsCurrent>
+    <us-gaap:AssetsCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000802" unitRef="U_iso4217USD">302498000</us-gaap:AssetsCurrent>
+    <us-gaap:PropertyPlantAndEquipmentNet contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000803" unitRef="U_iso4217CNY">64727000</us-gaap:PropertyPlantAndEquipmentNet>
+    <us-gaap:PropertyPlantAndEquipmentNet contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000804" unitRef="U_iso4217CNY">57832000</us-gaap:PropertyPlantAndEquipmentNet>
+    <us-gaap:PropertyPlantAndEquipmentNet contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000805" unitRef="U_iso4217USD">9075000</us-gaap:PropertyPlantAndEquipmentNet>
+    <us-gaap:OperatingLeaseRightOfUseAsset contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000806" unitRef="U_iso4217CNY">239155000</us-gaap:OperatingLeaseRightOfUseAsset>
+    <us-gaap:OperatingLeaseRightOfUseAsset contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000807" unitRef="U_iso4217CNY">221708000</us-gaap:OperatingLeaseRightOfUseAsset>
+    <us-gaap:OperatingLeaseRightOfUseAsset contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000808" unitRef="U_iso4217USD">34791000</us-gaap:OperatingLeaseRightOfUseAsset>
+    <us-gaap:FinanceLeaseRightOfUseAsset contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000809" unitRef="U_iso4217CNY">0</us-gaap:FinanceLeaseRightOfUseAsset>
+    <us-gaap:FinanceLeaseRightOfUseAsset contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000810" unitRef="U_iso4217CNY">866000</us-gaap:FinanceLeaseRightOfUseAsset>
+    <us-gaap:FinanceLeaseRightOfUseAsset contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000811" unitRef="U_iso4217USD">136000</us-gaap:FinanceLeaseRightOfUseAsset>
+    <us-gaap:IntangibleAssetsNetExcludingGoodwill contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000812" unitRef="U_iso4217CNY">20251000</us-gaap:IntangibleAssetsNetExcludingGoodwill>
+    <us-gaap:IntangibleAssetsNetExcludingGoodwill contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000813" unitRef="U_iso4217CNY">17797000</us-gaap:IntangibleAssetsNetExcludingGoodwill>
+    <us-gaap:IntangibleAssetsNetExcludingGoodwill contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000814" unitRef="U_iso4217USD">2793000</us-gaap:IntangibleAssetsNetExcludingGoodwill>
+    <us-gaap:DeferredIncomeTaxAssetsNet contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000818" unitRef="U_iso4217CNY">10598000</us-gaap:DeferredIncomeTaxAssetsNet>
+    <us-gaap:DeferredIncomeTaxAssetsNet contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000819" unitRef="U_iso4217CNY">0</us-gaap:DeferredIncomeTaxAssetsNet>
+    <us-gaap:DeferredIncomeTaxAssetsNet contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000820" unitRef="U_iso4217USD">0</us-gaap:DeferredIncomeTaxAssetsNet>
+    <us-gaap:OtherAssetsNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000821" unitRef="U_iso4217CNY">8783000</us-gaap:OtherAssetsNoncurrent>
+    <us-gaap:OtherAssetsNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000822" unitRef="U_iso4217CNY">10114000</us-gaap:OtherAssetsNoncurrent>
+    <us-gaap:OtherAssetsNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000823" unitRef="U_iso4217USD">1587000</us-gaap:OtherAssetsNoncurrent>
+    <us-gaap:AssetsNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000824" unitRef="U_iso4217CNY">643514000</us-gaap:AssetsNoncurrent>
+    <us-gaap:AssetsNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000825" unitRef="U_iso4217CNY">608317000</us-gaap:AssetsNoncurrent>
+    <us-gaap:AssetsNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000826" unitRef="U_iso4217USD">95459000</us-gaap:AssetsNoncurrent>
+    <us-gaap:Assets contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000827" unitRef="U_iso4217CNY">1533516000</us-gaap:Assets>
+    <us-gaap:Assets contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000828" unitRef="U_iso4217CNY">2536014000</us-gaap:Assets>
+    <us-gaap:Assets contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000829" unitRef="U_iso4217USD">397957000</us-gaap:Assets>
+    <us-gaap:AccountsPayableCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000830" unitRef="U_iso4217CNY">31694000</us-gaap:AccountsPayableCurrent>
+    <us-gaap:AccountsPayableCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000831" unitRef="U_iso4217CNY">40260000</us-gaap:AccountsPayableCurrent>
+    <us-gaap:AccountsPayableCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000832" unitRef="U_iso4217USD">6318000</us-gaap:AccountsPayableCurrent>
+    <us-gaap:OperatingLeaseLiabilityCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000839" unitRef="U_iso4217CNY">38054000</us-gaap:OperatingLeaseLiabilityCurrent>
+    <us-gaap:OperatingLeaseLiabilityCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000840" unitRef="U_iso4217CNY">35990000</us-gaap:OperatingLeaseLiabilityCurrent>
+    <us-gaap:OperatingLeaseLiabilityCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000841" unitRef="U_iso4217USD">5648000</us-gaap:OperatingLeaseLiabilityCurrent>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000848" unitRef="U_iso4217CNY">1226685000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000849" unitRef="U_iso4217CNY">2225938000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000850" unitRef="U_iso4217USD">349299000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:OperatingLeaseLiabilityNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000851" unitRef="U_iso4217CNY">204305000</us-gaap:OperatingLeaseLiabilityNoncurrent>
+    <us-gaap:OperatingLeaseLiabilityNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000852" unitRef="U_iso4217CNY">188104000</us-gaap:OperatingLeaseLiabilityNoncurrent>
+    <us-gaap:OperatingLeaseLiabilityNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000853" unitRef="U_iso4217USD">29518000</us-gaap:OperatingLeaseLiabilityNoncurrent>
+    <us-gaap:DeferredIncomeTaxLiabilitiesNet contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000857" unitRef="U_iso4217CNY">3131000</us-gaap:DeferredIncomeTaxLiabilitiesNet>
+    <us-gaap:DeferredIncomeTaxLiabilitiesNet contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000858" unitRef="U_iso4217CNY">499000</us-gaap:DeferredIncomeTaxLiabilitiesNet>
+    <us-gaap:DeferredIncomeTaxLiabilitiesNet contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000859" unitRef="U_iso4217USD">78000</us-gaap:DeferredIncomeTaxLiabilitiesNet>
+    <us-gaap:OtherLiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000860" unitRef="U_iso4217CNY">4977000</us-gaap:OtherLiabilitiesNoncurrent>
+    <us-gaap:OtherLiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000861" unitRef="U_iso4217CNY">8127000</us-gaap:OtherLiabilitiesNoncurrent>
+    <us-gaap:OtherLiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000862" unitRef="U_iso4217USD">1275000</us-gaap:OtherLiabilitiesNoncurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000863" unitRef="U_iso4217CNY">212413000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000864" unitRef="U_iso4217CNY">196730000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000865" unitRef="U_iso4217USD">30871000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:Liabilities contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231" decimals="-3" id="F_000866" unitRef="U_iso4217CNY">1439098000</us-gaap:Liabilities>
+    <us-gaap:Liabilities contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000867" unitRef="U_iso4217CNY">2422668000</us-gaap:Liabilities>
+    <us-gaap:Liabilities contextRef="C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231" decimals="-3" id="F_000868" unitRef="U_iso4217USD">380170000</us-gaap:Liabilities>
+    <us-gaap:RetainedEarningsAccumulatedDeficit contextRef="C_0001807192_srtCumulativeEffectPeriodOfAdoptionAxis_srtCumulativeEffectPeriodOfAdoptionAdjustmentMember_us-gaapAdjustmentsForNewAccountingPronouncementsAxis_us-gaapAccountingStandardsUpdate201613Member_20210101" decimals="-3" id="F_000894" unitRef="U_iso4217CNY">-8323000</us-gaap:RetainedEarningsAccumulatedDeficit>
+    <us-gaap:RetainedEarningsAccumulatedDeficit contextRef="C_0001807192_srtCumulativeEffectPeriodOfAdoptionAxis_srtCumulativeEffectPeriodOfAdoptionAdjustmentMember_us-gaapAdjustmentsForNewAccountingPronouncementsAxis_us-gaapAccountingStandardsUpdate201613Member_20210101" decimals="-3" id="F_000895" unitRef="U_iso4217USD">-1306000</us-gaap:RetainedEarningsAccumulatedDeficit>
+    <us-gaap:ShortTermInvestments contextRef="C_0001807192_20201231" decimals="-3" id="F_001006" unitRef="U_iso4217CNY">0</us-gaap:ShortTermInvestments>
+    <us-gaap:ShortTermInvestments contextRef="C_0001807192_20211231" decimals="-3" id="F_001007" unitRef="U_iso4217CNY">193672000</us-gaap:ShortTermInvestments>
+    <us-gaap:ShortTermInvestments contextRef="C_0001807192_20211231" decimals="-3" id="F_001008" unitRef="U_iso4217USD">30391000</us-gaap:ShortTermInvestments>
+    <us-gaap:AccountsReceivableNetCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_001131" unitRef="U_iso4217CNY">422224000</us-gaap:AccountsReceivableNetCurrent>
+    <us-gaap:AccountsReceivableNetCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_001132" unitRef="U_iso4217CNY">661027000</us-gaap:AccountsReceivableNetCurrent>
+    <us-gaap:AccountsReceivableNetCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_001133" unitRef="U_iso4217USD">103730000</us-gaap:AccountsReceivableNetCurrent>
+    <us-gaap:PropertyPlantAndEquipmentNet contextRef="C_0001807192_20201231" decimals="-3" id="F_001177" unitRef="U_iso4217CNY">6423830000</us-gaap:PropertyPlantAndEquipmentNet>
+    <us-gaap:PropertyPlantAndEquipmentNet contextRef="C_0001807192_20211231" decimals="-3" id="F_001178" unitRef="U_iso4217CNY">9427591000</us-gaap:PropertyPlantAndEquipmentNet>
+    <us-gaap:PropertyPlantAndEquipmentNet contextRef="C_0001807192_20211231" decimals="-3" id="F_001179" unitRef="U_iso4217USD">1479395000</us-gaap:PropertyPlantAndEquipmentNet>
+    <us-gaap:Goodwill contextRef="C_0001807192_srtOwnershipAxis_cdStackGroupMember_20191231" decimals="-3" id="F_001205" unitRef="U_iso4217CNY">466320000</us-gaap:Goodwill>
+    <us-gaap:Goodwill contextRef="C_0001807192_srtOwnershipAxis_cdStackGroupMember_20211231" decimals="-3" id="F_001209" unitRef="U_iso4217CNY">472883000</us-gaap:Goodwill>
+    <us-gaap:Goodwill contextRef="C_0001807192_srtOwnershipAxis_cdStackGroupMember_20201231" decimals="-3" id="F_001207" unitRef="U_iso4217CNY">472883000</us-gaap:Goodwill>
+    <us-gaap:Goodwill contextRef="C_0001807192_srtOwnershipAxis_cdStackGroupMember_20211231" decimals="-3" id="F_001210" unitRef="U_iso4217USD">74206000</us-gaap:Goodwill>
+    <us-gaap:DeferredIncomeTaxAssetsNet contextRef="C_0001807192_20201231" decimals="-3" id="F_001384" unitRef="U_iso4217CNY">18789000</us-gaap:DeferredIncomeTaxAssetsNet>
+    <us-gaap:DeferredIncomeTaxAssetsNet contextRef="C_0001807192_20211231" decimals="-3" id="F_001385" unitRef="U_iso4217CNY">30866000</us-gaap:DeferredIncomeTaxAssetsNet>
+    <us-gaap:DeferredIncomeTaxAssetsNet contextRef="C_0001807192_20211231" decimals="-3" id="F_001386" unitRef="U_iso4217USD">4844000</us-gaap:DeferredIncomeTaxAssetsNet>
+    <us-gaap:DeferredIncomeTaxLiabilitiesNet contextRef="C_0001807192_20201231" decimals="-3" id="F_001387" unitRef="U_iso4217CNY">254431000</us-gaap:DeferredIncomeTaxLiabilitiesNet>
+    <us-gaap:DeferredIncomeTaxLiabilitiesNet contextRef="C_0001807192_20211231" decimals="-3" id="F_001388" unitRef="U_iso4217CNY">270950000</us-gaap:DeferredIncomeTaxLiabilitiesNet>
+    <us-gaap:DeferredIncomeTaxLiabilitiesNet contextRef="C_0001807192_20211231" decimals="-3" id="F_001389" unitRef="U_iso4217USD">42518000</us-gaap:DeferredIncomeTaxLiabilitiesNet>
+    <us-gaap:DueToRelatedPartiesCurrent contextRef="C_0001807192_20201231" decimals="-3" id="F_001593" unitRef="U_iso4217CNY">37468000</us-gaap:DueToRelatedPartiesCurrent>
+    <us-gaap:DueToRelatedPartiesCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_001594" unitRef="U_iso4217CNY">38832000</us-gaap:DueToRelatedPartiesCurrent>
+    <us-gaap:DueToRelatedPartiesCurrent contextRef="C_0001807192_20211231" decimals="-3" id="F_001595" unitRef="U_iso4217USD">6094000</us-gaap:DueToRelatedPartiesCurrent>
+    <us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="C_0001807192_20181231" decimals="-3" id="F_001667" unitRef="U_iso4217CNY">18044000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="C_0001807192_20191231" decimals="-3" id="F_001669" unitRef="U_iso4217CNY">40011000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="C_0001807192_20201231" decimals="-3" id="F_001671" unitRef="U_iso4217CNY">-172586000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="C_0001807192_20211231" decimals="-3" id="F_001673" unitRef="U_iso4217CNY">-257977000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="C_0001807192_20211231" decimals="-3" id="F_001674" unitRef="U_iso4217USD">-40482000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:Goodwill contextRef="C_0001807192_us-gaapBusinessAcquisitionAxis_cdPRCSubsidiaryMember_20190426" decimals="-3" id="F_001702" unitRef="U_iso4217CNY">466320000</us-gaap:Goodwill>
+    <us-gaap:Goodwill contextRef="C_0001807192_us-gaapBusinessAcquisitionAxis_cdHuailaiHuizhiConstructionCoLtdMember_20201101" decimals="-3" id="F_001717" unitRef="U_iso4217CNY">6563000</us-gaap:Goodwill>
+    <cd:StatutoryReserves contextRef="C_0001807192_20211231" decimals="-3" id="F_001724" unitRef="U_iso4217CNY">189700000</cd:StatutoryReserves>
+    <cd:StatutoryReserves contextRef="C_0001807192_20211231" decimals="-3" id="F_001725" unitRef="U_iso4217USD">29768000</cd:StatutoryReserves>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001760" unitRef="U_iso4217CNY">3514736000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001761" unitRef="U_iso4217CNY">459522000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:CashAndCashEquivalentsAtCarryingValue contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001762" unitRef="U_iso4217USD">72109000</us-gaap:CashAndCashEquivalentsAtCarryingValue>
+    <us-gaap:ShortTermInvestments contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001763" unitRef="U_iso4217CNY">63726000</us-gaap:ShortTermInvestments>
+    <us-gaap:ShortTermInvestments contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001764" unitRef="U_iso4217USD">10000000</us-gaap:ShortTermInvestments>
+    <us-gaap:AssetsCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001770" unitRef="U_iso4217CNY">3517630000</us-gaap:AssetsCurrent>
+    <us-gaap:AssetsCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001771" unitRef="U_iso4217CNY">529102000</us-gaap:AssetsCurrent>
+    <us-gaap:AssetsCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001772" unitRef="U_iso4217USD">83028000</us-gaap:AssetsCurrent>
+    <us-gaap:OtherAssetsNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001776" unitRef="U_iso4217CNY">595000</us-gaap:OtherAssetsNoncurrent>
+    <us-gaap:OtherAssetsNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001777" unitRef="U_iso4217USD">93000</us-gaap:OtherAssetsNoncurrent>
+    <us-gaap:AssetsNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001778" unitRef="U_iso4217CNY">6318785000</us-gaap:AssetsNoncurrent>
+    <us-gaap:AssetsNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001779" unitRef="U_iso4217CNY">9658454000</us-gaap:AssetsNoncurrent>
+    <us-gaap:AssetsNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001780" unitRef="U_iso4217USD">1515621000</us-gaap:AssetsNoncurrent>
+    <us-gaap:Assets contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001781" unitRef="U_iso4217CNY">9836415000</us-gaap:Assets>
+    <us-gaap:Assets contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001782" unitRef="U_iso4217CNY">10187556000</us-gaap:Assets>
+    <us-gaap:Assets contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001783" unitRef="U_iso4217USD">1598649000</us-gaap:Assets>
+    <us-gaap:DueToRelatedPartiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001784" unitRef="U_iso4217CNY">36978000</us-gaap:DueToRelatedPartiesCurrent>
+    <us-gaap:DueToRelatedPartiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001785" unitRef="U_iso4217CNY">31600000</us-gaap:DueToRelatedPartiesCurrent>
+    <us-gaap:DueToRelatedPartiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001786" unitRef="U_iso4217USD">4959000</us-gaap:DueToRelatedPartiesCurrent>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001790" unitRef="U_iso4217CNY">65388000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001791" unitRef="U_iso4217CNY">50321000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:LiabilitiesCurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001792" unitRef="U_iso4217USD">7896000</us-gaap:LiabilitiesCurrent>
+    <us-gaap:OtherLiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001793" unitRef="U_iso4217CNY">31559000</us-gaap:OtherLiabilitiesNoncurrent>
+    <us-gaap:OtherLiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001794" unitRef="U_iso4217CNY">22603000</us-gaap:OtherLiabilitiesNoncurrent>
+    <us-gaap:OtherLiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001795" unitRef="U_iso4217USD">3547000</us-gaap:OtherLiabilitiesNoncurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001796" unitRef="U_iso4217CNY">31559000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001797" unitRef="U_iso4217CNY">22603000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:LiabilitiesNoncurrent contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001798" unitRef="U_iso4217USD">3547000</us-gaap:LiabilitiesNoncurrent>
+    <us-gaap:Liabilities contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001799" unitRef="U_iso4217CNY">96947000</us-gaap:Liabilities>
+    <us-gaap:Liabilities contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001800" unitRef="U_iso4217CNY">72924000</us-gaap:Liabilities>
+    <us-gaap:Liabilities contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001801" unitRef="U_iso4217USD">11443000</us-gaap:Liabilities>
+    <us-gaap:CommonStockValue contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001802" unitRef="U_iso4217CNY">46000</us-gaap:CommonStockValue>
+    <us-gaap:CommonStockValue contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001803" unitRef="U_iso4217CNY">46000</us-gaap:CommonStockValue>
+    <us-gaap:CommonStockValue contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001804" unitRef="U_iso4217USD">7000</us-gaap:CommonStockValue>
+    <cd:StatutoryReserves contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001808" unitRef="U_iso4217CNY">82792000</cd:StatutoryReserves>
+    <cd:StatutoryReserves contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001809" unitRef="U_iso4217CNY">189700000</cd:StatutoryReserves>
+    <cd:StatutoryReserves contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001810" unitRef="U_iso4217USD">29768000</cd:StatutoryReserves>
+    <us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001811" unitRef="U_iso4217CNY">-172586000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001812" unitRef="U_iso4217CNY">-257977000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001813" unitRef="U_iso4217USD">-40482000</us-gaap:AccumulatedOtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:RetainedEarningsAccumulatedDeficit contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001814" unitRef="U_iso4217CNY">-681300000</us-gaap:RetainedEarningsAccumulatedDeficit>
+    <us-gaap:RetainedEarningsAccumulatedDeficit contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001815" unitRef="U_iso4217CNY">-463465000</us-gaap:RetainedEarningsAccumulatedDeficit>
+    <us-gaap:RetainedEarningsAccumulatedDeficit contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001816" unitRef="U_iso4217USD">-72728000</us-gaap:RetainedEarningsAccumulatedDeficit>
+    <us-gaap:StockholdersEquity contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001817" unitRef="U_iso4217CNY">9739468000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001818" unitRef="U_iso4217CNY">10114632000</us-gaap:StockholdersEquity>
+    <us-gaap:StockholdersEquity contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001819" unitRef="U_iso4217USD">1587206000</us-gaap:StockholdersEquity>
+    <us-gaap:LiabilitiesAndStockholdersEquity contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231" decimals="-3" id="F_001820" unitRef="U_iso4217CNY">9836415000</us-gaap:LiabilitiesAndStockholdersEquity>
+    <us-gaap:LiabilitiesAndStockholdersEquity contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001821" unitRef="U_iso4217CNY">10187556000</us-gaap:LiabilitiesAndStockholdersEquity>
+    <us-gaap:LiabilitiesAndStockholdersEquity contextRef="C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231" decimals="-3" id="F_001822" unitRef="U_iso4217USD">1598649000</us-gaap:LiabilitiesAndStockholdersEquity>
+    </xbrl>

@@ -236,7 +236,9 @@ class XBRLS:
 
     def to_dataframe(self, statement_type: str,
                     max_periods: int = 8,
-                    standardize: bool = True) -> pd.DataFrame:
+                    standardize: bool = True,
+                    *,
+                    period_columns: str = "end_date") -> pd.DataFrame:
         """
         Convert a stitched statement to a pandas DataFrame.
 
@@ -244,6 +246,8 @@ class XBRLS:
             statement_type: Type of statement to convert ('BalanceSheet', 'IncomeStatement', etc.)
             max_periods: Maximum number of periods to include
             standardize: Whether to use standardized concept labels
+            period_columns: ``"end_date"`` (default) or ``"interval"`` to name each
+                column by its exact dates; see ``StitchedStatement.to_dataframe``.
 
         Returns:
             DataFrame with periods as columns and concepts as index
@@ -251,7 +255,7 @@ class XBRLS:
         # Create a StitchedStatement object and use its to_dataframe method
         from edgar.xbrl.statements import StitchedStatement
         statement = StitchedStatement(self, statement_type, max_periods, standardize)
-        return statement.to_dataframe()
+        return statement.to_dataframe(period_columns=period_columns)
 
     def get_periods(self) -> List[Dict[str, str]]:
         """

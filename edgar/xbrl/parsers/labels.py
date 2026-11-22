@@ -7,7 +7,7 @@ element labels for display purposes.
 
 import sys
 from pathlib import Path
-from typing import Dict, Optional, Tuple, Union
+from typing import Dict, List, Optional, Tuple, Union
 
 from lxml import etree as ET
 
@@ -16,6 +16,7 @@ from edgar.xbrl.models import ElementCatalog, XBRLProcessingError
 from edgar.xmltools import xml_parser
 
 from .base import BaseParser
+from .relationships import arc_candidate, effective_relationships
 
 
 def _english_rank(lang: str) -> Optional[int]:
@@ -99,7 +100,6 @@ class LabelsParser(BaseParser):
 
             # Optimize: Use specific XPath expressions with namespaces for faster lookups
             # This is much faster than using findall with '//' in element tree
-            label_arcs = root.xpath('//link:labelArc', namespaces=nsmap)
             labels = root.xpath('//link:label', namespaces=nsmap)
 
             # Optimize: Pre-allocate dictionary with expected size
@@ -148,68 +148,83 @@ class LabelsParser(BaseParser):
 
                 label_lookup[label_id][lang][role] = text
 
-            # Optimize: Cache attribute lookups for arcs
-            xlink_from = '{http://www.w3.org/1999/xlink}from'
-            xlink_to = '{http://www.w3.org/1999/xlink}to'
-            xlink_href = '{http://www.w3.org/1999/xlink}href'
-
-            # Optimize: Create a lookup table for locators by label for faster access
-            loc_by_label = {}
-            for loc in root.xpath('//link:loc', namespaces=nsmap):
-                loc_label = loc.get(xlink_label)
-                if loc_label:
-                    loc_by_label[loc_label] = loc.get(xlink_href)
-
-            # Connect labels to elements using arcs - with optimized lookups
-            for arc in label_arcs:
-                from_ref = arc.get(xlink_from)
-                to_ref = arc.get(xlink_to)
-
-                if not from_ref or not to_ref or to_ref not in label_lookup:
-                    continue
-
-                # Use cached locator lookup instead of expensive XPath
-                href = loc_by_label.get(from_ref)
-                if not href:
-                    continue
-
-                # Extract element ID from href
-                element_id = extract_element_id(href)
-
-                # Find this element's English labels (en-US, en, en-GB, ...).
-                # A lower-ranked language never replaces a label already held
-                # in a higher-ranked one, whichever arc came first.
-                ranked_labels = _english_labels(label_lookup[to_ref])
-                if ranked_labels:
-                    element_labels = {}
-                    for role, (rank, text) in ranked_labels.items():
-                        key = (element_id, role)
-                        held = self._label_ranks.get(key)
-                        if held is None or rank <= held:
-                            self._label_ranks[key] = rank
-                            element_labels[role] = text
-
-                    # Optimize: Update catalog with minimal overhead
-                    catalog_entry = self.element_catalog.get(element_id)
-                    if catalog_entry:
-                        catalog_entry.labels.update(element_labels)
-                    else:
-                        # A labeled element the filing's own schema does not
-                        # declare comes from a schema the filing imports but does
-                        # not contain (us-gaap, dei, srt), so its type, period
-                        # type and balance are unknown. None says so; "" and
-                        # "duration" read as answers, and "duration" is wrong for
-                        # every instant concept. The parser fills the period type
-                        # in from the facts once the instance is read.
-                        self.element_catalog[element_id] = ElementCatalog(
-                            name=element_id,
-                            data_type=None,
-                            period_type=None,
-                            labels=element_labels
-                        )
+            # Connect labels to elements using the effective arcs
+            for relationship in effective_relationships(self._label_candidates(root, nsmap, label_lookup)):
+                self._apply_labels(relationship['element_id'], label_lookup[relationship['to_ref']])
 
         except Exception as e:
             raise XBRLProcessingError(f"Error parsing label content: {str(e)}") from e
+
+    @staticmethod
+    def _label_candidates(root, nsmap: Dict[str, str],
+                          label_lookup: Dict[str, Dict[str, Dict[str, str]]]) -> List[Dict]:
+        """
+        Every concept-label arc in the document, as a relationship candidate.
+
+        Prohibition and overriding then decide which of them hold (XBRL 2.1
+        section 3.5.3.9.7). A label resource is identified by its extended link
+        and xlink:label.
+        """
+        xlink_label = '{http://www.w3.org/1999/xlink}label'
+        xlink_role = '{http://www.w3.org/1999/xlink}role'
+        xlink_from = '{http://www.w3.org/1999/xlink}from'
+        xlink_to = '{http://www.w3.org/1999/xlink}to'
+        xlink_href = '{http://www.w3.org/1999/xlink}href'
+
+        # A lookup table for locators by label, for fast access
+        loc_by_label = {}
+        for loc in root.xpath('//link:loc', namespaces=nsmap):
+            loc_label = loc.get(xlink_label)
+            if loc_label:
+                loc_by_label[loc_label] = loc.get(xlink_href)
+
+        candidates = []
+        for link_index, link in enumerate(root.xpath('//link:labelLink', namespaces=nsmap)):
+            role = link.get(xlink_role)
+            for arc in link.xpath('./link:labelArc', namespaces=nsmap):
+                to_ref = arc.get(xlink_to)
+                href = loc_by_label.get(arc.get(xlink_from))
+                if not href or not to_ref or to_ref not in label_lookup:
+                    continue
+                element_id = extract_element_id(href)
+                candidates.append(arc_candidate(arc, role, element_id, (link_index, to_ref),
+                                                {'element_id': element_id, 'to_ref': to_ref}))
+        return candidates
+
+    def _apply_labels(self, element_id: str, labels_by_lang: Dict[str, Dict[str, str]]) -> None:
+        """Give an element the English labels of one label resource set."""
+        # Find this element's English labels (en-US, en, en-GB, ...).
+        # A lower-ranked language never replaces a label already held
+        # in a higher-ranked one, whichever arc came first.
+        ranked_labels = _english_labels(labels_by_lang)
+        if not ranked_labels:
+            return
+
+        element_labels = {}
+        for role, (rank, text) in ranked_labels.items():
+            key = (element_id, role)
+            held = self._label_ranks.get(key)
+            if held is None or rank <= held:
+                self._label_ranks[key] = rank
+                element_labels[role] = text
+
+        catalog_entry = self.element_catalog.get(element_id)
+        if catalog_entry:
+            catalog_entry.labels.update(element_labels)
+        else:
+            # A labeled element the filing's own schema does not
+            # declare comes from a schema the filing imports but does
+            # not contain (us-gaap, dei, srt), so its type, period
+            # type and balance are unknown. None says so; "" and
+            # "duration" read as answers, and "duration" is wrong for
+            # every instant concept. The parser fills the period type
+            # in from the facts once the instance is read.
+            self.element_catalog[element_id] = ElementCatalog(
+                name=element_id,
+                data_type=None,
+                period_type=None,
+                labels=element_labels
+            )
 
     def get_element_label(self, element_id: str) -> str:
         """Get the label for an element, falling back to the element ID if not found."""

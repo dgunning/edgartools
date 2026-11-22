@@ -26,8 +26,8 @@ from edgar.exceptions import ValidationError
 
 from edgar.datatools import STR_DTYPE, null_column as _null_column
 from edgar.richtools import repr_rich
-from edgar.xbrl.core import STANDARD_LABEL, iso4217_code, parse_date, unit_currency
-from edgar.xbrl.models import is_negated_label_role, select_display_label
+from edgar.xbrl.core import STANDARD_LABEL, element_catalog_key, iso4217_code, parse_date, unit_currency
+from edgar.xbrl.models import NIL_MEMBER_LABEL, is_negated_label_role, select_display_label
 
 
 # Probed once in edgar.datatools, where the entity path's declared schema reads it
@@ -75,12 +75,15 @@ _CORE_COLUMNS: Dict[str, Any] = {
     'entity_scheme': _STR_DTYPE,
     'fiscal_period': _STR_DTYPE,
     'fiscal_year': 'Int64',
+    # Last, so existing core positions hold (GH #1254). Nullable: a derived
+    # aggregate row is not a source fact and gets no invented nil state.
+    'is_nil': 'boolean',
 }
 
 # Declared dtype applied to populated columns too, so it holds whichever rows match.
 # `is_dimensioned` is always populated as a bool; pinning it to `boolean` keeps an
 # empty result, which must declare a nullable dtype, identical to a populated one.
-_PINNED = frozenset({'preferred_sign', 'fiscal_year', 'is_dimensioned'})
+_PINNED = frozenset({'preferred_sign', 'fiscal_year', 'is_dimensioned', 'is_nil'})
 
 # Dropped by include_contexts=False.
 _CONTEXT_COLUMNS = frozenset(
@@ -112,7 +115,10 @@ _SKIP_COLUMNS = frozenset({'fact_key', 'original_label',
 # in the frame long enough for it to run (gh #1181). Two spellings of one rule is
 # the bug this file has produced most often, so both read these names.
 _DEDUP_REQUIRED = ('concept', 'context_ref', 'value', 'decimals')
-_DEDUP_OPTIONAL = ('unit_ref',)
+# `is_nil` is in it because a filed nil item and an empty non-nil element share
+# every other identity field; without it the frame kept whichever came first
+# (GH #1254). Two nil items, or two empty ones, still collapse.
+_DEDUP_OPTIONAL = ('unit_ref', 'is_nil')
 
 
 def _source_column_presence(results: List[Dict[str, Any]], names) -> set:
@@ -182,9 +188,8 @@ def _concept_spellings(concept: str) -> tuple:
     and in most SEC tooling. Only the NAMESPACE separator differs between them; a
     local name keeps whatever underscores the filer declared.
     """
-    if ':' in concept:
-        return (concept, concept.replace(':', '_', 1))
-    return (concept,)
+    key = element_catalog_key(concept)
+    return (concept, key) if key != concept else (concept,)
 
 
 def _sort_key(value: Any) -> tuple:
@@ -352,7 +357,8 @@ class FactQuery:
         Args:
             value_filter: Can be:
                 - A callable predicate that takes a value and returns bool
-                - A specific value to match exactly
+                - A string to match the filed text exactly
+                - A number to match the parsed numeric value exactly
                 - A tuple or list of (min, max) for range filtering
 
         Returns:
@@ -374,6 +380,12 @@ class FactQuery:
                         min_val <= f['numeric_value'] <= max_val)
 
             self._filters.append(numeric_range_filter)
+        elif isinstance(value_filter, str):
+            def text_equality_filter(fact):
+                text = fact.get('value')
+                return text == value_filter
+
+            self._filters.append(text_equality_filter)
         else:
             def numeric_equality_filter(f):
                 return ('numeric_value' in f and
@@ -669,7 +681,7 @@ class FactQuery:
             return member_value
 
         # Normalize to match element catalog key format (colons -> underscores)
-        member_normalized = member_value.replace(':', '_')
+        member_normalized = element_catalog_key(member_value)
 
         if member_normalized in self._facts_view.xbrl.element_catalog:
             mem_element = self._facts_view.xbrl.element_catalog[member_normalized]
@@ -749,7 +761,8 @@ class FactQuery:
 
         # Also update the 'label' column to match (GH-597 behavior for dimensional data)
         # Only update where we have a valid dimension_member_label
-        mask = df['dimension_member_label'].notna()
+        # A nil typed member's value is '' (GH #1751): it has no label to show.
+        mask = df['dimension_member_label'].notna() & (df['dimension_member_label'] != '')
         df.loc[mask, 'label'] = df.loc[mask, 'dimension_member_label']
 
         return df
@@ -1034,7 +1047,9 @@ class FactQuery:
                     # TypeError on any ordinary numeric fact. A fact with no
                     # numeric_value is not a number and cannot be aggregated.
                     numeric_value = fact.get('numeric_value')
-                    if dim_value and numeric_value is not None:
+                    # A nil typed member is '' and still a group (GH #1751);
+                    # only a fact without the axis is left out.
+                    if dim_value is not None and numeric_value is not None:
                         if dim_value not in groups:
                             groups[dim_value] = []
                         groups[dim_value].append(numeric_value)
@@ -1448,7 +1463,8 @@ class FactsView:
                 'unit_ref': fact.unit_ref,
                 'currency': _unit_currency(units.get(fact.unit_ref)) if fact.unit_ref else None,
                 'decimals': fact.decimals,
-                'numeric_value': fact.numeric_value
+                'numeric_value': fact.numeric_value,
+                'is_nil': fact.is_nil,
             }
 
             # Split element name from context for better concept display
@@ -1519,7 +1535,7 @@ class FactsView:
                             mem_label = dim_value
 
                             # Look up human-readable dimension label from element catalog
-                            dim_name_normalized = dim_name.replace(':', '_')
+                            dim_name_normalized = element_catalog_key(dim_name)
                             if dim_name_normalized in self.xbrl.element_catalog:
                                 dim_element = self.xbrl.element_catalog[dim_name_normalized]
                                 for role in ['http://www.xbrl.org/2003/role/terseLabel',
@@ -1529,7 +1545,7 @@ class FactsView:
                                         break
 
                             # Look up human-readable member label from element catalog
-                            dim_value_normalized = dim_value.replace(':', '_')
+                            dim_value_normalized = element_catalog_key(dim_value)
                             if dim_value_normalized in self.xbrl.element_catalog:
                                 mem_element = self.xbrl.element_catalog[dim_value_normalized]
                                 for role in ['http://www.xbrl.org/2003/role/verboseLabel',
@@ -1541,7 +1557,8 @@ class FactsView:
 
                             # Clean up labels (remove [Axis], [Member], etc.)
                             dim_label = dim_label.replace('[Axis]', '').replace('[Domain]', '').strip()
-                            mem_label = mem_label.replace('[Member]', '').strip()
+                            mem_label = (NIL_MEMBER_LABEL if dim_name in getattr(context, 'nil_dimensions', ())
+                                         else mem_label.replace('[Member]', '').strip())
 
                             dimension_metadata.append({
                                 'dimension': dim_name,
@@ -1584,8 +1601,8 @@ class FactsView:
                 fact_dict['is_dimensioned'] = False
 
             # Add element information and statement type
-            # Normalize element_id to match catalog keys (replace ':' with '_')
-            element_id = fact.element_id.replace(':', '_')
+            # Facts carry QNames; catalog and presentation keys use the element id
+            element_id = element_catalog_key(fact.element_id)
             if element_id in self.xbrl.element_catalog:
                 element = self.xbrl.element_catalog[element_id]
 
@@ -1638,14 +1655,10 @@ class FactsView:
 
                 # Add balance from element catalog (Issue #463)
                 # Balance indicates accounting classification (debit/credit)
-                # Try element catalog first, then fall back to static US-GAAP mapping
-                balance = element.balance
-                if balance is None:
-                    # Import here to avoid circular dependencies
-                    from edgar.xbrl.parsers.concepts import get_balance_type
-                    # Try to get balance from static mapping using the original concept ID
-                    balance = get_balance_type(fact.element_id)
-                fact_dict['balance'] = balance  # "debit", "credit", or None
+                # The filing's own declaration first, then the standard taxonomy's (#1728)
+                # Import here to avoid circular dependencies
+                from edgar.xbrl.parsers.concepts import resolve_balance
+                fact_dict['balance'] = resolve_balance(element.balance, fact.element_id)  # "debit", "credit", or None
 
                 # Add preferred_sign from presentation linkbase (Issue #463)
                 # Convert preferredLabel to a numeric sign multiplier for display

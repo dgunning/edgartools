@@ -1,0 +1,623 @@
+{
+ "version": "2.1",
+ "instance": {
+  "d241599d40f.htm d241599dex992.htm": {
+   "tag": {
+    "gib_IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity": {
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Increase (Decrease) Through Exercise Of Other Equity Instruments, Equity",
+        "label": "Increase (Decrease) Through Exercise Of Other Equity Instruments, Equity",
+        "terseLabel": "Exercise of performance share units",
+        "verboseLabel": "PSUs exercised"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseThroughExerciseOfOtherEquityInstrumentsEquity",
+     "nsuri": "http://www.cgi.com/20210930",
+     "presentation": [
+      "http://www.cgi.com/role/CapitalstockScheduleofoutstandingsharesDetails",
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "gib_PurchaseOfTreasurySharesForCancellation": {
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Purchase Of Treasury Shares For Cancellation",
+        "label": "Purchase Of Treasury Shares For Cancellation",
+        "negatedTerseLabel": "Purchase for cancellation of Class A subordinate voting shares"
+       }
+      }
+     },
+     "localname": "PurchaseOfTreasurySharesForCancellation",
+     "nsuri": "http://www.cgi.com/20210930",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_AccumulatedOtherComprehensiveIncomeMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for accumulated other comprehensive income. [Refer: Other comprehensive income]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Accumulated other comprehensive income [member]",
+        "terseLabel": "Accumulated other comprehensive income"
+       }
+      }
+     },
+     "localname": "AccumulatedOtherComprehensiveIncomeMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_AdditionalPaidinCapitalMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for amounts received from issuance of the entity's shares in excess of nominal value and amounts received from other transactions involving the entity's stock or stockholders."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Additional paid-in capital [member]",
+        "terseLabel": "Contributed surplus"
+       }
+      }
+     },
+     "localname": "AdditionalPaidinCapitalMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/CapitalstockScheduleofoutstandingsharesDetails",
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_ComponentsOfEquityAxis": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the domain members or categories in the table and the line items or concepts that complete the table."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Components of equity [axis]",
+        "terseLabel": "Components of equity [axis]"
+       }
+      }
+     },
+     "localname": "ComponentsOfEquityAxis",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/CapitalstockNarrativeDetails",
+      "http://www.cgi.com/role/CapitalstockScheduleofoutstandingsharesDetails",
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity",
+      "http://www.cgi.com/role/EarningspershareDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_ComprehensiveIncome": {
+     "calculation": {
+      "http://www.cgi.com/role/ConsolidatedStatementsofComprehensiveIncome": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of change in equity resulting from transactions and other events, other than those changes resulting from transactions with owners in their capacity as owners."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Comprehensive income",
+        "totalLabel": "Comprehensive income (loss)"
+       }
+      }
+     },
+     "localname": "ComprehensiveIncome",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity",
+      "http://www.cgi.com/role/ConsolidatedStatementsofComprehensiveIncome"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_DecreaseIncreaseThroughTaxOnSharebasedPaymentTransactions": {
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The decrease (increase) in equity resulting from tax on transactions in which the entity: (a) receives goods or services from the supplier of those goods or services (including an employee) in a share-based payment arrangement; or (b) incurs an obligation to settle the transaction with the supplier in a share-based payment arrangement when another group entity receives those goods or services. [Refer: Share-based payment arrangements [member]]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Decrease (increase) through tax on share-based payment transactions, equity",
+        "negatedTerseLabel": "Income tax impact associated with stock options"
+       }
+      }
+     },
+     "localname": "DecreaseIncreaseThroughTaxOnSharebasedPaymentTransactions",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_Equity": {
+     "calculation": {
+      "http://www.cgi.com/role/ConsolidatedBalanceSheets": {
+       "order": 2.0,
+       "parentTag": "ifrs-full_EquityAndLiabilities",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of residual interest in the assets of the entity after deducting all its liabilities."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Equity",
+        "periodEndLabel": "Ending balance",
+        "periodStartLabel": "Beginning balance",
+        "totalLabel": "Total equity"
+       }
+      }
+     },
+     "localname": "Equity",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/CapitalstockScheduleofoutstandingsharesDetails",
+      "http://www.cgi.com/role/ConsolidatedBalanceSheets",
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_EquityMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for the residual interest in the assets of the entity after deducting all its liabilities. It also represents the standard value for the 'Components of equity' axis if no other member is used."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Equity [member]",
+        "terseLabel": "Equity [member]"
+       }
+      }
+     },
+     "localname": "EquityMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/CapitalstockNarrativeDetails",
+      "http://www.cgi.com/role/CapitalstockScheduleofoutstandingsharesDetails",
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity",
+      "http://www.cgi.com/role/EarningspershareDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for the financial effect of changes in accounting policy required by IFRSs. [Refer: IFRSs [member]]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Increase (decrease) due to changes in accounting policy required by IFRSs [member]",
+        "terseLabel": "Adoption of IFRS 16"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity",
+      "http://www.cgi.com/role/IncometaxesDisclosureofthecontinuityofdeferredtaxbalancesDetails",
+      "http://www.cgi.com/role/PropertyplantandequipmentDetails",
+      "http://www.cgi.com/role/RightofuseassetsDetails",
+      "http://www.cgi.com/role/SupplementarycashflowinformationFinancingactivitiesDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_IncreaseDecreaseThroughExerciseOfOptions": {
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from the exercise of options."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Increase (decrease) through exercise of options, equity",
+        "terseLabel": "Exercise of stock options",
+        "verboseLabel": "Issued upon exercise of stock options"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseThroughExerciseOfOptions",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/CapitalstockScheduleofoutstandingsharesDetails",
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions": {
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The increase (decrease) in equity resulting from share-based payment transactions. [Refer: Equity]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Increase (decrease) through share-based payment transactions, equity",
+        "terseLabel": "Share-based payment costs"
+       }
+      }
+     },
+     "localname": "IncreaseDecreaseThroughSharebasedPaymentTransactions",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_IssuedCapitalMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing issued capital."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Issued capital [member]",
+        "terseLabel": "Capital stock"
+       }
+      }
+     },
+     "localname": "IssuedCapitalMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/CapitalstockNarrativeDetails",
+      "http://www.cgi.com/role/CapitalstockScheduleofoutstandingsharesDetails",
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity",
+      "http://www.cgi.com/role/EarningspershareDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_OtherComprehensiveIncome": {
+     "calculation": {
+      "http://www.cgi.com/role/ConsolidatedStatementsofComprehensiveIncome": {
+       "order": 2.0,
+       "parentTag": "ifrs-full_ComprehensiveIncome",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The amount of income and expense (including reclassification adjustments) that is not recognised in profit or loss as required or permitted by IFRSs. [Refer: IFRSs [member]]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Other comprehensive income",
+        "totalLabel": "Other comprehensive (loss) income",
+        "verboseLabel": "Other comprehensive (loss) income"
+       }
+      }
+     },
+     "localname": "OtherComprehensiveIncome",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity",
+      "http://www.cgi.com/role/ConsolidatedStatementsofComprehensiveIncome"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_PreviouslyStatedMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for the information previously stated in the financial statements (ie before retrospective application or retrospective restatement)."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Previously stated [member]",
+        "terseLabel": "Previously stated"
+       }
+      }
+     },
+     "localname": "PreviouslyStatedMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity",
+      "http://www.cgi.com/role/IncometaxesDisclosureofthecontinuityofdeferredtaxbalancesDetails",
+      "http://www.cgi.com/role/PropertyplantandequipmentDetails",
+      "http://www.cgi.com/role/RightofuseassetsDetails",
+      "http://www.cgi.com/role/SupplementarycashflowinformationFinancingactivitiesDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_ProfitLoss": {
+     "calculation": {
+      "http://www.cgi.com/role/ConsolidatedStatementsofCashFlows": {
+       "order": 7.0,
+       "parentTag": "ifrs-full_CashFlowsFromUsedInOperatingActivities",
+       "weight": 1.0
+      },
+      "http://www.cgi.com/role/ConsolidatedStatementsofComprehensiveIncome": {
+       "order": 1.0,
+       "parentTag": "ifrs-full_ComprehensiveIncome",
+       "weight": 1.0
+      },
+      "http://www.cgi.com/role/ConsolidatedStatementsofEarnings": {
+       "order": null,
+       "parentTag": null,
+       "root": true,
+       "weight": null
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The total of income less expenses from continuing and discontinued operations, excluding the components of other comprehensive income. [Refer: Other comprehensive income]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Profit (loss)",
+        "terseLabel": "Net earnings",
+        "totalLabel": "Net earnings",
+        "verboseLabel": "Net earnings"
+       }
+      }
+     },
+     "localname": "ProfitLoss",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofCashFlows",
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity",
+      "http://www.cgi.com/role/ConsolidatedStatementsofComprehensiveIncome",
+      "http://www.cgi.com/role/ConsolidatedStatementsofEarnings"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_PurchaseOfTreasuryShares": {
+     "crdr": "debit",
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The decrease in equity resulting from the purchase of treasury shares. [Refer: Treasury shares]"
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Purchase of treasury shares",
+        "negatedLabel": "Purchased and held in trust",
+        "negatedTerseLabel": "Purchase of Class A subordinate voting shares held in trusts"
+       }
+      }
+     },
+     "localname": "PurchaseOfTreasuryShares",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/CapitalstockScheduleofoutstandingsharesDetails",
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "ifrs-full_RestatedMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for the information currently stated in the financial statements. It also represents the standard value for the 'Retrospective application and retrospective restatement' and 'Departure from requirement of IFRS' axes if no other member is used."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Currently stated [member]",
+        "terseLabel": "Currently stated [member]"
+       }
+      }
+     },
+     "localname": "RestatedMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity",
+      "http://www.cgi.com/role/IncometaxesDisclosureofthecontinuityofdeferredtaxbalancesDetails",
+      "http://www.cgi.com/role/PropertyplantandequipmentDetails",
+      "http://www.cgi.com/role/RightofuseassetsDetails",
+      "http://www.cgi.com/role/SupplementarycashflowinformationFinancingactivitiesDetails"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_RetainedEarningsMember": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "This member stands for a component of equity representing an entity's cumulative undistributed earnings or deficit."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Retained earnings [member]",
+        "terseLabel": "Retained earnings"
+       }
+      }
+     },
+     "localname": "RetainedEarningsMember",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/CapitalstockScheduleofoutstandingsharesDetails",
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "The axis of a table defines the relationship between the domain members or categories in the table and the line items or concepts that complete the table."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Retrospective application and retrospective restatement [axis]",
+        "terseLabel": "Retrospective application and retrospective restatement [axis]"
+       }
+      }
+     },
+     "localname": "RetrospectiveApplicationAndRetrospectiveRestatementAxis",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity",
+      "http://www.cgi.com/role/IncometaxesDisclosureofthecontinuityofdeferredtaxbalancesDetails",
+      "http://www.cgi.com/role/PropertyplantandequipmentDetails",
+      "http://www.cgi.com/role/RightofuseassetsDetails",
+      "http://www.cgi.com/role/SupplementarycashflowinformationFinancingactivitiesDetails"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_StatementOfChangesInEquityAbstract": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Statement of changes in equity [abstract]",
+        "terseLabel": "Statement of changes in equity [abstract]"
+       }
+      }
+     },
+     "localname": "StatementOfChangesInEquityAbstract",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_StatementOfChangesInEquityLineItems": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "Line items represent concepts included in a table. These concepts are used to disclose reportable information associated with domain members defined in one or many axes of the table."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Statement of changes in equity [line items]",
+        "terseLabel": "Statement of changes in equity [line items]"
+       }
+      }
+     },
+     "localname": "StatementOfChangesInEquityLineItems",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "ifrs-full_StatementOfChangesInEquityTable": {
+     "lang": {
+      "en": {
+       "role": {
+        "documentation": "Schedule disclosing information related to changes in equity."
+       }
+      },
+      "en-us": {
+       "role": {
+        "label": "Statement of changes in equity [table]",
+        "terseLabel": "Statement of changes in equity [table]"
+       }
+      }
+     },
+     "localname": "StatementOfChangesInEquityTable",
+     "nsuri": "http://xbrl.ifrs.org/taxonomy/2020-03-16/ifrs-full",
+     "presentation": [
+      "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity"
+     ],
+     "xbrltype": "stringItemType"
+    }
+   },
+   "report": {
+    "R5": {
+     "firstAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "d241599dex992.htm",
+      "contextRef": "ia0d1017fa68a4a248420bac11553b9e8_I20190930",
+      "decimals": "-3",
+      "first": true,
+      "lang": "en-US",
+      "name": "ifrs-full:Equity",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "cad",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "100040005 - Statement - Consolidated Statements of Changes in Equity",
+     "role": "http://www.cgi.com/role/ConsolidatedStatementsofChangesinEquity",
+     "shortName": "Consolidated Statements of Changes in Equity",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "span",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "d241599dex992.htm",
+      "contextRef": "ia0d1017fa68a4a248420bac11553b9e8_I20190930",
+      "decimals": "-3",
+      "first": true,
+      "lang": "en-US",
+      "name": "ifrs-full:Equity",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "cad",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

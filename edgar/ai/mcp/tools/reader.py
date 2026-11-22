@@ -77,8 +77,15 @@ SECTION_MAP_6K = {
 # Form types that have dedicated extractors (keyed by base form, without /A suffix)
 FORM_EXTRACTORS = {"10-K", "10-Q", "8-K", "DEF 14A", "SC 13D", "SC 13G", "SC 13D/A", "SC 13G/A", "13F-HR"}
 
+# Schedule 13D/G form names: "SC 13D" until December 2024, "SCHEDULE 13D" since
+SCHEDULE_13D_FORMS = ("SC 13D", "SCHEDULE 13D")
+SCHEDULE_13G_FORMS = ("SC 13G", "SCHEDULE 13G")
+
 # Rows of a 13F-HR ``holdings`` section returned when the caller sets no ``limit``.
 DEFAULT_HOLDINGS_LIMIT = 30
+
+# Characters returned per text section when the caller sets no ``max_chars``.
+DEFAULT_MAX_CHARS = 6000
 
 # Share of the 6,000-character section cap given to each 8-K earnings statement.
 EARNINGS_STATEMENT_CHARS = 1800
@@ -95,7 +102,8 @@ Available sections by form type:
 - 20-F: business, risk_factors, mda, financials, directors, shareholders, controls
 - 8-K: items, press_release, earnings
 - DEF 14A: compensation, pay_performance, governance
-- SC 13D/13G: ownership, purpose
+- SC 13D / SCHEDULE 13D: ownership, purpose
+- SC 13G / SCHEDULE 13G: ownership
 - 13F-HR: holdings, summary
 
 Examples:
@@ -132,6 +140,14 @@ Examples:
                            "Validated for all forms, applied only to 13F holdings.",
             "default": DEFAULT_HOLDINGS_LIMIT,
             "minimum": 0
+        },
+        "max_chars": {
+            "type": "integer",
+            "description": "Maximum characters per text section (default 6000). Large values can return "
+                           "very large results, up to a whole filing in one response. "
+                           "Does not apply to 13F-HR holdings, which are bounded by the 'limit' parameter.",
+            "default": DEFAULT_MAX_CHARS,
+            "minimum": 1
         }
     },
     required=[]
@@ -142,6 +158,7 @@ async def edgar_read(
     form: Optional[str] = None,
     sections: Optional[list[str]] = None,
     limit: Optional[int] = DEFAULT_HOLDINGS_LIMIT,
+    max_chars: Optional[int] = DEFAULT_MAX_CHARS,
 ) -> Any:
     """
     Read SEC filing content.
@@ -151,22 +168,31 @@ async def edgar_read(
 
     ``limit`` caps the rows of a 13F-HR ``holdings`` section; ``0`` returns all
     of them. It is validated for every form but applied only to 13F holdings,
-    which are also exempt from the 6,000-character cap that every other section
-    gets, so the rows ``limit`` asks for are all returned.
+    which are also exempt from the character cap that every other section gets,
+    so the rows ``limit`` asks for are all returned.
+
+    ``max_chars`` controls the maximum characters per text section (default 6000).
+    Does not apply to 13F-HR holdings.
     """
     sections = sections or ["summary"]
+    original_limit, original_max_chars = limit, max_chars
 
+    limit = _coerce_int(limit, default=DEFAULT_HOLDINGS_LIMIT, minimum=0)
     if limit is None:
-        limit = DEFAULT_HOLDINGS_LIMIT
-    # JSON Schema counts 30.0 as an integer, so accept integral floats.
-    if isinstance(limit, float) and limit.is_integer():
-        limit = int(limit)
-    # bool is an int subclass: limit=True would silently mean one row.
-    if isinstance(limit, bool) or not isinstance(limit, int) or limit < 0:
         return error(
-            f"Invalid limit: {limit!r}",
+            f"Invalid limit: {original_limit!r}",
             suggestions=[
                 "Use a non-negative integer: 30 (the default), a larger number, or 0 for every row",
+            ],
+            error_code="INVALID_ARGUMENTS"
+        )
+
+    max_chars = _coerce_int(max_chars, default=DEFAULT_MAX_CHARS, minimum=1)
+    if max_chars is None:
+        return error(
+            f"Invalid max_chars: {original_max_chars!r}",
+            suggestions=[
+                f"Use a positive integer: {DEFAULT_MAX_CHARS} (the default) or a different limit",
             ],
             error_code="INVALID_ARGUMENTS"
         )
@@ -199,7 +225,7 @@ async def edgar_read(
 
         # Extract requested sections
         if not metadata_only:
-            extracted = await _extract_sections(filing, sections, limit=limit)
+            extracted = await _extract_sections(filing, sections, limit=limit, max_chars=max_chars)
             result["sections"] = extracted
 
         # Next steps
@@ -224,6 +250,22 @@ async def edgar_read(
             suggestions=classified["suggestions"],
             error_code=classified["error_code"]
         )
+
+
+def _coerce_int(value: Any, default: int, minimum: int) -> Optional[int]:
+    """Return ``value`` as an int of at least ``minimum``, or None if it is invalid.
+
+    ``None`` means "not set" and gives ``default``. JSON Schema counts 30.0 as an
+    integer, so integral floats are accepted. ``bool`` is an int subclass, so
+    ``True`` is rejected rather than silently meaning 1.
+    """
+    if value is None:
+        return default
+    if isinstance(value, float) and value.is_integer():
+        value = int(value)
+    if isinstance(value, bool) or not isinstance(value, int) or value < minimum:
+        return None
+    return value
 
 
 async def _get_filing(
@@ -255,7 +297,8 @@ async def _get_filing(
     return None
 
 
-async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HOLDINGS_LIMIT) -> dict[str, Any]:
+async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HOLDINGS_LIMIT,
+                           max_chars: int = DEFAULT_MAX_CHARS) -> dict[str, Any]:
     """Extract requested sections from filing."""
     extracted = {}
 
@@ -293,11 +336,11 @@ async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HO
             if content:
                 text = str(content)
                 if _is_13f_holdings(filing.form, section):
-                    # Bounded by ``limit``, so the 6,000-char cap would only cut
+                    # Bounded by ``limit``, so the character cap would only cut
                     # off rows the caller asked for.
                     extracted[section] = text
                 else:
-                    extracted[section] = truncate_text(text, max_chars=6000)
+                    extracted[section] = truncate_text(text, max_chars=max_chars)
             else:
                 extracted[section] = None
 
@@ -308,7 +351,7 @@ async def _extract_sections(filing, sections: list[str], limit: int = DEFAULT_HO
         # Try to get raw text as fallback
         try:
             if hasattr(filing, 'text'):
-                extracted["raw_text_preview"] = truncate_text(filing.text(), max_chars=4000)
+                extracted["raw_text_preview"] = truncate_text(filing.text(), max_chars=min(4000, max_chars))
         except Exception as e:
             logger.debug(f"Could not get raw text fallback: {e}")
 
@@ -335,8 +378,10 @@ def _get_section_list(form_type: str) -> list[str]:
         return ["items", "press_release", "earnings"]
     elif base == "DEF 14A":
         return ["compensation", "pay_performance", "governance"]
-    elif base in ("SC 13D", "SC 13G"):
+    elif base in SCHEDULE_13D_FORMS:
         return ["ownership", "purpose"]
+    elif base in SCHEDULE_13G_FORMS:
+        return ["ownership"]
     elif base == "13F-HR":
         return ["holdings", "summary"]
     else:
@@ -361,7 +406,7 @@ def _extract_section(obj, form_type: str, section: str, limit: int = DEFAULT_HOL
         return _extract_8k_section(obj, section)
     elif base == "DEF 14A":
         return _extract_proxy_section(obj, section)
-    elif base in ("SC 13D", "SC 13G"):
+    elif base in SCHEDULE_13D_FORMS or base in SCHEDULE_13G_FORMS:
         return _extract_schedule13_section(obj, section)
     elif base == "13F-HR":
         return _extract_13f_section(obj, section, limit=limit)
@@ -577,16 +622,9 @@ def _extract_schedule13_section(obj, section: str) -> Optional[str]:
         return None
 
     elif section == "purpose":
-        # Try to get the purpose of transaction text
-        try:
-            # Schedule 13D Item 4 is "Purpose of Transaction"
-            if hasattr(obj, 'purpose_of_transaction'):
-                return str(obj.purpose_of_transaction)
-            # Fallback: try generic string representation
-            return str(obj)
-        except Exception as e:
-            logger.debug(f"Could not extract 13D/G purpose: {e}")
-        return None
+        # Schedule 13D Item 4 is "Purpose of Transaction"; Schedule 13G has no such item
+        items = getattr(obj, 'items', None)
+        return getattr(items, 'item4_purpose_of_transaction', None)
 
     return None
 

@@ -28,7 +28,7 @@ The viewer is most useful for four tasks:
 
 **Verify data quality.** `viewer.validate()` checks whether each total in the filing's calculation tree actually equals the sum of its children — surfacing any arithmetic inconsistencies in the filing itself.
 
-**Cross-check the XBRL parser.** `viewer.compare(xbrl)` matches the SEC's own rendering against edgartools' XBRL parser output, giving you a match rate and a list of any discrepancies.
+**Cross-check the XBRL parser.** `viewer.compare(xbrl)` matches the SEC's own rendering against edgartools' XBRL parser output, pairing every numeric cell with the fact it shows and reporting a match rate, its coverage, and each discrepancy.
 
 ## Browse Reports by Category
 
@@ -138,15 +138,17 @@ c.report_names   # All report names across every category
 
 ### Currency scaling
 
-The R*.htm viewer files display monetary values in the units specified in the filing (often millions or thousands). To get the raw XBRL value:
+The R*.htm pages display amounts at the scale each page declares under its title (`$ in Millions`, `₨ in Thousands`); a page with no such statement is in whole units. `currency_scaling` returns that scale, so multiplying a displayed value by it gives the amount as filed:
 
 ```python
-report = viewer.financial_statements[0]
-scaling = report.concept_report.currency_scaling  # e.g., 1_000_000
+report = viewer.financial_statements[0]           # INCOME STATEMENTS, "$ in Millions"
+scaling = report.currency_scaling                 # 1_000_000
 
 c = viewer['us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax']
-raw_value = c.numeric_value * scaling             # 281_724_000_000
+raw_value = c.numeric_value * scaling             # 331_839_000_000 (Microsoft FY2026 10-K)
 ```
+
+Statements in one filing can use different scales. Airbnb's FY2024 10-K (0001559720-25-000010) shows its balance sheet in millions and its statement of operations in whole dollars, so use the scale of the report the value came from.
 
 ## Navigate Calculation Trees
 
@@ -212,7 +214,7 @@ The viewer can verify that children sum to their parents across every statement 
 ```python
 issues = viewer.validate()
 
-# Each result has: parent, role, expected, computed, difference, valid
+# Each result has: parent, role, expected, computed, difference, valid, missing_children
 for r in issues:
     if not r['valid']:
         parent = r['parent']
@@ -227,44 +229,94 @@ issues = viewer.validate(tolerance=0.01)
 
 A clean filing with no validation failures returns an empty list for `[r for r in issues if not r['valid']]`.
 
+A child with no value in the report, such as a nil "Commitments and contingencies" line, is left out of the sum, as XBRL 2.1 calculations do, and its ID is listed in `r['missing_children']`. A total is checked as long as at least one of its children has a value.
+
 ## Cross-Validate Against the XBRL Parser
 
-The `compare()` method checks the viewer's values against the edgartools XBRL parser. The viewer (R*.htm) is treated as ground truth since it reflects the SEC's authoritative rendering.
+The `compare()` method checks every numeric cell of the viewer's financial statements against the XBRL facts. The viewer (R*.htm) is treated as ground truth since it reflects the SEC's rendering. Each cell is paired with the one fact it shows (same concept, period, dimensions and unit, sign included) and lands in one of four outcomes: `matched`, `mismatched`, `missing` (no such fact) or `not_comparable` (the page does not identify the fact; `reason` says why).
 
 ```python
 xbrl = filing.xbrl()
 results = viewer.compare(xbrl)
 
-print(results.match_rate)   # 1.0 (100%)
-print(results.total)        # Number of concept-period pairs compared
-print(results.mismatches)   # List of ComparisonResult objects
+print(results.match_rate)       # matched / (matched + mismatched)
+print(results.coverage)         # share of all numeric cells that were compared
+print(results.total)            # numeric cells on the statement pages
+print(results.mismatches)       # list of ComparisonResult
+print(results.not_comparables)  # cells the harness could not pair, each with .reason
 ```
 
-For filings with discrepancies, print the full comparison:
+Display the summary (in a notebook or terminal, `results` renders a panel):
 
 ```python
-print(results)
+results
 ```
 
 ```
-Viewer vs XBRL
-Compared: 94  Matched: 94  Match rate: 100.0%
+╭───────────────────────── Viewer vs XBRL ──────────────────────────╮
+│ Compared: 303  Matched: 303  Match rate: 100.0%  Coverage: 100.0% │
+╰───────────────────────────────────────────────────────────────────╯
 ```
+
+That is Microsoft's FY2026 10-K (0001193125-26-323660). `print(results)` gives the same counts on one line, `ComparisonResults(total=303, matched=303 (exact=303, sign_unverified=0), mismatched=0, missing=0, not_comparable=0, noted=0, rate=100.0%, coverage=100.0%)`.
 
 Export the full comparison to a DataFrame for analysis:
 
 ```python
 df = results.to_dataframe()
-# Columns: concept_id, label, period, viewer_value, xbrl_value, difference, match, report
+# Columns: concept_id, label, period, viewer_value, xbrl_value, difference, match, report, status, reason, note, sign_only, xbrl_period_key, xbrl_dimensions, xbrl_unit, label_role, negated
 ```
 
-Cross-validation results from testing against major companies:
+A cell the page does not identify is `not_comparable` rather than a match or a miss, so read `coverage` beside `match_rate`.
 
-| Company | Match Rate | Notes |
-|---------|-----------|-------|
-| AAPL, MSFT, GOOGL, XOM, WMT, TSLA | 100% | Standard US GAAP |
-| JPM | 89.9% | Bank segment structure edge cases |
-| JNJ | 87.9% | Percentage decimal convention |
+### What the comparison does not check
+
+- Only statement pages are compared, parentheticals included; notes, policies, tables and details are not.
+- Text, date and footnote cells are not counted, and a page that cannot be read is listed in `unread_statements` and left out of `total`.
+- `match_rate` leaves out `missing` and `not_comparable` cells. A match whose sign could not be verified still counts as matched; `exact_matches` excludes those.
+- A statement of equity with member-header rows is not read, and a row whose period block the page does not settle is `not_comparable`.
+- When duplicate facts disagree beyond their precision, the most precise one is compared and `note` records the disagreement.
+- A cell matches within half a unit of its last displayed digit, so a page in millions cannot show an error under $0.5 million.
+- It checks the XBRL parse against the SEC's rendering of the same filing. It does not check the filer's numbers, calculation arithmetic (see `viewer.validate()`), or the statements edgartools builds from the facts.
+
+### Compare the statements edgartools builds
+
+`compare()` checks the facts. `compare_statements()` checks what a user reads: the statement each typed getter returns (`balance_sheet()`, `income_statement(parenthetical=True)` and the others, or the statement by role when no getter reaches the page), as a DataFrame (`to_dataframe()`) and as the rendered table (`render()`). It runs `compare()` once, available as `.facts`, and compares each statement page row by row and cell by cell.
+
+```python
+from edgar import find
+
+filing = find("0001581068-21-000012")          # Brixmor Property Group 10-K for 2020
+viewer = filing.viewer
+results = viewer.compare_statements(filing.xbrl())
+
+print(f"{results.value_rate('dataframe'):.1%} of {results.compared_cells('dataframe')} cells, "
+      f"coverage {results.coverage('dataframe'):.1%}")
+print(results.family_counts('dataframe'))
+
+for r in results.of_kind('extra_row_outside_role', 'dataframe')[:1]:
+    print(r.page, '|', r.library_label)
+    print(r.concept, r.dimensions)
+```
+
+```text
+100.0% of 480 cells, coverage 77.2%
+{'not_comparable': 36, 'matched': 673, 'presentation': 89, 'disagreement': 48}
+CONSOLIDATED BALANCE SHEETS | Held-for-sale
+us-gaap:RealEstateHeldforsale {'us-gaap:DisposalGroupClassificationAxis': 'us-gaap:DisposalGroupHeldforsaleNotDiscontinuedOperationsMember'}
+```
+
+The headline is a pair per surface (`'dataframe'` or `'rendered'`). `value_rate` is the share of compared cells the library shows, under the page column's own period (requested when the default view leaves it out), with the page's value and sign. A cell is compared when `compare()` matched it to a fact, its row has a library row and its column's period is known, unless the library row shows that period in another currency or unit (`unit_column_not_shown`) or the page prints a less precise duplicate fact (`less_precise_duplicate`); those two are reported beside. A library call that raises counts against `value_rate`: when `to_dataframe()` or `render()` raises on a page's statement, the page gets a `statement_raised` outcome and each cell that would have been looked up (matched by `compare()`, in a row whose context `compare()` established, under a column whose period is known) is `library_raised`; when requesting a period the default view leaves out raises, that cell is `library_raised`. Both carry the exception in `reason`. `coverage` is the share of all the pages' numeric cells that were compared. Every other outcome is reported beside the pair: each has a `kind` named for what was observed (`row_dropped`, `sign_differs`, `negative_zero`, `zero_rendered_blank`, `period_not_in_default_view` and so on; see `KINDS` in `edgar.xbrl.statement_fidelity`), and each kind belongs to one family, `disagreement`, `presentation` or `not_comparable`. `results.to_dataframe()` has one row per outcome.
+
+Limits:
+
+- A statement-of-equity page (members as columns, period blocks as rows) is compared cell by cell: each cell under the period its block covers, in the library row of its concept and members, the first for an opening balance and the last for a closing one. A balance row between two movements is read as the closing balance of the first.
+- A statement of equity with member header rows is not compared; its cells count in the `coverage` denominator.
+- A page row is aligned only when `compare()` matched at least one of its cells, so a row whose cells are all `missing` or `not_comparable` is `row_not_comparable`.
+- Heading rows under a member header are not compared, and `to_dataframe()` names only the first axis of a row with several, so such library rows are `library_row_not_identifiable`.
+- It reports what each side shows. Whether a disagreement is a library defect is for the reader to decide.
+
+Both checks run on a random sample of filings each release; the results are in the [As-Filed Fidelity Scorecard](../xbrl/fidelity-scorecard.md).
 
 ### LLM-based comparison
 
@@ -431,6 +483,7 @@ The viewer reflects what the SEC displays, so it's the definitive reference for 
 | `viewer.search(query)` | `List[Concept]` | Search by keyword |
 | `viewer.validate()` | `List[dict]` | Check calculation trees |
 | `viewer.compare(xbrl)` | `ComparisonResults` | Cross-validate against XBRL parser |
+| `viewer.compare_statements(xbrl)` | `StatementFidelityResults` | Compare the library's statements with the statement pages |
 | `viewer.compare_context(xbrl, stmt)` | `str` | LLM-ready side-by-side comparison |
 | `viewer.view(name)` | — | Display a report in the terminal |
 | `viewer.to_context()` | `str` | AI-optimized summary |
@@ -466,12 +519,20 @@ The viewer reflects what the SEC displays, so it's the definitive reference for 
 
 | Property / Method | Type | Description |
 |-------------------|------|-------------|
-| `results.match_rate` | `float` | Fraction matched (0.0-1.0) |
-| `results.total` | `int` | Total concept-period pairs compared |
-| `results.matched` | `int` | Matching pairs |
-| `results.mismatched` | `int` | Mismatched pairs (value present but differs) |
-| `results.missing` | `int` | Viewer concepts absent from XBRL |
+| `results.match_rate` | `float` | matched / (matched + mismatched) |
+| `results.coverage` | `float` | Compared cells (matched + mismatched) / total |
+| `results.total` | `int` | Numeric cells on the statement pages |
+| `results.matched` | `int` | Cells whose fact agrees |
+| `results.exact_matches` | `int` | Matched cells whose sign was verified too |
+| `results.mismatched` | `int` | Cells whose fact differs |
+| `results.missing` | `int` | Cells with no XBRL fact for their concept, period, dimensions and unit |
+| `results.not_comparable` | `int` | Cells whose fact the page does not identify |
+| `results.noted` | `int` | Compared cells whose duplicate facts disagree |
 | `results.mismatches` | `List[ComparisonResult]` | Only mismatched entries |
+| `results.not_comparables` | `List[ComparisonResult]` | Only not-comparable entries, each with `reason` |
+| `results.sign_unverified` | `List[ComparisonResult]` | Matches whose sign could not be verified |
+| `results.scaling_factors` | `Dict[str, int]` | Currency scale per statement |
+| `results.unread_statements` | `List[str]` | Statement pages that could not be read |
 | `results.to_dataframe()` | `pd.DataFrame` | Full results as DataFrame |
 
 ---

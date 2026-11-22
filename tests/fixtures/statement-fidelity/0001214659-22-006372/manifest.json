@@ -1,0 +1,15 @@
+{
+ "accession": "0001214659-22-006372",
+ "filer": "Good Times Restaurants Inc.",
+ "form": "10-Q",
+ "filing_date": "2022-05-05",
+ "role": "http://goodtimesburgers.com/role/ConsolidatedCashFlow",
+ "page": "R6.htm",
+ "short_name": "Condensed Consolidated Statements of Cash Flows (Unaudited)",
+ "sic": "5812",
+ "period_of_report": "2022-03-29",
+ "menu_categories": {
+  "http://goodtimesburgers.com/role/ConsolidatedCashFlow": "Statements"
+ },
+ "access": "cash_flow_statement()"
+}

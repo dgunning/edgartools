@@ -195,6 +195,54 @@ noninterest = calc[calc.parent_concept == 'NoninterestIncome']
 
 See the [Calculation Linkbase guide](../xbrl/guides/calculation-linkbase.md) for the longer walkthrough.
 
+#### element_metadata()
+```python
+def element_metadata(self, concept: str) -> Optional[ElementMetadata]
+```
+What a concept is: its type, balance, period type, abstract status, FASB definition and Accounting Standards Codification references. Accepts `us-gaap:Assets` or `us-gaap_Assets`, and returns `None` when no source knows the concept. A concept without a namespace prefix raises `ValueError`.
+
+Each field comes from the first source that states it: the filing's own schema (extension concepts), then the bundled FASB element table (us-gaap and srt), then the filing's `MetaLinks.json`. A field no source states is `None`; nothing is guessed from the name. `documentation` and `references` come from `MetaLinks.json`, which the first call reads from the loaded submission or downloads as one small file. They are `None` when the filing has no `MetaLinks.json` (before about 2012) or the XBRL was built from local files without one.
+
+| Field | Type | Description |
+|---|---|---|
+| `concept`, `prefix`, `name` | str | `us-gaap_Assets`, `us-gaap`, `Assets` |
+| `is_standard` | bool | True for us-gaap, srt, dei, ifrs-full and the other SEC taxonomies |
+| `data_type` | str \| None | Declared type as its source spells it, e.g. `xbrli:monetaryItemType` |
+| `balance` | str \| None | `debit`, `credit`, or `None` when none is declared |
+| `period_type` | str \| None | `instant` or `duration` |
+| `abstract` | bool \| None | Declared abstract flag; `None` when no declaration was read (dei) |
+| `documentation` | str \| None | Definition text |
+| `references` | tuple[AuthRef] \| None | ASC references; `()` when `MetaLinks.json` lists none |
+| `enumeration` | EnumerationDomain \| None | For an extensible-enumeration concept: `domain` (QName as written, e.g. `us-gaap:AssetsAbstract`), `linkrole`, `head_usable` (absent attribute is `False`) and `is_set`; `None` for any other concept. For a us-gaap or srt concept these come from the FASB release whose namespace the filing binds (`http://fasb.org/us-gaap/2023` reads 2023), since FASB moved every linkrole in 2026 |
+
+**Example:**
+```python
+from edgar import find
+
+xbrl = find("0001193125-26-389274").xbrl()   # Oracle 10-Q, quarter ended 2026-08-31
+meta = xbrl.element_metadata("us-gaap:IncreaseDecreaseInContractWithCustomerLiability")
+meta.balance            # 'debit'
+[f"{r.topic}-{r.sub_topic}-{r.section}-{r.paragraph}" for r in meta.references]
+# ['912-310-45-11', '230-10-45-28']
+```
+
+#### enumeration_members()
+```python
+def enumeration_members(self, value: Optional[str]) -> Tuple[EnumerationMember, ...]
+```
+Splits an extensible-enumeration fact value (one or more whitespace-separated `namespace#LocalName` expanded names) into its members. Each `EnumerationMember` has the `namespace` URI, the local `name`, and the `concept` id built from the prefix this filing binds to the namespace, or `None` when the filing binds no prefix to it (no prefix is guessed from the URI). `None` or an empty (nil) value gives `()`; a token that is not an expanded name raises `ValidationError`. Members are not checked against the concept's domain. The same parser is available without an XBRL object as `edgar.xbrl.parse_enumeration_value(value, namespace_prefixes)`.
+
+**Example** (Apple FY2023 10-K, 0000320193-23-000106):
+```python
+concept = "us-gaap:HedgedAssetStatementOfFinancialPositionExtensibleEnumeration"
+xbrl.element_metadata(concept).enumeration
+# EnumerationDomain(domain='us-gaap:AssetsAbstract', linkrole='http://fasb.org/us-gaap/role/eedm/ExtensibleEnumerationLists',
+#                   head_usable=False, is_set=True)
+value = xbrl.facts.query().by_concept(concept).to_dataframe()['value'].iloc[0]
+[m.concept for m in xbrl.enumeration_members(value)]
+# ['us-gaap_MarketableSecuritiesCurrent', 'us-gaap_MarketableSecuritiesNoncurrent']
+```
+
 #### Data Conversion
 
 #### to_pandas()
@@ -404,8 +452,8 @@ Convert statement to pandas DataFrame with optional transformations.
 **Value Modes:**
 - **Raw mode** (default): Preserves values exactly as reported in instance document
 - **Presentation mode** (`presentation=True`): Applies transformations to match SEC HTML rendering
-  - Cash Flow: outflows with preferred_sign=-1 shown as negative
-  - Income Statement: applies preferred_sign transformations
+  - Every statement, parentheticals and statements of equity included: a row with preferred_sign=-1 (a negated label on its presentation arc) has its values negated, as the SEC page shows them
+  - The result does not depend on how the statement was reached (`income_statement()` or `xbrl.statements[role]`)
 
 **Example:**
 ```python
@@ -656,6 +704,31 @@ facts_list = query.execute()
 facts_df = query.to_dataframe()
 count = len(facts_list)
 ```
+
+#### Nil facts
+
+A filer can report an item as `xsi:nil="true"`. Such a fact has `value == ''` and
+`numeric_value` of `None`, the same as an element filed with empty content, so the
+`is_nil` field tells the two apart. It appears on `Fact`, on every row of
+`execute()` and `FactsView.get_facts()`, as the last core column of
+`FactQuery.to_dataframe()` (nullable `boolean`), and in `FactsView.to_dataframe()`
+and `XBRL.to_pandas()['facts']`. It only records the filer's marker: it does not
+mean zero, not applicable, or a retraction of an earlier value.
+
+```python
+from edgar.xbrl import XBRL
+
+xbrl = XBRL.from_directory("tests/fixtures/xbrl/aapl/10k_2023")  # Apple FY2023 10-K
+nil = (xbrl.query()
+       .by_concept("us-gaap:CommitmentsAndContingencies", exact=True)
+       .to_dataframe("fact_id", "value", "numeric_value", "is_nil"))
+# fact_id f-194 and f-195: value '', numeric_value NaN, is_nil True
+```
+
+A nil fact and an empty non-nil fact with the same concept, context, decimals and
+unit are two rows in the DataFrame; two nil facts, or two empty ones, still
+collapse to one. Rows a query derives (aggregates) carry no nil marker, so their
+`is_nil` is `<NA>`.
 
 ## Multi-Period Analysis
 
@@ -989,7 +1062,7 @@ EdgarTools provides a two-layer system for XBRL value handling:
 
 All statement DataFrames include XBRL metadata columns:
 
-- **`balance`**: Debit or credit classification from schema (accounting semantics)
+- **`balance`**: Debit or credit classification (accounting semantics): the filing's own schema declaration, or for us-gaap and srt concepts the FASB taxonomy's; `None` where neither declares one (share counts, the cash-flow totals)
 - **`weight`**: Calculation weight from calculation linkbase (+1.0 or -1.0)
 - **`preferred_sign`**: Presentation hint from presentation linkbase (+1 or -1)
 

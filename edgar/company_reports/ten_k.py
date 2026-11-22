@@ -8,7 +8,7 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich.tree import Tree
 
-from edgar.company_reports._base import CompanyReport, report_lookup_miss
+from edgar.company_reports._base import CompanyReport, text_only_section
 from edgar.company_reports._structures import FilingStructure, item_sort_key
 from edgar.display.formatting import datefmt
 from edgar.documents import HTMLParser, ParserConfig, parse_html
@@ -73,6 +73,25 @@ _ITEM_TO_PART_10K = {
 # TwentyF, whose items sort by the same rule; kept bound here because it is
 # imported under this name.
 _item_sort_key = item_sort_key
+
+
+def _cross_reference_section(item_or_part: str, item_id: str, text: str):
+    """Wrap text read through the Cross Reference Index fallback as a Section.
+
+    That fallback reads a page range from the filing's index (GE, Henry
+    Schein, Citi: issue #107) after section detection found nothing. It
+    locates items the way `IndexSectionDetector` does, so it carries that
+    detector's confidence and method.
+    """
+    from edgar.documents.extractors.index_section_detector import INDEX_CONFIDENCE
+
+    canonical_part = _ITEM_TO_PART_10K.get(item_id.lower())
+    name = (f"part_{canonical_part}_item_{item_id.lower()}" if canonical_part
+            else f"item_{item_id.lower()}")
+    return text_only_section(name, item_or_part, text,
+                             detection_method='index', confidence=INDEX_CONFIDENCE,
+                             part=canonical_part.upper() if canonical_part else None,
+                             item=item_id.upper())
 
 
 class TenK(CompanyReport):
@@ -513,6 +532,13 @@ class TenK(CompanyReport):
         Returns:
             Section text content as string, or None if not found
         """
+        return super().__getitem__(item_or_part)
+
+    def _resolve_section(self, item_or_part: str):
+        """The 10-K lookup cascade behind `tenk[item]` and `tenk.section(item)`.
+
+        Returns `(section, text)` or None; see `CompanyReport._resolve_section`.
+        """
         # Mapping from Item numbers to friendly section names
         item_to_section = {f'Item {item}': name for name, item in TEN_K_FRIENDLY_ITEMS.items()}
 
@@ -556,7 +582,7 @@ class TenK(CompanyReport):
                     if part_key in self.sections:
                         text = self.sections[part_key].text()
                         if text and text.strip():
-                            return text
+                            return self.sections[part_key], text
 
                 # PRIORITY 1.5: A section under a combined heading ("Items 1 and 2.
                 # Business and Properties") holds both items. Some filings (energy,
@@ -568,7 +594,7 @@ class TenK(CompanyReport):
                         if item_num in covered and (section.part or '').lower() == canonical_part:
                             text = section.text()
                             if text and text.strip():
-                                return text
+                                return section, text
 
                 # Legacy combined-items keys (part_i_items_1_and_2_...) from releases
                 # that built them from the heading text.
@@ -578,17 +604,17 @@ class TenK(CompanyReport):
                     if combined_pattern.match(key):
                         text = self.sections[key].text()
                         if text and text.strip():
-                            return text
+                            return self.sections[key], text
 
             # PRIORITY 2: Direct key lookup (e.g., 'Item 1', 'business' if pattern-based)
             if item_or_part in self.sections:
-                return self.sections[item_or_part].text()
+                return self.sections[item_or_part], None
 
             # PRIORITY 3: Try friendly name -> Item mapping
             if item_or_part in section_to_item:
                 item_key = section_to_item[item_or_part]
                 if item_key in self.sections:
-                    return self.sections[item_key].text()
+                    return self.sections[item_key], None
 
             # PRIORITY 4: Handle 'Item X' format -> try friendly name.
             # Canonical spelling first so 'ITEM 1' and 'item 1' reach the same
@@ -598,19 +624,19 @@ class TenK(CompanyReport):
                 if candidate and candidate in item_to_section:
                     friendly_name = item_to_section[candidate]
                     if friendly_name in self.sections:
-                        return self.sections[friendly_name].text()
+                        return self.sections[friendly_name], None
 
             # PRIORITY 5: Handle short format '1', '1A', etc. -> convert to 'Item X'
             if re.match(r'^\d+[A-Z]?$', normalized, re.IGNORECASE):
                 item_key = f'Item {normalized.upper()}'
                 # Try direct lookup
                 if item_key in self.sections:
-                    return self.sections[item_key].text()
+                    return self.sections[item_key], None
                 # Try friendly name
                 if item_key in item_to_section:
                     friendly_name = item_to_section[item_key]
                     if friendly_name in self.sections:
-                        return self.sections[friendly_name].text()
+                        return self.sections[friendly_name], None
 
             # Legacy fallback: SEC-canonical Part lookup only.
             # Items have exactly one valid Part per SEC rules — see GH #821.
@@ -628,7 +654,7 @@ class TenK(CompanyReport):
                     if part_key in self.sections:
                         text = self.sections[part_key].text()
                         if text and text.strip():
-                            return text
+                            return self.sections[part_key], text
 
         # If Cross Reference Index format is detected, use it
         # (Some filings like GE, Henry Schein use Cross Reference Index - issue #107)
@@ -654,9 +680,8 @@ class TenK(CompanyReport):
                         last_line = item_text.split("\n")[-1]
                         if re.match(r'^\b(PART\s+[IVXLC]+)\b', last_line):
                             item_text = item_text.rstrip(last_line)
-                        return item_text
+                        return _cross_reference_section(item_or_part, item_id, item_text), item_text
 
-        report_lookup_miss(self, item_or_part)
         return None
 
     def get_item_with_part(self, part: str, item: str, markdown:bool=True):

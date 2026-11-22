@@ -1,0 +1,225 @@
+{
+ "cm_AvailableForSaleFinancialAssetsOtherComprehensiveIncomeNetOfTaxAfterReclassification": {
+  "http://www.xbrl.org/2003/role/documentation": "Available for sale financial assets other comprehensive income net of tax after reclassification.",
+  "http://www.xbrl.org/2003/role/label": "Available For Sale Financial Assets Other Comprehensive Income Net Of Tax After Reclassification",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net change in debt securities measured at FVOCI"
+ },
+ "cm_IncreaseDecreaseThroughExerciseOfStockOptionsAndSettlementOfOtherEquitysettledSharebasedAwards": {
+  "http://www.xbrl.org/2003/role/documentation": "Increase (decrease) through exercise of stock options and settlement of other equity-settled share-based awards, equity.",
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through exercise of stock options and settlement of other equity-settled share-based awards",
+  "http://www.xbrl.org/2003/role/terseLabel": "Exercise of stock options and settlement of other equity-settled share-based awards"
+ },
+ "cm_PremiumOnPurchaseOfCommonSharesForCancellation": {
+  "http://www.xbrl.org/2003/role/documentation": "Premium paid on purchase of common Shares for cancellation.",
+  "http://www.xbrl.org/2003/role/label": "Premium On Purchase Of Common Shares For Cancellation",
+  "http://www.xbrl.org/2003/role/terseLabel": "Premium on purchase of common shares for cancellation"
+ },
+ "cm_RedemptionOfPreferredSharesValue": {
+  "http://www.xbrl.org/2003/role/documentation": "Redemption of preferred shares value.",
+  "http://www.xbrl.org/2003/role/label": "Redemption Of Preferred Shares Value",
+  "http://www.xbrl.org/2003/role/terseLabel": "Redemption of preferred shares"
+ },
+ "cm_ReserveOfEquitySecuritiesDesignatedAtFairValueOfOtherComprehensiveIncomeMember": {
+  "http://www.xbrl.org/2003/role/documentation": "Reserve of equity securities designated at fair value of other comprehensive income [member]",
+  "http://www.xbrl.org/2003/role/label": "Reserve of equity securities designated at fair value of other comprehensive income [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Reserve of equity securities designated at fair value of other comprehensive income [member]"
+ },
+ "ifrs-full_AccumulatedOtherComprehensiveIncomeMember": {
+  "http://www.xbrl.org/2003/role/label": "Accumulated other comprehensive income [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "AOCI, net of tax [member]"
+ },
+ "ifrs-full_AdditionalPaidinCapitalMember": {
+  "http://www.xbrl.org/2003/role/label": "Additional Paid-in Capital [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Additional paid-in capital [member]"
+ },
+ "ifrs-full_BusinessCombinationsAxis": {
+  "http://www.xbrl.org/2003/role/label": "Business combinations [axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Business combinations [axis]"
+ },
+ "ifrs-full_CategoriesOfFinancialAssetsAxis": {
+  "http://www.xbrl.org/2003/role/label": "Categories of financial assets [axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Categories of financial assets [axis]"
+ },
+ "ifrs-full_ClassesOfShareCapitalAxis": {
+  "http://www.xbrl.org/2003/role/label": "Classes of share capital [axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Classes of share capital [axis]"
+ },
+ "ifrs-full_ClassesOfShareCapitalMember": {
+  "http://www.xbrl.org/2003/role/label": "Share capital [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Share capital [member]"
+ },
+ "ifrs-full_ComponentsOfEquityAxis": {
+  "http://www.xbrl.org/2003/role/label": "Components of equity [axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Components of equity [axis]"
+ },
+ "ifrs-full_DividendsPaid": {
+  "http://www.xbrl.org/2003/role/label": "Dividends recognised as distributions to owners",
+  "http://www.xbrl.org/2003/role/terseLabel": "Dividends and distributions paid",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Dividends and distributions"
+ },
+ "ifrs-full_EntitysTotalForBusinessCombinationsMember": {
+  "http://www.xbrl.org/2003/role/label": "Entity's total for business combinations [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Entity's total for business combinations [member]"
+ },
+ "ifrs-full_Equity": {
+  "http://www.xbrl.org/2003/role/label": "Equity",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Balance at end of year",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Balance at beginning of year",
+  "http://www.xbrl.org/2003/role/terseLabel": "Amount",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total equity",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Equity"
+ },
+ "ifrs-full_EquityMember": {
+  "http://www.xbrl.org/2003/role/label": "Equity [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity [member]"
+ },
+ "ifrs-full_FinancialAssetsAtFairValueThroughOtherComprehensiveIncomeCategoryMember": {
+  "http://www.xbrl.org/2003/role/label": "Financial assets at fair value through other comprehensive income, category [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Financial assets at fair value through OCI [member]"
+ },
+ "ifrs-full_FinancialAssetsCategoryMember": {
+  "http://www.xbrl.org/2003/role/label": "Financial assets, category [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Financial assets, category [member]"
+ },
+ "ifrs-full_GainsLossesOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax": {
+  "http://www.xbrl.org/2003/role/label": "Gains (losses) on financial assets measured at fair value through other comprehensive income, net of tax",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net gains (losses) on equity securities designated at FVOCI"
+ },
+ "ifrs-full_IFRS17Member": {
+  "http://www.xbrl.org/2003/role/label": "IFRS 17 [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "IFRS 17 [member]"
+ },
+ "ifrs-full_IncreaseDecreaseDueToChangesInAccountingPolicyRequiredByIFRSsMember": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) due to changes in accounting policy required by IFRSs [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Impact of adopting IFRS [member]"
+ },
+ "ifrs-full_IncreaseDecreaseThroughSharebasedPaymentTransactions": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through share-based payment transactions, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Compensation expense arising from equity-settled share-based awards"
+ },
+ "ifrs-full_IncreaseDecreaseThroughTransfersAndOtherChangesEquity": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through other changes, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Other"
+ },
+ "ifrs-full_IncreaseDecreaseThroughTreasuryShareTransactions": {
+  "http://www.xbrl.org/2003/role/label": "Increase (decrease) through treasury share transactions, equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Treasury shares",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Treasury shares, Amount"
+ },
+ "ifrs-full_InitiallyAppliedIFRSsAxis": {
+  "http://www.xbrl.org/2003/role/label": "Initially applied IFRSs [axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Effect of overlay approach reclassification [axis]"
+ },
+ "ifrs-full_InitiallyAppliedIFRSsMember": {
+  "http://www.xbrl.org/2003/role/label": "Initially applied IFRSs [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Initially applied IFRSs [member]"
+ },
+ "ifrs-full_IssueOfEquity": {
+  "http://www.xbrl.org/2003/role/label": "Issue of equity",
+  "http://www.xbrl.org/2003/role/terseLabel": "Issue of equity"
+ },
+ "ifrs-full_NoncontrollingInterestsMember": {
+  "http://www.xbrl.org/2003/role/label": "Non-controlling interests [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Non-controlling interests [member]"
+ },
+ "ifrs-full_OrdinarySharesMember": {
+  "http://www.xbrl.org/2003/role/label": "Ordinary shares [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Common shares [member]"
+ },
+ "ifrs-full_OtherComprehensiveIncomeNetOfTaxCashFlowHedges": {
+  "http://www.xbrl.org/2003/role/label": "Other comprehensive income, net of tax, cash flow hedges",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net change in cash flow hedges",
+  "http://www.xbrl.org/2003/role/totalLabel": "Other comprehensive income, net of tax, cash flow hedges"
+ },
+ "ifrs-full_OtherComprehensiveIncomeNetOfTaxChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiability": {
+  "http://www.xbrl.org/2003/role/label": "Other comprehensive income, net of tax, change in fair value of financial liability attributable to change in credit risk of liability",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net change attributable to changes in credit risk",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Net gains (losses) due to fair value change of fair value option (FVO) liabilities attributable to changes in credit risk"
+ },
+ "ifrs-full_OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation": {
+  "http://www.xbrl.org/2003/role/label": "Other comprehensive income, net of tax, exchange differences on translation",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net change in foreign currency translation adjustments"
+ },
+ "ifrs-full_OtherComprehensiveIncomeNetOfTaxGainsLossesOnRemeasurementsOfDefinedBenefitPlans": {
+  "http://www.xbrl.org/2003/role/label": "Other comprehensive income, net of tax, gains (losses) on remeasurements of defined benefit plans",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net change in post-employment defined benefit plans",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Net gains (losses) on post-employment defined benefit plans"
+ },
+ "ifrs-full_OtherReservesMember": {
+  "http://www.xbrl.org/2003/role/label": "Other reserves [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Other reserves [member]"
+ },
+ "ifrs-full_PreferenceSharesMember": {
+  "http://www.xbrl.org/2003/role/label": "Preference shares [member]",
+  "http://www.xbrl.org/2003/role/presentationGuidance": "Issue of preferred shares and limited recourse capital notes (LRCNs) [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Preference shares [member]",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Preferred shares and other equity instruments [member]"
+ },
+ "ifrs-full_PreviouslyStatedMember": {
+  "http://www.xbrl.org/2003/role/label": "Previously stated [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Previously stated [member]"
+ },
+ "ifrs-full_ProfitLossAttributableToNoncontrollingInterests": {
+  "http://www.xbrl.org/2003/role/label": "Profit (loss), attributable to non-controlling interests",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net income attributable to non-controlling interests",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Non-controlling interests"
+ },
+ "ifrs-full_ProfitLossAttributableToOwnersOfParent": {
+  "http://www.xbrl.org/2003/role/label": "Profit (loss), attributable to owners of parent",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity shareholders",
+  "http://www.xbrl.org/2003/role/totalLabel": "Net income attributable to equity shareholders",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Net income attributable to equity shareholders"
+ },
+ "ifrs-full_ReclassificationAdjustmentsOnFinancialAssetsMeasuredAtFairValueThroughOtherComprehensiveIncomeNetOfTax": {
+  "http://www.xbrl.org/2003/role/label": "Reclassification adjustments on financial assets measured at fair value through other comprehensive income, net of tax",
+  "http://www.xbrl.org/2003/role/terseLabel": "Realized (gains) losses on equity securities designated at FVOCI reclassified to retained earnings"
+ },
+ "ifrs-full_ReductionOfIssuedCapital": {
+  "http://www.xbrl.org/2003/role/label": "Reduction of issued capital",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Purchase of common shares for cancellation, Amount"
+ },
+ "ifrs-full_ReserveOfCashFlowHedgesMember": {
+  "http://www.xbrl.org/2003/role/label": "Reserve of cash flow hedges [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net gains (losses) on cash flow hedges [member]"
+ },
+ "ifrs-full_ReserveOfChangeInFairValueOfFinancialLiabilityAttributableToChangeInCreditRiskOfLiabilityMember": {
+  "http://www.xbrl.org/2003/role/label": "Reserve of change in fair value of financial liability attributable to change in credit risk of liability [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Reserve of change in fair value of financial liability attributable to change in credit risk of liability [member]"
+ },
+ "ifrs-full_ReserveOfExchangeDifferencesOnTranslationMember": {
+  "http://www.xbrl.org/2003/role/label": "Reserve of exchange differences on translation [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net foreign currency translation adjustments [member]"
+ },
+ "ifrs-full_ReserveOfRemeasurementsOfDefinedBenefitPlansMember": {
+  "http://www.xbrl.org/2003/role/label": "Reserve of remeasurements of defined benefit plans [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Reserve of remeasurements of defined benefit plans [member]"
+ },
+ "ifrs-full_ReservesWithinEquityAxis": {
+  "http://www.xbrl.org/2003/role/label": "Reserves within equity [axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Reserves within equity [axis]"
+ },
+ "ifrs-full_RestatedMember": {
+  "http://www.xbrl.org/2003/role/label": "Currently stated [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Currently stated [member]"
+ },
+ "ifrs-full_RetainedEarningsMember": {
+  "http://www.xbrl.org/2003/role/label": "Retained earnings [member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Retained earnings [member]"
+ },
+ "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis": {
+  "http://www.xbrl.org/2003/role/label": "Retrospective application and retrospective restatement [axis]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Retrospective application and retrospective restatement [axis]"
+ },
+ "ifrs-full_StatementOfChangesInEquityAbstract": {
+  "http://www.xbrl.org/2003/role/label": "Statement of changes in equity [abstract]",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Statement of changes in equity [abstract]"
+ },
+ "ifrs-full_StatementOfChangesInEquityLineItems": {
+  "http://www.xbrl.org/2003/role/label": "Statement of changes in equity [line items]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement of changes in equity [line items]"
+ },
+ "ifrs-full_StatementOfChangesInEquityTable": {
+  "http://www.xbrl.org/2003/role/label": "Statement of changes in equity [table]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Statement of changes in equity [table]"
+ }
+}

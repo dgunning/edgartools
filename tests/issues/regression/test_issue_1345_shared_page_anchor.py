@@ -273,7 +273,9 @@ def test_prospectus_trailing_section_markdown_stops_at_financial_statements():
     # GH #1369: markdown() now keeps the section's own heading,
     # "**Where You Can Find Additional Information **" (48 characters with its blank line).
     assert md.startswith("**Where You Can Find Additional Information **")
-    assert len(md) == 1982
+    # 1982 until edgartools-8n9an: the renderer padded "Form  S-1,  including"
+    # with two spaces the paragraph's text does not have; the words are unchanged.
+    assert len(md) == 1980
     assert "Index to Consolidated Financial Statements".upper() not in md.upper()
     # The section has no table of its own; the F-pages index no longer leaks in.
     assert section.tables() == []

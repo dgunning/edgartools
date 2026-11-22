@@ -44,6 +44,8 @@ class DocumentMetadata:
     parse_time: float = 0.0
     parser_version: str = "2.0.0"
     xbrl_data: Optional[List[XBRLFact]] = None
+    # {ix:footnote id: Footnote} -- see Document.xbrl_footnotes
+    xbrl_footnotes: Optional[Dict[str, Any]] = None
     preserve_whitespace: bool = False
     original_html: Optional[str] = None  # Store original HTML for anchor analysis
 
@@ -798,6 +800,10 @@ def _flatten_column_name(col) -> str:
     return ' '.join(out)
 
 
+# Columns Document.to_dataframe adds to every table's frame.
+_TABLE_METADATA_COLUMNS = ('_table_index', '_table_type', '_table_caption')
+
+
 def _flatten_table_frame(df: 'pd.DataFrame') -> 'pd.DataFrame':
     """Give one table's frame flat, unique, string column names and a clean index.
 
@@ -833,15 +839,27 @@ def _flatten_table_frame(df: 'pd.DataFrame') -> 'pd.DataFrame':
     # Flat, string, and unique. Duplicate header texts are ordinary in filings
     # ('' repeated across spacer columns), and duplicate names would make the
     # concatenated frame ambiguous to index into.
-    seen: Dict[str, int] = {}
+    #
+    # A suffix must not land on a name some other column already carries:
+    # headers 'Revenue, Revenue, Revenue.1' used to give 'Revenue.1' twice, and
+    # the concat then raised InvalidIndexError (GH #1734). So every literal
+    # name is reserved before any suffix is chosen, along with the metadata
+    # columns Document.to_dataframe adds, and a duplicate takes the lowest free
+    # suffix. Where nothing collides this is the same .1, .2, ... as before.
+    base_names = [_flatten_column_name(col) or f'column_{position}'
+                  for position, col in enumerate(df.columns)]
+    reserved = set(base_names)
+    used = set(_TABLE_METADATA_COLUMNS)
+    next_suffix: Dict[str, int] = {}
     names = []
-    for position, col in enumerate(df.columns):
-        name = _flatten_column_name(col) or f'column_{position}'
-        if name in seen:
-            seen[name] += 1
-            name = f'{name}.{seen[name]}'
-        else:
-            seen[name] = 0
+    for name in base_names:
+        if name in used:
+            suffix = next_suffix.get(name, 1)
+            while f'{name}.{suffix}' in used or f'{name}.{suffix}' in reserved:
+                suffix += 1
+            next_suffix[name] = suffix + 1
+            name = f'{name}.{suffix}'
+        used.add(name)
         names.append(name)
     df.columns = pd.Index(names, dtype=object)
     return df
@@ -981,6 +999,21 @@ class Document:
         if self._xbrl_facts is None:
             self._xbrl_facts = self._extract_xbrl_facts()
         return self._xbrl_facts
+
+    @property
+    def xbrl_footnotes(self) -> Dict[str, Any]:
+        """
+        The inline XBRL footnotes, keyed by ix:footnote id.
+
+        Each value is an ``edgar.xbrl.models.Footnote`` (text, lang, role,
+        related_fact_ids), the same lookup ``XBRL.footnotes`` gives. A fact's
+        ``footnotes`` lists the ids it is linked to by a fact-footnote
+        ix:relationship::
+
+            for fact in doc.xbrl_facts:
+                notes = [doc.xbrl_footnotes[fid].text for fid in fact.footnotes]
+        """
+        return self.metadata.xbrl_footnotes or {}
 
     def text(self,
              clean: bool = True,

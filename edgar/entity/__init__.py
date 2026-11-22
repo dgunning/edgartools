@@ -10,6 +10,7 @@ from edgar.entity.core import (
     Company,
     CompanyNotFoundError,
     Entity,
+    PredecessorHistoryWarning,
     SecFiler,
     get_company,
     get_entity,
@@ -33,8 +34,23 @@ from edgar.entity.submissions import (
 from edgar.entity.tickers import find_cik, find_ticker, get_cik_lookup_data, get_company_tickers, get_icon_from_ticker, get_ticker_to_cik_lookup
 from edgar.entity.utils import has_company_filings, normalize_cik
 
-# Import from the funds package instead of entity.funds
-from edgar.funds import FundData, FundSeries
+# FundData and FundSeries live in edgar.funds and are re-exported here on first
+# access (PEP 562), not imported at module level. edgar.funds.core needs
+# edgar.entity.core.Entity to define its classes, so a cold `import edgar.funds`
+# loads this package mid-way through edgar.funds; an eager import of edgar.funds
+# here then read the half-built module and raised ImportError. The package
+# init's eager imports hid that until 6.1 made `import edgar` lazy (edgartools-y4puq.5).
+_FUNDS_REEXPORTS = ('FundData', 'FundSeries')
+
+
+def __getattr__(name):
+    if name in _FUNDS_REEXPORTS:
+        import edgar.funds
+        value = getattr(edgar.funds, name)
+        globals()[name] = value
+        return value
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 # Aliases for backward compatibility
 CompanyFiling = EntityFiling
@@ -45,6 +61,7 @@ __all__ = [
     'SecFiler',
     'Entity',
     'Company',
+    'PredecessorHistoryWarning',
     'FundSeries',
 
     # Data classes

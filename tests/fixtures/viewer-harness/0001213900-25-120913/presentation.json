@@ -1,0 +1,123 @@
+{
+ "http://www.PhenixFIN.com/role/ConsolidatedScheduleofInvestmentsUnauditedTable": {
+  "roots": [
+   "pfx_ConsolidatedScheduleOfInvestmentsUnauditedAbstract"
+  ],
+  "nodes": {
+   "pfx_ConsolidatedScheduleOfInvestmentsUnauditedAbstract": {
+    "children": [
+     "us-gaap_StatementTable"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "us-gaap_StatementTable": {
+    "children": [
+     "srt_OwnershipAxis",
+     "us-gaap_InvestmentIdentifierAxis",
+     "us-gaap_StatementLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/label",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/label"
+    ]
+   },
+   "srt_OwnershipAxis": {
+    "children": [
+     "srt_OwnershipDomain",
+     "pfx_TotalInvestmentsMember"
+    ],
+    "child_preferred_labels": [
+     null,
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementLineItems": {
+    "children": [
+     "us-gaap_InvestmentMaturityDate",
+     "us-gaap_InvestmentOwnedBalancePrincipalAmount",
+     "us-gaap_InvestmentOwnedAtCost",
+     "us-gaap_InvestmentOwnedAtFairValue",
+     "us-gaap_InvestmentOwnedPercentOfNetAssets"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "pfx_ConsolidatedScheduleOfInvestmentsUnauditedAbstract",
+    "us-gaap_StatementTable",
+    1.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "srt_OwnershipAxis",
+    1.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "srt_OwnershipAxis",
+    "srt_OwnershipDomain",
+    0.0,
+    null
+   ],
+   [
+    "srt_OwnershipAxis",
+    "pfx_TotalInvestmentsMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_InvestmentIdentifierAxis",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementLineItems",
+    3.0,
+    "http://www.xbrl.org/2003/role/label"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_InvestmentMaturityDate",
+    0.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_InvestmentOwnedBalancePrincipalAmount",
+    1.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_InvestmentOwnedAtCost",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_InvestmentOwnedAtFairValue",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_InvestmentOwnedPercentOfNetAssets",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ]
+  ]
+ }
+}

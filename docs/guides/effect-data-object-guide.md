@@ -69,7 +69,7 @@ Columns: `cik`, `entity`, `source` (the source form type), `live` (True for prod
 
 The `effective_date` is returned as a string in `YYYY-MM-DD` format, not a `datetime` object.
 
-An EFFECT notice is not public on its filing date. Its `filing_date` equals `effective_date`, but SEC accepts and publishes the notice at about 00:15 ET on the next business day (Lyntris Inc.: filed 2026-08-18, accepted 2026-08-19 00:15:13). For point-in-time work, use `filing.header.acceptance_datetime`.
+An EFFECT notice is not public on its filing date. Its `filing_date` equals `effective_date`, but SEC accepts and publishes the notice at about 00:15 ET on the next business day (Lyntris Inc.: filed 2026-08-18, accepted 2026-08-19 00:15:13). For point-in-time work, use `filing.accepted_at`.
 
 ## Related
 

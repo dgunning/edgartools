@@ -15,6 +15,11 @@ patterns:
       xbrl.entity_name                  # Company name
       xbrl.entity_info["fiscal_year"]   # e.g., "2024" (a string)
       xbrl.entity_info["fiscal_period"] # FY, Q1, Q2, Q3, Q4
+      xbrl.entity_info["reporting_end_date"]        # date the document reports to (DocumentPeriodEndDate)
+      xbrl.entity_info["max_instant_context_date"]  # latest context instant, e.g. the share-count date
+      xbrl.entity_info["ticker"]        # First dei:TradingSymbol on the cover (JPM, not AMJB)
+      xbrl.entity_info["trading_symbols"]  # Every cover symbol in document order:
+                                        # [{"symbol", "class_of_stock", "context_ref"}, ...]
 
   - name: Statements
     when: Get financial statements from XBRL
@@ -46,6 +51,12 @@ patterns:
       income = xbrls.statements.income_statement(view="detailed")  # with dimensional breakdowns
       df = income.to_dataframe()
 
+      # Stitched 10-Qs are year-to-date by default; include_quarterly=True adds the
+      # three-month column. period_columns="interval" names each column by its exact
+      # dates ("2023-04-02 to 2023-07-01") instead of the bare end date.
+      q = XBRLS.from_filings(company.get_filings(form="10-Q").head(4))
+      df = q.statements.income_statement(include_quarterly=True).to_dataframe(period_columns="interval")
+
   - name: Concept History
     when: Track a value over time
     code: |
@@ -61,8 +72,53 @@ patterns:
       # Each fact: concept, value, numeric_value, unit_ref, currency, decimals, context_ref,
       #   period_start + period_end (duration) or period_instant (instant),
       #   is_dimensioned (dimensioned facts add dimension, member and dim_<axis> keys)
+      #   is_nil (True when the filer marked the item xsi:nil; value '' and numeric_value None,
+      #   which an empty non-nil element also has. It is not zero.)
       # unit_ref is the filing's unit id ("usd", "shares", "number"); currency is "USD" for
       # money and None otherwise.
+
+  - name: Fact Footnotes
+    when: Need the footnote a filer attached to a fact (e.g. "Excludes amortization ...")
+    code: |
+      # XBRL path: xbrl.footnotes is {footnote id: Footnote(text, lang, role, related_fact_ids)}
+      notes = xbrl.get_footnotes_for_fact("f-57")   # by the fact's filed id
+
+      # Inline HTML path: the same ids and the same Footnote model
+      from edgar.documents import parse_html
+      doc = parse_html(filing.html())
+      for fact in doc.xbrl_facts:
+          texts = [doc.xbrl_footnotes[fid].text for fid in fact.footnotes]
+      # fact.fact_id is the filed id (None when none is filed); fact.footnotes is [] when none.
+      # Only fact-footnote relationships attach; other arcroles are not ordinary footnotes.
+
+  - name: Inline XBRL Facts Across a Filing's Documents
+    when: An exhibit's inline facts (e.g. an inline EX-13) come back from parse_html with context None
+    code: |
+      # Only one document of a filing needs the ix:header; the others use its contexts and units.
+      from edgar.documents import parse_inline_xbrl_set
+      names = ["ibm-20241231.htm", "ibm-20241231_d2.htm"]   # primary + EX-13 of 0000051143-25-000015
+      docs = parse_inline_xbrl_set({n: filing.attachments[n].content for n in names})
+      facts = docs["ibm-20241231_d2.htm"].xbrl_facts       # only that document's facts, now resolved
+      # An ID defined in two documents is ambiguous: it resolves to None, with a warning.
+      # filing.xbrl() never needs this; it reads SEC's instance for the whole filing.
+
+  - name: What a Concept Is (type, balance, ASC references, enumerations)
+    when: Need a concept's balance, period type, abstract flag, FASB definition, ASC paragraphs, or the members an extensible-enumeration fact names
+    code: |
+      meta = xbrl.element_metadata("us-gaap:Assets")   # or "us-gaap_Assets"; None if unknown
+      meta.balance        # 'debit' / 'credit' / None (share counts, cash-flow totals have none)
+      meta.period_type    # 'instant' / 'duration'
+      meta.abstract       # declared flag; None when nothing declares it (e.g. dei)
+      meta.documentation  # FASB definition text, from the filing's MetaLinks.json
+      for r in meta.references:  # ASC references (edgar.sgml.AuthRef)
+          print(r.topic, r.sub_topic, r.section, r.paragraph)   # 942 210 S99 1
+      # references is None when MetaLinks.json is unavailable, () when it lists none.
+      # The first call downloads MetaLinks.json (one small file) unless the
+      # submission is already loaded; later calls are instant.
+      # Extensible enumerations (facts whose value is "uri#Member uri#Member"):
+      meta.enumeration    # None, or EnumerationDomain(domain='us-gaap:AssetsAbstract', linkrole=..., head_usable=False, is_set=True)
+      members = xbrl.enumeration_members(fact_value)   # () for a nil/empty value
+      [m.concept for m in members]   # ['us-gaap_MarketableSecuritiesCurrent', ...]; None if the filing binds no prefix
 
   - name: Calculation Linkbase as DataFrame
     when: Need per-filer concept hierarchy, extension → us-gaap mapping, or signed weights
@@ -100,6 +156,67 @@ patterns:
 
       # Note: calling extension_arcs() does NOT change render() output.
       # It's an opt-in additive view on top of the existing statement.
+
+  - name: Standard Concept of a Tag (e.g. Crypto Assets)
+    when: Find which standard concept a filed element maps to, or find crypto rows across filers
+    code: |
+      from edgar.xbrl.standardization.reverse_index import get_reverse_index
+
+      result = get_reverse_index().lookup("us-gaap:CryptoAssetFairValueNoncurrent")
+      result.primary_concept       # 'CryptoAssetsNoncurrent'
+      result.primary_display_name  # 'Crypto Assets, Noncurrent'
+      result.comment               # definition; excludes crypto held for platform users
+
+      # Rows of a statement by standard concept
+      df = xbrl.statements.balance_sheet().render(standard=True).to_dataframe()
+      crypto = df[df["standard_concept"].isin(["CryptoAssets", "CryptoAssetsCurrent", "CryptoAssetsNoncurrent"])]
+
+      # Crypto concepts (ASU 2023-08), one us-gaap element each:
+      # CryptoAssets, CryptoAssetsCurrent, CryptoAssetsNoncurrent (balance sheet; three
+      # different measures, never add them), CryptoUnrealizedGainLoss, CryptoGainLoss
+      # (income), CryptoPurchases, CryptoSaleProceeds (investing), CryptoConversionProceeds
+      # (operating)
+
+  - name: Cash Income Taxes Paid by Jurisdiction
+    when: Federal, state and local, or foreign cash taxes paid, gross payments, or refunds (ASU 2023-09)
+    code: |
+      df = xbrl.statements.cash_flow_statement().render(standard=True).to_dataframe()
+      paid = df[~df["dimension"] & df["standard_concept"].isin(
+          ["IncomeTaxesPaidFederal", "IncomeTaxesPaidStateLocal", "IncomeTaxesPaidForeign"])]
+      # ServiceNow FY2025: 46M + 83M + 154M = 283M, net of refunds
+
+      # Also: IncomeTaxesPaidFederalGross / ...StateLocalGross / ...ForeignGross (before
+      # refunds) and IncomeTaxRefundsFederal / ...StateLocal / ...Foreign (refunds received).
+      # "Federal" = federal or national jurisdiction. Components only, never tax expense;
+      # state/country rows (dimension=True) are inside these totals, so do not add them.
+      # Some filers put these in the income tax note, not the cash flow statement.
+      # The total stays unmapped: use facts.get_concept("income_taxes_paid") (EntityFacts).
+
+  - name: Change in Cash by Continuing and Discontinued Operations
+    when: A filer splits the net change in cash into continuing and discontinued (or held-for-sale) rows
+    code: |
+      df = xbrl.statements.cash_flow_statement().render(standard=True).to_dataframe()
+      split = df[~df["dimension"] & df["standard_concept"].isin(
+          ["NetChangeInCash", "NetChangeInCashContinuingOps", "NetChangeInCashDiscontinuedOps"])]
+      # Conagra FY2025: total -11.0M, held for sale -1.3M, continuing -9.7M
+
+      # Also: NetChangeInCashContinuingOpsExFX / NetChangeInCashDiscontinuedOpsExFX (excluding
+      # the exchange-rate effect). These are components, never NetChangeInCash: a statement
+      # with only a continuing row (DXC FY2026, -59M) has no NetChangeInCash row, and nothing
+      # is summed for you. "DiscontinuedOps" follows the FASB element; some filers use it for
+      # held-for-sale groups that are not discontinued operations (Conagra), so check the label.
+
+  - name: BDC Revenue and Net Investment Income
+    when: Revenue, expenses or net investment income of a BDC or other investment company
+    code: |
+      df = xbrl.statements.income_statement().to_dataframe(standard=True)
+      plain = df[~df["dimension"]]
+      plain[plain["standard_concept"].isin(["Revenue", "InvestmentExpenses", "NetInvestmentIncome"])]
+      # Revenue = total investment income (GrossInvestmentIncomeOperating); Main Street FY2025: 566.4M
+      # InvestmentExpenses = total expenses; NetInvestmentIncome = income less expenses (366.7M), never Revenue
+      from edgar.financials import Financials
+      Financials(xbrl).get_revenue()   # total investment income for a BDC
+      # An insurer's NetInvestmentIncome is one line inside Revenues; its Revenue is the filed total.
 
 when_to_use:
   appropriate:

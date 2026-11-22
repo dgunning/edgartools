@@ -55,11 +55,19 @@ def test_validation_issue_defaults():
 class TestValidationResult:
 
     def test_valid_result(self):
-        result = ValidationResult(is_valid=True)
+        result = ValidationResult(is_valid=True, checks_completed=["fundamental_equation"], level="fundamental")
         assert result.is_valid
         assert result.error_count == 0
         assert result.warning_count == 0
-        assert "VALID" in str(result)
+        assert str(result) == "ValidationResult: VALID (0 errors, 0 warnings)"
+
+    def test_result_without_completed_checks_is_inconclusive(self):
+        # A result built by hand records no completed comparison, so its
+        # status cannot be inferred from is_valid=True (GH #1210).
+        result = ValidationResult(is_valid=True)
+        assert result.is_valid
+        assert result.status == "inconclusive"
+        assert str(result) == "ValidationResult: INCONCLUSIVE (0 errors, 0 warnings)"
 
     def test_invalid_result_with_errors(self):
         result = ValidationResult(

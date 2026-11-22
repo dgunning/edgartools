@@ -4,8 +4,8 @@ from functools import lru_cache
 from typing import Any, Callable, Dict, List, Optional
 
 import pyarrow as pa
+from anyascii import anyascii
 from rapidfuzz import fuzz
-from unidecode import unidecode
 
 
 class FastSearch:
@@ -22,7 +22,7 @@ class FastSearch:
 
     @staticmethod
     def _default_preprocess(text: str) -> str:
-        text = unidecode(text.lower())
+        text = anyascii(text.lower())
         text = re.sub(r'[^\w\s]', '', text)
         text = re.sub(r'\s+', ' ', text).strip()
         return text
@@ -125,7 +125,7 @@ def company_ticker_score(query: str, value: str, column: str) -> float:
 
 
 def preprocess_company_name(company_name: str) -> str:
-    company_name = unidecode(company_name.lower())
+    company_name = anyascii(company_name.lower())
     company_name = re.sub(r'[^\w\s]', '', company_name)
     company_name = re.sub(r'\s+', ' ', company_name).strip()
     return company_name

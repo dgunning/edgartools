@@ -9,7 +9,7 @@ from rich.padding import Padding
 from rich.panel import Panel
 from rich.tree import Tree
 
-from edgar.company_reports._base import CompanyReport, report_lookup_miss
+from edgar.company_reports._base import CompanyReport
 from edgar.company_reports._structures import FilingStructure
 from edgar.display.formatting import datefmt
 from edgar.documents import HTMLParser, ParserConfig
@@ -314,11 +314,18 @@ class TenQ(CompanyReport):
         Returns:
             Section text content as string, or None if not found
         """
+        return super().__getitem__(item_or_part)
+
+    def _resolve_section(self, item_or_part: str):
+        """The lookup cascade behind `report[item]` and `report.section(item)`.
+
+        Returns `(section, text)` or None; see `CompanyReport._resolve_section`.
+        """
         # Try new parser sections first
         if self.sections:
             # Direct key lookup (e.g., 'part_i_item_1' or 'Item 1')
             if item_or_part in self.sections:
-                return self.sections[item_or_part].text()
+                return self.sections[item_or_part], None
 
             # Parse input to determine part and item
             normalized = item_or_part.lower().strip()
@@ -338,7 +345,7 @@ class TenQ(CompanyReport):
                 else:
                     key = f'part_ii_item_{item_num}'
                 if key in self.sections:
-                    return self.sections[key].text()
+                    return self.sections[key], None
 
             # Handle 'Item X' format
             item_match = re.match(r'item\s+(\d+[a-z]?)', normalized, re.IGNORECASE)
@@ -347,31 +354,30 @@ class TenQ(CompanyReport):
                 # Try pattern-based keys first (part-qualified)
                 key = f'part_i_item_{item_num}'
                 if key in self.sections:
-                    return self.sections[key].text()
+                    return self.sections[key], None
                 key = f'part_ii_item_{item_num}'
                 if key in self.sections:
-                    return self.sections[key].text()
+                    return self.sections[key], None
                 # Try TOC-based keys (e.g., 'Item 1', 'Item 1A')
                 for section_key in self.sections:
                     if section_key.lower() == f'item {item_num}' or section_key.lower() == f'item{item_num}':
-                        return self.sections[section_key].text()
+                        return self.sections[section_key], None
 
             # Handle simple number format (e.g., '1', '1a')
             if re.match(r'^\d+[a-z]?$', normalized):
                 # Try Part I first
                 key = f'part_i_item_{normalized}'
                 if key in self.sections:
-                    return self.sections[key].text()
+                    return self.sections[key], None
                 # Try Part II
                 key = f'part_ii_item_{normalized}'
                 if key in self.sections:
-                    return self.sections[key].text()
+                    return self.sections[key], None
                 # Try TOC-based keys
                 for section_key in self.sections:
                     if section_key.lower() == f'item {normalized}' or section_key.lower() == f'item{normalized}':
-                        return self.sections[section_key].text()
+                        return self.sections[section_key], None
 
-        report_lookup_miss(self, item_or_part)
         return None
 
     def get_item_with_part(self, part: str, item: str, markdown: bool = True) -> Optional[str]:

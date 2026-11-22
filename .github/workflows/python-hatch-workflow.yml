@@ -13,10 +13,12 @@
 # to produce them — the few CI minutes a markdown-only run costs are cheaper than
 # a merge queue that deadlocks on documentation.
 #
-# REQUIRED CHECKS ARE PINNED TO JOB NAMES. `main` requires exactly two contexts:
+# REQUIRED CHECKS ARE PINNED TO JOB NAMES. `main` requires exactly three contexts,
+# two from this file and one from agent-config-guard.yml:
 #
 #     Cassette safety gate
 #     test-fast (3.13)
+#     Agent config guard     (agent-config-guard.yml: a security gate, never remove)
 #
 # The second name is generated from the matrix below, which is event-dependent —
 # a pull request builds only 3.13, so the context is literally "test-fast (3.13)".
@@ -67,6 +69,13 @@ on:
 # main are never cancelled: PRs merge without being up to date with main, so the
 # post-merge run is the only check that the combination works, and back-to-back
 # merges used to cancel it before it finished.
+# Read-only by default. Jobs that write (the red-main `report` job) grant
+# their own job-level permissions; nothing else inherits the token's write scope.
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name != 'push' }}
@@ -80,9 +89,9 @@ jobs:
     name: Cassette safety gate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python 3.13
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: '3.13'
     - name: Install PyYAML
@@ -92,9 +101,10 @@ jobs:
 
   test-fast:
     # PRs to main: single version for a quick gate. Push/schedule: the declared
-    # floor (requires-python >=3.11) plus 3.13, so the minimum is exercised rather
-    # than merely asserted. A 5.*.x maintenance branch tests 3.10 from its own
-    # copy of this file (see the note above `on:`), not from this one.
+    # floor (requires-python >=3.11), 3.13, and the newest release (3.15), so both
+    # ends of the supported range are exercised rather than merely asserted. A
+    # 5.*.x maintenance branch tests 3.10 from its own copy of this file (see the
+    # note above `on:`), not from this one.
     # The main-PR leg must stay exactly ["3.13"]: branch protection requires the
     # context "test-fast (3.13)" (see the header of this file).
     needs: cassette-gate
@@ -102,12 +112,12 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ${{ (github.event_name == 'pull_request' && github.base_ref == 'main') && fromJSON('["3.13"]') || fromJSON('["3.11", "3.13"]') }}
+        python-version: ${{ (github.event_name == 'pull_request' && github.base_ref == 'main') && fromJSON('["3.13"]') || fromJSON('["3.11", "3.13", "3.15"]') }}
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
@@ -117,13 +127,13 @@ jobs:
         python -m pip install -e ".[ai]"
         python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock pytest-vcr "vcrpy>=8.3.0,<9" freezegun==1.5.1 filelock tqdm responses
 
-    # The floor leg also holds the pandas floor's major. We support pandas 2.x
-    # and 3.x, and until the Python floor rose pandas 2 was tested only by
-    # accident: pandas 3 requires Python 3.11, so the old 3.10 leg resolved to
-    # pandas 2.3.x while 3.13 got 3.x. Pinning here keeps both majors under test.
-    - name: Pin pandas 2.x on the floor leg
+    # The floor leg installs the declared pandas floor itself, so both majors
+    # stay under test and the floor in pyproject.toml is a tested version, not
+    # a claim: the 3.13 leg resolves to pandas 3.x. Keep this pin equal to the
+    # pandas floor in pyproject.toml.
+    - name: Pin the pandas floor on the floor leg
       if: matrix.python-version == '3.11'
-      run: python -m pip install "pandas>=2.0.0,<3"
+      run: python -m pip install "pandas==2.2.2"
 
     # A source scan, so it runs here rather than as its own job: this is the
     # only context pull requests are required to report, and adding a second
@@ -176,7 +186,7 @@ jobs:
         fi
 
     # A pull request that stages a 6.0 change (a deprecation, a will-raise
-    # warning, "removed in 6.0") has to touch docs/upgrade/6.0.md in the same PR.
+    # warning, "removed in 6.0") has to touch the current upgrade guide (docs/upgrade/6.1.md) in the same PR.
     # #1200/#1201 shipped 5.55.0 deprecations with no guide entry, and nothing
     # mechanical noticed (bead edgartools-07lk.14). Pull requests only: the check
     # reads the PR's diff, and main has no PR to read. Labels are read live
@@ -217,8 +227,50 @@ jobs:
           pytest -n auto --cov --cov-report=xml -m 'fast'
         fi
 
+    # Section-boundary accuracy, gated on the pull requests that can move it
+    # (bead edgartools-bdfuy.1). The two ratchets below pin how well section
+    # extraction finds where each 10-K/10-Q item starts and ends: start/end rates
+    # against the hand-labelled truth set (GH #1514), and the per-fixture set of
+    # items whose slice swallows a later item's heading (#1511). Both are marked
+    # slow, and test-slow skips pull requests, so until this step a change to
+    # edgar/documents merged without either being measured and a regression
+    # first showed up on main.
+    #
+    # Offline: they parse tracked fixtures only (html/, parity_gate/,
+    # heldout_retired/); the gitignored era corpus is absent on CI and those
+    # entries count as unmeasured, never as passing. --dist loadfile because each
+    # file builds one module-scoped scoring fixture; -n auto made every worker
+    # re-score the whole corpus (5:30 wall, 1,534 s CPU) where two workers, one
+    # per file, take ~5:00 locally.
+    #
+    # Scoped by the PR's file list (the API, for the shallow-checkout reason
+    # given above), and a step rather than its own job so it rides on the
+    # required "test-fast (3.13)" context — a separate job would need branch
+    # protection updated in lockstep (see the header of this file). The
+    # workflow file itself is in the trigger list so that editing this step
+    # exercises it.
+    - name: Check section boundaries have not regressed
+      if: github.event_name == 'pull_request'
+      env:
+        GH_TOKEN: ${{ github.token }}
+      run: |
+        set -euo pipefail
+        TRIGGERS=$(gh api --paginate \
+          "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
+          --jq '.[].filename' \
+          | grep -E '^(edgar/documents/|tests/fixtures/(parser_corpus|html|parity_gate|heldout_retired)/|tests/meta/test_(boundary_truth|section_self_consistency_ratchet)\.py$|\.github/workflows/python-hatch-workflow\.yml$)' || true)
+        if [ -z "$TRIGGERS" ]; then
+          echo "No section-extraction code or corpus changed; boundary ratchets not needed."
+          exit 0
+        fi
+        echo "Section-extraction inputs changed:"
+        echo "$TRIGGERS"
+        pytest -m slow -n 2 --dist loadfile \
+          tests/meta/test_boundary_truth.py \
+          tests/meta/test_section_self_consistency_ratchet.py
+
     - name: Upload coverage data
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: matrix.python-version == '3.13' && github.event_name != 'pull_request'
       with:
         name: coverage-fast
@@ -241,9 +293,9 @@ jobs:
       EDGAR_LOCAL_DATA_DIR: ${{ github.workspace }}/.edgar-data
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python 3.12
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: "3.12"
         cache: 'pip'
@@ -254,7 +306,7 @@ jobs:
     # run_id-suffixed key always writes a fresh entry; restore-keys warm-starts
     # from the most recent prior cache (monotonic, GH evicts LRU at the 10GB cap).
     - name: Restore SEC HTTP cache
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ github.workspace }}/.edgar-data/_tcache
         key: edgar-tcache-network-${{ github.run_id }}
@@ -274,7 +326,7 @@ jobs:
         pytest --cov --cov-report=xml -m 'network and not slow and not regression' --enable-cache
 
     - name: Upload coverage data
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: coverage-network
         path: |
@@ -292,16 +344,16 @@ jobs:
       EDGAR_LOCAL_DATA_DIR: ${{ github.workspace }}/.edgar-data
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python 3.12
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: "3.12"
         cache: 'pip'
 
     # Persist the SEC HTTP cache (see test-network for rationale).
     - name: Restore SEC HTTP cache
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ github.workspace }}/.edgar-data/_tcache
         key: edgar-tcache-slow-${{ github.run_id }}
@@ -320,7 +372,7 @@ jobs:
         pytest --cov --cov-report=xml -m 'slow and not regression' --enable-cache
 
     - name: Upload coverage data
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: coverage-slow
         path: |
@@ -336,9 +388,9 @@ jobs:
     needs: [test-fast, test-network, test-slow]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: "3.11"
         cache: 'pip'
@@ -346,19 +398,19 @@ jobs:
       run: pip install coverage[toml]
 
     - name: Download coverage data (fast)
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
         name: coverage-fast
         path: coverage-fast/
 
     - name: Download coverage data (network)
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
         name: coverage-network
         path: coverage-network/
 
     - name: Download coverage data (slow)
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
         name: coverage-slow
         path: coverage-slow/
@@ -378,7 +430,7 @@ jobs:
         coverage xml -o combined-coverage.xml
 
     - name: Upload combined coverage to Codecov
-      uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
       with:
         files: combined-coverage.xml
         fail_ci_if_error: false

@@ -6,6 +6,7 @@ from rich.panel import Panel
 from rich.text import Text
 
 from edgar.richtools import repr_rich
+from edgar.xmltools import parse_xml_boolean
 
 __all__ = ['AuditorInfo', 'extract_auditor_info']
 
@@ -66,7 +67,8 @@ def extract_auditor_info(xbrl) -> Optional['AuditorInfo']:
     except (ValueError, TypeError):
         firm_id = 0
 
-    icfr_attestation = icfr_str.lower() == 'true' if icfr_str else False
+    # xs:boolean: '1' is as true as 'true' (GH #1724). Absent reads False.
+    icfr_attestation = parse_xml_boolean(icfr_str) is True
 
     return AuditorInfo(
         name=name,

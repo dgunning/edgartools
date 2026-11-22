@@ -1,0 +1,133 @@
+{
+ "version": "2.1",
+ "instance": {
+  "gtim-20220329.htm": {
+   "tag": {
+    "srt_ProductOrServiceAxis": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "label": "Product and Service [Axis]"
+       }
+      }
+     },
+     "localname": "ProductOrServiceAxis",
+     "nsuri": "http://fasb.org/srt/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedIncomeStatement"
+     ],
+     "xbrltype": "stringItemType"
+    },
+    "us-gaap_Revenues": {
+     "calculation": {
+      "http://goodtimesburgers.com/role/ConsolidatedIncomeStatement": {
+       "order": 1.0,
+       "parentTag": "us-gaap_OperatingIncomeLoss",
+       "weight": 1.0
+      }
+     },
+     "crdr": "credit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of revenue recognized from goods sold, services rendered, insurance premiums, or other activities that constitute an earning process. Includes, but is not limited to, investment and interest income before deduction of interest expense when recognized as a component of revenue, and sales and trading gain (loss).",
+        "label": "Revenues",
+        "terseLabel": "Total net revenues",
+        "verboseLabel": "Total Revenues"
+       }
+      }
+     },
+     "localname": "Revenues",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedIncomeStatement",
+      "http://goodtimesburgers.com/role/ScheduleofreportablesegmentsTable"
+     ],
+     "xbrltype": "monetaryItemType"
+    },
+    "us-gaap_RoyaltyMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Money for usage-based right to asset.",
+        "label": "Royalty [Member]",
+        "terseLabel": "Franchise revenues [Member]"
+       }
+      }
+     },
+     "localname": "RoyaltyMember",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedIncomeStatement"
+     ],
+     "xbrltype": "domainItemType"
+    },
+    "us-gaap_ServiceMember": {
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Assistance, including, but not limited to, technology, license and maintenance, license and service, maintenance, oil and gas, and financial service.",
+        "label": "Service [Member]",
+        "terseLabel": "Restaurant sales [Member]"
+       }
+      }
+     },
+     "localname": "ServiceMember",
+     "nsuri": "http://fasb.org/us-gaap/2022",
+     "presentation": [
+      "http://goodtimesburgers.com/role/ConsolidatedIncomeStatement"
+     ],
+     "xbrltype": "domainItemType"
+    }
+   },
+   "report": {
+    "R4": {
+     "firstAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "gtim-20220329.htm",
+      "contextRef": "c12",
+      "decimals": "-3",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:Revenues",
+      "reportCount": 1,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "003 - Statement - Condensed Consolidated Statements of Operations (Unaudited)",
+     "role": "http://goodtimesburgers.com/role/ConsolidatedIncomeStatement",
+     "shortName": "Condensed Consolidated Statements of Operations (Unaudited)",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "td",
+       "tr",
+       "table",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "gtim-20220329.htm",
+      "contextRef": "c12",
+      "decimals": "-3",
+      "lang": null,
+      "name": "us-gaap:CostDirectMaterial",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "usd",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

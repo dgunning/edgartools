@@ -3,6 +3,11 @@ from typing import Any, Dict, List, Optional, Union
 
 import pandas as pd
 
+from edgar._liability_derivation import (
+    LiabilityDerivation,
+    LiabilityDerivationError,
+    derive_from_balance_sheet,
+)
 from edgar.core import log
 from edgar.richtools import repr_rich
 from edgar.xbrl import XBRL, XBRLS, Statement
@@ -21,6 +26,14 @@ _NON_PERIOD_COLUMNS = frozenset(
     {'concept', 'label', 'standard_concept', 'level', 'abstract', 'dimension',
      'is_breakdown', 'unit', 'point_in_time'}
 )
+
+# Operating cash of continuing operations only. It is the total when nothing is
+# discontinued, so get_operating_cash_flow() accepts it only then (GH #1452).
+_CONTINUING_OPERATING_CASH = 'us-gaap_NetCashProvidedByUsedInOperatingActivitiesContinuingOperations'
+# Local names of discontinued operating-cash rows: the us-gaap element
+# CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations and extension
+# elements built the same way.
+_DISCONTINUED_OPERATING_CASH = r'Cash.*Operating.*DiscontinuedOperations'
 
 
 def _parse_iso_date(value):
@@ -48,6 +61,67 @@ def _period_column_name(period) -> str:
     if period.end_date:
         return f"{period.end_date} ({period.quarter})" if period.quarter else period.end_date
     return period.label
+
+
+def _dates_descriptor(start, end, is_duration: bool = False) -> Optional[Dict[str, Optional[str]]]:
+    """A metric period descriptor from filed dates, or None when they don't state one.
+
+    A duration needs both dates; an instant has an end date and no start. A
+    period flagged as a duration without a start date is not stated, so None.
+    """
+    end_date = _parse_iso_date(end) if end else None
+    if end_date is None:
+        return None
+    if not start:
+        if is_duration:
+            return None
+        return {'period_type': 'instant', 'start_date': None, 'end_date': end_date.isoformat()}
+    start_date = _parse_iso_date(start)
+    if start_date is None:
+        return None
+    return {'period_type': 'duration', 'start_date': start_date.isoformat(), 'end_date': end_date.isoformat()}
+
+
+def _column_period_descriptor(rendered, column: str) -> Optional[Dict[str, Optional[str]]]:
+    """The period behind one rendered statement column (GH #1656).
+
+    Resolved from the ``PeriodData`` of the same rendered statement whose
+    column name is ``column``. None when no period, or more than one distinct
+    period, maps to that name: the column's dates are then not known.
+    """
+    stated = {(p.start_date or None, p.end_date or None, bool(p.is_duration))
+              for p in (getattr(rendered, 'periods', None) or [])
+              if _period_column_name(p) == column}
+    if len(stated) != 1:
+        return None
+    return _dates_descriptor(*stated.pop())
+
+
+def _common_period(descriptors: List[Optional[Dict[str, Optional[str]]]]) -> Optional[Dict[str, Optional[str]]]:
+    """The one period every descriptor states, or None.
+
+    None when there are none, when any is unknown, or when they differ in any
+    date, so an equal end date alone never makes two durations comparable.
+    """
+    if not descriptors or any(d is None for d in descriptors):
+        return None
+    first = descriptors[0]
+    return dict(first) if all(d == first for d in descriptors) else None
+
+
+def _select_period_column(rendered, df, period_offset: int):
+    """The value column ``period_offset`` selects in a rendered frame, with its period.
+
+    Returns ``(column, descriptor)``, or ``(None, None)`` when the frame has
+    too few period columns. The column is chosen exactly as before GH #1656;
+    the descriptor only describes it.
+    """
+    period_columns = _order_period_columns(
+        rendered, [col for col in df.columns if col not in _NON_PERIOD_COLUMNS])
+    if len(period_columns) <= period_offset:
+        return None, None
+    column = period_columns[period_offset]
+    return column, _column_period_descriptor(rendered, column)
 
 
 def _order_period_columns(rendered, df_period_columns: List[str]) -> List[str]:
@@ -124,11 +198,15 @@ def _order_period_columns(rendered, df_period_columns: List[str]) -> List[str]:
 
 
 class Financials:
-    def __init__(self, xb: Optional[XBRL]):
+    def __init__(self, xb: Optional[XBRL], *, accession: Optional[str] = None):
         self.xb: XBRL = xb
+        self._accession = accession
         # Set to a dict only for the duration of one get_financial_metrics() call;
         # None the rest of the time. See _render_statement_frame().
         self._statement_frame_memo: Optional[Dict[str, Any]] = None
+        # A list only while get_financial_metrics(include_periods=True) traces one
+        # getter; each lookup that returns a value appends the period it read.
+        self._period_trace: Optional[List[Optional[Dict[str, Optional[str]]]]] = None
 
     @classmethod
     def extract(cls, filing) -> Optional["Financials"]:
@@ -149,7 +227,7 @@ class Financials:
         xb = XBRL.from_filing(filing)
         if xb is None:
             return None
-        return Financials(xb)
+        return Financials(xb, accession=getattr(filing, "accession_no", None))
 
     def balance_sheet(self, *, view: ViewType = None):
         """
@@ -298,6 +376,11 @@ class Financials:
             return rendered, (None if df is None else df.copy())
         return rendered, df
 
+    def _note_source_period(self, descriptor: Optional[Dict[str, Optional[str]]]) -> None:
+        """Record the period a lookup's returned value came from, when tracing (GH #1656)."""
+        if self._period_trace is not None:
+            self._period_trace.append(descriptor)
+
     def _get_standardized_concept_by_xbrl(self, statement_type: str,
                                           standard_concept_names: List[str],
                                           period_offset: int = 0) -> Optional[Union[int, float]]:
@@ -338,13 +421,9 @@ class Financials:
 
             # Get period columns, ordered most-recent-first by period metadata
             # (positional df order is not recency-sorted — GH #885).
-            period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
-            period_columns = _order_period_columns(rendered, period_columns)
-
-            if len(period_columns) <= period_offset:
+            period_col, period = _select_period_column(rendered, df, period_offset)
+            if period_col is None:
                 return None
-
-            period_col = period_columns[period_offset]
 
             def _strip_ns(name: str) -> str:
                 # Normalize a concept name to its bare local-name for exact comparison.
@@ -395,9 +474,11 @@ class Financials:
 
                             # Convert to numeric
                             try:
-                                return float(value) if '.' in str(value) else int(value)
+                                number = float(value) if '.' in str(value) else int(value)
                             except (ValueError, TypeError):
                                 continue
+                            self._note_source_period(period)
+                            return number
 
             return None
 
@@ -436,11 +517,9 @@ class Financials:
             rendered, df = self._render_statement_frame('income')
             if df is None or df.empty:
                 return None
-            period_columns = _order_period_columns(
-                rendered, [col for col in df.columns if col not in _NON_PERIOD_COLUMNS])
-            if len(period_columns) <= period_offset:
+            column, _ = _select_period_column(rendered, df, period_offset)
+            if column is None:
                 return None
-            column = period_columns[period_offset]
             period = next((p for p in rendered.periods if _period_column_name(p) == column), None)
             if period is None or not period.start_date or not period.end_date:
                 return None
@@ -454,14 +533,19 @@ class Financials:
             if len(values) != 1:
                 return None
             value = values[0]
-            return int(value) if float(value).is_integer() else float(value)
+            number = int(value) if float(value).is_integer() else float(value)
+            # The facts were filtered to exactly these dates, so they are the
+            # value's period even when the column name is shared (GH #1656).
+            self._note_source_period(_dates_descriptor(period.start_date, period.end_date, True))
+            return number
         except Exception as e:
             log.debug(f"Error reading the filed {concept} fact: {e}")
             return None
 
     def _get_standardized_concept_value(self, statement_type: str, concept_patterns: list,
                                       period_offset: int = 0,
-                                      exclude_concepts: Optional[str] = None) -> Optional[Union[int, float]]:
+                                      exclude_concepts: Optional[str] = None,
+                                      exclude_labels: Optional[str] = None) -> Optional[Union[int, float]]:
         """
         Helper method to extract standardized concept values from financial statements.
 
@@ -471,6 +555,8 @@ class Financials:
             period_offset: Which period to get (0=most recent, 1=previous, etc.)
             exclude_concepts: Regex (case-insensitive); rows whose concept matches
                 it are never returned, whatever their label
+            exclude_labels: Regex (case-insensitive); rows whose label matches
+                it are never returned
 
         Returns:
             The concept value if found, None otherwise
@@ -493,6 +579,9 @@ class Financials:
             if exclude_concepts and 'concept' in df.columns:
                 df = df[~df['concept'].astype(str).str.contains(exclude_concepts, case=False, na=False)]
 
+            if exclude_labels and 'label' in df.columns:
+                df = df[~df['label'].astype(str).str.contains(exclude_labels, case=False, na=False)]
+
             # Find the concept using pattern matching
             for pattern in concept_patterns:
                 matches = df[df['label'].str.contains(pattern, case=False, na=False)]
@@ -500,12 +589,9 @@ class Financials:
                     # Get available period columns, ordered most-recent-first by
                     # period metadata (positional df order is not recency-sorted
                     # — GH #885).
-                    period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
-                    period_columns = _order_period_columns(rendered, period_columns)
+                    period_col, period = _select_period_column(rendered, df, period_offset)
 
-                    if len(period_columns) > period_offset:
-                        period_col = period_columns[period_offset]
-
+                    if period_col is not None:
                         # Try each match until we find one with a valid value
                         for idx in range(len(matches)):
                             value = matches.iloc[idx][period_col]
@@ -516,9 +602,11 @@ class Financials:
 
                             # Convert to numeric
                             try:
-                                return float(value) if '.' in str(value) else int(value)
+                                number = float(value) if '.' in str(value) else int(value)
                             except (ValueError, TypeError):
                                 continue
+                            self._note_source_period(period)
+                            return number
 
             return None
 
@@ -592,9 +680,17 @@ class Financials:
         # and MGE Energy's returned its $29.6M "Gas revenue" component for a
         # $161.2M total (gh #1665). It is a total, so it goes before contract
         # revenue, which a utility can report as one of its components.
+        #
+        # A BDC's top line is total investment income
+        # (us-gaap:GrossInvestmentIncomeOperating: interest, dividends and fees
+        # before expenses). The 'Revenue' list above comes from
+        # concept_mappings.json, not gaap_mappings.json, so it does not carry
+        # it, and Main Street's FY2025 10-K returned None for $566.4M
+        # (edgartools-k7mi8.6). An insurer files Revenues, which comes first.
         result = self._get_standardized_concept_by_xbrl(
             'income',
-            ['Revenue', 'us-gaap_RevenuesNetOfInterestExpense',
+            ['Revenue', 'us-gaap_GrossInvestmentIncomeOperating',
+             'us-gaap_RevenuesNetOfInterestExpense',
              'us-gaap_RegulatedAndUnregulatedOperatingRevenue'],
             period_offset
         )
@@ -826,6 +922,53 @@ class Financials:
         ]
         return self._get_standardized_concept_value('balance', patterns, period_offset)
 
+    def derive_total_liabilities(self, period_offset: int = 0) -> LiabilityDerivation:
+        """
+        Reconstruct a missing US GAAP liabilities total from the filed balance sheet.
+        Sum independent liability components and reconcile against assets less
+        consolidated equity and any separately presented temporary equity.
+        Raise LiabilityDerivationError with a reason if the filing already
+        reports the total or the two calculations cannot be reconciled.
+        """
+        if type(period_offset) is not int or period_offset < 0:
+            raise LiabilityDerivationError("invalid-period-offset", str(period_offset))
+        role, rendered, frame = self._derivation_balance_sheet()
+        _, period = _select_period_column(rendered, frame, period_offset)
+        if not period or period["period_type"] != "instant":
+            raise LiabilityDerivationError("missing-period", str(period_offset))
+        end = period["end_date"]
+        # Reuse this exact frame for both filed-total lookup paths. Restore any
+        # enclosing metrics-call memo even when the derivation is refused.
+        previous_memo = self._statement_frame_memo
+        self._statement_frame_memo = {"balance": (rendered, frame)}
+        try:
+            if self.get_total_liabilities(period_offset) is not None:
+                raise LiabilityDerivationError("already-reported", end)
+        finally:
+            self._statement_frame_memo = previous_memo
+        return derive_from_balance_sheet(self.xb, role, end, self._accession)
+
+    def _derivation_balance_sheet(self):
+        """Select one role and use it for rendering and calculation inputs."""
+        try:
+            statement = self.balance_sheet()
+            if statement is None:
+                raise LiabilityDerivationError("missing-balance-sheet", "No filed balance sheet")
+            role = statement.role_or_type
+            if role not in self.xb.calculation_trees and not role.startswith("http"):
+                _, role, _ = self.xb.find_statement(role)
+            if not role:
+                raise LiabilityDerivationError("missing-balance-sheet", "No balance-sheet role")
+            # Pin the selected role instead of resolving the canonical type again.
+            rendered = self.xb.render_statement(role, standard=True)
+            if rendered is None:
+                raise LiabilityDerivationError("missing-balance-sheet", role)
+            return role, rendered, rendered.to_dataframe(presentation=False)
+        except LiabilityDerivationError:
+            raise
+        except Exception as error:
+            raise LiabilityDerivationError("render-failed", str(error)) from error
+
     def get_total_liabilities(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
         Get total liabilities from the balance sheet using standardized labels.
@@ -925,18 +1068,42 @@ class Financials:
         # IFRS files the same total as CashFlowsFromUsedInOperatingActivities,
         # which the mapping does not carry; Shell ("Cash flow from operating
         # activities") and BP matched no label pattern and got None (gh #1785).
+        #
+        # The 'Net Cash from Operating Activities' mapping also carries the
+        # continuing-operations element, which is the total only when there is
+        # no discontinued operating cash to add to it. On SEC's CY2025 frames 95
+        # filers report the continuing element without a total, and 88 of them
+        # also report discontinued operating cash (GH #1452). So a reported
+        # total wins, and the continuing figure answers only when the statement
+        # has no discontinued operating cash for the same period.
+        # The family is searched as explicit concepts, in the mapping's sorted
+        # order, so that the continuing element can be held back.
+        from edgar.xbrl.standardization import get_default_store
+        totals = [concept for concept in
+                  sorted(get_default_store().mappings.get('Net Cash from Operating Activities', []))
+                  if concept != _CONTINUING_OPERATING_CASH]
         result = self._get_standardized_concept_by_xbrl(
             'cashflow',
-            ['Net Cash from Operating Activities', 'ifrs-full_CashFlowsFromUsedInOperatingActivities'],
+            totals + ['ifrs-full_CashFlowsFromUsedInOperatingActivities'],
             period_offset
         )
 
         if result is not None:
             return result
 
+        if not self._reports_discontinued_operating_cash(period_offset):
+            result = self._get_standardized_concept_by_xbrl(
+                'cashflow', [_CONTINUING_OPERATING_CASH], period_offset)
+            if result is not None:
+                return result
+
         # Fallback to label-based search, for statements where the concept is
         # absent or unmapped — a custom extension tag, or an IFRS filer outside
-        # the mapping set.
+        # the mapping set. Continuing- and discontinued-operations rows are not
+        # the total: the standardized label of the continuing element is "Net
+        # Cash from Operating Activities", and a discontinued row such as "Net
+        # cash used in operating activities of discontinued operations" matches
+        # the last pattern, so both are excluded by concept and by label.
         patterns = [
             r'^Net Cash from Operating',          # Most specific - matches "Net Cash from Operating Activities"
             r'^Net Cash Provided by Operating',   # Alternative phrasing
@@ -944,7 +1111,35 @@ class Financials:
             r'Operating.*Cash.*Flow',
             r'Net Cash.*Operations$',             # Avoid matching "adjustments to reconcile..."
         ]
-        return self._get_standardized_concept_value('cashflow', patterns, period_offset)
+        return self._get_standardized_concept_value(
+            'cashflow', patterns, period_offset,
+            exclude_concepts=r'ContinuingOperations|DiscontinuedOperations',
+            exclude_labels=r'continuing operations|discontinued operations')
+
+    def _reports_discontinued_operating_cash(self, period_offset: int = 0) -> bool:
+        """True when the cash flow statement has discontinued operating cash for the period.
+
+        The period is the column ``period_offset`` selects, the one the
+        operating-cash lookups answer for. A row that is present but empty for
+        that column does not count, and neither does a reported zero: with
+        nothing discontinued, continuing operations are the whole (GH #1452).
+        """
+        if self.xb is None:
+            return False
+        try:
+            rendered, df = self._render_statement_frame('cashflow')
+            if df is None or df.empty or 'concept' not in df.columns:
+                return False
+            column, _ = _select_period_column(rendered, df, period_offset)
+            if column is None:
+                return False
+            local = df['concept'].astype(str).str.split(r'[_:]', n=1).str[-1]
+            rows = df[local.str.contains(_DISCONTINUED_OPERATING_CASH, case=False, regex=True, na=False)]
+            values = pd.to_numeric(rows[column], errors='coerce')
+            return bool((values.notna() & (values != 0)).any())
+        except Exception as e:
+            log.debug(f"Error reading discontinued operating cash: {e}")
+            return False
 
     def get_free_cash_flow(self, period_offset: int = 0) -> Optional[Union[int, float]]:
         """
@@ -1115,11 +1310,9 @@ class Financials:
             # Get available period columns, ordered most-recent-first by period
             # metadata (positional df order is not recency-sorted — GH #885).
             # Invariant across patterns, so it is resolved once.
-            period_columns = [col for col in df.columns if col not in _NON_PERIOD_COLUMNS]
-            period_columns = _order_period_columns(rendered, period_columns)
-            if len(period_columns) <= period_offset:
+            period_col, period = _select_period_column(rendered, df, period_offset)
+            if period_col is None:
                 return None
-            period_col = period_columns[period_offset]
 
             # Find the concept using pattern matching on concept column
             for pattern in concept_patterns:
@@ -1141,9 +1334,11 @@ class Financials:
 
                     # Convert to numeric
                     try:
-                        return float(value) if '.' in str(value) else int(value)
+                        number = float(value) if '.' in str(value) else int(value)
                     except (ValueError, TypeError):
                         continue
+                    self._note_source_period(period)
+                    return number
 
             return None
 
@@ -1226,13 +1421,35 @@ class Financials:
         ]
         return self._get_concept_value('income', concept_patterns, period_offset)
 
-    def get_financial_metrics(self) -> Dict[str, Any]:
+    def get_financial_metrics(self, *, include_periods: bool = False) -> Dict[str, Any]:
         """
         Get a dictionary of common financial metrics using standardized labels.
 
+        Each statement's value comes from its own current column, so the metrics
+        need not share one period. On a 10-Q, quarterly filing access does not
+        make every metric quarterly: income figures usually cover the three
+        months while the cash flow statement covers the year to date, and
+        balance sheet figures are at the quarter-end date. Pass
+        ``include_periods=True`` to see the dates of each value before you
+        combine two of them.
+
+        Args:
+            include_periods: Keyword-only. When True, the result carries one
+                more key, ``periods``, mapping every metric key to the period its
+                value came from, or None. A descriptor is
+                ``{"period_type": "duration" | "instant", "start_date":
+                "YYYY-MM-DD" (None for an instant), "end_date": "YYYY-MM-DD"}``.
+                A metric with no value has a None period; a value whose period
+                cannot be stated with certainty keeps its value with a None
+                period. ``free_cash_flow`` carries a period only when operating
+                cash flow and capital expenditures share the exact same start
+                and end; the two ratios only when their inputs share the same
+                instant. The metric values are the same either way.
+
         Returns:
-            Dictionary containing available financial metrics. Two keys are
-            ratios computed from the others:
+            Dictionary of the 15 metrics below (numbers, or None when not
+            available), plus ``periods`` when requested. Two keys are ratios
+            computed from the others:
 
             - ``current_ratio``: ``current_assets / current_liabilities``.
             - ``debt_to_assets``: ``total_liabilities / total_assets``, a
@@ -1247,6 +1464,11 @@ class Financials:
             >>> financials = company.get_financials()
             >>> metrics = financials.get_financial_metrics()
             >>> print(f"Revenue: ${metrics.get('revenue', 'N/A'):,}")
+
+            >>> # Compare two values only when their periods match exactly
+            >>> metrics = financials.get_financial_metrics(include_periods=True)
+            >>> metrics['periods']['operating_cash_flow']   # dates of the latest 10-K's year
+            {'period_type': 'duration', 'start_date': 'YYYY-MM-DD', 'end_date': 'YYYY-MM-DD'}
         """
         # Every getter below funnels into _render_statement_frame(), which without
         # this memo re-rendered and re-converted the same three statements once per
@@ -1254,52 +1476,72 @@ class Financials:
         # outlives the call that produced it.
         self._statement_frame_memo = {}
         try:
-            return self._collect_financial_metrics()
+            return self._collect_financial_metrics(include_periods)
         finally:
             self._statement_frame_memo = None
+            self._period_trace = None
 
-    def _collect_financial_metrics(self) -> Dict[str, Any]:
+    def _traced_metric(self, getter) -> tuple:
+        """Call one metric getter and return ``(value, period)`` (GH #1656).
+
+        The period is the one every lookup that contributed to the value read
+        from, or None when the value is None or those periods differ or are
+        unknown. Free cash flow traces both operating cash flow and capex, so it
+        gets a period only when the two share it exactly.
+        """
+        self._period_trace = []
+        try:
+            value = getter()
+            trace = self._period_trace
+        finally:
+            self._period_trace = None
+        return value, (None if value is None else _common_period(trace))
+
+    def _collect_financial_metrics(self, include_periods: bool = False) -> Dict[str, Any]:
         """The body of get_financial_metrics(), run with the per-call memo installed."""
+        getters = (
+            # Income Statement Metrics
+            ('revenue', self.get_revenue),
+            ('operating_income', self.get_operating_income),
+            ('net_income', self.get_net_income),
+            # Balance Sheet Metrics
+            ('total_assets', self.get_total_assets),
+            ('total_liabilities', self.get_total_liabilities),
+            ('stockholders_equity', self.get_stockholders_equity),
+            ('current_assets', self.get_current_assets),
+            ('current_liabilities', self.get_current_liabilities),
+            # Cash Flow Metrics
+            ('operating_cash_flow', self.get_operating_cash_flow),
+            ('capital_expenditures', self.get_capital_expenditures),
+            ('free_cash_flow', self.get_free_cash_flow),
+            # Share Metrics
+            ('shares_outstanding_basic', self.get_shares_outstanding_basic),
+            ('shares_outstanding_diluted', self.get_shares_outstanding_diluted),
+        )
         metrics = {}
-
-        # Income Statement Metrics
-        metrics['revenue'] = self.get_revenue()
-        metrics['operating_income'] = self.get_operating_income()
-        metrics['net_income'] = self.get_net_income()
-
-        # Balance Sheet Metrics
-        metrics['total_assets'] = self.get_total_assets()
-        metrics['total_liabilities'] = self.get_total_liabilities()
-        metrics['stockholders_equity'] = self.get_stockholders_equity()
-        metrics['current_assets'] = self.get_current_assets()
-        metrics['current_liabilities'] = self.get_current_liabilities()
-
-        # Cash Flow Metrics
-        metrics['operating_cash_flow'] = self.get_operating_cash_flow()
-        metrics['capital_expenditures'] = self.get_capital_expenditures()
-        metrics['free_cash_flow'] = self.get_free_cash_flow()
-
-        # Share Metrics
-        metrics['shares_outstanding_basic'] = self.get_shares_outstanding_basic()
-        metrics['shares_outstanding_diluted'] = self.get_shares_outstanding_diluted()
+        periods = {}
+        for key, getter in getters:
+            if include_periods:
+                metrics[key], periods[key] = self._traced_metric(getter)
+            else:
+                metrics[key] = getter()
 
         # Calculate basic ratios if we have the data
-        if metrics['current_assets'] and metrics['current_liabilities']:
-            try:
-                metrics['current_ratio'] = metrics['current_assets'] / metrics['current_liabilities']
-            except (TypeError, ZeroDivisionError):
-                metrics['current_ratio'] = None
-        else:
-            metrics['current_ratio'] = None
+        for key, numerator, denominator in (('current_ratio', 'current_assets', 'current_liabilities'),
+                                            ('debt_to_assets', 'total_liabilities', 'total_assets')):
+            metrics[key] = None
+            if metrics[numerator] and metrics[denominator]:
+                try:
+                    metrics[key] = metrics[numerator] / metrics[denominator]
+                except (TypeError, ZeroDivisionError):
+                    metrics[key] = None
+            if include_periods:
+                period = _common_period([periods[numerator], periods[denominator]])
+                instant = period is not None and period['period_type'] == 'instant'
+                periods[key] = period if (metrics[key] is not None and instant) else None
 
-        if metrics['total_liabilities'] and metrics['total_assets']:
-            try:
-                metrics['debt_to_assets'] = metrics['total_liabilities'] / metrics['total_assets']
-            except (TypeError, ZeroDivisionError):
-                metrics['debt_to_assets'] = None
-        else:
-            metrics['debt_to_assets'] = None
-
+        if include_periods:
+            metrics['periods'] = periods
         return metrics
 
     def __str__(self):
@@ -1426,11 +1668,22 @@ class MultiFinancials:
     def balance_sheet(self, view: ViewType = None) -> Optional[StitchedStatement]:
         return self.xbs.statements.balance_sheet(view=view)
 
-    def income_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
-        return self.xbs.statements.income_statement(view=view)
+    def income_statement(self, view: ViewType = None, *,
+                         include_quarterly: bool = False) -> Optional[StitchedStatement]:
+        """The stitched income statement.
 
-    def cash_flow_statement(self, view: ViewType = None) -> Optional[StitchedStatement]:
-        return self.xbs.statements.cash_flow_statement(view=view)
+        Args:
+            view: StatementView controlling dimensional filtering.
+            include_quarterly: If True, also show the discrete quarter each 10-Q
+                reports next to its year-to-date column (GH #780, #1783). Quarters
+                are taken as filed, never derived. Default False: YTD/annual only.
+        """
+        return self.xbs.statements.income_statement(view=view, include_quarterly=include_quarterly)
+
+    def cash_flow_statement(self, view: ViewType = None, *,
+                            include_quarterly: bool = False) -> Optional[StitchedStatement]:
+        """The stitched cash flow statement. ``include_quarterly`` as on ``income_statement``."""
+        return self.xbs.statements.cash_flow_statement(view=view, include_quarterly=include_quarterly)
 
     def __rich__(self):
         return self.xbs.__rich__()

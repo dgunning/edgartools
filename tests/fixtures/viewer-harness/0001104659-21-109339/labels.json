@@ -1,0 +1,92 @@
+{
+ "rocru_CommonStockSubjectToPossibleRedemptionShares": {
+  "http://www.xbrl.org/2003/role/documentation": "Number of the shares of common stock subject to possible redemption.",
+  "http://www.xbrl.org/2003/role/label": "Common Stock Subject To Possible Redemption, Shares",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Common stock subject to possible redemption (in shares)"
+ },
+ "rocru_CommonStockSubjectToPossibleRedemptionValue": {
+  "http://www.xbrl.org/2003/role/documentation": "Equity impact of the value of common stock subject to possible redemption.",
+  "http://www.xbrl.org/2003/role/label": "Common Stock Subject To Possible Redemption, Value",
+  "http://www.xbrl.org/2009/role/negatedLabel": "Common stock subject to possible redemption"
+ },
+ "rocru_NetLoss": {
+  "http://www.xbrl.org/2003/role/documentation": "Represents the net loss.",
+  "http://www.xbrl.org/2003/role/label": "Net Loss",
+  "http://www.xbrl.org/2003/role/terseLabel": "Net loss"
+ },
+ "rocru_UnitsIssuedDuringPeriodSharesNewIssues": {
+  "http://www.xbrl.org/2003/role/documentation": "Number of new units issued during the period.",
+  "http://www.xbrl.org/2003/role/label": "Units Issued During Period, Shares, New Issues",
+  "http://www.xbrl.org/2003/role/terseLabel": "Sale of 408,000 Private Placement Units Private Placement Shares (in shares)",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Number of units sold"
+ },
+ "rocru_UnitsIssuedDuringPeriodValueNewIssues": {
+  "http://www.xbrl.org/2003/role/documentation": "Equity impact of the value of new unit issued during the period.",
+  "http://www.xbrl.org/2003/role/label": "Units Issued During Period, Value, New Issues",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Sale of 408,000 Private Placement Units Private Placement Shares"
+ },
+ "us-gaap_AdditionalPaidInCapitalMember": {
+  "http://www.xbrl.org/2003/role/label": "Additional Paid In Capital [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Additional Paid-in Capital"
+ },
+ "us-gaap_ClassOfStockDomain": {
+  "http://www.xbrl.org/2003/role/label": "Class Of Stock [Domain]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Class of Stock [Domain]"
+ },
+ "us-gaap_CommonClassAMember": {
+  "http://www.xbrl.org/2003/role/label": "Common Class A [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Common Stock A"
+ },
+ "us-gaap_CommonStockMember": {
+  "http://www.xbrl.org/2003/role/label": "Common Stock [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Non-redeemable common stock"
+ },
+ "us-gaap_EquityComponentDomain": {
+  "http://www.xbrl.org/2003/role/label": "Equity Component [Domain]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Equity Component [Domain]"
+ },
+ "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+  "http://www.xbrl.org/2003/role/label": "Increase (Decrease) in Stockholders' Equity [Roll Forward]"
+ },
+ "us-gaap_RetainedEarningsMember": {
+  "http://www.xbrl.org/2003/role/label": "Retained Earnings [Member]",
+  "http://www.xbrl.org/2003/role/terseLabel": "Accumulated Deficit"
+ },
+ "us-gaap_SharesIssued": {
+  "http://www.xbrl.org/2003/role/label": "Shares, Issued",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Balance at the end (in shares)",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Balance at the beginning (in shares)",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Shares issued"
+ },
+ "us-gaap_StatementClassOfStockAxis": {
+  "http://www.xbrl.org/2003/role/label": "Class of Stock [Axis]"
+ },
+ "us-gaap_StatementEquityComponentsAxis": {
+  "http://www.xbrl.org/2003/role/label": "Equity Components [Axis]"
+ },
+ "us-gaap_StatementLineItems": {
+  "http://www.xbrl.org/2003/role/label": "Statement [Line Items]"
+ },
+ "us-gaap_StatementOfStockholdersEquityAbstract": {
+  "http://www.xbrl.org/2003/role/label": "CONDENSED CONSOLIDATED STATEMENTS OF CHANGES IN STOCKHOLDERS' EQUITY"
+ },
+ "us-gaap_StatementTable": {
+  "http://www.xbrl.org/2003/role/label": "Statement [Table]"
+ },
+ "us-gaap_StockIssuedDuringPeriodSharesNewIssues": {
+  "http://www.xbrl.org/2003/role/label": "Stock Issued During Period, Shares, New Issues",
+  "http://www.xbrl.org/2003/role/terseLabel": "Sale of 11,500,000 Units, net of underwriting discount and offering expenses (in shares)",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Number of shares issued"
+ },
+ "us-gaap_StockIssuedDuringPeriodValueNewIssues": {
+  "http://www.xbrl.org/2003/role/label": "Stock Issued During Period, Value, New Issues",
+  "http://www.xbrl.org/2003/role/terseLabel": "Sale of 11,500,000 Units, net of underwriting discount and offering expenses",
+  "http://www.xbrl.org/2003/role/verboseLabel": "Aggregate cash amount for new issuances"
+ },
+ "us-gaap_StockholdersEquity": {
+  "http://www.xbrl.org/2003/role/label": "Stockholders' Equity Attributable to Parent",
+  "http://www.xbrl.org/2003/role/periodEndLabel": "Balance at the end",
+  "http://www.xbrl.org/2003/role/periodStartLabel": "Balance at the beginning",
+  "http://www.xbrl.org/2003/role/totalLabel": "Total Stockholders' Equity"
+ }
+}

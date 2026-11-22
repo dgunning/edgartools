@@ -17,7 +17,9 @@ from rich import box
 from rich.panel import Panel
 from rich.table import Table
 
-from edgar.bdc.industry import INDUSTRY_SOURCES, clean_industry_label, issuer_key, normalize_sector
+from edgar.bdc.industry import (
+    INDUSTRY_SOURCES, clean_industry_label, is_multi_member_industry, issuer_key, normalize_sector,
+)
 from edgar.exceptions import ValidationError
 from edgar.richtools import repr_rich
 
@@ -1457,11 +1459,11 @@ _NOT_AN_INDUSTRY_RE = re.compile(
     r'(?<!multi-sector )holdings?|'
     r'holdco|bidco|topco|midco|finco|opco|acquisition|acquisitions|buyer|purchaser|parent|'
     r'intermediate|intermediateco|group|partners|aggregator|borrower|'
-    r'sas|sarl|s\.a\.r\.l|ag|nv|n\.v|oy|pty|pte|spa|s\.p\.a|se|kg|bv|aps|a/s|ab|'
+    r'sas|sarl|s\.a\.r\.l|ag|nv|n\.v|oy|pty|pte|spa|s\.p\.a|se|kg|bv|aps|a/s|ab|scsp|scs|sca|sicav|'
     r'super|incremental|last out|first out|second out|portfolio|assets?|liabilities|'
     r'funds?|obligations|member|sofr|libor|euribor|prime|one|two|three|ii|iii|iv|'
     r'north|south|east|west|usd|eur|gbp|cad|aud|government|protective|advance|subordinate|'
-    r'receives|pays|corporate debt|company|related party|junior)\b',
+    r'receives|pays|corporate debt|company|related party|junior|middle)\b',
     re.IGNORECASE,
 )
 
@@ -1644,7 +1646,9 @@ def _industry_before_company(
             or _industry_key(span) in strong
             or _INDUSTRY_STOP_WORDS.match(rest) is not None
         )
-        if trusted:
+        # A taxonomy member can be the company itself ("Nordic Ferry
+        # Infrastructure AS" is an ARCC member); a grouping is never the company.
+        if trusted and not (company_name and issuer_key(span) == issuer_key(company_name)):
             return span
     if company_name and company_name not in (identifier, remainder):
         position = remainder.find(company_name)
@@ -1874,7 +1878,8 @@ def _fill_industries(investments: dict, member_candidates: tuple[str, ...] = ())
     by_company: dict[str, str] = {}
     for fields in investments.values():
         key = issuer_key(fields.get('company_name'))
-        if key and fields.get('industry') and key not in by_company:
+        if (key and fields.get('industry') and key not in by_company
+                and not is_multi_member_industry(fields['industry'], fields.get('industry_source'))):
             by_company[key] = fields['industry']
     for fields in investments.values():
         if fields.get('industry'):
@@ -1993,7 +1998,12 @@ class PortfolioInvestment:
 
     @property
     def sector(self) -> Optional[str]:
-        """The normalized sector for ``industry`` ('Software Sector' -> 'Software'), or None."""
+        """The normalized sector for ``industry`` ('Software Sector' -> 'Software'), or None.
+
+        None for a holding classified under several enumeration members.
+        """
+        if is_multi_member_industry(self.industry, self.industry_source):
+            return None
         return normalize_sector(self.industry)
 
     @property
@@ -2149,6 +2159,59 @@ def _as_float(value, default: float) -> float:
         return default
 
 
+DIM_EQUITY_SECURITIES_BY_INDUSTRY = 'dim_us-gaap_EquitySecuritiesByIndustryAxis'
+REPORTED_INDUSTRY_COLUMNS = ['industry', 'fair_value', 'pct_of_reported_total', 'pct_of_net_assets']
+
+
+def _industry_subtotal_member(fact, period: Optional[str]) -> Optional[str]:
+    """The industry member of a fact dimensioned by ``EquitySecuritiesByIndustryAxis`` alone, else None."""
+    if fact.get('period_instant') != period:
+        return None
+    dims = [key for key in fact if key.startswith('dim_') and fact.get(key)]
+    if dims != [DIM_EQUITY_SECURITIES_BY_INDUSTRY]:
+        return None
+    return str(fact[DIM_EQUITY_SECURITIES_BY_INDUSTRY])
+
+
+def _is_usd(fact) -> bool:
+    return str(fact.get('unit_ref') or '').upper() == 'USD' or str(fact.get('currency') or '').upper() == 'USD'
+
+
+def _reported_industry_rows(all_facts, period: Optional[str]) -> list:
+    """The filer's own fair value subtotal per industry, as ``(industry, fair_value, pct_of_net_assets)``.
+
+    ARCC tags none of its 1,417 holdings with an industry but files 23
+    ``InvestmentOwnedAtFairValue`` facts dimensioned by
+    ``EquitySecuritiesByIndustryAxis`` alone that sum to its reported total.
+    Only USD facts at ``period`` count, one per member (the most precise, so
+    identical duplicates count once). The percentage of net assets is the
+    filed ``InvestmentOwnedPercentOfNetAssets`` on that member, never derived.
+    """
+    values: dict = {}
+    percents: dict = {}
+    labels: dict = {}
+    for fact in all_facts:
+        concept = fact.get('concept')
+        if concept not in ('us-gaap:InvestmentOwnedAtFairValue', 'us-gaap:InvestmentOwnedPercentOfNetAssets'):
+            continue
+        member = _industry_subtotal_member(fact, period)
+        value = fact.get('numeric_value')
+        if member is None or value is None or pd.isna(value):
+            continue
+        if concept == 'us-gaap:InvestmentOwnedPercentOfNetAssets':
+            percents.setdefault(member, float(value))
+            continue
+        if not _is_usd(fact):
+            continue
+        precision = _as_float(fact.get('decimals'), -99)
+        if member not in values or precision > values[member][0]:
+            values[member] = (precision, float(value))
+            labels[member] = fact.get('dimension_member_label') or clean_industry_label(member)
+    rows = [(labels[member], value, percents.get(member, float('nan')))
+            for member, (_, value) in values.items()]
+    return sorted(rows, key=lambda row: row[1], reverse=True)
+
+
 # "Debt Investments Healthcare Services, Other and Total Marathon Health, LLC"
 _COMPANY_TOTAL_RE = re.compile(r'\bTotal\s+(.+)$')
 
@@ -2286,11 +2349,18 @@ def _exclude_restated_rows(rows: list[PortfolioInvestment]):
         parts = [o for o in kept if o is not inv and o.identifier.startswith(ident)
                  and len(o.identifier) > len(ident) and not o.identifier[len(ident)].isalnum()]
         if parts and abs(sum(map(fv, parts)) - fv(inv)) <= tolerance(len(parts)):
-            # A row with its own cost is a holding, not a header over one row:
-            # ARCC's "Proofpoint, Inc. | Second lien senior secured loan" (cost
-            # 52.6M) and "... loan 1" (cost 51.6M) are both worth 50.5M (GH #1505)
+            # A row with its own cost over one row is a holding unless the row
+            # repeats that cost under a longer label. ARCC's "Proofpoint, Inc. |
+            # Second lien senior secured loan" (cost 52.6M) and "... loan 1"
+            # (cost 51.6M) are both worth 50.5M (GH #1505); ARCC's "... loan" and
+            # "... loan 1" pairs that share a cost differ only by a counter. PFX's
+            # company subtotals repeat their holding's cost (GH #1583).
             if inv.cost is not None and len(parts) == 1:
-                continue
+                part = parts[0]
+                restated = (part.cost is not None and abs(part.cost - inv.cost) <= tolerance(1)
+                            and not re.fullmatch(r' \w+', part.identifier[len(ident):]))
+                if not restated:
+                    continue
             drop(inv, f"total of {len(parts)} row(s) that extend it")
 
     # One identifier spelled two ways
@@ -2389,6 +2459,7 @@ class PortfolioInvestments:
         reported_total_fair_value: Optional[Decimal] = None,
         excluded: Optional[list['ExcludedInvestment']] = None,
         unfunded_commitments_fair_value: Optional[Decimal] = None,
+        reported_industry_rows: Optional[list] = None,
     ):
         self._investments = investments
         self._period = period
@@ -2396,6 +2467,7 @@ class PortfolioInvestments:
         self._reported_total_fair_value = reported_total_fair_value
         self._excluded = excluded or []
         self._unfunded_commitments_fair_value = unfunded_commitments_fair_value
+        self._reported_industry_rows = reported_industry_rows or []
 
     def __len__(self) -> int:
         return len(self._investments)
@@ -2628,6 +2700,18 @@ class PortfolioInvestments:
                 if inv.fair_value is not None and inv.fair_value >= min_fair_value
             ]
 
+        if industry and not investments and self.industry_coverage < 1:
+            missing = sum(1 for inv in self._investments if inv.industry is None)
+            log.warning(
+                "filter(industry=%r) matched no holdings, but %d of %d holdings have no "
+                "industry, so no matches does not mean zero exposure. "
+                "reported_industry_breakdown() has the filer's own fair value by industry "
+                "when it reports one.",
+                industry, missing, len(self._investments),
+            )
+
+        # A subset keeps neither the reported total nor the reported industry
+        # breakdown: both describe the whole portfolio, not these rows.
         return PortfolioInvestments(investments, period=self._period,
                                     nonaccrual_fair_value=self._nonaccrual_fair_value)
 
@@ -2679,6 +2763,67 @@ class PortfolioInvestments:
         unknown = grouped[grouped[by].isna()]
         return pd.concat([known, unknown]).reset_index(drop=True)
 
+    def reported_industry_breakdown(self) -> pd.DataFrame:
+        """
+        The filer's own fair value by industry, as reported in the filing.
+
+        Many BDCs tag no industry on their holdings but file a subtotal per
+        industry (``InvestmentOwnedAtFairValue`` dimensioned by
+        ``EquitySecuritiesByIndustryAxis`` alone). Ares Capital's FY2025 10-K
+        reports 23 such subtotals summing to its 29,484.8M total while none of
+        its 1,417 holdings carries an industry. Use this when
+        ``industry_coverage`` is low and ``by_industry()`` is mostly ``None``.
+
+        Returns:
+            DataFrame with columns:
+
+            * ``industry``: the filer's label for the industry member
+            * ``fair_value``: the filed subtotal
+            * ``pct_of_reported_total``: calculated by edgartools as
+              ``fair_value / reported_total_fair_value`` (NaN without a reported total)
+            * ``pct_of_net_assets``: the filed ``InvestmentOwnedPercentOfNetAssets``
+              as filed (0.4912 means 49.12%), NaN when the filer does not report it
+
+            sorted by fair value descending. ``df.attrs`` holds ``sum_fair_value``,
+            ``reported_total_fair_value`` and their ``difference``. Only the
+            portfolio's own period counts, never an earlier one. The frame is
+            empty, with the same columns, when the filing reports no such
+            breakdown and for a filtered subset, which is not the whole portfolio.
+        """
+        rows = self._reported_industry_rows
+        df = pd.DataFrame(
+            [(label, value, float('nan'), pct) for label, value, pct in rows],
+            columns=REPORTED_INDUSTRY_COLUMNS,
+        ).astype({'fair_value': float, 'pct_of_reported_total': float, 'pct_of_net_assets': float})
+        reported = float(self._reported_total_fair_value) if self._reported_total_fair_value is not None else None
+        if reported:
+            df['pct_of_reported_total'] = df['fair_value'] / reported
+        total = float(df['fair_value'].sum()) if rows else None
+        df.attrs['sum_fair_value'] = total
+        df.attrs['reported_total_fair_value'] = reported
+        df.attrs['difference'] = total - reported if total is not None and reported is not None else None
+        return df
+
+    def _industry_context_lines(self) -> list:
+        """The coverage line, and the filer's own breakdown when it reports one."""
+        known = sum(1 for inv in self._investments if inv.industry is not None)
+        lines = [f'Industry known for {known} of {len(self._investments)} positions']
+        if self._reported_industry_rows:
+            lines.append(f'Reported industry breakdown: {len(self._reported_industry_rows)} industries '
+                         f'(filed subtotals, see .reported_industry_breakdown())')
+        return lines
+
+    def _reported_industry_context_lines(self) -> list:
+        breakdown = self.reported_industry_breakdown()
+        if breakdown.empty:
+            return []
+        lines = ['', 'REPORTED INDUSTRY BREAKDOWN (filed fair value; % of reported total is calculated):']
+        for row in breakdown.head(10).itertuples(index=False):
+            share = f' ({row.pct_of_reported_total:.1%} calc.)' if pd.notna(row.pct_of_reported_total) else ''
+            filed = f', {row.pct_of_net_assets:.2%} of net assets filed' if pd.notna(row.pct_of_net_assets) else ''
+            lines.append(f'  {row.industry}: ${row.fair_value:,.0f}{share}{filed}')
+        return lines
+
     def to_context(self, detail: str = 'standard') -> str:
         """
         AI-optimized context string for LLM consumption.
@@ -2708,8 +2853,7 @@ class PortfolioInvestments:
 
         dq = self.data_quality
         lines.append(f'Composition: {dq.debt_count} debt, {dq.equity_count} equity')
-        if self.industry_coverage:
-            lines.append(f'Industry Coverage: {self.industry_coverage:.0%}')
+        lines.extend(self._industry_context_lines())
 
         # Health metrics
         if self._nonaccrual_fair_value is not None:
@@ -2741,10 +2885,12 @@ class PortfolioInvestments:
             lines.append(f'  {inv.company_name} ({inv.investment_type}) — {fv}')
 
         if detail == 'standard':
+            lines.extend(self._reported_industry_context_lines())
             lines.append('')
             lines.append('AVAILABLE ACTIONS:')
             lines.append('  .filter(investment_type=, company_name=, industry=)   Filter investments')
             lines.append('  .by_industry()       Fair value by normalized sector')
+            lines.append("  .reported_industry_breakdown()   Filer's own fair value by industry")
             lines.append('  .to_dataframe()      All holdings as DataFrame')
             lines.append('  .data_quality        Coverage metrics')
             lines.append('  .non_accrual_rate    Non-accrual rate at FV')
@@ -2765,11 +2911,13 @@ class PortfolioInvestments:
             for row in self.by_industry().head(10).itertuples(index=False):
                 label = row.sector if row.sector is not None else 'No industry'
                 lines.append(f'  {label}: ${row.total_fair_value:,.0f} ({row.pct_of_portfolio:.1%})')
+        lines.extend(self._reported_industry_context_lines())
 
         lines.append('')
         lines.append('AVAILABLE ACTIONS:')
         lines.append('  .filter(investment_type=, company_name=, industry=)   Filter investments')
         lines.append('  .by_industry()       Fair value by normalized sector')
+        lines.append("  .reported_industry_breakdown()   Filer's own fair value by industry")
         lines.append('  .to_dataframe()      All holdings as DataFrame')
         lines.append('  .data_quality        Coverage metrics')
         lines.append('  .non_accrual_rate    Non-accrual rate at FV')
@@ -2782,9 +2930,9 @@ class PortfolioInvestments:
             {
                 'company_name': inv.company_name,
                 'investment_type': inv.investment_type,
-                'fair_value': float(inv.fair_value) if inv.fair_value else None,
-                'cost': float(inv.cost) if inv.cost else None,
-                'principal_amount': float(inv.principal_amount) if inv.principal_amount else None,
+                'fair_value': float(inv.fair_value) if inv.fair_value is not None else None,
+                'cost': float(inv.cost) if inv.cost is not None else None,
+                'principal_amount': float(inv.principal_amount) if inv.principal_amount is not None else None,
                 'shares': inv.shares,
                 'interest_rate': inv.interest_rate,
                 'pik_rate': inv.pik_rate,
@@ -2881,106 +3029,18 @@ class PortfolioInvestments:
         """
         Create PortfolioInvestments from an XBRL Schedule of Investments Statement.
 
+        Reads the statement's filing through ``from_xbrl``, so both entry points
+        name, type and exclude the same positions (GH #1612).
+
         Args:
             statement: The Statement from xbrl.statements.schedule_of_investments()
-            period: Optional period column (e.g., '2024-12-31'). If None, uses latest.
+            period: Optional period (e.g., '2024-12-31'). If None, ``from_xbrl`` picks it.
             include_untyped: If False (default), excludes investments with "Unknown" type.
-                These are typically company-level rollup entries that would inflate totals.
 
         Returns:
             PortfolioInvestments collection
         """
-        df = statement.to_dataframe()
-
-        # Find the period column to use
-        if period is None:
-            # Find date columns (exclude metadata columns)
-            date_cols = [
-                col for col in df.columns
-                if re.match(r'\d{4}-\d{2}-\d{2}', str(col))
-            ]
-            if not date_cols:
-                return cls([], period=None)
-            # Use the latest (first) date column
-            period = date_cols[0]
-
-        # Filter to rows with values and dimension labels
-        mask = (
-            df[period].notna() &
-            df['dimension_label'].notna() &
-            df['dimension_label'].str.contains('InvestmentIdentifierAxis', na=False)
-        )
-        data = df[mask].copy()
-
-        if data.empty:
-            return cls([], period=period)
-
-        # Group by dimension_label and pivot concepts
-        investments = {}
-        for _, row in data.iterrows():
-            dim_label = row['dimension_label']
-            concept = row['concept']
-            value = row[period]
-
-            if dim_label not in investments:
-                identifier, company_name, inv_type = _parse_investment_identifier(dim_label)
-                investments[dim_label] = {
-                    'identifier': identifier,
-                    'company_name': company_name,
-                    'investment_type': inv_type,
-                }
-            if concept == CONCEPT_INDUSTRY_ENUMERATION and isinstance(value, str) and value.strip():
-                investments[dim_label]['industry'] = clean_industry_label(value)
-                investments[dim_label]['industry_source'] = 'enumeration'
-
-            # Map concept to field
-            inv = investments[dim_label]
-
-            # Skip empty or invalid values
-            if pd.isna(value) or value == '':
-                continue
-
-            try:
-                if concept == CONCEPT_FAIR_VALUE:
-                    inv['fair_value'] = Decimal(str(value))
-                elif concept == CONCEPT_COST:
-                    inv['cost'] = Decimal(str(value))
-                elif concept == CONCEPT_PRINCIPAL:
-                    inv['principal_amount'] = Decimal(str(value))
-                elif concept == CONCEPT_SHARES:
-                    inv['shares'] = int(float(value))
-                elif concept == CONCEPT_INTEREST_RATE:
-                    inv['interest_rate'] = float(value)
-                elif concept == CONCEPT_PIK_RATE:
-                    inv['pik_rate'] = float(value)
-                elif concept == CONCEPT_SPREAD:
-                    inv['spread'] = float(value)
-                elif concept == CONCEPT_PCT_NET_ASSETS:
-                    inv['percent_of_net_assets'] = float(value)
-            except (ValueError, TypeError, InvalidOperation):
-                # Skip values that can't be converted
-                pass
-
-        _fill_industries(investments)
-
-        # Create PortfolioInvestment objects
-        portfolio = [
-            PortfolioInvestment(**inv_data)
-            for inv_data in investments.values()
-        ]
-
-        # Filter out Unknown types unless include_untyped is True
-        # Unknown types are typically company-level rollups that inflate totals
-        if not include_untyped:
-            portfolio = [inv for inv in portfolio if inv.investment_type != "Unknown"]
-
-        # Sort by fair value (largest first)
-        portfolio.sort(
-            key=lambda x: x.fair_value if x.fair_value is not None else Decimal(0),
-            reverse=True
-        )
-
-        return cls(portfolio, period=period)
+        return cls.from_xbrl(statement.xbrl, period=period, include_untyped=include_untyped)
 
     @classmethod
     def from_xbrl(
@@ -3177,4 +3237,5 @@ class PortfolioInvestments:
 
         return cls(portfolio, period=period, nonaccrual_fair_value=nonaccrual_fv,
                    reported_total_fair_value=reported_total, excluded=excluded,
-                   unfunded_commitments_fair_value=unfunded)
+                   unfunded_commitments_fair_value=unfunded,
+                   reported_industry_rows=_reported_industry_rows(all_facts, period))

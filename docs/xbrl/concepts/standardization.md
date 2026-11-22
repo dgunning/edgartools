@@ -149,6 +149,8 @@ The number of standardized concepts varies by provider:
 | `Revenue` | Revenue | 139 | `AdmissionsRevenue`, `AdvertisingRevenue`, `BinderSalesRevenue`, ... |
 | `CostOfGoodsAndServicesSold` | Cost of Revenue | 142 | `AdvertisingRevenueCost`, `AffiliateCosts`, `AircraftRentalAndLandingFees`, ... |
 | `GrossProfit` | Gross Profit | 1 | `GrossProfit` |
+| `InvestmentExpenses` | Investment Expenses | 1 | `InvestmentIncomeInvestmentExpense` |
+| `NetInvestmentIncome` | Net Investment Income | 1 | `NetInvestmentIncome` |
 
 
 ### Income Statement - Operating Expenses
@@ -230,6 +232,47 @@ The number of standardized concepts varies by provider:
 | `ForecastedIntangibleAmortizationYear5` | Forecasted Amortization, Year 5 | 1 | `FiniteLivedIntangibleAssetsAmortizationExpenseYearFive` |
 | `ForecastedIntangibleAmortizationAfterYear5` | Forecasted Amortization, Thereafter | 2 | `FiniteLivedIntangibleAssetsAmortizationExpenseAfterYearFive`, `FiniteLivedIntangibleAssetsAmortizationExpenseRollingAfterYearFive` |
 
+
+### Crypto Assets (ASU 2023-08)
+
+| Standard Concept | Display Name | XBRL Tags | Examples |
+|------------------|--------------|-----------|----------|
+| `CryptoAssets` | Crypto Assets | 1 | `CryptoAssetFairValue` |
+| `CryptoAssetsCurrent` | Crypto Assets, Current | 1 | `CryptoAssetFairValueCurrent` |
+| `CryptoAssetsNoncurrent` | Crypto Assets, Noncurrent | 1 | `CryptoAssetFairValueNoncurrent` |
+| `CryptoUnrealizedGainLoss` | Crypto Assets, Unrealized Gain (Loss) | 1 | `CryptoAssetUnrealizedGainLossOperatingAndNonoperating` |
+| `CryptoGainLoss` | Crypto Assets, Realized and Unrealized Gain (Loss) | 1 | `CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating` |
+| `CryptoPurchases` | Payments to Acquire Crypto Assets | 1 | `PaymentForAcquisitionCryptoAsset` |
+| `CryptoSaleProceeds` | Proceeds from Disposal of Crypto Assets | 1 | `ProceedsFromDisposalCryptoAsset` |
+| `CryptoConversionProceeds` | Proceeds from Conversion of Crypto Consideration | 1 | `ProceedsFromCryptoAssetOperatingActivity` |
+
+
+### Cash Income Taxes by Jurisdiction (ASU 2023-09)
+
+| Standard Concept | Display Name | XBRL Tags | Examples |
+|------------------|--------------|-----------|----------|
+| `IncomeTaxesPaidFederal` | Income Taxes Paid, Federal, Net of Refunds | 1 | `IncomeTaxPaidFederalAfterRefundReceived` |
+| `IncomeTaxesPaidStateLocal` | Income Taxes Paid, State and Local, Net of Refunds | 1 | `IncomeTaxPaidStateAndLocalAfterRefundReceived` |
+| `IncomeTaxesPaidForeign` | Income Taxes Paid, Foreign, Net of Refunds | 1 | `IncomeTaxPaidForeignAfterRefundReceived` |
+| `IncomeTaxesPaidFederalGross` | Income Taxes Paid, Federal, Before Refunds | 1 | `IncomeTaxPaidFederalBeforeRefundReceived` |
+| `IncomeTaxesPaidStateLocalGross` | Income Taxes Paid, State and Local, Before Refunds | 1 | `IncomeTaxPaidStateAndLocalBeforeRefundReceived` |
+| `IncomeTaxesPaidForeignGross` | Income Taxes Paid, Foreign, Before Refunds | 1 | `IncomeTaxPaidForeignBeforeRefundReceived` |
+| `IncomeTaxRefundsFederal` | Income Tax Refunds Received, Federal | 1 | `ProceedsFromIncomeTaxRefundFederal` |
+| `IncomeTaxRefundsStateLocal` | Income Tax Refunds Received, State and Local | 1 | `ProceedsFromIncomeTaxRefundStateAndLocal` |
+| `IncomeTaxRefundsForeign` | Income Tax Refunds Received, Foreign | 1 | `ProceedsFromIncomeTaxRefundForeign` |
+
+### Change in Cash by Continuing and Discontinued Operations
+
+The element names below share the prefix
+`CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecrease`.
+
+| Standard Concept | Display Name | XBRL Tags | Examples |
+|------------------|--------------|-----------|----------|
+| `NetChangeInCashContinuingOps` | Net Change in Cash, Continuing Operations, Including FX Effect | 1 | `...IncludingExchangeRateEffectContinuingOperations` |
+| `NetChangeInCashContinuingOpsExFX` | Net Change in Cash, Continuing Operations, Excluding FX Effect | 1 | `...ExcludingExchangeRateEffectContinuingOperations` |
+| `NetChangeInCashDiscontinuedOps` | Net Change in Cash, Discontinued Operations, Including FX Effect | 1 | `...IncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations` |
+| `NetChangeInCashDiscontinuedOpsExFX` | Net Change in Cash, Discontinued Operations, Excluding FX Effect | 1 | `...ExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations` |
+
 ---
 
 ## Concept Details
@@ -264,6 +307,22 @@ This includes:
 - `SalesRevenueGoodsNet`
 - And 135 more industry-specific variations
 
+#### Investment Companies (BDCs)
+
+A BDC's statement of operations runs total investment income, less expenses, equals net
+investment income. Total investment income (`GrossInvestmentIncomeOperating`) is its
+`Revenue`; total expenses are `InvestmentExpenses`; net investment income is
+`NetInvestmentIncome`, never `Revenue`. An insurer's net investment income is one line
+inside its revenues and takes `NetInvestmentIncome` too, so its `Revenue` is still the
+filed total.
+
+```python
+df = xbrl.statements.income_statement().to_dataframe(standard=True)
+df[~df["dimension"] & (df["standard_concept"] == "Revenue")]
+# Main Street Capital, FY2025: $566.4M total investment income
+# ($199.7M InvestmentExpenses, $366.7M NetInvestmentIncome)
+```
+
 #### Cost of Revenue
 
 Cost tags (142 variations) map to `CostOfGoodsAndServicesSold`:
@@ -288,6 +347,77 @@ The taxonomy distinguishes between:
 - **Ongoing Provisions**: `OngoingOperatingProvisions(WarrantiesEtc)` - recurring obligations
 - **Definite-Lived Provisions**: `DefiniteLivedOperatingProvisions(DecommissioningEtc)` - asset retirement
 - **Restructuring**: `RestructuringProvisions` - one-time reorganization costs
+
+### Crypto Assets
+
+Each crypto concept maps exactly one us-gaap element, and every one of them excludes
+crypto assets held for platform users, as the FASB definitions do. The mapping's
+definition is in `lookup(...).comment`:
+
+```python
+from edgar.xbrl.standardization.reverse_index import get_reverse_index
+
+result = get_reverse_index().lookup("us-gaap:CryptoAssetFairValueNoncurrent")
+result.primary_concept       # 'CryptoAssetsNoncurrent'
+result.primary_display_name  # 'Crypto Assets, Noncurrent'
+result.comment               # '... Excludes crypto assets held for platform users.'
+```
+
+- `CryptoAssets`, `CryptoAssetsCurrent` and `CryptoAssetsNoncurrent` are three measures.
+  A filer can report the total and the noncurrent balance at the same amount (Tesla, FY2025:
+  $1,008M each); do not add them together or treat one as the other.
+- `CryptoUnrealizedGainLoss` excludes realized gains; `CryptoGainLoss` includes them.
+  Both combine the operating and nonoperating amounts, so neither has a section.
+- `CryptoConversionProceeds` is operating cash from crypto received as noncash
+  consideration in the ordinary course and converted to cash nearly immediately, not
+  every crypto sale; a later sale is `CryptoSaleProceeds`.
+
+### Cash Income Taxes by Jurisdiction
+
+The nine concepts are components of cash income taxes paid, never income tax expense.
+"Federal" means the federal or national jurisdiction, so a non-US filer's national tax
+is `IncomeTaxesPaidFederal` too. The whole stays unmapped: `IncomeTaxesPaidNet`
+(net of refunds) and `IncomeTaxesPaid` (before refunds) are reached through the synonym
+groups `income_taxes_paid` and `income_taxes_paid_gross`.
+
+```python
+from edgar.xbrl.standardization.reverse_index import get_reverse_index
+
+result = get_reverse_index().lookup("us-gaap:IncomeTaxPaidFederalAfterRefundReceived")
+result.primary_concept       # 'IncomeTaxesPaidFederal'
+result.primary_display_name  # 'Income Taxes Paid, Federal, Net of Refunds'
+```
+
+- ServiceNow, FY2025: $46M federal + $83M state + $154M foreign = $283M paid, net of refunds.
+  A state or country row (on `IncomeTaxAuthorityAxis`) is already inside its jurisdiction's
+  total and takes no concept; do not add New Jersey's $15M to the $83M.
+- A net-of-refunds amount is negative in a year when refunds exceed payments (Allegro
+  MicroSystems, FY2026: $30,889K federal refund, $-27,081K net taxes paid).
+
+### Change in Cash by Continuing and Discontinued Operations
+
+The four concepts are components of the period's change in cash, never the whole. Only the
+undivided elements map to `NetChangeInCash`; a continuing-operations row does not, even when
+the filer reports no discontinued-operations row. Nothing is summed or derived from them.
+
+```python
+from edgar.xbrl.standardization.reverse_index import get_reverse_index
+
+element = ("us-gaap:CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalents"
+           "PeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations")
+get_reverse_index().lookup(element).primary_concept  # 'NetChangeInCashContinuingOps'
+```
+
+- Conagra, FY2025 (from the FY2026 10-K): net change in cash including held-for-sale balances
+  $-11.0M is `NetChangeInCash`, the held-for-sale change $-1.3M is
+  `NetChangeInCashDiscontinuedOps`, and the continuing-tagged $-9.7M is
+  `NetChangeInCashContinuingOps`.
+- FASB defines the `DisposalGroupIncludingDiscontinuedOperations` elements as attributable to
+  discontinued operations, and the concept follows the element. Conagra's disposal groups are
+  held for sale and not discontinued operations, so read the filed caption before treating
+  that row as discontinued operations.
+- DXC, FY2026: the only net-change row is continuing-tagged ($-59M), so the statement has
+  `NetChangeInCashContinuingOps` and no `NetChangeInCash` row.
 
 ---
 
@@ -433,7 +563,7 @@ Direct O(1) lookup for XBRL tags:
 from edgar.xbrl.standardization.reverse_index import (
     get_standard_concept,
     get_display_name,
-    lookup
+    get_reverse_index
 )
 
 # Simple lookup
@@ -443,13 +573,51 @@ concept = get_standard_concept("AccountsPayableCurrent")
 display = get_display_name("AccountsPayableCurrent")
 # Returns: "Accounts Payable"
 
-# Full result with metadata
-result = lookup("AccountsPayableCurrentAndNoncurrent")
-result.is_ambiguous          # True
-result.standard_concepts     # ['TradePayables', 'OtherOperatingNonCurrentLiabilities']
-result.display_names         # ['Accounts Payable', 'Other Non-Current Liabilities']
-result.comment               # None (not every ambiguous tag carries a comment)
+# Inspect stored mapping annotations when a mapping is returned
+index = get_reverse_index()
+result = index.lookup("us-gaap:AccountsPayableCurrentAndNoncurrent")
+if result is not None:
+    print(result.mapping_key, result.standard_concepts)
+    print(result.is_ambiguous, result.section, result.statement)
+    print(result.confidence, result.company_count)
+    print(result.metadata_origins)
 ```
+
+This entry maps to both `TradePayables` and `OtherOperatingNonCurrentLiabilities`,
+while its section annotation is `Current Liabilities`. Inspecting that metadata
+helps reveal the ambiguity; it does not choose between the candidates or establish
+their presentation in a filing.
+
+The annotations describe the effective mapping entry after any industry override,
+not each surviving candidate or an individual company's financial fact. Optional
+annotation fields may be `None`.
+
+| Field | Meaning and limits |
+|---|---|
+| `confidence` | Stored score of mixed origin, including generation scores and later corrections. It is not a uniform or comparable probability and must not rank candidates. |
+| `section`, `statement` | Mapping annotations, not the filing row's actual section, presentation role, or statement membership. |
+| `is_total` | Stored usage annotation, not proof that the source concept is a whole measure or belongs in a closed total family. |
+| `company_count` | Stored generation count that may predate candidate edits, not a live count or assurance of qualified-concept usage. Missing means unknown; zero with `years_present` zero and null `first_year`/`last_year` is a placeholder without a generation record, not observed zero-company usage. |
+| `mapping_key` | Exact stored key matched by the lookup. Treat it as opaque; a bare key does not establish a taxonomy namespace or version. |
+| `applied_industry` | Industry whose override actually matched, otherwise `None`. Supplying an industry alone does not mean an override was applied. |
+| `metadata_origins` | Source of each of the five annotations: `base`, `industry_override`, or `missing`. Explicit null keeps its source and has value `None`; an absent field has origin `missing`. |
+
+Overrides apply field by field. If an override changes only the candidates, inherited
+annotations still have origin `base`; they were not independently reassessed for the
+new candidates. Each lookup result has its own `metadata_origins` dictionary. Results
+constructed directly by callers may leave provenance unspecified with an empty dictionary.
+
+Metadata does not change candidate selection, exclusions, or total-membership guards.
+Unknown or excluded tags, and entries whose candidates are all rejected, still return
+`None`; for example, `us-gaap:SalesAndMarketingExpense` remains rejected. These
+annotations do not establish semantic equivalence or resolve entity, member, period,
+unit, sign, measurement basis, or missingness. Nil, empty, absent, and numeric zero
+remain distinct. The existing `is_deprecated=False` means no positive deprecation
+annotation was supplied, not that current taxonomy membership was verified.
+
+The new fields are appended with defaults, so existing six-argument `MappingResult`
+construction still works. `dataclasses.asdict()` now includes the new fields;
+consumers with strict serialized schemas should account for that additive change.
 
 ### Checking Coverage
 

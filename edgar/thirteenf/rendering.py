@@ -266,6 +266,18 @@ def _fmt_change(value, is_pct=False) -> Text:
     return Text(label, style="dim")
 
 
+def _put_call_text(value) -> str:
+    """'Put' / 'Call', or '' for an equity row (None, NaN and '' all read as blank)."""
+    if value is None or (isinstance(value, float) and math.isnan(value)):
+        return ""
+    return str(value)
+
+
+def _has_put_call(df) -> bool:
+    """True when any row of a comparison or history frame is a Put or a Call."""
+    return 'PutCall' in df.columns and any(_put_call_text(v) for v in df['PutCall'].unique())
+
+
 def render_holdings_comparison(comparison, display_limit: int = DEFAULT_DISPLAY_LIMIT) -> Panel:
     """Render a HoldingsComparison as a Rich Panel."""
     title = f"Holdings Comparison: {comparison.manager_name}  {comparison.current_period} vs {comparison.previous_period}"
@@ -287,10 +299,14 @@ def render_holdings_comparison(comparison, display_limit: int = DEFAULT_DISPLAY_
     for part in summary_parts:
         summary_line.append_text(part)
 
+    # Show the Put/Call designation only when the report has option rows (GH #1848)
+    show_put_call = _has_put_call(df)
+
     # Main table
     table = Table(
         Column("Issuer", max_width=30),
         Column("Ticker", style="bold"),
+        *([Column("Put/Call")] if show_put_call else []),
         Column("Shares", justify="right"),
         Column("Prev Shares", justify="right"),
         Column("Chg", justify="right"),
@@ -315,6 +331,7 @@ def render_holdings_comparison(comparison, display_limit: int = DEFAULT_DISPLAY_
         table.add_row(
             "" if issuer is None or (isinstance(issuer, float) and math.isnan(issuer)) else str(issuer),
             "" if ticker is None or (isinstance(ticker, float) and math.isnan(ticker)) else str(ticker),
+            *([_put_call_text(row.PutCall)] if show_put_call else []),
             shares,
             prev_shares,
             _fmt_change(row.ShareChange),
@@ -341,10 +358,14 @@ def render_holdings_history(history, display_limit: int = DEFAULT_DISPLAY_LIMIT)
     n = len(history.periods)
     title = f"Holdings History: {history.manager_name} ({n} quarters)"
 
+    df = history.data
+    show_put_call = _has_put_call(df)
     columns = [
         Column("Issuer", max_width=30),
         Column("Ticker", style="bold"),
     ]
+    if show_put_call:
+        columns.append(Column("Put/Call"))
     # Period columns oldest→newest (already in that order in history.periods after reversal in method)
     for period in history.periods:
         columns.append(Column(str(period), justify="right"))
@@ -352,7 +373,6 @@ def render_holdings_history(history, display_limit: int = DEFAULT_DISPLAY_LIMIT)
     columns.append(Column("Chg%", justify="right"))
 
     table = Table(*columns, box=box.SIMPLE, row_styles=["", "dim"])
-    df = history.data
     total = len(df)
     display_df = df.head(display_limit)
 
@@ -363,6 +383,8 @@ def render_holdings_history(history, display_limit: int = DEFAULT_DISPLAY_LIMIT)
             "" if issuer is None or (isinstance(issuer, float) and math.isnan(issuer)) else str(issuer),
             "" if ticker is None or (isinstance(ticker, float) and math.isnan(ticker)) else str(ticker),
         ]
+        if show_put_call:
+            cells.append(_put_call_text(row.get('PutCall')))
         values_for_spark = []
         for period in history.periods:
             val = row.get(period)

@@ -1,0 +1,62 @@
+[
+ {
+  "concept": "us-gaap:CommonStockValue",
+  "context_ref": "c-13",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "94000",
+  "numeric_value": 94000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockValue",
+  "context_ref": "c-14",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "93000",
+  "numeric_value": 93000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockValue",
+  "context_ref": "c-16",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "2000",
+  "numeric_value": 2000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassBMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockValue",
+  "context_ref": "c-15",
+  "period_key": "instant_2022-12-31",
+  "period_type": "instant",
+  "value": "2000",
+  "numeric_value": 2000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassBMember"
+  }
+ }
+]

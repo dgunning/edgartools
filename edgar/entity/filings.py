@@ -4,6 +4,7 @@ Filings-related classes for the Entity package.
 This module contains classes related to SEC filings for entities, including
 collections of filings and filing facts.
 """
+import warnings
 from typing import List, Optional, Union
 
 import pandas as pd
@@ -50,17 +51,21 @@ class EntityFiling(Filing):
             **Solution for Legacy Filings**: Use the ``parsed_items`` property to extract
             accurate items from the filing document text. This works for all 8-K filings.
 
-        acceptance_datetime (datetime): When SEC accepted the filing, read from
-            ``acceptanceDateTime`` in SEC's submissions JSON.
+        reported_acceptance_datetime (datetime): When SEC accepted the filing, as
+            ``acceptanceDateTime`` in SEC's submissions JSON reports it.
 
-            **Not reliably UTC**: SEC labels this value UTC, but for some filers it is
-            hours off. Apple's 10-Q ``0000320193-26-000020`` was accepted at 10:01:02
-            UTC, and on 2026-10-08 read as 14:01:02 here. The offset varies by filer
-            and by day, so it cannot be corrected after the fact.
+            **Not reliably UTC**: SEC labels this value UTC, but has served it hours
+            off for whole companies at a time. Apple's 10-Q ``0000320193-26-000020``
+            was accepted at 10:01:02 UTC and read 14:01:02 between 2026-10-08 and
+            2026-10-22. The offset follows each rebuild of a company's file, so it
+            cannot be corrected after the fact (GH #1501).
 
-            **For a precise time**: Use ``filing.header.acceptance_datetime``, which
-            reads the filing's own SGML header (naive Eastern time) and matches the
-            "Accepted" time on SEC's index page. It costs one extra request per filing.
+            **For the exact time**: use ``filing.accepted_at``, read from the
+            filing's own header (one small request), or ``filings.accepted_at()``
+            for many filings.
+
+        acceptance_datetime (datetime): Deprecated alias of
+            ``reported_acceptance_datetime``; removed in 7.0.
     """
 
     def __init__(self,
@@ -69,7 +74,7 @@ class EntityFiling(Filing):
                  form: str,
                  filing_date: str,
                  report_date: str,
-                 acceptance_datetime: str,
+                 reported_acceptance_datetime: str,
                  accession_no: str,
                  file_number: str,
                  items: str,
@@ -80,7 +85,7 @@ class EntityFiling(Filing):
                  is_inline_xbrl: bool):
         super().__init__(cik=cik, company=company, form=form, filing_date=filing_date, accession_no=accession_no)
         self.report_date = report_date
-        self.acceptance_datetime = acceptance_datetime
+        self.reported_acceptance_datetime = reported_acceptance_datetime
         self.file_number: str = file_number
         self.items: str = items  # See class docstring for important notes on data source and limitations
         self.size: int = size
@@ -88,6 +93,22 @@ class EntityFiling(Filing):
         self.primary_doc_description: str = primary_doc_description
         self.is_xbrl: bool = is_xbrl
         self.is_inline_xbrl: bool = is_inline_xbrl
+
+    @property
+    def acceptance_datetime(self):
+        """Deprecated: renamed ``reported_acceptance_datetime``, removed in 7.0.
+
+        The new name says what the value is, SEC's reported (not verified) time;
+        ``accepted_at`` is the exact one (GH #1501).
+        """
+        warnings.warn(
+            "EntityFiling.acceptance_datetime is deprecated and will be removed in edgartools 7.0. "
+            "It is the submissions-JSON value, which SEC has served hours off: use "
+            "filing.accepted_at for the exact acceptance time, or "
+            "filing.reported_acceptance_datetime for the same value under its new name.",
+            DeprecationWarning, stacklevel=2,
+        )
+        return self.reported_acceptance_datetime
 
     def related_filings(self):
         """Get all the filings related to this one by file number."""
@@ -178,6 +199,13 @@ class EntityFilings(Filings):
 
     This extends the base Filings class with additional methods and properties
     specific to entity filings.
+
+    The ``to_pandas()`` columns keep the field names of SEC's submissions JSON
+    (``reportDate``, ``acceptanceDateTime``, ``fileNumber`` ...). The
+    ``acceptanceDateTime`` column is SEC's reported value, the same as
+    ``EntityFiling.reported_acceptance_datetime``: tz-aware UTC as SEC labels it,
+    but SEC has served it hours off for whole companies at a time (GH #1501).
+    For the exact acceptance time use ``filings.accepted_at()``.
     """
 
     def __init__(self,
@@ -215,7 +243,7 @@ class EntityFilings(Filings):
             form=self.data['form'][item].as_py(),
             filing_date=self.data['filing_date'][item].as_py(),
             report_date=self.data['reportDate'][item].as_py(),
-            acceptance_datetime=self.data['acceptanceDateTime'][item].as_py(),
+            reported_acceptance_datetime=self.data['acceptanceDateTime'][item].as_py(),
             accession_no=self.data['accession_number'][item].as_py(),
             file_number=self.data['fileNumber'][item].as_py(),
             items=self.data['items'][item].as_py(),

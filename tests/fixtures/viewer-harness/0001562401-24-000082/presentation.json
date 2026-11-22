@@ -1,0 +1,490 @@
+{
+ "http://www.americanhomes4rent.com/role/CondensedConsolidatedStatementsofEquity": {
+  "roots": [
+   "us-gaap_StatementOfStockholdersEquityAbstract"
+  ],
+  "nodes": {
+   "us-gaap_StatementOfStockholdersEquityAbstract": {
+    "children": [
+     "us-gaap_StatementTable"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementTable": {
+    "children": [
+     "us-gaap_StatementEquityComponentsAxis",
+     "us-gaap_StatementClassOfStockAxis",
+     "us-gaap_StatementLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementEquityComponentsAxis": {
+    "children": [
+     "us-gaap_EquityComponentDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_EquityComponentDomain": {
+    "children": [
+     "us-gaap_ParentMember",
+     "us-gaap_NoncontrollingInterestMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_ParentMember": {
+    "children": [
+     "us-gaap_CommonStockMember",
+     "us-gaap_PreferredStockMember",
+     "us-gaap_AdditionalPaidInCapitalMember",
+     "us-gaap_RetainedEarningsMember",
+     "us-gaap_AccumulatedOtherComprehensiveIncomeMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementClassOfStockAxis": {
+    "children": [
+     "us-gaap_ClassOfStockDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_ClassOfStockDomain": {
+    "children": [
+     "us-gaap_CommonClassAMember",
+     "us-gaap_CommonClassBMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementLineItems": {
+    "children": [
+     "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward": {
+    "children": [
+     "us-gaap_CommonStockSharesOutstanding",
+     "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+     "us-gaap_PreferredStockSharesOutstanding",
+     "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+     "us-gaap_StockIssuedDuringPeriodSharesShareBasedCompensation",
+     "us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation",
+     "us-gaap_StockIssuedDuringPeriodSharesNewIssues",
+     "us-gaap_StockIssuedDuringPeriodValueNewIssues",
+     "us-gaap_DividendsAbstract",
+     "us-gaap_ProfitLoss",
+     "us-gaap_OtherComprehensiveIncomeLossNetOfTax",
+     "us-gaap_CommonStockSharesOutstanding",
+     "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+     "us-gaap_PreferredStockSharesOutstanding"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     "http://www.xbrl.org/2003/role/periodStartLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/verboseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/periodEndLabel",
+     "http://www.xbrl.org/2003/role/periodEndLabel",
+     "http://www.xbrl.org/2003/role/periodEndLabel"
+    ]
+   },
+   "us-gaap_DividendsAbstract": {
+    "children": [
+     "us-gaap_PreferredStockDividendsIncomeStatementImpact",
+     "us-gaap_MinorityInterestDecreaseFromDistributionsToNoncontrollingInterestHolders",
+     "us-gaap_DividendsCommonStock"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel",
+     "http://www.xbrl.org/2009/role/negatedLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_StatementOfStockholdersEquityAbstract",
+    "us-gaap_StatementTable",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementEquityComponentsAxis",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementEquityComponentsAxis",
+    "us-gaap_EquityComponentDomain",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_EquityComponentDomain",
+    "us-gaap_ParentMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ParentMember",
+    "us-gaap_CommonStockMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_ParentMember",
+    "us-gaap_PreferredStockMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ParentMember",
+    "us-gaap_AdditionalPaidInCapitalMember",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ParentMember",
+    "us-gaap_RetainedEarningsMember",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ParentMember",
+    "us-gaap_AccumulatedOtherComprehensiveIncomeMember",
+    5.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_EquityComponentDomain",
+    "us-gaap_NoncontrollingInterestMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementClassOfStockAxis",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementClassOfStockAxis",
+    "us-gaap_ClassOfStockDomain",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ClassOfStockDomain",
+    "us-gaap_CommonClassAMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_ClassOfStockDomain",
+    "us-gaap_CommonClassBMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementLineItems",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_CommonStockSharesOutstanding",
+    1.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+    2.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_PreferredStockSharesOutstanding",
+    3.0,
+    "http://www.xbrl.org/2003/role/periodStartLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_AdjustmentsToAdditionalPaidInCapitalSharebasedCompensationRequisiteServicePeriodRecognitionValue",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockIssuedDuringPeriodSharesShareBasedCompensation",
+    5.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation",
+    6.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockIssuedDuringPeriodSharesNewIssues",
+    7.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockIssuedDuringPeriodValueNewIssues",
+    8.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_DividendsAbstract",
+    9.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_DividendsAbstract",
+    "us-gaap_PreferredStockDividendsIncomeStatementImpact",
+    1.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_DividendsAbstract",
+    "us-gaap_MinorityInterestDecreaseFromDistributionsToNoncontrollingInterestHolders",
+    2.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_DividendsAbstract",
+    "us-gaap_DividendsCommonStock",
+    3.0,
+    "http://www.xbrl.org/2009/role/negatedLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_ProfitLoss",
+    10.0,
+    "http://www.xbrl.org/2003/role/verboseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_OtherComprehensiveIncomeLossNetOfTax",
+    11.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_CommonStockSharesOutstanding",
+    12.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest",
+    13.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ],
+   [
+    "us-gaap_IncreaseDecreaseInStockholdersEquityRollForward",
+    "us-gaap_PreferredStockSharesOutstanding",
+    14.0,
+    "http://www.xbrl.org/2003/role/periodEndLabel"
+   ]
+  ]
+ },
+ "http://www.americanhomes4rent.com/role/CondensedConsolidatedBalanceSheetsLPParenthetical": {
+  "roots": [
+   "us-gaap_StatementOfFinancialPositionAbstract"
+  ],
+  "nodes": {
+   "us-gaap_StatementOfFinancialPositionAbstract": {
+    "children": [
+     "us-gaap_StatementTable"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementTable": {
+    "children": [
+     "dei_LegalEntityAxis",
+     "us-gaap_PartnerTypeOfPartnersCapitalAccountAxis",
+     "us-gaap_StatementLineItems"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "dei_LegalEntityAxis": {
+    "children": [
+     "dei_EntityDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "dei_EntityDomain": {
+    "children": [
+     "amh_AmericanHomes4RentLimitedPartnershipMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_PartnerTypeOfPartnersCapitalAccountAxis": {
+    "children": [
+     "us-gaap_PartnerTypeOfPartnersCapitalAccountNameDomain"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_PartnerTypeOfPartnersCapitalAccountNameDomain": {
+    "children": [
+     "us-gaap_GeneralPartnerMember",
+     "us-gaap_LimitedPartnerMember"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   },
+   "us-gaap_StatementLineItems": {
+    "children": [
+     "us-gaap_CommonUnitIssued",
+     "us-gaap_CommonUnitOutstanding",
+     "us-gaap_PreferredUnitsOutstanding",
+     "us-gaap_PreferredUnitsIssued"
+    ],
+    "child_preferred_labels": [
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel",
+     "http://www.xbrl.org/2003/role/terseLabel"
+    ]
+   }
+  },
+  "relationships": [
+   [
+    "us-gaap_StatementOfFinancialPositionAbstract",
+    "us-gaap_StatementTable",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "dei_LegalEntityAxis",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "dei_LegalEntityAxis",
+    "dei_EntityDomain",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "dei_EntityDomain",
+    "amh_AmericanHomes4RentLimitedPartnershipMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_PartnerTypeOfPartnersCapitalAccountAxis",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_PartnerTypeOfPartnersCapitalAccountAxis",
+    "us-gaap_PartnerTypeOfPartnersCapitalAccountNameDomain",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_PartnerTypeOfPartnersCapitalAccountNameDomain",
+    "us-gaap_GeneralPartnerMember",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_PartnerTypeOfPartnersCapitalAccountNameDomain",
+    "us-gaap_LimitedPartnerMember",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementTable",
+    "us-gaap_StatementLineItems",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_CommonUnitIssued",
+    1.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_CommonUnitOutstanding",
+    2.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_PreferredUnitsOutstanding",
+    3.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ],
+   [
+    "us-gaap_StatementLineItems",
+    "us-gaap_PreferredUnitsIssued",
+    4.0,
+    "http://www.xbrl.org/2003/role/terseLabel"
+   ]
+  ]
+ }
+}

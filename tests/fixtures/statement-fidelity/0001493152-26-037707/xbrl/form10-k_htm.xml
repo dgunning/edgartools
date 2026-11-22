@@ -1,0 +1,324 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:BAR="http://graniteshares.com/20260630" xmlns:cyd="http://xbrl.sec.gov/cyd/2026" xmlns:dei="http://xbrl.sec.gov/dei/2026" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:srt="http://fasb.org/srt/2026" xmlns:us-gaap="http://fasb.org/us-gaap/2026" xmlns:utr="http://www.xbrl.org/2009/utr" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xhtml="http://www.w3.org/1999/xhtml" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <link:schemaRef xlink:href="bar-20260630.xsd" xlink:type="simple"/>
+    <context id="From2025-07-01to2026-06-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+        </entity>
+        <period>
+            <startDate>2025-07-01</startDate>
+            <endDate>2026-06-30</endDate>
+        </period>
+    </context>
+    <context id="AsOf2026-06-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2026-08-13">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+        </entity>
+        <period>
+            <instant>2026-08-13</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2026-06-30_us-gaap_RelatedPartyMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:RelatedPartyTransactionsByRelatedPartyAxis">us-gaap:RelatedPartyMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_us-gaap_RelatedPartyMember">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:RelatedPartyTransactionsByRelatedPartyAxis">us-gaap:RelatedPartyMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2024-06-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+        </entity>
+        <period>
+            <instant>2024-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2023-06-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+        </entity>
+        <period>
+            <instant>2023-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2026-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel1Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:GoldMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2026-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel2Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:GoldMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2026-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel3Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:GoldMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2026-06-30_us-gaap_FairValueInputsLevel1Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2026-06-30_us-gaap_FairValueInputsLevel2Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2026-06-30_us-gaap_FairValueInputsLevel3Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2026-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel1Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:GoldMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel2Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:GoldMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel3Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="us-gaap:FinancialInstrumentAxis">us-gaap:GoldMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_us-gaap_FairValueInputsLevel1Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel1Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_us-gaap_FairValueInputsLevel2Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel2Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <context id="AsOf2025-06-30_us-gaap_FairValueInputsLevel3Member">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001690437</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:FairValueByFairValueHierarchyLevelAxis">us-gaap:FairValueInputsLevel3Member</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2025-06-30</instant>
+        </period>
+    </context>
+    <unit id="USD">
+        <measure>iso4217:USD</measure>
+    </unit>
+    <unit id="Shares">
+        <measure>shares</measure>
+    </unit>
+    <unit id="USDPShares">
+        <divide>
+            <unitNumerator>
+                <measure>iso4217:USD</measure>
+            </unitNumerator>
+            <unitDenominator>
+                <measure>shares</measure>
+            </unitDenominator>
+        </divide>
+    </unit>
+    <dei:AmendmentFlag contextRef="From2025-07-01to2026-06-30" id="Fact000003">false</dei:AmendmentFlag>
+    <dei:DocumentFiscalPeriodFocus contextRef="From2025-07-01to2026-06-30" id="Fact000004">FY</dei:DocumentFiscalPeriodFocus>
+    <dei:EntityCentralIndexKey contextRef="From2025-07-01to2026-06-30" id="Fact000005">0001690437</dei:EntityCentralIndexKey>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2026-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel2Member" id="xdx2ixbrl0322" unitRef="USD" xsi:nil="true"/>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2026-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel3Member" id="xdx2ixbrl0323" unitRef="USD" xsi:nil="true"/>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2026-06-30_us-gaap_FairValueInputsLevel2Member" id="xdx2ixbrl0326" unitRef="USD" xsi:nil="true"/>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2026-06-30_us-gaap_FairValueInputsLevel3Member" id="xdx2ixbrl0327" unitRef="USD" xsi:nil="true"/>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2025-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel2Member" id="xdx2ixbrl0330" unitRef="USD" xsi:nil="true"/>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2025-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel3Member" id="xdx2ixbrl0331" unitRef="USD" xsi:nil="true"/>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2025-06-30_us-gaap_FairValueInputsLevel2Member" id="xdx2ixbrl0334" unitRef="USD" xsi:nil="true"/>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2025-06-30_us-gaap_FairValueInputsLevel3Member" id="xdx2ixbrl0335" unitRef="USD" xsi:nil="true"/>
+    <dei:DocumentType contextRef="From2025-07-01to2026-06-30" id="Fact000013">10-K</dei:DocumentType>
+    <dei:DocumentAnnualReport contextRef="From2025-07-01to2026-06-30" id="Fact000014">true</dei:DocumentAnnualReport>
+    <dei:DocumentPeriodEndDate contextRef="From2025-07-01to2026-06-30" id="Fact000015">2026-06-30</dei:DocumentPeriodEndDate>
+    <dei:CurrentFiscalYearEndDate contextRef="From2025-07-01to2026-06-30" id="Fact000016">--06-30</dei:CurrentFiscalYearEndDate>
+    <dei:DocumentFiscalYearFocus contextRef="From2025-07-01to2026-06-30" id="Fact000017">2026</dei:DocumentFiscalYearFocus>
+    <dei:DocumentTransitionReport contextRef="From2025-07-01to2026-06-30" id="Fact000018">false</dei:DocumentTransitionReport>
+    <dei:EntityFileNumber contextRef="From2025-07-01to2026-06-30" id="Fact000019">001-38195</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="From2025-07-01to2026-06-30" id="Fact000020">GRANITESHARES GOLD TRUST</dei:EntityRegistrantName>
+    <dei:EntityIncorporationStateCountryCode contextRef="From2025-07-01to2026-06-30" id="Fact000021">NY</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityTaxIdentificationNumber contextRef="From2025-07-01to2026-06-30" id="Fact000022">82-6393903</dei:EntityTaxIdentificationNumber>
+    <dei:EntityAddressAddressLine1 contextRef="From2025-07-01to2026-06-30" id="Fact000023">c/o     GRANITESHARES LLC</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressAddressLine2 contextRef="From2025-07-01to2026-06-30" id="Fact000024">250     Broadway</dei:EntityAddressAddressLine2>
+    <dei:EntityAddressAddressLine3 contextRef="From2025-07-01to2026-06-30" id="Fact000025">24th     floor</dei:EntityAddressAddressLine3>
+    <dei:EntityAddressCityOrTown contextRef="From2025-07-01to2026-06-30" id="Fact000026">New     York</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="From2025-07-01to2026-06-30" id="Fact000027">NY</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="From2025-07-01to2026-06-30" id="Fact000028">10007</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="From2025-07-01to2026-06-30" id="Fact000029">(646)</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="From2025-07-01to2026-06-30" id="Fact000030">876 5096</dei:LocalPhoneNumber>
+    <dei:TradingSymbol contextRef="From2025-07-01to2026-06-30" id="Fact000031">BAR</dei:TradingSymbol>
+    <dei:Security12bTitle contextRef="From2025-07-01to2026-06-30" id="Fact000032">GraniteShares     Gold Shares</dei:Security12bTitle>
+    <dei:SecurityExchangeName contextRef="From2025-07-01to2026-06-30" id="Fact000033">NYSE</dei:SecurityExchangeName>
+    <dei:EntityWellKnownSeasonedIssuer contextRef="From2025-07-01to2026-06-30" id="Fact000034">Yes</dei:EntityWellKnownSeasonedIssuer>
+    <dei:EntityVoluntaryFilers contextRef="From2025-07-01to2026-06-30" id="Fact000035">No</dei:EntityVoluntaryFilers>
+    <dei:EntityCurrentReportingStatus contextRef="From2025-07-01to2026-06-30" id="Fact000036">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityInteractiveDataCurrent contextRef="From2025-07-01to2026-06-30" id="Fact000037">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityFilerCategory contextRef="From2025-07-01to2026-06-30" id="Fact000038">Large Accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntitySmallBusiness contextRef="From2025-07-01to2026-06-30" id="Fact000039">false</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="From2025-07-01to2026-06-30" id="Fact000040">false</dei:EntityEmergingGrowthCompany>
+    <dei:IcfrAuditorAttestationFlag contextRef="From2025-07-01to2026-06-30" id="Fact000041">true</dei:IcfrAuditorAttestationFlag>
+    <dei:EntityShellCompany contextRef="From2025-07-01to2026-06-30" id="Fact000042">false</dei:EntityShellCompany>
+    <dei:DocumentFinStmtErrorCorrectionFlag contextRef="From2025-07-01to2026-06-30" id="Fact000043">false</dei:DocumentFinStmtErrorCorrectionFlag>
+    <dei:EntityPublicFloat contextRef="AsOf2026-06-30" decimals="0" id="Fact000044" unitRef="USD">1330184500</dei:EntityPublicFloat>
+    <dei:EntityCommonStockSharesOutstanding contextRef="AsOf2026-08-13" decimals="INF" id="Fact000045" unitRef="Shares">33050000</dei:EntityCommonStockSharesOutstanding>
+    <dei:DocumentsIncorporatedByReferenceTextBlock contextRef="From2025-07-01to2026-06-30" id="Fact000046">None</dei:DocumentsIncorporatedByReferenceTextBlock>
+    <dei:AuditorFirmId contextRef="From2025-07-01to2026-06-30" id="Fact000056">445</dei:AuditorFirmId>
+    <dei:AuditorOpinionTextBlock contextRef="From2025-07-01to2026-06-30" id="Fact000058">&lt;span style="font-family: Times New Roman, Times, Serif; font-size: 10pt"&gt;We
+have audited the accompanying statements of assets and liabilities of GraniteShares Gold Trust (the “Trust”), including the
+schedules of investments, as of June 30, 2026 and 2025, the related statements of operations, the statements of changes in net assets,
+and the financial highlights for each of the years in the three-year period ended June 30, 2026 and the related notes (collectively referred
+to as the “financial statements”). In our opinion, the financial statements present fairly, in all material respects, the
+financial position of the Trust as of June 30, 2026 and 2025, and the results of its operations, the changes in its net assets, and the
+financial highlights for each of the years in the three-year period ended June 30, 2026, in conformity with U.S. generally accepted accounting
+principles.&lt;/span&gt;We
+also have audited, in accordance with the standards of the Public Company Accounting Oversight Board (United States) (“PCAOB”),
+the Trust’s internal control over financial reporting as of June 30, 2026, based on criteria established in Internal Control –
+Integrated Framework (2013) issued by the Committee of Sponsoring Organizations of the Treadway Commission (COSO), and our report dated
+August 13, 2026, expressed an unqualified opinion.</dei:AuditorOpinionTextBlock>
+    <dei:AuditorName contextRef="From2025-07-01to2026-06-30" id="Fact000059">TAIT, WELLER &amp; BAKER LLP</dei:AuditorName>
+    <dei:AuditorLocation contextRef="From2025-07-01to2026-06-30" id="Fact000060">Pennsylvania</dei:AuditorLocation>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2026-06-30" decimals="-3" id="Fact000065" unitRef="USD">1334011000</us-gaap:InvestmentInPhysicalCommodities>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2025-06-30" decimals="-3" id="Fact000066" unitRef="USD">1105737000</us-gaap:InvestmentInPhysicalCommodities>
+    <us-gaap:Assets contextRef="AsOf2026-06-30" decimals="-3" id="Fact000068" unitRef="USD">1334011000</us-gaap:Assets>
+    <us-gaap:Assets contextRef="AsOf2025-06-30" decimals="-3" id="Fact000069" unitRef="USD">1105737000</us-gaap:Assets>
+    <us-gaap:AccountsPayableCurrentAndNoncurrent contextRef="AsOf2026-06-30_us-gaap_RelatedPartyMember" decimals="-3" id="Fact000074" unitRef="USD">205000</us-gaap:AccountsPayableCurrentAndNoncurrent>
+    <us-gaap:AccountsPayableCurrentAndNoncurrent contextRef="AsOf2025-06-30_us-gaap_RelatedPartyMember" decimals="-3" id="Fact000075" unitRef="USD">162000</us-gaap:AccountsPayableCurrentAndNoncurrent>
+    <us-gaap:Liabilities contextRef="AsOf2026-06-30" decimals="-3" id="Fact000077" unitRef="USD">205000</us-gaap:Liabilities>
+    <us-gaap:Liabilities contextRef="AsOf2025-06-30" decimals="-3" id="Fact000078" unitRef="USD">162000</us-gaap:Liabilities>
+    <us-gaap:AssetsNet contextRef="AsOf2026-06-30" decimals="-3" id="Fact000080" unitRef="USD">1333806000</us-gaap:AssetsNet>
+    <us-gaap:AssetsNet contextRef="AsOf2025-06-30" decimals="-3" id="Fact000081" unitRef="USD">1105575000</us-gaap:AssetsNet>
+    <us-gaap:CommonStockSharesIssued contextRef="AsOf2026-06-30" decimals="INF" id="Fact000083" unitRef="Shares">33650000</us-gaap:CommonStockSharesIssued>
+    <us-gaap:CommonStockSharesOutstanding contextRef="AsOf2026-06-30" decimals="INF" id="Fact000085" unitRef="Shares">33650000</us-gaap:CommonStockSharesOutstanding>
+    <us-gaap:CommonStockSharesIssued contextRef="AsOf2025-06-30" decimals="INF" id="Fact000087" unitRef="Shares">34100000</us-gaap:CommonStockSharesIssued>
+    <us-gaap:CommonStockSharesOutstanding contextRef="AsOf2025-06-30" decimals="INF" id="Fact000089" unitRef="Shares">34100000</us-gaap:CommonStockSharesOutstanding>
+    <BAR:NetAssetsPerCommonShare contextRef="AsOf2026-06-30" decimals="INF" id="Fact000091" unitRef="USDPShares">39.64</BAR:NetAssetsPerCommonShare>
+    <BAR:NetAssetsPerCommonShare contextRef="AsOf2025-06-30" decimals="INF" id="Fact000092" unitRef="USDPShares">32.42</BAR:NetAssetsPerCommonShare>
+    <us-gaap:AssetsNet contextRef="AsOf2026-06-30" decimals="-3" id="Fact000126" unitRef="USD">1333806000</us-gaap:AssetsNet>
+    <us-gaap:AssetsNet contextRef="AsOf2025-06-30" decimals="-3" id="Fact000148" unitRef="USD">1105575000</us-gaap:AssetsNet>
+    <us-gaap:AssetsNet contextRef="AsOf2025-06-30" decimals="-3" id="Fact000224" unitRef="USD">1105575000</us-gaap:AssetsNet>
+    <us-gaap:AssetsNet contextRef="AsOf2024-06-30" decimals="-3" id="Fact000225" unitRef="USD">790994000</us-gaap:AssetsNet>
+    <us-gaap:AssetsNet contextRef="AsOf2023-06-30" decimals="-3" id="Fact000226" unitRef="USD">935811000</us-gaap:AssetsNet>
+    <us-gaap:AssetsNet contextRef="AsOf2026-06-30" decimals="-3" id="Fact000256" unitRef="USD">1333806000</us-gaap:AssetsNet>
+    <us-gaap:AssetsNet contextRef="AsOf2025-06-30" decimals="-3" id="Fact000257" unitRef="USD">1105575000</us-gaap:AssetsNet>
+    <us-gaap:AssetsNet contextRef="AsOf2024-06-30" decimals="-3" id="Fact000258" unitRef="USD">790994000</us-gaap:AssetsNet>
+    <us-gaap:AssetsNet contextRef="AsOf2026-06-30" decimals="-3" id="Fact000292" unitRef="USD">1333806000</us-gaap:AssetsNet>
+    <us-gaap:AssetsNet contextRef="AsOf2025-06-30" decimals="-3" id="Fact000293" unitRef="USD">1105575000</us-gaap:AssetsNet>
+    <us-gaap:AssetsNet contextRef="AsOf2024-06-30" decimals="-3" id="Fact000294" unitRef="USD">790994000</us-gaap:AssetsNet>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2026-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel1Member" decimals="-3" id="Fact000321" unitRef="USD">1334011000</us-gaap:InvestmentInPhysicalCommodities>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2026-06-30_us-gaap_FairValueInputsLevel1Member" decimals="-3" id="Fact000325" unitRef="USD">1334011000</us-gaap:InvestmentInPhysicalCommodities>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2025-06-30_us-gaap_GoldMember_us-gaap_FairValueInputsLevel1Member" decimals="-3" id="Fact000329" unitRef="USD">1105737000</us-gaap:InvestmentInPhysicalCommodities>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2025-06-30_us-gaap_FairValueInputsLevel1Member" decimals="-3" id="Fact000333" unitRef="USD">1105737000</us-gaap:InvestmentInPhysicalCommodities>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2025-06-30" decimals="-3" id="Fact000393" unitRef="USD">1105737000</us-gaap:InvestmentInPhysicalCommodities>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2026-06-30" decimals="-3" id="Fact000409" unitRef="USD">1334011000</us-gaap:InvestmentInPhysicalCommodities>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2024-06-30" decimals="-3" id="Fact000413" unitRef="USD">791131000</us-gaap:InvestmentInPhysicalCommodities>
+    <us-gaap:InvestmentInPhysicalCommodities contextRef="AsOf2025-06-30" decimals="-3" id="Fact000429" unitRef="USD">1105737000</us-gaap:InvestmentInPhysicalCommodities>
+    </xbrl>

@@ -108,7 +108,8 @@ CROSS_CONTEXT = f"""{_ctx("A")}{_ctx("B")}
 
 def test_pretty_printed_measure_is_stripped():
     x = _xbrl(CROSS_CONTEXT)
-    assert x.parser.units["usd"] == {"type": "simple", "measure": "iso4217:USD"}
+    assert x.parser.units["usd"] == {"type": "simple", "measure": "iso4217:USD",
+                                     "definition": {"numerator": ["{http://www.xbrl.org/2003/iso4217}USD"], "denominator": [], "expression": "iso4217:USD"}}
     assert x._reporting_currency() == "iso4217:USD"
 
 

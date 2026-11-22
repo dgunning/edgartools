@@ -193,7 +193,9 @@ def test_disney_period_with_a_filed_total_is_unchanged(dis):
 
 @pytest.mark.parametrize("concept, column, expected", [
     # The same double count was inflating other lines of the same statement.
-    ("us-gaap_DividendsCommonStock", "2024-09-28 (FY)", 1366000000.0),
+    # A negated label: the SEC page (0001744489-25-000155) shows (1,366); signed
+    # since edgartools-auvk1.13.
+    ("us-gaap_DividendsCommonStock", "2024-09-28 (FY)", -1366000000.0),
     ("us-gaap_StockIssuedDuringPeriodValueShareBasedCompensation",
      "2025-09-27 (FY)", 1200000000.0),
 ])

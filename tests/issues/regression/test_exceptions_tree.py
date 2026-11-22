@@ -52,6 +52,7 @@ CONSTRUCTOR_ARGS = {
     "AttachmentNotFoundError": ("boom",),
     "ParsingError": ("boom",),
     "XBRLProcessingError": ("boom",),
+    "LowConfidenceSectionError": ("boom",),
     "DataObjectError": ("boom",),
     "ValidationError": ("boom",),
     "InvalidDateError": ("boom",),

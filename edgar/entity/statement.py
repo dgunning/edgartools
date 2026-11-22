@@ -96,6 +96,8 @@ class FinancialStatement:
 
         # Store original numeric data
         self._numeric_data = data.copy()
+        # Row label -> XBRL unit, when the producer knows it (pivot_by_period does)
+        self._units = dict(data.attrs.get('units') or {})
 
     def get_concept_formatting(self, concept_label: str) -> ConceptFormatting:
         """
@@ -133,8 +135,12 @@ class FinancialStatement:
 
         formatting = self.get_concept_formatting(concept_label)
 
-        # Handle percentage formatting
+        # Handle percentage formatting. A 'pure' unit (which the company facts parser
+        # renames 'number') is a ratio, 0.156, so it is scaled to a percentage; a row
+        # matched only by its label ('Gross margin' in USD) is shown as filed (GH #1850).
         if formatting.percentage:
+            if str(self._units.get(concept_label, '')).lower() in ('pure', 'number'):
+                value = value * 100
             return f"{value:.{formatting.decimal_places}f}%"
 
         # Always use full number formatting with commas - no scaling to preserve precision

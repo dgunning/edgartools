@@ -1,18 +1,18 @@
 """Cassettes with no recorded reason phrase must replay on the pinned vcrpy.
 
 79 of the suite's cassettes store ``message: null`` (they were recorded through
-vcrpy's httpcore stub). vcrpy 8.2+ crashes replaying those until
-kevin1024/vcrpy#1029 is released, so ``tests/_vcr_compat.py`` fills the phrase
-in. These tests replay through a real VCR, the way a cassette-backed test does,
-so they fail if that fix stops being applied.
+vcrpy's httpcore stub). vcrpy 8.2 and 8.3 crash replaying those with
+``'NoneType' object has no attribute 'encode'``; 8.4.0 ships the upstream fix
+(kevin1024/vcrpy#1029), so the floor in pyproject.toml is 8.4.0 and the local
+patch that filled the phrase in (``tests/_vcr_compat.py``) is gone. These tests
+replay through a real VCR, the way a cassette-backed test does, so they fail
+if a vcrpy below the floor is installed or the upstream fix regresses.
 """
 import importlib
 import importlib.util
 
 import pytest
 import vcr
-
-from tests import _vcr_compat
 
 pytestmark = pytest.mark.fast
 
@@ -74,11 +74,3 @@ def test_replay_supplies_the_reason_phrase(replay_only, name, library):
     assert response.status_code == code
     assert response.reason_phrase == expected_phrase
     assert response.text == name
-
-
-def test_the_compat_fix_is_still_needed():
-    """When this fails, the pinned vcrpy handles a null phrase by itself:
-    delete tests/_vcr_compat.py and its call in tests/conftest.py."""
-    from vcr.stubs import httpx_stubs
-
-    assert httpx_stubs._deserialize_response.__module__ == _vcr_compat.__name__

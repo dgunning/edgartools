@@ -252,7 +252,9 @@ def test_an_axis_outside_the_catalog_still_reads_as_explicit():
     """
     The half that stays open. An axis declared only in an imported taxonomy
     never reaches the element catalog, because there is no xs:import traversal,
-    so it still reports False — see edgartools-0c1q.16.1.
+    so with no instance evidence it still reports False — see
+    edgartools-0c1q.16.1. An instance typedMember on such an axis does make it
+    typed (test_issue_1234.py).
     """
     parser = XBRLParser()
     locators = ''.join(

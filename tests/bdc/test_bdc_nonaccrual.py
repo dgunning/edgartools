@@ -165,32 +165,18 @@ class TestHelperFunctions:
         # 2024-12-31 appears twice — most common wins
         assert _determine_latest_instant(facts) == '2024-12-31'
 
-    def test_determine_latest_instant_uses_anchor_period(self):
-        """Anchor period from filing.period_of_report takes precedence."""
-        dim_key = 'dim_us-gaap_InvestmentIdentifierAxis'
-        facts = [
-            {'period_instant': '2025-12-31', dim_key: 'inv_1'},
-            {'period_instant': '2025-12-31', dim_key: 'inv_2'},
-            {'period_instant': '2026-03-20', dim_key: 'inv_3'},
-        ]
-        # Without anchor, most common (2025-12-31) wins
-        assert _determine_latest_instant(facts) == '2025-12-31'
-        # With anchor matching investment data, uses anchor
-        assert _determine_latest_instant(facts, anchor_period='2025-12-31') == '2025-12-31'
-        # Anchor with no investment data falls back to most common
-        assert _determine_latest_instant(facts, anchor_period='2024-12-31') == '2025-12-31'
+    def test_determine_latest_instant_with_no_investment_facts(self):
+        """With no investment facts, the most common instant of any fact wins.
 
-    def test_determine_latest_instant_anchor_fallback_no_dimensions(self):
-        """Anchor period used even when no investment-dimensioned facts exist."""
+        Only reached when no period is known; a known period is read as given
+        (edgartools-a3m66, tests/issues/regression/test_a3m66_t75ot_nonaccrual.py).
+        """
         facts = [
             {'period_instant': '2025-12-31'},
             {'period_instant': '2025-12-31'},
             {'period_instant': '2026-03-10'},
         ]
-        # Anchor exists in all_instants, use it
-        assert _determine_latest_instant(facts, anchor_period='2025-12-31') == '2025-12-31'
-        # Anchor not in facts, fall back to most common
-        assert _determine_latest_instant(facts, anchor_period='2024-12-31') == '2025-12-31'
+        assert _determine_latest_instant(facts) == '2025-12-31'
 
     def test_determine_latest_instant_empty(self):
         assert _determine_latest_instant([]) is None

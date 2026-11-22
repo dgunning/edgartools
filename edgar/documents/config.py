@@ -2,6 +2,7 @@
 Configuration for the HTML parser.
 """
 
+import warnings
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 
@@ -44,6 +45,9 @@ class ParserConfig:
         extract_xbrl: Extract inline XBRL facts
         extract_styles: Extract and process CSS styles
         preserve_whitespace: Preserve original whitespace
+        extract_images: Deprecated and ignored; removed in 7.0. Every <img>
+            becomes an ImageNode whatever its value. Document.text() already
+            leaves images out unless called with include_images=True.
         optimize_for_ai: Enable AI-specific optimizations
         max_token_estimation: Maximum estimated tokens for AI optimization
         features: Feature flags for optional functionality
@@ -63,7 +67,7 @@ class ParserConfig:
     preserve_whitespace: bool = False
     normalize_text: bool = True
     extract_links: bool = True
-    extract_images: bool = False
+    extract_images: Optional[bool] = None  # Deprecated, ignored (see docstring)
 
     # AI optimization
     optimize_for_ai: bool = True
@@ -143,6 +147,17 @@ class ParserConfig:
     # Performance monitoring
     enable_profiling: bool = False
     log_performance: bool = False
+
+    def __post_init__(self):
+        if self.extract_images is not None:
+            warnings.warn(
+                "ParserConfig(extract_images=...) is ignored: every <img> becomes an "
+                "ImageNode whatever its value. The parameter is removed in 7.0; drop it "
+                "from the call. Document.text() already leaves images out unless "
+                "called with include_images=True.",
+                DeprecationWarning,
+                stacklevel=3,
+            )
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert configuration to dictionary."""

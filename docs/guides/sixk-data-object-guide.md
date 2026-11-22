@@ -151,7 +151,7 @@ if six_k.financials:
     financials.cash_flow_statement
 ```
 
-Most earnings data in 6-K filings is in HTML tables inside EX-99.x exhibits, not in XBRL. If you need structured financial data from a 6-K, parse the press release exhibits directly.
+Most earnings data in 6-K filings is in HTML tables inside EX-99.x exhibits, not in XBRL. To read those tables, use `EarningsRelease.from_filing(filing)` from `edgar.earnings`, which returns the press release's income statement and other tables as DataFrames. For the latest quarterly result, `Company.get_quarterly_financials()` also checks recent 6-K earnings exhibits for an income table. See [Financial data](financial-data.md#foreign-private-issuers-6-k) for its return types.
 
 ---
 

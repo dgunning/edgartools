@@ -1,0 +1,90 @@
+{
+ "version": "2.2",
+ "instance": {
+  "qnrx-20230630x10q.htm": {
+   "tag": {
+    "us-gaap_CashAndCashEquivalentsAtCarryingValue": {
+     "calculation": {
+      "http://www.quoinpharma.com/role/StatementCondensedConsolidatedBalanceSheets": {
+       "order": 1.0,
+       "parentTag": "us-gaap_AssetsCurrent",
+       "weight": 1.0
+      }
+     },
+     "crdr": "debit",
+     "lang": {
+      "en-us": {
+       "role": {
+        "documentation": "Amount of currency on hand as well as demand deposits with banks or financial institutions. Includes other kinds of accounts that have the general characteristics of demand deposits. Also includes short-term, highly liquid investments that are both readily convertible to known amounts of cash and so near their maturity that they present insignificant risk of changes in value because of changes in interest rates. Excludes cash and cash equivalents within disposal group and discontinued operation.",
+        "label": "Cash and Cash Equivalents, at Carrying Value",
+        "terseLabel": "Cash and cash equivalents",
+        "verboseLabel": "Cash balance"
+       }
+      }
+     },
+     "localname": "CashAndCashEquivalentsAtCarryingValue",
+     "nsuri": "http://fasb.org/us-gaap/2023",
+     "presentation": [
+      "http://www.quoinpharma.com/role/DisclosureLiquidityRisksAndOtherUncertaintiesDetails",
+      "http://www.quoinpharma.com/role/StatementCondensedConsolidatedBalanceSheets"
+     ],
+     "xbrltype": "monetaryItemType"
+    }
+   },
+   "report": {
+    "R2": {
+     "firstAnchor": {
+      "ancestors": [
+       "p",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "qnrx-20230630x10q.htm",
+      "contextRef": "As_Of_6_30_2023_ZvOkE8zQc0GVxWJ1e3jrbA",
+      "decimals": "0",
+      "first": true,
+      "lang": null,
+      "name": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+      "reportCount": 1,
+      "unitRef": "Unit_Standard_USD_mkeQm1ush06IWES_sPiG9A",
+      "xsiNil": "false"
+     },
+     "groupType": "statement",
+     "isDefault": "false",
+     "longName": "00100 - Statement - Condensed Consolidated Balance Sheets",
+     "menuCat": "Statements",
+     "order": "2",
+     "role": "http://www.quoinpharma.com/role/StatementCondensedConsolidatedBalanceSheets",
+     "shortName": "Condensed Consolidated Balance Sheets",
+     "subGroupType": "",
+     "uniqueAnchor": {
+      "ancestors": [
+       "p",
+       "td",
+       "tr",
+       "table",
+       "div",
+       "div",
+       "body",
+       "html"
+      ],
+      "baseRef": "qnrx-20230630x10q.htm",
+      "contextRef": "As_Of_6_30_2023_ZvOkE8zQc0GVxWJ1e3jrbA",
+      "decimals": "0",
+      "lang": null,
+      "name": "us-gaap:AssetsCurrent",
+      "reportCount": 1,
+      "unique": true,
+      "unitRef": "Unit_Standard_USD_mkeQm1ush06IWES_sPiG9A",
+      "xsiNil": "false"
+     }
+    }
+   }
+  }
+ }
+}

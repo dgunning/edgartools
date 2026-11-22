@@ -1,0 +1,62 @@
+{
+ "http://www.cibc.com/role/ConsolidatedStatementOfChangesInEquity": {
+  "ifrs-full_BusinessCombinationsAxis": {
+   "default_member_id": "ifrs-full_EntitysTotalForBusinessCombinationsMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_CategoriesOfFinancialAssetsAxis": {
+   "default_member_id": "ifrs-full_FinancialAssetsCategoryMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_ClassesOfShareCapitalAxis": {
+   "default_member_id": "ifrs-full_ClassesOfShareCapitalMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_ComponentsOfEquityAxis": {
+   "default_member_id": "ifrs-full_EquityMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_InitiallyAppliedIFRSsAxis": {
+   "default_member_id": "ifrs-full_InitiallyAppliedIFRSsMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_ReservesWithinEquityAxis": {
+   "default_member_id": "ifrs-full_OtherReservesMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis": {
+   "default_member_id": "ifrs-full_RestatedMember",
+   "is_typed_dimension": false
+  }
+ },
+ "merged": {
+  "ifrs-full_BusinessCombinationsAxis": {
+   "default_member_id": "ifrs-full_EntitysTotalForBusinessCombinationsMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_CategoriesOfFinancialAssetsAxis": {
+   "default_member_id": "ifrs-full_FinancialAssetsCategoryMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_ClassesOfShareCapitalAxis": {
+   "default_member_id": "ifrs-full_ClassesOfShareCapitalMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_ComponentsOfEquityAxis": {
+   "default_member_id": "ifrs-full_EquityMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_InitiallyAppliedIFRSsAxis": {
+   "default_member_id": "ifrs-full_InitiallyAppliedIFRSsMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_ReservesWithinEquityAxis": {
+   "default_member_id": "ifrs-full_OtherReservesMember",
+   "is_typed_dimension": false
+  },
+  "ifrs-full_RetrospectiveApplicationAndRetrospectiveRestatementAxis": {
+   "default_member_id": "ifrs-full_RestatedMember",
+   "is_typed_dimension": false
+  }
+ }
+}

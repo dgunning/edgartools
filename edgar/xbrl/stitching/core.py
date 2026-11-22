@@ -5,8 +5,8 @@ This module contains the core StatementStitcher class and related functionality
 for combining multiple XBRL statements across different time periods.
 """
 
-from collections import defaultdict
-from datetime import datetime
+from collections import Counter, defaultdict
+from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Dict, List, Optional, Set, Tuple, Union
 
@@ -99,6 +99,11 @@ class StatementStitcher:
         # Every value each filing reports for a concept, comparative columns
         # included, so merges can check that two lines are the same amount (GH #1685)
         self.value_evidence = defaultdict(dict)  # {concept: {period: value}}
+        # The values each filing presents in its statement columns, per filing
+        # (source index, lower = more recently filed). Discrete-quarter
+        # derivation reads its operands and reported quarters from here
+        # (bead edgartools-k7mi8.3).
+        self.filed_facts = defaultdict(dict)  # {concept: {period: {source: {value, decimals}}}}
 
     def stitch_statements(
         self,
@@ -131,6 +136,7 @@ class StatementStitcher:
         self.original_statement_order = []
         self.concept_to_label_map = {}  # Reset concept-to-label mapping for each stitch
         self.value_evidence = defaultdict(dict)
+        self.filed_facts = defaultdict(dict)
 
         # Initialize ordering manager for this statement type
         statement_type = statements[0].get('statement_type', 'IncomeStatement') if statements else 'IncomeStatement'
@@ -172,6 +178,11 @@ class StatementStitcher:
 
             # Store data for each item
             self._integrate_statement_data(processed_data, statement['periods'], relevant_periods)
+            # The values the filing presents in its statement, every column, with
+            # the filing they came from (bead edgartools-k7mi8.3)
+            self._record_filed_facts(processed_data,
+                                     statement.get('presented_periods', statement['periods']),
+                                     statement.get('source_index', _i))
 
         # Merge duplicate rows that map to the same standard_concept
         self._merge_duplicate_standard_concepts()
@@ -179,6 +190,11 @@ class StatementStitcher:
         # Merge known concept renames (Issue #711): handles cases where a company
         # switched to a completely different concept name across filing years.
         self._merge_known_concept_renames()
+
+        # Merge a line the company retagged between filings (GH #1802): same
+        # label, no stitched period in common, and the filings' comparatives
+        # show both tags carrying the same amount.
+        self._merge_retagged_lines()
 
         # Unaccumulate YTD cash flow periods into discrete quarters.
         # SEC requires only YTD cash flows in 10-Q filings (Q2 = 6-month cumulative,
@@ -202,11 +218,18 @@ class StatementStitcher:
         """
         # Use a dictionary to track unique periods by their end date
         # This will handle cases where different period_ids reference the same date
-        unique_periods = {}  # key: date string, value: (period_id, datetime, statement_index)
+        unique_periods = {}  # key: normalized period, value: (period_id, datetime, statement_index, source_index)
 
         for i, statement in enumerate(statements):
             # Use statement index (i) to prioritize more recent filings
             # Lower index = more recent filing
+            # The filing this statement came from, as a position in the caller's
+            # xbrl_list. It is not i: the optimal-periods path passes one filtered
+            # statement per selected period, so a 10-Q contributing a quarter and a
+            # YTD column is two statements here, and a filing that lacks the
+            # statement is skipped. Enumerating gave ORCL's six-month column the
+            # index of the next filing and its Q1 an index past the end (GH #1837).
+            source_index = statement.get('source_index', i)
             for period_id, period_info in statement['periods'].items():
                 # Extract end date for sorting
                 try:
@@ -253,12 +276,12 @@ class StatementStitcher:
                         existing_idx = unique_periods[normalized_key][2]
                         # Only replace if this statement is from a more recent filing
                         if i < existing_idx:
-                            unique_periods[normalized_key] = (period_id, end_date, i)
+                            unique_periods[normalized_key] = (period_id, end_date, i, source_index)
                             # Use the enhanced label from period_info if available, otherwise fall back to display_date
                             self.period_dates[period_id] = period_info.get('label', display_date)
                     else:
                         # Add new period
-                        unique_periods[normalized_key] = (period_id, end_date, i)
+                        unique_periods[normalized_key] = (period_id, end_date, i, source_index)
                         # Use the enhanced label from period_info if available, otherwise fall back to display_date
                         self.period_dates[period_id] = period_info.get('label', display_date)
 
@@ -271,11 +294,11 @@ class StatementStitcher:
         # same answer to attribute a stitched fact to its source filing. Recomputing
         # it there would be a second copy of this rule, free to drift from it
         # (bead edgartools-qbm7).
-        self.period_sources = {period_id: statement_index
-                               for period_id, _, statement_index in unique_periods.values()}
+        self.period_sources = {period_id: source_index
+                               for period_id, _, _, source_index in unique_periods.values()}
 
         # Extract and sort the unique periods
-        all_periods = [(period_id, end_date) for period_id, end_date, _ in unique_periods.values()]
+        all_periods = [(period_id, end_date) for period_id, end_date, _, _ in unique_periods.values()]
 
         # Sort by date, newest first
         return sorted(all_periods, key=lambda x: x[1], reverse=True)
@@ -526,6 +549,48 @@ class StatementStitcher:
                             'decimals': decimals_for_scaling(item.get('decimals', {}).get(period_id))
                         }
 
+    def _record_filed_facts(self, statement_data: List[Dict[str, Any]],
+                            presented_periods, source_index: int):
+        """Record the values a filing presents in its statement, per line, period
+        and filing. A lower source index is a more recently filed input, the rule
+        ``_extract_periods`` uses to pick a period's filing.
+
+        Only the statement's own columns count (see ``_statement_columns``).
+        """
+        presented = self._statement_columns(statement_data, presented_periods)
+        for item in statement_data:
+            concept_key = self.concept_to_label_map.get(item.get('concept'))
+            if concept_key is None or item.get('is_dimension', False):
+                continue
+            for period_id, value in (item.get('values') or {}).items():
+                if value is None or period_id not in presented:
+                    continue
+                by_source = self.filed_facts[concept_key].setdefault(period_id, {})
+                by_source.setdefault(source_index, {
+                    'value': value,
+                    'decimals': decimals_for_scaling(item.get('decimals', {}).get(period_id)),
+                })
+
+    @staticmethod
+    def _statement_columns(statement_data: List[Dict[str, Any]], periods) -> Set[str]:
+        """The periods a statement presents as columns: those with values for at
+        least half as many lines as its fullest period.
+
+        A statement's periods also include contexts that only a few note facts
+        use, and a line's ``values`` carries them. JNJ's 10-Q 0000200406-26-000197
+        tags $17,500M of acquisitions for six months its cash flow statement says
+        were $263M, and NVDA's dividends of $6.0B for a quarter its statement only
+        shows cumulatively; neither is the line's amount for the period.
+        """
+        counts = Counter()
+        for item in statement_data:
+            if item.get('is_dimension', False):
+                continue
+            values = item.get('values') or {}
+            counts.update(p for p in periods if values.get(p) is not None)
+        fullest = max(counts.values(), default=0)
+        return {p for p, n in counts.items() if 2 * n >= fullest}
+
     @staticmethod
     def _extract_preferred_sign(item: Dict[str, Any]) -> Optional[int]:
         """Extract concept-level preferred_sign from a statement item.
@@ -674,6 +739,10 @@ class StatementStitcher:
         # Carry the secondary's evidence so later merges in a chain can use it
         for period_id, value in self.value_evidence.pop(secondary_key, {}).items():
             self.value_evidence[primary_key].setdefault(period_id, value)
+        for period_id, by_source in self.filed_facts.pop(secondary_key, {}).items():
+            merged = self.filed_facts[primary_key].setdefault(period_id, {})
+            for source, fact in by_source.items():
+                merged.setdefault(source, fact)
         # Remove the secondary entry
         if secondary_key in self.data:
             del self.data[secondary_key]
@@ -796,6 +865,77 @@ class StatementStitcher:
                     continue
                 self._merge_into(primary, secondary)
 
+    @staticmethod
+    def _label_key(label: Optional[str]) -> str:
+        return ' '.join((label or '').lower().split())
+
+    def _shown_to_be_same_nonzero_amount(self, key_a: str, key_b: str) -> bool:
+        """Like _shown_to_be_same_amount, but a shared zero is not evidence:
+        two unrelated lines both report 0 often enough to look identical."""
+        if not self._shown_to_be_same_amount(key_a, key_b):
+            return False
+        a, b = self._evidence_for(key_a), self._evidence_for(key_b)
+        return any(a[p] != 0 for p in a if p in b)
+
+    def _merge_retagged_lines(self):
+        """Merge a line item the company moved to a different XBRL concept.
+
+        Sprouts tagged net income as ``ProfitLoss`` through FY2023 and as
+        ``NetIncomeLoss`` from FY2024, and its two operating-lease lines moved
+        from ``sfm:`` extensions to ``us-gaap`` concepts. Neither pair is a name
+        variant or shares a standard concept, so each line stitched as two
+        half-empty rows (GH #1802).
+
+        Two rows merge only when all of these hold:
+
+        1. They carry the same label in the filings.
+        2. No stitched period has a value in both. A filer that presents both
+           lines in one statement (``ProfitLoss`` and ``NetIncomeLoss`` with a
+           non-controlling interest) fills both in the same periods, so its
+           rows never merge, even where the amounts are equal.
+        3. Some filing reports both concepts for a common period, every common
+           period agrees, and at least one agreeing amount is nonzero. This is
+           the same evidence rule as GH #1685, so a shared label alone (two
+           "Other" lines) is never enough.
+        4. A continuing-operations amount is not being folded into its total
+           where the filing reports discontinued cash (GH #1690).
+        """
+        label_to_keys: dict[str, list[str]] = defaultdict(list)
+        for concept_key in list(self.data.keys()):
+            metadata = self.concept_metadata.get(concept_key, {})
+            if metadata.get('is_abstract'):
+                continue
+            label = self._label_key(metadata.get('latest_label'))
+            if label:
+                label_to_keys[label].append(concept_key)
+
+        for keys in label_to_keys.values():
+            if len(keys) <= 1:
+                continue
+            merged = True
+            while merged:
+                merged = False
+                live_keys = [k for k in keys if k in self.data]
+                # The row with the most recent period is primary, so the merged
+                # row keeps the concept the company files today.
+                live_keys.sort(key=lambda k: (min((self.periods.index(p) for p in self.data[k]
+                                                   if p in self.periods), default=len(self.periods)),
+                                              -len(self.data[k]), k))
+                for i in range(len(live_keys)):
+                    if merged:
+                        break
+                    for j in range(i + 1, len(live_keys)):
+                        a_key, b_key = live_keys[i], live_keys[j]
+                        if set(self.data[a_key]) & set(self.data[b_key]):
+                            continue
+                        if not self._shown_to_be_same_nonzero_amount(a_key, b_key):
+                            continue
+                        if self._continuing_differs_from_total(a_key, b_key):
+                            continue
+                        self._merge_into(a_key, b_key)
+                        merged = True
+                        break
+
     # ------------------------------------------------------------------
     # YTD → discrete quarter unaccumulation (CashFlowStatement only)
     # ------------------------------------------------------------------
@@ -815,7 +955,15 @@ class StatementStitcher:
           Q3_discrete = YTD_9M - YTD_6M
           Q4_discrete = FY - YTD_9M
 
-        The YTD periods are replaced in-place with the discrete quarter values.
+        Each YTD period is replaced by its discrete quarter, re-keyed to the
+        quarter's own dates (GH #1697).
+
+        The inputs can disagree about a period when a later filing recasts it, so
+        the derivation uses the latest vintage without mixing vintages (bead
+        edgartools-k7mi8.3): the longer operand is its latest-filed value, the
+        shorter one comes from that filing or the latest one filed before it, and a
+        three-month value an input reports for the quarter is kept over the
+        derived one.
         """
         from edgar.core import log
 
@@ -857,8 +1005,54 @@ class StatementStitcher:
                     f"{shorter_pid} ({shorter['duration_days']}d)"
                 )
 
-                # Subtract shorter from longer for every concept
-                self._subtract_periods(longer_pid, shorter_pid, discrete_label)
+                # The longer operand is its latest-filed value and the shorter one
+                # is of the same vintage; the cells then show the latest-filed
+                # values, and shorter is subtracted from longer for every concept
+                shorter_operands = self._same_vintage_operands(longer_pid, shorter_pid)
+                self._use_latest_filed_values(longer_pid, shorter_pid)
+                self._subtract_periods(longer_pid, shorter_pid, discrete_label, shorter_operands)
+
+    def _same_vintage_operands(self, longer_pid: str, shorter_pid: str) -> Dict[str, Any]:
+        """The shorter operand to subtract, per line, so a derived quarter never
+        mixes vintages (bead edgartools-k7mi8.3).
+
+        The longer period's value is the latest-filed one. The shorter value comes
+        from the same filing when it presents that period, otherwise from the
+        latest input filed before it (the next higher source index); never from a
+        later filing. MSFT's Q1 FY2026 investment gains were $1,007M in the Q1
+        10-Q and recast to $(3,907)M in the next year's Q1 10-Q, which reports no
+        six-month figure, so the six months from the Q2 10-Q pair with $1,007M.
+        None means no such value exists. Lines with no filed longer value are
+        absent, and keep subtracting their cells.
+        """
+        operands = {}
+        for concept_key in self.data:
+            filed = self.filed_facts.get(concept_key, {})
+            longer_by_source = filed.get(longer_pid)
+            if not longer_by_source:
+                continue
+            vintage = min(longer_by_source)
+            shorter_by_source = filed.get(shorter_pid, {})
+            same_or_older = [source for source in shorter_by_source if source >= vintage]
+            operands[concept_key] = (shorter_by_source[min(same_or_older)]
+                                     if same_or_older else None)
+        return operands
+
+    def _use_latest_filed_values(self, *period_ids: str):
+        """Set each stitched line's cells for ``period_ids`` to the latest-filed value.
+
+        A period's cell holds the value of the filing chosen for that column, which
+        need not be the most recent filing that reports it. MSFT's Q1 FY2026
+        investment gains were $1,007M in the Q1 10-Q (0001193125-25-256321) and
+        recast to $(3,907)M as the comparative in 10-Q 0001193125-26-436133, which
+        the Q1 column shows when both are inputs (bead edgartools-k7mi8.3).
+        """
+        for concept_key, values in self.data.items():
+            filed = self.filed_facts.get(concept_key, {})
+            for period_id in period_ids:
+                by_source = filed.get(period_id)
+                if by_source:
+                    values[period_id] = dict(by_source[min(by_source)])
 
     def _parse_duration_periods(self) -> List[Dict[str, Any]]:
         """Parse duration period IDs into structured records with start/end dates and duration."""
@@ -916,20 +1110,24 @@ class StatementStitcher:
         longer_pid: str,
         shorter_pid: str,
         discrete_label: str,
+        shorter_operands: Optional[Dict[str, Any]] = None,
     ):
         """Subtract shorter YTD values from longer YTD values in-place.
+
+        ``shorter_operands`` gives the shorter value per line where it differs from
+        the shorter cell (see ``_same_vintage_operands``).
 
         For each concept that has values in both the longer and shorter periods,
         computes: discrete_value = longer_value - shorter_value.
 
-        The longer period entry is updated in-place with the discrete value.
-        The display label in self.period_dates is updated to reflect the discrete quarter.
+        The discrete values then move from the longer period's key to the
+        quarter's own key, ``duration_<day after shorter end>_<longer end>``,
+        with a label that names the quarter (GH #1697).
         """
-        from edgar.core import log
-
         for concept_key in list(self.data.keys()):
             longer_entry = self.data[concept_key].get(longer_pid)
-            shorter_entry = self.data[concept_key].get(shorter_pid)
+            shorter_entry = (shorter_operands or {}).get(
+                concept_key, self.data[concept_key].get(shorter_pid))
 
             if longer_entry is None:
                 continue
@@ -964,13 +1162,72 @@ class StatementStitcher:
                 'decimals': longer_entry.get('decimals', 0),
             }
 
-        # Update the display label to indicate this is now a discrete quarter
-        old_label = self.period_dates.get(longer_pid, '')
+        # The values now cover the quarter, so the period is re-keyed to the
+        # quarter's own dates: the day after the shorter cumulative period ends,
+        # to the longer period's end (GH #1697).
+        quarter_start = datetime.strptime(shorter_pid.split('_')[2], '%Y-%m-%d') + timedelta(days=1)
+        quarter_end = datetime.strptime(longer_pid.split('_')[2], '%Y-%m-%d')
+        quarter_pid = f"duration_{quarter_start:%Y-%m-%d}_{quarter_end:%Y-%m-%d}"
+        new_label = self._discrete_quarter_label(
+            self.period_dates.get(longer_pid, ''), discrete_label, quarter_start, quarter_end)
+        # A three-month value an input reports for the quarter, selected column or
+        # not, is placed under the quarter's key so the merge in
+        # _rekey_derived_quarter keeps it over the derived cell (k7mi8.3).
+        self._use_latest_filed_values(quarter_pid)
+        self._rekey_derived_quarter(longer_pid, quarter_pid, new_label)
+
+    @staticmethod
+    def _discrete_quarter_label(old_label: str, discrete_label: str,
+                                quarter_start: datetime, quarter_end: datetime) -> str:
+        """The display label of a quarter derived from a cumulative period's label."""
         if 'YTD' in old_label:
-            new_label = old_label.replace('YTD ', '')
+            # "Q3 YTD Jun 27, 2026" -> "Q3 Jun 27, 2026", the form a reported quarter takes
+            return old_label.replace('YTD ', '')
+        if old_label.startswith('FY '):
+            # "FY Sep 30, 2023" -> "Q4 Sep 30, 2023": the value is no longer the fiscal year
+            return f"{discrete_label} {old_label[3:]}"
+        if ' to ' in old_label.partition(': ')[2]:
+            # A filing's own label, "Nine Months: September 28, 2025 to June 27,
+            # 2026", names the cumulative range, so the label names the quarter's
+            # range instead (GH #1697). The prefix keeps it distinct from a reported
+            # "Quarterly: ..." column for the same dates.
+            return (f"{discrete_label} Quarterly: {quarter_start:%B %d, %Y} "
+                    f"to {quarter_end:%B %d, %Y}")
+        return f"{discrete_label} {old_label}" if old_label else discrete_label
+
+    def _rekey_derived_quarter(self, cumulative_pid: str, quarter_pid: str, label: str):
+        """Move a derived quarter from its cumulative period key to its own key.
+
+        The values of ``cumulative_pid`` are the quarter's once subtracted, so the
+        key ``duration_<fiscal start>_<end>`` would claim a cumulative interval for
+        them. Everything keyed by period id moves: the values, the label, the source
+        filing and the position in the period order.
+
+        A filing can also carry three-month facts for the same dates (a selected
+        column with ``include_quarterly=True`` or ``use_optimal_periods=False``, or
+        placed there by ``_subtract_periods`` from any input that presents them),
+        which made a second column for the same quarter. The two merge into one column, and where
+        both have a cell the reported fact is kept: it is the filer's own number for
+        that interval, while the derived one can mix a restated cumulative figure
+        with an original earlier quarter (MSFT's Q2 FY2026 investment gains: $9,931M
+        reported, $5,017M derived against the unrestated Q1). A derived cell fills a
+        concept the filing did not report for the quarter.
+        """
+        if quarter_pid == cumulative_pid:
+            return
+        for values in self.data.values():
+            derived = values.pop(cumulative_pid, None)
+            if derived is not None and quarter_pid not in values:
+                values[quarter_pid] = derived
+        cumulative_source = self.period_sources.pop(cumulative_pid, None)
+        cumulative_label = self.period_dates.pop(cumulative_pid, None)
+        if quarter_pid in self.periods:
+            self.periods = [pid for pid in self.periods if pid != cumulative_pid]
         else:
-            new_label = f"{discrete_label} {old_label}" if old_label else discrete_label
-        self.period_dates[longer_pid] = new_label
+            self.periods = [quarter_pid if pid == cumulative_pid else pid for pid in self.periods]
+        self.period_dates[quarter_pid] = label or cumulative_label or quarter_pid
+        if cumulative_source is not None:
+            self.period_sources[quarter_pid] = cumulative_source
 
     def _format_output_with_ordering(self, statements: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
@@ -1137,7 +1394,11 @@ def stitch_statements(
                         'definition': statement['definition'],
                         'statement_type': statement['statement_type'],
                         'periods': {period_key: statement['periods'][period_key]},
-                        'data': statement['data']
+                        # Every column the filing presents, for the reported
+                        # values discrete-quarter derivation reads (k7mi8.3)
+                        'presented_periods': list(statement['periods']),
+                        'data': statement['data'],
+                        'source_index': xbrl_index,
                     }
 
                     # Update the period label to include information from entity_info
@@ -1178,7 +1439,7 @@ def stitch_statements(
                     statements.append(filtered_statement)
     # Traditional approach without using entity info
     else:
-        for xbrl in xbrl_list:
+        for xbrl_index, xbrl in enumerate(xbrl_list):
             # Get statement data for the specified type.  This must be
             # get_statement_by_type() and not find_statement(): the latter
             # returns a (statements, role, statement_type) tuple of index
@@ -1192,7 +1453,8 @@ def stitch_statements(
             except StatementNotFoundError:
                 continue
             if statement:
-                statements.append(statement)
+                # A copy, so the caller's statement dict is not tagged in place
+                statements.append({**statement, 'source_index': xbrl_index})
 
     # Stitch the statements
     return stitcher.stitch_statements(statements, period_type, max_periods, standard,

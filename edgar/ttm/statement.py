@@ -643,6 +643,18 @@ class TTMStatementBuilder:
             )
             return trend.head(max_periods)
 
+        def _base_trend_candidate(concept: str) -> Optional[pd.DataFrame]:
+            # Choosing the period columns must not fail on one concept's data:
+            # the item loop below skips a concept with too few quarters, and a
+            # sparse line item reached here raised for the whole statement
+            # instead (GH #1822).
+            try:
+                return _trend_for_concept(concept, max_periods=max_periods)
+            except (ValueError, KeyError) as e:
+                from edgar.core import log
+                log.debug(f"{concept} cannot set the TTM periods: {e}")
+                return None
+
         preferred_concepts = [
             "RevenueFromContractWithCustomerExcludingAssessedTax",
             "Revenues",
@@ -652,7 +664,7 @@ class TTMStatementBuilder:
 
         base_trend = None
         for concept in preferred_concepts:
-            trend = _trend_for_concept(concept, max_periods=max_periods)
+            trend = _base_trend_candidate(concept)
             if trend is None:
                 continue
             candidate_periods = [
@@ -665,7 +677,7 @@ class TTMStatementBuilder:
 
         if base_trend is None:
             for item, _, _ in multi_period.iter_hierarchy():
-                trend = _trend_for_concept(item.concept, max_periods=max_periods)
+                trend = _base_trend_candidate(item.concept)
                 if trend is None:
                     continue
                 candidate_periods = [

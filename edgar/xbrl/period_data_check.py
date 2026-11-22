@@ -7,6 +7,8 @@ data before displaying them to investors.
 
 from typing import Dict, List, Optional, Set, Tuple
 
+from edgar.xbrl.core import catalog_entry
+
 
 def count_facts_for_period(xbrl_instance, period_key: str, statement_type: Optional[str] = None) -> int:
     """
@@ -162,7 +164,8 @@ def check_period_data_quality(xbrl_instance, period_key: str, statement_type: st
                 break
 
             # Check if this fact matches the concept
-            element = xbrl_instance.element_catalog.get(fact.element_id)
+            # Facts carry QNames ('us-gaap:Assets'); the catalog keys on 'us-gaap_Assets'.
+            element = catalog_entry(xbrl_instance.element_catalog, fact.element_id)
             if element and concept in element.name:
                 # Check if it's for our period
                 context = xbrl_instance.contexts.get(fact.context_ref)

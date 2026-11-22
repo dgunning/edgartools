@@ -666,3 +666,13 @@ def clear_locale_corrupted_cache():
     return _apply_cache_clear_migrations(
         {"locale_fix_457": _CACHE_CLEAR_MIGRATIONS["locale_fix_457"]}
     )
+
+
+# Run the migrations once per process, before the first request can read the
+# cache. This used to happen in edgar/__init__.py, which no longer imports any
+# submodule (GH #1325); every request goes through this module, so running here
+# keeps "before the cache is first used". Never fatal.
+try:
+    _run_import_time_cache_migrations()
+except Exception as _error:  # not critical: the cache may still hold stale entries
+    log.debug("One-time cache migrations failed: %s", _error)

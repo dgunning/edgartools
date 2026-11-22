@@ -7,7 +7,7 @@ This module provides functions for working with financial statements.
 import re
 import warnings
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Dict, List, Optional, Sequence, Union
 
 import pandas as pd
@@ -50,6 +50,34 @@ STRUCTURAL_CONCEPT_SUFFIXES = ('Axis', 'Domain', 'Member', 'LineItems', 'Table')
 # _build_dataframe_from_raw_data() to _add_metadata_columns() (GH #1657).
 _ROW_SIGN = '_row_preferred_sign'
 _ROW_HAS_VALUES = '_row_has_values'
+# Working column that carries each row's own presentation parent (GH #1705).
+_ROW_PARENT = '_row_parent_abstract_concept'
+
+# Statements whose to_dataframe() value columns hold only numbers (GH #1995).
+# Elsewhere a text cell, such as a note's narrative (Issue #762), is kept.
+_NUMERIC_VALUE_STATEMENTS = ('IncomeStatement', 'CashFlowStatement', 'BalanceSheet', 'ComprehensiveIncome')
+
+
+def _row_presentation_parents(raw_data: List[Dict[str, Any]]) -> List[Optional[str]]:
+    """
+    Return the presentation parent of each raw row, aligned with ``raw_data``.
+
+    A concept presented under two parents appears twice in the raw rows, each
+    occurrence with its own ``parent`` (GH #1705). A dimensional row has no
+    parent of its own, so it takes the parent of the nearest earlier
+    non-dimensional occurrence of its concept: the line it breaks down (#542).
+    """
+    parents: List[Optional[str]] = []
+    line_parent: Dict[str, Optional[str]] = {}
+    for item in raw_data:
+        concept = item.get('concept')
+        if item.get('is_dimension'):
+            parents.append(line_parent.get(concept))
+        else:
+            parent = item.get('parent')
+            line_parent[concept] = parent
+            parents.append(parent)
+    return parents
 
 
 def is_xbrl_structural_element(item: Dict[str, Any]) -> bool:
@@ -1230,7 +1258,8 @@ class Statement:
 
             # Apply presentation transformation if requested (Issue #463)
             if presentation:
-                df = self._apply_presentation(df)
+                df = self._apply_presentation(
+                    df, numeric_only=self.classified_type in _NUMERIC_VALUE_STATEMENTS)
 
             # Apply matrix transformation for equity statements (Issue edgartools-uqg7)
             if matrix:
@@ -1261,14 +1290,20 @@ class Statement:
             view: StatementView controlling which dimensional data to include.
                   Used for STANDARD vs DETAILED filtering logic.
         """
-        from edgar.xbrl.core import (get_unit_display_name, is_period_end_label_role,
-                                     is_period_start_label_role, row_metadata_value)
+        from edgar.xbrl.core import (
+            SourceKeyLookup,
+            balance_cell_key,
+            record_cell_unit,
+            row_metadata_value,
+            summarize_unit_definitions,
+        )
         from edgar.xbrl.core import is_point_in_time as get_is_point_in_time
         from edgar.xbrl.periods import determine_periods_to_display
-        from edgar.xbrl.rendering import _is_html, html_to_text
+        from edgar.xbrl.rendering import EQUITY_POSITION_STATEMENTS, _is_html, html_to_text
 
         # Get raw statement data with view-based filtering
         raw_data = self.get_raw_data(period_filter=period_filter, view=view)
+        unit_defs = getattr(self.xbrl, 'units', None) or {}
         if not raw_data:
             return pd.DataFrame()
 
@@ -1346,11 +1381,7 @@ class Statement:
 
         # Issue #572: Track concept occurrences for Statement of Equity roll-forward logic
         # First occurrence = beginning balance, later occurrences = ending balance
-        is_equity_statement = statement_type in (
-            'StatementOfEquity', 'StatementOfStockholdersEquity',
-            'StatementOfChangesInEquity', 'ComprehensiveIncome',
-            'StatementOfComprehensiveIncome'
-        )
+        is_equity_statement = statement_type in EQUITY_POSITION_STATEMENTS
         # Issue #583: Track by (concept, label) tuple to handle dimensional items correctly
         # Different dimensional items have same concept but different labels
         item_occurrence_count = {}  # Tracks total occurrences of each (concept, label) pair
@@ -1374,7 +1405,8 @@ class Statement:
                 item_key = (concept, label)
                 item_occurrence_count[item_key] = item_occurrence_count.get(item_key, 0) + 1
 
-        for item in raw_data:
+        row_parents = _row_presentation_parents(raw_data)
+        for item, row_parent in zip(raw_data, row_parents, strict=True):
             # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
             # These are internal XBRL constructs, not financial data
             if is_xbrl_structural_element(item):
@@ -1429,88 +1461,25 @@ class Statement:
             }
 
             # Add period values (raw from instance document)
-            values_dict = item.get('values', {})
+            # GH #1746: remember which key each column's value came from, so the
+            # row's unit is read from the facts actually shown.
+            values_dict = SourceKeyLookup(item.get('values', {}))
+            cell_units: Dict[str, Optional[Dict[str, Any]]] = {}
             for period_key, period_label in periods_to_display:
+                values_dict.source_key = None
                 column_name = _period_column_names.get(period_key, period_label)
-                # Extract start/end dates for equity statement logic
-                start_date = None
-                end_date = None
-                if '_' in period_key:
-                    parts = period_key.split('_')
-                    if len(parts) >= 3:
-                        start_date = parts[1]
-                        end_date = parts[2]
-                    elif len(parts) == 2:
-                        end_date = parts[1]
-
-                # Use raw value from instance document
-                value = values_dict.get(period_key)
-
-                # edgartools-0609: Roll-forward mapping for periodStart/periodEnd
-                # balances (e.g. cash flow / equity "beginning/ending balances").
-                # These are instant facts shown against duration columns: the
-                # beginning balance is the instant at the day before the period
-                # start, the ending balance is the instant at the period end.
-                # Driven by the per-reference preferred label so it works
-                # regardless of statement type and keeps the DataFrame consistent
-                # with the rich view.
-                # Only non-dimensional rows carry a reliable per-reference label;
-                # dimensional rows share the node's label and use the occurrence-
-                # based equity logic below instead.
-                item_preferred_label = None if item.get('is_dimension') else item.get('preferred_label')
-                # Negated period roles count too (GH #1700).
-                is_period_start = is_period_start_label_role(item_preferred_label)
-                is_period_end = is_period_end_label_role(item_preferred_label)
-                if value is None and (is_period_start or is_period_end):
-                    if is_period_start and start_date:
-                        # Beginning balance: instant at the day before period start
-                        try:
-                            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-                            beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
-                            value = values_dict.get(f"instant_{beginning_date}")
-                            if value is None:
-                                value = values_dict.get(f"instant_{start_date}")
-                        except (ValueError, AttributeError):
-                            pass
-                    if value is None and is_period_end and end_date:
-                        value = values_dict.get(f"instant_{end_date}")
-
-                # Issue #572/#583: For Statement of Equity, match instant facts when duration key is empty
-                # This mirrors the logic in rendering.py (Issue #450) for consistent DataFrame output
-                # Roll-forward structure: first occurrence = beginning balance, later = ending balance
-                # Issue #583: Use (concept, label) tracking for proper beginning/ending logic with dimensions
-                if value is None and is_equity_statement:
+                # edgartools-auvk1.14: one rule, shared with the rendered table,
+                # for which value (an instant balance under a duration column
+                # included) this row shows in this column. The row's own arc role
+                # decides; dimension rows carry their parent reference's role.
+                opening_by_position = False
+                if is_equity_statement:
                     item_key = (concept, base_label)
-                    total_occurrences = item_occurrence_count.get(item_key, 1)
-                    current_occurrence = item_current_index.get(item_key, 1)
-                    is_first_occurrence = current_occurrence == 1
-
-                    if is_first_occurrence and total_occurrences > 1 and start_date:
-                        # Beginning balance: try instant at day before start_date
-                        try:
-                            start_dt = datetime.strptime(start_date, '%Y-%m-%d')
-                            beginning_date = (start_dt - timedelta(days=1)).strftime('%Y-%m-%d')
-                            instant_key = f"instant_{beginning_date}"
-                            value = values_dict.get(instant_key)
-                        except (ValueError, AttributeError):
-                            pass  # Fall through to try end_date
-
-                    # If still no value, try instant at end_date (ending balances and most facts).
-                    # edgartools-0609: never apply the period-end instant to a beginning row.
-                    if value is None and end_date and not is_period_start:
-                        instant_key = f"instant_{end_date}"
-                        value = values_dict.get(instant_key)
-
-                # General fallback: handle period type mismatch for disclosure notes (#635)
-                # Notes/disclosures default to duration period selection, but balance-sheet-type
-                # notes (PPE, Accrued Liabilities) have instant facts.
-                # Try the instant key at the duration's end date.
-                # edgartools-0609: skip beginning-balance rows -- the period end instant
-                # is the *ending* balance and would mislabel the beginning row.
-                if (value is None and period_key.startswith('duration_') and end_date
-                        and not is_period_start):
-                    instant_key = f"instant_{end_date}"
-                    value = values_dict.get(instant_key)
+                    opening_by_position = (item_current_index.get(item_key, 1) == 1
+                                           and item_occurrence_count.get(item_key, 1) > 1)
+                source_key = balance_cell_key(item.get('values') or {}, period_key,
+                                              item.get('preferred_label'), opening_by_position)
+                value = values_dict.get(source_key) if source_key else None
 
                 # Issue #762: Sanitize HTML strings from TextBlock XBRL concepts
                 # Disclosure tables contain facts whose values are full HTML markup.
@@ -1523,12 +1492,13 @@ class Statement:
                 # accounting standard changes). If we already have a value, don't overwrite with None.
                 if value is not None or column_name not in row:
                     row[column_name] = value
+                record_cell_unit(cell_units, column_name, value, item.get('units'),
+                                 values_dict.source_key, unit_defs)
 
-            # Add unit if requested
+            # Add unit if requested: from the shown cells' unit definitions,
+            # never the opaque unit id (GH #1746)
             if include_unit:
-                unit_ref = row_metadata_value(item.get('units'),
-                                              (key for key, _ in periods_to_display))
-                row['unit'] = get_unit_display_name(unit_ref)
+                row['unit'] = summarize_unit_definitions(cell_units.values())
 
             # Add point_in_time if requested
             if include_point_in_time:
@@ -1542,6 +1512,7 @@ class Statement:
             row_signs = item.get('preferred_signs') or {}
             row[_ROW_SIGN] = next(iter(row_signs.values())) if row_signs else None
             row[_ROW_HAS_VALUES] = bool(item.get('values'))
+            row[_ROW_PARENT] = row_parent
 
             # Add structural columns
             row['level'] = item.get('level', 0)
@@ -1751,11 +1722,16 @@ class Statement:
         else:
             df['preferred_sign'] = concept_signs
         df['parent_concept'] = df['concept'].map(parent_concept_map)
-        df['parent_abstract_concept'] = df['concept'].map(parent_abstract_concept_map)
+        # GH #1705: each row's own presentation parent, so a concept presented
+        # under two parents keeps both; dimensional rows follow their line.
+        if _ROW_PARENT in df.columns:
+            df['parent_abstract_concept'] = df.pop(_ROW_PARENT)
+        else:
+            df['parent_abstract_concept'] = df['concept'].map(parent_abstract_concept_map)
 
         return df
 
-    def _apply_presentation(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _apply_presentation(self, df: pd.DataFrame, numeric_only: bool = False) -> pd.DataFrame:
         """
         Apply presentation logic to match SEC HTML display.
 
@@ -1764,6 +1740,9 @@ class Statement:
         - preferred_sign = -1: negate for display (expenses, dividends, outflows)
         - preferred_sign = 1: show as-is
         - preferred_sign = None: no transformation
+
+        ``numeric_only`` is set for a primary statement: its value columns hold
+        numbers, and any text that is not a text block becomes NaN (GH #1995).
         """
         if df.empty:
             return df
@@ -1778,45 +1757,63 @@ class Statement:
                         'dimension_member_label', 'dimension_label']
         period_cols = [col for col in df.columns if col not in metadata_cols]
 
-        # Decide on the type render() resolves for this statement, so the frame and
-        # the rendered view always agree. render() looks up canonical_type (or the
-        # role) with find_statement and gates on the type of the role it finds;
-        # classified_type reports the requested kind instead. They differ when
-        # comprehensive_income() lands on an equity role: KO's FY2011 10-K has its
-        # comprehensive income inside ConsolidatedStatementsOfShareownersEquity,
-        # which resolves to StatementOfEquity, so render() kept "Dividends paid to
-        # noncontrolling interests" at 38 while the frame flipped it to -38 (GH #1676).
-        statement_type = self._presentation_sign_type()
-
-        # Same statements as the rendered view (PRESENTATION_SIGN_STATEMENTS): income,
-        # cash flow, balance sheet (contra accounts like Treasury Stock) and
-        # comprehensive income (GH #1676)
-        from edgar.xbrl.rendering import PRESENTATION_SIGN_STATEMENTS
-        if statement_type in PRESENTATION_SIGN_STATEMENTS:
-            if 'preferred_sign' in result.columns:
-                for col in period_cols:
-                    if col not in result.columns:
-                        continue
-                    # Convert to numeric - handles object dtype columns with None values (Issue #556)
-                    # This is needed because columns with None values become object dtype
-                    numeric_col = pd.to_numeric(result[col], errors='coerce')
-                    if pd.api.types.is_numeric_dtype(numeric_col):
-                        # FIX (Issue #599): Convert entire column to numeric first to prevent
-                        # pandas FutureWarning about assigning incompatible dtype to object column
-                        result[col] = numeric_col
-                        # Apply preferred_sign where it's not None and not 0
-                        mask = result['preferred_sign'].notna() & (result['preferred_sign'] != 0)
-                        result.loc[mask, col] = numeric_col[mask] * result.loc[mask, 'preferred_sign']
+        # The presentation sign applies on every statement, wherever the arc
+        # carries a negated role, as the SEC renderer and render() apply it
+        # (edgartools-auvk1.13). Gating it on the statement type made the sign
+        # depend on how the statement was reached (GH #1676, DRDGOLD
+        # 0001562762-22-000397 by role) and skipped parentheticals.
+        if 'preferred_sign' in result.columns:
+            # Numeric, so the product stays float: an object-dtype sign column
+            # (None beside -1) made an object result that pandas refuses to write
+            # into a float column -- TypeError on DiamondRock's parenthetical
+            # balance sheet (0001298946-24-000052), and under pandas 3 on a role
+            # where no row has a sign (GH #1960, KEYS FY2020 land-sale details).
+            # The column is replaced whole, never assigned through .loc.
+            signs = pd.to_numeric(result['preferred_sign'], errors='coerce')
+            mask = signs.notna() & (signs != 0)
+            # A primary statement's value columns are numbers, as in 6.0. Some
+            # filers put a non-numeric fact on the face: Zimmer Biomet's income
+            # statement carries TypeOfRevenueExtensibleList = us-gaap:ProductMember
+            # (0001564590-19-004283), which left str beside float and broke
+            # pl.from_pandas (GH #1995). The caller decides from classified_type,
+            # which answers by name and by role alike, so the rule doesn't depend
+            # on how the statement was reached.
+            # A text block is narrative, never a face line, and keeps its text: a
+            # 2010 Netflix 10-Q's comprehensive income resolves to its note.
+            if numeric_only:
+                from edgar.xbrl.abstract_detection import is_textblock_concept
+                narrative = result['concept'].map(lambda c: is_textblock_concept(str(c).replace(':', '_')))
+            for col in period_cols:
+                if col not in result.columns:
+                    continue
+                # Convert to numeric - handles object dtype columns with None values (Issue #556)
+                # This is needed because columns with None values become object dtype
+                original = result[col]
+                numeric_col = pd.to_numeric(original, errors='coerce')
+                is_text = original.notna() & numeric_col.isna() & original.astype(str).str.strip().ne('')
+                if numeric_only:
+                    # Other text on a primary statement becomes NaN (GH #1995)
+                    is_text = is_text & narrative
+                # Under a negated label the SEC page shows a zero as 0, however it was
+                # filed; 0.0 * -1 is -0.0 (edgartools-auvk1.12: Entergy
+                # 0000065984-24-000112). Without one, a zero filed with a minus sign
+                # keeps it, as the page's (0.00) loss per share does (0001493152-24-046709).
+                flip = mask & numeric_col.notna() & numeric_col.ne(0)
+                negated_zero = mask & signs.lt(0) & numeric_col.eq(0)
+                presented = (numeric_col * signs).where(flip, 0.0)
+                change = flip | negated_zero
+                if not is_text.any():
+                    # FIX (Issue #599): a column of numbers (and blanks) becomes numeric,
+                    # with preferred_sign applied where it's not None and not 0
+                    result[col] = numeric_col.where(~change, presented)
+                elif numeric_only:
+                    result[col] = original.where(is_text, numeric_col).where(~change, presented)
+                else:
+                    # A text cell (a note's narrative, Issue #762) stays as it is;
+                    # only the numeric cells take the sign
+                    result[col] = original.where(~change, presented)
 
         return result
-
-    def _presentation_sign_type(self) -> Optional[str]:
-        """The statement type render() gates the presentation sign on."""
-        rendering_type = self.canonical_type if self.canonical_type else self.role_or_type
-        try:
-            return self.xbrl.find_statement(rendering_type)[2]
-        except StatementNotFoundError:
-            return self.classified_type
 
     def _pivot_to_matrix(self, df: pd.DataFrame) -> pd.DataFrame:
         """
@@ -1995,32 +1992,38 @@ class Statement:
         Args:
             level: Validation level - "fundamental", "sections", or "detailed"
                    - fundamental: Basic equation check
-                   - sections: Also validates section subtotals
-                   - detailed: Full line-item rollup validation
+                   - sections: Also checks that current and non-current
+                     subtotals add up to total assets and total liabilities
+                   - detailed: The same checks as "sections"; line-item
+                     rollups to subtotals are not implemented
 
         Returns:
-            ValidationResult with is_valid flag and any issues found
+            ValidationResult with is_valid flag and any issues found.
+            ``result.status`` is "valid" only when every comparison the level
+            asks for ran without an error, "inconclusive" when one could not
+            run (a missing total, or a statement type with no validator, such
+            as an income statement), and "invalid" on any error.
+            ``is_valid`` stays True whenever there is no error.
+
+        Raises:
+            ValidationError: ``level`` is not one of the three levels
+                (case-insensitive) or a ValidationLevel member.
 
         Example:
             >>> bs = xbrl.statements.balance_sheet()
             >>> result = bs.validate()
             >>> print(result)
             ValidationResult: VALID (0 errors, 0 warnings)
+            >>> print(xbrl.statements.income_statement().validate())
+            ValidationResult: INCONCLUSIVE (0 errors, 0 warnings)
             >>> if not result.is_valid:
             ...     for error in result.errors:
             ...         print(f"Error: {error.message}")
         """
-        from edgar.xbrl.validation import validate_statement, ValidationLevel
+        from edgar.xbrl.validation import validate_statement
 
-        # Map string level to enum
-        level_map = {
-            "fundamental": ValidationLevel.FUNDAMENTAL,
-            "sections": ValidationLevel.SECTIONS,
-            "detailed": ValidationLevel.DETAILED,
-        }
-        validation_level = level_map.get(level.lower(), ValidationLevel.FUNDAMENTAL)
-
-        return validate_statement(self, self.classified_type, level=validation_level)
+        # validate_statement parses the level and raises on an unknown one
+        return validate_statement(self, self.classified_type, level=level)
 
     def calculate_ratios(self, period: Optional[str] = None) -> Dict[str, float]:
         """Calculate common financial ratios for this statement.
@@ -3530,7 +3533,7 @@ class StitchedStatement:
             show_date_range=show_date_range
         )
 
-    def to_dataframe(self, presentation: bool = True) -> pd.DataFrame:
+    def to_dataframe(self, presentation: bool = True, *, period_columns: str = "end_date") -> pd.DataFrame:
         """
         Convert the stitched statement to a pandas DataFrame.
 
@@ -3538,13 +3541,29 @@ class StitchedStatement:
             presentation: If True (default), apply preferred_sign so values match
                          SEC HTML display (e.g., cash outflows shown as negative).
                          If False, return raw XBRL instance values.
+            period_columns: How the period columns are named.
+                         ``"end_date"`` (default): the end date, ``"2023-07-01"``,
+                         or the period label when two columns share an end date.
+                         Stitched 10-Qs are year-to-date by default, so an end-date
+                         column can hold three, six or nine months.
+                         ``"interval"``: the exact dates, ``"2022-09-25 to 2023-07-01"``
+                         for a duration and ``"2023-07-01"`` for an instant.
 
         Returns:
             pandas DataFrame with periods as columns and concepts as rows
+
+        Raises:
+            ValueError: if ``period_columns`` is not ``"end_date"`` or ``"interval"``.
+
+        Example:
+            >>> income = xbrls.statements.income_statement(include_quarterly=True)
+            >>> income.to_dataframe(period_columns="interval").columns
+            # ['label', 'concept', 'standard_concept', '2023-04-02 to 2023-07-01',
+            #  '2022-09-25 to 2023-07-01', 'preferred_sign']
         """
         from edgar.xbrl.stitching import to_pandas
 
-        return to_pandas(self.statement_data, presentation=presentation)
+        return to_pandas(self.statement_data, presentation=presentation, period_columns=period_columns)
 
     def __rich__(self):
         """

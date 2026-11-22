@@ -17,16 +17,16 @@ Two independent keys were too narrow, and they compounded:
   entire filing pivoted into a 2-row table.
 
 Residual collisions are logged rather than silently resolved. The ones that
-remain on this filing are a *different* key: ``_format_period_label`` maps
+remained on this filing were a *different* key: ``_format_period_label`` mapped
 distinct periods (monthly durations and the full year; instants at 2024-03-26 and
-2024-12-31) onto one "FY 2024" label. That is the edgartools-51xd period-identity
-species, which this bead was deliberately filed apart from.
+2024-12-31) onto one "FY 2024" label. GH #1851 classifies durations by their days
+and gives a period that would still share a cell its own dated column, so every
+deduplicated fact now has a cell.
 """
 
 import json
 from pathlib import Path
 
-import pandas as pd
 import pytest
 
 from edgar.entity.parser import EntityFactsParser
@@ -89,10 +89,17 @@ def test_discriminators_are_added_only_where_they_are_needed(facts):
     assert "Revenue (USD)" not in pivot.index
 
 
-def test_unresolved_collisions_are_reported_not_silently_dropped(facts, caplog):
-    """A remaining collision must say so. Silence is what this bug was."""
+def test_unresolved_collisions_are_reported_not_silently_dropped(facts, caplog, monkeypatch):
+    """A remaining collision must say so. Silence is what this bug was.
+
+    GH #1851 resolves the collisions this filing had, so they are restored here by
+    switching off the period disambiguation; the report must still fire for them.
+    """
     import logging
 
+    from edgar.entity.query import FactQuery
+
+    monkeypatch.setattr(FactQuery, "_distinct_period_keys", staticmethod(lambda df: df["period_key"]))
     with caplog.at_level(logging.WARNING, logger="edgar"):
         facts.query().pivot_by_period(return_statement=False)
 
@@ -100,31 +107,26 @@ def test_unresolved_collisions_are_reported_not_silently_dropped(facts, caplog):
         "residual collisions were resolved in silence")
 
 
-def test_measured_shape_of_this_filing(facts):
+def test_measured_shape_of_this_filing(facts, caplog):
     """Ground truth, so a future change that drops rows again fails here.
 
-    The residual collisions are a different key -- `_format_period_label` maps
-    monthly durations and the full year onto one "FY 2024" -- and belong to
-    edgartools-51xd, not here. They are logged, and pinned so their count cannot
-    grow unnoticed.
+    The residual collisions were a different key -- `_format_period_label` mapped
+    monthly durations and the full year onto one "FY 2024" (edgartools-51xd). Since
+    GH #1851 they get their own columns, so every deduplicated fact has a cell and
+    nothing is logged.
     """
+    import logging
+
     query = facts.query()
     all_facts = query.execute()
     dedup = query._deduplicate_facts(all_facts)
-    pivot = query.pivot_by_period(return_statement=False)
+    with caplog.at_level(logging.WARNING, logger="edgar"):
+        pivot = query.pivot_by_period(return_statement=False)
 
     assert len(all_facts) == 768
     assert len(dedup) == 569            # was 550: 19 unit-distinguished facts recovered
-    assert pivot.shape == (188, 6)      # was (2, 6)
+    assert pivot.shape == (184, 15)     # was (2, 6), then (188, 6) with 21 facts colliding
+    assert not any("share a cell" in r.getMessage() for r in caplog.records)
 
-    records = pd.DataFrame([{"label": f.label, "concept": f.concept, "unit": f.unit,
-                             "period_key": query._format_period_label(f)} for f in dedup])
-    keys = query._pivot_row_keys(records)
-    colliding = int(pd.DataFrame({"k": keys, "p": records["period_key"]})
-                    .duplicated(keep=False).sum())
-    assert colliding == 21
-
-    # Every distinct (row, period) the facts produce occupies a cell -- nothing
-    # lands nowhere.
-    distinct_cells = len(set(zip(keys, records["period_key"], strict=True)))
-    assert int(pivot.notna().sum().sum()) == distinct_cells
+    # Every deduplicated fact occupies its own cell -- nothing lands nowhere.
+    assert int(pivot.notna().sum().sum()) == len(dedup)

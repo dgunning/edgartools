@@ -17,7 +17,6 @@ class TestCurrencyDisplay:
 
     @pytest.mark.data_quality
     @pytest.mark.slow
-    @pytest.mark.xfail(reason="Some monetary lines still render with $ instead of € for non-USD filers")
     def test_deutsche_bank_eur_currency_display(self):
         """Test that Deutsche Bank cash flow statement shows EUR symbols, not USD."""
         # Get Deutsche Bank company

@@ -670,6 +670,7 @@ def test_configure_http_multiple_settings():
     # Store original values
     original_verify = HTTP_MGR.httpx_params.get("verify", True)
     original_proxy = HTTP_MGR.httpx_params.get("proxy")
+    original_mgr_proxy = HTTP_MGR.proxy
 
     try:
         # Set multiple settings
@@ -685,6 +686,8 @@ def test_configure_http_multiple_settings():
             HTTP_MGR.httpx_params.pop("proxy", None)
         else:
             HTTP_MGR.httpx_params["proxy"] = original_proxy
+        HTTP_MGR.proxy = original_mgr_proxy
+        HTTP_MGR.close()
 
 
 def test_get_http_config_returns_current_settings():

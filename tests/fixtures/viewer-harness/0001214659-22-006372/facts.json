@@ -1,0 +1,294 @@
+[
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c4",
+  "period_key": "duration_2021-12-29_2022-03-29",
+  "period_type": "duration",
+  "value": "33364000",
+  "numeric_value": 33364000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "pf0:ProductOrServiceAxis": "us-gaap:ServiceMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c5",
+  "period_key": "duration_2020-12-30_2021-03-30",
+  "period_type": "duration",
+  "value": "28995000",
+  "numeric_value": 28995000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "pf0:ProductOrServiceAxis": "us-gaap:ServiceMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c6",
+  "period_key": "duration_2021-09-29_2022-03-29",
+  "period_type": "duration",
+  "value": "66040000",
+  "numeric_value": 66040000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "pf0:ProductOrServiceAxis": "us-gaap:ServiceMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c7",
+  "period_key": "duration_2020-09-30_2021-03-30",
+  "period_type": "duration",
+  "value": "56076000",
+  "numeric_value": 56076000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "pf0:ProductOrServiceAxis": "us-gaap:ServiceMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c8",
+  "period_key": "duration_2021-12-29_2022-03-29",
+  "period_type": "duration",
+  "value": "233000",
+  "numeric_value": 233000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "pf0:ProductOrServiceAxis": "us-gaap:RoyaltyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c9",
+  "period_key": "duration_2020-12-30_2021-03-30",
+  "period_type": "duration",
+  "value": "197000",
+  "numeric_value": 197000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "pf0:ProductOrServiceAxis": "us-gaap:RoyaltyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c10",
+  "period_key": "duration_2021-09-29_2022-03-29",
+  "period_type": "duration",
+  "value": "473000",
+  "numeric_value": 473000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "pf0:ProductOrServiceAxis": "us-gaap:RoyaltyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c11",
+  "period_key": "duration_2020-09-30_2021-03-30",
+  "period_type": "duration",
+  "value": "412000",
+  "numeric_value": 412000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "pf0:ProductOrServiceAxis": "us-gaap:RoyaltyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c109",
+  "period_key": "duration_2021-12-29_2022-03-29",
+  "period_type": "duration",
+  "value": "25524000",
+  "numeric_value": 25524000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "gtim:BadDaddysMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c110",
+  "period_key": "duration_2020-12-30_2021-03-30",
+  "period_type": "duration",
+  "value": "21029000",
+  "numeric_value": 21029000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "gtim:BadDaddysMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c111",
+  "period_key": "duration_2021-09-29_2022-03-29",
+  "period_type": "duration",
+  "value": "50196000",
+  "numeric_value": 50196000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "gtim:BadDaddysMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c112",
+  "period_key": "duration_2020-09-30_2021-03-30",
+  "period_type": "duration",
+  "value": "39782000",
+  "numeric_value": 39782000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "gtim:BadDaddysMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c113",
+  "period_key": "duration_2021-12-29_2022-03-29",
+  "period_type": "duration",
+  "value": "8073000",
+  "numeric_value": 8073000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "gtim:GoodTimesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c114",
+  "period_key": "duration_2020-12-30_2021-03-30",
+  "period_type": "duration",
+  "value": "8163000",
+  "numeric_value": 8163000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "gtim:GoodTimesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c115",
+  "period_key": "duration_2021-09-29_2022-03-29",
+  "period_type": "duration",
+  "value": "16317000",
+  "numeric_value": 16317000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "gtim:GoodTimesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c116",
+  "period_key": "duration_2020-09-30_2021-03-30",
+  "period_type": "duration",
+  "value": "16706000",
+  "numeric_value": 16706000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementBusinessSegmentsAxis": "gtim:GoodTimesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c12",
+  "period_key": "duration_2021-12-29_2022-03-29",
+  "period_type": "duration",
+  "value": "33597000",
+  "numeric_value": 33597000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c13",
+  "period_key": "duration_2020-12-30_2021-03-30",
+  "period_type": "duration",
+  "value": "29192000",
+  "numeric_value": 29192000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c0",
+  "period_key": "duration_2021-09-29_2022-03-29",
+  "period_type": "duration",
+  "value": "66513000",
+  "numeric_value": 66513000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:Revenues",
+  "context_ref": "c14",
+  "period_key": "duration_2020-09-30_2021-03-30",
+  "period_type": "duration",
+  "value": "56488000",
+  "numeric_value": 56488000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ }
+]

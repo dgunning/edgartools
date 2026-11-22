@@ -1,1 +1,0 @@
-- **A captioned table prints once in `doc.text()`** — the table renderer already opens with the caption and the text extractor added it again. An old SGML filing's never-closed `<CAPTION>` holds the whole table, so those tables printed twice: across 43 plain-text filings, 128k duplicated words are gone.

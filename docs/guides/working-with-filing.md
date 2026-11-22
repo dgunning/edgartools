@@ -96,7 +96,7 @@ company = Company("AAPL")
 filing = company.get_filings(form="10-K").latest()
 
 # EntityFiling-specific properties
-print(f"Acceptance Time: {filing.acceptance_datetime}")
+print(f"Reported acceptance: {filing.reported_acceptance_datetime}")
 print(f"File Number: {filing.file_number}")
 print(f"Size: {filing.size} bytes")
 print(f"Primary Doc: {filing.primary_document}")
@@ -104,7 +104,12 @@ print(f"Is XBRL: {filing.is_xbrl}")
 print(f"Is Inline XBRL: {filing.is_inline_xbrl}")
 ```
 
-`acceptance_datetime` comes from SEC's submissions JSON, which labels it UTC but for some filers is hours off, by an amount that varies by filer and by day. When the exact time matters, for example in point-in-time backtests, use `filing.header.acceptance_datetime`. It reads the filing's own SGML header, matches the "Accepted" time on SEC's index page, and is naive Eastern time. It costs one extra request per filing.
+`reported_acceptance_datetime` (called `acceptance_datetime` until 6.0, a name that still works with a deprecation warning until 7.0) comes from SEC's submissions JSON, which labels it UTC but has served it hours off for whole companies at a time. When the exact time matters, for example in point-in-time backtests, use `filing.accepted_at`: it reads the filing's own header, matches the "Accepted" time on SEC's index page, and is a tz-aware `America/New_York` datetime. It costs one small request per filing, cached after the first read; `filings.accepted_at()` reads a whole set.
+
+```python
+filing.accepted_at                  # 2026-07-31 06:01:02-04:00 for Apple's 10-Q 0000320193-26-000020
+filings.accepted_at()               # Series of exact times, indexed by accession number
+```
 
 ## Viewing Filings
 

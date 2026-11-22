@@ -392,6 +392,45 @@ _FALLBACK_CONCEPT_MAPPINGS = {
     'ProceedsFromSaleOfInvestments': 'CashFlowStatement',
     'ProceedsFromIssuanceOfLongTermDebt': 'CashFlowStatement',
     'ProceedsFromMaturitiesPrepaymentsAndCallsOfAvailableForSaleSecurities': 'CashFlowStatement',
+    # Crypto assets at fair value (ASU 2023-08, GH #1447). The learned data
+    # predates these 2024-taxonomy elements, so without an entry their facts
+    # carry no statement and no statement shows them.
+    'CryptoAssetFairValue': 'BalanceSheet',
+    'CryptoAssetFairValueCurrent': 'BalanceSheet',
+    'CryptoAssetFairValueNoncurrent': 'BalanceSheet',
+    'CryptoAssetUnrealizedGainLossOperatingAndNonoperating': 'IncomeStatement',
+    'CryptoAssetRealizedAndUnrealizedGainLossOperatingAndNonoperating': 'IncomeStatement',
+    'PaymentForAcquisitionCryptoAsset': 'CashFlowStatement',
+    'ProceedsFromDisposalCryptoAsset': 'CashFlowStatement',
+    'ProceedsFromCryptoAssetOperatingActivity': 'CashFlowStatement',
+    # Cash income taxes by jurisdiction (ASU 2023-09, GH #1448): paid net of
+    # refunds, paid before refunds, and refunds received. Components of the
+    # cash taxes paid, never tax expense; 2024-taxonomy elements the learned
+    # data predates.
+    'IncomeTaxPaidFederalAfterRefundReceived': 'CashFlowStatement',
+    'IncomeTaxPaidStateAndLocalAfterRefundReceived': 'CashFlowStatement',
+    'IncomeTaxPaidForeignAfterRefundReceived': 'CashFlowStatement',
+    'IncomeTaxPaidFederalBeforeRefundReceived': 'CashFlowStatement',
+    'IncomeTaxPaidStateAndLocalBeforeRefundReceived': 'CashFlowStatement',
+    'IncomeTaxPaidForeignBeforeRefundReceived': 'CashFlowStatement',
+    'ProceedsFromIncomeTaxRefundFederal': 'CashFlowStatement',
+    'ProceedsFromIncomeTaxRefundStateAndLocal': 'CashFlowStatement',
+    'ProceedsFromIncomeTaxRefundForeign': 'CashFlowStatement',
+    # Change in cash split by continuing and discontinued operations, with
+    # and without the exchange-rate effect (GH #1448). Components of the
+    # change in cash, never the whole; 2023-taxonomy elements the learned
+    # data predates.
+    'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectContinuingOperations': 'CashFlowStatement',
+    'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectContinuingOperations': 'CashFlowStatement',
+    'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseIncludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations': 'CashFlowStatement',
+    'CashCashEquivalentsRestrictedCashAndRestrictedCashEquivalentsPeriodIncreaseDecreaseExcludingExchangeRateEffectDisposalGroupIncludingDiscontinuedOperations': 'CashFlowStatement',
+    # An investment company's (BDC's) statement of operations: total
+    # investment income and total expenses (edgartools-k7mi8.6). The learned
+    # data has neither, so their facts carried no statement and a BDC's income
+    # statement showed net investment income with nothing above it.
+    # NetInvestmentIncome already comes from concept_linkages.json.
+    'GrossInvestmentIncomeOperating': 'IncomeStatement',
+    'InvestmentIncomeInvestmentExpense': 'IncomeStatement',
 }
 
 
@@ -534,7 +573,13 @@ _IFRS_FALLBACK_MAPPINGS = {
     'RepaymentsOfBorrowingsClassifiedAsFinancingActivities': 'CashFlowStatement',
     'PaymentsOfLeaseLiabilitiesClassifiedAsFinancingActivities': 'CashFlowStatement',
     'DividendsPaidClassifiedAsFinancingActivities': 'CashFlowStatement',
-    'DividendsPaid': 'CashFlowStatement',
+    'DividendsPaidToEquityHoldersOfParentClassifiedAsFinancingActivities': 'CashFlowStatement',
+    'DividendsPaidToNoncontrollingInterestsClassifiedAsFinancingActivities': 'CashFlowStatement',
+    # ifrs-full:DividendsPaid is "dividends recognised as distributions to
+    # owners", an IAS 1 statement-of-changes-in-equity element, not a cash flow.
+    # Classed as cash flow it filled the "Dividends paid" row: SAP's FY2025
+    # equity total of EUR 2,746M instead of the filed EUR 2,743M (GH #1679).
+    'DividendsPaid': 'StatementOfEquity',
     'PaymentsToAcquireOrRedeemEntitysShares': 'CashFlowStatement',
     'ProceedsFromIssuingShares': 'CashFlowStatement',
     'InterestPaidClassifiedAsFinancingActivities': 'CashFlowStatement',

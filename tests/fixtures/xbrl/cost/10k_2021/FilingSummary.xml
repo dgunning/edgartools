@@ -1,0 +1,693 @@
+<?xml version='1.0' encoding='utf-8'?>
+<FilingSummary>
+  <Version>3.21.2</Version>
+  <ProcessingTime/>
+  <ReportFormat>html</ReportFormat>
+  <ContextCount>193</ContextCount>
+  <ElementCount>431</ElementCount>
+  <EntityCount>1</EntityCount>
+  <FootnotesReported>false</FootnotesReported>
+  <SegmentCount>66</SegmentCount>
+  <ScenarioCount>0</ScenarioCount>
+  <TuplesReported>false</TuplesReported>
+  <UnitCount>7</UnitCount>
+  <MyReports>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R1.htm</HtmlFileName>
+      <LongName>0001001 - Document - Cover</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/Cover</Role>
+      <ShortName>Cover</ShortName>
+      <MenuCategory>Cover</MenuCategory>
+      <Position>1</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R2.htm</HtmlFileName>
+      <LongName>1001002 - Statement - Consolidated Statements Of Income</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/ConsolidatedStatementsOfIncome</Role>
+      <ShortName>Consolidated Statements Of Income</ShortName>
+      <MenuCategory>Statements</MenuCategory>
+      <Position>2</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R3.htm</HtmlFileName>
+      <LongName>1002003 - Statement - Consolidated Statements Of Comprehensive Income</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/ConsolidatedStatementsOfComprehensiveIncome</Role>
+      <ShortName>Consolidated Statements Of Comprehensive Income</ShortName>
+      <MenuCategory>Statements</MenuCategory>
+      <Position>3</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R4.htm</HtmlFileName>
+      <LongName>1003004 - Statement - Consolidated Balance Sheets</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/ConsolidatedBalanceSheets</Role>
+      <ShortName>Consolidated Balance Sheets</ShortName>
+      <MenuCategory>Statements</MenuCategory>
+      <Position>4</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R5.htm</HtmlFileName>
+      <LongName>1004005 - Statement - Consolidated Balance Sheets (Parenthetical)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/ConsolidatedBalanceSheetsParenthetical</Role>
+      <ShortName>Consolidated Balance Sheets (Parenthetical)</ShortName>
+      <MenuCategory>Statements</MenuCategory>
+      <Position>5</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R6.htm</HtmlFileName>
+      <LongName>1005006 - Statement - Consolidated Statements of Equity</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/ConsolidatedStatementsofEquity</Role>
+      <ShortName>Consolidated Statements of Equity</ShortName>
+      <MenuCategory>Statements</MenuCategory>
+      <Position>6</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R7.htm</HtmlFileName>
+      <LongName>1006007 - Statement - Consolidated Statements Of Cash Flows</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/ConsolidatedStatementsOfCashFlows</Role>
+      <ShortName>Consolidated Statements Of Cash Flows</ShortName>
+      <MenuCategory>Statements</MenuCategory>
+      <Position>7</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R8.htm</HtmlFileName>
+      <LongName>2101101 - Disclosure - Summary of Significant Accounting Policies</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/SummaryofSignificantAccountingPolicies</Role>
+      <ShortName>Summary of Significant Accounting Policies</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>8</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R9.htm</HtmlFileName>
+      <LongName>2106102 - Disclosure - Acquisitions</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/Acquisitions</Role>
+      <ShortName>Acquisitions</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>9</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R10.htm</HtmlFileName>
+      <LongName>2109103 - Disclosure - Investments</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/Investments</Role>
+      <ShortName>Investments</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>10</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R11.htm</HtmlFileName>
+      <LongName>2114104 - Disclosure - Fair Value Measurement</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/FairValueMeasurement</Role>
+      <ShortName>Fair Value Measurement</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>11</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R12.htm</HtmlFileName>
+      <LongName>2117105 - Disclosure - Debt</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/Debt</Role>
+      <ShortName>Debt</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>12</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R13.htm</HtmlFileName>
+      <LongName>2122106 - Disclosure - Leases</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/Leases</Role>
+      <ShortName>Leases</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>13</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R14.htm</HtmlFileName>
+      <LongName>2128107 - Disclosure - Stockholders' Equity</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/StockholdersEquity</Role>
+      <ShortName>Stockholders' Equity</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>14</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R15.htm</HtmlFileName>
+      <LongName>2132108 - Disclosure - Stock-Based Compensation Plans</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/StockBasedCompensationPlans</Role>
+      <ShortName>Stock-Based Compensation Plans</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>15</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R16.htm</HtmlFileName>
+      <LongName>2137109 - Disclosure - Income Taxes</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/IncomeTaxes</Role>
+      <ShortName>Income Taxes</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>16</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R17.htm</HtmlFileName>
+      <LongName>2145110 - Disclosure - Net Income per Common and Common Equivalent Share</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/NetIncomeperCommonandCommonEquivalentShare</Role>
+      <ShortName>Net Income per Common and Common Equivalent Share</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>17</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R18.htm</HtmlFileName>
+      <LongName>2148111 - Disclosure - Commitments and Contingencies</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/CommitmentsandContingencies</Role>
+      <ShortName>Commitments and Contingencies</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>18</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R19.htm</HtmlFileName>
+      <LongName>2150112 - Disclosure - Segment Reporting</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/SegmentReporting</Role>
+      <ShortName>Segment Reporting</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>19</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R20.htm</HtmlFileName>
+      <LongName>2202201 - Disclosure - Summary of Significant Accounting Policies (Policies)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/SummaryofSignificantAccountingPoliciesPolicies</Role>
+      <ShortName>Summary of Significant Accounting Policies (Policies)</ShortName>
+      <MenuCategory>Policies</MenuCategory>
+      <ParentRole>http://www.costco.com/role/SummaryofSignificantAccountingPolicies</ParentRole>
+      <Position>20</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R21.htm</HtmlFileName>
+      <LongName>2303301 - Disclosure - Summary of Significant Accounting Policies (Tables)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/SummaryofSignificantAccountingPoliciesTables</Role>
+      <ShortName>Summary of Significant Accounting Policies (Tables)</ShortName>
+      <MenuCategory>Tables</MenuCategory>
+      <ParentRole>http://www.costco.com/role/SummaryofSignificantAccountingPolicies</ParentRole>
+      <Position>21</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R22.htm</HtmlFileName>
+      <LongName>2310303 - Disclosure - Investments (Tables)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/InvestmentsTables</Role>
+      <ShortName>Investments (Tables)</ShortName>
+      <MenuCategory>Tables</MenuCategory>
+      <ParentRole>http://www.costco.com/role/Investments</ParentRole>
+      <Position>22</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R23.htm</HtmlFileName>
+      <LongName>2315304 - Disclosure - Fair Value Measurement (Tables)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/FairValueMeasurementTables</Role>
+      <ShortName>Fair Value Measurement (Tables)</ShortName>
+      <MenuCategory>Tables</MenuCategory>
+      <ParentRole>http://www.costco.com/role/FairValueMeasurement</ParentRole>
+      <Position>23</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R24.htm</HtmlFileName>
+      <LongName>2318305 - Disclosure - Debt (Tables)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/DebtTables</Role>
+      <ShortName>Debt (Tables)</ShortName>
+      <MenuCategory>Tables</MenuCategory>
+      <ParentRole>http://www.costco.com/role/Debt</ParentRole>
+      <Position>24</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R25.htm</HtmlFileName>
+      <LongName>2323306 - Disclosure - Leases (Tables)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/LeasesTables</Role>
+      <ShortName>Leases (Tables)</ShortName>
+      <MenuCategory>Tables</MenuCategory>
+      <ParentRole>http://www.costco.com/role/Leases</ParentRole>
+      <Position>25</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R26.htm</HtmlFileName>
+      <LongName>2329307 - Disclosure - Stockholders' Equity (Tables)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/StockholdersEquityTables</Role>
+      <ShortName>Stockholders' Equity (Tables)</ShortName>
+      <MenuCategory>Tables</MenuCategory>
+      <ParentRole>http://www.costco.com/role/StockholdersEquity</ParentRole>
+      <Position>26</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R27.htm</HtmlFileName>
+      <LongName>2333308 - Disclosure - Stock-Based Compensation Plans (Tables)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/StockBasedCompensationPlansTables</Role>
+      <ShortName>Stock-Based Compensation Plans (Tables)</ShortName>
+      <MenuCategory>Tables</MenuCategory>
+      <ParentRole>http://www.costco.com/role/StockBasedCompensationPlans</ParentRole>
+      <Position>27</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R28.htm</HtmlFileName>
+      <LongName>2338309 - Disclosure - Income Taxes (Tables)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/IncomeTaxesTables</Role>
+      <ShortName>Income Taxes (Tables)</ShortName>
+      <MenuCategory>Tables</MenuCategory>
+      <ParentRole>http://www.costco.com/role/IncomeTaxes</ParentRole>
+      <Position>28</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R29.htm</HtmlFileName>
+      <LongName>2346310 - Disclosure - Net Income per Common and Common Equivalent Share Net Income per Common and Common Equivalent Share (Tables)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/NetIncomeperCommonandCommonEquivalentShareNetIncomeperCommonandCommonEquivalentShareTables</Role>
+      <ShortName>Net Income per Common and Common Equivalent Share Net Income per Common and Common Equivalent Share (Tables)</ShortName>
+      <MenuCategory>Tables</MenuCategory>
+      <Position>29</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R30.htm</HtmlFileName>
+      <LongName>2351311 - Disclosure - Segment Reporting (Tables)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/SegmentReportingTables</Role>
+      <ShortName>Segment Reporting (Tables)</ShortName>
+      <MenuCategory>Tables</MenuCategory>
+      <ParentRole>http://www.costco.com/role/SegmentReporting</ParentRole>
+      <Position>30</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R31.htm</HtmlFileName>
+      <LongName>2404401 - Disclosure - Summary of Significant Accounting Policies - Additional Information (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/SummaryofSignificantAccountingPoliciesAdditionalInformationDetails</Role>
+      <ShortName>Summary of Significant Accounting Policies - Additional Information (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>31</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R32.htm</HtmlFileName>
+      <LongName>2405402 - Disclosure - Summary Of Significant Accounting Policies (Merchandise Inventories (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/SummaryOfSignificantAccountingPoliciesMerchandiseInventoriesDetails</Role>
+      <ShortName>Summary Of Significant Accounting Policies (Merchandise Inventories (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>32</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R33.htm</HtmlFileName>
+      <LongName>2408403 - Disclosure - Acquisitions (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/AcquisitionsDetails</Role>
+      <ShortName>Acquisitions (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <ParentRole>http://www.costco.com/role/Acquisitions</ParentRole>
+      <Position>33</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R34.htm</HtmlFileName>
+      <LongName>2411404 - Disclosure - Investments - Available for Sale and Held to Maturity Investments (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/InvestmentsAvailableforSaleandHeldtoMaturityInvestmentsDetails</Role>
+      <ShortName>Investments - Available for Sale and Held to Maturity Investments (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>34</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R35.htm</HtmlFileName>
+      <LongName>2413406 - Disclosure - Investments - Maturities of Available for Sale and Held to Maturity Securities (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/InvestmentsMaturitiesofAvailableforSaleandHeldtoMaturitySecuritiesDetails</Role>
+      <ShortName>Investments - Maturities of Available for Sale and Held to Maturity Securities (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>35</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R36.htm</HtmlFileName>
+      <LongName>2416407 - Disclosure - Fair Value Measurement - Fair Value of Financial Assets and Financial Liabilities Measured on Recurring Basis (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/FairValueMeasurementFairValueofFinancialAssetsandFinancialLiabilitiesMeasuredonRecurringBasisDetails</Role>
+      <ShortName>Fair Value Measurement - Fair Value of Financial Assets and Financial Liabilities Measured on Recurring Basis (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>36</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R37.htm</HtmlFileName>
+      <LongName>2419408 - Disclosure - Debt (Schedule Of Short-Term Debt) (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/DebtScheduleOfShortTermDebtDetails</Role>
+      <ShortName>Debt (Schedule Of Short-Term Debt) (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <ParentRole>http://www.costco.com/role/DebtTables</ParentRole>
+      <Position>37</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R38.htm</HtmlFileName>
+      <LongName>2420409 - Disclosure - Debt (Schedule Of Long-Term Debt Maturities) (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/DebtScheduleOfLongTermDebtMaturitiesDetails</Role>
+      <ShortName>Debt (Schedule Of Long-Term Debt Maturities) (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <ParentRole>http://www.costco.com/role/DebtTables</ParentRole>
+      <Position>38</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R39.htm</HtmlFileName>
+      <LongName>2421410 - Disclosure - Debt (Additional Information) (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/DebtAdditionalInformationDetails</Role>
+      <ShortName>Debt (Additional Information) (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <ParentRole>http://www.costco.com/role/DebtTables</ParentRole>
+      <Position>39</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R40.htm</HtmlFileName>
+      <LongName>2424411 - Disclosure - Leases, Supplemental Balance Sheet Information</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/LeasesSupplementalBalanceSheetInformation</Role>
+      <ShortName>Leases, Supplemental Balance Sheet Information</ShortName>
+      <MenuCategory>Uncategorized</MenuCategory>
+      <Position>40</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R41.htm</HtmlFileName>
+      <LongName>2425412 - Disclosure - Leases, Components of Lease Expense</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/LeasesComponentsofLeaseExpense</Role>
+      <ShortName>Leases, Components of Lease Expense</ShortName>
+      <MenuCategory>Cover</MenuCategory>
+      <Position>41</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R42.htm</HtmlFileName>
+      <LongName>2426413 - Disclosure - Leases, Supplemental Cash Flow Information</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/LeasesSupplementalCashFlowInformation</Role>
+      <ShortName>Leases, Supplemental Cash Flow Information</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>42</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R43.htm</HtmlFileName>
+      <LongName>2427414 - Disclosure - Leases, Future Minimum Payments</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/LeasesFutureMinimumPayments</Role>
+      <ShortName>Leases, Future Minimum Payments</ShortName>
+      <MenuCategory>Notes</MenuCategory>
+      <Position>43</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R44.htm</HtmlFileName>
+      <LongName>2430415 - Disclosure - Stockholders' Equity - Additional Information (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/StockholdersEquityAdditionalInformationDetails</Role>
+      <ShortName>Stockholders' Equity - Additional Information (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>44</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R45.htm</HtmlFileName>
+      <LongName>2431416 - Disclosure - Stockholders' Equity (Stock Repurchased During Period) (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/StockholdersEquityStockRepurchasedDuringPeriodDetails</Role>
+      <ShortName>Stockholders' Equity (Stock Repurchased During Period) (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <ParentRole>http://www.costco.com/role/StockholdersEquityTables</ParentRole>
+      <Position>45</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R46.htm</HtmlFileName>
+      <LongName>2434417 - Disclosure - Stock-Based Compensation Plans - Additional Information (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/StockBasedCompensationPlansAdditionalInformationDetails</Role>
+      <ShortName>Stock-Based Compensation Plans - Additional Information (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>46</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R47.htm</HtmlFileName>
+      <LongName>2435418 - Disclosure - Stock-Based Compensation Plans - Summary of RSU Transactions (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/StockBasedCompensationPlansSummaryofRSUTransactionsDetails</Role>
+      <ShortName>Stock-Based Compensation Plans - Summary of RSU Transactions (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>47</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R48.htm</HtmlFileName>
+      <LongName>2436419 - Disclosure - Stock-Based Compensation Plans - Summary of Stock-Based Compensation Expense (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/StockBasedCompensationPlansSummaryofStockBasedCompensationExpenseDetails</Role>
+      <ShortName>Stock-Based Compensation Plans - Summary of Stock-Based Compensation Expense (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>48</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R49.htm</HtmlFileName>
+      <LongName>2439420 - Disclosure - Income Taxes - Additional Information (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/IncomeTaxesAdditionalInformationDetails</Role>
+      <ShortName>Income Taxes - Additional Information (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>49</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R50.htm</HtmlFileName>
+      <LongName>2440421 - Disclosure - Income Taxes (Income Before Income Taxes) (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/IncomeTaxesIncomeBeforeIncomeTaxesDetails</Role>
+      <ShortName>Income Taxes (Income Before Income Taxes) (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <ParentRole>http://www.costco.com/role/IncomeTaxesTables</ParentRole>
+      <Position>50</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R51.htm</HtmlFileName>
+      <LongName>2441422 - Disclosure - Income Taxes (Schedule of Foreign And Domestic Income Taxes) (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/IncomeTaxesScheduleofForeignAndDomesticIncomeTaxesDetails</Role>
+      <ShortName>Income Taxes (Schedule of Foreign And Domestic Income Taxes) (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <ParentRole>http://www.costco.com/role/IncomeTaxesTables</ParentRole>
+      <Position>51</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R52.htm</HtmlFileName>
+      <LongName>2442423 - Disclosure - Income Taxes (Reconciliation Between Statutory And Effective Rates) (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/IncomeTaxesReconciliationBetweenStatutoryAndEffectiveRatesDetails</Role>
+      <ShortName>Income Taxes (Reconciliation Between Statutory And Effective Rates) (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <ParentRole>http://www.costco.com/role/IncomeTaxesTables</ParentRole>
+      <Position>52</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R53.htm</HtmlFileName>
+      <LongName>2443424 - Disclosure - Income Taxes (Components of Deferred Tax Assets And Liabilities) (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/IncomeTaxesComponentsofDeferredTaxAssetsAndLiabilitiesDetails</Role>
+      <ShortName>Income Taxes (Components of Deferred Tax Assets And Liabilities) (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <ParentRole>http://www.costco.com/role/IncomeTaxesTables</ParentRole>
+      <Position>53</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R54.htm</HtmlFileName>
+      <LongName>2444425 - Disclosure - Income Taxes (Gross Unrecognized Tax Benefits) (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/IncomeTaxesGrossUnrecognizedTaxBenefitsDetails</Role>
+      <ShortName>Income Taxes (Gross Unrecognized Tax Benefits) (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <ParentRole>http://www.costco.com/role/IncomeTaxesTables</ParentRole>
+      <Position>54</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R55.htm</HtmlFileName>
+      <LongName>2447426 - Disclosure - Net Income per Common and Common Equivalent Share - Schedule of Earnings per Share Effect on Net Income and Weighted Averegae Number of Dilutive Potential Common Stock (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/NetIncomeperCommonandCommonEquivalentShareScheduleofEarningsperShareEffectonNetIncomeandWeightedAveregaeNumberofDilutivePotentialCommonStockDetails</Role>
+      <ShortName>Net Income per Common and Common Equivalent Share - Schedule of Earnings per Share Effect on Net Income and Weighted Averegae Number of Dilutive Potential Common Stock (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>55</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R56.htm</HtmlFileName>
+      <LongName>2452428 - Disclosure - Segment Reporting Information by Segment (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/SegmentReportingInformationbySegmentDetails</Role>
+      <ShortName>Segment Reporting Information by Segment (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>56</Position>
+    </Report>
+    <Report instance="cost-20210829.htm">
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <HtmlFileName>R57.htm</HtmlFileName>
+      <LongName>2453429 - Disclosure - Segment Reporting Information by Item Category (Details)</LongName>
+      <ReportType>Sheet</ReportType>
+      <Role>http://www.costco.com/role/SegmentReportingInformationbyItemCategoryDetails</Role>
+      <ShortName>Segment Reporting Information by Item Category (Details)</ShortName>
+      <MenuCategory>Details</MenuCategory>
+      <Position>57</Position>
+    </Report>
+    <Report>
+      <IsDefault>false</IsDefault>
+      <HasEmbeddedReports>false</HasEmbeddedReports>
+      <LongName>All Reports</LongName>
+      <ReportType>Book</ReportType>
+      <ShortName>All Reports</ShortName>
+    </Report>
+  </MyReports>
+  <InputFiles>
+    <File doctype="10-K" original="cost-20210829.htm">cost-20210829.htm</File>
+    <File>cost-20210829.xsd</File>
+    <File>cost-20210829_cal.xml</File>
+    <File>cost-20210829_def.xml</File>
+    <File>cost-20210829_lab.xml</File>
+    <File>cost-20210829_pre.xml</File>
+    <File>costex21110k082921.htm</File>
+    <File>costex23110k082921.htm</File>
+    <File>costex31110k082921.htm</File>
+    <File>costex32110k082921.htm</File>
+  </InputFiles>
+  <SupplementalFiles>
+    <File>cost-20210829_g1.jpg</File>
+  </SupplementalFiles>
+  <BaseTaxonomies>
+    <BaseTaxonomy>http://fasb.org/srt/2021-01-31</BaseTaxonomy>
+    <BaseTaxonomy>http://xbrl.sec.gov/country/2021</BaseTaxonomy>
+    <BaseTaxonomy>http://xbrl.sec.gov/dei/2021</BaseTaxonomy>
+    <BaseTaxonomy>http://fasb.org/us-gaap/2021-01-31</BaseTaxonomy>
+  </BaseTaxonomies>
+  <HasPresentationLinkbase>true</HasPresentationLinkbase>
+  <HasCalculationLinkbase>true</HasCalculationLinkbase>
+</FilingSummary>

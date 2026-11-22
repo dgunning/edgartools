@@ -7,7 +7,7 @@ analytics and AI-ready interfaces.
 
 import warnings
 from collections import OrderedDict, defaultdict
-from datetime import date, timedelta
+from datetime import date, datetime, timedelta
 from functools import cached_property
 from typing import TYPE_CHECKING, Any, Callable, Dict, Iterator, List, Optional, Union as TypingUnion
 
@@ -80,6 +80,60 @@ def load_company_facts_from_local(cik: int) -> Dict[str, Any]:
     return json.loads(company_facts_file.read_text())
 
 
+def _load_company_facts_json(cik: int) -> Dict[str, Any]:
+    if is_using_local_storage():
+        return load_company_facts_from_local(cik)
+    return download_company_facts_from_sec(cik)
+
+
+def _with_predecessor_facts(cik: int, company_facts_json: Dict[str, Any]) -> Dict[str, Any]:
+    """Add the history a successor registrant's predecessor filed under its own CIK (GH #1821)."""
+    from edgar.reference.successors import get_predecessor
+    predecessor = get_predecessor(cik)
+    if predecessor is None:
+        return company_facts_json
+    try:
+        predecessor_json = _load_company_facts_json(predecessor.cik)
+    except CompanyFactsNotFoundError:
+        warnings.warn(f"No company facts found for CIK {predecessor.cik}, the predecessor of CIK {cik}; "
+                      f"facts from before {predecessor.effective_date} are missing.", stacklevel=3)
+        return company_facts_json
+    return merge_predecessor_facts(company_facts_json, predecessor_json, predecessor.effective_date)
+
+
+def merge_predecessor_facts(successor_json: Dict[str, Any], predecessor_json: Dict[str, Any],
+                            effective_date: str) -> Dict[str, Any]:
+    """
+    Merge a predecessor's companyfacts JSON into its successor's.
+
+    Only predecessor facts for periods that ended before ``effective_date`` are taken,
+    so a predecessor that keeps filing as a subsidiary adds nothing after the
+    succession. Where both CIKs report the same concept, unit and period, the
+    successor's value wins.
+
+    The inputs are not modified.
+    """
+    merged = dict(successor_json)
+    merged_facts = {taxonomy: dict(concepts) for taxonomy, concepts in successor_json.get('facts', {}).items()}
+    for taxonomy, concepts in predecessor_json.get('facts', {}).items():
+        target = merged_facts.setdefault(taxonomy, {})
+        for concept, body in concepts.items():
+            existing = target.get(concept)
+            units = dict(existing['units']) if existing else {}
+            for unit, rows in body.get('units', {}).items():
+                have = list(units.get(unit, []))
+                periods = {(row.get('start'), row.get('end')) for row in have}
+                have.extend(row for row in rows
+                            if row.get('end', '') < effective_date
+                            and (row.get('start'), row.get('end')) not in periods)
+                if have:
+                    units[unit] = have
+            if units:
+                target[concept] = {**(existing or body), 'units': units}
+    merged['facts'] = merged_facts
+    return merged
+
+
 # Revenue variants for get_revenue() and get_revenue_detailed(), in priority
 # order. The filed total, Revenues, comes first, as in the statement builder's
 # _REVENUE_CONCEPTS and Financials.get_revenue() (edgartools-jrqvs).
@@ -90,6 +144,30 @@ _REVENUE_VARIANTS = [
     'Revenue',
     'TotalRevenues',
     'NetSales',
+    # A utility's total operating revenue comes before its contract revenue
+    # filed beside it: Duke's FY2025 10-K files 32.237B and 31.741B.
+    'RegulatedAndUnregulatedOperatingRevenue',
+    'RevenueFromContractWithCustomerIncludingAssessedTax',
+    'RevenuesNetOfInterestExpense',
+    'ifrs-full:RevenueFromContractsWithCustomers',
+]
+
+# A variant written with a taxonomy prefix ('ifrs-full:Equity') matches only
+# that concept. A bare name is also tried as us-gaap and ifrs-full and falls
+# back to a lowercased label, so a bare 'Equity' would pick up any fact
+# labelled "Equity" (edgartools-8p5ci).
+#
+# Parent-attributable profit comes before ProfitLoss: under IFRS ProfitLoss
+# includes non-controlling interests, so BHP's FY2025 20-F returned $11.143B
+# for $9.019B attributable to owners (US-GAAP filers tag NetIncomeLoss, which
+# already ranks first).
+_NET_INCOME_VARIANTS = [
+    'NetIncomeLoss',
+    'ifrs-full:ProfitLossAttributableToOwnersOfParent',
+    'ProfitLoss',
+    'NetIncome',
+    'NetEarnings',
+    'NetIncomeLossAttributableToParent',
 ]
 
 _COMPANY_FACTS_CACHE_MAXSIZE = 1
@@ -125,10 +203,9 @@ def get_company_facts(cik: int):
         _company_facts_cache.move_to_end(cik)
         return cached
 
-    if is_using_local_storage():
-        company_facts_json = load_company_facts_from_local(cik)
-    else:
-        company_facts_json = download_company_facts_from_sec(cik)
+    company_facts_json = _load_company_facts_json(cik)
+    if company_facts_json:
+        company_facts_json = _with_predecessor_facts(cik, company_facts_json)
     if not company_facts_json:
         warnings.warn(
             f"Could not retrieve company facts for CIK {cik}. "
@@ -852,19 +929,18 @@ class EntityFacts:
                           'fiscal_period', 'fiscal_year') \
             .head(periods)
 
-        if not df.empty:
-            # Compute duration_days for duration facts; instant facts get None.
-            # Use a comprehension so date/datetime/None mixes are handled safely.
-            df = df.assign(
-                duration_days=[
-                    (e - s).days if (s is not None and e is not None) else None
-                    for s, e in zip(df['period_start'], df['period_end'])
-                ]
-            )
-            df = df[['period_start', 'period_end', 'duration_days',
-                     'numeric_value', 'fiscal_period', 'fiscal_year']]
-
-        return df
+        # Compute duration_days for duration facts; instant facts get None.
+        # Use a comprehension so date/datetime/None mixes are handled safely.
+        # An empty frame takes the same path: the documented columns are a
+        # property of the query, not of which rows matched (GH #1709).
+        df = df.assign(
+            duration_days=[
+                (e - s).days if (s is not None and e is not None) else None
+                for s, e in zip(df['period_start'], df['period_end'])
+            ]
+        )
+        return df[['period_start', 'period_end', 'duration_days',
+                   'numeric_value', 'fiscal_period', 'fiscal_year']]
 
     # DEI (Document and Entity Information) helpers
     def dei_facts(self, as_of: Optional[date] = None) -> pd.DataFrame:
@@ -1030,13 +1106,7 @@ class EntityFacts:
             >>> annual_income = facts.get_net_income(period="2024-FY")
         """
         return self._get_standardized_concept_value(
-            concept_variants=[
-                'NetIncomeLoss',
-                'ProfitLoss',
-                'NetIncome',
-                'NetEarnings',
-                'NetIncomeLossAttributableToParent'
-            ],
+            concept_variants=_NET_INCOME_VARIANTS,
             period=period,
             unit=unit,
             annual=annual
@@ -1064,7 +1134,9 @@ class EntityFacts:
             concept_variants=[
                 'Assets',
                 'TotalAssets',
-                'AssetsCurrent'  # Fallback for some filings
+                # No AssetsCurrent fallback: current assets are not total
+                # assets, and a filer without a total gets None, as
+                # get_total_liabilities does (GH #1279, edgartools-8p5ci).
             ],
             period=period,
             unit=unit,
@@ -1129,7 +1201,16 @@ class EntityFacts:
                 'ShareholdersEquity',
                 'TotalEquity',
                 'PartnersCapital',  # For partnerships
-                'MembersEquity'     # For LLCs
+                'MembersEquity',    # For LLCs
+                # The parent-attributable total wins when a filing has both
+                # (same filing date, so list order breaks the tie); the total
+                # including non-controlling interest answers only when no
+                # parent total is filed, as in Financials (#1442). IFRS splits
+                # equity the same way (IAS 1.54(q)-(r)): Shell's FY2025 20-F
+                # files $174.392B to owners beside $175.319B in total.
+                'StockholdersEquityIncludingPortionAttributableToNoncontrollingInterest',
+                'ifrs-full:EquityAttributableToOwnersOfParent',
+                'ifrs-full:Equity',
             ],
             period=period,
             unit=unit,
@@ -1158,7 +1239,8 @@ class EntityFacts:
                 'OperatingIncomeLoss',
                 'OperatingIncome',
                 'IncomeLossFromOperations',
-                'OperatingProfit'
+                'OperatingProfit',
+                'ifrs-full:ProfitLossFromOperatingActivities',
             ],
             period=period,
             unit=unit,
@@ -1215,6 +1297,7 @@ class EntityFacts:
         - Income statement: 'revenue', 'net_income', 'operating_income', 'gross_profit', 'ebitda'
         - Balance sheet: 'total_assets', 'total_liabilities', 'stockholders_equity', 'cash_and_equivalents'
         - Cash flow: 'operating_cash_flow', 'capex', 'free_cash_flow', 'dividends_paid'
+        - Cash paid: 'interest_paid', 'income_taxes_paid' (net), and their '_gross' variants
         - Leases: 'operating_lease_payments', 'operating_lease_liability' (Phil Oakley framework)
 
         Args:
@@ -1226,6 +1309,8 @@ class EntityFacts:
         Returns:
             Concept value as float, or None if not found.
             If return_metadata=True, returns dict with 'value', 'tag_used', 'period'.
+            Groups with a measurement basis (e.g. 'interest_paid') also carry
+            'basis' ('net' or 'gross'); there is no fallback between bases.
 
         Example:
             >>> facts = company.get_facts()
@@ -1274,7 +1359,7 @@ class EntityFacts:
         def _build_result(value, tag, unit_used, fact):
             if not return_metadata:
                 return value
-            return {
+            result = {
                 'value': value,
                 # The fact's OWN qualified concept, not the lookup key that
                 # happened to match it. Since a concept is also indexed under its
@@ -1297,6 +1382,12 @@ class EntityFacts:
                 'concept_name': concept_name,
                 'synonyms_tried': synonyms_tried.copy(),
             }
+            # Measurement basis ('net' or 'gross') comes from the group
+            # definition, never from the name; groups without one (most of
+            # them) keep their existing metadata keys unchanged (GH #1858).
+            if group.basis is not None:
+                result['basis'] = group.basis
+            return result
 
         # Suppress warnings from get_fact() during synonym resolution
         self._suppress_warnings = True
@@ -1802,11 +1893,60 @@ class EntityFacts:
 
         raise ValueError(f"Invalid date format: '{as_of}'. Use 'YYYY-MM-DD' or 'YYYY-QN'")
 
-    def get_ttm(self, concept: str, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
-        """Calculate Trailing Twelve Months value for a concept."""
+    def _parse_filed_by(self, filed_by: Optional[Union[date, str]]) -> Optional[date]:
+        """Parse a ``filed_by`` cutoff: a date or an ISO 'YYYY-MM-DD' string (GH #1699).
+
+        A quarter string is rejected: it names a reporting period, not the day a
+        filing was made.
+        """
+        from edgar.exceptions import InvalidDateError
+
+        if filed_by is None:
+            return None
+        if isinstance(filed_by, datetime):
+            return filed_by.date()
+        if isinstance(filed_by, date):
+            return filed_by
+        if not isinstance(filed_by, str):
+            raise TypeError(f"filed_by must be date, str, or None, got {type(filed_by).__name__}")
+        try:
+            return date.fromisoformat(filed_by.strip())
+        except ValueError:
+            hint = ("a quarter names a reporting period, not a filing date; pass as_of for that"
+                    if 'Q' in filed_by.upper() else "expected an ISO date YYYY-MM-DD")
+            raise InvalidDateError(
+                f"Invalid filed_by '{filed_by}': {hint}.",
+                parameter="filed_by", invalid_value=filed_by,
+                suggestions=["filed_by='2024-08-02'"]) from None
+
+    def _facts_filed_by(self, filed_by: date) -> List[FinancialFact]:
+        """Facts filed on or before ``filed_by``, split-adjusted using only those facts.
+
+        Built per call: the cached split-adjusted facts were adjusted with splits
+        that may have been disclosed after the cutoff (GH #1699).
+        """
+        from edgar.ttm.calculator import facts_filed_by
+        from edgar.ttm.splits import apply_split_adjustments, detect_splits
+
+        eligible = facts_filed_by(self._facts or [], filed_by)
+        splits = detect_splits(eligible)
+        return apply_split_adjustments(eligible, splits) if splits else eligible
+
+    def get_ttm(self, concept: str, as_of: Optional[Union[date, str]] = None, *,
+                filed_by: Optional[Union[date, str]] = None) -> 'TTMMetric':
+        """Calculate Trailing Twelve Months value for a concept.
+
+        ``as_of`` is a reporting-period cutoff. ``filed_by`` (keyword-only) also
+        limits the facts to filings made on or before that date; given alone it
+        is both cutoffs. See `TTMCalculator.calculate_ttm`.
+        """
         from edgar.ttm.calculator import TTMCalculator
 
-        facts = self._get_split_adjusted_facts()
+        filed_by_date = self._parse_filed_by(filed_by)
+        if filed_by_date is None:
+            facts = self._get_split_adjusted_facts()
+        else:
+            facts = self._facts_filed_by(filed_by_date)
 
         if ':' not in concept:
             concept_candidates = [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']
@@ -1816,17 +1956,19 @@ class EntityFacts:
         target_facts = [fact for fact in facts if fact.concept in concept_candidates]
 
         if not target_facts:
-            raise KeyError(f"Concept '{concept}' not found in facts")
+            filed = f" filed on or before {filed_by_date}" if filed_by_date else ""
+            raise KeyError(f"Concept '{concept}' not found in facts{filed}")
 
         calc = TTMCalculator(target_facts)
         as_of_date = self._parse_ttm_date(as_of)
-        return calc.calculate_ttm(as_of=as_of_date)
+        return calc.calculate_ttm(as_of=as_of_date, filed_by=filed_by_date)
 
     def _best_ttm_across_concepts(
         self,
         concepts: List[str],
         as_of: Optional[Union[date, str]],
         not_found_message: str,
+        filed_by: Optional[Union[date, str]] = None,
     ) -> 'TTMMetric':
         """Compute TTM for each candidate concept and return the freshest result.
 
@@ -1837,25 +1979,46 @@ class EntityFacts:
         order of magnitude, with no error (GH #893). Instead we evaluate every
         candidate and pick the one whose window ends most recently (by
         ``as_of_date``), tie-broken by the caller's priority order.
+
+        With ``filed_by``, each concept's result is already its latest gap-free
+        window, so only qualifying windows are ranked (GH #1699).
         """
+        from edgar.exceptions import ValidationError
+
+        # With filed_by, parse before the loop: a bad argument must raise, not be
+        # skipped as "this concept has no TTM". (Without it, as_of keeps its
+        # existing handling.)
+        filed_by = self._parse_filed_by(filed_by)
+        if filed_by is not None:
+            as_of = self._parse_ttm_date(as_of)
         best = None  # ((as_of_date, -priority_index), TTMMetric)
+        insufficient = False
         for priority_index, concept in enumerate(concepts):
             try:
-                metric = self.get_ttm(concept, as_of)
-            except (KeyError, ValueError):
-                # KeyError: concept absent. ValueError: present but <4 quarters.
-                # Either way it cannot yield a TTM — skip and keep searching so a
+                metric = self.get_ttm(concept, as_of, filed_by=filed_by)
+            except KeyError:
+                continue
+            except ValueError:
+                # Present but no usable window. Skip and keep searching so a
                 # stale-but-resolvable earlier candidate never masks a fresh one.
+                insufficient = True
                 continue
             key = (metric.as_of_date, -priority_index)
             if best is None or key > best[0]:
                 best = (key, metric)
 
         if best is None:
+            if filed_by is not None and insufficient:
+                raise ValidationError(
+                    f"{not_found_message}: no candidate concept has four gap-free quarters "
+                    f"ending on or before {as_of or filed_by} in filings made on or before {filed_by}.",
+                    parameter="filed_by", invalid_value=filed_by,
+                    suggestions=["Pass a later filed_by date"])
             raise KeyError(not_found_message)
         return best[1]
 
-    def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
+    def get_ttm_revenue(self, as_of: Optional[Union[date, str]] = None, *,
+                        filed_by: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months revenue using common revenue concepts."""
         revenue_concepts = [
             'Revenues',
@@ -1864,14 +2027,15 @@ class EntityFacts:
             'Revenue',
         ]
         return self._best_ttm_across_concepts(
-            revenue_concepts, as_of, "Could not find revenue concept in company facts"
+            revenue_concepts, as_of, "Could not find revenue concept in company facts", filed_by=filed_by
         )
 
-    def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None) -> 'TTMMetric':
+    def get_ttm_net_income(self, as_of: Optional[Union[date, str]] = None, *,
+                           filed_by: Optional[Union[date, str]] = None) -> 'TTMMetric':
         """Get Trailing Twelve Months net income using common net income concepts."""
         income_concepts = ['NetIncomeLoss', 'NetIncome', 'ProfitLoss']
         return self._best_ttm_across_concepts(
-            income_concepts, as_of, "Could not find net income concept in company facts"
+            income_concepts, as_of, "Could not find net income concept in company facts", filed_by=filed_by
         )
 
     @cached_property
@@ -1916,6 +2080,35 @@ class EntityFacts:
             # ValidationError IS-A ValueError, so this stays catchable as one.
             raise ValidationError(
                 "period must be one of: 'annual', 'quarterly', 'ttm'",
+                parameter="period",
+                invalid_value=resolved,
+            )
+        return resolved
+
+    @classmethod
+    def _resolve_balance_sheet_period(cls,
+                                      period: Optional[str],
+                                      annual: Optional[bool]) -> str:
+        """Collapse period/annual into 'annual' or 'quarterly' for a balance sheet.
+
+        A balance sheet is point-in-time, so 'ttm' is rejected along with any
+        other name, as `ValidationError` (IS-A `ValueError`) like its siblings.
+        """
+        if annual is not None:
+            resolved = "annual" if annual else "quarterly"
+        elif period is not None:
+            resolved = period.lower()
+        else:
+            resolved = "annual"
+        if resolved == "ttm":
+            raise ValidationError(
+                "TTM not applicable for Balance Sheet (point-in-time data)",
+                parameter="period",
+                invalid_value=resolved,
+            )
+        if resolved not in {"annual", "quarterly"}:
+            raise ValidationError(
+                "period must be one of: 'annual', 'quarterly'",
                 parameter="period",
                 invalid_value=resolved,
             )
@@ -2038,14 +2231,7 @@ class EntityFacts:
             stmt = facts.balance_sheet(periods=4)
             df = stmt.to_dataframe()
         """
-        if annual is not None:
-            period = 'annual' if annual else 'quarterly'
-
-        period = period.lower()
-        if period == 'ttm':
-            raise ValueError("TTM not applicable for Balance Sheet (point-in-time data)")
-        if period not in {'annual', 'quarterly'}:
-            raise ValueError("period must be one of: 'annual', 'quarterly'")
+        period = self._resolve_balance_sheet_period(period, annual)
 
         if not as_of:
             return self._build_enhanced_statement(
@@ -2481,7 +2667,8 @@ class EntityFacts:
             if not prior.numeric_value:
                 continue  # growth from nil revenue is undefined
             local = concept.rsplit(':', 1)[-1]
-            rank = _REVENUE_VARIANTS.index(local) if local in _REVENUE_VARIANTS else len(_REVENUE_VARIANTS)
+            rank = next((i for i, v in enumerate(_REVENUE_VARIANTS) if v in (concept, local)),
+                        len(_REVENUE_VARIANTS))
             pairs.append((unit != 'USD', rank, current, prior))
         if not pairs:
             return None
@@ -2597,8 +2784,11 @@ class EntityFacts:
             # which used to "win" purely by being tried first.
             candidates = []
             for concept in concept_variants:
-                # Try with all known taxonomy prefixes
-                for concept_variant in [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']:
+                if ':' in concept:
+                    spellings = [concept]  # a prefixed variant names one taxonomy
+                else:
+                    spellings = [concept, f'us-gaap:{concept}', f'ifrs-full:{concept}']
+                for concept_variant in spellings:
                     # Use annual fact if requested and no specific period provided
                     if annual and period is None:
                         fact = self.get_annual_fact(concept_variant)
@@ -2727,6 +2917,12 @@ class EntityFacts:
             gross_profit_fact.numeric_value is not None and
             cost_of_revenue_fact.numeric_value is not None):
 
+            if (
+                gross_profit_fact.period_start != cost_of_revenue_fact.period_start
+                or gross_profit_fact.period_end != cost_of_revenue_fact.period_end
+            ):
+                return None
+
             # Use enhanced unit compatibility checking
             gp_result = UnitNormalizer.get_normalized_value(gross_profit_fact, target_unit=unit, apply_scale=True,
                                                             strict_unit_match=strict_unit_match)
@@ -2785,6 +2981,12 @@ class EntityFacts:
         if (revenue_fact and cost_of_revenue_fact and
             revenue_fact.numeric_value is not None and
             cost_of_revenue_fact.numeric_value is not None):
+
+            if (
+                revenue_fact.period_start != cost_of_revenue_fact.period_start
+                or revenue_fact.period_end != cost_of_revenue_fact.period_end
+            ):
+                return None
 
             # Use enhanced unit compatibility checking
             rev_result = UnitNormalizer.get_normalized_value(revenue_fact, target_unit=unit, apply_scale=True,
@@ -2904,13 +3106,7 @@ class EntityFacts:
             UnitResult with value, unit info, and error details
         """
         return self._get_standardized_concept_value(
-            concept_variants=[
-                'NetIncomeLoss',
-                'ProfitLoss',
-                'NetIncome',
-                'NetEarnings',
-                'NetIncomeLossAttributableToParent'
-            ],
+            concept_variants=_NET_INCOME_VARIANTS,
             period=period,
             unit=unit,
             return_detailed=True,

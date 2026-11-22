@@ -47,7 +47,13 @@ from edgar.core import (
     parallel_thread_map,
     quarters_in_year,
 )
-from edgar.dates import InvalidDateError, current_year_and_quarter, filing_date_to_year_quarters, is_start_of_quarter
+from edgar.dates import (
+    SEC_TIMEZONE,
+    InvalidDateError,
+    current_year_and_quarter,
+    filing_date_to_year_quarters,
+    is_start_of_quarter,
+)
 from edgar.display.formatting import accession_number_text, display_size
 from edgar.display.styles import print_info, print_warning
 from edgar.documents import HTMLParser, ParserConfig
@@ -547,6 +553,29 @@ class Filings:
         """Return the filing index as a python dataframe"""
         df = self.data.to_pandas()
         return df.filter(columns) if len(columns) > 0 else df
+
+    def accepted_at(self, show_progress: bool = True) -> pd.Series:
+        """The exact acceptance time of every filing here, as ``Filing.accepted_at`` reads it.
+
+        A method rather than a column because it costs one small request per
+        filing, made at SEC's rate limit: about 2 minutes for 1,000 filings the
+        first time, then served from the cache.
+
+        Returns:
+            A Series indexed by accession number, named ``accepted_at``, holding
+            tz-aware ``America/New_York`` timestamps, one per row of this index.
+        """
+        from tqdm.auto import tqdm
+
+        accessions, times, seen = [], [], {}
+        for i in tqdm(range(len(self.data)), desc="Reading acceptance times", disable=not show_progress):
+            filing = self.get_filing_at(i)
+            if filing.accession_no not in seen:  # a multi-filer filing has a row per filer
+                seen[filing.accession_no] = filing.accepted_at
+            accessions.append(filing.accession_no)
+            times.append(seen[filing.accession_no])
+        return pd.Series(times, index=pd.Index(accessions, name="accession_no"), name="accepted_at",
+                         dtype=f"datetime64[ns, {SEC_TIMEZONE.key}]")
 
     def save_parquet(self, location: str):
         """Save the filing index as parquet"""
@@ -2051,6 +2080,35 @@ class Filing:
         if index_header_text is None:
             raise ValueError(f"Could not download index headers from {index_headers_url}")
         return IndexHeaders.load(index_header_text)
+
+    @cached_property
+    def accepted_at(self) -> datetime:
+        """The moment SEC accepted this filing, as a tz-aware ``America/New_York`` datetime.
+
+        Read from the filing's ``ACCEPTANCE-DATETIME`` header in
+        ``{accession}-index-headers.html`` — the "Accepted" time on SEC's index
+        page, on SEC's own clock. One small request (3-20 KB) the first time;
+        archive files never change, so it is cached after that.
+
+        Prefer this to ``acceptanceDateTime`` from the submissions JSON
+        (``EntityFiling.reported_acceptance_datetime``), which SEC labels UTC but
+        has served hours off for whole companies at a time (GH #1501). For many
+        filings at once, ``filings.accepted_at()``.
+
+        Example:
+            >>> find("0000320193-26-000020").accepted_at   # Apple 10-Q
+            datetime.datetime(2026, 7, 31, 6, 1, 2, tzinfo=zoneinfo.ZoneInfo(key='America/New_York'))
+
+        Raises:
+            ParsingError: if the header carries no acceptance time.
+        """
+        accepted = self.index_headers.acceptance_datetime
+        if accepted is None:
+            raise ParsingError(
+                f"The index headers of filing {self.accession_no} carry no ACCEPTANCE-DATETIME; "
+                f"try filing.header.acceptance_datetime, read from the full submission."
+            )
+        return accepted.replace(tzinfo=SEC_TIMEZONE)
 
     def to_dict(self) -> Dict[str, Union[str, int]]:
         """Return the filing as a Dict string"""

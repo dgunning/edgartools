@@ -54,6 +54,27 @@ total_assets = financials.get_total_assets()
 
 All methods accept `period_offset` to access prior periods (0=current, 1=previous).
 
+### Reconstruct a missing total liabilities figure
+
+For a US GAAP balance sheet with no standalone total liabilities, call
+`derive_total_liabilities()` explicitly. The result gives the amount, reporting
+date, currency, filing accession (when known), and the inputs to both
+calculations. It requires the filed liability components to reconcile against
+assets less consolidated and separately presented temporary equity.
+
+```python
+from edgar.financials import LiabilityDerivationError
+
+if financials.get_total_liabilities() is None:
+    try:
+        result = financials.derive_total_liabilities()
+        print(result.value, result.currency, result.period)
+    except LiabilityDerivationError as error:
+        print(error.reason)
+```
+
+The existing getter and financial ratios continue to use filed totals.
+
 ---
 
 ## Available Statements
@@ -118,80 +139,45 @@ income = quarterly.income_statement()
 | Annual (10-K) | `company.get_financials()` |
 | Quarterly (10-Q) | `company.get_quarterly_financials()` |
 
-### Foreign issuers and untagged 6-K earnings
+### Foreign private issuers (6-K)
 
-When no 10-Q exists, the method examines up to 10 recent unamended 6-Ks,
-newest first. Each filing's XBRL takes precedence. If XBRL is absent, an
-EX-99 HTML earnings exhibit can provide a **table-backed income statement**.
-A monthly notice without an income statement is skipped. Increase the explicit
-bound with `company.get_quarterly_financials(max_6k_filings=20)` if necessary;
-this does not fetch older submission-history files.
+When a company has no 10-Q, `get_quarterly_financials()` checks up to 10
+unamended 6-Ks filed in the last 183 days, newest first. Each filing's XBRL
+takes priority. An HTML earnings exhibit with identifiable quarterly columns
+and explicit units can supply a `QuarterlyIncome` result. A monthly notice
+alone cannot. The search limit can be set with `max_6k_filings`.
 
 ```python
-from edgar import Company
+from edgar import Company, Financials, QuarterlyIncome
 
 quarterly = Company("TSM").get_quarterly_financials()
-if quarterly is not None:
-    income = quarterly.income_statement()
-    print(income.to_dataframe(include_unit=True, include_point_in_time=True))
-    print(quarterly.get_net_income())
-    if quarterly.xb is None:
-        print(income.currency, income.scale)
-        print(income.source_url)
-        print(income.notes)
+if isinstance(quarterly, QuarterlyIncome):
+    print(quarterly.get_net_income())  # Actual currency units
+    print(quarterly.to_dataframe(include_unit=True))
+    print(quarterly.source_url, quarterly.notes)
+elif isinstance(quarterly, Financials):
+    print(quarterly.balance_sheet())
 ```
 
-For TSM's October 15, 2026 release (`0001046179-26-000726`), the reported net
-income is TWD 763,064 million. `get_net_income()` and `to_dataframe()` return
-**763,064,000,000 TWD**, while `income.dataframe` retains the reported millions.
-EPS remains unscaled: the release's `EPS (NT$)` row is **29.43**, not millions
-of dollars. The row is reported EPS; this adapter does not infer a basic/diluted
-classification or an ADR conversion.
+The income table preserves the exhibit's period labels. A `period_offset`
+of 1 selects the next reported comparison column, which can be a year earlier.
+`to_dataframe()` scales monetary amounts to currency units and leaves per-share
+values as reported. Generic EPS has no inferred basic or diluted classification.
+When no supported filing is found, the method returns `None`.
 
-HTML results have `xb=None`. The income statement is a `FinancialTable`, not
-an XBRL `Statement`: it supports `.dataframe`, `.to_dataframe()` and the
-earnings-table display methods, but not XBRL rendering or facts.
-The exported DataFrame has the same non-period columns as `Statement.to_dataframe()`:
-`concept`, `label`, `standard_concept` and the structural/linkbase metadata.
-`concept` and unavailable XBRL metadata are null, never fabricated tags or hierarchies.
-Original row labels and reported period headers remain unchanged; compact fiscal
-quarters are not converted to guessed calendar dates. The selected value columns
-are also listed in `df.attrs['period_columns']`.
+To inspect a particular historical release and read the amounts in their
+original printed scale, use its accession:
 
-`standard=True` (the default) maps exact, unambiguous HTML labels to existing
-standard identifiers such as `Revenue`, `GrossProfit`, `OperatingIncomeLoss`
-and `PretaxIncomeLoss`. Generic `Net income` and `EPS` remain unmapped: those
-labels alone do not establish parent attribution or basic/diluted EPS. An
-explicit parent-attributed income or basic/diluted EPS label can be mapped.
-Unrecognized/adjusted labels remain unmapped, and `standard=False` leaves the
-`standard_concept` column null without changing labels or values. As with
-`Statement`, the legacy `include_standardization` flag does not override `standard`.
-`df.attrs['standardization_source']` identifies the HTML label mapping;
-the source URL, currency, original scale and notes are retained in `df.attrs`.
+```python
+from edgar import find
+from edgar.earnings import EarningsRelease
 
-`include_unit=True` adds per-row units (`twd` for amounts, `twdPerShare` for
-TSM's EPS); values use actual currency amounts, not millions. Share-count units
-are `shares`, reported percentages use `percent` without dividing by 100, and
-unclassified rows have a null unit. `include_point_in_time=True` adds `False`
-for these quarterly-duration values. To select a comparison column, pass its
-exact reported header, for example `income.to_dataframe(period_filter=income.periods[-1])`.
-An unknown column raises `ValueError`, and misspelled keyword arguments raise `TypeError`.
-Explicit `view` and `period_view`, `presentation=False` (raw XBRL signs), and
-`matrix=True` raise `NotImplementedError`; no requested XBRL operation is silently
-ignored. This also applies to `quarterly.income_statement(view=...)`.
+filing = find("0001046179-26-000726")        # TSMC's 3Q26 earnings release, filed 2026-10-15
+release = EarningsRelease.from_filing(filing)
+release.income_statement.dataframe
+```
 
-`get_revenue()`, `get_gross_profit()`, `get_operating_income()` and
-`get_net_income()` support recognized income rows. Other statements and
-unavailable metrics return `None`; they are not reconstructed. `period_offset`
-walks the actual quarterly **comparison columns** in date order, which need
-not be consecutive quarters.
-
-Currency and scale must be explicit near the table; annual/YTD, unknown-period,
-change-percent and ambiguous duplicate-period columns are not treated as
-quarterly amounts. Source URLs and nearby footnotes travel with the table,
-including TSM's note that the current figures had not been approved by its
-Board of Directors. Unsupported formats still return `None`; this limited
-fallback does not promise coverage of every foreign issuer's HTML or PDF.
+Net income for 3Q26 comes back as 763,064 against 452,302 a year earlier. The amounts are as printed in the release, which states its unit as "NT$ million", so check that note before comparing them with XBRL figures. To find the earnings releases among a company's 6-Ks, see the [6-K guide](sixk-data-object-guide.md).
 
 ---
 
@@ -384,6 +370,7 @@ print(xbrl.reporting_periods)
 | `financials.get_net_income()` | Net income value |
 | `financials.get_total_assets()` | Total assets value |
 | `financials.get_financial_metrics()` | Dict of all key metrics |
+| `financials.get_financial_metrics(include_periods=True)` | Same dict plus `periods`: the dates each metric covers (a 10-Q mixes quarter income with year-to-date cash flow) |
 
 ### Statement Object
 

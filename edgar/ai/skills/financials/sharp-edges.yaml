@@ -25,6 +25,16 @@ sharp_edges:
       quarterly = company.get_quarterly_financials() # 10-Q (quarter)
       # Compare same period types only
 
+  - id: metrics-mix-quarter-and-ytd
+    summary: get_financial_metrics() on a 10-Q mixes quarter income with year-to-date cash flow
+    severity: high
+    solution: |
+      metrics = quarterly.get_financial_metrics(include_periods=True)
+      p = metrics['periods']
+      if p['free_cash_flow'] is not None and p['free_cash_flow'] == p['revenue']:
+          fcf_margin = metrics['free_cash_flow'] / metrics['revenue']
+    detection_pattern: "get_financial_metrics\\(\\)\\[.free_cash_flow.\\]\\s*/"
+
   - id: none-return-values
     summary: Quick getters can return None if data missing
     severity: medium
@@ -89,3 +99,12 @@ sharp_edges:
     solution: |
       revenue = financials.get_revenue()  # Already in dollars
       print(f"${revenue/1e9:.1f}B")       # Format for display
+
+  - id: ticker-moved-to-successor
+    summary: A ticker that moved to a new registrant (holding company, redomicile) leaves 10-Ks on the old CIK
+    severity: high
+    solution: |
+      xom = Company("XOM")                 # ExxonMobil Holdings Corp (CIK 2115436) since 2026-07-01
+      xom.get_facts().income_statement()   # already includes predecessor history (FY2016-)
+      xom.get_financials()                 # None + PredecessorHistoryWarning: no 10-K filed yet
+      financials = xom.predecessor.get_financials()   # Exxon Mobil Corp (CIK 34088) latest 10-K

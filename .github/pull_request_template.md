@@ -17,7 +17,7 @@ Fixes #
 
 ## 6.0
 
-- [ ] This PR adds a deprecation, a 6.0 warning, or a "removed in 6.0" note, and `docs/upgrade/6.0.md` says what users see now and what to do instead
+- [ ] This PR adds a deprecation, a 6.0 warning, or a "removed in 6.0" note, and the current upgrade guide, `docs/upgrade/6.1.md`, says what users see now and what to do instead
 
 CI fails a PR that stages a 6.0 change without touching the upgrade guide. If it flags something that isn't a 6.0 change, add the `no-upgrade-guide` label, say why here, and re-run the job.
 

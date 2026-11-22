@@ -1,0 +1,1027 @@
+<?xml version='1.0' encoding='utf-8'?>
+<xbrl xmlns="http://www.xbrl.org/2003/instance" xmlns:bhe="http://www.brkenergy.com/20240630" xmlns:country="http://xbrl.sec.gov/country/2024" xmlns:dei="http://xbrl.sec.gov/dei/2024" xmlns:iso4217="http://www.xbrl.org/2003/iso4217" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:srt="http://fasb.org/srt/2024" xmlns:us-gaap="http://fasb.org/us-gaap/2024" xmlns:utr="http://www.xbrl.org/2009/utr" xmlns:xbrldi="http://xbrl.org/2006/xbrldi" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xml:lang="en-US">
+    <link:schemaRef xlink:href="bhe-20240630.xsd" xlink:type="simple"/>
+    <context id="c-1">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-2">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:PacificorpMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-3">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:MidAmericanFundingLLCAndSubsidiariesMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-4">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:MidamericanEnergyCompanyAndSubsidiariesMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-5">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:NevadaPowerCompanyMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-6">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:SierraPacificPowerCompanyMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-7">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-8">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternGasTransmissionAndStorageIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-9">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:EntityAddressesAddressTypeAxis">dei:FormerAddressMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:MidAmericanFundingLLCAndSubsidiariesMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-10">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:EntityAddressesAddressTypeAxis">dei:FormerAddressMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-11">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:EntityAddressesAddressTypeAxis">dei:FormerAddressMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:MidamericanEnergyCompanyAndSubsidiariesMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-12">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:EntityAddressesAddressTypeAxis">dei:FormerAddressMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternGasTransmissionAndStorageIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-13">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:EntityAddressesAddressTypeAxis">dei:FormerAddressMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-14">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+        </entity>
+        <period>
+            <instant>2024-08-01</instant>
+        </period>
+    </context>
+    <context id="c-15">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:PacificorpMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-08-01</instant>
+        </period>
+    </context>
+    <context id="c-16">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:MidamericanEnergyCompanyAndSubsidiariesMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-08-01</instant>
+        </period>
+    </context>
+    <context id="c-17">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:NevadaPowerCompanyMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-08-01</instant>
+        </period>
+    </context>
+    <context id="c-18">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:SierraPacificPowerCompanyMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-08-01</instant>
+        </period>
+    </context>
+    <context id="c-19">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternGasTransmissionAndStorageIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <instant>2024-08-01</instant>
+        </period>
+    </context>
+    <context id="c-30">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+        </entity>
+        <period>
+            <startDate>2024-04-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-31">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+        </entity>
+        <period>
+            <startDate>2023-04-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-32">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-42">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-04-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-59">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-69">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-04-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-84">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-692">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedDefinedBenefitPlansAdjustmentIncludingPortionAttributableToNoncontrollingInterestMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-693">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedForeignCurrencyAdjustmentIncludingPortionAttributableToNoncontrollingInterestMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-694">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedGainLossCashFlowHedgeIncludingNoncontrollingInterestMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-695">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AociAttributableToNoncontrollingInterestMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-704">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedDefinedBenefitPlansAdjustmentIncludingPortionAttributableToNoncontrollingInterestMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-705">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedForeignCurrencyAdjustmentIncludingPortionAttributableToNoncontrollingInterestMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-706">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedGainLossCashFlowHedgeIncludingNoncontrollingInterestMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-707">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AociAttributableToNoncontrollingInterestMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1690">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-04-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1691">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-04-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1692">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1697">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:MemberUnitsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-04-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1698">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:NoncontrollingInterestMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-04-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1699">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-04-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1708">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:MemberUnitsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1709">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:NoncontrollingInterestMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1710">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1715">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:MemberUnitsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-04-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1716">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:NoncontrollingInterestMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-04-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1717">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-04-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1724">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:MemberUnitsMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1725">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:NoncontrollingInterestMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1726">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedOtherComprehensiveIncomeMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1814">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedDefinedBenefitPlansAdjustmentIncludingPortionAttributableToNoncontrollingInterestMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1815">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedGainLossCashFlowHedgeIncludingNoncontrollingInterestMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1816">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AociAttributableToNoncontrollingInterestMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1823">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedDefinedBenefitPlansAdjustmentIncludingPortionAttributableToNoncontrollingInterestMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1824">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AccumulatedGainLossCashFlowHedgeIncludingNoncontrollingInterestMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1825">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="us-gaap:StatementEquityComponentsAxis">us-gaap:AociAttributableToNoncontrollingInterestMember</xbrldi:explicitMember>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternEnergyGasHoldingsLLCMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-01-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1835">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternGasTransmissionAndStorageIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2024-04-01</startDate>
+            <endDate>2024-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1836">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternGasTransmissionAndStorageIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-04-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <context id="c-1837">
+        <entity>
+            <identifier scheme="http://www.sec.gov/CIK">0001081316</identifier>
+            <segment>
+                <xbrldi:explicitMember dimension="dei:LegalEntityAxis">bhe:EasternGasTransmissionAndStorageIncMember</xbrldi:explicitMember>
+            </segment>
+        </entity>
+        <period>
+            <startDate>2023-01-01</startDate>
+            <endDate>2023-06-30</endDate>
+        </period>
+    </context>
+    <unit id="shares">
+        <measure>shares</measure>
+    </unit>
+    <unit id="usd">
+        <measure>iso4217:USD</measure>
+    </unit>
+    <dei:AmendmentFlag contextRef="c-1" id="f-160">false</dei:AmendmentFlag>
+    <dei:DocumentFiscalYearFocus contextRef="c-1" id="f-161">2024</dei:DocumentFiscalYearFocus>
+    <dei:DocumentFiscalPeriodFocus contextRef="c-1" id="f-162">Q2</dei:DocumentFiscalPeriodFocus>
+    <dei:EntityCentralIndexKey contextRef="c-1" id="f-163">0001081316</dei:EntityCentralIndexKey>
+    <dei:CurrentFiscalYearEndDate contextRef="c-1" id="f-164">--12-31</dei:CurrentFiscalYearEndDate>
+    <dei:EntityCentralIndexKey contextRef="c-2" id="f-165">0000075594</dei:EntityCentralIndexKey>
+    <dei:CurrentFiscalYearEndDate contextRef="c-1" id="f-166">--12-31</dei:CurrentFiscalYearEndDate>
+    <dei:EntityCentralIndexKey contextRef="c-3" id="f-167">0001098296</dei:EntityCentralIndexKey>
+    <dei:CurrentFiscalYearEndDate contextRef="c-1" id="f-168">--12-31</dei:CurrentFiscalYearEndDate>
+    <dei:EntityCentralIndexKey contextRef="c-4" id="f-169">0000928576</dei:EntityCentralIndexKey>
+    <dei:CurrentFiscalYearEndDate contextRef="c-1" id="f-170">--12-31</dei:CurrentFiscalYearEndDate>
+    <dei:EntityCentralIndexKey contextRef="c-5" id="f-171">0000071180</dei:EntityCentralIndexKey>
+    <dei:CurrentFiscalYearEndDate contextRef="c-1" id="f-172">--12-31</dei:CurrentFiscalYearEndDate>
+    <dei:EntityCentralIndexKey contextRef="c-6" id="f-173">0000090144</dei:EntityCentralIndexKey>
+    <dei:CurrentFiscalYearEndDate contextRef="c-1" id="f-174">--12-31</dei:CurrentFiscalYearEndDate>
+    <dei:EntityCentralIndexKey contextRef="c-7" id="f-175">0001603291</dei:EntityCentralIndexKey>
+    <dei:CurrentFiscalYearEndDate contextRef="c-1" id="f-176">--12-31</dei:CurrentFiscalYearEndDate>
+    <dei:EntityCentralIndexKey contextRef="c-8" id="f-177">0001936737</dei:EntityCentralIndexKey>
+    <dei:CurrentFiscalYearEndDate contextRef="c-1" id="f-178">--12-31</dei:CurrentFiscalYearEndDate>
+    <dei:DocumentType contextRef="c-1" id="f-1">10-Q</dei:DocumentType>
+    <dei:DocumentQuarterlyReport contextRef="c-1" id="f-2">true</dei:DocumentQuarterlyReport>
+    <dei:DocumentPeriodEndDate contextRef="c-1" id="f-3">2024-06-30</dei:DocumentPeriodEndDate>
+    <dei:DocumentTransitionReport contextRef="c-1" id="f-4">false</dei:DocumentTransitionReport>
+    <dei:EntityFileNumber contextRef="c-1" id="f-5">001-14881</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="c-1" id="f-6">BERKSHIRE HATHAWAY ENERGY COMPANY</dei:EntityRegistrantName>
+    <dei:EntityTaxIdentificationNumber contextRef="c-1" id="f-7">94-2213782</dei:EntityTaxIdentificationNumber>
+    <dei:EntityIncorporationStateCountryCode contextRef="c-1" id="f-8">IA</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityAddressAddressLine1 contextRef="c-1" id="f-9">1615 Locust Street</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="c-1" id="f-10">Des Moines</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c-1" id="f-11">IA</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c-1" id="f-12">50309-3037</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="c-1" id="f-13">515</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="c-1" id="f-14">242-4300</dei:LocalPhoneNumber>
+    <dei:EntityFileNumber contextRef="c-2" id="f-15">001-05152</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="c-2" id="f-16">PACIFICORP</dei:EntityRegistrantName>
+    <dei:EntityTaxIdentificationNumber contextRef="c-2" id="f-17">93-0246090</dei:EntityTaxIdentificationNumber>
+    <dei:EntityIncorporationStateCountryCode contextRef="c-2" id="f-18">OR</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityAddressAddressLine1 contextRef="c-2" id="f-19">825 N.E. Multnomah Street</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressAddressLine2 contextRef="c-2" id="f-20">Suite 2000</dei:EntityAddressAddressLine2>
+    <dei:EntityAddressCityOrTown contextRef="c-2" id="f-21">Portland</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c-2" id="f-22">OR</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c-2" id="f-23">97232</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="c-2" id="f-24">888</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="c-2" id="f-25">221-7070</dei:LocalPhoneNumber>
+    <dei:EntityFileNumber contextRef="c-3" id="f-26">333-90553</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="c-3" id="f-27">MIDAMERICAN FUNDING, LLC</dei:EntityRegistrantName>
+    <dei:EntityTaxIdentificationNumber contextRef="c-3" id="f-28">47-0819200</dei:EntityTaxIdentificationNumber>
+    <dei:EntityIncorporationStateCountryCode contextRef="c-3" id="f-29">IA</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityAddressAddressLine1 contextRef="c-3" id="f-30">1615 Locust Street</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="c-3" id="f-31">Des Moines</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c-3" id="f-32">IA</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c-3" id="f-33">50309-3037</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="c-3" id="f-34">515</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="c-3" id="f-35">242-4300</dei:LocalPhoneNumber>
+    <dei:EntityFileNumber contextRef="c-4" id="f-36">333-15387</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="c-4" id="f-37">MIDAMERICAN ENERGY COMPANY</dei:EntityRegistrantName>
+    <dei:EntityTaxIdentificationNumber contextRef="c-4" id="f-38">42-1425214</dei:EntityTaxIdentificationNumber>
+    <dei:EntityIncorporationStateCountryCode contextRef="c-4" id="f-39">IA</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityAddressAddressLine1 contextRef="c-4" id="f-40">1615 Locust Street</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="c-4" id="f-41">Des Moines</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c-4" id="f-42">IA</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c-4" id="f-43">50309-3037</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="c-4" id="f-44">515</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="c-4" id="f-45">242-4300</dei:LocalPhoneNumber>
+    <dei:EntityFileNumber contextRef="c-5" id="f-46">000-52378</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="c-5" id="f-47">NEVADA POWER COMPANY</dei:EntityRegistrantName>
+    <dei:EntityTaxIdentificationNumber contextRef="c-5" id="f-48">88-0420104</dei:EntityTaxIdentificationNumber>
+    <dei:EntityIncorporationStateCountryCode contextRef="c-5" id="f-49">NV</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityAddressAddressLine1 contextRef="c-5" id="f-50">6226 West Sahara Avenue</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="c-5" id="f-51">Las Vegas</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c-5" id="f-52">NV</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c-5" id="f-53">89146</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="c-5" id="f-54">702</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="c-5" id="f-55">402-5000</dei:LocalPhoneNumber>
+    <dei:EntityFileNumber contextRef="c-6" id="f-56">000-00508</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="c-6" id="f-57">SIERRA PACIFIC POWER COMPANY</dei:EntityRegistrantName>
+    <dei:EntityTaxIdentificationNumber contextRef="c-6" id="f-58">88-0044418</dei:EntityTaxIdentificationNumber>
+    <dei:EntityIncorporationStateCountryCode contextRef="c-6" id="f-59">NV</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityAddressAddressLine1 contextRef="c-6" id="f-60">6100 Neil Road</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="c-6" id="f-61">Reno</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c-6" id="f-62">NV</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c-6" id="f-63">89511</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="c-6" id="f-64">775</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="c-6" id="f-65">834-4011</dei:LocalPhoneNumber>
+    <dei:EntityFileNumber contextRef="c-7" id="f-66">001-37591</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="c-7" id="f-67">EASTERN ENERGY GAS HOLDINGS, LLC</dei:EntityRegistrantName>
+    <dei:EntityTaxIdentificationNumber contextRef="c-7" id="f-68">46-3639580</dei:EntityTaxIdentificationNumber>
+    <dei:EntityIncorporationStateCountryCode contextRef="c-7" id="f-69">VA</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityAddressAddressLine1 contextRef="c-7" id="f-70">10700 Energy Way</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="c-7" id="f-71">Glen Allen</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c-7" id="f-72">VA</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c-7" id="f-73">23060</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="c-7" id="f-74">804</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="c-7" id="f-75">613-5100</dei:LocalPhoneNumber>
+    <dei:EntityFileNumber contextRef="c-8" id="f-76">333-266049</dei:EntityFileNumber>
+    <dei:EntityRegistrantName contextRef="c-8" id="f-77">EASTERN GAS TRANSMISSION AND STORAGE, INC.</dei:EntityRegistrantName>
+    <dei:EntityTaxIdentificationNumber contextRef="c-8" id="f-78">55-0629203</dei:EntityTaxIdentificationNumber>
+    <dei:EntityIncorporationStateCountryCode contextRef="c-8" id="f-79">DE</dei:EntityIncorporationStateCountryCode>
+    <dei:EntityAddressAddressLine1 contextRef="c-8" id="f-80">10700 Energy Way</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="c-8" id="f-81">Glen Allen</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c-8" id="f-82">VA</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c-8" id="f-83">23060</dei:EntityAddressPostalZipCode>
+    <dei:CityAreaCode contextRef="c-8" id="f-84">804</dei:CityAreaCode>
+    <dei:LocalPhoneNumber contextRef="c-8" id="f-85">613-5100</dei:LocalPhoneNumber>
+    <dei:EntityAddressAddressLine1 contextRef="c-9" id="f-86">666 Grand Avenue</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressAddressLine1 contextRef="c-10" id="f-87">666 Grand Avenue</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressAddressLine1 contextRef="c-11" id="f-88">666 Grand Avenue</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="c-9" id="f-89">Des Moines</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressCityOrTown contextRef="c-11" id="f-90">Des Moines</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressCityOrTown contextRef="c-10" id="f-91">Des Moines</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c-11" id="f-92">IA</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressStateOrProvince contextRef="c-10" id="f-93">IA</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressStateOrProvince contextRef="c-9" id="f-94">IA</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c-10" id="f-95">50309-2580</dei:EntityAddressPostalZipCode>
+    <dei:EntityAddressPostalZipCode contextRef="c-9" id="f-96">50309-2580</dei:EntityAddressPostalZipCode>
+    <dei:EntityAddressPostalZipCode contextRef="c-11" id="f-97">50309-2580</dei:EntityAddressPostalZipCode>
+    <dei:EntityAddressAddressLine1 contextRef="c-12" id="f-98">6603 West Broad Street</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressAddressLine1 contextRef="c-13" id="f-99">6603 West Broad Street</dei:EntityAddressAddressLine1>
+    <dei:EntityAddressCityOrTown contextRef="c-12" id="f-100">Richmond</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressCityOrTown contextRef="c-13" id="f-101">Richmond</dei:EntityAddressCityOrTown>
+    <dei:EntityAddressStateOrProvince contextRef="c-12" id="f-102">VA</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressStateOrProvince contextRef="c-13" id="f-103">VA</dei:EntityAddressStateOrProvince>
+    <dei:EntityAddressPostalZipCode contextRef="c-13" id="f-104">23230</dei:EntityAddressPostalZipCode>
+    <dei:EntityAddressPostalZipCode contextRef="c-12" id="f-105">23230</dei:EntityAddressPostalZipCode>
+    <dei:EntityCurrentReportingStatus contextRef="c-6" id="f-106">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityCurrentReportingStatus contextRef="c-8" id="f-107">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityCurrentReportingStatus contextRef="c-5" id="f-108">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityCurrentReportingStatus contextRef="c-7" id="f-109">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityCurrentReportingStatus contextRef="c-4" id="f-110">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityCurrentReportingStatus contextRef="c-1" id="f-111">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityCurrentReportingStatus contextRef="c-2" id="f-112">Yes</dei:EntityCurrentReportingStatus>
+    <dei:EntityCurrentReportingStatus contextRef="c-3" id="f-113">No</dei:EntityCurrentReportingStatus>
+    <dei:EntityInteractiveDataCurrent contextRef="c-5" id="f-114">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityInteractiveDataCurrent contextRef="c-3" id="f-115">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityInteractiveDataCurrent contextRef="c-6" id="f-116">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityInteractiveDataCurrent contextRef="c-1" id="f-117">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityInteractiveDataCurrent contextRef="c-7" id="f-118">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityInteractiveDataCurrent contextRef="c-2" id="f-119">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityInteractiveDataCurrent contextRef="c-4" id="f-120">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityInteractiveDataCurrent contextRef="c-8" id="f-121">Yes</dei:EntityInteractiveDataCurrent>
+    <dei:EntityFilerCategory contextRef="c-8" id="f-122">Non-accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntityFilerCategory contextRef="c-4" id="f-123">Non-accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntityFilerCategory contextRef="c-3" id="f-124">Non-accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntityFilerCategory contextRef="c-1" id="f-125">Non-accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntityFilerCategory contextRef="c-2" id="f-126">Non-accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntityFilerCategory contextRef="c-6" id="f-127">Non-accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntityFilerCategory contextRef="c-5" id="f-128">Non-accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntityFilerCategory contextRef="c-7" id="f-129">Non-accelerated Filer</dei:EntityFilerCategory>
+    <dei:EntitySmallBusiness contextRef="c-1" id="f-130">false</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="c-1" id="f-131">false</dei:EntityEmergingGrowthCompany>
+    <dei:EntitySmallBusiness contextRef="c-2" id="f-132">false</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="c-2" id="f-133">false</dei:EntityEmergingGrowthCompany>
+    <dei:EntitySmallBusiness contextRef="c-3" id="f-134">false</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="c-3" id="f-135">false</dei:EntityEmergingGrowthCompany>
+    <dei:EntitySmallBusiness contextRef="c-4" id="f-136">false</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="c-4" id="f-137">false</dei:EntityEmergingGrowthCompany>
+    <dei:EntitySmallBusiness contextRef="c-5" id="f-138">false</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="c-5" id="f-139">false</dei:EntityEmergingGrowthCompany>
+    <dei:EntitySmallBusiness contextRef="c-6" id="f-140">false</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="c-6" id="f-141">false</dei:EntityEmergingGrowthCompany>
+    <dei:EntitySmallBusiness contextRef="c-7" id="f-142">false</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="c-7" id="f-143">false</dei:EntityEmergingGrowthCompany>
+    <dei:EntitySmallBusiness contextRef="c-8" id="f-144">false</dei:EntitySmallBusiness>
+    <dei:EntityEmergingGrowthCompany contextRef="c-8" id="f-145">false</dei:EntityEmergingGrowthCompany>
+    <dei:EntityShellCompany contextRef="c-3" id="f-146">false</dei:EntityShellCompany>
+    <dei:EntityShellCompany contextRef="c-7" id="f-147">false</dei:EntityShellCompany>
+    <dei:EntityShellCompany contextRef="c-2" id="f-148">false</dei:EntityShellCompany>
+    <dei:EntityShellCompany contextRef="c-1" id="f-149">false</dei:EntityShellCompany>
+    <dei:EntityShellCompany contextRef="c-8" id="f-150">false</dei:EntityShellCompany>
+    <dei:EntityShellCompany contextRef="c-4" id="f-151">false</dei:EntityShellCompany>
+    <dei:EntityShellCompany contextRef="c-5" id="f-152">false</dei:EntityShellCompany>
+    <dei:EntityShellCompany contextRef="c-6" id="f-153">false</dei:EntityShellCompany>
+    <dei:EntityCommonStockSharesOutstanding contextRef="c-14" decimals="INF" id="f-154" unitRef="shares">75627913</dei:EntityCommonStockSharesOutstanding>
+    <dei:EntityCommonStockSharesOutstanding contextRef="c-15" decimals="INF" id="f-155" unitRef="shares">357060915</dei:EntityCommonStockSharesOutstanding>
+    <dei:EntityCommonStockSharesOutstanding contextRef="c-16" decimals="INF" id="f-156" unitRef="shares">70980203</dei:EntityCommonStockSharesOutstanding>
+    <dei:EntityCommonStockSharesOutstanding contextRef="c-17" decimals="INF" id="f-157" unitRef="shares">1000</dei:EntityCommonStockSharesOutstanding>
+    <dei:EntityCommonStockSharesOutstanding contextRef="c-18" decimals="INF" id="f-158" unitRef="shares">1000</dei:EntityCommonStockSharesOutstanding>
+    <dei:EntityCommonStockSharesOutstanding contextRef="c-19" decimals="INF" id="f-159" unitRef="shares">60101</dei:EntityCommonStockSharesOutstanding>
+    <us-gaap:ProfitLoss contextRef="c-30" decimals="-6" id="f-347" unitRef="usd">993000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-31" decimals="-6" id="f-348" unitRef="usd">1205000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1" decimals="-6" id="f-349" unitRef="usd">1682000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-32" decimals="-6" id="f-350" unitRef="usd">2308000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-30" decimals="-6" id="f-367" unitRef="usd">993000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-31" decimals="-6" id="f-368" unitRef="usd">1205000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1" decimals="-6" id="f-369" unitRef="usd">1682000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-32" decimals="-6" id="f-370" unitRef="usd">2308000000</us-gaap:ProfitLoss>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax contextRef="c-30" decimals="-6" id="f-371" unitRef="usd">-1000000</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax contextRef="c-31" decimals="-6" id="f-372" unitRef="usd">4000000</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax contextRef="c-1" decimals="-6" id="f-373" unitRef="usd">-5000000</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax contextRef="c-32" decimals="-6" id="f-374" unitRef="usd">7000000</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax contextRef="c-30" decimals="-6" id="f-375" unitRef="usd">-4000000</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax contextRef="c-31" decimals="-6" id="f-376" unitRef="usd">7000000</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax contextRef="c-1" decimals="-6" id="f-377" unitRef="usd">-15000000</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax contextRef="c-32" decimals="-6" id="f-378" unitRef="usd">11000000</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="c-30" decimals="-6" id="f-379" unitRef="usd">-25000000</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="c-31" decimals="-6" id="f-380" unitRef="usd">232000000</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="c-1" decimals="-6" id="f-381" unitRef="usd">-170000000</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax contextRef="c-32" decimals="-6" id="f-382" unitRef="usd">331000000</us-gaap:OtherComprehensiveIncomeLossForeignCurrencyTransactionAndTranslationAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-30" decimals="-6" id="f-383" unitRef="usd">6000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-31" decimals="-6" id="f-384" unitRef="usd">13000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-1" decimals="-6" id="f-385" unitRef="usd">8000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-32" decimals="-6" id="f-386" unitRef="usd">-7000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax contextRef="c-30" decimals="-6" id="f-387" unitRef="usd">19000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax contextRef="c-31" decimals="-6" id="f-388" unitRef="usd">39000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax contextRef="c-1" decimals="-6" id="f-389" unitRef="usd">26000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax contextRef="c-32" decimals="-6" id="f-390" unitRef="usd">-16000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-30" decimals="-6" id="f-391" unitRef="usd">-2000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-31" decimals="-6" id="f-392" unitRef="usd">264000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1" decimals="-6" id="f-393" unitRef="usd">-129000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-32" decimals="-6" id="f-394" unitRef="usd">304000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest contextRef="c-30" decimals="-6" id="f-395" unitRef="usd">991000000</us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest contextRef="c-31" decimals="-6" id="f-396" unitRef="usd">1469000000</us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest contextRef="c-1" decimals="-6" id="f-397" unitRef="usd">1553000000</us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest contextRef="c-32" decimals="-6" id="f-398" unitRef="usd">2612000000</us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest contextRef="c-30" decimals="-6" id="f-399" unitRef="usd">39000000</us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest contextRef="c-31" decimals="-6" id="f-400" unitRef="usd">130000000</us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest contextRef="c-1" decimals="-6" id="f-401" unitRef="usd">75000000</us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest contextRef="c-32" decimals="-6" id="f-402" unitRef="usd">244000000</us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-30" decimals="-6" id="f-403" unitRef="usd">952000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-31" decimals="-6" id="f-404" unitRef="usd">1339000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-1" decimals="-6" id="f-405" unitRef="usd">1478000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-32" decimals="-6" id="f-406" unitRef="usd">2368000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-42" decimals="-6" id="f-417" unitRef="usd">264000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-31" decimals="-6" id="f-418" unitRef="usd">264000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-59" decimals="-6" id="f-444" unitRef="usd">304000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-32" decimals="-6" id="f-445" unitRef="usd">304000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-69" decimals="-6" id="f-471" unitRef="usd">-2000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-30" decimals="-6" id="f-472" unitRef="usd">-2000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-84" decimals="-6" id="f-492" unitRef="usd">-129000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1" decimals="-6" id="f-493" unitRef="usd">-129000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:ProfitLoss contextRef="c-1" decimals="-6" id="f-506" unitRef="usd">1682000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-32" decimals="-6" id="f-507" unitRef="usd">2308000000</us-gaap:ProfitLoss>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-692" decimals="-6" id="f-1577" unitRef="usd">-11000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-693" decimals="-6" id="f-1578" unitRef="usd">331000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-694" decimals="-6" id="f-1579" unitRef="usd">-16000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-695" decimals="-6" id="f-1580" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-32" decimals="-6" id="f-1581" unitRef="usd">304000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-704" decimals="-6" id="f-1592" unitRef="usd">15000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-705" decimals="-6" id="f-1593" unitRef="usd">-170000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-706" decimals="-6" id="f-1594" unitRef="usd">26000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-707" decimals="-6" id="f-1595" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1" decimals="-6" id="f-1596" unitRef="usd">-129000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:ProfitLoss contextRef="c-1690" decimals="-6" id="f-4932" unitRef="usd">177000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1691" decimals="-6" id="f-4933" unitRef="usd">230000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-7" decimals="-6" id="f-4934" unitRef="usd">413000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1692" decimals="-6" id="f-4935" unitRef="usd">470000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1690" decimals="-6" id="f-4944" unitRef="usd">177000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1691" decimals="-6" id="f-4945" unitRef="usd">230000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-7" decimals="-6" id="f-4946" unitRef="usd">413000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1692" decimals="-6" id="f-4947" unitRef="usd">470000000</us-gaap:ProfitLoss>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax contextRef="c-1690" decimals="-6" id="f-4948" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax contextRef="c-1691" decimals="-6" id="f-4949" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax contextRef="c-7" decimals="-6" id="f-4950" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax contextRef="c-1692" decimals="-6" id="f-4951" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax contextRef="c-1690" decimals="-6" id="f-4952" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax contextRef="c-1691" decimals="-6" id="f-4953" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax contextRef="c-7" decimals="-6" id="f-4954" unitRef="usd">-1000000</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax contextRef="c-1692" decimals="-6" id="f-4955" unitRef="usd">1000000</us-gaap:OtherComprehensiveIncomeLossPensionAndOtherPostretirementBenefitPlansAdjustmentNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-1690" decimals="-6" id="f-4956" unitRef="usd">1000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-1691" decimals="-6" id="f-4957" unitRef="usd">4000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-7" decimals="-6" id="f-4958" unitRef="usd">1000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-1692" decimals="-6" id="f-4959" unitRef="usd">3000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax contextRef="c-1690" decimals="-6" id="f-4960" unitRef="usd">3000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax contextRef="c-1691" decimals="-6" id="f-4961" unitRef="usd">7000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax contextRef="c-7" decimals="-6" id="f-4962" unitRef="usd">3000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax contextRef="c-1692" decimals="-6" id="f-4963" unitRef="usd">5000000</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationAndTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1690" decimals="-6" id="f-4964" unitRef="usd">3000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1691" decimals="-6" id="f-4965" unitRef="usd">7000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-7" decimals="-6" id="f-4966" unitRef="usd">4000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1692" decimals="-6" id="f-4967" unitRef="usd">4000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest contextRef="c-1690" decimals="-6" id="f-4968" unitRef="usd">180000000</us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest contextRef="c-1691" decimals="-6" id="f-4969" unitRef="usd">237000000</us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest contextRef="c-7" decimals="-6" id="f-4970" unitRef="usd">417000000</us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest contextRef="c-1692" decimals="-6" id="f-4971" unitRef="usd">474000000</us-gaap:ComprehensiveIncomeNetOfTaxIncludingPortionAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest contextRef="c-1690" decimals="-6" id="f-4972" unitRef="usd">38000000</us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest contextRef="c-1691" decimals="-6" id="f-4973" unitRef="usd">131000000</us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest contextRef="c-7" decimals="-6" id="f-4974" unitRef="usd">74000000</us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest contextRef="c-1692" decimals="-6" id="f-4975" unitRef="usd">249000000</us-gaap:ComprehensiveIncomeNetOfTaxAttributableToNoncontrollingInterest>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-1690" decimals="-6" id="f-4976" unitRef="usd">142000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-1691" decimals="-6" id="f-4977" unitRef="usd">106000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-7" decimals="-6" id="f-4978" unitRef="usd">343000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-1692" decimals="-6" id="f-4979" unitRef="usd">225000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    <us-gaap:ProfitLoss contextRef="c-1697" decimals="-6" id="f-4984" unitRef="usd">99000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1698" decimals="-6" id="f-4985" unitRef="usd">131000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1691" decimals="-6" id="f-4986" unitRef="usd">230000000</us-gaap:ProfitLoss>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1699" decimals="-6" id="f-4987" unitRef="usd">7000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1691" decimals="-6" id="f-4988" unitRef="usd">7000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:ProfitLoss contextRef="c-1708" decimals="-6" id="f-5002" unitRef="usd">221000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1709" decimals="-6" id="f-5003" unitRef="usd">249000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1692" decimals="-6" id="f-5004" unitRef="usd">470000000</us-gaap:ProfitLoss>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1710" decimals="-6" id="f-5005" unitRef="usd">4000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1692" decimals="-6" id="f-5006" unitRef="usd">4000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:ProfitLoss contextRef="c-1715" decimals="-6" id="f-5020" unitRef="usd">139000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1716" decimals="-6" id="f-5021" unitRef="usd">38000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1690" decimals="-6" id="f-5022" unitRef="usd">177000000</us-gaap:ProfitLoss>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1717" decimals="-6" id="f-5023" unitRef="usd">3000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1690" decimals="-6" id="f-5024" unitRef="usd">3000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:ProfitLoss contextRef="c-1724" decimals="-6" id="f-5037" unitRef="usd">339000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1725" decimals="-6" id="f-5038" unitRef="usd">74000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-7" decimals="-6" id="f-5039" unitRef="usd">413000000</us-gaap:ProfitLoss>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1726" decimals="-6" id="f-5040" unitRef="usd">4000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-7" decimals="-6" id="f-5041" unitRef="usd">4000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:ProfitLoss contextRef="c-7" decimals="-6" id="f-5051" unitRef="usd">413000000</us-gaap:ProfitLoss>
+    <us-gaap:ProfitLoss contextRef="c-1692" decimals="-6" id="f-5052" unitRef="usd">470000000</us-gaap:ProfitLoss>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1814" decimals="-6" id="f-5314" unitRef="usd">-1000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1815" decimals="-6" id="f-5315" unitRef="usd">5000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1816" decimals="-6" id="f-5316" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1692" decimals="-6" id="f-5317" unitRef="usd">4000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1823" decimals="-6" id="f-5326" unitRef="usd">1000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1824" decimals="-6" id="f-5327" unitRef="usd">3000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-1825" decimals="-6" id="f-5328" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossNetOfTax contextRef="c-7" decimals="-6" id="f-5329" unitRef="usd">4000000</us-gaap:OtherComprehensiveIncomeLossNetOfTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-1835" decimals="-6" id="f-5472" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-1836" decimals="-6" id="f-5473" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-8" decimals="-6" id="f-5474" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax contextRef="c-1837" decimals="-6" id="f-5475" unitRef="usd">0</us-gaap:OtherComprehensiveIncomeLossCashFlowHedgeGainLossAfterReclassificationTax>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-1835" decimals="-6" id="f-5484" unitRef="usd">52000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-1836" decimals="-6" id="f-5485" unitRef="usd">59000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-8" decimals="-6" id="f-5486" unitRef="usd">139000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    <us-gaap:ComprehensiveIncomeNetOfTax contextRef="c-1837" decimals="-6" id="f-5487" unitRef="usd">128000000</us-gaap:ComprehensiveIncomeNetOfTax>
+    </xbrl>

@@ -1,0 +1,490 @@
+[
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "102267000",
+  "numeric_value": 102267000.0,
+  "unit_ref": "U_iso4217CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "us-gaap:VariableInterestEntityPrimaryBeneficiaryMember",
+   "us-gaap:RecourseStatusAxis": "us-gaap:NonrecourseMember"
+  }
+ },
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "114478000",
+  "numeric_value": 114478000.0,
+  "unit_ref": "U_iso4217CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "us-gaap:VariableInterestEntityPrimaryBeneficiaryMember",
+   "us-gaap:RecourseStatusAxis": "us-gaap:NonrecourseMember"
+  }
+ },
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_us-gaapRecourseStatusAxis_us-gaapNonrecourseMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "17965000",
+  "numeric_value": 17965000.0,
+  "unit_ref": "U_iso4217USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "us-gaap:VariableInterestEntityPrimaryBeneficiaryMember",
+   "us-gaap:RecourseStatusAxis": "us-gaap:NonrecourseMember"
+  }
+ },
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "1832940000",
+  "numeric_value": 1832940000.0,
+  "unit_ref": "U_iso4217CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "4301347000",
+  "numeric_value": 4301347000.0,
+  "unit_ref": "U_iso4217CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "674975000",
+  "numeric_value": 674975000.0,
+  "unit_ref": "U_iso4217USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesAuthorized",
+  "context_ref": "C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "4500000000",
+  "numeric_value": 4500000000.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "344577783",
+  "numeric_value": 344577783.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesAuthorized",
+  "context_ref": "C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassBMember_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "500000000",
+  "numeric_value": 500000000.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassBMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassBMember_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "380214434",
+  "numeric_value": 380214434.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassBMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesAuthorized",
+  "context_ref": "C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "4500000000",
+  "numeric_value": 4500000000.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "358376753",
+  "numeric_value": 358376753.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesAuthorized",
+  "context_ref": "C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassBMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "500000000",
+  "numeric_value": 500000000.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassBMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassBMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "368500979",
+  "numeric_value": 368500979.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassBMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_us-gaapSubsidiarySaleOfStockAxis_cdPreIPOPrivatePlacementsMember_20200818",
+  "period_key": "instant_2020-08-18",
+  "period_type": "instant",
+  "value": "9215147",
+  "numeric_value": 9215147.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:SubsidiarySaleOfStockAxis": "cd:PreIPOPrivatePlacementsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_us-gaapSubsidiarySaleOfStockAxis_us-gaapIPOMember_20201002",
+  "period_key": "instant_2020-10-02",
+  "period_type": "instant",
+  "value": "80000000",
+  "numeric_value": 80000000.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember",
+   "us-gaap:SubsidiarySaleOfStockAxis": "us-gaap:IPOMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_us-gaapSubsidiarySaleOfStockAxis_cdConcurrentPrivatePlacementMember_20201002",
+  "period_key": "instant_2020-10-02",
+  "period_type": "instant",
+  "value": "20000000",
+  "numeric_value": 20000000.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember",
+   "us-gaap:SubsidiarySaleOfStockAxis": "cd:ConcurrentPrivatePlacementMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_us-gaapSubsidiarySaleOfStockAxis_cdUnderwritersOptionMember_20201002",
+  "period_key": "instant_2020-10-02",
+  "period_type": "instant",
+  "value": "12000000",
+  "numeric_value": 12000000.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember",
+   "us-gaap:SubsidiarySaleOfStockAxis": "cd:UnderwritersOptionMember"
+  }
+ },
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "1226685000",
+  "numeric_value": 1226685000.0,
+  "unit_ref": "U_iso4217CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "us-gaap:VariableInterestEntityPrimaryBeneficiaryMember"
+  }
+ },
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "2225938000",
+  "numeric_value": 2225938000.0,
+  "unit_ref": "U_iso4217CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "us-gaap:VariableInterestEntityPrimaryBeneficiaryMember"
+  }
+ },
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_us-gaapVariableInterestEntityPrimaryBeneficiaryMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "349299000",
+  "numeric_value": 349299000.0,
+  "unit_ref": "U_iso4217USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "us-gaap:VariableInterestEntityPrimaryBeneficiaryMember"
+  }
+ },
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "65388000",
+  "numeric_value": 65388000.0,
+  "unit_ref": "U_iso4217CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "50321000",
+  "numeric_value": 50321000.0,
+  "unit_ref": "U_iso4217CNY",
+  "currency": "CNY",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:LiabilitiesCurrent",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "7896000",
+  "numeric_value": 7896000.0,
+  "unit_ref": "U_iso4217USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesAuthorized",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "4500000000",
+  "numeric_value": 4500000000.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember",
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "344577783",
+  "numeric_value": 344577783.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember",
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesAuthorized",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_us-gaapStatementClassOfStockAxis_us-gaapCommonClassBMember_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "500000000",
+  "numeric_value": 500000000.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember",
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassBMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_us-gaapStatementClassOfStockAxis_us-gaapCommonClassBMember_20201231",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "380214434",
+  "numeric_value": 380214434.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember",
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassBMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesAuthorized",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "4500000000",
+  "numeric_value": 4500000000.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember",
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_us-gaapStatementClassOfStockAxis_us-gaapCommonClassAMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "358376753",
+  "numeric_value": 358376753.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember",
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesAuthorized",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_us-gaapStatementClassOfStockAxis_us-gaapCommonClassBMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "500000000",
+  "numeric_value": 500000000.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember",
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassBMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CommonStockSharesIssued",
+  "context_ref": "C_0001807192_srtConsolidatedEntitiesAxis_srtParentCompanyMember_us-gaapStatementClassOfStockAxis_us-gaapCommonClassBMember_20211231",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "368500979",
+  "numeric_value": 368500979.0,
+  "unit_ref": "U_xbrlishares",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "srt:ConsolidatedEntitiesAxis": "srt:ParentCompanyMember",
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassBMember"
+  }
+ }
+]

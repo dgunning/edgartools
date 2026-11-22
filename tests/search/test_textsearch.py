@@ -18,9 +18,12 @@ def test_create_bm25_search_index():
     bm25: BM25Search = BM25Search(document_sections)
     assert bm25
     search_results = bm25.search("financial")
-    # One hit per passage containing the word: 2 of the chunker's 14 passages.
-    # (The legacy blank-line split had it in 3 of 31.)
-    assert len(search_results) == 2
+    # One hit per passage containing the word: 1 of the chunker's 13 passages.
+    # (The legacy blank-line split had it in 3 of 31.) It was 2 of 14 until
+    # edgartools-s4cg: the italic '10-K' inside "...Annual Report on Form 10-K
+    # for the year ended..." was promoted to a heading and split that sentence,
+    # and the chunker splits passages at headings.
+    assert len(search_results) == 1
 
     # Search for item
     print()

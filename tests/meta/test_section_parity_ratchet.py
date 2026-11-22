@@ -192,6 +192,10 @@ BASELINE_GAPS = {
     # 16. A. Audit Committee Financial Expert", so neither `item_16a` (which
     # expects the letter attached, "Item 16A") nor `item_16` (which expects
     # "[Reserved]") matches, while legacy reads the whole series as Item 16.
+    # 2026-11-13 (edgartools-ga4a): the item grammar now accepts the split
+    # letter, so the new parser returns all eight of 16A-16H. "16" stays here
+    # as a granularity difference only: the frozen legacy parser lumps the
+    # series into one Item 16, and the filing has no Item 16 of its own.
     ("20-F", "0001062993-16-008650"): ["16"],
     # ("20-F", "0001144204-10-017467") CLOSED 2026-08-21, in two steps. It was
     # banked 2026-08-13 at 22 -> 8 by edgartools-dt1f Defect 1: the fallback

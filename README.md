@@ -13,11 +13,13 @@
   <a href="https://pepy.tech/project/edgartools"><img alt="Monthly downloads" src="https://static.pepy.tech/badge/edgartools/month"></a>
 </p>
 
-**EdgarTools** is a Python library for SEC EDGAR filings as structured data: financial statements, insider trades, fund holdings, proxy statements and dozens of other filing types, through one consistent Python API. SEC publishes every filing since 1994 for free, and almost none of it is ready to use; EdgarTools turns a filing into a typed Python object. Free and open source, MIT-licensed.
+**EdgarTools** turns any SEC filing into financial statements, clean text and tidy DataFrames in a few lines of Python. No API key, no vendor, no bill: it reads straight from the SEC and covers every filing since 1993, from 10-Ks and insider trades to 13F holdings and fund reports. Spend your time on the analysis, not the parsing: your first income statement in three lines of code.
 
-**[Docs](https://edgartools.readthedocs.io/en/latest/)** · **[Cheat sheet](https://edgartools.readthedocs.io/en/latest/quick-guide/)** · Agents: **[Skill](https://edgartools.readthedocs.io/en/latest/ai/skills/)** · **[MCP server](https://edgartools.readthedocs.io/en/latest/ai/mcp-setup/)** · Hosted: **[edgar.tools](https://www.edgar.tools)**
+**[Docs](https://edgartools.readthedocs.io/en/latest/)** · **[Cheat sheet](https://edgartools.readthedocs.io/en/latest/quick-guide/)** · Agents: **[Skill](https://edgartools.readthedocs.io/en/latest/ai/skills/)** · **[MCP server](https://edgartools.readthedocs.io/en/latest/ai/mcp-setup/)** · Hosted: **[edgar.tools](https://www.edgar.tools/?utm_source=edgartools&utm_campaign=readme&utm_content=header)**
 
 ![EdgarTools SEC filing data extraction demo](https://raw.githubusercontent.com/dgunning/edgartools/main/docs/images/edgartools-demo.gif)
+
+*Hear the story behind the library: Dwight Gunning on the [Stack to Street](https://www.stacktostreet.com/episodes/edgartools/) podcast, "EdgarTools: AI That Cites the SEC Filing" ([YouTube](https://youtu.be/Fc42T1X-XjU) · [Apple Podcasts](https://podcasts.apple.com/us/podcast/stack-to-street/id6819263656?i=1000802764139) · [transcript](https://www.stacktostreet.com/episodes/edgartools/)).*
 
 ## Quick Start
 
@@ -173,13 +175,13 @@ eightk.earnings   # the EX-99.1 press release tables, parsed
 
 ## Library or hosted?
 
-**EdgarTools** is this library: free, MIT-licensed, running in your own Python process. **[edgar.tools](https://www.edgar.tools)** is the hosted platform built on it: the same parsing, kept running and current, with every answer cited to its filing. You are not paying for the parsing; you are paying for it to be run and answerable. No feature is ever removed from the library to sell the platform.
+**EdgarTools** is this library: free, MIT-licensed, running in your own Python process. **[edgar.tools](https://www.edgar.tools/?utm_source=edgartools&utm_campaign=readme&utm_content=library-or-hosted)** is the hosted platform built on it: the same parsing, kept running and current, with every answer cited to its filing. You are not paying for the parsing; you are paying for it to be run and answerable. No feature is ever removed from the library to sell the platform.
 
 | If you want to… | Use |
 |---|---|
 | Build something that runs: pipelines, backfills, backtests, model corpora, notebooks, custom joins, anything repeated across hundreds of names or run inside your own network | **The library** |
-| Ask, not build: what the companies you cover filed and what changed since last time, who sold, who holds it, one person across every company they touch, screens across a universe, alerts, cited answers to forward or share with a team. From a browser, a phone, Excel, Claude or ChatGPT, or an agent that cannot run Python | **[edgar.tools](https://app.edgar.tools)**. Free account to start |
-| Own a maintained dataset (insider trades, 13F, BDC portfolios, material events), every row traceable to its filing, without running the pipeline | **[edgar.tools data licensing](https://www.edgar.tools/data)** |
+| Ask, not build: what the companies you cover filed and what changed since last time, who sold, who holds it, one person across every company they touch, screens across a universe, alerts, cited answers to forward or share with a team. From a browser, a phone, Excel, Claude or ChatGPT, or an agent that cannot run Python | **[edgar.tools](https://app.edgar.tools/signup?utm_source=edgartools&utm_campaign=readme&utm_content=ask-not-build)**. Free account to start |
+| Own a maintained dataset (insider trades, 13F, BDC portfolios, material events), every row traceable to its filing, without running the pipeline | **[edgar.tools data licensing](https://www.edgar.tools/data?utm_source=edgartools&utm_campaign=readme&utm_content=data)** |
 | Fetch one known filing or one JSON document, once, from a script | **Neither**: call EDGAR directly |
 
 Both have an MCP server: the library's runs locally (see AI Integration below), and edgar.tools' is hosted at [app.edgar.tools/mcp](https://app.edgar.tools/mcp). Attach one per client, not both: they overlap and split your assistant's routing.
@@ -217,7 +219,7 @@ The SEC changes filing formats and ships a new XBRL taxonomy every year. Sponsor
 
 - **[GitHub Sponsors](https://github.com/sponsors/dgunning)**: monthly or one-time. Companies can sponsor on their existing GitHub bill.
 - **[Buy Me a Coffee](https://www.buymeacoffee.com/edgartools)**: a one-time thank-you.
-- **[Consulting](https://www.edgar.tools/consulting)**: help from the library's author with SEC data pipelines and financial AI built on it.
+- **[Consulting](https://www.edgar.tools/consulting?utm_source=edgartools&utm_campaign=readme&utm_content=consulting)**: help from the library's author with SEC data pipelines and financial AI built on it.
 
 <p align="center">
   <a href="https://github.com/sponsors/dgunning" target="_blank">
@@ -228,6 +230,10 @@ The SEC changes filing formats and ships a new XBRL taxonomy every year. Sponsor
     <img src="https://img.shields.io/badge/Buy_me_a_coffee-FFDD00?style=for-the-badge&logo=buymeacoffee&logoColor=black" alt="Buy Me A Coffee" height="44">
   </a>
 </p>
+
+## Upgrading from 5.x
+
+EdgarTools 6.0 needs Python 3.11 or newer and renames or removes some 5.x APIs. Read [Upgrading to 6.0](https://edgartools.readthedocs.io/en/latest/upgrade/6.0/) before you upgrade, and [Upgrading to 6.1](https://edgartools.readthedocs.io/en/latest/upgrade/6.1/) for what changed since.
 
 ## Docs, help and contributing
 

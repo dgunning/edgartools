@@ -18,8 +18,8 @@ import re
 from typing import Optional
 
 __all__ = [
-    'SECTOR_ALIASES', 'INDUSTRY_SOURCES', 'clean_industry_label', 'issuer_key',
-    'normalize_sector', 'sector_key',
+    'SECTOR_ALIASES', 'INDUSTRY_SOURCES', 'MULTI_MEMBER_SEPARATOR', 'clean_industry_label',
+    'is_multi_member_industry', 'issuer_key', 'normalize_sector', 'sector_key',
 ]
 
 # The provenance values an industry can carry, in resolution order.
@@ -35,25 +35,52 @@ _LEGAL_FORM_TOKENS = frozenset({
 })
 
 
+# Joins the labels of an enumeration value that names several members.
+MULTI_MEMBER_SEPARATOR = '; '
+_EXPANDED_NAME = re.compile(r'^[A-Za-z][A-Za-z0-9+.-]*:\S*#\S+$')
+
+
+def _member_label(fragment: str) -> str:
+    return _MEMBER_SUFFIX.sub('', _CAMEL_BOUNDARY.sub(' ', fragment)).strip()
+
+
 def clean_industry_label(value):
     """
     Reduce the ways an industry member arrives to one readable label.
 
     Axis members come as 'Healthcare Sector [Member]' or 'Healthcare Sector Member';
-    the extensible enumeration comes as a QName URI such as
-    'http://fasb.org/us-gaap/2024#HealthcareSectorMember' or, from a fact
-    dimension, 'us-gaap:HealthcareSectorMember'. All become 'Healthcare Sector'.
-    Spelling differences between filers are left alone; see normalize_sector.
+    the extensible enumeration comes as an expanded-name URI such as
+    'http://fasb.org/us-gaap/2024#HealthcareSectorMember' (any scheme with a
+    ``#`` fragment) or, from a fact dimension, 'us-gaap:HealthcareSectorMember'.
+    All become 'Healthcare Sector'. An enumeration value holding several
+    whitespace-separated URIs keeps every label, joined with '; ' in source
+    order (see :func:`is_multi_member_industry`). Spelling differences between
+    filers are left alone; see normalize_sector.
     """
     if not isinstance(value, str):
         return value
-    if value.startswith('http') and '#' in value:
-        value = _CAMEL_BOUNDARY.sub(' ', value.rsplit('#', 1)[1])
-    else:
-        qname = _QNAME_MEMBER.match(value.strip())
-        if qname:
-            value = _CAMEL_BOUNDARY.sub(' ', qname.group('local'))
+    tokens = value.split()
+    if tokens and all(_EXPANDED_NAME.match(token) for token in tokens):
+        labels = [label for label in (_member_label(token.rsplit('#', 1)[1]) for token in tokens) if label]
+        if labels:
+            return MULTI_MEMBER_SEPARATOR.join(labels)
+    qname = _QNAME_MEMBER.match(value.strip())
+    if qname:
+        value = _CAMEL_BOUNDARY.sub(' ', qname.group('local'))
     return _MEMBER_SUFFIX.sub('', value).strip()
+
+
+def is_multi_member_industry(label, source=None) -> bool:
+    """
+    True when an industry label was joined from several enumeration members.
+
+    Such a holding has no single sector, and is never a donor when peers
+    fill missing industries. ``source`` is the provenance; only a tagged
+    ('axis' or 'enumeration') label is ever joined, so any other source is False.
+    """
+    if not isinstance(label, str) or MULTI_MEMBER_SEPARATOR not in label:
+        return False
+    return source in (None, 'axis', 'enumeration')
 
 
 def issuer_key(name) -> Optional[str]:

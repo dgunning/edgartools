@@ -1,0 +1,238 @@
+[
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-20",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "3265000000",
+  "numeric_value": 3265000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-21",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "1565000000",
+  "numeric_value": 1565000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-785",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "1289000000",
+  "numeric_value": 1289000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:PacificorpMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-786",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "138000000",
+  "numeric_value": 138000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:PacificorpMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-942",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "930000000",
+  "numeric_value": 930000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:MidamericanEnergyCompanyAndSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-943",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "636000000",
+  "numeric_value": 636000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:MidamericanEnergyCompanyAndSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-1226",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "933000000",
+  "numeric_value": 933000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:MidAmericanFundingLLCAndSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-1227",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "637000000",
+  "numeric_value": 637000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:MidAmericanFundingLLCAndSubsidiariesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-1284",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "111000000",
+  "numeric_value": 111000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:NevadaPowerCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-1285",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "20000000",
+  "numeric_value": 20000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:NevadaPowerCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-1436",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "70000000",
+  "numeric_value": 70000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:SierraPacificPowerCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-1437",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "44000000",
+  "numeric_value": 44000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:SierraPacificPowerCompanyMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-1684",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "107000000",
+  "numeric_value": 107000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:EasternEnergyGasHoldingsLLCMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-1685",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "62000000",
+  "numeric_value": 62000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:EasternEnergyGasHoldingsLLCMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-1829",
+  "period_key": "instant_2024-06-30",
+  "period_type": "instant",
+  "value": "34000000",
+  "numeric_value": 34000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:EasternGasTransmissionAndStorageIncMember"
+  }
+ },
+ {
+  "concept": "us-gaap:CashAndCashEquivalentsAtCarryingValue",
+  "context_ref": "c-1830",
+  "period_key": "instant_2023-12-31",
+  "period_type": "instant",
+  "value": "5000000",
+  "numeric_value": 5000000.0,
+  "unit_ref": "usd",
+  "currency": "USD",
+  "decimals": "-6",
+  "is_dimensioned": true,
+  "dimensions": {
+   "dei:LegalEntityAxis": "bhe:EasternGasTransmissionAndStorageIncMember"
+  }
+ }
+]

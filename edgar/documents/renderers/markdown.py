@@ -7,9 +7,23 @@ from typing import Dict, List, Optional, Set
 from urllib.parse import urljoin
 
 from edgar.documents.document import Document
-from edgar.documents.nodes import HeadingNode, ImageNode, ListItemNode, ListNode, Node, ParagraphNode, TextNode
+from edgar.documents.nodes import (
+    HeadingNode,
+    ImageNode,
+    ListItemNode,
+    ListNode,
+    Node,
+    ParagraphNode,
+    TextNode,
+    inline_runs,
+)
 from edgar.documents.table_nodes import TableNode
 from edgar.documents.utils.table_matrix import TableMatrix
+
+
+def _one_line(text: str) -> str:
+    """Collapse a cell's whitespace, line breaks included, so it stays on its row."""
+    return ' '.join(text.split())
 
 
 def _escape_pipe_cell(text: str) -> str:
@@ -184,7 +198,11 @@ class MarkdownRenderer:
     def _render_paragraph(self, node: ParagraphNode) -> str:
         """Render paragraph node."""
         # Get paragraph content
-        content = self._render_children(node).strip()
+        if self._in_table or any(isinstance(child, (HeadingNode, ParagraphNode, TableNode, ListNode))
+                                 for child in node.children):
+            content = self._render_children(node).strip()
+        else:
+            content = self._render_inline_runs(node).strip()
         if not content:
             return ""
 
@@ -345,12 +363,12 @@ class MarkdownRenderer:
         # Add headers
         if node.headers:
             for header_row in node.headers:
-                cells = [cell.text() for cell in header_row]
+                cells = [_one_line(cell.text()) for cell in header_row]
                 all_rows.append(" | ".join(cells))
 
         # Add data rows
-        for row in node.rows:
-            cells = [cell.text() for cell in row.cells]
+        for row in [*node.rows, *node.footer]:
+            cells = [_one_line(cell.text()) for cell in row.cells]
             all_rows.append(" | ".join(cells))
 
         if all_rows:
@@ -372,16 +390,16 @@ class MarkdownRenderer:
         # Add headers
         if node.headers:
             for header_row in node.headers:
-                cells = [cell.text() for cell in header_row]
+                cells = [_one_line(cell.text()) for cell in header_row]
                 rows.append("  ".join(cells))
 
         # Add separator if we have headers
-        if node.headers and node.rows:
+        if node.headers and (node.rows or node.footer):
             rows.append("")
 
         # Add data rows
-        for row in node.rows:
-            cells = [cell.text() for cell in row.cells]
+        for row in [*node.rows, *node.footer]:
+            cells = [_one_line(cell.text()) for cell in row.cells]
             rows.append("  ".join(cells))
 
         return "\n".join(rows)
@@ -448,6 +466,43 @@ class MarkdownRenderer:
             return "\n\n".join(parts)
         else:
             return " ".join(parts)
+
+    def _render_inline_runs(self, node: ParagraphNode) -> str:
+        """Join a paragraph's inline children where ParagraphNode.text() puts word gaps.
+
+        Space-joining them split every word a filer wrote across two elements
+        ('PROPERT IES', '**Comp** *any*'); the gaps come from the same rule as the
+        paragraph's text instead (edgartools-8n9an).
+        """
+        runs = {i: (text, spaced) for i, text, spaced in inline_runs(node.children)}
+        out = []
+        for i, child in enumerate(node.children):
+            child_md = self._render_node(child)
+            if not child_md:
+                continue
+            if i in runs:
+                text, spaced = runs[i]
+                if spaced:
+                    # The run's leading space became the gap; drop it from the markup
+                    # too when the child rendered as plain text.
+                    if text != child.text() and child_md.startswith(' '):
+                        child_md = child_md.lstrip()
+                    child_md = ' ' + child_md
+            elif out:
+                # No text to judge by (an image): keep it apart from its neighbours.
+                child_md = ' ' + child_md
+            if out and not child_md.startswith(' '):
+                # One word in two runs of the same style: '**THE C****OMPANY**'
+                # reads as two bold spans, so continue the open one instead.
+                for close, open_ in (('**', '**'), ('</u>', '<u>'), ('*', '*')):
+                    if (out[-1].endswith(close) and child_md.startswith(open_)
+                            and not (close == '*' and (out[-1].endswith(('**', '\\*'))
+                                                       or child_md.startswith('**')))):
+                        out[-1] = out[-1][:-len(close)]
+                        child_md = child_md[len(open_):]
+                        break
+            out.append(child_md)
+        return ''.join(out)
 
     def _render_metadata(self, document: Document) -> str:
         """Render document metadata."""
@@ -537,13 +592,15 @@ class MarkdownRenderer:
         Align header cells using their spans and preserve body expansion.
         Returns (expanded_headers, expanded_data_rows).
         """
+        # tfoot rows are body rows to every text output (edgartools-niru).
+        body_rows = [*node.rows, *node.footer]
         # Flat/headerless tables retain their original column and whitespace policy.
         if len(node.headers) < 2:
-            all_rows = [*node.headers, *(row.cells for row in node.rows)]
+            all_rows = [*node.headers, *(row.cells for row in body_rows)]
             max_columns = max((sum(cell.colspan for cell in row) for row in all_rows), default=0)
             return (
                 [self._expand_row_to_columns(row, max_columns) for row in node.headers],
-                [self._expand_row_to_columns(row.cells, max_columns) for row in node.rows],
+                [self._expand_row_to_columns(row.cells, max_columns) for row in body_rows],
             )
 
         # Parsed headers can omit blank physical rows crossed by a rowspan.
@@ -561,7 +618,7 @@ class MarkdownRenderer:
         # Use the matrix only for headers; retain the body expansion below.
         matrix = TableMatrix().build_from_rows(header_rows, [])
         max_columns = max(matrix.col_count, max((sum(cell.colspan for cell in row.cells)
-                                               for row in node.rows), default=0))
+                                               for row in body_rows), default=0))
 
         # Find content columns before copying group labels across their spans,
         # so a header over empty SEC spacing columns does not keep those columns.
@@ -570,7 +627,7 @@ class MarkdownRenderer:
             expanded = [cell.text().strip() if cell else "" for cell in matrix.get_expanded_row(row_index)]
             expanded.extend([""] * (max_columns - len(expanded)))
             expanded_headers.append(expanded)
-        expanded_data_rows = [self._expand_row_to_columns(row.cells, max_columns) for row in node.rows]
+        expanded_data_rows = [self._expand_row_to_columns(row.cells, max_columns) for row in body_rows]
         content_columns = self._identify_content_columns(expanded_headers, expanded_data_rows)
 
         for row_index, expanded in enumerate(expanded_headers):

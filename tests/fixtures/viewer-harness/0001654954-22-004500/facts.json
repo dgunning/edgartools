@@ -1,0 +1,1840 @@
+[
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "172306000",
+  "numeric_value": 172306000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2020-12-31_ndm_SubscriptionsReceivedForSharesMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:SubscriptionsReceivedForSharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2021-12-31_ndm_SubscriptionsReceivedForSharesMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:SubscriptionsReceivedForSharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2021-12-31_ndm_TotalLoansIncludingInterestPayableMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfRelatedPartiesAxis": "ndm:TotalLoansIncludingInterestPayableMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2020-12-31_ndm_TotalLoansIncludingInterestPayableMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfRelatedPartiesAxis": "ndm:TotalLoansIncludingInterestPayableMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2020-12-31_ndm_PebbleServicesIncMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "183000",
+  "numeric_value": 183000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:SignificantInvestmentsInSubsidiariesAxis": "ndm:PebbleServicesIncMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:RestrictedCashAndCashEquivalents",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "785000",
+  "numeric_value": 785000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:RestrictedCashAndCashEquivalents",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "791000",
+  "numeric_value": 791000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "134339000",
+  "numeric_value": 134339000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "135646000",
+  "numeric_value": 135646000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:NoncurrentAssets",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "135124000",
+  "numeric_value": 135124000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:NoncurrentAssets",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "136437000",
+  "numeric_value": 136437000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:CurrentAssets",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "24158000",
+  "numeric_value": 24158000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:CurrentAssets",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "43937000",
+  "numeric_value": 43937000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Assets",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "159282000",
+  "numeric_value": 159282000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Assets",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "180374000",
+  "numeric_value": 180374000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IssuedCapital",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "700278000",
+  "numeric_value": 700278000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:IssuedCapital",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "683039000",
+  "numeric_value": 683039000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherReserves",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "106735000",
+  "numeric_value": 106735000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherReserves",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "109245000",
+  "numeric_value": 109245000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:RetainedEarnings",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "-619978000",
+  "numeric_value": -619978000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:NoncurrentLiabilities",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "1365000",
+  "numeric_value": 1365000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:NoncurrentLiabilities",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "657000",
+  "numeric_value": 657000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:CurrentLiabilities",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "2424000",
+  "numeric_value": 2424000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:CurrentLiabilities",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "7411000",
+  "numeric_value": 7411000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Liabilities",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "3789000",
+  "numeric_value": 3789000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Liabilities",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "8068000",
+  "numeric_value": 8068000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:EquityAndLiabilities",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "159282000",
+  "numeric_value": 159282000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:EquityAndLiabilities",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "180374000",
+  "numeric_value": 180374000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ExpenseArisingFromExplorationForAndEvaluationOfMineralResources",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "-12435000",
+  "numeric_value": -12435000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:ExpenseArisingFromExplorationForAndEvaluationOfMineralResources",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "-39219000",
+  "numeric_value": -39219000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:AdministrativeExpense",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "-9991000",
+  "numeric_value": -9991000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:AdministrativeExpense",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "-11545000",
+  "numeric_value": -11545000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:AuditorsRemunerationForAuditServices",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "-5941000",
+  "numeric_value": -5941000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:AuditorsRemunerationForAuditServices",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "-2438000",
+  "numeric_value": -2438000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:EmployeeBenefitsExpense",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "-2858000",
+  "numeric_value": -2858000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:EmployeeBenefitsExpense",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "-9342000",
+  "numeric_value": -9342000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:LossFromOperatingActivities",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "31225000",
+  "numeric_value": 31225000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:LossFromOperatingActivities",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "62544000",
+  "numeric_value": 62544000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:GainsLossesOnExchangeDifferencesOnTranslationRecognisedInProfitOrLoss",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "-456000",
+  "numeric_value": -456000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:GainsLossesOnExchangeDifferencesOnTranslationRecognisedInProfitOrLoss",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "-1545000",
+  "numeric_value": -1545000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:InterestIncome",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "176000",
+  "numeric_value": 176000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:InterestIncome",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "146000",
+  "numeric_value": 146000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:FinanceCosts",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "-67000",
+  "numeric_value": -67000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:FinanceCosts",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "-117000",
+  "numeric_value": -117000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherIncome",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "16000",
+  "numeric_value": 16000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherIncome",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "392000",
+  "numeric_value": 392000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:GainLossOnrevaluationofwarrantliabilities",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "-204000",
+  "numeric_value": -204000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:GainLossOnDisposalOfPlantAndEquipment",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "-2000",
+  "numeric_value": -2000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "-903000",
+  "numeric_value": -903000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:OtherComprehensiveIncomeNetOfTaxExchangeDifferencesOnTranslation",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "-2704000",
+  "numeric_value": -2704000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:OtherComprehensiveLoss",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "903000",
+  "numeric_value": 903000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:OtherComprehensiveLoss",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "2704000",
+  "numeric_value": 2704000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:TotalComprehensiveLoss",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "32445000",
+  "numeric_value": 32445000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:TotalComprehensiveLoss",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "66576000",
+  "numeric_value": 66576000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:BasicAndDilutedEarningsLossPerShare",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "0.06",
+  "numeric_value": 0.06,
+  "unit_ref": "CADPShares",
+  "currency": "CAD",
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:BasicAndDilutedEarningsLossPerShare",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "0.13",
+  "numeric_value": 0.13,
+  "unit_ref": "CADPShares",
+  "currency": "CAD",
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:NetLoss",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "31542000",
+  "numeric_value": 31542000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:NetLoss",
+  "context_ref": "From2020-01-01to2020-12-31",
+  "period_key": "duration_2020-01-01_2020-12-31",
+  "period_type": "duration",
+  "value": "63872000",
+  "numeric_value": 63872000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ndm:Gainonmodificationoflease",
+  "context_ref": "From2021-01-01to2021-12-31",
+  "period_key": "duration_2021-01-01_2021-12-31",
+  "period_type": "duration",
+  "value": "16000",
+  "numeric_value": 16000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:CashAndCashEquivalents",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "42460000",
+  "numeric_value": 42460000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:CashAndCashEquivalents",
+  "context_ref": "AsOf2019-12-31",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "14038000",
+  "numeric_value": 14038000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:CashAndCashEquivalents",
+  "context_ref": "AsOf2019-12-31",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "14038000",
+  "numeric_value": 14038000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:CashAndCashEquivalents",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "22291000",
+  "numeric_value": 22291000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2019-12-31_ifrs-full_IssuedCapitalMember",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "587448000",
+  "numeric_value": 587448000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2019-12-31_ndm_EquitySettledShareBasedCompensationReserveMember",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "70150000",
+  "numeric_value": 70150000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:EquitySettledShareBasedCompensationReserveMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2019-12-31_ndm_ForeignCurrencyTranslationReserveMember",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "32365000",
+  "numeric_value": 32365000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:ForeignCurrencyTranslationReserveMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2019-12-31_ndm_InvestmentRevaluationReserveMember",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "-17000",
+  "numeric_value": -17000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:InvestmentRevaluationReserveMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2019-12-31_ndm_SharePurchaseWarrantMember",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "3972000",
+  "numeric_value": 3972000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:SharePurchaseWarrantMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2019-12-31_ndm_SubscriptionsReceivedForSharesMember",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "693000",
+  "numeric_value": 693000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:SubscriptionsReceivedForSharesMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2019-12-31_ndm_DeficitMember",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "-556106000",
+  "numeric_value": -556106000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:DeficitMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2019-12-31",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "138505000",
+  "numeric_value": 138505000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2020-12-31_ifrs-full_IssuedCapitalMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "683039000",
+  "numeric_value": 683039000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2020-12-31_ndm_EquitySettledShareBasedCompensationReserveMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "77018000",
+  "numeric_value": 77018000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:EquitySettledShareBasedCompensationReserveMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2020-12-31_ndm_ForeignCurrencyTranslationReserveMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "29661000",
+  "numeric_value": 29661000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:ForeignCurrencyTranslationReserveMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2020-12-31_ndm_InvestmentRevaluationReserveMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "-17000",
+  "numeric_value": -17000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:InvestmentRevaluationReserveMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2020-12-31_ndm_SharePurchaseWarrantMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "2583000",
+  "numeric_value": 2583000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:SharePurchaseWarrantMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2020-12-31_ndm_DeficitMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "619978000",
+  "numeric_value": 619978000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:DeficitMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2021-12-31_ifrs-full_IssuedCapitalMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "700278000",
+  "numeric_value": 700278000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ifrs-full:IssuedCapitalMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2021-12-31_ndm_EquitySettledShareBasedCompensationReserveMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "77723000",
+  "numeric_value": 77723000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:EquitySettledShareBasedCompensationReserveMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2021-12-31_ndm_ForeignCurrencyTranslationReserveMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "28758000",
+  "numeric_value": 28758000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:ForeignCurrencyTranslationReserveMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2021-12-31_ndm_InvestmentRevaluationReserveMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "-17000",
+  "numeric_value": -17000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:InvestmentRevaluationReserveMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2021-12-31_ndm_SharePurchaseWarrantMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "271000",
+  "numeric_value": 271000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:SharePurchaseWarrantMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2021-12-31_ndm_DeficitMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "-651520000",
+  "numeric_value": -651520000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ComponentsOfEquityAxis": "ndm:DeficitMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:Equity",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "155493000",
+  "numeric_value": 155493000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:RetainedEarnings",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "-651520000",
+  "numeric_value": -651520000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember_ndm_MineralPropertyInterestMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "112541000",
+  "numeric_value": 112541000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfAssetsAxis": "ndm:MineralPropertyInterestMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember_ndm_MineralPropertyInterestMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "112541000",
+  "numeric_value": 112541000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfAssetsAxis": "ndm:MineralPropertyInterestMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember_ndm_PlantAndEquipmentMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "3018000",
+  "numeric_value": 3018000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfAssetsAxis": "ndm:PlantAndEquipmentMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember_ndm_PlantAndEquipmentMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "3018000",
+  "numeric_value": 3018000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfAssetsAxis": "ndm:PlantAndEquipmentMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "115559000",
+  "numeric_value": 115559000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "115559000",
+  "numeric_value": 115559000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2021-12-31_ndm_CostMember_ndm_MineralPropertyInterestMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "112541000",
+  "numeric_value": 112541000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfAssetsAxis": "ndm:MineralPropertyInterestMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2021-12-31_ndm_CostMember_ndm_PlantAndEquipmentMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "3029000",
+  "numeric_value": 3029000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfAssetsAxis": "ndm:PlantAndEquipmentMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2021-12-31_ndm_CostMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "115570000",
+  "numeric_value": 115570000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember_ndm_LandsAndBuildingsMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "1591000",
+  "numeric_value": 1591000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfPropertyPlantAndEquipmentAxis": "ndm:LandsAndBuildingsMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember_ndm_LandsAndBuildingsMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "1591000",
+  "numeric_value": 1591000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfPropertyPlantAndEquipmentAxis": "ndm:LandsAndBuildingsMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember_ndm_EquipmentsMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "53000",
+  "numeric_value": 53000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfAssetsAxis": "ndm:EquipmentsMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember_ndm_EquipmentsMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "53000",
+  "numeric_value": 53000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfAssetsAxis": "ndm:EquipmentsMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember_ndm_ROUAssetsMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "1644000",
+  "numeric_value": 1644000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfAssetsRecognisedFromCostsToObtainOrFulfilContractsWithCustomersAxis": "ndm:ROUAssetsMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2020-12-31_ndm_CostMember_ndm_ROUAssetsMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "1644000",
+  "numeric_value": 1644000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfAssetsRecognisedFromCostsToObtainOrFulfilContractsWithCustomersAxis": "ndm:ROUAssetsMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2021-12-31_ndm_CostMember_ndm_LandsAndBuildingsMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "1631000",
+  "numeric_value": 1631000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfPropertyPlantAndEquipmentAxis": "ndm:LandsAndBuildingsMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2021-12-31_ndm_CostMember_ndm_EquipmentsMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "32000",
+  "numeric_value": 32000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:ClassesOfAssetsAxis": "ndm:EquipmentsMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:PropertyPlantAndEquipment",
+  "context_ref": "AsOf2021-12-31_ndm_CostMember_ndm_ROUAssetsMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "1663000",
+  "numeric_value": 1663000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfAssetsRecognisedFromCostsToObtainOrFulfilContractsWithCustomersAxis": "ndm:ROUAssetsMember",
+   "ifrs-full:MeasurementAxis": "ndm:CostMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherCurrentReceivables",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "1867000",
+  "numeric_value": 1867000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherCurrentReceivables",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "1477000",
+  "numeric_value": 1477000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2021-12-31_ndm_KeyManagementPersonnelMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "35000",
+  "numeric_value": 35000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CounterpartiesAxis": "ndm:KeyManagementPersonnelMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2020-12-31_ndm_KeyManagementPersonnelMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "34000",
+  "numeric_value": 34000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CounterpartiesAxis": "ndm:KeyManagementPersonnelMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2021-12-31_ndm_HunterDickinsonServicesIncMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "341000",
+  "numeric_value": 341000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfRelatedPartiesAxis": "ndm:HunterDickinsonServicesIncMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2020-12-31_ndm_HunterDickinsonServicesIncMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "814000",
+  "numeric_value": 814000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfRelatedPartiesAxis": "ndm:HunterDickinsonServicesIncMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "376000",
+  "numeric_value": 376000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "848000",
+  "numeric_value": 848000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "848000",
+  "numeric_value": 848000.0,
+  "unit_ref": "USD",
+  "currency": "USD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2020-12-31_ndm_LoanPayableMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "971000",
+  "numeric_value": 971000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfRelatedPartiesAxis": "ndm:LoanPayableMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2020-12-31_ndm_AdditionalLoansProvidedMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "183000",
+  "numeric_value": 183000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfRelatedPartiesAxis": "ndm:AdditionalLoansProvidedMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2020-12-31_ndm_AccruedInterestMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "5000",
+  "numeric_value": 5000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfRelatedPartiesAxis": "ndm:AccruedInterestMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2020-12-31_ndm_RepaymentOfLoansMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "-1159000",
+  "numeric_value": -1159000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:CategoriesOfRelatedPartiesAxis": "ndm:RepaymentOfLoansMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherCurrentPayables",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "2048000",
+  "numeric_value": 2048000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherCurrentPayables",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "6563000",
+  "numeric_value": 6563000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:NoncurrentPayables",
+  "context_ref": "AsOf2021-12-31",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "1365000",
+  "numeric_value": 1365000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:NoncurrentPayables",
+  "context_ref": "AsOf2020-12-31",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "657000",
+  "numeric_value": 657000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "ifrs-full:RestrictedCashAndCashEquivalents",
+  "context_ref": "AsOf2021-12-31_ndm_CreditRisksMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "785000",
+  "numeric_value": 785000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:TypesOfRisksAxis": "ndm:CreditRisksMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:RestrictedCashAndCashEquivalents",
+  "context_ref": "AsOf2020-12-31_ndm_CreditRisksMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "791000",
+  "numeric_value": 791000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:TypesOfRisksAxis": "ndm:CreditRisksMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:CashAndCashEquivalents",
+  "context_ref": "AsOf2021-12-31_ndm_CreditRisksMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "22291000",
+  "numeric_value": 22291000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:TypesOfRisksAxis": "ndm:CreditRisksMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:CashAndCashEquivalents",
+  "context_ref": "AsOf2020-12-31_ndm_CreditRisksMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "42460000",
+  "numeric_value": 42460000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:TypesOfRisksAxis": "ndm:CreditRisksMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:NoncurrentPayables",
+  "context_ref": "AsOf2021-12-31_ndm_ForeignExchangeRiskMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "-1365000",
+  "numeric_value": -1365000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:TypesOfRisksAxis": "ndm:ForeignExchangeRiskMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:NoncurrentPayables",
+  "context_ref": "AsOf2020-12-31_ndm_ForeignExchangeRiskMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "-657000",
+  "numeric_value": -657000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:TypesOfRisksAxis": "ndm:ForeignExchangeRiskMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherCurrentPayables",
+  "context_ref": "AsOf2021-12-31_ndm_ForeignExchangeRiskMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "-1670000",
+  "numeric_value": -1670000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:TypesOfRisksAxis": "ndm:ForeignExchangeRiskMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherCurrentPayables",
+  "context_ref": "AsOf2020-12-31_ndm_ForeignExchangeRiskMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "-6170000",
+  "numeric_value": -6170000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:TypesOfRisksAxis": "ndm:ForeignExchangeRiskMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2021-12-31_ndm_ForeignExchangeRiskMember",
+  "period_key": "instant_2021-12-31",
+  "period_type": "instant",
+  "value": "-190000",
+  "numeric_value": -190000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:TypesOfRisksAxis": "ndm:ForeignExchangeRiskMember"
+  }
+ },
+ {
+  "concept": "ifrs-full:TradeAndOtherPayablesToRelatedParties",
+  "context_ref": "AsOf2020-12-31_ndm_ForeignExchangeRiskMember",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "-650000",
+  "numeric_value": -650000.0,
+  "unit_ref": "CAD",
+  "currency": "CAD",
+  "decimals": "-3",
+  "is_dimensioned": true,
+  "dimensions": {
+   "ifrs-full:TypesOfRisksAxis": "ndm:ForeignExchangeRiskMember"
+  }
+ }
+]

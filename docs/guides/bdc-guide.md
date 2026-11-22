@@ -235,11 +235,45 @@ issuer another position in the same portfolio has tagged takes that industry
 with source `'peer'`. When nothing can be recovered, `industry`,
 `industry_source` and `sector` are all `None`, never an empty string.
 
+Industry coverage varies widely: Ares Capital's FY2025 10-K tags no industry
+on any of its 1,417 holdings. Check `industry_coverage` before trusting an
+industry filter. `filter(industry=...)` returning no rows while some holdings
+have no industry does not mean zero exposure, and it logs a warning saying so;
+`to_context()` always states "Industry known for X of N positions".
+
+#### The filer's own industry breakdown
+
+Many BDCs that tag no industry on their holdings still report fair value by
+industry as subtotals. `reported_industry_breakdown()` returns them as filed:
+
+```python
+breakdown = investments.reported_industry_breakdown()
+# industry | fair_value | pct_of_reported_total | pct_of_net_assets
+breakdown.attrs   # sum_fair_value, reported_total_fair_value, difference
+```
+
+For ARCC's FY2025 10-K this gives 23 industries summing to the
+$29,484.8M reported total, with Software and Services at $7,032.3M.
+`pct_of_reported_total` (0.2385 here) is calculated by edgartools from the
+reported total; `pct_of_net_assets` (0.4912, i.e. 49.12%) is the filer's own
+figure, `NaN` when it is not filed. The breakdown is the filer's
+classification, independent of the per-holding `industry`. It comes from
+`InvestmentOwnedAtFairValue` facts dimensioned by
+`EquitySecuritiesByIndustryAxis` alone, at the portfolio's period. The frame
+is empty, with the same columns, when the filing reports no such breakdown
+(Main Street) and for a subset returned by `filter()`, since the subtotals
+describe the whole portfolio.
+
 `sector` folds the filers' spellings into one vocabulary
 (`edgar.bdc.industry.SECTOR_ALIASES`): "Software Sector", "Software And
 Services" and "Software & Services" are all `'Software'`. A label the table
 does not know passes through as its own sector with a trailing "Sector"
 removed.
+
+If an enumeration value names several members, `industry` keeps all of them
+joined with `'; '` (for example `'Healthcare Sector; Technology Sector'`),
+`sector` is `None`, and the holding never lends its industry to another
+position of the same issuer. DERA's 2024Q3 to 2025Q4 data sets contain none.
 
 ### Convert to DataFrame
 
@@ -487,6 +521,13 @@ When a BDC files both footnote data and a custom XBRL concept for the non-accrua
 if result.custom_concept_rate is not None:
     print(f"Stated rate (XBRL concept): {result.custom_concept_rate:.2%}")
     print(f"Computed rate (footnotes):  {result.nonaccrual_rate:.2%}")
+```
+
+The investment rows follow the footnote links in the filer's XBRL, and those can be looser than the marks in its printed schedule: a filer can link its non-accrual footnote to a loan its schedule does not mark. Nothing in the XBRL tells such a link from a real one. When the filer also tags a non-accrual total at cost or fair value, or a count of non-accrual loans, and the rows disagree with it, `result.warnings` says so:
+
+```python
+for warning in result.warnings:
+    print(warning)
 ```
 
 ### Batch Extraction

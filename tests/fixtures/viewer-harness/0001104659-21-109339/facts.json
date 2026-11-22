@@ -1,0 +1,1054 @@
+[
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_4_1_2020_To_6_30_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_xm7Y40RpTEOjnGUJi_SBMA",
+  "period_key": "duration_2020-04-01_2020-06-30",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_4_1_2020_To_6_30_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_Q6boWgEvLUybZYxB-p2lkA",
+  "period_key": "duration_2020-04-01_2020-06-30",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_4_1_2020_To_6_30_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_CKyKfYG1e0mihb5UVp5quA",
+  "period_key": "duration_2020-04-01_2020-06-30",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_4_1_2020_To_6_30_2020_4ZlNvmfQ4Eeg31VdMr4afA",
+  "period_key": "duration_2020-04-01_2020-06-30",
+  "period_type": "duration",
+  "value": "",
+  "numeric_value": null,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": null,
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "As_Of_12_31_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_ZRJ09cHq80mFJFJHXqKBUw",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "2875000",
+  "numeric_value": 2875000.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_12_31_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_ZRJ09cHq80mFJFJHXqKBUw",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "288",
+  "numeric_value": 288.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_12_31_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_utNP2N8xQEK10ANSQ2TBPQ",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "24712",
+  "numeric_value": 24712.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_12_31_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_6RiZqUp_9Uizr_Mgmt6yYg",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "-2200",
+  "numeric_value": -2200.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_12_31_2020_ne3L52b7QEq9OT1L487XkQ",
+  "period_key": "instant_2020-12-31",
+  "period_type": "instant",
+  "value": "22800",
+  "numeric_value": 22800.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "rocru:UnitsIssuedDuringPeriodSharesNewIssues",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_FUSc4X4CGkirE5AKEhQhNw",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "11500000",
+  "numeric_value": 11500000.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesNewIssues",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_Ux41RrlXDESREpk1_yJ86Q",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "11500000",
+  "numeric_value": 11500000.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueNewIssues",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_Ux41RrlXDESREpk1_yJ86Q",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "1150",
+  "numeric_value": 1150.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueNewIssues",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_ngv2vwJaFkOSpdnNIQt7Nw",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "112186638",
+  "numeric_value": 112186638.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueNewIssues",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_qPJyPIt8iUKZaxRHpjSyzA",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueNewIssues",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_FUSc4X4CGkirE5AKEhQhNw",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "112187788",
+  "numeric_value": 112187788.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "rocru:UnitsIssuedDuringPeriodSharesNewIssues",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_Ux41RrlXDESREpk1_yJ86Q",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "408000",
+  "numeric_value": 408000.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "rocru:UnitsIssuedDuringPeriodValueNewIssues",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_Ux41RrlXDESREpk1_yJ86Q",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "41",
+  "numeric_value": 41.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "rocru:UnitsIssuedDuringPeriodValueNewIssues",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_ngv2vwJaFkOSpdnNIQt7Nw",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "3988159",
+  "numeric_value": 3988159.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "rocru:UnitsIssuedDuringPeriodValueNewIssues",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_qPJyPIt8iUKZaxRHpjSyzA",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "rocru:UnitsIssuedDuringPeriodValueNewIssues",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_FUSc4X4CGkirE5AKEhQhNw",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "3988200",
+  "numeric_value": 3988200.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "rocru:CommonStockSubjectToPossibleRedemptionShares",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_Ux41RrlXDESREpk1_yJ86Q",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "11117004",
+  "numeric_value": 11117004.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "rocru:CommonStockSubjectToPossibleRedemptionValue",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_Ux41RrlXDESREpk1_yJ86Q",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "1113",
+  "numeric_value": 1113.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "rocru:CommonStockSubjectToPossibleRedemptionValue",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_ngv2vwJaFkOSpdnNIQt7Nw",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "111168926",
+  "numeric_value": 111168926.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "rocru:CommonStockSubjectToPossibleRedemptionValue",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_qPJyPIt8iUKZaxRHpjSyzA",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "rocru:CommonStockSubjectToPossibleRedemptionValue",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_FUSc4X4CGkirE5AKEhQhNw",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "111170039",
+  "numeric_value": 111170039.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_ngv2vwJaFkOSpdnNIQt7Nw",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_qPJyPIt8iUKZaxRHpjSyzA",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "-28740",
+  "numeric_value": -28740.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_1_1_2021_To_3_31_2021_FUSc4X4CGkirE5AKEhQhNw",
+  "period_key": "duration_2021-01-01_2021-03-31",
+  "period_type": "duration",
+  "value": "-28740",
+  "numeric_value": -28740.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "As_Of_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_YC13g29BGUC5QH6Enyn8WQ",
+  "period_key": "instant_2021-03-31",
+  "period_type": "instant",
+  "value": "3665996",
+  "numeric_value": 3665996.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_YC13g29BGUC5QH6Enyn8WQ",
+  "period_key": "instant_2021-03-31",
+  "period_type": "instant",
+  "value": "366",
+  "numeric_value": 366.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_XgBUwCwomkq7hpUtUR89Mw",
+  "period_key": "instant_2021-03-31",
+  "period_type": "instant",
+  "value": "5030583",
+  "numeric_value": 5030583.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_3_31_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_bpkmk-SLBkOLjmRL8qVgOA",
+  "period_key": "instant_2021-03-31",
+  "period_type": "instant",
+  "value": "-30940",
+  "numeric_value": -30940.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_3_31_2021_o8vqauh7KE2GeOI5hyYYEQ",
+  "period_key": "instant_2021-03-31",
+  "period_type": "instant",
+  "value": "5000009",
+  "numeric_value": 5000009.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "rocru:CommonStockSubjectToPossibleRedemptionShares",
+  "context_ref": "Duration_4_1_2021_To_6_30_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_dgvJPv5J-kWS8uP7zrzVWw",
+  "period_key": "duration_2021-04-01_2021-06-30",
+  "period_type": "duration",
+  "value": "-58397",
+  "numeric_value": -58397.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "rocru:CommonStockSubjectToPossibleRedemptionValue",
+  "context_ref": "Duration_4_1_2021_To_6_30_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_dgvJPv5J-kWS8uP7zrzVWw",
+  "period_key": "duration_2021-04-01_2021-06-30",
+  "period_type": "duration",
+  "value": "-6",
+  "numeric_value": -6.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "rocru:CommonStockSubjectToPossibleRedemptionValue",
+  "context_ref": "Duration_4_1_2021_To_6_30_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_5I3FvB6P8Ui2YR8j13yjZg",
+  "period_key": "duration_2021-04-01_2021-06-30",
+  "period_type": "duration",
+  "value": "-583964",
+  "numeric_value": -583964.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "rocru:CommonStockSubjectToPossibleRedemptionValue",
+  "context_ref": "Duration_4_1_2021_To_6_30_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_Jqbb46F8yka-8UPlIf7rHg",
+  "period_key": "duration_2021-04-01_2021-06-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "rocru:CommonStockSubjectToPossibleRedemptionValue",
+  "context_ref": "Duration_4_1_2021_To_6_30_2021_aBEbotjQbk2b7LAbOBRglQ",
+  "period_key": "duration_2021-04-01_2021-06-30",
+  "period_type": "duration",
+  "value": "-583970",
+  "numeric_value": -583970.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_4_1_2021_To_6_30_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_5I3FvB6P8Ui2YR8j13yjZg",
+  "period_key": "duration_2021-04-01_2021-06-30",
+  "period_type": "duration",
+  "value": "0",
+  "numeric_value": 0.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_4_1_2021_To_6_30_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_Jqbb46F8yka-8UPlIf7rHg",
+  "period_key": "duration_2021-04-01_2021-06-30",
+  "period_type": "duration",
+  "value": "-583968",
+  "numeric_value": -583968.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_4_1_2021_To_6_30_2021_aBEbotjQbk2b7LAbOBRglQ",
+  "period_key": "duration_2021-04-01_2021-06-30",
+  "period_type": "duration",
+  "value": "-583968",
+  "numeric_value": -583968.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "As_Of_6_30_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember__bjyAIFESUaSvv7ZhxZEKw",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "3724393",
+  "numeric_value": 3724393.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_6_30_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember__bjyAIFESUaSvv7ZhxZEKw",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "372",
+  "numeric_value": 372.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_6_30_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_SZH_mgWwekSip3mmsI-9EA",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "5614547",
+  "numeric_value": 5614547.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_6_30_2021_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_RjankXVuNkCQOD6h_h4Wxw",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "-614908",
+  "numeric_value": -614908.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_6_30_2021__xyv38RhwkGCqDhA4G3fmg",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "5000011",
+  "numeric_value": 5000011.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "As_Of_12_31_2019_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_kIEYlyr9ykSAHqamcka4dA",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "2875000",
+  "numeric_value": 2875000.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_12_31_2019_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_kIEYlyr9ykSAHqamcka4dA",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "288",
+  "numeric_value": 288.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_12_31_2019_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_ychsT0BA0U2ljbzGYZepww",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "24712",
+  "numeric_value": 24712.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_12_31_2019_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_C2nZY658qUSgCJp1pZmURw",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "-1225",
+  "numeric_value": -1225.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_12_31_2019_M2CAUk1qlkCHrpVd1hPdFQ",
+  "period_key": "instant_2019-12-31",
+  "period_type": "instant",
+  "value": "23775",
+  "numeric_value": 23775.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_1_1_2020_To_3_31_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_rqhjkK9zl0280GvPZrkl5g",
+  "period_key": "duration_2020-01-01_2020-03-31",
+  "period_type": "duration",
+  "value": "-85",
+  "numeric_value": -85.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "rocru:NetLoss",
+  "context_ref": "Duration_1_1_2020_To_3_31_2020_R7-GU6aex0yRW2h-6Rr4rQ",
+  "period_key": "duration_2020-01-01_2020-03-31",
+  "period_type": "duration",
+  "value": "-85",
+  "numeric_value": -85.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "As_Of_3_31_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_jB3D7df2vUmfh380Oi1Iwg",
+  "period_key": "instant_2020-03-31",
+  "period_type": "instant",
+  "value": "2875000",
+  "numeric_value": 2875000.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_3_31_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_jB3D7df2vUmfh380Oi1Iwg",
+  "period_key": "instant_2020-03-31",
+  "period_type": "instant",
+  "value": "288",
+  "numeric_value": 288.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_3_31_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_e5aKTIUEIkWqilucRsWxTA",
+  "period_key": "instant_2020-03-31",
+  "period_type": "instant",
+  "value": "24712",
+  "numeric_value": 24712.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_3_31_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_7HhK_1Cy70mxzz1eOZNQdA",
+  "period_key": "instant_2020-03-31",
+  "period_type": "instant",
+  "value": "-1310",
+  "numeric_value": -1310.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_3_31_2020_h78FfKxRw027A2LFnEPAGg",
+  "period_key": "instant_2020-03-31",
+  "period_type": "instant",
+  "value": "23690",
+  "numeric_value": 23690.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "As_Of_6_30_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_HWdW6tL590WXEKKnH_e3aw",
+  "period_key": "instant_2020-06-30",
+  "period_type": "instant",
+  "value": "2875000",
+  "numeric_value": 2875000.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_6_30_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_CommonStockMember_HWdW6tL590WXEKKnH_e3aw",
+  "period_key": "instant_2020-06-30",
+  "period_type": "instant",
+  "value": "288",
+  "numeric_value": 288.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:CommonStockMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_6_30_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_AdditionalPaidInCapitalMember_EpGN7eFCBkq-7HvPDoxu-w",
+  "period_key": "instant_2020-06-30",
+  "period_type": "instant",
+  "value": "24712",
+  "numeric_value": 24712.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:AdditionalPaidInCapitalMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_6_30_2020_us-gaap_StatementEquityComponentsAxis_us-gaap_RetainedEarningsMember_L7VsAFThwUuCNe1WmFsYfA",
+  "period_key": "instant_2020-06-30",
+  "period_type": "instant",
+  "value": "-1310",
+  "numeric_value": -1310.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:StatementEquityComponentsAxis": "us-gaap:RetainedEarningsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockholdersEquity",
+  "context_ref": "As_Of_6_30_2020_Hu187wQraUKJtV8P3juU8Q",
+  "period_key": "instant_2020-06-30",
+  "period_type": "instant",
+  "value": "23690",
+  "numeric_value": 23690.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "0",
+  "is_dimensioned": false,
+  "dimensions": {}
+ },
+ {
+  "concept": "rocru:UnitsIssuedDuringPeriodSharesNewIssues",
+  "context_ref": "Duration_3_5_2021_To_3_5_2021_us-gaap_SubsidiarySaleOfStockAxis_us-gaap_IPOMember_3k5Zl2TUTEarXRAVccjaMA",
+  "period_key": "duration_2021-03-05_2021-03-05",
+  "period_type": "duration",
+  "value": "11500000",
+  "numeric_value": 11500000.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:SubsidiarySaleOfStockAxis": "us-gaap:IPOMember"
+  }
+ },
+ {
+  "concept": "rocru:UnitsIssuedDuringPeriodSharesNewIssues",
+  "context_ref": "Duration_3_5_2021_To_3_5_2021_us-gaap_SubsidiarySaleOfStockAxis_us-gaap_OverAllotmentOptionMember_k53yZAjil0-J5ZGrI4mX8Q",
+  "period_key": "duration_2021-03-05_2021-03-05",
+  "period_type": "duration",
+  "value": "1500000",
+  "numeric_value": 1500000.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:SubsidiarySaleOfStockAxis": "us-gaap:OverAllotmentOptionMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesNewIssues",
+  "context_ref": "Duration_2_1_2019_To_2_28_2019_us-gaap_RelatedPartyTransactionAxis_rocru_FounderSharesMember_zGI9ikdBFUqT21EdXZcFqQ",
+  "period_key": "duration_2019-02-01_2019-02-28",
+  "period_type": "duration",
+  "value": "100",
+  "numeric_value": 100.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:RelatedPartyTransactionAxis": "rocru:FounderSharesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodSharesNewIssues",
+  "context_ref": "Duration_2_1_2021_To_2_28_2021_us-gaap_RelatedPartyTransactionAxis_rocru_FounderSharesMember_25V6QzFy1kOT6GUoguc4IA",
+  "period_key": "duration_2021-02-01_2021-02-28",
+  "period_type": "duration",
+  "value": "35233",
+  "numeric_value": 35233.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "0",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:RelatedPartyTransactionAxis": "rocru:FounderSharesMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "As_Of_6_30_2021_us-gaap_ContingentConsiderationByTypeAxis_rocru_BlockerOwnerConsiderationMember_qf1F5AAjikSDqpoPaCKaKw",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "6111111",
+  "numeric_value": 6111111.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:ContingentConsiderationByTypeAxis": "rocru:BlockerOwnerConsiderationMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "As_Of_6_30_2021_us-gaap_ContingentConsiderationByTypeAxis_rocru_FlowThroughSellerConsiderationMember_6rucO68FoUyChCV4YbZ2pg",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "6111111",
+  "numeric_value": 6111111.0,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "INF",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:ContingentConsiderationByTypeAxis": "rocru:FlowThroughSellerConsiderationMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "As_Of_6_30_2021_us-gaap_ContingentConsiderationByTypeAxis_rocru_BlockerOwnerEarnoutSharesMember_us-gaap_StatementClassOfStockAxis_us-gaap_CommonClassAMember_w2ISmfZ2PU2xGsf5r5LFMA",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "3333333.33",
+  "numeric_value": 3333333.33,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "2",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:ContingentConsiderationByTypeAxis": "rocru:BlockerOwnerEarnoutSharesMember",
+   "us-gaap:StatementClassOfStockAxis": "us-gaap:CommonClassAMember"
+  }
+ },
+ {
+  "concept": "us-gaap:SharesIssued",
+  "context_ref": "As_Of_6_30_2021_us-gaap_ContingentConsiderationByTypeAxis_rocru_EarnoutCommonUnitsMember_D1BjC6CDAESHXpf3MWtDHA",
+  "period_key": "instant_2021-06-30",
+  "period_type": "instant",
+  "value": "2777777.78",
+  "numeric_value": 2777777.78,
+  "unit_ref": "Unit_Standard_shares_hKRp_za_eky-38DG5bLsCw",
+  "currency": null,
+  "decimals": "2",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:ContingentConsiderationByTypeAxis": "rocru:EarnoutCommonUnitsMember"
+  }
+ },
+ {
+  "concept": "us-gaap:StockIssuedDuringPeriodValueNewIssues",
+  "context_ref": "Duration_1_1_2021_To_6_30_2021_us-gaap_BusinessAcquisitionAxis_rocru_MergerAgreementWithMergerSubAndQualtekMember_us-gaap_SubsidiarySaleOfStockAxis_rocru_PipeSubscriptionAgreementsMember_8fAuOaGWOUaFVyFAvhoZAg",
+  "period_key": "duration_2021-01-01_2021-06-30",
+  "period_type": "duration",
+  "value": "66100000",
+  "numeric_value": 66100000.0,
+  "unit_ref": "Unit_Standard_USD_QhqTu1STDUW5aS-rpnPsWw",
+  "currency": "USD",
+  "decimals": "-5",
+  "is_dimensioned": true,
+  "dimensions": {
+   "us-gaap:BusinessAcquisitionAxis": "rocru:MergerAgreementWithMergerSubAndQualtekMember",
+   "us-gaap:SubsidiarySaleOfStockAxis": "rocru:PipeSubscriptionAgreementsMember"
+  }
+ }
+]

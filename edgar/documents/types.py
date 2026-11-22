@@ -2,6 +2,7 @@
 Type definitions for the HTML parser.
 """
 
+import dataclasses
 import re
 from dataclasses import dataclass
 from enum import Enum, auto
@@ -156,6 +157,9 @@ class XBRLFact:
     scale: Optional[str] = None
     format: Optional[str] = None
     sign: Optional[str] = None
+    # @precision as filed (significant digits), the alternative to decimals
+    # that XBRL 2.1 §4.6.6 allows. It was dropped, leaving no stated accuracy.
+    precision: Optional[str] = None
 
     # escape="true" means the fact's value IS the child markup rather than the
     # text flattened out of it; continued_at names the next ix:continuation in
@@ -170,15 +174,27 @@ class XBRLFact:
     # Additional metadata
     metadata: Optional[Dict[str, Any]] = None
 
+    # The filed id attribute, and the ids of the ix:footnotes an
+    # ix:relationship links this fact to (keys of Document.xbrl_footnotes).
+    # The same names the XBRL instance path's Fact uses, so the two paths
+    # join by id (GH #1756).
+    fact_id: Optional[str] = None
+    footnotes: List[str] = dataclasses.field(default_factory=list)
+
+    # Whether the filer marked the fact xsi:nil, the same source flag as
+    # edgar.xbrl.models.Fact.is_nil (GH #1757). A nil fact has no value: its
+    # content is kept as filed, untransformed, and numeric_value is None.
+    is_nil: bool = False
+
     @property
     def numeric_value(self) -> Optional[float]:
         """Get numeric value if applicable.
 
         Only a fact with a unit (ix:nonFraction) is numeric. An ix:nonNumeric
         identifier such as a CIK parses as a float but is text (GH #1755), the
-        same rule the instance parser applies.
+        same rule the instance parser applies. A nil fact has no value.
         """
-        if not self.unit_ref:
+        if not self.unit_ref or self.is_nil:
             return None
         try:
             # Remove commas and convert
@@ -203,12 +219,16 @@ class XBRLFact:
             'scale': self.scale,
             'format': self.format,
             'sign': self.sign,
+            'precision': self.precision,
             'escape': self.escape,
             'continued_at': self.continued_at,
             'context': self.context,
             'unit': self.unit,
             'is_numeric': self.is_numeric,
-            'numeric_value': self.numeric_value
+            'numeric_value': self.numeric_value,
+            'fact_id': self.fact_id,
+            'footnotes': list(self.footnotes),
+            'is_nil': self.is_nil,
         }
 
 

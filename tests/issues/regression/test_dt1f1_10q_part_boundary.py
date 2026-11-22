@@ -183,7 +183,12 @@ def test_gs_10q_resolves_its_part_ii_sections():
     #   - every number in the old text is still present IN ORDER, with 2 added;
     #   - the first and last 80 characters are byte-identical, so no boundary moved;
     #   - part_ii_item_1 and part_ii_item_6 are byte-identical, as prose should be.
-    assert len(sections["part_i_item_1"].text()) == 627581  # +137: table cells no longer fused (edgartools-wzgu)
+    #
+    # GH #1847 then shrank part_i_item_1 by 80, from 627,581: empty display:none
+    # spacer cells no longer take a grid slot, so one market-making revenue table
+    # lost a dead padding column. The 68,281 words are identical and in the same
+    # order, and the first and last 80 characters are byte-identical.
+    assert len(sections["part_i_item_1"].text()) == 627501
     assert len(sections["part_i_item_2"].text()) == 398100  # tables rendered cell by cell (edgartools-wzgu)
 
     assert sections["part_ii_item_1"].text().startswith("Item 1. Legal Proceedings")
@@ -211,7 +216,7 @@ def test_gs_10q_lookups_answer_without_any_legacy_fallback():
     # have started depending on the Part II marker to resolve anything.
     # Count re-pinned for edgartools-kq2q and again for -3cis; see the note in the
     # test above for why this number went up and then back down.
-    assert len(report.get_item_with_part("Part I", "Item 1")) == 627581  # +137: table cells no longer fused (edgartools-wzgu)
+    assert len(report.get_item_with_part("Part I", "Item 1")) == 627501  # -80: hidden spacer column gone (GH #1847)
 
 
 def test_signatures_bounds_the_last_item_on_other_filings_too():
