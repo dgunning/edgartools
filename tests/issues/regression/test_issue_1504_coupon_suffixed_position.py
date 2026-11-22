@@ -47,7 +47,6 @@ def test_a_roll_up_without_principal_stays_unknown():
     assert _type_coupon_suffixed(row) is row
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_phenixfin_keeps_its_delayed_draw_loan():
     """Ground truth: PhenixFIN 10-Q for 2026-06-30, accession 0001213900-26-085667."""
@@ -59,7 +58,6 @@ def test_phenixfin_keeps_its_delayed_draw_loan():
         (Decimal('221625'), Decimal('225132'), Decimal('225000'), 'Senior Secured Delayed Draw Term Loan')]
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_hercules_roll_ups_stay_excluded():
     """Hercules' 10-Q for 2024-09-30, accession 0001280784-24-000026, files 52 roll-ups ending in a percent."""

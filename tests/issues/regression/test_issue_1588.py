@@ -55,7 +55,6 @@ def test_local_data_mode_keeps_the_bundle_first(lookups, monkeypatch):
     assert find_company_cik("NEWCO") == 222
 
 
-@pytest.mark.network
 def test_xom_resolves_to_exxonmobil_holdings():
     # SEC's company_tickers.json maps XOM to CIK 2115436 (read 2026-10-20)
     assert find_cik("XOM") == 2115436

@@ -73,7 +73,6 @@ def _xbrl_only(**filing):
     return filing.xbrl()
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_mge_operating_revenue_total_is_revenue_not_electric():
     """MGE Energy 10-Q Q2 2026, 0001193125-26-333969 ($K): Total Operating Revenues 161,195."""

@@ -54,7 +54,6 @@ def test_percent_change_column_is_not_a_fact():
 
 
 @pytest.mark.regression
-@pytest.mark.network
 @pytest.mark.vcr
 def test_issue_1780_home_bancorp_year_ago_column():
     # Home Bancorp 8-K 0001436425-25-000016, EX-99.1 condensed income statement (thousands):

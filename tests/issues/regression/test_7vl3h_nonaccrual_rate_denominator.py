@@ -45,7 +45,6 @@ def test_identifier_rows_are_summed_only_without_a_balance_sheet_total():
     assert _portfolio_total_fair_value(facts, '2023-12-31') == (None, None)
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_main_street_rate_uses_its_balance_sheet_total():
     """Ground truth: Main Street Capital 10-K for 2024-12-31, accession 0001396440-25-000018."""

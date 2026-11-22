@@ -190,7 +190,6 @@ def test_main_street_reports_no_breakdown():
 
 # ---------------------------------------------------------------- network
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_fsk_has_holding_industries_and_a_separate_breakdown():
     """FS KKR 10-K for 2025-12-31, accession 0001628280-26-011734.

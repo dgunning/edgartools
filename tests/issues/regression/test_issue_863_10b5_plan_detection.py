@@ -132,7 +132,6 @@ def test_aff10b5_one_checkbox_flows_through_xml_parsing_end_to_end():
     assert summary.has_10b5_1_plan is False
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_problem2_real_pre_checkbox_filing_resolves_via_per_transaction_footnotes():
     """End-to-end on the reported Problem 2 filing: AAPL insider Form 4 (2022).

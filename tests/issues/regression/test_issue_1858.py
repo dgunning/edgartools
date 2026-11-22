@@ -181,7 +181,6 @@ def test_existing_groups_do_not_gain_a_basis_key():
 # Network (cassettes): real filers
 # --------------------------------------------------------------------------- #
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_oracle_fy2026_cash_interest_and_taxes_paid():
     """The documented example in edgar/standardization/README.md, run as written."""
@@ -210,7 +209,6 @@ def test_oracle_fy2026_cash_interest_and_taxes_paid():
     assert _concept(facts, "interest_paid_gross", period="2026-FY") is None
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_johnson_and_johnson_fy2025_net_and_gross_interest_differ():
     from edgar import Company
@@ -223,7 +221,6 @@ def test_johnson_and_johnson_fy2025_net_and_gross_interest_differ():
     assert net["period_end"] == gross["period_end"] == date(2025, 12, 28)
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_boeing_fy2025_interest_paid_is_none_where_only_gross_is_reported():
     from edgar import Company
