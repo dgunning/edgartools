@@ -4,7 +4,6 @@ from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from contextlib import closing
 from datetime import date, datetime, timedelta
-from functools import partial
 from itertools import islice
 from operator import index
 from pathlib import Path
@@ -561,13 +560,14 @@ def _download_filing_submissions(filings: 'Filings',
     Each one goes to <data_directory>/<YYYYMMDD of its filing date>/<accession>.nc,
     where the local readers look first. Returns the number of filings stored.
     """
-    download_one = partial(
-        _download_single_submission,
-        data_directory=data_directory,
-        overwrite_existing=overwrite_existing,
-        compress=compress,
-        compression_level=compression_level,
-    )
+    def download_one(filing):
+        return _download_single_submission(
+            filing,
+            data_directory=data_directory,
+            overwrite_existing=overwrite_existing,
+            compress=compress,
+            compression_level=compression_level,
+        )
 
     def download_results():
         if max_workers == 1:
@@ -580,12 +580,12 @@ def _download_filing_submissions(filings: 'Filings',
         for filing in filings:
             filings_by_accession[filing.accession_no].append(filing)
 
-        stopping = Event()
+        stop_requested = Event()
 
         def download_group(group):
             results = []
             for filing in group:
-                if stopping.is_set():
+                if stop_requested.is_set():
                     break
                 results.append(download_one(filing))
             return results
@@ -594,17 +594,25 @@ def _download_filing_submissions(filings: 'Filings',
         pool = ThreadPoolExecutor(max_workers=max_workers)
         try:
             # Submit one batch at a time so a failure leaves later filings untouched.
-            while batch := list(islice(groups, max_workers)):
-                futures = [pool.submit(download_group, group) for group in batch]
+            while True:
+                batch = list(islice(groups, max_workers))
+                if not batch:
+                    break
+
+                futures = []
+                for group in batch:
+                    futures.append(pool.submit(download_group, group))
+
                 for future in as_completed(futures):
                     yield from future.result()
         finally:
-            stopping.set()
+            stop_requested.set()
             pool.shutdown(cancel_futures=True)
 
     stored = skipped = 0
     not_found = []
     try:
+        # Run the downloader's cleanup even if progress handling is interrupted.
         with closing(download_results()) as results:
             for outcome, accession in tqdm(results, desc='Downloading filing(s)', total=len(filings),
                                            disable=disable_progress):
