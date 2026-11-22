@@ -1,0 +1,1 @@
+**A fund series or class with more than 100 filings was missing one.** Paging through SEC's series filing list skipped position 100, so `Fund("VEXMX")`'s series returned 485 of its 486 filings and silently dropped a 2023 24F-2NT. The second page now starts at 100.
