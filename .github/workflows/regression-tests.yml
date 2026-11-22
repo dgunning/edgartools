@@ -62,7 +62,6 @@ on:
       - 'tests/_vcr_safety.py'
       - 'pyproject.toml'
 
-# Cancel superseded regression runs on the same ref.
 # Read-only by default. Jobs that write (the red-main `report` job) grant
 # their own job-level permissions; nothing else inherits the token's write scope.
 permissions:
@@ -70,9 +69,15 @@ permissions:
   pull-requests: read
   issues: read
 
+# Cancel a superseded pull-request run when a newer commit lands on the same PR.
+# Pushes to main are never cancelled, matching python-hatch-workflow.yml: PRs
+# merge without being up to date with main, so the post-merge run is the only
+# check that the combination works. With `true` here, the run for 4f710f58 (the
+# merge that added the Regression gate) was cancelled 15 seconds in by the next
+# merge, and that commit never got a regression run.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name != 'push' }}
 
 jobs:
   # Decides whether this change can affect the regression suite. Only pull
