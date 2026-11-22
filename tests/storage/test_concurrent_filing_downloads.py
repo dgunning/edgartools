@@ -1,11 +1,12 @@
 """Tests for bounded submission downloads (GitHub issue #1985)."""
 
 from datetime import date
-from threading import Barrier, Lock
+from threading import Barrier, Event, Lock
 
+import numpy as np
 import pyarrow as pa
 import pytest
-from httpx2 import Response
+from httpx2 import Request, Response
 
 from edgar._filings import Filings
 from edgar.exceptions import ValidationError
@@ -34,6 +35,7 @@ def test_concurrent_submissions_respect_worker_limit_and_skip_duplicates(monkeyp
 
     # Track how many fake downloads are active at once.
     lock = Lock()
+    # Four distinct accessions let both batches reach the barrier in pairs.
     pair = Barrier(2, timeout=5)
     active = 0
     requested = []
@@ -54,7 +56,7 @@ def test_concurrent_submissions_respect_worker_limit_and_skip_duplicates(monkeyp
     monkeypatch.setattr("edgar.httprequests.get_with_retry", fetch)
 
     download_filings(filings=filings, data_directory=str(tmp_path), compress=False,
-                     disable_progress=True, max_workers=2)
+                     disable_progress=True, max_workers=np.int64(2))
 
     # Check that each distinct filing was requested exactly once.
     expected = {filing.text_url: filing.accession_no for filing in filings}
@@ -64,6 +66,55 @@ def test_concurrent_submissions_respect_worker_limit_and_skip_duplicates(monkeyp
     for url, accession in expected.items():
         saved_file = tmp_path / "20241101" / f"{accession}.nc"
         assert saved_file.read_bytes() == url.encode()
+
+
+@pytest.mark.parametrize("failure", [RuntimeError, KeyboardInterrupt])
+def test_concurrent_submissions_stop_after_error(monkeypatch, tmp_path, caplog, failure):
+    accessions = [f"0000320193-24-{number:06d}" for number in range(1, 7)]
+    filings = Filings(pa.table({
+        "accession_number": accessions,
+        "filing_date": [date(2024, 11, 1)] * len(accessions),
+        "cik": [320193] * len(accessions),
+        "form": ["10-K"] * len(accessions),
+        "company": ["Apple Inc."] * len(accessions),
+    }))
+    missing_url = filings[0].text_url
+    failing_url = filings[1].text_url
+    second_started = Event()
+    missing_counted = Event()
+    requested = []
+
+    def fetch(url):
+        requested.append(url)
+        if url == missing_url:
+            return Response(404, request=Request("GET", url))
+        if url == failing_url:
+            second_started.set()
+            assert missing_counted.wait(timeout=5)
+            if failure is RuntimeError:
+                raise RuntimeError("stop downloading")
+            return Response(404, request=Request("GET", url))
+        return Response(200, content=b"should never be stored")
+
+    def track_progress(results, **kwargs):
+        for result in results:
+            yield result
+            if result == ("not_found", accessions[0]):
+                assert second_started.wait(timeout=5)
+                missing_counted.set()
+                if failure is KeyboardInterrupt:
+                    raise KeyboardInterrupt("stop downloading")
+
+    monkeypatch.setattr("edgar.httprequests.get_with_retry", fetch)
+    monkeypatch.setattr("edgar.storage._local.tqdm", track_progress)
+
+    with pytest.raises(failure, match="stop downloading"):
+        download_filings(filings=filings, data_directory=str(tmp_path), compress=False,
+                         disable_progress=True, max_workers=2)
+
+    assert sorted(requested) == sorted([missing_url, failing_url])
+    assert f"1 of 6 filings were not found at SEC: {accessions[0]}" in caplog.text
+    assert not list(tmp_path.rglob("*.nc*"))
 
 
 # Check that invalid worker counts raise a validation error.

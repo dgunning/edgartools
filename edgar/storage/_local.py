@@ -1,9 +1,14 @@
 import os
 import re
-from concurrent.futures import ThreadPoolExecutor
+from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import closing
 from datetime import date, datetime, timedelta
 from functools import partial
+from itertools import islice
+from operator import index
 from pathlib import Path
+from threading import Event
 from typing import TYPE_CHECKING, List, Optional, Union
 
 if TYPE_CHECKING:
@@ -294,14 +299,24 @@ def download_edgar_data(submissions: bool = True,
              "download_filings('YYYY-MM-DD')")
 
 
-def _validate_download_options(source: str, max_workers: int, filings: Optional['Filings']) -> None:
+def _validate_download_options(source: str, max_workers: int, filings: Optional['Filings']) -> int:
     if source not in ('submission', 'feed'):
         raise ValidationError(f"source must be 'submission' or 'feed', not {source!r}")
 
-    if isinstance(max_workers, bool) or not isinstance(max_workers, int) or max_workers < 1:
+    if isinstance(max_workers, bool):
+        raise ValidationError("max_workers must be a positive integer")
+    try:
+        max_workers = index(max_workers)
+    except TypeError as exc:
+        raise ValidationError("max_workers must be a positive integer") from exc
+    if max_workers < 1:
         raise ValidationError("max_workers must be a positive integer")
     if max_workers != 1 and (filings is None or source != 'submission'):
         raise ValidationError("max_workers greater than 1 requires filings and source='submission'")
+    if max_workers > 10:
+        log.warning('max_workers=%d may increase time spent waiting on the shared SEC rate limiter.',
+                    max_workers)
+    return max_workers
 
 
 def download_filings(filing_date: Optional[str] = None,
@@ -358,8 +373,9 @@ def download_filings(filing_date: Optional[str] = None,
             Ignored without ``filings``.
         max_workers: Maximum concurrent downloads for selected submissions. Defaults to 1.
             All workers share the HTTP rate limiter. Daily feed downloads require 1.
+            Each active worker can hold a full submission in memory.
     """
-    _validate_download_options(source, max_workers, filings)
+    max_workers = _validate_download_options(source, max_workers, filings)
 
     if not data_directory:
         data_directory = get_edgar_data_directory() / 'filings'
@@ -522,9 +538,9 @@ def _download_single_submission(filing: 'Filing',
     folder = data_directory / filing_date.strftime('%Y%m%d')
     folder.mkdir(parents=True, exist_ok=True)
     target = folder / f"{accession_number}.nc"
-    partial = folder / f"{accession_number}.nc.part"
-    partial.write_bytes(response.content)
-    partial.replace(target)
+    part_path = folder / f"{accession_number}.nc.part"
+    part_path.write_bytes(response.content)
+    part_path.replace(target)
     stale = Path(f"{target}.gz")
     if compress:
         compress_filing(target, compression_level=compression_level)
@@ -559,37 +575,51 @@ def _download_filing_submissions(filings: 'Filings',
                 yield download_one(filing)
             return
 
-        # groups duplicate filings together
-        filings_by_accession = {}
+        # Workers for the same accession would collide on the .part file.
+        filings_by_accession = defaultdict(list)
         for filing in filings:
-            accession = filing.accession_no
-            if accession not in filings_by_accession:
-                filings_by_accession[accession] = []
-            filings_by_accession[accession].append(filing)
+            filings_by_accession[filing.accession_no].append(filing)
+
+        stopping = Event()
 
         def download_group(group):
-            return [download_one(filing) for filing in group]
+            results = []
+            for filing in group:
+                if stopping.is_set():
+                    break
+                results.append(download_one(filing))
+            return results
 
-        with ThreadPoolExecutor(max_workers=max_workers) as pool:
-            for results in pool.map(download_group, filings_by_accession.values()):
-                yield from results
+        groups = iter(filings_by_accession.values())
+        pool = ThreadPoolExecutor(max_workers=max_workers)
+        try:
+            # Submit one batch at a time so a failure leaves later filings untouched.
+            while batch := list(islice(groups, max_workers)):
+                futures = [pool.submit(download_group, group) for group in batch]
+                for future in as_completed(futures):
+                    yield from future.result()
+        finally:
+            stopping.set()
+            pool.shutdown(cancel_futures=True)
 
     stored = skipped = 0
     not_found = []
-    results = download_results()
-    for outcome, accession in tqdm(results, desc='Downloading filing(s)', total=len(filings),
-                                   disable=disable_progress):
-        if outcome == "stored":
-            stored += 1
-        elif outcome == "skipped":
-            skipped += 1
-        else:
-            not_found.append(accession)
+    try:
+        with closing(download_results()) as results:
+            for outcome, accession in tqdm(results, desc='Downloading filing(s)', total=len(filings),
+                                           disable=disable_progress):
+                if outcome == "stored":
+                    stored += 1
+                elif outcome == "skipped":
+                    skipped += 1
+                else:
+                    not_found.append(accession)
+    finally:
+        if not_found:
+            log.warning('%d of %d filings were not found at SEC: %s', len(not_found), len(filings),
+                        ', '.join(not_found[:10]) + (' ...' if len(not_found) > 10 else ''))
 
     log.info('Download complete. Stored %d filings, skipped %d already stored.', stored, skipped)
-    if not_found:
-        log.warning('%d of %d filings were not found at SEC: %s', len(not_found), len(filings),
-                    ', '.join(not_found[:10]) + (' ...' if len(not_found) > 10 else ''))
     return stored
 
 

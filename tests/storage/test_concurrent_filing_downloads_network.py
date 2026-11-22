@@ -9,9 +9,20 @@ from edgar import httpclient
 from edgar._filings import Filings
 
 
+@pytest.fixture
+def uncached_http_manager(monkeypatch):
+    # Use the real client and rate limiter while bypassing any existing HTTP cache.
+    manager = httpclient.get_http_mgr(cache_enabled=False)
+    monkeypatch.setattr(httpclient, "HTTP_MGR", manager)
+    try:
+        yield
+    finally:
+        manager.close()
+
+
 @pytest.mark.network
 @pytest.mark.vcr
-def test_downloads_known_submissions_with_two_workers(monkeypatch, tmp_path):
+def test_downloads_known_submissions_with_two_workers(uncached_http_manager, tmp_path):
     submissions = [
         ("0000077476-17-000050", date(2017, 10, 13), "pepsicoform8-koctober2017.htm"),
         ("0000077476-26-000042", date(2026, 9, 17), "pep-20260917.htm"),
@@ -23,9 +34,6 @@ def test_downloads_known_submissions_with_two_workers(monkeypatch, tmp_path):
         "form": ["8-K", "8-K"],
         "company": ["PEPSICO INC", "PEPSICO INC"],
     }))
-    # Use the real client and rate limiter while bypassing any existing HTTP cache.
-    monkeypatch.setattr(httpclient, "HTTP_MGR", httpclient.get_http_mgr(cache_enabled=False))
-
     filings.download(data_directory=str(tmp_path), compress=False, disable_progress=True,
                      source="submission", max_workers=2)
 

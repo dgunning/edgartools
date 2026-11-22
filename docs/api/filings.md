@@ -453,6 +453,8 @@ Download all filings in collection to local storage.
 - `disable_progress`: Disable progress display
 - `source`: Use `"submission"` (default) to fetch each selected filing individually, or `"feed"` to download the daily feed files containing them.
 - `max_workers`: Maximum concurrent downloads for the selected filings when `source="submission"`. Defaults to 1. For `source="feed"`, leave this at 1.
+  Each active worker can hold a full submission in memory. On an error or Ctrl-C,
+  the downloader stops scheduling work and lets active downloads finish.
 
 **Example:**
 ```python
