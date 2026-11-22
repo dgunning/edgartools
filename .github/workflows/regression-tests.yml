@@ -210,9 +210,9 @@ jobs:
         # No coverage on pull requests: the Codecov upload below skips them, so
         # it would be computed and thrown away (edgartools-07lk.26 step B).
         if [ "${{ github.event_name }}" = "pull_request" ]; then
-          pytest -m 'regression and not fast' --enable-cache
+          pytest -rs -m 'regression and not fast' --enable-cache
         else
-          pytest --cov --cov-report=xml -m 'regression and not fast' --enable-cache
+          pytest -rs --cov --cov-report=xml -m 'regression and not fast' --enable-cache
         fi
 
     # `always()`: a run that failed still warmed the cache, and the next one
