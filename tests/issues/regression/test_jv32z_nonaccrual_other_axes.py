@@ -67,7 +67,6 @@ def test_one_affiliation_line_is_not_taken_for_the_total():
     assert _affiliation_split_total(facts, '2024-12-31') is None
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_triplepoint_fy2024_non_accruals_match_its_footnote():
     """Ground truth: TriplePoint Venture Growth 10-K for 2024-12-31, accession 0001580345-25-000005."""
@@ -85,7 +84,6 @@ def test_triplepoint_fy2024_non_accruals_match_its_footnote():
     ]
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_oxford_square_fy2024_non_accruals_match_its_footnote():
     """Ground truth: Oxford Square Capital 10-K for 2024-12-31, accession 0001213900-25-020801."""

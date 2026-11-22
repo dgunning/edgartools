@@ -61,14 +61,12 @@ class TestIssue1778TotalRevenue:
         release = _earnings_with(["Subscription revenue", "Services revenue"], [7.0, 3.0])
         assert release.get_key_metrics()["revenue"] == pytest.approx(7_000_000)
 
-    @pytest.mark.network
     @pytest.mark.vcr
     def test_alta_equipment_q2_2025_total_revenues(self):
         # Alta Equipment Group 8-K EX-99.1, accession 0000950170-25-105056: Total revenues 481.2 (millions)
         earnings = find("0000950170-25-105056").obj().earnings
         assert earnings.get_key_metrics()["revenue"] == pytest.approx(481_200_000)
 
-    @pytest.mark.network
     @pytest.mark.vcr
     def test_caterpillar_total_sales_and_revenues(self):
         # Caterpillar 8-K, accession 0000018230-26-000040: Total sales and revenues 20,543 (millions)

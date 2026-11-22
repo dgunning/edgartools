@@ -143,7 +143,6 @@ def _xbrl_only(**filing):
     return filing.xbrl()
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_caterpillar_reports_profit_attributable_to_its_shareholders():
     """Caterpillar 10-K FY2025, 0000018230-26-000008 ($M): Profit of consolidated and

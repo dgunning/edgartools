@@ -204,7 +204,6 @@ def test_xbrl_attachments_reuse_the_sniffed_instance():
     assert reads["cato2023012810K_htm.xml"] == 1
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_cato_10q_selective_download_live(monkeypatch):
     """CATO's 10-Q for the quarter ended 2026-08-01 (0001562762-26-000100), threshold forced to 0."""

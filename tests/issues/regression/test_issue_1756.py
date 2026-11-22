@@ -123,7 +123,6 @@ def test_a_document_without_footnotes_has_an_empty_lookup():
     assert doc.xbrl_footnotes == {}
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_bmy_cost_of_goods_keeps_its_amortization_footnote():
     """The reported filing: BMY 10-Q Q1 2026, 0000014272-26-000010."""

@@ -48,7 +48,6 @@ def test_caption_before_a_wrapper_div_sets_the_scale():
 
 
 @pytest.mark.regression
-@pytest.mark.network
 @pytest.mark.vcr
 def test_issue_1779_cardlytics_thousands():
     # Cardlytics 8-K 0001666071-25-000124, EX-99.1 statement of operations
@@ -61,7 +60,6 @@ def test_issue_1779_cardlytics_thousands():
 
 
 @pytest.mark.regression
-@pytest.mark.network
 @pytest.mark.vcr
 def test_issue_1779_gartner_millions():
     # Gartner 8-K 0000749251-25-000044, EX-99.1 "(Unaudited; in millions, except per share data)":
@@ -141,7 +139,6 @@ def test_scale_caption_after_the_title_rows_sets_the_scale():
 
 
 @pytest.mark.regression
-@pytest.mark.network
 @pytest.mark.vcr
 def test_issue_1779_snail_whole_dollars():
     # Snail 8-K 0001641172-25-024808, EX-99.1 ex99-1.htm statement of operations, no scale caption:
