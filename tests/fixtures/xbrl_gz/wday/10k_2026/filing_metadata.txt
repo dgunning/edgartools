@@ -1,0 +1,6 @@
+ticker=WDAY
+accession=0001327811-26-000014
+form=10-K
+filing_date=2026-03-06
+cik=1327811
+company=Workday, Inc.

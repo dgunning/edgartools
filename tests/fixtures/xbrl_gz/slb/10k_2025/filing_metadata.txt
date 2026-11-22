@@ -1,0 +1,6 @@
+ticker=SLB
+accession=0001193125-26-021017
+form=10-K
+filing_date=2026-01-23
+cik=87347
+company=SLB LIMITED/NV

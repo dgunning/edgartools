@@ -1,0 +1,6 @@
+ticker=BSX
+accession=0000885725-26-000010
+form=10-K
+filing_date=2026-02-17
+cik=885725
+company=BOSTON SCIENTIFIC CORP
