@@ -6,9 +6,11 @@ name: Regression Tests
 on:
   # Manual trigger
   workflow_dispatch:
-  # Run weekly on Sundays
+  # Nightly, an hour after python-hatch-workflow.yml's full run. This is the
+  # run that measures the lane's coverage for Codecov; pushes to main skip it
+  # (see "Run regression tests" below).
   schedule:
-    - cron: '0 8 * * 0'
+    - cron: '0 8 * * *'
 
   # PRE-MERGE GATE. The required context is the `Regression gate` job at the end
   # of this file, never the `regression` job itself.
@@ -207,12 +209,16 @@ jobs:
     # tests and the few marked neither fast nor network.
     - name: Run regression tests
       run: |
-        # No coverage on pull requests: the Codecov upload below skips them, so
-        # it would be computed and thrown away (edgartools-07lk.26 step B).
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          pytest -rs -m 'regression and not fast' --enable-cache
-        else
+        # Coverage only on the nightly and manual runs. It roughly doubles the
+        # lane: push runs on main took 25-37 min with it (November 2026) against
+        # 12-19 min for the same tests on a pull request without it, and a push
+        # run's job is to say quickly whether main is red. Codecov carries the
+        # `regression` flag forward between nightly uploads (codecov.yml), so
+        # commits in between keep this lane's lines in their total.
+        if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
           pytest -rs --cov --cov-report=xml -m 'regression and not fast' --enable-cache
+        else
+          pytest -rs -m 'regression and not fast' --enable-cache
         fi
 
     # `always()`: a run that failed still warmed the cache, and the next one
@@ -224,12 +230,13 @@ jobs:
         path: ${{ github.workspace }}/.edgar-data/_tcache
         key: edgar-tcache-regression-${{ github.run_id }}
 
-    # Not on pull requests. Codecov posts its own commit statuses, and a partial
-    # `regression`-flag upload from an advisory lane would put a red check on a
-    # pull request that this workflow is explicitly not allowed to influence.
+    # Only from the runs that measured coverage: the nightly and manual ones.
+    # Never on pull requests: Codecov posts its own commit statuses, and a
+    # partial `regression`-flag upload would put a red check on a pull request
+    # that only the `Regression gate` job may decide.
     - name: Upload coverage reports
       uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
-      if: matrix.python-version == '3.12' && github.event_name != 'pull_request'
+      if: matrix.python-version == '3.12' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
       with:
         files: coverage.xml
         fail_ci_if_error: false
