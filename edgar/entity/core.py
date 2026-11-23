@@ -245,6 +245,23 @@ class Entity(SecFiler):
 
         self._data = None
 
+    def __eq__(self, other):
+        """
+        Two entities are equal when they are the same registrant: the same CIK.
+
+        ``Company("XOM") == Company(2115436)`` whether it was found by ticker or
+        CIK, and an ``Entity`` equals a ``Company`` with its CIK. A successor and
+        its predecessor are different registrants and are never equal:
+        ``Company("XOM") != Company(34088)``, though one's history includes the
+        other's.
+        """
+        if not isinstance(other, Entity):
+            return NotImplemented
+        return self.cik == other.cik
+
+    def __hash__(self):
+        return hash((Entity, self.cik))
+
     @property
     def cik(self) -> int:
         """Get the CIK number for this entity."""

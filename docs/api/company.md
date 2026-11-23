@@ -44,6 +44,22 @@ company = Company("0000320193")  # Zero-padded
 - `CompanyNotFoundError`: When company cannot be found
 - `ValueError`: When identifier format is invalid
 
+### Equality
+
+Two `Company` objects are equal when they have the same CIK, however they were
+created, so they de-duplicate in a set and work as dictionary keys. An `Entity`
+equals a `Company` with its CIK. A company is never equal to a bare CIK number.
+
+```python
+Company("AAPL") == Company(320193)                  # True
+len({Company("AAPL"), Company("0000320193")})       # 1
+Company("AAPL") == 320193                           # False: compare company.cik
+```
+
+A successor registrant and its predecessor have different CIKs, so they are not
+equal: `Company("XOM") != Company(34088)`, though `Company("XOM").get_filings()`
+includes the predecessor's filings. See [Successor registrants](#successor-registrants).
+
 ## Core Properties
 
 ### Basic Information
