@@ -35,6 +35,11 @@ patterns:
       company = Company("AAPL")           # Ticker or CIK
       filings = company.get_filings(form="10-K")
       filing = filings[0]                 # Select by index
+    note: |
+      A ticker that moved to a new registrant (holding company, redomicile) keeps its
+      history: Company("XOM").get_filings() includes Exxon Mobil Corp's (CIK 34088)
+      filings, and the cik column names each row's filer. predecessors=False gives
+      the new CIK alone; company.predecessor / company.successor walk the link.
 
   - name: Working with a Filing
     when: After selecting a filing

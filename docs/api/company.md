@@ -204,7 +204,9 @@ def get_filings(
     is_xbrl: bool = None,
     is_inline_xbrl: bool = None,
     sort_by: str = "filing_date",
-    trigger_full_load: bool = False
+    trigger_full_load: bool = True,
+    report_date: str = None,
+    predecessors: bool = True
 ) -> EntityFilings
 ```
 
@@ -220,7 +222,9 @@ def get_filings(
 - `is_xbrl`: Filter for XBRL filings
 - `is_inline_xbrl`: Filter for inline XBRL filings
 - `sort_by`: Sort field (default: "filing_date")
-- `trigger_full_load`: Load all filing details upfront
+- `trigger_full_load`: Load the company's whole filing history, not just its most recent filings
+- `report_date`: Filter by exact period of report (YYYY-MM-DD)
+- `predecessors`: Include the filings of the registrant this company succeeded (default: True). See [Successor registrants](#successor-registrants)
 
 **Returns:** `EntityFilings` - Collection of company filings
 
@@ -247,6 +251,49 @@ xbrl_filings = company.get_filings(is_xbrl=True)
 # Exclude amendments
 original_only = company.get_filings(amendments=False)
 ```
+
+### Successor registrants
+
+When a company forms a holding company or redomiciles, SEC gives its ticker to a
+new CIK and leaves the earlier filings under the old one. `Company("XOM")` has been
+ExxonMobil Holdings Corp (CIK 2115436) since 2026-07-01; its 10-Ks up to FY2025
+were filed by Exxon Mobil Corp (CIK 34088).
+
+For successions reviewed by hand, `get_filings()`, `latest_tenk`, `get_financials()`
+and `get_facts()` include the predecessor's history. The company's `cik`, `name` and
+`tickers` stay the new registrant's, and the filings gain `cik` and `company`
+columns naming the filer of each row.
+
+```python
+xom = Company("XOM")
+tenk = xom.get_filings(form="10-K").latest()
+tenk.cik                                    # 34088: filed by Exxon Mobil Corp
+xom.get_filings(predecessors=False)         # the new CIK's own filings only
+
+xom.predecessor                             # Company(34088)
+Company(34088).successor                    # Company(2115436)
+```
+
+A predecessor contributes what it filed before the succession, plus 10-K, 10-Q,
+20-F and 40-F reports for periods that ended before it. A filing made under both
+CIKs is listed once. A succession that has not been reviewed is not merged: when
+such a company has no annual report, `get_financials()` emits a
+`PredecessorHistoryWarning` naming its 8-K12B.
+
+#### predecessor
+```python
+@property
+def predecessor(self) -> Optional[Company]
+```
+The registrant this company succeeded, or `None`.
+
+#### successor
+```python
+@property
+def successor(self) -> Optional[Company]
+```
+The registrant that continues this one, or `None`. `Company(34088)` itself is
+unchanged: its own filings and facts, with no tickers.
 
 ### latest()
 
