@@ -37,14 +37,19 @@ def filings_table(*rows):
 
 
 class _Data:
-    def __init__(self, name, table):
-        self.name, self.table = name, table
+    def __init__(self, cik, name, table):
+        self.cik, self.name, self.table = cik, name, table
 
-    def get_filings(self, form=None, **query):
+    def get_filings(self, form=None, report_date=None, accession_number=None, **query):
+        pc = pa.compute
         table = self.table
         if form:
-            table = table.filter(pa.compute.is_in(table['form'], pa.array([form] if isinstance(form, str) else form)))
-        return EntityFilings(table, cik=0, company_name=self.name)
+            table = table.filter(pc.is_in(table['form'], pa.array([form] if isinstance(form, str) else form)))
+        if report_date:
+            table = table.filter(pc.equal(table['reportDate'], report_date))
+        if accession_number:
+            table = table.filter(pc.equal(table['accession_number'], accession_number))
+        return EntityFilings(table, cik=self.cik, company_name=self.name)
 
 
 class _OfflineCompany(Company):
@@ -52,8 +57,8 @@ class _OfflineCompany(Company):
 
     def __init__(self, cik, name, table, predecessors=()):
         super().__init__(cik)
-        self._offline = _Data(name, table)
-        self.__dict__['_predecessor_companies'] = list(predecessors)
+        self._offline = _Data(cik, name, table)
+        self.__dict__['_predecessor_chain'] = list(predecessors)
 
     @property
     def data(self):
@@ -83,7 +88,7 @@ def xom(monkeypatch):
         ("0002115436-26-000020", "2026-11-02", "10-Q", "2026-09-30"),
         ("0000034088-26-000093", "2026-08-03", "10-Q", "2026-06-30"),
         ("0001193125-26-291990", "2026-07-01", "8-K12B", ""),
-    ), predecessors=[old])
+    ), predecessors=[(SUCCESSION, old)])
     return new
 
 
@@ -128,7 +133,7 @@ def test_get_financials_reads_the_predecessor_10k_without_a_warning(xom, monkeyp
     monkeypatch.setattr('edgar.entity.filings.EntityFiling.obj', lambda self: read.append(self.accession_no) or self)
     with warnings.catch_warnings():
         warnings.simplefilter("error", PredecessorHistoryWarning)
-        xom.latest_tenk
+        _ = xom.latest_tenk
     assert read == ["0000034088-26-000045"]
 
 
@@ -175,19 +180,29 @@ def test_an_unreviewed_succession_gets_a_hint_not_a_merge(monkeypatch):
 
 @pytest.mark.network
 def test_xom_10ks_include_exxon_mobil_corp():
-    """ExxonMobil Holdings Corp (2115436) has filed no 10-K; Exxon Mobil Corp (34088)
-    filed 31, the latest 0000034088-26-000045 on 2026-02-18 for FY2025."""
+    """Exxon Mobil Corp (34088) filed the FY2016-FY2025 10-Ks; the FY2025 one is
+    0000034088-26-000045. Pinned by period, so ExxonMobil Holdings Corp's own
+    first 10-K does not change what this checks."""
     xom = Company("XOM")
     tenks = xom.get_filings(form="10-K", amendments=False)
-    assert len(tenks) == 31
-    latest = tenks.latest()
-    assert (latest.accession_no, latest.cik) == ("0000034088-26-000045", EXXON_MOBIL)
-    assert sum(1 for d in tenks.data['reportDate'].to_pylist() if "2016" <= d[:4] <= "2025") == 10
-    assert len(xom.get_filings(form="10-K", predecessors=False)) == 0
+    by_period = {f.report_date: (f.accession_no, f.cik) for f in tenks if f.report_date}
+    assert by_period["2025-12-31"] == ("0000034088-26-000045", EXXON_MOBIL)
+    assert all(by_period[f"{year}-12-31"][1] == EXXON_MOBIL for year in range(2016, 2026))
+    own = xom.get_filings(form="10-K", amendments=False, predecessors=False)
+    assert all(f.cik == XOM_HOLDINGS and f.report_date > "2026-06-30" for f in own)
     # The 2026-08-03 10-Q was filed under both CIKs: listed once, as the successor's
     tenq = xom.get_filings(accession_number="0000034088-26-000093")
     assert len(tenq) == 1 and tenq[0].cik == XOM_HOLDINGS
     assert Company(EXXON_MOBIL).successor.cik == XOM_HOLDINGS
+
+
+@pytest.mark.network
+def test_northwestern_quarter_reported_by_both_is_listed_once():
+    """NorthWestern Corp (73088) and NorthWestern Energy Group (1993004) each filed a
+    10-Q for the quarter to 2023-09-30 on 2023-10-27, after the 2023-10-02
+    succession, under separate accessions. The successor's is kept."""
+    tenqs = Company(1993004).get_filings(form="10-Q", report_date="2023-09-30")
+    assert [(f.accession_no, f.cik) for f in tenqs] == [("0001993004-23-000006", 1993004)]
 
 
 @pytest.mark.network
@@ -205,3 +220,73 @@ def test_a_company_without_a_predecessor_is_unchanged():
     filings = apple.get_filings(form="10-K")
     assert filings.data.equals(apple.get_filings(form="10-K", predecessors=False).data)
     assert 'cik' not in filings.data.column_names
+
+
+@pytest.mark.fast
+def test_a_period_both_reported_after_the_succession_is_the_successors(xom):
+    # The successor also files a 10-Q for 2026-03-31, the period of the predecessor's late one
+    own = xom._offline.table
+    xom._offline.table = pa.concat_tables([own, filings_table(("0002115436-26-000005", "2026-07-20", "10-Q", "2026-03-31"))])
+    rows = [(f.accession_no, f.cik) for f in xom.get_filings(form="10-Q", report_date="2026-03-31")]
+    # The predecessor's 2026-05-04 report, filed before the succession, is not the same filing
+    assert rows == [("0002115436-26-000005", XOM_HOLDINGS), ("0000034088-26-000067", EXXON_MOBIL)]
+
+
+@pytest.mark.fast
+def test_an_accession_the_successor_has_does_not_read_the_predecessor(xom):
+    predecessor = xom._predecessor_companies[0]
+    predecessor._offline = None   # any read of the predecessor would fail
+    found = xom.get_filings(accession_number="0000034088-26-000093")
+    assert [f.cik for f in found] == [XOM_HOLDINGS]
+
+
+@pytest.mark.fast
+def test_an_empty_successor_table_still_merges(xom):
+    # The empty-submissions path types size/isXBRL as strings; SEC's JSON infers int64
+    empty = pa.table({name: pa.array([], pa.string()) if name in ('size', 'isXBRL', 'isInlineXBRL') else
+                      pa.array([], COMPANY_FILINGS_SCHEMA.field(name).type) for name in COMPANY_FILINGS_SCHEMA.names})
+    xom._offline.table = empty
+    predecessor = xom._predecessor_companies[0]
+    table = predecessor._offline.table
+    for name in ('size', 'isXBRL', 'isInlineXBRL'):
+        i = table.schema.get_field_index(name)
+        table = table.set_column(i, name, pa.array([1] * table.num_rows, pa.int64()))
+    predecessor._offline.table = table
+    assert len(xom.get_filings(form="10-K")) == 2
+
+
+@pytest.mark.fast
+def test_filter_by_the_companys_ticker_keeps_predecessor_rows(xom, monkeypatch):
+    monkeypatch.setattr('edgar.reference.tickers.find_cik', lambda ticker: XOM_HOLDINGS if ticker == "XOM" else None)
+    filings = xom.get_filings()
+    assert len(filings.filter(ticker="XOM")) == len(filings)
+    assert len(filings.filter(ticker="AAPL")) == 0
+    # A registrant's own filings, which have no cik column, filter by ticker and CIK too
+    own = xom.get_filings(predecessors=False)
+    assert len(own.filter(ticker="XOM")) == len(own)
+    assert len(own.filter(cik=XOM_HOLDINGS)) == len(own)
+    assert len(own.filter(cik=EXXON_MOBIL)) == 0
+
+
+@pytest.mark.fast
+def test_business_category_reads_only_the_registrants_own_forms(xom):
+    assert xom._get_form_types() == {"10-Q", "8-K12B"}
+
+
+@pytest.mark.fast
+def test_facts_chain_continues_past_a_predecessor_without_facts(monkeypatch):
+    from edgar.entity import entity_facts
+    from edgar.exceptions import CompanyFactsNotFoundError
+    monkeypatch.setattr(successors, '_get_predecessor_lookup', lambda: {
+        3: Predecessor(2, "2025-01-01", "x"), 2: Predecessor(1, "2020-01-01", "y")})
+    oldest = {"facts": {"us-gaap": {"Assets": {"units": {"USD": [{"end": "2019-12-31", "val": 7}]}}}}}
+
+    def load(cik):
+        if cik == 2:
+            raise CompanyFactsNotFoundError(cik=cik)
+        return oldest
+
+    monkeypatch.setattr(entity_facts, '_load_company_facts_json', load)
+    with pytest.warns(UserWarning, match="CIK 2, the predecessor of CIK 3"):
+        merged = entity_facts._with_predecessor_facts(3, {"facts": {}})
+    assert merged["facts"]["us-gaap"]["Assets"]["units"]["USD"] == [{"end": "2019-12-31", "val": 7}]

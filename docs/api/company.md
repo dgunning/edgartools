@@ -266,8 +266,8 @@ columns naming the filer of each row.
 
 ```python
 xom = Company("XOM")
-tenk = xom.get_filings(form="10-K").latest()
-tenk.cik                                    # 34088: filed by Exxon Mobil Corp
+fy2025 = xom.get_filings(form="10-K", report_date="2025-12-31")[0]
+fy2025.cik                                  # 34088: filed by Exxon Mobil Corp
 xom.get_filings(predecessors=False)         # the new CIK's own filings only
 
 xom.predecessor                             # Company(34088)

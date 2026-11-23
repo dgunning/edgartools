@@ -58,7 +58,8 @@ def test_company_predecessor_is_the_old_registrant():
 
 
 def test_get_financials_points_a_successor_to_its_predecessor(no_annual_reports):
-    with pytest.warns(PredecessorHistoryWarning, match=r"succeeded CIK 34088 on 2026-07-01.*Company\(34088\)\.get_financials\(\)"):
+    # get_filings() already includes the predecessor (GH #2034), so the warning says both were searched
+    with pytest.warns(PredecessorHistoryWarning, match=r"neither has CIK 34088, which it succeeded on 2026-07-01.*full history of both"):
         assert Company(XOM_HOLDINGS).get_financials() is None
 
 

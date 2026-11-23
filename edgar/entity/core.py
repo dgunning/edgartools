@@ -28,6 +28,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar._filings import Filings
+from edgar.core import listify
 from edgar.company_reports import TenK, TenQ
 from edgar.display.styles import get_style, SYMBOLS
 from edgar.entity.data import Address, CompanyData, EntityData
@@ -454,32 +455,42 @@ class Entity(SecFiler):
         filings = self.data.get_filings(**query)
         if not predecessors or filings is None:
             return filings
-        chain = get_predecessor_chain(self.cik)
-        if not chain:
+        if not self._predecessor_chain:
             return filings
-        return self._with_predecessor_filings(filings, chain, query)
+        # An accession lookup the registrant's own filings answered needs nothing more
+        if accession_number and len(filings) >= len(set(listify(accession_number))):
+            return filings
+        return self._with_predecessor_filings(filings, query)
 
     @cached_property
-    def _predecessor_companies(self) -> List['Company']:
-        """The registrants this one continues, nearest first, as Company objects."""
-        return [Company(predecessor.cik) for predecessor in get_predecessor_chain(self.cik)]
+    def _predecessor_chain(self) -> List[Tuple[Predecessor, 'Company']]:
+        """The registrants this one continues, nearest first, with their successions."""
+        return [(predecessor, Company(predecessor.cik)) for predecessor in get_predecessor_chain(self.cik)]
 
-    def _with_predecessor_filings(self, filings: 'EntityFilings', chain: List[Predecessor],
-                                  query: dict) -> 'EntityFilings':
+    @property
+    def _predecessor_companies(self) -> List['Company']:
+        return [company for _, company in self._predecessor_chain]
+
+    def _with_predecessor_filings(self, filings: 'EntityFilings', query: dict) -> 'EntityFilings':
         """This registrant's filings followed by those its predecessors filed for it (GH #2034)."""
-        from edgar.entity.filings import EntityFilings, before_succession, with_filer
+        from edgar.entity.filings import EntityFilings, before_succession, with_filer, without_reports_of
         tables = [with_filer(filings.data, self.cik, self.name)]
         seen = pa.array(filings.data['accession_number'].to_pylist(), pa.string())
-        for predecessor, company in zip(chain, self._predecessor_companies, strict=True):
+        for predecessor, company in self._predecessor_chain:
             own = company.get_filings(**query, predecessors=False)
             if own is None or own.empty:
                 continue
             table = before_succession(own.data, predecessor.effective_date)
             # A filing made under both CIKs is listed once, as the successor's
             table = table.filter(pc.invert(pc.is_in(table['accession_number'], value_set=seen)))
+            # So is a period both registrants reported on separately after the succession
+            table = without_reports_of(table, tables[0], predecessor.effective_date)
             seen = pa.concat_arrays([seen, table['accession_number'].combine_chunks().cast(pa.string())])
             tables.append(with_filer(table, company.cik, company.name))
-        merged = pa.concat_tables(tables)
+        # An empty submissions list is built with a fixed schema that differs from the one
+        # inferred from SEC's JSON (string sizes, naive acceptance times): cast empties to match.
+        schema = next((t.schema for t in tables if t.num_rows), tables[0].schema)
+        merged = pa.concat_tables([t if t.schema == schema else t.cast(schema) for t in tables])
         sort_by = query.get('sort_by') or [('filing_date', 'descending')]
         return EntityFilings(merged.sort_by(sort_by), cik=self.cik, company_name=self.name)
 
@@ -695,10 +706,12 @@ class Company(Entity):
         if predecessor is None:
             self._hint_unreviewed_succession(problem)
             return
+        # get_filings() already searched the predecessor's recent filings too (GH #2034),
+        # so sending the user to Company(predecessor) would find nothing more.
         warnings.warn(
-            f"{self.name} (CIK {self.cik}) {problem}. It succeeded CIK {predecessor.cik} on "
-            f"{predecessor.effective_date}, and the earlier filings are under that CIK: "
-            f"Company({predecessor.cik}).{method}() or company.predecessor.{method}()",
+            f"{self.name} (CIK {self.cik}) {problem}, and neither has CIK {predecessor.cik}, which it "
+            f"succeeded on {predecessor.effective_date}, among its recent filings. "
+            f"company.get_filings(form='10-K') searches the full history of both.",
             PredecessorHistoryWarning,
             stacklevel=3,
         )
@@ -888,7 +901,8 @@ class Company(Entity):
         Returns:
             Set of form type strings (e.g., {'10-K', '10-Q', '8-K'})
         """
-        filings = self.get_filings(trigger_full_load=False)
+        # This registrant's own forms: a predecessor's would classify another filer
+        filings = self.get_filings(trigger_full_load=False, predecessors=False)
         if filings is None or filings.empty:
             return set()
 

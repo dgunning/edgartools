@@ -100,8 +100,10 @@ def _with_predecessor_facts(cik: int, company_facts_json: Dict[str, Any]) -> Dic
         except CompanyFactsNotFoundError:
             warnings.warn(f"No company facts found for CIK {predecessor.cik}, the predecessor of CIK {successor_cik}; "
                           f"facts from before {predecessor.effective_date} are missing.", stacklevel=3)
-            break
-        company_facts_json = merge_predecessor_facts(company_facts_json, predecessor_json, predecessor.effective_date)
+        else:
+            company_facts_json = merge_predecessor_facts(company_facts_json, predecessor_json,
+                                                         predecessor.effective_date)
+        # A hop with no facts does not end the chain: older registrants may still have them
         successor_cik = predecessor.cik
     return company_facts_json
 

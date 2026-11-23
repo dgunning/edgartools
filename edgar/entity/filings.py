@@ -285,6 +285,23 @@ class EntityFilings(Filings):
         Returns:
             Filtered EntityFilings
         """
+        if ticker:
+            # Entity filings may have no cik column, and merged ones list a successor's
+            # predecessors under their own CIKs, which hold no ticker (GH #2034)
+            from edgar.reference.successors import get_predecessor_chain
+            from edgar.reference.tickers import find_cik
+            ticker_ciks = {c for c in (find_cik(t) for t in listify(ticker)) if c}
+            ticker_ciks |= {p.cik for c in list(ticker_ciks) for p in get_predecessor_chain(c)}
+            if 'cik' in self.data.column_names:
+                cik = sorted(ticker_ciks | {int(c) for c in listify(cik)} if cik else ticker_ciks) or [-1]
+            elif int(self.cik) not in ticker_ciks:
+                return EntityFilings(data=self.data.slice(0, 0), cik=self.cik, company_name=self.company_name)
+            ticker = None
+        if cik and 'cik' not in self.data.column_names:
+            # One registrant's own filings: every row is self.cik
+            if int(self.cik) not in {int(c) for c in listify(cik)}:
+                return EntityFilings(data=self.data.slice(0, 0), cik=self.cik, company_name=self.company_name)
+            cik = None
         # The super filter returns Filings. We want EntityFilings
         res = super().filter(form=form,
                              amendments=amendments,
@@ -715,6 +732,27 @@ def before_succession(data: pa.Table, effective_date: str) -> pa.Table:
         pc.is_in(base_form, value_set=_PERIODIC_FORMS),
         pc.and_(pc.not_equal(report_date, ''), pc.less(report_date, effective_date)))
     return data.filter(pc.fill_null(pc.or_(filed_before, late_periodic), False))
+
+
+def without_reports_of(data: pa.Table, successor: pa.Table, effective_date: str) -> pa.Table:
+    """
+    Drop a predecessor's report filed after the succession for a period the successor reported too.
+
+    NorthWestern Corp and NorthWestern Energy Group each filed a 10-Q for the quarter to
+    2023-09-30 after the 2023-10-02 succession, under separate accession numbers. The
+    successor's is kept. Reports filed before the succession are never dropped.
+    """
+    if data.num_rows == 0 or successor.num_rows == 0:
+        return data
+    reported = {(form, report) for form, report in zip(successor['form'].to_pylist(),
+                                                      successor['reportDate'].to_pylist(), strict=True) if report}
+    if not reported:
+        return data
+    succession = datetime.date.fromisoformat(effective_date)
+    keep = [filed < succession or (form, report) not in reported
+            for form, report, filed in zip(data['form'].to_pylist(), data['reportDate'].to_pylist(),
+                                           data['filing_date'].to_pylist(), strict=True)]
+    return data.filter(pa.array(keep))
 
 
 def with_filer(data: pa.Table, cik: int, company_name: str) -> pa.Table:
