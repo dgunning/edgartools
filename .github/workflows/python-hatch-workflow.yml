@@ -156,10 +156,20 @@ jobs:
     - name: Check the interpreter has the C decimal module
       run: python -c "import sys, _decimal; print(sys.version)"
 
+    # The 3.13 leg (the one pull requests run) also installs the `cloud` and
+    # `data` extras, so the tests that importorskip fsspec, duckdb and zstandard
+    # run instead of skipping: 4 of the 9 skips on 2026-11-22. The 3.11 floor
+    # leg keeps the bare `.[ai]` install, so the library is still tested
+    # without them. 3.15 does too: zstandard has no 3.15 wheel yet (0.25.0), and
+    # building it from source there is not what that leg is for.
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -e ".[ai]"
+        if [ "${{ matrix.python-version }}" = "3.13" ]; then
+          python -m pip install -e ".[ai,cloud,data]"
+        else
+          python -m pip install -e ".[ai]"
+        fi
         python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock pytest-vcr "vcrpy>=8.3.0,<9" freezegun==1.5.1 filelock tqdm responses
 
     # The floor leg installs the declared pandas floor itself, so both majors
