@@ -792,31 +792,37 @@ class DocumentBuilder:
 
     def _process_table_basic(self, element: HtmlElement, style: Style) -> TableNode:
         """Basic table processing without advanced strategy."""
+        from edgar.documents.strategies.table_processing import TableProcessor, _cell_xbrl_fact_ids
+
         table = TableNode(style=style)
 
         # Set config for rendering decisions
         table._config = self.config
 
         # Extract caption
-        caption_elem = element.find('.//caption')
+        caption_elem = TableProcessor._own_section(element, 'caption')
         if caption_elem is not None:
             table.caption = caption_elem.text_content().strip()
 
         # Process rows
-        for tr in element.findall('.//tr'):
+        for tr in TableProcessor._own_rows(element):
+            owned_cells = TableProcessor._own_cells(tr)
+            # Basic mode historically emits data cells before header cells in a mixed row.
+            owned_cells.sort(key=lambda cell: cell.tag == 'th')
             cells = []
-            for td in tr.findall('.//td') + tr.findall('.//th'):
+            for td in owned_cells:
                 cell = Cell(
                     content=td.text_content().strip(),
                     colspan=int(td.get('colspan', '1')),
                     rowspan=int(td.get('rowspan', '1')),
                     is_header=(td.tag == 'th'),
-                    align=td.get('align')
+                    align=td.get('align'),
+                    xbrl_fact_ids=_cell_xbrl_fact_ids(td),
                 )
                 cells.append(cell)
 
             if cells:
-                row = Row(cells=cells, is_header=(tr.find('.//th') is not None))
+                row = Row(cells=cells, is_header=any(cell.is_header for cell in cells))
 
                 # Determine if header or data row
                 if tr.getparent().tag == 'thead' or row.is_header:
