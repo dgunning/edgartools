@@ -163,9 +163,11 @@ jobs:
     # without them. 3.15 does too: zstandard has no 3.15 wheel yet (0.25.0), and
     # building it from source there is not what that leg is for.
     - name: Install dependencies
+      env:
+        PYTHON_VERSION: ${{ matrix.python-version }}
       run: |
         python -m pip install --upgrade pip
-        if [ "${{ matrix.python-version }}" = "3.13" ]; then
+        if [ "$PYTHON_VERSION" = "3.13" ]; then
           python -m pip install -e ".[ai,cloud,data]"
         else
           python -m pip install -e ".[ai]"
