@@ -4,6 +4,7 @@ Filings-related classes for the Entity package.
 This module contains classes related to SEC filings for entities, including
 collections of filings and filing facts.
 """
+import datetime
 import warnings
 from typing import List, Optional, Union
 
@@ -237,9 +238,14 @@ class EntityFilings(Filings):
 
     def get_filing_at(self, item: int):
         """Get the filing at the specified index."""
+        # Filings merged across a successor and its predecessors name each row's filer (GH #2034)
+        if 'cik' in self.data.column_names:
+            cik, company = self.data['cik'][item].as_py(), self.data['company'][item].as_py()
+        else:
+            cik, company = self.cik, self.company_name
         return EntityFiling(
-            cik=self.cik,
-            company=self.company_name,
+            cik=cik,
+            company=company,
             form=self.data['form'][item].as_py(),
             filing_date=self.data['filing_date'][item].as_py(),
             report_date=self.data['reportDate'][item].as_py(),
@@ -687,6 +693,36 @@ COMPANY_FILINGS_SCHEMA = schema = pa.schema([
             ('primaryDocument', pa.string()),
             ('primaryDocDescription', pa.string())
         ])
+
+# Periodic reports a predecessor may file after the succession for a period before it
+_PERIODIC_FORMS = pa.array(['10-K', '10-Q', '20-F', '40-F', '10-KT', '10-QT', '20-FT'])
+
+
+def before_succession(data: pa.Table, effective_date: str) -> pa.Table:
+    """
+    The rows of a predecessor's filings that belong to its successor's history.
+
+    Everything filed before ``effective_date``, plus periodic reports (and their
+    amendments) for a period that ended before it: Summit Midstream's predecessor
+    filed its 10-Q for the quarter to 2024-06-30 after the 2024-08-01 succession.
+    What the predecessor files afterwards as a subsidiary (8-Ks, Form 4s,
+    prospectuses) stays on its own CIK.
+    """
+    filed_before = pc.less(data['filing_date'], pa.scalar(datetime.date.fromisoformat(effective_date)))
+    base_form = pc.replace_substring(data['form'], pattern='/A', replacement='')
+    report_date = pc.fill_null(data['reportDate'], '')
+    late_periodic = pc.and_(
+        pc.is_in(base_form, value_set=_PERIODIC_FORMS),
+        pc.and_(pc.not_equal(report_date, ''), pc.less(report_date, effective_date)))
+    return data.filter(pc.fill_null(pc.or_(filed_before, late_periodic), False))
+
+
+def with_filer(data: pa.Table, cik: int, company_name: str) -> pa.Table:
+    """Add ``cik`` and ``company`` columns naming the filer of every row."""
+    rows = data.num_rows
+    data = data.append_column('cik', pa.array([int(cik)] * rows, pa.int64()))
+    return data.append_column('company', pa.array([company_name] * rows, pa.string()))
+
 
 def empty_company_filings(cik:IntString, company_name:str):
     """

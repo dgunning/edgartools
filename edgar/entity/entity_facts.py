@@ -87,18 +87,23 @@ def _load_company_facts_json(cik: int) -> Dict[str, Any]:
 
 
 def _with_predecessor_facts(cik: int, company_facts_json: Dict[str, Any]) -> Dict[str, Any]:
-    """Add the history a successor registrant's predecessor filed under its own CIK (GH #1821)."""
-    from edgar.reference.successors import get_predecessor
-    predecessor = get_predecessor(cik)
-    if predecessor is None:
-        return company_facts_json
-    try:
-        predecessor_json = _load_company_facts_json(predecessor.cik)
-    except CompanyFactsNotFoundError:
-        warnings.warn(f"No company facts found for CIK {predecessor.cik}, the predecessor of CIK {cik}; "
-                      f"facts from before {predecessor.effective_date} are missing.", stacklevel=3)
-        return company_facts_json
-    return merge_predecessor_facts(company_facts_json, predecessor_json, predecessor.effective_date)
+    """Add the history a successor registrant's predecessors filed under their own CIKs (GH #1821).
+
+    Follows the whole reviewed chain, nearest predecessor first, each with its own
+    effective date: the same chain ``Company.get_filings()`` follows (GH #2034).
+    """
+    from edgar.reference.successors import get_predecessor_chain
+    successor_cik = cik
+    for predecessor in get_predecessor_chain(cik):
+        try:
+            predecessor_json = _load_company_facts_json(predecessor.cik)
+        except CompanyFactsNotFoundError:
+            warnings.warn(f"No company facts found for CIK {predecessor.cik}, the predecessor of CIK {successor_cik}; "
+                          f"facts from before {predecessor.effective_date} are missing.", stacklevel=3)
+            break
+        company_facts_json = merge_predecessor_facts(company_facts_json, predecessor_json, predecessor.effective_date)
+        successor_cik = predecessor.cik
+    return company_facts_json
 
 
 def merge_predecessor_facts(successor_json: Dict[str, Any], predecessor_json: Dict[str, Any],
