@@ -199,15 +199,16 @@ jobs:
     - name: Check no new test needs the SEC while marked fast
       env:
         GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.number }}
       run: |
         set -euo pipefail
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
+        if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
           # The API, not `git diff`: this checkout is shallow, so no merge base
           # with the target branch exists to diff against. Only test modules
           # (pytest's test_*.py / *_test.py): a helper under tests/ collects
           # nothing, and the audit reads an empty run as a broken one (#1527).
           CHANGED=$(gh api --paginate \
-            "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
+            "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" \
             --jq '.[] | select(.status != "removed") | .filename' \
             | grep -E '^tests/(.*/)?(test_[^/]*|[^/]*_test)\.py$' | tr '\n' ' ' || true)
           if [ -z "$CHANGED" ]; then
@@ -231,12 +232,13 @@ jobs:
       if: github.event_name == 'pull_request'
       env:
         GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.number }}
       run: |
         set -euo pipefail
         gh api --paginate \
-          "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
+          "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" \
           --jq '.[] | {filename, status, patch} | tojson' > "$RUNNER_TEMP/pr_files.jsonl"
-        PR_LABELS=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.number }}/labels" \
+        PR_LABELS=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels" \
           --jq '[.[].name] | join(",")') \
           python scripts/check_upgrade_guide.py "$RUNNER_TEMP/pr_files.jsonl"
 
@@ -256,7 +258,7 @@ jobs:
         # upload below and the Combine Coverage job with its 65% floor run on
         # push), and --cov with branch coverage doubles this step: 273 s vs 577 s
         # locally at 4 workers (edgartools-07lk.26 step B).
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
+        if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
           pytest -rs -n auto -m 'fast'
         else
           pytest -rs -n auto --cov --cov-report=xml -m 'fast'
@@ -288,10 +290,11 @@ jobs:
       if: github.event_name == 'pull_request'
       env:
         GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.number }}
       run: |
         set -euo pipefail
         TRIGGERS=$(gh api --paginate \
-          "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
+          "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" \
           --jq '.[].filename' \
           | grep -E '^(edgar/documents/|tests/fixtures/(parser_corpus|html|parity_gate|heldout_retired)/|tests/meta/test_(boundary_truth|section_self_consistency_ratchet)\.py$|\.github/workflows/python-hatch-workflow\.yml$)' || true)
         if [ -z "$TRIGGERS" ]; then
