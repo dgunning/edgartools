@@ -82,7 +82,6 @@ def vcr_cassette_name():
     return "test_opera_exchange_rate_effect_is_not_the_net_change_in_cash"
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_opera_lease_interest_is_interest_expense(tmp_path):
     """Opera Ltd FY2025 20-F, 0001737450-26-000005, Note 6: interest expense on lease

@@ -35,6 +35,23 @@ patterns:
     note: |
       get_X() returns ONE value. For multi-year data, use income_statement() instead.
 
+  - name: Derive Missing Total Liabilities
+    when: A US GAAP balance sheet omits a standalone liabilities total
+    code: |
+      from edgar.financials import LiabilityDerivationError
+
+      try:
+          result = financials.derive_total_liabilities(period_offset=0)
+          print(result.value, result.currency, result.period)
+          print(result.components, result.identity_inputs)
+      except LiabilityDerivationError as error:
+          print(error.reason)  # Refuses missing, ambiguous or inconsistent inputs
+    note: |
+      Opt-in calculation: non-overlapping filed components must agree exactly
+      with assets less consolidated equity and separately presented temporary equity.
+      Includes accession and both calculation totals. Does not fill get_total_liabilities()
+      or ratios. An existing filed total raises already-reported; use the getter instead.
+
   - name: Multi-Year Revenue or Metrics
     when: Need revenue or any metric for 2-3 years (trend, history)
     code: |

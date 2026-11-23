@@ -1,0 +1,6 @@
+ticker=INTU
+accession=0000896878-26-000037
+form=10-K
+filing_date=2026-09-09
+cik=896878
+company=INTUIT INC.

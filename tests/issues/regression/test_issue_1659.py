@@ -110,7 +110,6 @@ def test_fixture_filings_return_the_filed_stockholders_equity(directory, period_
     assert _filed_equity(financials, period_key) == {Decimal(expected)}
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_starbucks_reports_its_deficit_not_total_assets():
     """Starbucks 10-Q 2026-06-28, 0000829224-26-000130: total shareholders' deficit
@@ -123,7 +122,6 @@ def test_starbucks_reports_its_deficit_not_total_assets():
     assert sbux.get_stockholders_equity(1) == -8096600000
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_novagold_reports_its_uncaptioned_equity_total():
     """NovaGold 10-Q 2026-08-31, 0001171843-26-006530: equity 387,255 thousand

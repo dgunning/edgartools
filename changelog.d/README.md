@@ -6,7 +6,8 @@ Do not edit `CHANGELOG.md` in a pull request. Add one file here instead:
 changelog.d/<id>.<section>.md
 ```
 
-- `<id>`: the bead ID (`xn1u`), issue number (`1244`), or a short slug.
+- `<id>`: the GitHub issue number (`1244`), or a short slug (`fund-class-lookup`) when there is
+  no issue. Never a bead ID: beads are internal and not in a clone. No dots in the id.
 - `<section>`: `added`, `changed`, `deprecated`, `removed`, `fixed`, `security`, or `performance`.
 - Body: the bullet text exactly as it should appear in the changelog — a bold headline
   naming the user-visible defect, then one or two sentences with **one measured value**,
@@ -14,7 +15,7 @@ changelog.d/<id>.<section>.md
   root-cause narrative belongs in the commit message and the PR, not here. The leading
   `- ` is optional. Example:
 
-  `**`get_revenue()` returned a component of revenue instead of the filed total.** Contract revenue was tried before `Revenues`, understating Cato's FY2023 top line by $7.7M of other income. The order now matches `Statement.REVENUE_CONCEPTS`. (GH #1294, bead edgartools-y4yp.2)`
+  `**`get_revenue()` returned a component of revenue instead of the filed total.** Contract revenue was tried before `Revenues`, understating Cato's FY2023 top line by $7.7M of other income. The order now matches `Statement.REVENUE_CONCEPTS`. (GH #1294)`
 
 At release time `python scripts/release/assemble_changelog.py` folds every fragment into
 `[Unreleased]` and deletes it. `--check` validates and previews without changing anything.

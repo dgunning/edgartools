@@ -145,7 +145,6 @@ def test_footnotes_load_from_the_inline_document_on_first_use():
     assert reads == [1]
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_gecc_fy2024_10k_footnotes_come_from_the_inline_document():
     from edgar.bdc import extract_nonaccrual
@@ -173,7 +172,6 @@ def test_gecc_fy2024_10k_footnotes_come_from_the_inline_document():
             if f.footnote_id == NONACCRUAL_FOOTNOTE] == [NONACCRUAL_FOOTNOTE]
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_gecc_10q_instance_footnotes_are_unchanged():
     xbrl = offline_filing(GECC_10Q).xbrl()

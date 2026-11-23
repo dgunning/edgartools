@@ -71,7 +71,6 @@ def test_aal_total_assets_is_the_filed_assets_fact():
     assert financials.get_total_assets() == 61774000000
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_novagold_reports_its_balance_sheet_total():
     """NovaGold 10-Q 2026-08-31, 0001171843-26-006530 (thousands): the uncaptioned
@@ -85,7 +84,6 @@ def test_novagold_reports_its_balance_sheet_total():
     assert novagold.get_current_assets() == 349770000
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_coeur_reports_its_balance_sheet_total():
     """Coeur Mining 10-K 2025-12-31, 0000215466-26-000004 (thousands): TOTAL ASSETS

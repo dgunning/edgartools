@@ -45,7 +45,6 @@ def test_a_real_split_still_adds():
     assert _affiliation_split_total(facts, '2026-06-30') == Decimal('355050000.0')
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_slr_hc_bdc_rate_uses_its_total_once():
     """SLR HC BDC 10-Q for 2026-06-30 (0001193125-26-332723)."""

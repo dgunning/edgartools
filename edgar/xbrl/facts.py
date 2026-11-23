@@ -357,7 +357,8 @@ class FactQuery:
         Args:
             value_filter: Can be:
                 - A callable predicate that takes a value and returns bool
-                - A specific value to match exactly
+                - A string to match the filed text exactly
+                - A number to match the parsed numeric value exactly
                 - A tuple or list of (min, max) for range filtering
 
         Returns:
@@ -379,6 +380,12 @@ class FactQuery:
                         min_val <= f['numeric_value'] <= max_val)
 
             self._filters.append(numeric_range_filter)
+        elif isinstance(value_filter, str):
+            def text_equality_filter(fact):
+                text = fact.get('value')
+                return text == value_filter
+
+            self._filters.append(text_equality_filter)
         else:
             def numeric_equality_filter(f):
                 return ('numeric_value' in f and

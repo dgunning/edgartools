@@ -1,0 +1,6 @@
+ticker=CSX
+accession=0000277948-26-000006
+form=10-K
+filing_date=2026-02-12
+cik=277948
+company=CSX CORP

@@ -78,6 +78,8 @@ class Cell:
     rowspan: int = 1
     is_header: bool = False
     align: Optional[str] = None
+    # IDs on inline facts belonging to this physical cell, in source order.
+    xbrl_fact_ids: tuple[str, ...] = field(default=(), repr=False, compare=False, kw_only=True)
 
     def text(self) -> str:
         """Extract text from cell."""

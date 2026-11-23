@@ -18,7 +18,6 @@ from decimal import Decimal
 import pytest
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_hercules_non_accruals_are_named_by_company():
     """Ground truth: Hercules Capital 10-Q for 2026-06-30, accession 0001280784-26-000042."""
