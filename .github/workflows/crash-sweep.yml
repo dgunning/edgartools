@@ -1,0 +1,68 @@
+# Weekly crash sweep over last week's filings.
+#
+# Draws a stratified sample of the filings SEC published in the last 7 days and runs the
+# user entry points on each (attachments, text, markdown, obj and its rendering, xbrl, the
+# three primary statements). Each new failure signature (exception type, stage, innermost
+# edgar/ frame) becomes one `sweep:crash` issue; the run's scorecard is a comment on one
+# rolling issue. Closing a failure issue is the decision: it is never filed again.
+# See scripts/crash_sweep.py and scripts/scheduled_issues.py.
+
+name: Crash sweep
+
+on:
+  schedule:
+    - cron: '0 9 * * 2'   # Tuesdays 09:00 UTC; Monday's successor scan runs first
+  workflow_dispatch:
+    inputs:
+      days:
+        description: "Filing window in days, ending yesterday"
+        default: "7"
+      size:
+        description: "Filings to draw (shared across form families)"
+        default: "156"
+      dry_run:
+        description: "Print what would be filed instead of filing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: crash-sweep
+  cancel-in-progress: false
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    permissions:
+      contents: read
+      issues: write
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+    - name: Set up Python 3.11
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      with:
+        python-version: "3.11"
+    - name: Install edgartools
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install -e .
+    - name: Sweep and file issues
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        EDGAR_IDENTITY: "S Robinson Robinson@edgar.tools"
+        DAYS: ${{ github.event.inputs.days || '7' }}
+        SIZE: ${{ github.event.inputs.size || '156' }}
+        DRY_RUN: ${{ github.event.inputs.dry_run == 'true' && '--dry-run' || '' }}
+      run: |
+        python scripts/crash_sweep.py --days "$DAYS" --size "$SIZE" --out crash-run \
+          --repo "${{ github.repository }}" $DRY_RUN
+    - name: Keep the run's results
+      if: always()
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+      with:
+        name: crash-sweep-${{ github.run_id }}
+        path: crash-run/
+        retention-days: 90
