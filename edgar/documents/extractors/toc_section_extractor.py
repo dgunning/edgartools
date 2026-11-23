@@ -254,8 +254,11 @@ class SECSectionExtractor:
         self._rescue_item_8_pointer_to_trailing_statements(tree)
         self._bound_sections_at_unlisted_item_headings(tree)
         self._bound_sections_at_part_dividers(tree)
-        self._advance_starts_past_page_furniture(tree)
+        # A heading printed above its TOC anchor claims the start before the
+        # furniture pass walks forward from the anchor and past it (USCB's
+        # Item 8 opened on the auditor's report, its heading in no section).
         self._retreat_starts_to_preceding_own_heading(tree)
+        self._advance_starts_past_page_furniture(tree)
         self._bound_item_4_at_executive_officers(tree)
         self._split_exhibit_index_from_item_16(tree)
         self._split_exhibit_index_from_signatures(tree)
@@ -454,6 +457,29 @@ class SECSectionExtractor:
     _BLOCK_TAGS = ('p', 'div', 'table', 'tr', 'td', 'th', 'li', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
                    'blockquote', 'pre', 'section', 'article', 'header', 'footer', 'center')
 
+    @staticmethod
+    def _holds_text(el) -> bool:
+        """Whether ``el`` holds any non-whitespace text (``&#160;`` counts as whitespace)."""
+        for node in el.iter():
+            if node.text and node.text.strip():
+                return True
+            if node is not el and node.tail and node.tail.strip():
+                return True
+        return False
+
+    @classmethod
+    def _is_container_block(cls, el) -> bool:
+        """Whether ``el`` holds a nested block with text, so its lines are
+        read from those blocks rather than from ``el`` itself.
+
+        A nested block with no text does not count. Absolutely positioned
+        filings put a ``display:inline-block`` spacer holding ``&#160;``
+        inside most lines (Henry Schein's FY2023 10-K), and a line holding
+        one is still a leaf: treating it as a container skipped its text
+        entirely, so a closing line of content read as nothing.
+        """
+        return any(cls._holds_text(d) for d in el.iterdescendants(*cls._BLOCK_TAGS))
+
     def _advance_starts_past_page_furniture(self, tree) -> None:
         """Start a section at its heading, or its first block of content, not
         at page furniture.
@@ -559,7 +585,7 @@ class SECSectionExtractor:
                         seen.append((el, 'other'))
                         skipping = el
                         continue
-                if next(el.iterdescendants(*block_tags), None) is not None:
+                if self._is_container_block(el):
                     continue  # a container: look inside it
                 content = el
                 break
@@ -587,6 +613,8 @@ class SECSectionExtractor:
     # Empty blocks (anchor markers, rules, blank lines) the backward walk may
     # step over between a TOC anchor and the heading printed above it.
     _PRECEDING_HEADING_MAX_STEPS = 6
+    # Lines of text the backward walk may read before giving up on the heading.
+    _PRECEDING_HEADING_MAX_LINES = 8
 
     def _retreat_starts_to_preceding_own_heading(self, tree) -> None:
         """Start a section at its own heading when the TOC anchor sits after it.
@@ -597,8 +625,12 @@ class SECSectionExtractor:
         The section opened on the balance sheet and its heading fell into no
         section (GH #1622).
 
-        Only an empty anchor block qualifies (an anchor inside its heading is
-        :func:`heading_block`'s case), and only when no own heading follows it.
+        The anchor is an empty block, or the first line of the section's body:
+        Henry Schein's FY2022 and FY2023 10-Ks put Item 9B's anchor on "Not
+        applicable." under "ITEM 9B. Other Information", so the heading fell
+        into Item 9A. An anchor inside its heading is :func:`heading_block`'s
+        case, and an anchor that is itself the heading or holds several
+        blocks is left alone. Only when no own heading follows the anchor.
         Walk back over empty blocks to the first block with text; when that is
         a short line opening on this section's own "Item N", start there, and
         end any section that ended at this anchor at the heading instead. A
@@ -630,16 +662,29 @@ class SECSectionExtractor:
         if not starts or heading_block(starts[0]) is not None:
             return None
         anchor = starts[0]
-        if self._collapsed_text(anchor):
+        anchor_text = self._collapsed_text(anchor)
+        if anchor_text and (is_own_heading(anchor_text, own_item)
+                            or self._is_container_block(anchor)):
             return None
         following = self._first_text_block(anchor)
         if following is not None and is_own_heading(self._collapsed_text(following), own_item):
             return None
-        heading = self._preceding_text_block(anchor, anchor_ids - {boundary.anchor_id})
+        # Step back over a few lines of the section's own body when the anchor
+        # sits below them (USCB puts Item 2's anchor on its last line, six
+        # lines under "Item 2. Properties"); any other section's anchor stops it.
+        stop_ids = anchor_ids - {boundary.anchor_id}
+        heading, cur = None, anchor
+        for _ in range(self._PRECEDING_HEADING_MAX_LINES):
+            cur = self._preceding_text_block(cur, stop_ids)
+            if cur is None:
+                return None
+            text = self._collapsed_text(cur)
+            if len(text) <= self._ITEM_HEADING_MAX and is_own_heading(text, own_item):
+                heading = cur
+                break
+            if self._ITEM_HEADING_RE.match(text):
+                return None  # another item's heading: this is not our body
         if heading is None:
-            return None
-        text = self._collapsed_text(heading)
-        if len(text) > self._ITEM_HEADING_MAX or not is_own_heading(text, own_item):
             return None
         tables = [a for a in heading.iterancestors() if a.tag == 'table']
         new_start = tables[-1] if tables else heading
@@ -665,7 +710,7 @@ class SECSectionExtractor:
                 continue
             if node.tag not in self._BLOCK_TAGS:
                 continue
-            if next(node.iterdescendants(*self._BLOCK_TAGS), None) is not None:
+            if self._is_container_block(node):
                 continue
             if self._collapsed_text(node):
                 return node
@@ -719,7 +764,7 @@ class SECSectionExtractor:
         # Lines this document prints on page after page, page numbers masked.
         repeats: Dict[str, int] = {}
         for el in tree.iter(*block_tags):
-            if next(el.iterdescendants(*block_tags), None) is not None:
+            if self._is_container_block(el):
                 continue
             text = collapsed(el)
             if text and len(text) <= self._FURNITURE_MAX_CHARS:
@@ -843,7 +888,7 @@ class SECSectionExtractor:
                     # Numeric cells repeat through any filing and would pass
                     # for furniture one by one (Mastercard's Item 8 tail).
                     leaves = [collapsed(c) for c in el.iter(*block_tags)
-                              if next(c.iterdescendants(*block_tags), None) is None]
+                              if not self._is_container_block(c)]
                     leaves = [t for t in leaves if t]
                     skipping = el
                     if not leaves:
@@ -867,7 +912,7 @@ class SECSectionExtractor:
                         trail.append(el)
                         skipping = el
                         continue
-                if next(el.iterdescendants(*block_tags), None) is not None:
+                if self._is_container_block(el):
                     continue  # a container: look inside it
                 trail = []
                 content_seen = True
@@ -1270,7 +1315,7 @@ class SECSectionExtractor:
             # Keep only headers that no substantive content follows.
             landmarks = []
             for el in tree.iter(*self._BLOCK_TAGS):
-                if next(el.iterdescendants(*self._BLOCK_TAGS), None) is not None:
+                if self._is_container_block(el):
                     continue
                 text = ' '.join(el.text_content().split())
                 if text and len(text) <= self._FURNITURE_MAX_CHARS and self._TRAILING_CONTENT_RE.match(text):
@@ -1380,7 +1425,7 @@ class SECSectionExtractor:
                     break
                 if end_id and is_anchor_match(el, end_id):
                     break
-            if el.tag not in self._BLOCK_TAGS or next(el.iterdescendants(*self._BLOCK_TAGS), None) is not None:
+            if el.tag not in self._BLOCK_TAGS or self._is_container_block(el):
                 continue
             text = collapsed(el)
             if not text:

@@ -98,3 +98,65 @@ def test_item_7_has_its_content(tenk):
 
     assert mda.startswith("Management’s Discussion and Analysis of Financial Condition")
     assert len(mda) > 50000, f"Item 7 is {len(mda)} chars; the bug returned ~18"
+
+
+# Each 10-K's MD&A closes on the same cross-reference, then "ITEM 7A." follows.
+ITEM_7_ENDINGS = {
+    "2021": "please see Note 1 – Significant Accounting Policies included under Item 8.",
+    "2023": "please see Note 1 – Basis of Presentation and Significant Accounting Policies "
+            "included under Item 8.",
+    "2024": "please see Note 1 – Basis of Presentation and Significant Accounting Policies "
+            "included under Item 8.",
+}
+
+
+def test_item_7_ends_on_its_closing_cross_reference(request, tenk):
+    """Item 7 keeps its last line (FY2023 lost it).
+
+    In the FY2023 10-K the last line is two positioned divs: a link "Note 1 – ..."
+    and "included under Item 8.", whose div holds an empty inline-block spacer. The
+    end-of-section furniture pass read that div as a container, skipped its text, and
+    took the link (printed three times in the filing) for a running header, so Item 7
+    ended at "...please see".
+    """
+    year = request.node.callspec.params["tenk"]
+    mda = " ".join(tenk['Item 7'].split())
+
+    assert mda.endswith(ITEM_7_ENDINGS[year])
+    assert "Quantitative and Qualitative Disclosures" not in mda[-500:]
+
+
+# The opening sentence of Item 2 and the closing date of the auditor's report in Item 9A.
+ITEM_2_OPENINGS = {
+    "2021": "We own or lease the following properties with more than 100,000 square feet",
+    "2023": "Within our health care distribution segment (for properties with more than 100,000 square feet)",
+    "2024": "Within our health care distribution segment (for properties with more than 100,000 square feet)",
+}
+ITEM_9A_DATES = {"2021": "February 17, 2021", "2023": "February 21, 2023", "2024": "February 28, 2024"}
+
+
+def test_item_2_opens_on_its_first_sentence(request, tenk):
+    """FY2022 and FY2023 Item 2 opened mid-sentence ("and/or own approximately ...")."""
+    year = request.node.callspec.params["tenk"]
+    properties = " ".join(tenk['Item 2'].split())
+
+    assert ITEM_2_OPENINGS[year] in properties[:200]
+
+
+def test_item_9a_ends_on_the_auditors_report(request, tenk):
+    """Item 9A ends on the report's date, not on "ITEM 9B. Other Information".
+
+    Item 9B's TOC anchor is on "Not applicable." below its heading, so the
+    heading belongs to Item 9B, not to the end of Item 9A.
+    """
+    year = request.node.callspec.params["tenk"]
+    controls = " ".join(tenk['Item 9A'].split())
+
+    assert controls.endswith(ITEM_9A_DATES[year])
+
+
+def test_item_15_does_not_end_on_the_item_16_heading(tenk):
+    exhibits = " ".join(tenk['Item 15'].split())
+
+    assert not exhibits.endswith("Form 10-K Summary")
+    assert "ITEM 16" not in exhibits[-200:]
