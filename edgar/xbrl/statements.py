@@ -1180,7 +1180,8 @@ class Statement:
                      include_point_in_time: bool = False,
                      include_standardization: bool = False,
                      presentation: bool = True,
-                     matrix: bool = False) -> Any:
+                     matrix: bool = False,
+                     include_metadata: bool = True) -> Any:
         """Convert statement to pandas DataFrame.
 
         Args:
@@ -1206,9 +1207,12 @@ class Statement:
             matrix: If True, return matrix format for Statement of Equity (equity components
                    as columns, activities as rows). Ignored for non-equity statements.
                    Default: False (standard flat format for backwards compatibility).
+            include_metadata: Include balance, weight, preferred_sign, parent_concept,
+                              and parent_abstract_concept columns. Defaults to True.
+                              Disabling metadata preserves the requested presentation.
 
         Returns:
-            DataFrame with raw values + metadata (balance, weight, preferred_sign) by default.
+            DataFrame with presented values and metadata by default.
             If matrix=True and this is a Statement of Equity, returns pivoted matrix format.
 
         Examples:
@@ -1253,13 +1257,20 @@ class Statement:
             if df is None or isinstance(df, str) or df.empty:
                 return df
 
-            # Add metadata columns (balance, weight, preferred_sign) - Issue #463
-            df = self._add_metadata_columns(df)
+            if include_metadata:
+                df = self._add_metadata_columns(df)
+            elif presentation:
+                df = self._add_metadata_columns(df, include_metadata=False)
+
+            if not include_metadata:
+                df = df.drop(columns=[_ROW_SIGN, _ROW_HAS_VALUES, _ROW_PARENT], errors='ignore')
 
             # Apply presentation transformation if requested (Issue #463)
             if presentation:
                 df = self._apply_presentation(
                     df, numeric_only=self.classified_type in _NUMERIC_VALUE_STATEMENTS)
+                if not include_metadata:
+                    df = df.drop(columns='preferred_sign')
 
             # Apply matrix transformation for equity statements (Issue edgartools-uqg7)
             if matrix:
@@ -1643,9 +1654,10 @@ class Statement:
             # Return DataFrame with nice __repr__
             return df
 
-    def _add_metadata_columns(self, df: pd.DataFrame) -> pd.DataFrame:
+    def _add_metadata_columns(self, df: pd.DataFrame, *, include_metadata: bool = True) -> pd.DataFrame:
         """
         Add metadata columns (balance, weight, preferred_sign, parent_concept, parent_abstract_concept) to DataFrame.
+        When metadata is disabled, prepare only the sign needed for presentation.
 
         Issue #463: Users need access to XBRL metadata to understand value transformations.
         Issue #514: Users need parent_concept to understand hierarchy relationships.
@@ -1673,18 +1685,32 @@ class Statement:
             if concept and concept not in raw_data_by_concept:
                 raw_data_by_concept[concept] = item
 
-        # Create metadata dictionaries to populate
+        concepts = [concept for concept in df['concept'].unique() if concept]
+        preferred_sign_map = {}
+        for concept in concepts:
+            preferred_signs = raw_data_by_concept.get(concept, {}).get('preferred_signs')
+            if preferred_signs:
+                preferred_sign_map[concept] = next(iter(preferred_signs.values()))
+
+        # GH #1657: a row with values takes its own occurrence's sign; the
+        # concept's first occurrence speaks only for rows with nothing to sign.
+        preferred_sign = df['concept'].map(preferred_sign_map)
+        if _ROW_SIGN in df.columns:
+            own_signs = df.pop(_ROW_SIGN)
+            has_values = df.pop(_ROW_HAS_VALUES).astype(bool)
+            preferred_sign = own_signs.where(has_values, preferred_sign)
+
+        if not include_metadata:
+            df['preferred_sign'] = preferred_sign
+            return df
+
         balance_map = {}
         weight_map = {}
-        preferred_sign_map = {}
         parent_concept_map = {}  # Calculation tree parent (metric)
         parent_abstract_concept_map = {}  # Presentation tree parent (may be abstract)
 
         # For each unique concept in the DataFrame
-        for concept in df['concept'].unique():
-            if not concept:
-                continue
-
+        for concept in concepts:
             # Get balance and weight from facts (concept-level attributes)
             facts_df = self.xbrl.facts.query().by_concept(concept, exact=True).limit(1).to_dataframe()
 
@@ -1693,15 +1719,9 @@ class Statement:
                 balance_map[concept] = fact.get('balance')
                 weight_map[concept] = fact.get('weight')
 
-            # Get preferred_sign and parent from statement raw data (presentation linkbase)
+            # Get parents from the statement's raw data.
             if concept in raw_data_by_concept:
                 item = raw_data_by_concept[concept]
-
-                # preferred_sign is period-specific, so we take the first available value
-                preferred_signs = item.get('preferred_signs', {})
-                if preferred_signs:
-                    # Use first period's preferred_sign as representative value
-                    preferred_sign_map[concept] = next(iter(preferred_signs.values()))
 
                 # parent_concept from calculation tree (Issue #514 refinement) - metric parent for math
                 parent_concept_map[concept] = item.get('calculation_parent')
@@ -1712,15 +1732,7 @@ class Statement:
         # Add metadata columns
         df['balance'] = df['concept'].map(balance_map)
         df['weight'] = df['concept'].map(weight_map)
-        # GH #1657: a row with values takes its own occurrence's sign; the
-        # concept's first occurrence speaks only for rows with nothing to sign.
-        concept_signs = df['concept'].map(preferred_sign_map)
-        if _ROW_SIGN in df.columns:
-            own_signs = df.pop(_ROW_SIGN)
-            has_values = df.pop(_ROW_HAS_VALUES).astype(bool)
-            df['preferred_sign'] = own_signs.where(has_values, concept_signs)
-        else:
-            df['preferred_sign'] = concept_signs
+        df['preferred_sign'] = preferred_sign
         df['parent_concept'] = df['concept'].map(parent_concept_map)
         # GH #1705: each row's own presentation parent, so a concept presented
         # under two parents keeps both; dimensional rows follow their line.
