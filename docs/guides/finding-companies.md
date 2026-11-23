@@ -161,8 +161,9 @@ facts include the predecessor's history, so a loop over tickers keeps working:
 
 ```python
 xom = Company("XOM")
-xom.get_filings(form="10-K").latest().cik   # 34088, Exxon Mobil Corp's FY2025 10-K
-xom.get_financials()                        # read from that 10-K
+fy2025 = xom.get_filings(form="10-K", report_date="2025-12-31")[0]
+fy2025.cik                                  # 34088: filed by Exxon Mobil Corp
+xom.get_financials()                        # the latest 10-K, under either CIK
 xom.predecessor                             # Company(34088)
 Company(34088).successor                    # Company(2115436)
 ```
