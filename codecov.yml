@@ -1,0 +1,11 @@
+# Codecov settings. Anything not set here keeps Codecov's defaults.
+#
+# The regression lane (.github/workflows/regression-tests.yml) uploads coverage
+# under the `regression` flag only from its nightly and manual runs; pushes to
+# main skip coverage to finish in half the time. Carryforward reuses the last
+# `regression` upload for commits that have none, so their totals do not dip
+# by this lane's lines between nightly runs.
+flag_management:
+  individual_flags:
+    - name: regression
+      carryforward: true
