@@ -372,6 +372,59 @@ def _is_fee_label(text: str) -> bool:
     return any(kw in norm for kw in fee_keywords)
 
 
+_BLANK_CELL_CHARS = ' \t\n\xa0\u200b\ufeff'
+
+
+def _is_fee_reduction_label(label: str) -> bool:
+    """Return whether a normalized fee-table label names a waiver/reimbursement row.
+
+    Matches the word stems so "Fees waived and/or expenses reimbursed" counts
+    as well as "Fee Waiver and Reimbursement", plus "Less ... Reductions".
+    """
+    return ('waive' in label or 'reimburs' in label
+            or 'reduction' in label or label.startswith('less'))
+
+
+def _operating_expense_field(label: str, data: Dict) -> Optional[str]:
+    """Route a normalized operating-expense row label to its field name.
+
+    ``data`` holds the fields already read for this share class; the net row
+    is sometimes recognisable only by its position after the waiver.
+    """
+    # A waiver row can name the fee it reduces ("Less Management Fee
+    # Reductions and/or Expense Reimbursements"), so the plain
+    # management-fee test must not claim waiver-shaped labels.
+    if 'management fee' in label and not _is_fee_reduction_label(label):
+        return 'management_fee'
+    if '12b-1' in label or ('distribution' in label and 'service' in label):
+        return 'twelve_b1_fee'
+    if 'other expense' in label:
+        return 'other_expenses'
+    if 'acquired fund' in label:
+        return 'acquired_fund_fees'
+    if 'total annual' in label and 'after' not in label:
+        # Some filers qualify the GROSS row ("... (before fee waivers ...)")
+        # and leave the net row plain, so a second unqualified total that
+        # follows the waiver is the net.
+        if ('before' not in label and 'total_annual_expenses' in data
+                and 'fee_waiver' in data):
+            return 'net_expenses'
+        return 'total_annual_expenses'
+    # Net expenses must be tested before the waiver, because the standard SEC
+    # wording for the net row, "Total Annual Fund Operating Expenses After Fee
+    # Waiver and Reimbursement", contains "fee waiver" too. Anchored on the
+    # start of the label: filers sometimes spill the footnote prose into the
+    # waiver's own label cell, and that prose routinely contains both
+    # "total ... expenses" and "after", which an unanchored match would misread
+    # as the net row.
+    if ('net expense' in label or label.startswith('net')
+            or (label.startswith('total') and 'after' in label)):
+        return 'net_expenses'
+    if _is_fee_reduction_label(label):
+        return 'fee_waiver'
+    return None
+
+
 def _extract_operating_expenses(rows: List[List[str]]) -> List[Dict]:
     """
     Extract operating expenses from a table.
@@ -420,38 +473,22 @@ def _extract_operating_expenses(rows: List[List[str]]) -> List[Dict]:
             label = _normalize(row[0]) if row[0] else ''
             value = row[col_idx] if col_idx < len(row) else ''
 
-            if 'management fee' in label:
-                data['management_fee'] = _parse_percentage(value)
-            elif '12b-1' in label or ('distribution' in label and 'service' in label):
-                data['twelve_b1_fee'] = _parse_percentage(value)
-            elif 'other expense' in label:
-                data['other_expenses'] = _parse_percentage(value)
-            elif 'acquired fund' in label:
-                data['acquired_fund_fees'] = _parse_percentage(value)
-            elif 'total annual' in label and 'after' not in label:
-                data['total_annual_expenses'] = _parse_percentage(value)
-            # Net expenses must be tested before the waiver, because the
-            # standard SEC wording for the net row — "Total Annual Fund
-            # Operating Expenses After Fee Waiver and Reimbursement" —
-            # contains "fee waiver" too. Matching the waiver first captured
-            # the net ratio as the waiver and left net_expenses unreachable.
-            # Anchored on the start of the label: filers sometimes spill the
-            # footnote prose into the waiver's own label cell, and that prose
-            # routinely contains both "total ... expenses" and "after", which
-            # an unanchored match would misread as the net row.
-            elif ('net expense' in label or
-                  label.startswith('net') or
-                  (label.startswith('total') and 'after' in label)):
-                data['net_expenses'] = _parse_percentage(value)
-            elif 'fee waiver' in label or 'reimbursement' in label:
+            field = _operating_expense_field(label, data)
+            if field is None:
+                continue
+            parsed = _parse_percentage(value)
+            # A label that wraps onto a second row ("... After Waivers and" /
+            # "Reimbursements") leaves the continuation row with blank value
+            # cells. It must not overwrite the value read from the first row.
+            if parsed is None and not value.strip(_BLANK_CELL_CHARS) and data.get(field) is not None:
+                continue
+            if field == 'fee_waiver' and parsed is not None and parsed > 0:
                 # Filers render the waiver either parenthesized ("(0.19)%") or
                 # bare ("0.03%"). Normalize to a signed reduction so that
                 # total_annual_expenses + fee_waiver == net_expenses holds
                 # regardless of how the filer wrote it.
-                waiver = _parse_percentage(value)
-                if waiver is not None and waiver > 0:
-                    waiver = -waiver
-                data['fee_waiver'] = waiver
+                parsed = -parsed
+            data[field] = parsed
 
         results.append(data)
 
@@ -705,37 +742,43 @@ def _extract_quarter_data(rows: List[List[str]]) -> Tuple[Optional[Tuple[Decimal
         label = _normalize(row[0]) if row[0] else ''
 
         if 'highest' in label or 'best' in label:
-            # Look for return value and date in remaining cells
-            return_val = None
-            date_str = None
-            for cell in row[1:]:
-                cell_text = cell.strip()
-                if '%' in cell_text or re.match(r'-?\d+\.?\d*', cell_text):
-                    pct = _parse_percentage(cell_text)
-                    if pct is not None:
-                        return_val = pct
-                elif re.search(r'(january|february|march|april|may|june|july|august|'
-                               r'september|october|november|december)', cell_text.lower()):
-                    date_str = cell_text
-            if return_val is not None:
-                best = (return_val, date_str or '')
-
+            best = _quarter_row_value(row) or best
         elif 'lowest' in label or 'worst' in label:
-            return_val = None
-            date_str = None
-            for cell in row[1:]:
-                cell_text = cell.strip()
-                if '%' in cell_text or re.match(r'-?\d+\.?\d*', cell_text):
-                    pct = _parse_percentage(cell_text)
-                    if pct is not None:
-                        return_val = pct
-                elif re.search(r'(january|february|march|april|may|june|july|august|'
-                               r'september|october|november|december)', cell_text.lower()):
-                    date_str = cell_text
-            if return_val is not None:
-                worst = (return_val, date_str or '')
+            worst = _quarter_row_value(row) or worst
 
     return best, worst
+
+
+# Period labels seen in highest/lowest-quarter rows: "March 31, 2020",
+# "4Q 2023", "Q2 2020", "Q1/2023", "12/31/2023".
+_QUARTER_DATE_RE = re.compile(
+    r'january|february|march|april|may|june|july|august|september|october|november|december'
+    r'|\b[1-4]q\s*\d{4}\b'
+    r'|\bq[1-4]\s*[/,-]?\s*\d{4}\b'
+    r'|\b\d{1,2}/\d{1,2}/\d{2,4}\b'
+)
+
+
+def _quarter_row_value(row: List[str]) -> Optional[Tuple[Decimal, str]]:
+    """Return (return, period label) from a highest/lowest-quarter row.
+
+    Each cell is tested independently as a period label and as a return.
+    Numeric dates ("12/31/2023") and quarter labels ("4Q 2023") start with
+    digits, so routing cells to one test or the other dropped their labels;
+    every date shape parses to None as a percentage.
+    """
+    return_val = None
+    date_str = None
+    for cell in row[1:]:
+        cell_text = cell.strip()
+        if _QUARTER_DATE_RE.search(cell_text.lower()):
+            date_str = cell_text
+        pct = _parse_percentage(cell_text)
+        if pct is not None:
+            return_val = pct
+    if return_val is None:
+        return None
+    return return_val, date_str or ''
 
 
 # ---------------------------------------------------------------------------

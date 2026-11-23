@@ -1,0 +1,1043 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - efts.sec.gov
+    method: GET
+    uri: https://efts.sec.gov/LATEST/search-index?q=%220001580642-25-003937%22
+  response:
+    body:
+      string: '{"took":273,"timed_out":false,"_shards":{"total":50,"successful":50,"skipped":0,"failed":0},"hits":{"total":{"value":1,"relation":"eq"},"max_score":0,"hits":[{"_index":"edgar_file","_id":"0001580642-25-003937:waycross-fcef_sumpro.htm","_score":0,"_source":{"ciks":["0001815558"],"period_ending":null,"file_num":["333-239562"],"display_names":["Waycross
+        Independent Trust  (CIK 0001815558)"],"xsl":null,"sequence":1,"root_forms":["497K"],"file_date":"2025-06-30","biz_states":["OH"],"sics":[],"form":"497K","adsh":"0001580642-25-003937","film_num":["251090631"],"biz_locations":["Cincinnati,
+        OH"],"file_type":"497K","file_description":"497K","inc_states":["DE"],"items":[]}}]},"aggregations":{"entity_filter":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"key":"Waycross
+        Independent Trust  (CIK 0001815558)","doc_count":1}]},"sic_filter":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[]},"biz_states_filter":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"key":"OH","doc_count":1}]},"form_filter":{"doc_count_error_upper_bound":0,"sum_other_doc_count":0,"buckets":[{"key":"497K","doc_count":1}]}},"query":{"_source":{"exclude":["doc_text"]},"query":{"bool":{"must":[],"must_not":[],"should":[],"filter":[{"term":{"adsh":"0001580642-25-003937"}}]}},"from":0,"size":100,"aggregations":{"form_filter":{"terms":{"field":"root_forms","size":30}},"entity_filter":{"terms":{"field":"display_names.raw","size":30}},"sic_filter":{"terms":{"field":"sics","size":30}},"biz_states_filter":{"terms":{"field":"biz_states","size":30}}}}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      connection:
+      - keep-alive
+      content-length:
+      - '1587'
+      content-type:
+      - application/json
+      date:
+      - Mon, 23 Nov 2026 21:40:24 GMT
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-apigw-id:
+      - HUDdFEPXIAMEKbg=
+      x-amz-cf-id:
+      - WOxij_ex1i_VrNr_zA339GHl7pgde6Q50ma8FzKOELqPmAn4aQ0o5Q==
+      x-amz-cf-pop:
+      - ORD58-P1
+      x-amzn-requestid:
+      - a2a756c4-717c-48ea-ad73-18ac9ecad2e3
+      x-amzn-trace-id:
+      - Root=1-6b04b2b9-7ef18d5e41d1ccfc4bc13782;Parent=52404b4c7460e257;Sampled=0;Lineage=1:fc027ad0:0
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1815558/000158064225003937/0001580642-25-003937.txt
+  response:
+    body:
+      string: "<SEC-DOCUMENT>0001580642-25-003937.txt : 20250630\n<SEC-HEADER>0001580642-25-003937.hdr.sgml
+        : 20250630\n<ACCEPTANCE-DATETIME>20250630131614\nACCESSION NUMBER:\t\t0001580642-25-003937\nCONFORMED
+        SUBMISSION TYPE:\t497K\nPUBLIC DOCUMENT COUNT:\t\t3\nFILED AS OF DATE:\t\t20250630\nDATE
+        AS OF CHANGE:\t\t20250630\nEFFECTIVENESS DATE:\t\t20250630\n\nFILER:\n\n\tCOMPANY
+        DATA:\t\n\t\tCOMPANY CONFORMED NAME:\t\t\tWaycross Independent Trust\n\t\tCENTRAL
+        INDEX KEY:\t\t\t0001815558\n\t\tORGANIZATION NAME:           \t\n\t\tEIN:\t\t\t\t000000000\n\t\tSTATE
+        OF INCORPORATION:\t\t\tDE\n\n\tFILING VALUES:\n\t\tFORM TYPE:\t\t497K\n\t\tSEC
+        ACT:\t\t1933 Act\n\t\tSEC FILE NUMBER:\t333-239562\n\t\tFILM NUMBER:\t\t251090631\n\n\tBUSINESS
+        ADDRESS:\t\n\t\tSTREET 1:\t\tC/O ULTIMUS FUND SOLUTIONS, LLC\n\t\tSTREET 2:\t\t225
+        PICTORIA DRIVE, SUITE 450\n\t\tCITY:\t\t\tCINCINNATI\n\t\tSTATE:\t\t\tOH\n\t\tZIP:\t\t\t45246\n\t\tBUSINESS
+        PHONE:\t\t513-587-3400\n\n\tMAIL ADDRESS:\t\n\t\tSTREET 1:\t\tC/O ULTIMUS
+        FUND SOLUTIONS, LLC\n\t\tSTREET 2:\t\t225 PICTORIA DRIVE, SUITE 450\n\t\tCITY:\t\t\tCINCINNATI\n\t\tSTATE:\t\t\tOH\n\t\tZIP:\t\t\t45246\n<SERIES-AND-CLASSES-CONTRACTS-DATA>\n<EXISTING-SERIES-AND-CLASSES-CONTRACTS>\n<SERIES>\n<OWNER-CIK>0001815558\n<SERIES-ID>S000069480\n<SERIES-NAME>WAYCROSS
+        FOCUSED CORE EQUITY FUND\n<CLASS-CONTRACT>\n<CLASS-CONTRACT-ID>C000221781\n<CLASS-CONTRACT-NAME>WAYCROSS
+        FOCUSED CORE EQUITY FUND\n<CLASS-CONTRACT-TICKER-SYMBOL>WAYFX\n</CLASS-CONTRACT>\n</SERIES>\n</EXISTING-SERIES-AND-CLASSES-CONTRACTS>\n</SERIES-AND-CLASSES-CONTRACTS-DATA>\n</SEC-HEADER>\n<DOCUMENT>\n<TYPE>497K\n<SEQUENCE>1\n<FILENAME>waycross-fcef_sumpro.htm\n<DESCRIPTION>497K\n<TEXT>\n<HTML>\n<HEAD>\n
+        \    <TITLE></TITLE>\n</HEAD>\n<BODY STYLE=\"font: 10pt Times New Roman, Times,
+        Serif\">\n\n<TABLE CELLSPACING=\"0\" CELLPADDING=\"0\" STYLE=\"width: 100%;
+        border-collapse: collapse; font: 11pt Times New Roman, Times, Serif\">\n  <TR
+        STYLE=\"vertical-align: top\">\n    <TD STYLE=\"padding-top: 3pt; border-bottom:
+        Black 1pt solid; font: 10pt Arial, Helvetica, Sans-Serif; width: 67%; padding-bottom:
+        3pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        12pt; color: rgb(31,39,91)\"><B>SUMMARY\n    PROSPECTUS</B></FONT></TD>\n
+        \   <TD STYLE=\"padding-top: 3pt; border-bottom: Black 1pt solid; font: 10pt
+        Arial, Helvetica, Sans-Serif; width: 33%; text-align: right; padding-bottom:
+        3pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        12pt; color: rgb(31,39,91)\"><B>June\n    30, 2025</B></FONT></TD></TR>\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n
+        \   <TD STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></TD>\n    <TD
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; text-align: right\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></TD></TR>\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n
+        \   <TD STYLE=\"padding-top: 3pt; font: 10pt Arial, Helvetica, Sans-Serif;
+        padding-bottom: 3pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 22pt; color: rgb(31,39,91)\"><B>WAYCROSS\n    FOCUSED CORE<BR>\n
+        \   EQUITY FUND </B></FONT><B><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 16pt; color: rgb(31,39,91)\">(WAYFX)</FONT></B></TD>\n
+        \   <TD STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; padding-top: 3pt;
+        text-align: center; padding-bottom: 3pt\"><IMG SRC=\"wa001_v1.jpg\" ALT=\"(LOGO)\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></TD></TR>\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n
+        \   <TD STYLE=\"border-bottom: Black 1pt solid; font: 10pt Arial, Helvetica,
+        Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\">&nbsp;</FONT></TD>\n    <TD STYLE=\"border-bottom: Black 1pt solid;
+        font: 10pt Arial, Helvetica, Sans-Serif; text-align: right\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></TD></TR>\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n
+        \   <TD COLSPAN=\"2\" STYLE=\"padding-top: 3pt; border-bottom: Black 1pt solid;
+        font: 10pt Arial, Helvetica, Sans-Serif; text-align: justify; padding-bottom:
+        3pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        8pt\">Before\n    you invest, you may want to review the Fund&#146;s prospectus
+        and Statement of Additional Information (&#147;SAI&#148;), which contain\n
+        \   more information about the Fund and its risks. You can find the Fund&#146;s
+        Prospectus, SAI and other information about the Fund\n    online at <U>http://www.waycrossfunds.com</U>.
+        You can also get this information at no cost by calling 1-866 -267-4304 or
+        by sending\n    an email request to <U>Fulfillment@ultimusfundsolutions.com</U>.
+        The current Prospectus and SAI, each dated June 30, 2025, are incorporated\n
+        \   by reference into this Summary Prospectus.</FONT></TD></TR>\n  </TABLE>\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n\n<DIV
+        STYLE=\"float:LEFT; width:48%\">\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 12pt\"><B>INVESTMENT\nOBJECTIVE</B></FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">The\nWaycross
+        Focused Core Equity Fund (the &#147;Fund&#148;) seeks capital appreciation
+        over a full market cycle, which the Fund defines\nas a sustained upswing in
+        equity markets followed by a pull back and recovery.</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 12pt\"><B>FEES\nAND EXPENSES</B></FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">This\ntable
+        describes the fees and expenses that you may pay if you buy, hold, and sell
+        shares of the Fund. <B>You may pay other fees, such\nas brokerage commissions
+        and other fees to financial intermediaries, which are not reflected in the
+        table and example.</B></FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\"><B>Shareholder\nFees&nbsp;</B></FONT></P>\n\n\n<TABLE CELLSPACING=\"0\"
+        CELLPADDING=\"0\" STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; width:
+        100%; border-collapse: collapse\">\n  <TR STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; vertical-align: top\">\n    <TD STYLE=\"text-indent: -8.65pt;
+        padding-left: 8.65pt; font: 10pt Arial, Helvetica, Sans-Serif; width: 90%\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\"><I>(fees\n
+        \   paid directly from your investment)</I></FONT></TD>\n    <TD STYLE=\"vertical-align:
+        bottom; text-align: center; font: 10pt Arial, Helvetica, Sans-Serif; width:
+        10%\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\">None</FONT></TD></TR>\n    </table>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt\">&nbsp;</P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\"><B>Annual\nFund Operating Expenses&nbsp;</B></FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align:
+        justify\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><I>(expenses\nthat you pay each year as a percentage of the value of
+        your investment)</I></FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">&nbsp;</FONT></P>\n\n<TABLE CELLSPACING=\"0\" CELLPADDING=\"0\"
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; width: 100%; border-collapse:
+        collapse\">\n  <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align:
+        top\">\n    <TD STYLE=\"text-indent: -8.65pt; padding-left: 8.65pt; font:
+        10pt Arial, Helvetica, Sans-Serif; width: 90%\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">Management\n    Fees</FONT></TD>\n
+        \   <TD STYLE=\"vertical-align: bottom; text-align: center; font: 10pt Arial,
+        Helvetica, Sans-Serif; width: 10%\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\">0.66%</FONT></TD></TR>\n  <TR STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n    <TD STYLE=\"text-indent:
+        -8.65pt; padding-left: 8.65pt; font: 10pt Arial, Helvetica, Sans-Serif\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">Distribution\n
+        \   and/or Service (12b-1) Fees</FONT></TD>\n    <TD STYLE=\"vertical-align:
+        bottom; text-align: center; font: 10pt Arial, Helvetica, Sans-Serif\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">None</FONT></TD></TR>\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n
+        \   <TD STYLE=\"text-indent: -8.65pt; padding-left: 8.65pt; font: 10pt Arial,
+        Helvetica, Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">Other\n    Expenses</FONT></TD>\n    <TD STYLE=\"vertical-align:
+        bottom; text-align: center; font: 10pt Arial, Helvetica, Sans-Serif\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">0.46%</FONT></TD></TR>\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n
+        \   <TD STYLE=\"text-indent: -8.65pt; padding-left: 8.65pt; font: 10pt Arial,
+        Helvetica, Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">Total\n    Annual Fund Operating Expenses</FONT></TD>\n
+        \   <TD STYLE=\"vertical-align: bottom; text-align: center; font: 10pt Arial,
+        Helvetica, Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">1.12%</FONT></TD></TR>\n  <TR STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; vertical-align: top\">\n    <TD STYLE=\"text-indent:
+        -8.65pt; padding-left: 8.65pt; padding-bottom: 1pt; font: 10pt Arial, Helvetica,
+        Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\">Less\n    Management Fee Reductions and/or Expense Reimbursements<SUP>(1)</SUP></FONT></TD>\n
+        \   <TD STYLE=\"vertical-align: bottom; border-bottom: Black 1pt solid; font:
+        10pt Arial, Helvetica, Sans-Serif; text-align: center\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">(0.43%)</FONT></TD></TR>\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n
+        \   <TD STYLE=\"text-indent: -8.65pt; padding-left: 8.65pt; padding-bottom:
+        2.5pt; font: 10pt Arial, Helvetica, Sans-Serif\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">Total\n    Annual Fund Operating
+        Expenses After Fee Reductions and/or Expense Reimbursements<SUP>(1)</SUP></FONT></TD>\n
+        \   <TD STYLE=\"vertical-align: bottom; border-bottom: Black 2.5pt double;
+        font: 10pt Arial, Helvetica, Sans-Serif; text-align: center\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">0.69%</FONT></TD></TR>\n  </TABLE>\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<TABLE
+        CELLPADDING=\"0\" CELLSPACING=\"0\" STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif;
+        margin-top: 0pt; margin-bottom: 0pt; width: 100%\"><TR STYLE=\"vertical-align:
+        top; text-align: justify\">\n<TD STYLE=\"width: 0in\"></TD><TD STYLE=\"width:
+        0.3in; text-align: left\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 8pt\"><SUP>(1)</SUP></FONT></TD><TD STYLE=\"text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 8pt\">Waycross\n
+        \                                           Partners, LLC (the &#147;Adviser&#148;)
+        has contractually agreed, until June 30, 2026,\n                                            to
+        reduce the Fund&#146;s Management Fees and reimburse Other Expenses to the
+        extent necessary\n                                            to limit Total
+        Annual Fund Operating Expenses (exclusive of brokerage costs, taxes, interest,\n
+        \                                           borrowing costs such as interest
+        and dividend expenses on securities sold short, costs to\n                                            organize
+        the Fund, Acquired Fund fees and expenses, and extraordinary expenses such
+        as litigation\n                                            and merger or reorganization
+        costs and other expenses not incurred in the ordinary course\n                                            of
+        the Fund&#146;s business) to an</FONT></TD>\n</TR></TABLE>\n\n</DIV>\n\n<DIV
+        STYLE=\"float:right; width:48%\">\n\n\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt 0pt 0pt 0.3in; text-align: justify\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 8pt\">amount\nnot exceeding 0.69%
+        of the Fund&#146;s average daily net assets. Management Fee reductions and
+        expense reimbursements by the Adviser\nare subject to repayment by the Fund
+        for three years after such fees and expenses were incurred, provided that
+        the repayments do not\ncause Total Annual Fund Operating Expenses (after the
+        repayment is taken into account) to exceed (i) the expense limitation then
+        in effect,\nif any, and (ii) the expense limitation in effect at the time
+        the expenses to be repaid were incurred. Before June 30, 2026, this agreement\nmay
+        not be modified or terminated without the approval of the Board of Trustees
+        (the &#147;Board&#148;). This agreement will terminate\nautomatically if the
+        Fund&#146;s investment advisory agreement (the &#147;Advisory Agreement&#148;)
+        with the Adviser is terminated.</FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\"><B>Example</B></FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">This\nExample
+        is intended to help you compare the cost of investing in the Fund with the
+        cost of investing in other mutual funds. The Example\nassumes that you invest
+        $10,000 in the Fund for the time periods indicated and then redeem all your
+        shares at the end of those periods.\nThe Example also assumes that your investment
+        has a 5% return each year and the operating expenses of the Fund remain the
+        same and the\ncontractual agreement to limit expenses remains in effect through
+        the expiration date described above. Although your actual costs may\nbe higher
+        or lower, based on these assumptions your costs would be:</FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<TABLE
+        CELLSPACING=\"0\" CELLPADDING=\"0\" STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif;
+        width: 100%; border-collapse: collapse\">\n  <TR STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; vertical-align: bottom\">\n    <TD STYLE=\"border-bottom:
+        Black 1pt solid; font: 10pt Arial, Helvetica, Sans-Serif; width: 32%; text-align:
+        center\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B>1\n    Year</B></FONT></TD>\n    <TD STYLE=\"border-bottom: Black
+        1pt solid; font: 10pt Arial, Helvetica, Sans-Serif; width: 19%; text-align:
+        center\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B>3\n    Years</B></FONT></TD>\n    <TD STYLE=\"border-bottom: Black
+        1pt solid; font: 10pt Arial, Helvetica, Sans-Serif; width: 24%; text-align:
+        center\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B>5\n    Years</B></FONT></TD>\n    <TD STYLE=\"border-bottom: Black
+        1pt solid; font: 10pt Arial, Helvetica, Sans-Serif; width: 25%; text-align:
+        center\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B>10\n    Years</B></FONT></TD></TR>\n  <TR STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; vertical-align: bottom\">\n    <TD STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; text-align: center\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">$70</FONT></TD>\n    <TD STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; text-align: center\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">$313</FONT></TD>\n    <TD
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; text-align: center\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">$575</FONT></TD>\n
+        \   <TD STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; text-align: center\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">$1,325</FONT></TD></TR>\n
+        \ </TABLE>\n<P STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\"><B>Portfolio\nTurnover</B></FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">The\nFund
+        pays transaction costs, such as commissions, when it buys and sells securities
+        (or &#147;turns over&#148; its portfolio). A higher\nportfolio turnover rate
+        may indicate higher transaction costs and may result in higher taxes when
+        Fund shares are held in a taxable account.\nThese costs, which are not reflected
+        in Annual Fund Operating Expenses or in the Example, affect the Fund&#146;s
+        performance. During\nthe most recent fiscal year, the Fund&#146;s portfolio
+        turnover rate was 36% of the average value of its portfolio.</FONT></P>\n\n\n</div>\n<br
+        CLEAR=ALL><BR>\n\n<!-- Field: Page; Sequence: 1; Options: NewSection; Value:
+        1 -->\n    <DIV STYLE=\"margin-top: 12pt; margin-bottom: 6pt; border-bottom:
+        Black 2pt solid\"><P STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; text-align:
+        center; margin-top: 0pt; margin-bottom: 0pt\"><!-- Field: Sequence; Type:
+        Arabic; Name: PageNo -->1<!-- Field: /Sequence --></P></DIV>\n    <DIV STYLE=\"break-before:
+        page; margin-top: 6pt; margin-bottom: 12pt\"><P STYLE=\"margin: 0pt\">&nbsp;</P></DIV>\n
+        \   <!-- Field: /Page -->\n\n<DIV STYLE=\"float:LEFT; width:48%\">\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 12pt\"><B>PRINCIPAL\nINVESTMENT STRATEGIES</B></FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">The\nFund
+        is a non-diversified portfolio and pursues its investment objective by investing,
+        under normal circumstances, 80% of its net assets\n(plus the amount of any
+        borrowings for investment purposes) in equity securities traded in the U.S.
+        This investment policy may be changed\nwithout shareholder approval upon at
+        least 60 days&#146; prior written notice to shareholders.</FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">The\nFund
+        holds a portfolio of common stocks of mid-capitalization and large-capitalization
+        companies with attractive valuations based on\nthe Adviser&#146;s proprietary
+        analysis. The Adviser defines mid-capitalization companies as companies with
+        a total market capitalization\nof between $1 billion and $10 billion at the
+        time of purchase and large capitalization companies as companies with a total
+        market capitalization\nof $10 billion or more at the time of purchase. The
+        Fund may also invest in securities of foreign companies that are publicly
+        traded\nin the U.S., including in American Depositary Receipts (&#147;ADRs&#148;).
+        The Fund expects to hold 25-35 holdings, under normal market\ncircumstances.
+        The number of securities held by the Fund may exceed this range occasionally,
+        such as when the adviser is accumulating\nnew positions, phasing out or replacing
+        existing positions, or responding to unusual market conditions. The Fund may
+        invest a significant\nportion of its assets in securities of companies conducting
+        business within a single sector, as defined by third-party sources, including\nthe
+        technology sector.</FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif;
+        margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif;
+        margin: 0pt; text-align: justify\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\">The\nAdviser seeks to emphasize companies that
+        have proven their ability to sustainably grow earnings, sometimes through
+        innovation, above\nmarket expectations. The Adviser generates a focus universe
+        of investment candidates of approximately 300 companies traded in the United\nStates.
+        The Adviser rigorously analyzes each investment candidate, evaluating company-specific
+        metrics (&#147;key factors&#148;) it\ndeems most likely to affect annual earnings,
+        and then ranks the companies based on the Adviser&#146;s assessment of these
+        key factors.\nThe Adviser defines key factors as the most critical drivers
+        of a company&#146;s annual earnings estimates; for example, foot traffic\nat
+        a restaurant, units sold for a tech product company, or operating costs for
+        an industrial company. Following further analysis, the\nAdviser buys stocks
+        for the Fund&#146;s portfolio that it determines to have improving key factors
+        and are available at reasonable valuations.</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">The\nAdviser
+        will sell a stock when there is a material adverse change in the issuer&#146;s
+        key factors. A security position may also be\nsold when the Adviser believes
+        other investment opportunities are more attractive or that the security is
+        unlikely to benefit from current\nbusiness, market, or economic conditions.</FONT></P>\n\n\n</DIV>\n\n<DIV
+        STYLE=\"float:right; width:48%\">\n\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 12pt\"><B>PRINCIPAL\nRISKS</B></FONT></P>\n\n<P STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial,
+        Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">As\nwith
+        any mutual fund investment, there is a risk that you could lose money by investing
+        in the Fund. The success of the Fund&#146;s\ninvestment strategy depends upon
+        the Adviser&#146;s skill in selecting securities for purchase and sale by
+        the Fund and there is no\nassurance that the Fund will achieve its investment
+        objective. Because of the types of securities in which the Fund invests and
+        the investment\ntechniques the Adviser uses, the Fund is designed for investors
+        who are investing for the long term. The Fund may not be appropriate\nfor
+        use as a complete investment program. The principal risks of an investment
+        in the Fund are described below.</FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\"><B><I>Non-Diversification\nRisk.</I></B>
+        The Fund is non-diversified under the Investment Company Act and employs a
+        concentrated investment strategy. Accordingly,\nthe Fund typically invests
+        a greater portion of its assets in, and its performance may be affected by,
+        a smaller number of issuers than\nif it were a diversified, less concentrated
+        fund. Further, the Fund may experience greater losses because of a single
+        issuer&#146;s\nunfavorable market or economic conditions or other adverse
+        developments impacting the market value of the issuer&#146;s securities.</FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\"><B><I>Equity\nSecurities
+        Risk.</I></B> As with any fund that invests in stocks, your investment will
+        fluctuate in value, and the loss of your investment\nis a risk of investing.
+        The Fund&#146;s price per share will fluctuate due to changes in the market
+        prices of its investments. Also,\nthe Fund&#146;s investments may not grow
+        as fast as the rate of inflation and stocks tend to be more volatile than
+        some other investments\nyou could make, such as bonds.</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt 0pt 0pt 0.3in; text-align:
+        justify\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B><I>Large-Capitalization\nCompany Risk.</I></B> Large-capitalization
+        companies are more mature and may be unable to respond as quickly as smaller
+        companies to\nnew competitive challenges, such as changes in technology and
+        consumer tastes, and may not be able to attain the high growth rate of\nsuccessful
+        smaller companies, especially during extended periods of economic expansion.</FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt 0pt 0pt 0.3in; text-align:
+        justify\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B><I>Mid-Capitalization\nCompany Risk.</I></B> Investments in mid-capitalization
+        companies often involve higher risks than large-capitalization companies because\nthese
+        companies may lack the management experience, financial resources, product
+        diversification and competitive strengths of larger\ncompanies. Therefore,
+        the securities of mid-capitalization companies may be more susceptible to
+        market downturns and other events, and\ntheir prices may be subject to greater
+        price fluctuations. In addition, in many instances, the securities of mid
+        -capitalization companies\nare traded only over-the-counter or on a regional
+        securities exchange, and the frequency and volume of their trading is less
+        than is\ntypical of larger companies. Because mid-capitalization companies
+        normally have fewer shares outstanding than larger companies, it may\nbe more
+        difficult to buy or sell significant amounts of such shares without an unfavorable
+        impact on prevailing prices. Mid capitalization\ncompanies are typically subject
+        to greater changes in earnings and business prospects than larger, more established
+        companies and may\nnot be widely followed by investors, which can lower the
+        demand for their stock.</FONT></P>\n\n\n</div>\n<br CLEAR=ALL><BR>\n\n<!--
+        Field: Page; Sequence: 2; Value: 1 -->\n    <DIV STYLE=\"margin-top: 12pt;
+        margin-bottom: 6pt; border-bottom: Black 2pt solid\"><P STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; text-align: center; margin-top: 0pt; margin-bottom:
+        0pt\"><!-- Field: Sequence; Type: Arabic; Name: PageNo -->2<!-- Field: /Sequence
+        --></P></DIV>\n    <DIV STYLE=\"break-before: page; margin-top: 6pt; margin-bottom:
+        12pt\"><P STYLE=\"margin: 0pt\">&nbsp;</P></DIV>\n    <!-- Field: /Page -->\n\n<DIV
+        STYLE=\"float:LEFT; width:48%\">\n\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt; text-align: justify\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\"><B><I>Sector\nRisk.</I></B>
+        The Fund may have significant exposure to one or more sectors that the Adviser
+        believes offer more growth potential in\ncurrent market conditions. The Fund
+        may face various risks associated with investing substantially in certain
+        sectors, such as that an\nindividual sector may be more volatile than the
+        broader market, or could perform differently, and that the stocks of multiple
+        companies\nwithin a sector could simultaneously decline in price because of
+        an event that affects the entire sector.</FONT></P>\n\n<P STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial,
+        Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt 0pt 0pt 0.3in; text-align:
+        justify\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B><I>Technology\nSector Risk.</I></B> At times, the Fund&#146;s assets
+        are focused on the Technology sector, which means it will be affected by performance\nof
+        and developments in that sector, as compared to a more diversified fund. The
+        value of stocks of technology companies is particularly\nvulnerable to rapid
+        changes in technology product cycles, product obsolescence, government regulation,
+        and competition, both domestically\nand internationally.</FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\"><B><I>Market\nRisk.</I></B>
+        Market risk is the risk that the value of the securities in the Fund&#146;s
+        portfolio may decline due to daily fluctuations\nin the securities markets
+        that are beyond the Adviser&#146;s control, including fluctuations in interest
+        rates, the quality of the Fund&#146;s\ninvestments, economic conditions, and
+        general equity market conditions. Certain market events could increase volatility
+        and exacerbate\nmarket risk, such as changes in governments&#146; economic
+        policies, political turmoil, environmental events, trade disputes, and epidemics,\npandemics,
+        or other public health issues. Turbulence in financial markets, and reduced
+        liquidity in equity, credit and fixed income markets\nmay negatively affect
+        many issuers domestically and around the world, and can result in trading
+        halts, any of which could have an adverse\nimpact on the Fund. During periods
+        of market volatility, security prices (including securities held by the Fund)
+        could fall drastically\nand rapidly, and therefore adversely affect the Fund.</FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\"><B><I>Foreign\nSecurities
+        Risk.</I></B> Since the Fund&#146;s investments may include ADRs, which represent
+        interests in foreign securities, the Fund\nis subject to risks beyond those
+        associated with investing in domestic securities. The value of foreign securities
+        is subject is subject\nto currency fluctuations. Foreign companies are generally
+        not subject to the same regulatory requirements of U.S. companies thereby
+        resulting\nin less publicly available information about these companies. In
+        addition, foreign accounting, auditing, and financial reporting standards\ndiffer
+        from those applicable to U.S. companies.</FONT></P>\n\n<P STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial,
+        Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\"><B><I>Management\nStyle
+        Risk.</I></B> The Adviser&#146;s method of security selection may not be successful,
+        and the Fund may underperform relative to\nits benchmark index or to other
+        mutual funds that employ similar investment strategies. In addition, the Adviser
+        may select investments\nthat fail to perform as anticipated. The ability of
+        the Fund to meet its investment objective is directly related to the success
+        of the\nAdviser&#146;s investment process and there is no guarantee that the
+        Adviser&#146;s judgments about the attractiveness, value and potential\nappreciation
+        of a particular investment for the Fund will be correct or produce the desired
+        results.</FONT></P>\n\n</DIV>\n\n<DIV STYLE=\"float:right; width:48%\">\n\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 12pt\"><B>PERFORMANCE\nSUMMARY</B></FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">The\nbar
+        chart and table that follow provide some indication of the risks of investing
+        in the Fund by showing changes in the Fund&#146;s performance\nfrom year to
+        year and by showing how the Fund&#146;s average annual total returns for one
+        year and since inception compare with those\nof a broad-based securities market
+        index. How the Fund has performed in the past (before and after taxes) is
+        not necessarily an indication\nof how the Fund will perform in the future.
+        Updated performance information, current through the most recent month end,
+        is available\nby calling 1-866-267-4304 or by visiting the Fund&#146;s website
+        at <U>http://www.waycrossfunds.com</U>.</FONT></P>\n\n<P STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial,
+        Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"text-align:
+        center; font: 10pt Arial, Helvetica, Sans-Serif; margin-top: 0pt; margin-bottom:
+        0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B>Calendar\nYear Returns</B></FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; text-align: center; margin-top: 0pt; margin-bottom:
+        0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B>&nbsp;</B></FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; text-align: center; margin-top: 0pt; margin-bottom: 0pt\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\"><B><IMG
+        SRC=\"wa002_v1.jpg\" ALT=\"(BAR CHART)\">&nbsp;</B></FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"text-align:
+        justify; font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">The\nFund&#146;s year-to-date
+        return through March 31, 2025 is (6.14%).</FONT></P>\n\n<P STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial,
+        Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"text-align:
+        center; font: 10pt Arial, Helvetica, Sans-Serif; margin-top: 0pt; margin-bottom:
+        0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B>Quarterly\nReturns During This Time Period</B></FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"text-align:
+        center; font: 10pt Arial, Helvetica, Sans-Serif; margin-top: 0pt; margin-bottom:
+        0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\">Highest:&#9;13.70%&nbsp;\n(quarter ended March 31, 2024)&nbsp;</FONT></P>\n\n<P
+        STYLE=\"text-align: center; font: 10pt Arial, Helvetica, Sans-Serif; margin-top:
+        0pt; margin-bottom: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">Lowest:&nbsp;(17.50%)\n(quarter ended June 30, 2022)</FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\"><B>Average\nAnnual Total Returns</B></FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\"><B>(for\nperiods ended December
+        31, 2024)</B></FONT></P>\n\n<TABLE CELLSPACING=\"0\" CELLPADDING=\"0\" STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; width: 100%; border-collapse: collapse\">\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n
+        \   <TD STYLE=\"text-indent: -8.65pt; padding-left: 8.65pt; font: 10pt Arial,
+        Helvetica, Sans-Serif; width: 80%\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\">&nbsp;</FONT></TD>\n    <TD STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; vertical-align: bottom; width: 10%; white-space:
+        nowrap; text-align: center\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\">&nbsp;</FONT></TD>\n    <TD STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; vertical-align: bottom; width: 10%; white-space:
+        nowrap; text-align: center\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\"><B>Since</B></FONT></TD></TR>\n  <TR STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n    <TD STYLE=\"text-indent:
+        -8.65pt; padding-left: 8.65pt; vertical-align: bottom; font: 10pt Arial, Helvetica,
+        Sans-Serif; white-space: nowrap; text-align: center\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></TD>\n    <TD
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: bottom; white-space:
+        nowrap; text-align: center\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\">&nbsp;</FONT></TD>\n    <TD STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; vertical-align: bottom; white-space: nowrap;
+        text-align: center\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\"><B>Inception</B></FONT></TD></TR>\n  <TR STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; vertical-align: top\">\n    <TD STYLE=\"text-indent:
+        -8.65pt; padding-left: 8.65pt; vertical-align: bottom; font: 10pt Arial, Helvetica,
+        Sans-Serif; white-space: nowrap; text-align: center\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></TD>\n    <TD
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: bottom; white-space:
+        nowrap; text-align: center\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\"><B>One</B></FONT></TD>\n    <TD STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; vertical-align: bottom; white-space: nowrap;
+        text-align: center\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\"><B>(December\n    15,</B></FONT></TD></TR>\n  <TR STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n    <TD STYLE=\"text-indent:
+        -8.65pt; padding-left: 8.65pt; border-bottom: Black 1pt solid; font: 10pt
+        Arial, Helvetica, Sans-Serif; vertical-align: bottom; white-space: nowrap;
+        text-align: center\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">&nbsp;</FONT></TD>\n    <TD STYLE=\"border-bottom: Black
+        1pt solid; font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: bottom;
+        white-space: nowrap; text-align: center\"><FONT STYLE=\"font-family: Arial,
+        Helvetica, Sans-Serif; font-size: 10pt\"><B>Year</B></FONT></TD>\n    <TD
+        STYLE=\"border-bottom: Black 1pt solid; font: 10pt Arial, Helvetica, Sans-Serif;
+        vertical-align: bottom; white-space: nowrap; text-align: center\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\"><B>2020)</B></FONT></TD></TR>\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n
+        \   <TD STYLE=\"text-indent: -8.65pt; padding-left: 8.65pt; font: 10pt Arial,
+        Helvetica, Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">Waycross\n    Focused Core Equity Fund</FONT></TD>\n    <TD
+        STYLE=\"vertical-align: bottom; text-align: center; font: 10pt Arial, Helvetica,
+        Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\">&nbsp;</FONT></TD>\n    <TD STYLE=\"vertical-align: bottom; text-align:
+        center; font: 10pt Arial, Helvetica, Sans-Serif\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></TD></TR>\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n
+        \   <TD STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; text-indent: -8.65pt;
+        padding-left: 17.3pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">Return\n    Before Taxes</FONT></TD>\n    <TD STYLE=\"vertical-align:
+        bottom; text-align: center; font: 10pt Arial, Helvetica, Sans-Serif\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">25.10%</FONT></TD>\n
+        \   <TD STYLE=\"vertical-align: bottom; text-align: center; font: 10pt Arial,
+        Helvetica, Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">14.47%</FONT></TD></TR>\n  <TR STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; vertical-align: top\">\n    <TD STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; text-indent: -8.65pt; padding-left: 17.3pt\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">Return\n
+        \   After Taxes on Distributions</FONT></TD>\n    <TD STYLE=\"vertical-align:
+        bottom; text-align: center; font: 10pt Arial, Helvetica, Sans-Serif\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">25.02%</FONT></TD>\n
+        \   <TD STYLE=\"vertical-align: bottom; text-align: center; font: 10pt Arial,
+        Helvetica, Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">14.31%</FONT></TD></TR>\n  <TR STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; vertical-align: top\">\n    <TD STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; text-indent: -8.65pt; padding-left: 17.3pt\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">Return\n
+        \   After Taxes on Distributions and Sale of Fund Shares</FONT></TD>\n    <TD
+        STYLE=\"vertical-align: bottom; text-align: center; font: 10pt Arial, Helvetica,
+        Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\">14.92%</FONT></TD>\n    <TD STYLE=\"vertical-align: bottom; text-align:
+        center; font: 10pt Arial, Helvetica, Sans-Serif\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">11.47%</FONT></TD></TR>\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\">\n
+        \   <TD STYLE=\"text-indent: -8.65pt; padding-left: 8.65pt; font: 10pt Arial,
+        Helvetica, Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">S&amp;P\n    500&reg; Index (reflects no deduction for fees,
+        expenses, or taxes)</FONT></TD>\n    <TD STYLE=\"vertical-align: bottom; text-align:
+        center; font: 10pt Arial, Helvetica, Sans-Serif\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">25.02%</FONT></TD>\n    <TD
+        STYLE=\"vertical-align: bottom; text-align: center; font: 10pt Arial, Helvetica,
+        Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\">13.90%</FONT></TD></TR>\n  </TABLE>\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt; text-align: justify\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">After-tax\nreturns are calculated
+        using the historical highest individual federal marginal income tax rates
+        and do not reflect the impact of state\nand local taxes. Actual after-tax
+        returns depend on an investor&#146;s tax situation and may differ from those
+        shown above. After tax\nreturns shown are not relevant to investors who hold
+        their shares through tax deferred arrangements, such as a 401(k) plan or an
+        individual\nretirement account (&#147;IRA&#148;). Return After Taxes on Distributions
+        and Sale of Fund Shares may be higher than other returns\nfor the same period
+        due to a tax benefit of realizing a capital loss on the sale of Fund shares.</FONT></P>\n\n\n\n</div>\n<br
+        CLEAR=ALL><BR>\n\n<!-- Field: Page; Sequence: 3; Value: 1 -->\n    <DIV STYLE=\"margin-top:
+        12pt; margin-bottom: 6pt; border-bottom: Black 2pt solid\"><P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; text-align: center; margin-top: 0pt; margin-bottom:
+        0pt\"><!-- Field: Sequence; Type: Arabic; Name: PageNo -->3<!-- Field: /Sequence
+        --></P></DIV>\n    <DIV STYLE=\"break-before: page; margin-top: 6pt; margin-bottom:
+        12pt\"><P STYLE=\"margin: 0pt\">&nbsp;</P></DIV>\n    <!-- Field: /Page -->\n\n<DIV
+        STYLE=\"float:LEFT; width:48%\">\n\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 12pt\"><B>MANAGEMENT\nOF THE FUND</B></FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"text-align:
+        justify; font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">Waycross\nPartners, LLC is
+        the Fund&#146;s investment adviser.</FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<TABLE CELLSPACING=\"0\"
+        CELLPADDING=\"0\" STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; width:
+        100%; border-collapse: collapse\">\n  <TR STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; vertical-align: bottom\">\n    <TD STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; width: 28%\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 9pt\">&nbsp;</FONT></TD>\n    <TD STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; width: 31%\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 9pt\"><B>Investment</B></FONT></TD>\n    <TD STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; width: 41%\"><FONT STYLE=\"font-family: Arial,
+        Helvetica, Sans-Serif; font-size: 9pt\">&nbsp;</FONT></TD></TR>\n  <TR STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; vertical-align: bottom\">\n    <TD STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 9pt\"><B>Portfolio</B></FONT></TD>\n    <TD STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 9pt\"><B>Experience</B></FONT></TD>\n    <TD STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 9pt\"><B>Primary\n    Title</B></FONT></TD></TR>\n
+        \ <TR STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: bottom\">\n
+        \   <TD STYLE=\"border-bottom: Black 1pt solid; font: 10pt Arial, Helvetica,
+        Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        9pt\"><B>Managers</B></FONT></TD>\n    <TD STYLE=\"border-bottom: Black 1pt
+        solid; font: 10pt Arial, Helvetica, Sans-Serif\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 9pt\"><B>with\n    the Fund</B></FONT></TD>\n
+        \   <TD STYLE=\"border-bottom: Black 1pt solid; font: 10pt Arial, Helvetica,
+        Sans-Serif\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        9pt\"><B>with\n    Adviser</B></FONT></TD></TR>\n  <TR STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; vertical-align: bottom\">\n    <TD STYLE=\"text-align:
+        left; font: 10pt Arial, Helvetica, Sans-Serif; vertical-align: top\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 9pt\">Benjamin\n
+        \   H. Thomas, CFA</FONT></TD>\n    <TD STYLE=\"text-align: left; font: 10pt
+        Arial, Helvetica, Sans-Serif; vertical-align: top\"><P STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial,
+        Helvetica, Sans-Serif; font-size: 9pt\">Manager\nof the Fund since its inception
+        in 2020</FONT></P></TD>\n    <TD STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif\"><P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 9pt\">Founding\nPrincipal, Chief
+        Investment Officer, and Portfolio Manager</FONT></P></TD></TR>\n  <TR STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; vertical-align: bottom\">\n    <TD STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif\"><FONT STYLE=\"font-size: 9pt\">&nbsp;</FONT></TD>\n
+        \   <TD STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif\"><FONT STYLE=\"font-size:
+        9pt\">&nbsp;</FONT></TD>\n    <TD STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif\"><FONT
+        STYLE=\"font-size: 9pt\">&nbsp;</FONT></TD></TR>\n  <TR STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; vertical-align: bottom\">\n    <TD STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; text-align: left; vertical-align: top\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 9pt\">John\n
+        \   W. Ferreby,&nbsp; CFA</FONT></TD>\n    <TD STYLE=\"text-align: left; font:
+        10pt Arial, Helvetica, Sans-Serif; vertical-align: top\"><P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 9pt\">Manager\nof the Fund since
+        its inception in 2020</FONT></P></TD>\n    <TD STYLE=\"text-align: left; font:
+        10pt Arial, Helvetica, Sans-Serif; vertical-align: top\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 9pt\">Portfolio\n    Manager</FONT></TD></TR>\n
+        \ </TABLE>\n<P STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 12pt\"><B>PURCHASE\nAND SALE OF FUND
+        SHARES</B></FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif;
+        margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif;
+        margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B>Minimum\nInitial Investment</B></FONT></P>\n\n<P STYLE=\"font: 10pt
+        Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial,
+        Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"text-align:
+        justify; font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">The\nminimum investment amount
+        is $5,000 for all regular accounts.</FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\"><B>Minimum\nAdditional Investment</B></FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">Once\nan
+        account is open, additional purchases of Fund shares may be made at any time
+        in any amount.</FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif;
+        margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif;
+        margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size:
+        10pt\"><B>General\nInformation</B></FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">You\nmay purchase or redeem
+        (sell) shares of the Fund on each day that the New York Stock Exchange (&#147;NYSE&#148;)
+        is open for business.\nTransactions may be initiated by written request, by
+        telephone or through your financial intermediary. Written requests to the
+        Fund should\nbe sent to the Waycross Focused Core Equity Fund, c/o Ultimus
+        Fund Solutions, LLC, P.O. Box 46707, Cincinnati, Ohio 45246-0707 (for overnight\ndelivery,
+        please mail to: [Name of Fund], c/o Ultimus Fund Solutions, LLC, 225 Pictoria
+        Drive, Suite 450, Cincinnati, OH 45246). For\nmore information about purchasing
+        and redeeming shares, please see &#147;How to Buy Shares&#148; and &#147;How
+        to Redeem Shares&#148;\nin the Fund&#146;s Prospectus or call 1-866-267-4304
+        for assistance.</FONT></P>\n\n\n</DIV>\n\n<DIV STYLE=\"float:right; width:48%\">\n\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 12pt\"><B>TAX\nINFORMATION</B></FONT></P>\n\n<P
+        STYLE=\"font: 10pt Arial, Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font:
+        10pt Arial, Helvetica, Sans-Serif; margin: 0pt; text-align: justify\"><FONT
+        STYLE=\"font-family: Arial, Helvetica, Sans-Serif; font-size: 10pt\">The\nFund&#146;s
+        distributions are taxed as ordinary income or capital gains, unless you are
+        investing through a tax-deferred arrangement,\nsuch as a 401(k) plan or an
+        IRA. Such tax-deferred arrangements may be taxed later upon withdrawal of
+        monies from those arrangements.</FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font: 10pt Arial,
+        Helvetica, Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica,
+        Sans-Serif; font-size: 12pt\"><B>PAYMENTS\nTO BROKER-DEALERS AND<BR>\nOTHER
+        FINANCIAL INTERMEDIARIES</B></FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt\"><FONT STYLE=\"font-family: Arial, Helvetica, Sans-Serif;
+        font-size: 10pt\">&nbsp;</FONT></P>\n\n<P STYLE=\"font: 10pt Arial, Helvetica,
+        Sans-Serif; margin: 0pt; text-align: justify\"><FONT STYLE=\"font-family:
+        Arial, Helvetica, Sans-Serif; font-size: 10pt\">If\nyou purchase shares of
+        the Fund through a broker-dealer or any other financial intermediary (such
+        as a bank), the Fund and its related\ncompanies may pay the intermediary for
+        the sale of Fund shares and related services. These payments may create a
+        conflict of interest\nby influencing the broker-dealer or other intermediary
+        and your salesperson to recommend the Fund over another investment. These
+        payments\nare sometimes referred to as &#147;revenue sharing.&#148; Ask your
+        salesperson or visit your financial intermediary&#146;s website\nfor more
+        information.</FONT></P>\n\n</div>\n<br CLEAR=ALL><BR>\n\n<!-- Field: Page;
+        Sequence: 4 -->\n    <DIV STYLE=\"margin-top: 12pt; margin-bottom: 6pt; border-bottom:
+        Black 2pt solid\"><P STYLE=\"margin: 0pt\">&nbsp;</P></DIV>\n    <!-- Field:
+        /Page -->\n\n\n</BODY>\n</HTML>\n</TEXT>\n</DOCUMENT>\n<DOCUMENT>\n<TYPE>GRAPHIC\n<SEQUENCE>2\n<FILENAME>wa001_v1.jpg\n<DESCRIPTION>GRAPHIC\n<TEXT>\nbegin
+        644 wa001_v1.jpg\nM_]C_X  02D9)1@ ! @  9 !D  #_[  11'5C:WD  0 $    9   _^X
+        #D%D\nM;V)E &3      ?_; (0  0$! 0$! 0$! 0$! 0$! 0$! 0$! 0$! 0$! 0$!\nM 0$!
+        0$! 0$! 0$! 0(\" @(\" @(\" @(\" P,# P,# P,# P$! 0$! 0$\" 0$\"\nM @(! @(# P,#
+        P,# P,# P,# P,# P,# P,# P,# P,# P,# P,# P,# P,#\nM P,# P,# P,#_\\  $0@ .P#7
+        P$1  (1 0,1 ?_$ ,8   $$ @(#\nM       &\" D* P<\"!0$$\"P$  00# 0$               0%!@<!\"
+        D\" Q\nM  8\" 0,! @<+\"P4      0(#! 4&!P@ $1()$R$4,7&R,W,5%D$B(U1UUI<X\nMN!DY43*S-'355I87MPIA@20E)A$
+        \ @$# @,$ P84!0,%     0(# !$$!08A\nM,1)!(A,'46$4<8$R([0(L4)2<H*RTC-S@Y/3)%24%34V-QB1H<%B%D-C-.'Q\nMDE,7_]H
+        # ,!  (1 Q$ /P\"_QPHHX44<**.%%'\"BCA143?G(442\\7&SZB1SI\nMG*&&>TZ9C$.7KL#BD!Z&*(\"'4!Z?%RP/*P
+        [\\P >7QWR>6F'<W\\$F^P^W6I8\nM$?FDOHR?)#D /.GT<JR<Q6:.%%'\"BCA11PHHX44<**.%%'\"BCA11PHHX44<*\nM*.%%'\"BCA11PHHX44<**^>,\\N-R][=?_
+        &=Q#_R%_8%KL !\\Z;[GUCSL3'IN\nMF^&OZ-C?!'_2C]'UM<))=6U;Q6_2\\OX1_P\"M+Z?KZ]?[8W/_
+        !G<?\\UV#^\\>\nM>_W;IGZMC?DH_N:\\?O;5OUO+_+2_=UP\"ZV\\3\"0+O;Q,'PE\"VSXF#XP\"2ZAS/\nM[KTX\"_LN/;\\%']S7G]\\:K?I]LRK_
+        (>7[NN?VQN?^,[C_FNP?WCS'[MTS]6Q\nMOR4?W->OWMJWZWE_EI?NZ/MC<_\\ &=Q_S78/[QX?NW3/U;&_)1_<T?O;5OUO\nM+_+2_=U<4\\13Y](Z'XH=R+Y]).U)S)P*.Y%XY?NU
+        3R5:B)@HZ=JK+J FF4\"\nME 3#VE  #V!SG#\\XB**'S7U\".%%2,18U@H\"C_P :+L  KJS\\UJ::?R5TR7(=\nMY)3-F79F+,;9<UKEB3P[.-(7SE_PM=H/BPQ^T%BGD2\\K/Y\\P/QWR>6KGW-_!\nM)OL/MUJ6-'YI+Z,GR0Y7YYT^CE30-WLH[*X0P5<,PZVT/%N3Y;&59M%XN-#R\nM--6NOR%AK%9B#S#Q\"CR=982:0V1%FS<*$;/$03=B4J9%$SB'60[8P=$U/58]\nM.UN6>\"*=U1)(PC!68V!<,1W;D7(-QSL:0ZE-F8V,V1AJCLBEBK$BX
+        OP(OQ]\nMWG6H/%KN/DO?36\"'V8OL%BFIL+E,3<77:AC:6M<Y(UI6JSDO 3;&[25D:,&Y\nMI=TLR0=-DV:0I$:.\"\"90YC=\"N6^]N86T]>?0\\1LB1HE4L\\@10W6H92@4GNV)\nM!ZC>X/
+        4GT34)M3P1FRB-0Q-@I)M8D&Y/;V\\.RDQFSR757#WDKUB\\?[F&AGA\nM,YT*R3]HNB\\JNE(TVUOB2XXGK*$:FD+1<;BM4Y));UCE4(9=D*8\"\"@]?MIFR\nM<C4=DYV[E9A[),JJEN#KP\\5K\\^YUH1;T-?E7C)UB/'UB#2B!\\:A)-^1^E'OV\nM/^5.XVZRG>L&ZYY8S/CX,<'EL44RP9$DT,J/;!&U-Y6Z?#OYZ=9'D:TFXDF,\nMJ\\9,13:*>DJD\"Y@
+        Y! >1[;V!BZIK./IN7XWAY$JQCP@I<,Y\"J;-P(!-R.!M\nMR-+\\^:7&Q),B+HZHU+=Z]K 7/+_*M<Z%YAV9V#P%3,X[(8[Q?BA?*U3JE[H5\nM
+        H$S;9^;@JO98Y26:#?9&RL(QJE./HUTS7(U9)'(U*<Y%%3G]A5NZ].T/2-6\nMETO1)I\\A<>1XWDD5%5F4V/AA23T@@B['CP(
+        %?'3,C,RL5<G,1$,BAE5220\"\nM+]XGMY<N5;MP9L5A/9:MV*WX)R)!Y*K-3O5GQI8)B !\\#2.N]-<)-;'!'%^T\nM9*+*,%7\"8E62*=LX34*HBHHF8IA:]4T?4]%F3&U6%X)Y(EE4-:Y1Q=6X$\\_0\nM>(Y$
+        TIQLK'RT,F,X=%8J2.QAS'O4V*W^57Q_P! N<GCB[[(5RJ9$B996#=T\nM\">JV18V[J2J;U6/2:1U3=4Y.?F#2+M(2LC-&ZY'X\"!FPJE,41?,?8F[<O&7-\nMQ<*23\"9>H2*T9CM:]RX?I6P^%U$=/TUJ1R:UI<4AADF59@;=)#!K^I;7/JL#\nM?LO6[<O;BZY8#H=,RAF7(9\\<X^OK%.1K]MLU.OS&'1:K,F$@@%H<?990:*Z<\nM-Y-$$T)P(Y=18QD2D%4AR%;-/V[K.JY<F#IL/C9D1LR*\\98FY'<'5\\8.!N8^\nMH
+        <;V(-*)\\_$QHEFR'Z(F%P2\"![_  [O/Z:WHYUYIFY&L=]P]8M@J_F\"LI80\nMJIU2S65+,E,4:CI)(M&;T7S\"P7>,KS\":B5DI!(J+QD=PT76-Z*:AE2F(&,G;\nMFMXFHII$V.YU23X,2V>2]R+%4+%6X&ZM9@.)%N-$>?ARP'*21?9EYL;A?3>Y\nML\"./,<*:L\\\\NNJ1JV\\OU5K.TF2,4L\"+N'68L=ZF9\\L>+0CVR1UUYEG;@H[1I\nM+P221#&,^9%<-
+        *43>IV@)@?5\\O]>$XP\\A\\&'4&Y0R9>.LM^5BGB75O]K6/J\nMO2,ZYA>&9D$SP#Z=8I\"ONWZ>(]8X5NR,\\AVI,KK/6]P6N298^N]I6DD&&1$L\nM994?M61H9Y*Q\\NXL$3%4I_/5N+C7T(Z26?OFK=@4Z?3UA[R=S:^T-P1ZX^W&\nM@7]\\QVO'XD0)N
+        0%)<*Q(8$*I+<>7.E U7!;#74 Y]D;Z;I;LO>XM< 6/$BW\nMKK1X^:#QK?4!+<38TRU+,L+<]Y0Q#G56D(+E6.@HBYMQ,9#7T%$5R\"10#.
+        [\nM#>PW0?9QT_\\ S;>OC^RG\"_2[7\\/QH.NWUGB]7^5)O^0:1X?B^-\\5]5T/T_X]\nM-O\\
+        .G_XGR_B[.U$A,GX;OU6R7CZQI**PMMITPTFX5[Z\"@HN4\"NFBAP0>LUR\nMBFNW5 BZ\"@\"10A3
+        (<B6?IV=I66^#J44D&8A[R.\"K#T<#V'F#R(XBG2\">')B\nM$V.RO$W(@W!ILV6/(?J_B?)C[\"/VEM^5LW1+0C^=P_@#&M[SE?ZRR5+W).+?\nM%8W@9YM32JAT[\"RR[(YP,42E$#!U>L#:.N9^\"-4Z(X-+8V6:>2.\"-CZ$,C+U\nM_8!K=M(Y]4PX)CC=3/DCFB*SL/=\"@V]^U)C%GD^U$R=EF-P$^METPSG.<]+[\nM.XEV*Q??L&7&SF6[@22JR60H&&B+*Y65(*::+%VX664^]3*<0'GWSMD;APM.\nM.KI''DZ4OPI<>6.=%^O\\-F*>ZP
+        ';7B'6,\"7(&(6:/*/)9%9\"?<Z@+^\\:=?F\nMO.V'-<<?RN4\\ZY(J6+,?0IDDG]HN$LA%1_O2X'%M'LBJ\"9U*2KOTS>BT:IK.\nMENT>Q,W0>,.F:5J.LY:X&E0R3YC\\D0$FW:3Z
+        .TFP'::6Y&3CXD1GR75(AVD\nMV'_OZJ8I)>8?1ZO1<1:+A8LV43'E@=-6E?RM>M6MD:IBZ;4?J%1C3QUWF,7-\nMH95&444(#0YCE*Z[P%+O
+        >O)4GEUNB:1H,9,:7,07:*/*QGE6W.Z+*6X?3>C\nMMIM;7]-0!Y#(D)Y,T<@4^XQ6W'L]-.>V)W5UBU29U5;.N5X>GRM\\5(WH5,:Q\nM\\]:LC7ERH)2)MZACFHQ4[=Y]0RRA4Q%NP.0BIBD,8IA
+        .,6C[:UO7VD&E8[2\nM1Q\"\\CW58XQZ7D<JB^^PX<J6Y>H8>\"%]I<*S?!'$LWN* 6/O\"M L/*YJ\"XMS/\nM'<R\\SI2<D3E=M%GIN.K_
+        *O;$4RZY#CJ?6Y*VS:&/(*=QJT<7*61@XI51-DR\nM]5TJJ)$\"D%=0B9G=]A;A&.<R(8LN$CJKR1Y6.Z1EV\"+XC+*>@%C;J:P
+        N;V!\nM-)!K>!X@B;Q5F()\"M'(K-8%CT@KQ-AR''LYU3'>?UMU_:5_Z4W.L4?WM?K1]\nM\"N%DOWUOKC]&I=_&QH11\\VP5IV7V4=!$:[XZ5DA;QKQ^K\"L+H\\KB
+        OK+)3LH\nMBJ@[:T>M)$]-?T#IG>NO42!0I$%\"J:[>=GFUJNV,N#9&R5\\3>.8%NRJ':$2'\nMIB2-2\"#/*>*]0(1;-8EE(VI^;WY(:-O#!R?,/S!/A[%P2_2C,8TG,0ZII)7!\nM!&/\"!8])'B/U#J\"HP9]]
+        V+\\46S=X:ZJ,-<86L0MI64K&/KTYQK5::SG)LZ2\nMA&2<'8(1T2\\5J6DE$@^KW#LB!W*PD(IVG.\"9JGU?9GG]L;2VW]-K,L^5
+        /%R\nM(!DRS,B7%_$C<&\"5%O\\ &*A8*+D7 )%V:'O_ .;1YBZROEE!H,,&'D'PL6=L\nM.&!)9+&PBDC(R(7;_I,X0N;
+        V8A3H_6#QCTVC;/[,N=C8YI:-===(QRI#/K:\nMB=&(N3>R02=MBIN6]V,BDN%)I!S*2 )& A9)1,0#H7MY*=]>>6I:KL70TV8[\nM0;RUEQUK\";O\"8W\\)D2]R/'GX1WX^&#Z;U#?+GYN>DZ+YB[ADW[&F3L/0XSX3\nM3@B.=98Q.LCVL#[-CW\\6W#Q2\"!PM4(^7[33KME&]VG'E-B\\>T&8L;]:E4R'0\nM.W90-60,#2$0,FHHJ?ZP<Q[<CAV83=#.UE!
+        \ #H ;0[<P-2TS0<3 UG)DS-7\nMCA43S.;M)*>+F]AW0Q*I_L [:TYW9J6D:QN7-U+;^)%@Z%+D,<>\",$+'\".['\nMP)/>90'?C\\-FM8<*MS^'_P#4(Q+^7<H_[FVOG/+YQG]6M0_!8OR:*NHGS5?Z\nM):7^'S/E<U([SE_PM=H/BPQ^T%BGD/\\
+        *S^?,#\\=\\GEJZ]S?P2;[#[=:EC1^\nM:2^C)\\D.5^>=/HY5C=M&K]HZ8O6Z+MD];K-';5PF55!RU<IF1<-UTC@)%$5D\nMCB4Q1
+        0$HB \\%8JP939@;@UD@$6/*JU?A#=.=4=JO))XT+&Y69Q>),L+9UPZ\nMW?G!%-3&=M%G'N';?U1
+        ONP5IU57!Q*/:\"CA41]O4>75YGJNOZ#HF]X0#)DX\nM_@36_P#M2YL?7U>*/< J'[;/L.=F:,W!8Y.M/K6_].G_
+        !-1U[PXQMN5M9\\@\nM^;JFM7W^IU?\\@,1E'$TL41]9KJ#A^:C<%8K23*02BE'2EQJ+>Q*>P\"F1DU#C\nM[#\")ICM7.Q\\#7(?+#*(]@DTAH91V>V3*9Y3[JHYB'K4\"FK4X7FPGW'&/CURP\nMZG_M(>A?>)'5[]3B>0?*,5M_K'IKKWC)^LHS\\FV1\\0L'AV!O6=L=<(F(8YVS\nMI*'42'\\&#.BP!(EQU
+        \ !63!,W01Z#5NT<&3;NMZEK&:!UZ'#,1?D<DDP0#\\H\nMW6/4EZDFJS+GX>/B0GAF.GY,#K<__$6]^G1^1C,$_@;5-U2L+(HL<V9VG*?J\nMMK;#QZ?I\"PR%E=8*G&3+-N@)#H1V-:F60GU3E#L1;Q(]W0O&/9VG0ZKKPR=2\nMN=+Q4?*R2>V.+OE23VROTQCTEZ6ZMD/C81CQ^&3*1''ZF;@#]B+M[@J%GQ&P\nMKOQP>3[;KQ>S\\W+2-!R+7:_FG
+        ,U8#=SVS+05?:NW;D%2E2;+RDU3GSE)Z=,\nM! 7-64#X2CRS/,*8;TV-IV^HE5<R%V@R%7DMV-O6
+        ' *W[)14=T)3I&M9&BL\nM287 >,GML./OVY_6T^WSA:-V38O T!LK@1%U$[<Z<2:>6L4V\"O(D)9YZNUMX\nMWL=BIK19/L7>R#%>+2FH=$PG_P#8LA;IE#WU7K%?*_=,&BZL^BZO9MNZDO@S\nM*WP59@55SZ!Q*.?J6N?@BG+<FF/F8HR\\6XU#'/6A',@<2O\\
+        E<>L6[:;#CW<\nM!OYPZ!JQK16F\"\\53'D9!YG\\F2#1!VWC86(QA8VZ%3P''O% 136;;#9*A\"2I2\nMI'.LC4F\"H''U#J$![S=NOY79F?K4YZLH,T.FDVNQE7OY!'IQXFZ?09F%N
+        %)\nM(=07<D4.)'PCL'R/4%/\"/\\8PO]8#6LO(5(%VX\\UND7CBN0$;ZM8N@(/+=JQ:\nM@(,:G?K)&5>ZWEDQFXEI[LU>Q+&\"IK\"*:MC%%-NV=/02
+        HKB(+MH)_Q[RQU3\nM>F-QUZ=S\"DO-XU9HT)4GB\"2[,2.)(6_*OAJK>W[CQM'D_P#\"1>LKV,0&(N/0\nM
+        H ]T^FK38P\\2,0-?\"-9$@QC1APB$FR2,<2)]U]R\"-39I$(@DR*S_! D4H$*\nMG]Z  '*)\\1^OQ;GQ+WOVWYWOZ;\\:FMA;IMW;5'G9=<:AJ/XM,S:YT-X\\D:GB\nM_4_86(B'\\BB@@]>$D:3?[
+        Z<.D6XF1*JJ^EU1'M'H/)?!K.3N'?>-K.6 ,B?\nM4,<D#D+/&HM[P%-3XD>!HLF)%][2!P/\\&/\\
+        K4%'BB\\@NC.O/A\\8XHV&RK2'\nM]R=GSO'.=?U$%[)>KRG:[',FAZK'TU!B\\5D#6U*6032,<H-0!T4RJA
+        \ PEM3\nMS VANK6/,9\\_1\\>48P\\ C(^#&G2BW<O<6Z\"I)[>' <JC6AZMIF)M]8,J1?$L\nMXZ.;&Y-AT]M[^YQI8^.W'.T/BQ\\,V[F=<JUJ8QKD2:0MN5,48RLH=T[0%EZ=\nM
+        T.L3]E@SJ'\"&F)\"R&2>+1ZW:N5LS1%P0BAS$*GWCF:'O[S+TS2M.=9\\->B*\nM65?@R6=I'\"M],
+        MU##A<FW\"QKWI$.;H>W<C)G4I,>IU4\\UX!1<=AOQM_C3\\/\nM^/!B^'JWCHJ677 ?6^2]D,A90RAE&\\2*Y).T6Z9:WVQ5\"*5GYQ05)!\\HTC*^\nM\"@)KJ&%)RZ<'Z
+        =90313SAS9)]YRZ<O=P<*&**) +(B^&KD*O(7+<QS 'H%.\nM>TX0FD+.>,TS,[,>))ZB!<^X/HUTG_(VPK4;[XZ+7EYXT399$UVO.-[QCNX,\nMB^ZV*$5L-[KE&G(^.ET.Q\\S:R#2Q$<F*0Y0!VQ;+!^$1((?;R9U+(Q-YQZ<I\nMOAYD4D<B'BK!8V=25Y$@K;CV,PY$UXW=CQR:0V0?OT+*RD<P2P4V/O\\
+        ^(![\nM*BH\\AL%MWNSXUO%5O!3Z;-9K4PS 'N><J*TBGME=S=FC5ZK%-<FS%.8@X>V6\nM$?N\\>R\"4L+=)59JUF#J
+        4$#KF)/-G2[=VOO77]K94JXHR6\\.\"2X4*AZSX0<\\\nM%8\"1>FY +(!>X%V35ES]2T?!U.)3+X8ZG6U[GAWBO:.Z;V[&]%ZD3QYY6?'5\nMY:\\2(:H9GL,OKKDR^SV.A=X[R&BP:,WMXH]YK=VC8:B7YRV<5*8.\\GJRDU3;\nM/RQLFX26,D5H\"A@#D-S=@[R\\OM0.OZ<BYF#\"DEI8[FR.C(6>,$.O=8FZ]2BU\nM^JG>'7-(UV#V'()BG8KW6^J#!K*>1XBUC8^JF8^3Y?8;0?S\"T+R?36%;%GC6\nM=\"C5RJ(OXQHO(L,<L?L5(4:W5T9(&[MG0[,W>OW,]$.GI4(^05?JH\"L4_K&3\nMDVQAHV[?+F;8L>2F)KAF9[$V,IZPZ-;@9%L!&X6[*%#6M8%NUHYFE[@36FC:\nM7\"Z
+        .''IX6(_VGZ8$V!N1>I)*QY'/&INJ:E;E5K(\\VIDG0''6Q.?R84FHF-K\nMN65*FYPQ.L<CI1M>G7)(RUE;UZ/]9!Q#2BS4CI!+UUTTC#R%S[+WMMDR;;G@\nM48>KS8^/XP):'K\\93'=EXKWC8AU!L392:=TU?1M1\"ZBCDRXJ22=!
+        #VZ#U<#\nMSX=H-KVXU5]D3BFN^4 .HD5=' /Y1*<X]/\\ OTYU\"A%U0>D\"N'.0>EW([\"?]\nM:L=^0%Z.N'BYUGP!5E31O^HC:A0UG]!0$SR+)C7%<B70J@DZ&5),7)5
+        ZWW#\nMD4,4W4#\"'-+O*&,;U\\]];W=GCK]C.1)%<?!9I!CP^YT0]07T$ CE70+SSE/E\nM_P#-PT#8^G'PSG+BPRV/PE6(Y61[HDGZ>KTAB#SJOECAE;)+(N/V%#;.WEY=\nMWBI(TUHPZ@\\<6D9]@:!3;F+[2'^LRICW?
+        0 $P^P!YM_K<NGP:+F3:LRKI2X\nMLIF+<A%X;>)?[&_#MY#C6BFW(=4R-Q:?!HBL^LMFP\"!5^$9O%7P[>CO6X\\@.\nM)X59N\\U&R\\CCC\"%6P!\"][*UYW(L\\N3MGZA4&=\"K*L>,S&HNQ2)ZREDFUV[00\nM
+        W=[BDN4X \"A>NCOS9=D0ZUNB?=V59M/TFPA!M=LB0-T,1?@(T#/R^&4(Y&N\nMB?SNO,.?;VSL?9.%=-3UJYF87LN+$5\\10UN)E<K'SOX8DN.(JJ]S?:N:=7+O\nM#_\\
+        J$8E_+N4?]S;7SFO\\XS^K6H?@L7Y-%767YJO]$M+_#YGRN:D=YR_X6NT\nM'Q88_:\"Q3R'^5G\\^8'X[Y/+5U[F_@DWV'VZU+&C\\TE]&3Y(<K\\\\Z?1RK)S%9\nMJI?YN,?YGP/O_K/LEK.T]*^;I8JOFA\\N=$7!0/=KQ'FJ%5FU1;AU&5805R2D\nM&740_\"58@B/80W2__+'+TW5MHYVB:V?T33)X\\]>7P(SU.O'L)3I/X4]M0?<<\nM63BZK!F88^-R$:
+        ^ZW!3[HO<?6U84G-/,<R&CS_1MDU;H8Y-KP; 488[<I0;\nM,VU*\"K1<^=)/V?6+9^BG(\"8.HBY+W#U'E01;BS4W.-T,2<WVSV@^L]?65]PB\nMZ^Y4J;
+        A.G'31]Y\\+P_>M8'_ %JOO_Q_*_E.[R4Q;-ADFT/6_&71,FZ;XX<S\nM+@[9K&W*X9(DL@YLG9!R^%-G'.J/5(*$@
+        5$X%1BS=![0$W+=\\W9M/Q56#1B\nM6FUR6+-D '$HL8C@46XD.[226[6]ZHKM5)Y+OE\\%PE:%;^DMU.?>
+        5?<K?MS\nMR%J1Y8?)['80M.4Z[<-?-4,.R3[&T+6LFS-*6S?LMDF1*2T6#&]EJ,W7)RUQ\nMF'L=UD[156)>*$*Z?N!
+        3H=XBT8V)N#8.QSJF/ \\6KZAD@2,T:OX.-$+JLBN\nMK*AFD;J =1P1>VU*Y),'7-9]FD<-B01]T!B.N1N94@@D(HMP/,FF'^7;!NN_\nMC!V)T2VFU4D'$?EO'V4R/\\B8CE,L7K)N0[7C8H\"[0FDV%VM%KM,;5G$6SGH-\nM8Y5$62RLJ0\"E,<AQ\"6>7FJZQOG1]6V_N\"S:?-C_%S\"*..-)>5KHJ*6N8W'-@\nM$]!%->OXV)HN7BY^#PG23O+U,S%?39B3:UQZ.-6J:9M[K'?L(J;'UG.6-76$\nMFC1)S,9$=6R'C:]6UE4F:AHFTNI!TW^S4^W-(()JQ[T$7B:JQ\"\"GW'*
+        T+D[\nM?UK$U/\\ <T^+,-3)L(^@EFY\\5 !ZE-C9EN\" 3>IO'G8DN/[6DB''M\\*XL/=]\nM!]1XU7$_XWN7<1QM_P!^<?JW:IPMNRIL<YNV*JF_=-X&8OE#;*7APC,4F+?D\nM8KST2Q9*@J*;0B@MD#=YB$(/4;F\\Z,#4'Q=(RQ'(V/!@A)6'>$<G<NKD7Z6)\nM]/,\\+FHAM\">
+        /E1=2B1YRRCD67CQ'I'N5NSS'Z7;.57:; 'E6TJISG)N3,#M\nMX2,REBJ*;N7U@L5<J[R8583<3#LA&2LD?)5NR2,'-,V13R\"3-1!RV25%-;L;\nM?+C<NASZ#F;!W/*(,#+),4IX*KL!<,3P4AE5T+=TD%6(N*4[@T[-3-BUS35Z\nMYXK!D',@7Y>G@2\"!QM8CE3IL/>?SQ_Y
+        KK$<DV#)N ,H%23;6##^0\\/92D[7\nM&3Y !)]$1+BFTVP,K&5)\\!DD3)>BY5Z!WMTCB*96#4O*;=V',?8T@S,'FLT<\nMT00KV,>MU*\\.)OP'I(XTNQ]T:5,GQK/%-VHR-<'T<
+        ;_ $?53BMKMKL3R_CS\nMV!R?:C6S#U>R1AO-%#QS&YJJLGCBZ7F>G<>6>.JR,!0IHH7#U+<J?OCFKEDV\nMD%4/PIVR9.AA9MOZ#GIO##P8/#R)H<F%Y#\"PD1%61\"Y:1>Y9/IB&*@\\.HTKS\nMLV
+        Z5+._5&CQN%ZP5))4@64\\>/8+7]50!:!ZEXH\\B7@Z=:F-Y6L--IL0VS)^\nM1*$PEBA%W''EU>6Z9D:BI+I/$6TJRI61XM8T8[<$[VAT7/J!W+M2
+        2V]V[AU\nM#9OFI_R$JYT+(2*-R.*2QA%#]-K@O&>\\!S!%N3&\\7TO @U?;/L%Q[9&6(]*M\nM<D7[;,.![+'TBG6Z$[9Q6]&FV5_%)O+,RF(-QXNAVS7H8_)[%W\"V;(L:VA73\nM\"HW\"*\"83:IV2]TI=DC]:M4U#KO\\
+        W%.02%5)T<R3!NW;[[4W)C[^VJJY&VVF\nM3(!C(*QGJ!=&Z?@H]STDBR]10V*\\5NEYPU/3Y-#U,F/4
+        AC/4+%N%@1?FP[1\nMVVZNVN/BDVH#QHX\\GO'IY'(Z5UULF,+W;Y3#.8+1\"S?^A65:3;9I:>=)5K)K\nM2,7K2+EG8GSUVD+Q=OZC-V1)3TG2\"R/,[_T,;VS5WCLQES()XD$T*LOCPNBA\nM>]$3U6*A1W0>()%U(-8T+,.CPG2=7!BD1CT.0>AU)OP:UKWN>-N!]-ZV/Y/L\nM_)^3#$+/03QZ\"XSU8\\N7ND*YES-7(>95P'A/&E3L#&UNI6VY278-ZK(3#^9B\nMF0MXR,<O7JS=)4\"I^H=$BB+8VE_\\)U([NW?^B0XT3^#\"S
+        9$\\KJ4 2*_6% +\nM7=@J@VXVO;[ZUD_OC'_=>E?&O(R];@'H10;W+<KW L!<TX#,&;83Q5S_
+        (MM\nM>?KJP0>J<74LG8NS;D%Q49&2JT<WJ.-*W'8YLUTGHV)E K#N9R.[,X$ 62*<\nMJ[@3=R:8F(T:=I<N_(==UCI1]?:2.6&,.
+        Y+RL95121UA8_42+#M/%5D9*Z*\nMV%B7(P0K*[6N!TJ I8CE=OHFHI/,[2-2/(>XP]6_'33Z]GW=FQY)9$LMYU_K\nMJAZS&8M=Q$R68FLY9*AXYI2V?N%D-&K,7<F]-(-\"(N!()2=2'GWEGF:_LX9,\nM^\\9'Q-L)
+        >F.=N\\TH*]*P1,2YNO4&\"+TFXO3'N.+\"U;PTTE1+J1<79!P\"V-R\nM[#AP-B+FXXVJ4ZH[\\P6M.XF6-1]TLFM*CC\"J:R:N,<=9%R;\"R,1CV]9):5\";\nM;YR\"/N\\K#EBYX]A^N(E5<KMT<I%6JJ7L4]4G(%/M*76=MX^X=MPF3.DSLGQ(\nMXV#21Q]:^!>,&Z]-G
+        L.1!Y6-/B:HN)J$F!J#],(ACZ6865FL>NS'@;W7Z%1\nM Y.U^UTSYY:<0;':)TB\"KVG^#89#*^\\6=8JG/:IJVDRJ+FQ2^2X2-=2L6PI]\nMF4O&*T%(:=90Z\"[%V@]65<$,4CM0;&P=9U?2?+S)T7=4KON+*;PL&
+        N'RN^%\nM$;$ ET\"2V>,N0P*@+S45'YL/%RM>CS-,4+@1#JF<\"T?\"_4./ ]2\\& X6))[:\nMCCDBB=9^0O3N.HZ*'7X.IC*
+        '7_IU'G0. @*A/( 5Q5R 2S@<R6_UJS[NCB*\nMX[YZ#ZN9+P#%%OEDJ;*N3SNL,'S)\"4=-G]1\"K76-8&?NVC169K=E8$(LW.H5\nM0Y$%>SJ<
+        *;1;RSW%IOE-YM:[HF[I#B8.0TD8E96*@K-XL#-T@D))&Q(8 @%\nMEOPN1T>\\WMJZIYV>2FW=P[(B&9J..L4OA*RARKP^#D(I=E4O%*H#*2\">A@.-\nM@=%Z@ZAQ>@-2L6\\6Z2<97['3HAZWQ)BD9\"-DIQ&Q2K-=JW55%JLZ8.KW.)J&\nM9QS1N=<L<@JNY7.4Q1%\"5>8WF+/YNZC#Y6^69>;\"R9%.7E=+*AC0@D\"X#\"\"/\nMX<CL%\\1@J*\"#WX;Y5>5>+Y':5D><7FYX<&HXL+##P^I'D61U*CD2K9,H/AQ(\nMA81*SNY!OX>R?(1A#*>^>NFJ&SF((.%FW[/'LG/7Z$2GHN(2AXBVP<#/2+IB\nM\\G';1!TUJDU!NFKA(5/>.AP,!#\"4X
+        R>3^Z=!\\IMY;@V/N266*)LQ8X'\\-G+\nMO#))&H94!(,J.K*;=/\"UQ<5(//79NX_.S86V?,':<4,LR83RY$?BH@2/(BBD\nM<JTA4,(9(V1A?JXW
+        -C5:8ABG*4Y![BG*!BC[?:4P=0'V]!]H#S=P@@V/,5S\nMQ!!%QR-7,/#_ /J$8E_+N4?]S;7SFO\\
+        .,_JUJ'X+%^315UE^:K_ $2TO\\/F\nM?*YJ1WG+_A:[0?%AC]H+%/(?Y6?SY@?COD\\M77N;^\"3?8?;K4L:/S27T9/DA\nMROSSI]'*LG,5FNDEZS6[
+        XA'<]7X2;=UJ53G:XYEXIA).(\"<2;N&B4S\"+/6Z\nMRD5*IM7:J17\" IK FH<H&Z&$!^D<TT098G95=>E@\"1U\"][&W,7
+        -CPN*\\LBL\nM06 )!N+]A](]%=WSYUZKHHJK5F!1EVT'78*&;V\"5DIV>0BHB/CD9N;F1*,O,\nMRZ3-NB22E942![RX6
+        ZR_0.\\QNG/K)--*5,KLQ50JW)-@.0%^0'8!P'97D*J\nMW\"@ $W/K)YFLJ%>@&JC59M!P[=9CW>Y*H1C)%1IW
+        8IO=3IH%,W[BG, ]@AU\nM 1_EYY,LAN\"S$'GQ/'W:STKZ!2+?W;#GVB&,E+=C/[6I.DH<T>_GZM]HDGIE\nM!21BQ:.'?UF1T*SCM*AV@?N/T
+        O4?:Z1Z-KSXOM46+EG\"*]76(I.CIYENH+T\nMVL+WO;A32^O:#'E>Q29N&N:'\">&9HP_4> 7I+=742;
+        6OQY4M2P$\"1HO'DA(\nM@K!RL5PY9%C696CAP7T^U==L\"((JK%]$G0QBB8.T/;[ XU^+)U!NINH=MS>G\nM;I7E86I/%D\\;-FIK$60HZ#*%DCP9YTKN!2:Q,N1R$6>'-)@H5)A)%=N
+        ;BW$\nMY%04/Z?;W#T%8,+4VE&*(IS,Z=83I?J9+=76%M<KTCJZK6L+WM2(ZCIHA;),\nM\\ QTDZ\"_6G2K]73T%KV#=1\"])-^HVM>EQQ!2ZDH>7HXNIR44DZH+VI%$MDD3\nMO8@759*5I[X8LX[,IZL*4K$?5$%S)@\"/WW\\WV\\6##S[1((IK9'WL=+?&<>GN\nM\"W?[W#NWX\\.=(SGX
+        \\9C-#^C_?3UK\\5PZOC./<[O>[UN''E2A0592+9L\\;*M\nM7S-RBD[9ND#I.6SANX3*H@Y;+IB=)5%=$X&(<@B4Q1
+        0$0'B9T>)S'(\"LBD@\nM@BQ!' @@\\00>8/*E*.DJ\"2,AHV ((-P0>(((X$$<01SI,2]YQ_6I5O#SUQIT\nM!-NTD3M8J7L$+%2KI%RJ=)N=NQ>.T':R2ZZ1BD$I1
+        QRB =1 >+<?2M5S(#D\nMXF-D2XRDW=(W900+F[*\"!8&YN> I!E:QI&#.N+FY6-#E, 0CRHC$$V%E9@3<\nM@@6'$BE&I&1JSQ*05CV*K]
+        \ !!\\HT;G>(E#KT!)R9,5DP ##\\!@^'B$.P7I!\nM/2>R_\"G&PO?MKH;=9:-7&\"!KY/U.!C)%T1DU-;I6'BV#YZ;[Y-H@,RN@W<NC\nM![2IE[CC]P.*\\'
+        U'4)\"FFP3SRHO41$C.0/20@) ]9X4BS]3TW3(UDU/(@QX\nMG;I4RR)&&;ZD%R 3ZAQI1,DV2;1N6.(U38^D0S4K(J16GH'#O3,W!
+        \ 1](Y3\nM=0$OL$!Z\\2.&#$/?K!XWYW]?KI8K*RAD(*$7!'(CU5G4336(=)4A%4E\"B11-\nM0I3D.0P=#%.0P\"4Q1#X0'V<\\@D<1SKU7KLV#&.1]WCV31@W[A/Z#-NBU1[S=\nM.X_I($(3N-T]H].H\\RS,QNQ)/KHL!RKR\\9,I!
+        6S]HU?-C\"!C-WC=)R@8Q?Y\nMHBDL0Z8B7[GL]G!693=20?500#SKF#9L#?W0&Z -?2%#W8$DP;^B8HD,CZ(%\nM]/TA(/02].G3V<+F]^VBOG5O/ZVZ_M*_]*;G92/[VOUH^A7!67[ZWUQ^C3CL\nM$;B;*:T-)\",POE29J<%*NCOWU:790]BK2L@H0B2LBC\"6./E&+!^NFF4%%FQ4\nM5%0(7O$W0.0O=GEOLG>\\B3[FP(\\C+C7I64,\\<@4<0I>-E+*.-@UP+FUKU8.R\nM?-GS\"\\NXGQMI:E)C8,C]30LL<L)8BQ81RJX5CPZBG26L+WM2,S/L+FS8><:V\nM'-.2+'?Y\"/(JG%(RJS=M#PI%^GKEA*]%MV$%$BX[0]0R#<AU.@=QAZ!QSVSL\nM[:^SL5L/;.%#B1/;K*@EWMRZY'+2/;L#,0.P\"FC=V_-X[\\S$SMW:A/G31@]\nM<A8X[\\_#B0+&A/:54$]I-*>C;;[)8UQG-X;I.7K1!XQL#*9CI\"GE\"+?QR;\"P\nMI+HSK2+6DXYZ_@T)4CI452LUD
+        $ZACAT.83\"@U7R[V3K>N1;DU33H)==A9&6\nM;OJQ:,@H7\"LJR%;\"W6&X #D+4Y:+YJ>86W=NS;2T?5<B';DR2(T%D=0LH(D5\nM\"Z,\\8?J8D1LO$EA8F]-S*4\"E
+        I0Z%* %  ^   .@ 'Q!R:$W-SSJOP !8<JN\nM7^'_ /4(Q+^7<H_[FVOG-?YQG]6M0_!8OR:*NLOS5?Z):7^'S/E<U([SE_PM\nM=H/BPQ^T%BGD/\\K/Y\\P/QWR>6KKW-_!)OL/MUJ6-'YI+Z,GR0Y7YYT^CE63F\nM*S1PHHX44<**.%%0M86U0NERVAV$RM)U#
+        :=2B]Q;#+G'*^ORUERO+Q,4QJ$\nMDG+XYR5(2T:G#1:BHA]7+I-723=ZBLH!C\"/0-EMS;_TS3MBZ1H$&3JYU\"3;D\nM:?HNH\"/$1W:92F1C*C%WM]\\4NI9\"JV',ZG[1\\M-6U/S$US<V5B:&--CW5+)?\nM,TPRYSHB0,),7,:1!&G5]Z81N%=78$D\\)I>:TUMA5>RU)6Q'&V:=*0Q+E9SF\nMB_[T.\\E5<6N/)]?'LCC>9SG6LE)Y!4R*1E]DFL
+        SKD:L9P*KDKA)<G8*?7KT\nMV]P#I[:UIGF;^\\-/&VL/:HQI;Y$8R%R4P),;V<8_5XQD:1ATV4J5-[VK2341\nMJ2Z%JWE*-,U)MVYN\\FRX>G%E.,^))J<69[4<KI\\!8EB5NOJ<.KCI*WJPGS4*\nMMVZKFY\\P[L+&W3R69HQ#7K3.(628?XHR!BUS\"R8QN4<26W!\\$R+>Z*B5H*LS\nM<<96=ZJND=J5<'#3WIL'WP\"0^Y.TMR;/GTS9.V=Q38\\301KE090=>K%RXLZ1\nMO
+        G-[)#DQ*%(;IZ7\\.3EQ&BN^-I[ZQ]5\\P=V[6Q\\F<9+G\"R,,H_1F84VFQ+[\nM3C#IN^1AS,S
+        IU=<?BQ<^!G7P\"S<QV\",*1[UJX9/&.),;LW;)V@HU=-'+6G0\nMR\"[5RU6*19LX;JD$ATSE
+        Q# (\" \"'-5MV2)-NK4YHF#1OJ&00P(((,SD$$<\"\nM\".((X&MQMFQ20;0TJ\"9625--QE96!!4B%
+        00>((/ @\\0>%17[5P^&D-WKS.;\nM\":^7'-](F]3J95Z:RKF&;-DY5Q=@R!=7#J+@I2%B';>LV%2+<$
+        KHSIH9$%\"\nMF]4G4!&^-A96Y&\\K\\7$VAK&-I>J1;@FEF,F;%B@0^SP -(KN#+&&![O2X-B.\nMDUKEYCX.U!YNYF=OC0<K6='FVSCPP\"+3YLPF?VK)+)&\\<;\"&4HR]_KC*@@]0\nMI^^BM/RA0M3\\,5/,1)5M?(BMN4WT9/27UO.P4.XFI1W4ZY-R?J*B[E:]57#)\nMFN(F,)%$1((B)>O*H\\U-1T+5M_ZGJ&VS&VDR3@JT:]\"2.$42R(O\"R22AW7AQ\nM#7[:N;R=TO<6B^6FDZ9NH2KK<6.0R2/XDD:&1VABD>YZGBA,<;&YXJ1<VIE'\nMDYIU=?7;%%[?L[%(3]7HN0XF#B;5K/.[*:_6?[0+1/JU*TQE=%67I=]FSL2I\nMQTHW2]0B'<'J)]\"];-\\CM2S8M,U#2H6A3$GRL=W>+4H]-SXO##VFB:2R30)U\nM7DB8V+6[IXU4OSA-)P)]6TS69UG?-QL3*2-)M)EU;3)O%,=X)HXKOCY,A4\"&\nM9!?IZAU#A4CVMCR??Z_X:=VG'33$<^KC>I!)XQ8)K(,J*NE#-40K35LY.H[9\nMMXQ),J9$%C&60*'IJ\")RF$:8WK%AP[NU*/
+        S&U'#&;+TY+6+3@N3XI(X$L>)\nM8<&YC@15[[!FSI]DZ5+J6 NEYQP(.O$6X7'/AJ/\" /%0@L
+        K=Y?@MQ!K=O(Q\nM4NHX44<**.%%0_J>$32Y5114SS-/<H<RANF0V@!W',)AZ!]F?8'4>;%K\\Z'S\nM,50H73+
+        ?JY_.UJLWS/?*-F+%]7N3?\\ \\I?S-</W(.EOXYFK](C3\\V>9_NB\\\nMS/J=,_9S^=K']G?E']7J_P\"U+^9H_<@Z6_CF:OTB-/S9X?W1>9GU.F?LY_.T\nM?V=^4?U>K_M2_F:/W(.EOXYFK](C3\\V>']T7F9]3IG[.?SM']G?E']7J_P\"U\nM+^9H_<@Z6_CF:OTB-/S9X?W1>9GU.F?LY_.T?V=^4?U>K_M2_F:D8U[P)1=9\nML50&'<;GG5*C6W4X[CCV23)+RXJV\":?SS_WA^FT9$5(#Z14],/3+VI]\"^WIU\nMY36\\-VZKO?7YMR:T(AJ,RH&\\->A+1HL:V4EK=U1?CQ/&K[V)LC1?+O;,&U-O\nMF8Z7CM(R^*_6]Y9&D:[!5OWF-N'
+        6%,#\\Y?\\+7:#XL,?M!8IX]>5G\\^8'X[Y\nM/+3CN;^\"3?8?;K4L:/S27T9/DAROSSI]'*LG,5FCA11PHHX44<**.%%'\"BCA\nM11PHHX44<**.%%'\"BCA11PHHX44<**.%%'\"BCA11PHHX44<**.%%'\"BHGO.)\nMV?NNMGO4]'LZ8:Z^OZ_I?K
+        8JZ=_NWX?X?@[?N_#[.O+ \\K?Y[P+?][Y/+3%\nMN7^\"S?8?;K4KJ/S27T9/DAR 'G3X.59.8K-'\"BCA11PHHX44<**.%%'\"BCA1\n;1PHHX44<**.%%'\"BCA11PHHX44<**.%%?__9\n\nend\n</TEXT>\n</DOCUMENT>\n<DOCUMENT>\n<TYPE>GRAPHIC\n<SEQUENCE>3\n<FILENAME>wa002_v1.jpg\n<DESCRIPTION>GRAPHIC\n<TEXT>\nbegin
+        644 wa002_v1.jpg\nM_]C_X  02D9)1@ ! @  9 !D  #_[  11'5C:WD  0 $    9   _^X
+        #D%D\nM;V)E &3      ?_; (0  0$! 0$! 0$! 0$! 0$! 0$! 0$! 0$! 0$! 0$!\nM 0$!
+        0$! 0$! 0$! 0(\" @(\" @(\" @(\" P,# P,# P,# P$! 0$! 0$\" 0$\"\nM @(! @(# P,#
+        P,# P,# P,# P,# P,# P,# P,# P,# P,# P,# P,# P,#\nM P,# P,# P,#_\\  $0@ QP%W
+        P$1  (1 0,1 ?_$ (0  0 \" @,!  ,\nM       '\"PD*!08(! $\" P$!                     !
+        \   8\" 0 %\" 8(\nM!00#      (#! 4& 0<($1(3\"0H4%S=WE[=8.2$5UWBX&C%!%E9VEK;6(B/5\nM5SA1,B388:$8$0$
+        \                    _]H # ,!  (1 Q$ /P#:<[Q6\nM,WW9=@<68^I:;OU^TY2N2'%'8LU-Z^M]/CLEOS'E!KIF;-]K4I882T2%(H=#\nM3?R?_BI.XY5\\]2=/.P)%X.</#6O>.&Q=DWKDK7+8O==>G94_>\\QR=N$5K*XD\nM1V9M6/YG[$V'QZ6R1UBL8W2_C>,2^\"PZT5)NOJUJO\"H=KA)NW8
+        ,F'\"N];;)\nM=-M::VAK.>B9.I$@;A.[3EW$Z[6NMLMD9&'61D7LA 1M>?\\ DL(1M'QQXA[(\nM=#2$4R^*U7.FD8)O6O\\
+        R\"M%^VO :WK&G\"UG65SAJ05_=[5=FL[,R#_6&O-C\nMO'YF,#4G\\>Q9H^< C1(F%U3G\\ERH;)>TP0@3#KY7:BK.1SM1CKYC(8=IXB\":\nM^E;'*LU&'8%RL:14L<-#+HN\\.>G!2I%.3*?1G.<9^@!((\nM
+        \               .)4GX))M*O%9J)2:02BJ,XZ4D69&T,L@@DZ62E5S+82C\nME$6RY%#%6R3)4SE-GZ,XR
+        ^\\SEN1N9X=P@1H1#+D[HRJ96Y6Y4^U,X,ODV$B\nMH%2QULGSGJX+]/3T /F++19WZ<622CS2:K#ZU2CBO&YGZD7A8C?,DFSPIEP=\nMAAPH4G;8+E/KFP7IZ<]
+        #ZRKHG/A,JR1E,I%7P0JA,GRB;/5*M@N,Y-E(QOH\nMP;]&<@/Z@                     \"
+        M.>D'E7Z_8#\\,/' !/H\nM                       #7XC*-5\"6+F'9Y#C1M!OJ38K+1[F?@YCC%LB9\nM6U?NJM;6VM)JSNQ=8-I]P\\YRLZ[<K=BWSTY!+2C9S7\\QL;C\"S1JB=
+        .S;3J.\nM^I3NH(?BO0M(;#LMQ9<76E?W;1C/[%KNR.=9V#5NTV\\1!4F=FH7ZMD+'<K!3\nMF#*8ID6]6FJQ\"2N8Y4B*JC(RH?7/Z'3W#R&T-\"GT_L'5-[DM0R,1O6_HZJGD\nM9;$+<^%LKKN%M-=Y.I.'-5;UG6-IEE*J[UI@K)62LCDD^9KA)GY0Z\"9.)\\?M\nMS16\\*KI_&KYN=UA<J[94&.SY&H6*LEIE$JEFW#*5J
+        C(]G$?L90ZI%VHO:,J\nM\\Z=ED?JR]PZ3,IV\\,\\-D,N0                      @+3GI!Y5^OV
+        _##\nMQP 3Z                               #!1W^?>Q[0[H?C5I[>.J]64+\nM;$SLC>;75,C\";
+        ?V&.C(^+<4\"[6_,HR6KCMHZ,_*[JZ26\"J9,GV:AOHZW1G\nM:HGYW/F)\\&'&G^:-H_ZP ?G<^8GP8<:?YHVC_K
+        !^=SYB?!AQI_FC:/^L /Q\nMGQN?,7HSU>&/&C&>C/1G-GVEG&,_JSG&)DN<XQG]73@!8W4R<6LU/JED<HI-\nMG%AK4%.+MT,G,BW6EHMJ_511,IG)\\I)'<9*7)L]/1CZ0'90\nM
+        \  &)OO$HZ!E-G<;F[!A>5=NH['U)(4%Q'Q-Y>L7-7CM\\:\\>;0BM03L#+MJE\nM1]Z'@$D7$A(S#5RDM1$99L<ODBKM5
+        /#-\"U#M+:6PN4=;D[K;-9OVU6WO9.6\nM%KB839:C.3VA6^9VPK+QZ14;-YBK.[$\\1XK$*I$$A)-,Y8@D(3.5(_#9LH&3\nMKA5M;8,G<=LZ7V/K^RQUOIF(*Z6_8LS)2;T]DL=PBXI1!C)1[J!CXB#*VKR;\nM-G$_5S^23D6T2Y<+$9*_Y)P[W4)3>;/;7*I'7=&U/8J_Y\\:P<TC=-JW\"FS.)\nM
+        W&/CKATWQ#0>FKVRRS2)A/*:WE^#J9,;&4B=7&3!Z:HCW9KUI('V;6:)67Z\nM;I,L4A1+S8+RT=,<H%RJO(.[!KS7BS!T1STE*DFBY(8F,&RIC.>K@.]@
+        #'[\nMWDU@U?7N/T.?:\\>K/P\\OM.GP5?J$I.RE;UA;KG(,Y_\\ 9^.WO,1,;*.FVEH1\nM1%2;F\"E2,HJ>*0(@1=R9!LL&,?7BMAU;RBTG-V^W8Y\"QFO:CQ[BZ3M2;K6VV\nME_DN,5;X:O7>T^3,)M&&MB=+0U_C:;.9S9*J^B)-:?E)!J5VL>2+#&*$S[@-\nMJZQ\\TK/:J_$[GEHMSH;>,KR%\\WL+MAAN.?UY-:#I:]&E:%:VTQB\"E]%/X5QE\nMI7:_!H,)E#9I7#I!7#M*214#J.F]/;,>ZVH.R=4;
+        FH!\"I<F=YUW3%7HE:O,\nM1J>UU?9MKAW,-:=25:?MB:E'U?6JE'2I7S2<+-,W*K:4-&':$>M#$#*9PIVX\nMON+1<1,*:VE]7M*K(JT*)@I:2E9E1Y%5N(AO)'Q9::K52D'\\BPR]-%S&3,L$\nM1L$:_136<II$<*AZU
+        \                    :9?C9?E]<6/OD1ON3VZ K.\nMP    %]QJ;T5ZT]7]-_IR- 2       (VW#)7R'U;?936\"U(:;
+        85B5<U60V\nM2\\=L*!$RJ;8V4INX.&!T7F:]\")]9VZ335;F621RGVR/7[4@8EHKFGR>B6&A[\nM9L)ZTB]
+        R5ZOD?<^2<3Q^<R%>V+KI?=NL=6\\?KW)5R3V_6932<'MY&TR1DWK\nM5I:C*MB-)A)HC&*FR0/1?-CE[N'B]99MW\"TJBS&NXWB1R-W/#/7$I8I:Y3>T\nMM4SVF8*\"@Y2K,X:*80]%9EVD5RZ<-Y9Z^D,%.3\"3'\"&%G
+        0\\AS#Y;T+8MZU_\nM9Z=6-N5;C_N9UJW:FV:]17U)0NV;AJC1>T=<,XJ,5V!+,:!.LO/:2-.J;$VU\nMG7K$C5$C%94Q\\!DFT1M:K[BUM\"6NLWBN;!4;$)
+        VBPU5!VRAE+A%M6OU\\1C'\nMR!$W[./76<%=,>TQDKF.<-W*1U4%DE3A,0       (\"TYZ0>5?K]@/PP\\<
+        $\nM^@   UD^='BG>$' 7E=N#B)M317*JUW[3$K7XFQ6'7]?U(\\I\\DO8J;7+LT4A\nM7-BV[7)I5%&-LR*2G;LD#87(?!<&+@IC!Y,_.O\\
+        =O\\ PT\\V_P\"5=$_;P ?G\nM7^[?^&GFW_*NB?MX /SK_=O_  T\\V_Y5T3]O #*%W57B ^*G>X;EV'I+0FI>\nM0>O[)K?62NTYB3V[#:YC81[\"(VJNU([\"-5INQ[F_/*Y?V5!3!54$D>Q(?/:=\nM;!2F#.Z
+        \                    TR_&R_+ZXL??(C?<GMT!6=@    +[C4W\nMHKUIZOZ;_3D: D       0QNJ#TSM.@7S26WIR%S4M@UB1J=SKAKVXI<P]KE\nM@9F;/FA)6#G(.RQ&'[)7)<+-7\"\"O4-GJGQC(#ST?C1PR>OJ)*V.Q+7B8UV^.\nM[@)K8')#8MYEG[3%JKUZCZW<W]GV3)N-ATFOW>IQLQ%04]F1B(J39IN&C9%3\nMK&,$@R^M.*MD;(M+7+5>Y((UG=5,SBY[6E+:HXJ7(6?C;+M>N/5[#;9%=]#S\nMTC#-\"-4%C')#LFJ32.PU:IE1P'XI.L^*U
+        KB%6@9BLNHTNP3[5D'5KVO*WJ?\nMLNPS1Z<4G;+G:+I;9^R724:QK5L@W-*NG9&R3%H5(I,-&V$@[IH^F:%U%
+        >;\nMK2[VN,XUW).YO,0TNR]MEG;S+%DP[4[R8G)J;<MHJ\"B&C%JEE4R+&-9(-D2I\nMH(ID*$\\
+        \       @+3GI!Y5^OV _##QP 3Z   \"G1\\2A\\[OGI_&FKO<!J8!@\nMU   !N;^\"9^8#RJ^YT_]]>I@%F\"
+        \                    TR_&R_+ZXL??\nM(C?<GMT!6=@    +[C4WHKUIZOZ;_3D: D       5)GBQ?G8\\@_5QQY]S-0\nM
+        :W0   -D'PGOSL^.WJ\\Y#^Y.Y@+;<   &(_GA-ZU?<G.+^OG>]WNIMQOI&G\nM6^IOI_:S77=\"H])K>ZJ,]N4W
+        UMRJR)M7<FZ4&>*!&0Y_+6Z</)R+A<B**9R\nM/@\\1Z^K>[=LW_DY7D-NV;6$VC5-[6_E=.M;-M1XSJ&QZ5S.V%Y@HE5&*L,/(\nMU%PXXJ1V'3!I!.(X\\C!L(C*I%XY5+M0R>\\*MW6VT7#;&F=B52TMMBTS$'=[K\nM;YJ5,[*^E;?%Q.6,0\\KGDI$**BUKQ6*$4F@Y<(S1&+YZ4C<V#E4#O%1G]V1F\nMV^53;7^L=?6^
+        \\^%84-+6;;\\U1Y/$@?C'QVPY:8A&&HKNWRU0(5/)%_+<&4R\nM8V,I$ZN,F#TW0Y79$JTD%-D4NJ4M\\BZ33C&M4O\\
+        (W]N^991*95R[>2-!H)X\nMYP1QG),)%1<%,7&#=IC.>K@.^  \"G1\\2A\\[OGI_&FKO<!J8!@U
+        \  !N;^\"9^\nM8#RJ^YT_]]>I@%F\"                     TR_&R_+ZXL??(C?<GMT!6=@\nM
+        \   +[C4WHKUIZOZ;_3D: D       5)GBQ?G8\\@_5QQY]S-0 :W0   -D'P\nMGOSL^.WJ\\Y#^Y.Y@+;<
+        \  #H  #H_7^O(\" M.>D'E7Z_8#\\,/' !/H   *='\nMQ*'SN^>G\\::N]P&I@&#4   &YOX)GY@/*K[G3_WUZF
+        68(\nM      #3+\\;+\\OKBQ]\\B-]R>W0%9V     ON-3>BO6GJ_IO].1H\"0      !\nM4F>+%^=CR#]7''GW,U
+        !K=    V0?\">_.SX[>KSD/[D[F MMP       0%IS\nMT@\\J_7[ ?AAXX )]   !3H^)0^=WST_C35WN
+        U, P:@   W-_!,_,!Y5?<Z?\nM^^O4P\"S!                     :9?C9?E]<6/OD1ON3VZ
+        K.P    %]QJ\nM;T5ZT]7]-_IR- 2       *DSQ8OSL>0?JXX\\^YFH -;H   &R#X3WYV?';U\nM><A_<G<P%MN
+        \  #Q+S7<7:*9\\:IZH;(N-):->7W&^#MM=K.8)\"+V-6KAM\"NU\nMM_6[:]>0CVQHPJ\";W+CL8Q]'X='+V3ORAL8R)@Q-:\\D.1&U[UR-KD-O>?H-A\nM0IN]KQR;?+[1V.[CM57G7'-'8M?TK!%2A9I>2TIF5XP0_ER4?!(1?U[$P[!1\nMRBNU='=*ADTX6\\AIR_V[:NGM@0MO3VK2_J6ZW>;G'K!6/PXM4;%?5T\"A6FCM\nMPXU^WCZ_F/(T;*E30F5TI!ZVQU<*F,';JK;]OP>W>53&CZ;87R$SN^KKYG7.\nMS8BHJ%?*<8^.V'#'ZI?04BODK8A\"9PMVG5/U^C&,=7Z0].Z_L%_L#.16O^O&\nMNO'C=VFC',FMSC[F62:&0*=1X=U'QD81B9-?.4^S,4^38QUNGHST
+        )   %.C\nMXE#YW?/3^--7>X#4P#!J   #<W\\$S\\P'E5]SI_[Z]3 +,$\nM      !IE^-E^7UQ8^^1&^Y/;H\"L[
+        \    7W&IO17K3U?TW^G(T!(\nMJ3/%B_.QY!^KCCS[F:@ UN@   ;(/A/?G9\\=O5YR']R=S
+        6VX   /T.FFK@N\nM%$R*8(<BA<'*4^\"J)FP9-0N#8ST'(;'3C/Z<9_0 _D5FT(9T<K5N4[TQ3O3E\nM02P9V8B1$\"F=&P7&7!BH)E)C)^G.\"%QC]&
+        '[$;MTU5G\":\"*:[GL_*%B)$*J\nMOV)<D1[90I<'5[(F<X+ULYZN,]& $$:<](/*OU^P'X8>.
+        \"?0   4Z/B4/G=\nM\\]/XTU=[@-3 ,&H   -S?P3/S >57W.G_OKU, LP0\nM &F7XV7Y?7%C[Y$;[D]N@*SL
+        \   !?<:F]%>M/5_3?Z<C0$@      \"I,\\6+\nM\\['D'ZN.//N9J #6Z   !L@^$]^=GQV]7G(?W)W,!;;@
+        \      @+3GI!Y5^\nMOV _##QP 3Z   \"G1\\2A\\[OGI_&FKO<!J8!@U   !N;^\"9^8#RJ^YT_]]>I@\nM%F\"
+        \                    TR_&R_+ZXL??(C?<GMT!6=@    +[C4WHKUI\nMZOZ;_3D: D       5)GBQ?G8\\@_5QQY]S-0
+        :W0   -D'PGOSL^.WJ\\Y#^Y\nM.Y@+;<    !KF4\"\\\\HMMW7D!5JUOV<I5C5I>^+]O?ZZVM8',-I\"TZEYL[%H>\nMJJY$X:-[,OH=O.<=8/RQ5C&1;=.>9P*2CE$YWCF0.&3#ACR4>[.LVR]37EK<\nML[=J&(RZ71[-XBDJ^UQ9&$05C7(\"#92SV4IS>%A%8[K-WS5DE)/U7SIEY0D5\nM54!V>JWW9%;V[RJCJIHNT[%BL[OJ[G-AA[EK2!9E=*\\8^.Q5H[R&V6N&E<K-\nM2IE,93L>R-A3'5-G.#8P$F>=S=OPH7[VFZ/^T
+        \ \\[F[?A0OWM-T?]H !YW-V\nM_\"A?O:;H_P\"T !H=][7X<+O2>?/>(<EN76JM?Z@J^O\\
+        <UAITM6X&^[HKS*W\nM1[:NZRI-)=$FFL RGXA%9:1K*RJ>$'BY>Q.3.<X-TEP&.?\\ *!=\\5^[W''VY\nM-?[:
+        /R@7?%?N]QQ]N37^V@#\\H%WQ7[O<<?;DU_MH!GW\\/9W+G>+=TER<W3N\nMS?>IJ)?*YL?0SG5L+&ZGW%2Y&9:3JVPJ/;\"O9).V*U-DE%8CJTN3)DEE5>V.\nM3'9]7)C%#;E\\[F[?A0OWM-T?]H
+        !YW-V_\"A?O:;H_P\"T !&VT+?R,N,166%=\nMXSWR%<Q.S=76R2<&VKIIKY57*A>X&QV6*(9E?C*+JRT+&K-R(GZJ\"QE.HJ8I\nM,FS@))\\[F[?A0OWM-T?]H
+        !YW-V_\"A?O:;H_[0 '2-F\\G]D:CUML+:]TXJ[+\nM0I^L*-;=B6M:-V#I\"1DDZW28\"0LLX>.C\\;$1R^?XC(Q7L4>N3\"JO5+DQ<9ZV\nM
+        UNL>-6[LO.,9_\\ SYS@+TXQGHS1=&=..G]6>KR ,7IQ_P#&<X ?G\\ZKW9?P\nM^\\W_ .1=&_;^
+        ?G5>[+^'WF__(NC?M_ /SJO=E_#[S?_ )%T;]OX#./PB[S1\nMMWA/'>J\\H^-_%W=C_4]RE[9\"0CB\\V;1U0LAGM+L+^KS>7<$7:4N1LA]:QJN$\nM#>4&RHGC!LE+T]
+        #UIYW-V_\"A?O:;H_[0 #SN;M^%\"_>TW1_V@ (U:V[D8CN\nM*<OBG&B^*562UC4ZDT@?.KIO*C6R0MLNLQ)ROD6;]]7D1>Q4\\S2PL4W;G,AD\nMABX(0ALA)7G<W;\\*%^]INC_M
+        \ /.YNWX4+][3='_ &@ ,!GB$N 7-[O;>+VF\nM-):%T5&4.S:YWVUVI,R.U]M:WCX-W!-]>7>I991J]3F;6^4E32%H14ZBB\"26\nM$4SY[3K=!<AJ+?E
+        N^*_=[CC[<FO]M 'Y0+OBOW>XX^W)K_;0!^4\"[XK]WN.\nM/MR:_P!M 'Y0+OBOW>XX^W)K_;0\"RVI6P=ZUFFU&N.^*MY7=P%7K\\*[60V9I\nM'R=5W%1#-BY.WRI?RJ&;F70-DF3%*8Q.C.2ES]&
+        [-YW-V_\"A?O:;H_[0 #&\nMW-V_KXH7[H_7T;,T=G_Z\\X..D!&NI+?R-I%)3@+/QGODY,8M6QII1^3:VFWA\nM,1UJV/;+3
+        ,2N']^3<GS%UZ9:MC%R7!$CHY33Z4R$,8)*\\[F[?A0OWM-T?\\\nM:  >=S=OPH7[VFZ/^T !I#]]EX?;O-^\\J[PG9_+;36M]64^A7>I:K@HV!V1N\nM:L,+8U>4?7\\#5951ZVK:-EB2MW$C&*';F([.8R.2Y.4ALY+@,3?Y0+OBOW>X\nMX^W)K_;0!^4\"[XK]WN./MR:_VT
+        ?E N^*_=[CC[<FO\\ ;0#+#W)_A].\\X[M?\nMO\"M6<M]RZWU9<*#1:KM2#DX'6^YJP_MCIW>->6\"I12C)M9$*U$F;MY&53.XR\nM=V0Q4<&R0IS8P3(;O?G<W;\\*%^]INC_M
+        \ /.YNWX4+][3='_ &@ .A['NW(:\nMVUUC%P7&6^0\\@TOFJ;,HZ/M/3+<CB'I>TZ9<;-%9697\\R^#3=9@GC,A,ERDL\nM=<J2O52.<Y0]F
+        .'1KM?;K3;E\"\"AT'%E435L:Z,8R36GU46:<<BI-JD0*>54\nM2CT2(%ROE3)42X)C_#C& 'TMXJ+:/I\"3:QK!M)2V&A920;LVZ+Z2+'I'08%D\nM'::95WF&**AB(X4,;LBFS@O1C.0$(Z<](/*OU^P'X8>.
+        \"?0\nM    'DOGU_P4YJ?=+Y&^YZY *+L    !;:^$[^2;QY]8O(;WTW$!LA@\nM                              @+3GI!Y5^OV
+        _##QP 3Z\nM       \\E\\^O^\"G-3[I?(WW/7(!1=@    +;7PG?R3>//K%Y#>^FX@-D,\nM
+        \                           &.KDWMW=!+!JY&FLMD:1K%1YD<;=>W&3\nML]=UV_A.1E'V1L&)KD@QUW/P6P['9*W7(U5SC,B>4B(Q\\\\*<C=-/\"9U5,!CP\nMH^UN8.UKCNZN4K=TK5++/TW?&R-D(6F]QIH'0DMI3FYL+3M#K=8,>LVLFIHV\nMQZ0KOE;YN:-<$ER0\"JIR8>.W+[(9,.'')C.V9B^ZXN)K=G;5?RVN=H++,(QG\nM5&+*9:0S=I7:@T:RCJ;AD8\"+6CCO4)1FQRXDWSI1D9V@4ZI
+        [)3=@VZL[9Y5\nM1L'HW:&Q&6=XUESFP5\"9TJPB\"K+<8^.I5(_*%^V[2)[+QKA/!E#88Y;YPH7J\nM*GSUL%#TS1[7/VMH_<3^L[KK-9FZ3;MV%UD-<R#J42.B54SUB?7-^OS)-LD?\nM.4S8<K-ULGQG)4\\DZ#9#NX
+        \              /)?/K_@IS4^Z7R-]SUR 478\nM    \"VU\\)W\\DWCSZQ>0WOIN(#9#                               !Q\nM\\C$14PFU2EXR/E$F4@PEV2<BR;/DVDK%.4WL9)M2.4U2MY\".>)%506)C\"B*I\nM<&)G!L8R
+        X-G0J+'N[>_84NIL7VP545[Z]9UR';.[NNWCBQ\"\"UO<HLR+655\"\nM)+AJ0SW*V2M\\83QT$_P@.18UJN1<Q-6&,K\\)'3]E)%IV*<8Q3!I,3Y(1LHSA\nMB34FW03>RI(AHJ=)KA<ZF&Z9LE3ZI<YP
+        AW3GI!Y5^OV _##QP 3Z\nM          \\E\\^O^\"G-3[I?(WW/7(!1=@    +;7PG?R3>//K%Y#>^FX@-D,\nM
+        \                                  $!:<](/*OU^P'X8>. \"?0\nM            'DOGU_P4YJ?=+Y&^YZY
+        *+L    !;:^$[^2;QY]8O(;WTW$!\nMLA@                               Q2[GVSNS:.VM01.E;+N73=Y97Y\nMHP;Z(N5#JD)'66AU#:M#+NC?^VY-68L*[G1:VK'KZO55LW5CI&2MDJ@9N0ZJ\nM7:,P\\G5#>W-?9UQVW!Z\\V?*PL[=*?OK9\\E'7\"3UZWB=\">8CF]?N/M9K5.=2%\nM*F6%6C;7JFM$>2GURWE?*SP3U9'*+QP=4H9(^'_)Q/<C^ZTFV.;&7:D29*X3\nM$>^@21=3C861;0S-M
+        TISDV))=. :+L%Y0D@DDL23E52H'71)DR8?=4]HSM/\nMVYRJB([2>W=@-\\[PK#OZ_I\"&N%(7\"B_&/CL4[#)K3L>JRGEK7\"6#*?\\
+        B]ET\nM*%ZIS9ZV\"AZ<H-VD[LSD74GK>_:W48.TVR3&_)5!)Y)D40*MEY'8J%OM[;+1\nM(QNS-VRB*G7QGH)DO0;(=^
+        \              !!W)S6D[N?C9R%T]5W46QLN\nMV-';9UI77LVLZ;0K.=O=\"GZO$NI=PR:2#Q\"+;OY5,[@Z*\"ZI4L&R5,YL8+D*\nMW
+        O@L^]&R4N3[NX/%/DN,F*79.[3%*;H_P 6\"FSQ[)DV,9_1GHQT_P#3 #]O\nMR6?>B?[X<'_:/NS_
+        -?0#\\EGWHG^^'!_VC[L_P#7T _)9]Z)_OAP?]H^[/\\\nMU] ;R7<A<$-O=VWW=VK.)F\\Y[7UEV-1[;M:<E)?6$M/S=/<,KOL2P6N'*QD+\nM-6*A+J.48R42*X*=BF5-?!BD,H7&#F#+8\nM
+        \   \"(;UQ]T/M\"V5N^;)TMJF_P!XIQ&J=2N5SU]5+-::PDQE4YUFE7[!,Q3R\nM6ATFDVB1XF5NJF4CHN%<8P?&#
+        .?C=3ZMAG]_E8C6]#BI/:ZJ:^T9&-J, Q?\nM;'628*Q22M[=M8])Q;5$XQ<[?!GYG&<(',3_
+        +39QD.7BJ13(*PV.W0E2K4/\nM:K@G$)6RRQ<'&,)^SI5]H=A IV\"7:M4I\"83A62AD6F'\"BF&Z6<E3ZI<]
+        \"*M\nM.>D'E7Z_8#\\,/' !/H                  QT\\Q-K[H0JSYOKI#9>C&FM.1\nMW$&.G]@3=8H,K7-\\4+87(/6-4N%,UG,1NQ).SUM!:.GE&4J^DX1DXPFH9%JF\nM?\"N5TPA;C;O/;1N<FVZ)LB[RLM2E8OD]*3\\B_P!C:QG-0P*M)Y.T#7?&N#UQ\nM\"P,X_L]$L*>LK:]A+8SF$8M9];8U?&$G2B7:X#Q5K'DGR#V'1GKVVWC;$6\\N\nM%MXX;\"WS#U+D+24YB
+        U]M>^<F==8UII^9M4%J>+T#NU'9U#K\\=,TYI879#U2\nM.PNP=?7;M_VX3%4-^<M&FH]!<@=C[-EG&L-H<>*O^T,#!.ZJ?8)4(AW77L_L\nM>+:,(\".K&+A/L$#(?M(6=;UX[JWQQ\"MF[9#RTH9L]6;'@=O:[I^S*PE(MX*Z\nM0;2;CVLN@@VE&9'.,E68OTVKE\\RR[9.4SI'.W7<-E#$ZZ*JJ1B*&#OX\nM
+        \                             (\"TYZ0>5?K]@/PP\\< $^@\nM        #CY2(B9QI]7S49'3##RJ/?>12C)M(-/+8F0:RT4\\\\F=I+(^51DHR\nM1<MU.KUT7\")%\"9P<I<X#J\"VJ-6N5K6X<:UH\"[B^2,%,7A=:G5U5:YR]77:NJ\nMU*6M4\\<8]BD:ZY8H*,5WF5E6AT2&2,3)\"YP'X=ZFU6_B+C
+        /M9Z_>P.Q)):8\nMV#\".Z97'$1>I=P9N9Q*W&-6C3L[/)+F:)9.N](NJ;*1.DV>KCH#L#VIU:28G\nMC)&M5^0C5(%]53QSV&CG3$]7E$FR$E6SM%VRC<T#(HLD2+L\\E\\G6*D3!R9P4\nMO0')QL;'0T<PB(A@RBHF*9-8V+BXUJ@QCHV.8H)M63!@R:II-F;)FV2*FDDF\nM4I$R%P4N,8QC
+        #[0                               8H>1G)'8TDWT_\nML[4E[V;J./8;(UC\"W+2]\\U=4Z39\\5\"U[[I6N+3MG;U/VJ1':\\GIY.(D%X.+1\nMJ#1M**S4PW?8<';MS9;AYPK')'G#L.V[/@M=VU^C-7:I;WV9'0MLC]4,&>B6\nM>@>;5YXX1]9IK^6K#:(RQN6NH!M(RI[2XEE3*Q4DNQ5066202#(GQ(Y0,MWN\nM;A5K')2)-H19TK9)UI2L/X:MP%<D6T4T80M2F';)L>Q8BFZK-Y*Y6.HZ9/YK\nMR<QLE(4J8<O%WR:U5L_D(VE=0;ELC&Y;4KUQK4_2*8C8X&3A,:'TM3UU$WR,\nMN@=%TTL50?MU454R*%RC@V,9(<AC!Z\"U]L#S@,Y%Y^Q.P:3]7.TVGDNP:WFM\nMO'W:(%7\\ICD,O'GE30G6ZAC])>A3&<=
+        \"00\nM                              1Q;]/ZJV!9J1=+SKJF6VW:UD%I77]E\nML-<BY:;ITBNHT76=UZ2>MEG46J=S'MUO\\HQ<8<-D5<?YB29BA\\4/HW35?E-F\nMSD%JVAP\\QN@_7VU*1E7B&3[8YLLW3
+        _[9.6[5-6?*HU?N\"GPXR?!\\N%C&QDR\nMJF3!SL%K77U7M5KO-<I58@KE>4H9&XV>*A6#&<LR5>:980:<U(MD$W,@2*99\nM[)'\"AC8(3&,8^C&.@.[@\nM
+        \                           /@)*Q:LBYATY)@I+LVK=\\[BR/&YY%JR=\nMG62:O'+$JF7*#5RHW4*FH8N\"',0V,9SDN>@/A1M-8<-(A^WL<\"NQL#HK&!>H\nMR\\>JTFWIL+F*SB')'!D9)T;#57.$T3'/G\"9OH_PYZ
+        Y@JZ)U542+)'60PGE9\nM(JA#*HX5QDR654\\9R=/\"F\"YR7IQCIQCZ ']0         !U\\MLJQV1),EEKY\nMXY66Q
+        )2!9F.,R4G<O\\ ,5B%(ZPYR@>6S*8RV\\FP;MO*,=GU>O\\ 0 ^\\LQ$'\nM>2$>25CCOXA!LZE6)7S8SR,:O\"+*-',@VPKE9D@Z3;J&3.H4I3X3-DN<]7/0\nM'[QLG&S+!I*P\\@QEHN00(Z824:[0?,'K97'62<-'C515NY04+])3D,8N<?HR\nM
+        ^X        !Q\\I+14&Q7E)J3CX>,;92PYD91XVCV+?*ZR;9#\"[MVHBW2RLX\nM6(F3K&QUCFP7'TYQ@
+        S+16))2'S)Q^)=&/++*Q67K;$DE%G74:DDE&/:>5$C\nMSN43IX6R7\">3ER7IZ<9P ^-&S5MPTB'Z%A@UV-@<D9P+U&68*-)MVHFNJFUB\nM')'!D9)RHDU5,4B)CFR5,V<8Z\"YZ
+        YP          ? I*Q:,BVAU9)@E+O6S\nMEZSBU'C<DB[9LSHINW;9B93#E=LU4<)E44*7)\"9.7!LXR;'2''J6NK(LG4DK\nM98!*.8RN8)Z_4F8XC)G.8>)QV89TZ,YP@WE<2\"Q$/)SFPMVQ\\$ZO6SC
+        #F<N\nM$\"KIM3+HE<JI*KI-\\J$PNH@@=%-=9-')NT.DB=PF4YL8S@N3EQG_ +L=(?V\nM              !KC;^<ZKV=R7[PBG:7E7VKN4NON,G*B'8-9&L[(9W#<-UV\nM%H'5R<A>[9M&8A&6O8+1&MJ^VK[\"H1)YPJ1YY=Q(E*T31;^5AYV?W+A]9XFK\nMQW;,Z)H_DIRPW.\\XD;(@M8;#=QNC=/02O#F&OD!IS75#ITRIK7D3LGD%4WF*\nMX\\D&40]@6;^2E#9R55)E)!G-XUUIC6>7W>\"$CW4ZZ2GK;Q^L[OZ^M=DMAVTK\nM,:D,9^TB5+-+S\"]>@$>P)EI$,LMHM@0V<-6Z)#9QD/>H
+        \       \".=Q3,;7\nM=1[2L$Q#W&PQ$'KF[S$I :\\;23R_SD=&UJ3>O8>CM(91&8=7\"3;(F1C$VIR.\nM3O3IX3-@^2YP&I';9?CQ/\\8'VU=?S>O8[36P'^]Z$33U:U_>V>KM+\\F+)PGB\nMJ!PWBJXMLFFT_-QV=&$B59.R;!;1S>/;3DLF^<.&+1J1\\8/7%CV1Q:B-B\\W9\nM2^U6X6\"\\Z%T1LNA\\@]65FG[G9[\"Y'/;Q8-
+        EW)N#;>TF=/?Q#/1-9EX:)95M\nMDS<RF8JH.9N3(U\\A7(P(&63NRR:S<<8D['JFY1%QKEWVEM:[/_V.HMWUKJRH\nM6BQ7!\\ZLFO-.TK8%>K%@B-;4B2P9@T4,T2(_=I.7F2(J.%&Z(9!@\nM&,CO6;]I76_'RF3^[JS7+%%/MP0]6ISS852M6P-0TB[VBA[$B&VQMM4\"I0]@\nMD+M5Z36EY1XRC#,E\"N[\"6.3(JR6,F_:AB%>M]/:]VI-UJ2F;9MZ/UMIJ^;:M\nMLHTBYV.WUMCNTVG=3ZPU76*:[LGDL3=36.U<@F9II:N?Y$I'/\\JRKIDV04\\J\nM5#[+I9^,SWBIJQS49\"NRMOVYR
+        V-L?2BU;U/=H#4,)N9+:^FWL[Q!X^M;:SU\nMW8-&.9V2B85BRV<:):LFCQ\";>(G:.)-6.R&U*
+        \         ,+&^IW0MB[T;4\nMFMG;F0U[OZ AZ-LFOW9]3-GV\"R;2D4*5OB\"H.I=;V:)K4G2Z)J.&:OI^;OJS\nMB09HRZZ31EE$^?*G#<,1%;MW'JM\\=IA]LU*DJTN4:\\4>-%BLTYKVU6[5^L^=\nM=7XI[^B^8_(G86M*#\"SK_9=HQ599
+        D'*K-E&]ELB#5=I*8;D<2: 97..<?LR\nM$[R;5Z-HK,M(U=3@_N.HZHO%EV_'V&R/./%&OO%:/UK:9_7;^!@+E$76_P
+        J\n91Q*V1S(MR/#RLIY*<W9QA\" ,X0    #_V0$!\n\nend\n</TEXT>\n</DOCUMENT>\n</SEC-DOCUMENT>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      connection:
+      - keep-alive
+      content-length:
+      - '88499'
+      content-type:
+      - text/plain
+      date:
+      - Mon, 23 Nov 2026 21:40:24 GMT
+      last-modified:
+      - Mon, 30 Jun 2025 17:16:38 GMT
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - 3JcI2EtYiXFZkkMhgO6fKmS1ApxwADQ4uhi9JuMRuLzIWBQWJhvg+UaJ/Gr3VdjNiKUIjnOjSoM=
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - COMPLETED
+      x-amz-request-id:
+      - T6CG6Z16H0V05X53
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - xOVA7c_fRHC7E0DN1WkLJ1mat1QV6D0p
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+version: 1
