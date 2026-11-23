@@ -17,7 +17,10 @@ linkbases in the schema, so its directory has only the instance and the schema. 
 directory name is the fiscal year of the report's period end, taken from the instance
 filename.
 
-Used by `tests/issues/regression/test_issue_68lp_gh577_validation.py`.
+Used by `tests/issues/regression/test_issue_68lp_gh577_validation.py` and
+`tests/issues/regression/test_issue_683_vale_cashflow.py` (VALE: three consecutive 20-Fs, for
+stitching; checked against `filing.xbrl()` on 2026-11-23 by comparing the stitched cash flow
+statement on both stitching paths).
 
 ## Filings
 
@@ -37,6 +40,9 @@ Used by `tests/issues/regression/test_issue_68lp_gh577_validation.py`.
 | RTX | RTX Corp | 10-K | 2026-02-06 | `0000101829-26-000006` | `rtx/10k_2025` |
 | SLB | SLB LIMITED/NV | 10-K | 2026-01-23 | `0001193125-26-021017` | `slb/10k_2025` |
 | WDAY | Workday, Inc. | 10-K | 2026-03-06 | `0001327811-26-000014` | `wday/10k_2026` |
+| VALE | Vale S.A. | 20-F | 2026-03-27 | `0001292814-26-001844` | `vale/20f_2025` |
+| VALE | Vale S.A. | 20-F | 2025-03-28 | `0001292814-25-001137` | `vale/20f_2024` |
+| VALE | Vale S.A. | 20-F | 2024-04-19 | `0001292814-24-001463` | `vale/20f_2023` |
 
 ## SHA-256 of the decompressed files
 
@@ -123,4 +129,22 @@ b313a9362b47b41ab99219ff1334e3915371ae5eb9fa6daf69170cec6a565d14  slb/10k_2025/s
 249b8608e8978461217a4d58d3f8112cc31bd8dc083f39599961bb461c4fc03a  wday/10k_2026/wday-20260131_htm.xml
 68659c6b320f85d5e6f825b51787434eaa450a286884af4dbdd228343ce28332  wday/10k_2026/wday-20260131_lab.xml
 2b6388ca5cd90ed81a7a168a064dbc9442b0bab220f87ca55cd9ef6eda870f18  wday/10k_2026/wday-20260131_pre.xml
+79939e7a6693222eb15137324a3cfdf40f72e9203a4dc6d197fe8060840ef642  vale/20f_2023/vale-20231231_cal.xml
+a696d9d3afaf6999f0cc5f561c23aa01c8e850bbb81f17d4950385294b7c9245  vale/20f_2023/vale-20231231_def.xml
+e80f833c0a6a68a7ac4d535a42fbabb8043a2ceaa86e864d09b19e25e5787c16  vale/20f_2023/vale-20231231_lab.xml
+170921270ea8fd8ae5d0734ed6e9d9e75356cc1223290ae44ed3aec2081eee3e  vale/20f_2023/vale-20231231_pre.xml
+6bedb3cb5524b59972c949ad872156d19235da215b89faacd2a780bfdc9cb3e7  vale/20f_2023/vale-20231231.xsd
+b9a1b4a8ad0cf1568652c82ea055baa88a6bfb7406b7c06b00b26a55cbd93986  vale/20f_2023/valeform20f_2023_htm.xml
+be950923b38513bcd3786b76bd45ef6f095a4340fa6a71a3c578062a8e185d0c  vale/20f_2024/vale-20241231_cal.xml
+33d4ca339256c3f613f6ad0d253f462be8fdb1f1106c7d5848f380deaf5e01a5  vale/20f_2024/vale-20241231_def.xml
+a392d0a8f9f478f6686b0585df32666d1aff2c39243df830751158e37cbda170  vale/20f_2024/vale-20241231_lab.xml
+3151958ea4a8c6593763fe6657d13767f0e354843fe408bec6cd0f5a440f1bb0  vale/20f_2024/vale-20241231_pre.xml
+7dcdb322e8b56d425a72f6d39b14bee2d452ea5e3c88c3057004634fccc18b7b  vale/20f_2024/vale-20241231.xsd
+0d2984de12d8e8460758a92842b947f12be3b36930414bf75a6d02410e729e73  vale/20f_2024/valeform20f_2024_htm.xml
+6bac21eaaa3b27b81874feaca91d9cdbee9b9bef121103fdf3902d35f509a869  vale/20f_2025/vale-20251231_cal.xml
+0f26f85cf0ca4fa5202fa168c3080aa39ee79acb236728d6e76bd6ae6f3592ee  vale/20f_2025/vale-20251231_def.xml
+85ac8c615bd5845f503a875401128c5685323d70b5b002c482b0fdd96625bd56  vale/20f_2025/vale-20251231_lab.xml
+b5890c854f43be48f985eb69be8de7324d01ff4d40e4817a333ab5f83204af85  vale/20f_2025/vale-20251231_pre.xml
+cf7bf0bd9d15e72cf6c4c6ecb7d2cd82b6aacce70386cd1afd7c2d2105bd991e  vale/20f_2025/vale-20251231.xsd
+a5c9e5d99174340def207213349b8aed36bfb8b3e2692632b2e2c9da1fff22d0  vale/20f_2025/valeform20f_2025_htm.xml
 ```
