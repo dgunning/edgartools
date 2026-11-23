@@ -75,7 +75,7 @@ _QUARTERLY_DAYS = (60, 120)
 _CONSOLIDATED_TOTAL_CONCEPTS = frozenset({"revenue"})
 
 
-def _prefer_consolidated_totals(all_rows, chosen):
+def _prefer_consolidated_totals(period_rows, chosen):
     """Replace a ranked pick with the same-period total it is a slice of.
 
     The variant list orders *names*; it cannot tell that one name measures a
@@ -85,13 +85,17 @@ def _prefer_consolidated_totals(all_rows, chosen):
     the $77.1B its own income statement reports, and disagreed with
     `get_revenue()` for the same company and year.
 
+    `period_rows` must already be filtered to the caller's period window
+    (`_of_period_type`): passing the unfiltered series lets 6M/9M YTD or annual
+    rows on the same `period_end` dwarf and overwrite discrete quarterly picks.
+
     Uses the same threshold as the standardized getters
     (`is_consolidated_total_over`) rather than a second copy of the rule, which
     is what let the two surfaces drift apart in the first place.
     """
     from edgar.entity.utils import is_consolidated_total_over
 
-    largest = all_rows.groupby('period_end')['numeric_value'].max()
+    largest = period_rows.groupby('period_end')['numeric_value'].max()
 
     def _total_for(row):
         candidate = largest.get(row.period_end)
@@ -237,19 +241,21 @@ async def edgar_trends(
                 # 10-Q pushed the correct annual row out of the window, which is
                 # why the same call returned different concepts for different
                 # values of `periods` (GH #1138).
-                filtered = _of_period_type(ts, period)
+                period_rows = _of_period_type(ts, period)
 
                 # One row per period: the highest-ranked concept present, then
                 # the largest value, which drops segment-level facts reported
                 # under the same concept as the consolidated figure.
-                if not filtered.empty:
-                    filtered = (filtered
+                if not period_rows.empty:
+                    filtered = (period_rows
                                 .sort_values(['period_end', '_concept_rank', 'numeric_value'],
                                              ascending=[False, True, False])
                                 .drop_duplicates(subset=['period_end'], keep='first'))
 
                     if concept_name in _CONSOLIDATED_TOTAL_CONCEPTS:
-                        filtered = _prefer_consolidated_totals(ts, filtered)
+                        filtered = _prefer_consolidated_totals(period_rows, filtered)
+                else:
+                    filtered = period_rows
 
                 # Limit to requested periods
                 filtered = filtered.head(periods)
