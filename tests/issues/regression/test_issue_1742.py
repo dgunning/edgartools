@@ -13,9 +13,12 @@ so no caller could tell the two apart.
 Only the two summation-item arcroles now build calculations, each network
 keeps its own relationships, and every `CalculationArc` records its arcrole.
 
-Out of scope here and left as filed: two arcs in ONE network with the same
-endpoints and different weights still keep the first, and a missing weight
-still reads as 1.0.
+The second half: two arcs in ONE network with the same endpoints and different
+weights kept whichever came first, so reversing them reversed the sign, and a
+missing or unparseable weight read as 1.0 (zero was kept as 0.0). `weight` is
+required and non-zero (XBRL 2.1 section 5.2.5.2.1), and conflicting duplicates
+are an error (Calculations 1.1 section 4.2). Such an arc or edge is now left
+out of the tree with a warning instead of being given an invented weight.
 """
 
 from pathlib import Path
@@ -30,12 +33,16 @@ ROLE = "http://x/role/IS"
 
 
 def calculation(arcs):
+    """(child, weight, arcrole) per arc in the tree; `weight=None` omits the attribute."""
     locs = "".join(
         f'<link:loc xlink:type="locator" xlink:label="{c}" xlink:href="x.xsd#us-gaap_{c}"/>'
         for c in ["OI", "Revenues", "CostOfRevenue", "Other"])
+    def weight_attribute(weight):
+        return "" if weight is None else f' weight="{weight}"'
+
     body = "".join(
         f'<link:calculationArc xlink:type="arc" xlink:arcrole="{arcrole}" xlink:from="OI" '
-        f'xlink:to="{to}" weight="{weight}"/>'
+        f'xlink:to="{to}"{weight_attribute(weight)}/>'
         for arcrole, to, weight in arcs)
     xml = ('<link:linkbase xmlns:link="http://www.xbrl.org/2003/linkbase" '
            'xmlns:xlink="http://www.w3.org/1999/xlink">'
@@ -82,3 +89,29 @@ def test_nike_fy2026_calculations_are_calculations_1_1():
                     if arc.parent_id == "us-gaap_GrossProfit"]
     assert gross_profit == [("us-gaap_RevenueFromContractWithCustomerExcludingAssessedTax", 1.0),
                             ("us-gaap_CostOfGoodsAndServicesSold", -1.0)]
+
+
+def test_missing_unusable_or_zero_weight_is_not_a_contribution(caplog):
+    for weight in (None, "abc", "0", "0.000"):
+        caplog.clear()
+        assert calculation([(A23, "Other", weight), (A23, "Revenues", "1")]) == [
+            ("us-gaap_Revenues", 1.0, A23)], weight
+        assert "missing, unusable or zero weight" in caplog.text
+
+
+def test_conflicting_weights_drop_the_edge_whatever_the_order(caplog):
+    # Same parent and child in one network with opposite weights: the
+    # contribution is unknowable, so neither order may decide it.
+    for arcs in ([(A23, "Revenues", "1"), (A23, "Revenues", "-1")],
+                 [(A23, "Revenues", "-1"), (A23, "Revenues", "1")]):
+        caplog.clear()
+        assert calculation(arcs + [(A23, "CostOfRevenue", "-1")]) == [
+            ("us-gaap_CostOfRevenue", -1.0, A23)]
+        assert "conflicting weights [-1.0, 1.0]" in caplog.text
+
+
+def test_same_weight_written_differently_is_one_relationship(caplog):
+    # weight="1" and weight="1.0" are the same decimal, so not a conflict.
+    assert calculation([(A23, "Revenues", "1"), (A23, "Revenues", "1.0")]) == [
+        ("us-gaap_Revenues", 1.0, A23)]
+    assert "conflicting" not in caplog.text
