@@ -152,6 +152,24 @@ except:
     print(f"Found: {company.name}")
 ```
 
+### Ticker Moved to a New Registrant
+When a company forms a holding company or redomiciles, SEC gives its ticker to a
+new CIK and leaves the history under the old one. `Company("XOM")` is ExxonMobil
+Holdings Corp (CIK 2115436) since July 2026, and Exxon Mobil Corp (CIK 34088) filed
+the earlier 10-Ks. For successions reviewed by hand, the company's filings and
+facts include the predecessor's history, so a loop over tickers keeps working:
+
+```python
+xom = Company("XOM")
+xom.get_filings(form="10-K").latest().cik   # 34088, Exxon Mobil Corp's FY2025 10-K
+xom.get_financials()                        # read from that 10-K
+xom.predecessor                             # Company(34088)
+Company(34088).successor                    # Company(2115436)
+```
+
+Pass `predecessors=False` to `get_filings()` for the new CIK's own filings. See
+[Successor registrants](../api/company.md#successor-registrants).
+
 ## Batch Company Lookup
 
 For analyzing multiple companies efficiently:
