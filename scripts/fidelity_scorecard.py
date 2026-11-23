@@ -487,7 +487,9 @@ def _record_error(run: FilingRun, e: BaseException, stage: str) -> None:
     run.error_type = type(e).__name__
     run.error_message = ' '.join(str(e).split())[:300]
     run.error_stage = stage
-    run.traceback = ' || '.join(traceback.format_exc().strip().splitlines()[-8:])[:1200]
+    # The whole stack: scripts/fidelity_sweep.py keys a failure on its innermost edgar/ frame,
+    # which a deep pandas or lxml stack pushes out of a short tail.
+    run.traceback = ' || '.join(traceback.format_exc().strip().splitlines())
 
 
 def run_filing(row: Dict[str, Any], timeout: int = DEFAULT_TIMEOUT) -> FilingRun:
