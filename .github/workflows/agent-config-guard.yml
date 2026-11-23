@@ -1,0 +1,116 @@
+# Agent config guard
+#
+# AI coding tools treat some repository files as instructions or as code to
+# run: .claude/settings.json can define hooks that run shell commands when a
+# session starts, .mcp.json launches MCP servers, CLAUDE.md / AGENTS.md steer
+# every agent that opens the repo, and edgar/ai/skills/ is installed into
+# users' ~/.claude/skills/. A pull request that edits one of these is a pull
+# request that edits code which runs on the maintainer's machine (or on every
+# user's), and it has to be reviewed that way, not skimmed as documentation.
+#
+# Rules, for pull requests from anyone other than a maintainer:
+#   1. HOOK_CAPABLE files (settings that can run commands or start servers)
+#      always fail. A maintainer makes those changes directly.
+#   2. SENSITIVE paths fail until a maintainer APPROVES the pull request at its
+#      current head commit. A new push makes the approval stale, and the check
+#      fails again. After approving, re-run this check from the PR's Checks tab
+#      or add any label to the PR (see `labeled` below).
+# Maintainer pull requests pass and list what they touched.
+#
+# WHY pull_request_target: a `pull_request` run from a fork uses the fork's
+# copy of this file, so the PR under review could rewrite the guard to pass.
+# `pull_request_target` always runs the copy on main. That is safe here only
+# because this job NEVER checks out or executes pull request code. It reads the
+# changed-file list through the API with a read-only token. Keep it that way:
+# no actions/checkout, no scripts from the PR, and no `${{ }}` expressions of
+# PR-controlled text inside `run:` (use env vars).
+#
+# LIMIT: this is a tripwire, not a cryptographic gate. A fork could add its own
+# workflow with a job of the same name. That workflow sits under .github/ (so
+# this guard fails), and outside contributors' workflows need maintainer
+# approval before they run at all. Read any change under .github/ in full.
+
+name: Agent config guard
+
+on:
+  # zizmor: dangerous-triggers flags every pull_request_target. Accepted here
+  # because this job never checks out or runs PR code, holds no secrets beyond a
+  # read-only token, and passes PR data to the script only through env (see header).
+  pull_request_target: # zizmor: ignore[dangerous-triggers]
+    # `labeled` lets a maintainer run the guard on an existing PR by adding any
+    # label, without asking the author to push. Only users with triage access can
+    # label, and the run still uses main's copy of this file, so it adds no
+    # attacker-controlled path.
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
+
+permissions:
+  contents: read        # no checkout; kept explicit so nothing inherits more
+  pull-requests: read   # list the PR's changed files and reviews via the API
+
+concurrency:
+  group: agent-config-guard-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  guard:
+    name: Agent config guard
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      REPO: ${{ github.repository }}
+      PR: ${{ github.event.pull_request.number }}
+      AUTHOR: ${{ github.event.pull_request.user.login }}
+      HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      MAINTAINERS: "dgunning"
+      # Files that can make a tool run commands or start processes on open.
+      HOOK_CAPABLE: '(^|/)\.claude/settings(\.local)?\.json$|(^|/)\.claude/hooks/|(^|/)\.mcp\.json$|(^|/)\.cursor/mcp\.json$|(^|/)\.vscode/(settings|tasks|launch|mcp)\.json$|(^|/)\.gemini/settings\.json$|(^|/)\.codex/config\.toml$|(^|/)\.devcontainer/|(^|/)\.envrc$'
+      # Files that steer agents, run in CI, or ship to users' agent setups.
+      SENSITIVE: '(^|/)\.claude/|(^|/)(CLAUDE|AGENTS|GEMINI)\.md$|^\.github/|^edgar/ai/skills/|^\.cursor/|^\.cursorrules$|^\.windsurf|^\.vscode/|^\.codex/|^\.gemini/|^\.githooks/|^\.pre-commit-config\.yaml$'
+    steps:
+      - name: Check changed files
+        run: |
+          set -euo pipefail
+          # Both the new and the previous name of a renamed file count.
+          gh api --paginate "repos/$REPO/pulls/$PR/files" \
+            --jq '.[] | .filename, (.previous_filename // empty)' | sort -u > files.txt
+          hook=$(grep -E  "$HOOK_CAPABLE" files.txt || true)
+          sens=$(grep -E  "$SENSITIVE"    files.txt || true)
+
+          if [ -z "$hook$sens" ]; then
+            echo "No agent-config, CI or shipped-skill paths touched."
+            exit 0
+          fi
+
+          if printf '%s\n' $MAINTAINERS | grep -qxF "$AUTHOR"; then
+            echo "::notice::Maintainer PR touches agent-config/CI paths:"
+            printf '%s\n' "$hook" "$sens" | grep -v '^$' | sort -u
+            exit 0
+          fi
+
+          if [ -n "$hook" ]; then
+            echo "::error::This PR adds or changes files that can make AI tools or editors run commands:"
+            printf '%s\n' "$hook" | sed 's/^/  /'
+            echo "These are not accepted from outside contributors. A maintainer makes such changes directly."
+            exit 1
+          fi
+
+          approvals=$(gh api --paginate "repos/$REPO/pulls/$PR/reviews" \
+            --jq '.[] | select(.state == "APPROVED") | "\(.user.login) \(.commit_id)"' \
+            | while read -r who sha; do
+                if printf '%s\n' $MAINTAINERS | grep -qxF "$who" && [ "$sha" = "$HEAD_SHA" ]; then
+                  echo "$who"
+                fi
+              done)
+
+          if [ -n "$approvals" ]; then
+            echo "Sensitive paths approved at $HEAD_SHA by: $approvals"
+            printf '%s\n' "$sens" | sed 's/^/  /'
+            exit 0
+          fi
+
+          echo "::error::This PR touches agent-config, CI or shipped-skill paths:"
+          printf '%s\n' "$sens" | sed 's/^/  /'
+          echo "A maintainer must review these files in full and approve the PR at its"
+          echo "current head ($HEAD_SHA), then re-run this check or add any label."
+          exit 1

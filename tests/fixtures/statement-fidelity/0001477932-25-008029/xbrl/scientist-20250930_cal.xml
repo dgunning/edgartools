@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='utf-8'?>
+<!--XBRL Document Created with XBRLMaster--><!--Version: 2.3.08--><!--Based on XBRL 2.1--><!--Date of creation: 11/12/2025--><!--Software architectural design and coding: A'c Dharmapremananda Avt.--><!--Copyright (c) 2025 I-NET Business Solutions, Inc. All Rights Reserved.--><link:linkbase xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:link="http://www.xbrl.org/2003/linkbase" xsi:schemaLocation="http://www.xbrl.org/2003/linkbase http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd">
+  <link:roleRef roleURI="http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited" xlink:href="scientist-20250930.xsd#CondensedConsolidatedStatementOfStockholdersEquityUnaudited" xlink:type="simple"/>
+  <link:calculationLink xlink:type="extended" xlink:role="http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited" xlink:title="148600 - Statement - CONDENSED CONSOLIDATED STATEMENT OF STOCKHOLDERS EQUITY (Unaudited)"/>
+  </link:linkbase>

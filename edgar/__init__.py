@@ -308,6 +308,7 @@ def _get_obj_info(form: str) -> tuple[bool, str | None, str | None]:
         '10-Q': ('TenQ', 'quarterly report with financials'),
         '10-K': ('TenK', 'annual report with financials'),
         '10-D': ('TenD', 'ABS distribution report'),
+        'ABS-EE': ('AssetData', 'asset-level data for an asset-backed security'),
         '20-F': ('TwentyF', 'foreign issuer annual report'),
         '40-F': ('FortyF', 'Canadian MJDS annual report'),
         '13F-HR': ('ThirteenF', 'institutional holdings'),
@@ -484,6 +485,10 @@ def obj(sec_filing: "Filing") -> object | None:
         if has_cmbs_data:
             from edgar.abs import TenD
             return TenD(sec_filing)
+    elif _matches_form(sec_filing, "ABS-EE"):
+        # Streams the EX-102 exhibit; raises DataObjectError when there is none.
+        from edgar.abs import AssetData
+        return AssetData.from_filing(sec_filing)
     elif _matches_form(sec_filing, "20-F"):
         return TwentyF(sec_filing)
     elif _matches_form(sec_filing, "40-F"):

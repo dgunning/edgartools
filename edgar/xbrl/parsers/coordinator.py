@@ -155,6 +155,8 @@ class XBRLParser:
         self.typed_dimensions = self.instance_parser.typed_dimensions
         self.instance_parser.namespace_prefixes = self.namespace_prefixes
         self.schema_parser.namespace_prefixes = self.namespace_prefixes
+        # The us-gaap year a standard typed axis's domain reference is read for (gh #1234).
+        self.definition_parser.namespace_prefixes = self.namespace_prefixes
         self.definition_parser.observed_typed_dimensions = self.typed_dimensions
 
         # Set up cross-references for embedded linkbase processing

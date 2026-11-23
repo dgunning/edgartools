@@ -1,0 +1,406 @@
+<SEC-DOCUMENT>0001213900-21-000188.txt : 20210104
+<SEC-HEADER>0001213900-21-000188.hdr.sgml : 20210104
+<ACCEPTANCE-DATETIME>20210104165440
+ACCESSION NUMBER:		0001213900-21-000188
+CONFORMED SUBMISSION TYPE:	ABS-EE/A
+PUBLIC DOCUMENT COUNT:		3
+CONFORMED PERIOD OF REPORT:	20210104
+<DEPOSITOR-CIK>0001718415
+<SPONSOR-CIK>0001719617
+FILED AS OF DATE:		20210104
+DATE AS OF CHANGE:		20210104
+PERIOD START:           	20210101
+ABS ASSET CLASS:             	Debt Securities
+
+FILER:
+
+	COMPANY DATA:	
+		COMPANY CONFORMED NAME:			GNMAG Asset Backed Securitizations, LLC
+		CENTRAL INDEX KEY:			0001718415
+		STANDARD INDUSTRIAL CLASSIFICATION:	ASSET-BACKED SECURITIES [6189]
+		IRS NUMBER:				822912088
+		STATE OF INCORPORATION:			DE
+		FISCAL YEAR END:			1231
+
+	FILING VALUES:
+		FORM TYPE:		ABS-EE/A
+		SEC ACT:		1934 Act
+		SEC FILE NUMBER:	333-220994
+		FILM NUMBER:		21502452
+
+	BUSINESS ADDRESS:	
+		STREET 1:		THE EMPIRE STATE BUILDING
+		STREET 2:		350 FIFTH AVENUE, 59TH FLOOR
+		CITY:			NEW YORK
+		STATE:			NY
+		ZIP:			10118
+		BUSINESS PHONE:		(520) 775-2951
+
+	MAIL ADDRESS:	
+		STREET 1:		180 W. MAGEE ROAD, STE. 110
+		CITY:			ORO VALLEY
+		STATE:			AZ
+		ZIP:			85704
+
+FILER:
+
+	COMPANY DATA:	
+		COMPANY CONFORMED NAME:			GNMAG Asset Backed Securitizations Trust, Series 2020-1
+		CENTRAL INDEX KEY:			0001798801
+		STANDARD INDUSTRIAL CLASSIFICATION:	ASSET-BACKED SECURITIES [6189]
+		STATE OF INCORPORATION:			DE
+		FISCAL YEAR END:			1231
+
+	FILING VALUES:
+		FORM TYPE:		ABS-EE/A
+		SEC ACT:		1934 Act
+		SEC FILE NUMBER:	333-220994-01
+		FILM NUMBER:		21502451
+
+	BUSINESS ADDRESS:	
+		STREET 1:		THE EMPIRE STATE BUILDING
+		STREET 2:		350 FIFTH AVENUE, 59TH FLOOR
+		CITY:			NEW YORK
+		STATE:			NY
+		ZIP:			10118
+		BUSINESS PHONE:		(520) 775-2951
+
+	MAIL ADDRESS:	
+		STREET 1:		180 W. MAGEE ROAD, STE. 110
+		CITY:			ORO VALLEY
+		STATE:			AZ
+		ZIP:			85704
+</SEC-HEADER>
+<DOCUMENT>
+<TYPE>ABS-EE/A
+<SEQUENCE>1
+<FILENAME>s129643_absee-a.htm
+<DESCRIPTION>ABS-EE/A
+<TEXT>
+<HTML>
+<HEAD>
+     <TITLE></TITLE>
+</HEAD>
+<BODY STYLE="font: 10pt Times New Roman, Times, Serif">
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><B>UNITED STATES</B></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><B>SECURITIES AND EXCHANGE COMMISSION</B></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><B>Washington, D.C. 20549</B></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">FORM FOR SUBMISSION OF&nbsp;<B>ELECTRONIC
+EXHIBITS</B>&nbsp;FOR</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">ASSET-BACKED SECURITIES</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">Commission File Number of issuing entity:</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><FONT STYLE="font-family: Times New Roman, Times, Serif">Central
+Index Key Number of the issuing entity: </FONT>0001798801</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><B><U>GNMAG ASSET BACKED SECURITIZATIONS
+TRUST, SERIES 2020-1</U></B></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">(Exact name of issuing entity as specified
+in its charter)</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><FONT STYLE="font-family: Times New Roman, Times, Serif">Commission
+File Number of depositor: </FONT>333-220994</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><FONT STYLE="font-family: Times New Roman, Times, Serif">Central
+Index Key Number of the depositor: </FONT>0001718415</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><B><U>GNMAG ASSET BACKED SECURITIZATIONS,
+LLC</U></B></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">(Exact name of depositor as specified in
+its charter)</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><FONT STYLE="font-family: Times New Roman, Times, Serif">Central
+Index Key Number of sponsor: </FONT>0001719617</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><U>&nbsp;<B>GMTH HOLDINGS, LLC</B></U></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">(Exact name of sponsor as specified in its
+charter)</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><FONT STYLE="font-family: Times New Roman, Times, Serif"><U>Chris
+Vaughan (</U></FONT><U>646) 402-9802</U></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">(Name and telephone number, including area
+code, of the person to contact in connection with this filing)</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><B>INFORMATION INCLUDED WITH THIS FORM</B></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0"><A HREF="exh_102.xml"><FONT STYLE="font-size: 10pt">Item 1&nbsp;</FONT>- Asset Data File in accordance with Exhibit 601(b) (102) (17 CFR 229.601(b) (102)).&nbsp;</A></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0"><A HREF="exh_103.xml">Item 2 - Asset Related Document in accordance with Exhibit 601(b) (103) (17 CFR 229.601(b) (103)).</A></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0"></P>
+
+<!-- Field: Page; Sequence: 1 -->
+    <DIV STYLE="margin-top: 6pt; margin-bottom: 6pt; border-bottom: Black 1pt solid"><P STYLE="margin: 0pt">&nbsp;</P></DIV>
+    <DIV STYLE="break-before: page; margin-top: 6pt; margin-bottom: 6pt"><P STYLE="margin: 0pt">&nbsp;</P></DIV>
+    <!-- Field: /Page -->
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">EXPLANATORY NOTE: This Form ABS-EE/A and the attached Exhibits
+102 and 103 amend and restate in their entirety the submission of electronic exhibits for asset-backed securities offerings on
+Form ABS-EE and attached Exhibits 102 and 103 previously filed with the U.S. Securities and Exchange Commission on December 10,
+2020 with respect to GNMAG ASSET BACKED SECURITIZATIONS TRUST, SERIES 2020-1 (the &ldquo;Original Report&rdquo;). Effective upon
+the filing of this Form ABS-EE/A, Exhibits 102 and 103 of the Original Report are replaced and superseded in their entirety by
+Exhibits 102 and 103, respectively, to this Form ABS-EE/A.</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+
+<!-- Field: Page; Sequence: 2 -->
+    <DIV STYLE="margin-top: 12pt; margin-bottom: 6pt; border-bottom: Black 1.5pt solid"><P STYLE="margin: 0pt">&nbsp;</P></DIV>
+    <DIV STYLE="break-before: page; margin-top: 6pt; margin-bottom: 12pt"><P STYLE="text-align: center; margin-top: 0pt; margin-bottom: 0pt">&nbsp;</P></DIV>
+    <!-- Field: /Page -->
+
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><B>SIGNATURES</B></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">&nbsp;&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-indent: 0.5in">The depositor has duly caused this Form
+to be signed on its behalf by the undersigned hereunto duly authorized</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><FONT STYLE="font-weight: normal">&nbsp;</FONT></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center"><B><U>GNMAG ASSET BACKED SECURITIZATIONS,
+LLC</U></B></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center">(Depositor)</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-align: center; text-indent: 0.5in">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">Dated: January 4, 2021</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin-top: 0pt; margin-bottom: 0pt; text-align: left">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-indent: 0.25in"><FONT STYLE="font-family: Times New Roman, Times, Serif">By:&nbsp;<FONT STYLE="font-size: 10pt">&nbsp;&nbsp;&nbsp;&nbsp;</FONT>&nbsp;</FONT><B STYLE="font-style: normal; font-weight: normal">GNMAG
+Asset Backed Securitizations, LLC</B><FONT STYLE="font-family: Times New Roman, Times, Serif">, as Depositor</FONT></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-indent: 0.25in">By:<FONT STYLE="font-size: 10pt">&nbsp;&nbsp;&nbsp;&nbsp;</FONT>&nbsp;<U>/s/
+Chris Vaughan</U>&nbsp;<FONT STYLE="font-size: 10pt">&nbsp;&nbsp;&nbsp;&nbsp;</FONT></P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-indent: 0.25in">Name:<FONT STYLE="font-size: 10pt">&nbsp;&nbsp;&nbsp;&nbsp;</FONT>&nbsp;Chris
+Vaughan</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0; text-indent: 0.25in">Title:&nbsp;<FONT STYLE="font-size: 10pt">&nbsp;&nbsp;&nbsp;&nbsp;</FONT>&nbsp;
+President</P>
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0"></P>
+
+<!-- Field: Page; Sequence: 3; Options: Last -->
+    <DIV STYLE="margin-top: 12pt; margin-bottom: 6pt; border-bottom: Black 1.5pt solid"><P STYLE="margin: 0pt">&nbsp;</P></DIV>
+    <!-- Field: /Page -->
+
+<P STYLE="font: 10pt Times New Roman, Times, Serif; margin: 0pt 0">&nbsp;</P>
+
+</BODY>
+</HTML>
+</TEXT>
+</DOCUMENT>
+<DOCUMENT>
+<TYPE>EX-102
+<SEQUENCE>2
+<FILENAME>exh_102.xml
+<DESCRIPTION>EXHIBIT 102
+<TEXT>
+<XML>
+<?xml version="1.0" encoding="UTF-8"?>
+<assetData xmlns="http://www.sec.gov/edgar/document/absee/debtsecurities/assetdata" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sec.gov/edgar/document/absee/debtsecurities/assetdata eis_ABS_DebtSecuritiesAssetData.xsd">
+
+<assets>
+		<assetTypeNumber>CUSIP</assetTypeNumber>
+		<assetNumber>36179V4W7</assetNumber>
+		<reportPeriodBeginningDate>01-01-2021</reportPeriodBeginningDate>
+		<reportPeriodEndDate>01-04-2021</reportPeriodEndDate>
+		<issuerName>Multiple</issuerName>
+		<originalIssuanceDate>01/2021</originalIssuanceDate>
+		<originalSecurityAmount>-50000000</originalSecurityAmount>
+		<originalSecurityTermNumber>360</originalSecurityTermNumber>
+		<securityMaturityDate>01/2051</securityMaturityDate>
+		<originalAmortizationTermNumber>360</originalAmortizationTermNumber>
+		<originalInterestRatePercentage>-0.030</originalInterestRatePercentage>
+		<accrualTypeCode>1</accrualTypeCode>
+		<interestRateTypeCode>1</interestRateTypeCode>
+		<originalInterestOnlyTermNumber>0</originalInterestOnlyTermNumber>
+		<firstPaymentDate>02/2021</firstPaymentDate>
+		<underwritingIndicator>true</underwritingIndicator>
+		<securityTitleName>GinnieMaeIIPool</securityTitleName>
+		<denominationNumber>-25000</denominationNumber>
+		<currencyName>USDollars</currencyName>
+		<trusteeName>TheBankofNewYorkMellon</trusteeName>
+		<callableIndicator>false</callableIndicator>
+		<paymentFrequencyCode>1</paymentFrequencyCode>
+		<zeroCouponIndicator>true</zeroCouponIndicator>
+		<assetModifiedIndicator>false</assetModifiedIndicator>
+		<reportPeriodBeginningAssetBalanceAmount>-0</reportPeriodBeginningAssetBalanceAmount>
+		<reportPeriodBeginningScheduledAssetBalanceAmount>-0</reportPeriodBeginningScheduledAssetBalanceAmount>
+		<reportPeriodScheduledPaymentAmount>-0</reportPeriodScheduledPaymentAmount>
+		<reportPeriodInterestRatePercentage>-0.0300</reportPeriodInterestRatePercentage>
+		<totalActualPaidAmount>-0</totalActualPaidAmount>
+		<actualInterestCollectionAmount>-0</actualInterestCollectionAmount>
+		<actualPrincipalCollectedAmount>-0</actualPrincipalCollectedAmount>
+		<actualOtherCollectionAmount>-0</actualOtherCollectionAmount>
+		<otherPrincipalAdjustmentAmount>-0</otherPrincipalAdjustmentAmount>
+		<otherInterestAdjustmentAmount>-0</otherInterestAdjustmentAmount>
+		<scheduledInterestAmount>-0</scheduledInterestAmount>
+		<scheduledPrincipalAmount>-0</scheduledPrincipalAmount>
+		<endReportingPeriodActualBalanceAmount>-0</endReportingPeriodActualBalanceAmount>
+		<endReportingPeriodScheduledBalanceAmount>-49917348.52</endReportingPeriodScheduledBalanceAmount>
+		<servicingFeePercentage>-0</servicingFeePercentage>
+		<servicingFlatFeeAmount>-0</servicingFlatFeeAmount>
+		<remainingTermToMaturityNumber>359</remainingTermToMaturityNumber>
+		<currentDelinquentStatusNumber>0</currentDelinquentStatusNumber>
+		<paymentPastDueDaysNumber>0</paymentPastDueDaysNumber>
+		<paymentPastDueNumber>0</paymentPastDueNumber>
+		<nextReportPeriodPaymentDueAmount>-226401.48</nextReportPeriodPaymentDueAmount>
+		<nextDueDate>02/2021</nextDueDate>
+		<primaryLoanServicerName>TheBankofNewYorkMellon</primaryLoanServicerName>
+		<mostRecentServicingTransferReceivedDate>01/2021</mostRecentServicingTransferReceivedDate>
+		<assetSubjectToDemandIndicator>false</assetSubjectToDemandIndicator>
+	</assets>
+
+<assets>
+		<assetTypeNumber>CUSIP</assetTypeNumber>
+		<assetNumber>36179V4X5</assetNumber>
+		<reportPeriodBeginningDate>01-01-2021</reportPeriodBeginningDate>
+		<reportPeriodEndDate>01-04-2021</reportPeriodEndDate>
+		<issuerName>Multiple</issuerName>
+		<originalIssuanceDate>01/2021</originalIssuanceDate>
+		<originalSecurityAmount>-50000000</originalSecurityAmount>
+		<originalSecurityTermNumber>360</originalSecurityTermNumber>
+		<securityMaturityDate>01/2051</securityMaturityDate>
+		<originalAmortizationTermNumber>360</originalAmortizationTermNumber>
+		<originalInterestRatePercentage>-0.035</originalInterestRatePercentage>
+		<accrualTypeCode>1</accrualTypeCode>
+		<interestRateTypeCode>1</interestRateTypeCode>
+		<originalInterestOnlyTermNumber>0</originalInterestOnlyTermNumber>
+		<firstPaymentDate>02/2021</firstPaymentDate>
+		<underwritingIndicator>true</underwritingIndicator>
+		<securityTitleName>GinnieMaeIIPool</securityTitleName>
+		<denominationNumber>-25000</denominationNumber>
+		<currencyName>USDollars</currencyName>
+		<trusteeName>TheBankofNewYorkMellon</trusteeName>
+		<callableIndicator>false</callableIndicator>
+		<paymentFrequencyCode>1</paymentFrequencyCode>
+		<zeroCouponIndicator>true</zeroCouponIndicator>
+		<assetModifiedIndicator>false</assetModifiedIndicator>
+		<reportPeriodBeginningAssetBalanceAmount>-0</reportPeriodBeginningAssetBalanceAmount>
+		<reportPeriodBeginningScheduledAssetBalanceAmount>-0</reportPeriodBeginningScheduledAssetBalanceAmount>
+		<reportPeriodScheduledPaymentAmount>-0</reportPeriodScheduledPaymentAmount>
+		<reportPeriodInterestRatePercentage>-0.0350</reportPeriodInterestRatePercentage>
+		<totalActualPaidAmount>-0</totalActualPaidAmount>
+		<actualInterestCollectionAmount>-0</actualInterestCollectionAmount>
+		<actualPrincipalCollectedAmount>-0</actualPrincipalCollectedAmount>
+		<actualOtherCollectionAmount>-0</actualOtherCollectionAmount>
+		<otherPrincipalAdjustmentAmount>-0</otherPrincipalAdjustmentAmount>
+		<otherInterestAdjustmentAmount>-0</otherInterestAdjustmentAmount>
+		<scheduledInterestAmount>-0</scheduledInterestAmount>
+		<scheduledPrincipalAmount>-0</scheduledPrincipalAmount>
+		<endReportingPeriodActualBalanceAmount>-0</endReportingPeriodActualBalanceAmount>
+		<endReportingPeriodScheduledBalanceAmount>-49925499.59</endReportingPeriodScheduledBalanceAmount>
+		<servicingFeePercentage>-0</servicingFeePercentage>
+		<servicingFlatFeeAmount>-0</servicingFlatFeeAmount>
+		<remainingTermToMaturityNumber>359</remainingTermToMaturityNumber>
+		<currentDelinquentStatusNumber>0</currentDelinquentStatusNumber>
+		<paymentPastDueDaysNumber>0</paymentPastDueDaysNumber>
+		<paymentPastDueNumber>0</paymentPastDueNumber>
+		<nextReportPeriodPaymentDueAmount>-235500.41</nextReportPeriodPaymentDueAmount>
+		<nextDueDate>02/2021</nextDueDate>
+		<primaryLoanServicerName>TheBankofNewYorkMellon</primaryLoanServicerName>
+		<mostRecentServicingTransferReceivedDate>01/2021</mostRecentServicingTransferReceivedDate>
+		<assetSubjectToDemandIndicator>false</assetSubjectToDemandIndicator>
+	</assets>
+</assetData>
+</XML>
+</TEXT>
+</DOCUMENT>
+<DOCUMENT>
+<TYPE>EX-103
+<SEQUENCE>3
+<FILENAME>exh_103.xml
+<DESCRIPTION>EXHIBIT 103
+<TEXT>
+<XML>
+<?xml version="1.0" encoding="UTF-8"?>
+
+<assetdata>
+
+<!--  Asset Related Document  -->
+<!-- General Narrative. -->
+<!-- Assets are newly issued on 1/01/2021 so for the initial ABS-EE filing, they are not applicable. No reporting period as been completed to date and no amounts have been due or payable on the underlying securities. -->
+<!-- Item-specific Narrative. -->
+<!-- 5(b)(2) Report Period End date : The reporting period has not ended. -->
+<!-- 5(c)(1) Issuer Name : The security is pooled from multiple issuers. -->
+<!-- 5(c)(17) SEC File Number : Not applicable to underlying security. -->
+<!-- 5(c)(17) CIK : Not applicable to underlying security. -->
+<!-- 5(c)(21) Zero Coupon Indicator : The underlying securities are interest bearing. -->
+<!-- 5(d)(7) Total Actual Paid Amount : No payments are due during the applicable partial reporting period. -->
+<!-- 5(d)(8) Actual Interest Collection Amount : No interest is collected during the applicable partial reporting period. -->
+<!-- 5(d)(9) Actual Principal Collection Amount : No principal is collected during the applicable partial reporting period. -->
+<!-- 5(d)(10) Actual Other Collection Amount : No amounts are collected during the applicable partial reporting period. -->
+<!-- 5(d)(11) Other Principal Adjustment Amount : The reporting period has not ended. -->
+<!-- 5(d)(12) Other Interest Adjustment Amount : The reporting period has not ended. -->
+<!-- 5(d)(13) Scheduled Interest Amount : No interest is scheduled to be collected during the applicable partial reporting period. -->
+<!-- 5(d)(14) Scheduled Principal Amount : No principal is scheduled to be collected during the applicable partial reporting period. -->
+<!-- 5(d)(15) Reporting Period Actual Balance Amount : The reporting period has not ended. -->
+<!-- 5(d)(17) Servicing Fee Percentage : There is no ongoing servicing fee. -->
+<!-- 5(d)(18) Servicing Flat Fee Amount : There is no ongoing servicing fee. -->
+<!-- 5(d)(19)(i) Zero Balance Code : The loan balance was not reduced to zero during the reporting period. -->
+<!-- 5(d)(19)(ii) Zero Balance Effective Date : The loan balance was not reduced to zero during the reporting period. -->
+<!-- 5(e)(2) Most Recent Servicing Transfer Received Date : SErvicing has not been transferred. -->
+<!-- 5(f)(1) Status Asset Subject to Demand Code : Asset was not subject to demand or repurchase during the reporting period. -->
+<!-- 5(f)(2) Repurchase Amount : Asset was not subject to demand or repurchase during the reporting period. -->
+<!-- 5(f)(3) Demand Resolution Date : Asset was not subject to demand or repurchase during the reporting period. -->
+<!-- 5(f)(4) Repurchaser Name : Asset was not subject to demand or repurchase during the reporting period. -->
+<!-- 5(f)(5) Repurchase Replacement Reason Code : Asset was not subject to demand or repurchase during the reporting period. -->
+
+</assetdata>
+</XML>
+</TEXT>
+</DOCUMENT>
+</SEC-DOCUMENT>

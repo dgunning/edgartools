@@ -317,7 +317,6 @@ ALGM_FILES = ("algm-20260327.xsd", "algm-20260327_htm.xml")
 ALGM_ROLE = "http://www.allegromicro.com/20260327/taxonomy/role/IncomeTaxesNarrativeDetails"
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_servicenow_cash_taxes_by_jurisdiction(tmp_path):
     """ServiceNow FY2025 10-K, 0001373715-26-000007, cash flow statement (R8): income taxes
@@ -347,7 +346,6 @@ def test_servicenow_cash_taxes_by_jurisdiction(tmp_path):
     assert dimensioned["standard_concept"].isna().all()
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_allegro_federal_refund_and_a_net_refund_year(tmp_path):
     """Allegro MicroSystems FY2026 10-K, 0001193125-26-233537: federal refund $30,889K, net
@@ -522,7 +520,6 @@ def _change_rows(xbrl):
                    for concept, row in zip(rows["concept"], rows.to_dict("records"), strict=True)}
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_conagra_continuing_and_held_for_sale_rows_stay_components(tmp_path):
     """Conagra FY2026 10-K, 0001104659-26-083905 (R8), year ended 2025-05-25: total $-11.0M,
@@ -547,7 +544,6 @@ def test_conagra_continuing_and_held_for_sale_rows_stay_components(tmp_path):
     assert (plain["standard_concept"] == "NetChangeInCash").sum() == 1
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_dxc_continuing_only_row_is_not_promoted_to_the_whole(tmp_path):
     """DXC FY2026 10-K, 0001688568-26-000022 (R8): the only net-change row is

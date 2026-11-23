@@ -65,7 +65,6 @@ def test_a_footnote_about_its_holding_is_a_flag(text):
     assert _classify_nonaccrual_footnote(text.lower(), linked_to_investments=True) is True
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_agl_portfolio_count_flags_only_the_marked_loan():
     """AGL Private Credit Income Fund 10-Q for 2025-09-30 (0001193125-25-269116).

@@ -304,7 +304,6 @@ CAN_FILES = ("can-20251231.xsd", "can-20251231_pre.xml", "can-20251231_lab.xml",
              "can-20251231x20f_htm.xml")
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_tesla_digital_assets_are_noncurrent_crypto_assets(tmp_path):
     """Tesla FY2025 10-K, 0001628280-26-003952, balance sheet (R3): Digital assets $1,008M
@@ -320,7 +319,6 @@ def test_tesla_digital_assets_are_noncurrent_crypto_assets(tmp_path):
     assert _rows(frame, "CryptoAssets", "2025-12-31") == {}
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_tesla_unrealized_result_and_equal_total_stay_distinct(tmp_path):
     """Tesla FY2025 10-K: CryptoAssetFairValue and CryptoAssetFairValueNoncurrent are both
@@ -345,7 +343,6 @@ def test_tesla_unrealized_result_and_equal_total_stay_distinct(tmp_path):
     assert index.lookup("us-gaap:CryptoAssetFairValueNoncurrent").standard_concepts == ["CryptoAssetsNoncurrent"]
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_strategy_digital_assets_and_purchases(tmp_path):
     """Strategy FY2025 10-K, 0001050446-26-000020: Digital assets $58,854,028K (R3, the
@@ -364,7 +361,6 @@ def test_strategy_digital_assets_and_purchases(tmp_path):
     assert row["label"] == "Purchases of digital assets"
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_canaan_unrealized_change_in_operating_cash_flows(tmp_path):
     """Canaan FY2025 20-F, 0001104659-26-043786: Change in fair value of cryptocurrency, $11,428K
@@ -390,7 +386,6 @@ def test_canaan_unrealized_change_in_operating_cash_flows(tmp_path):
     assert _rows(balance, "CryptoAssetsCurrent", "2025-12-31") == {}
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_tesla_entity_facts_balance_sheet_shows_the_crypto_line():
     from edgar import Company
@@ -400,7 +395,6 @@ def test_tesla_entity_facts_balance_sheet_shows_the_crypto_line():
     assert frame.loc["CryptoAssetFairValueNoncurrent", "FY 2025"] == 1_008_000_000
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_strategy_entity_facts_shows_crypto_balance_and_purchases():
     from edgar import Company

@@ -310,7 +310,8 @@ The headline is a pair per surface (`'dataframe'` or `'rendered'`). `value_rate`
 
 Limits:
 
-- Statement-of-equity pages are not compared yet; their cells count in the `coverage` denominator.
+- A statement-of-equity page (members as columns, period blocks as rows) is compared cell by cell: each cell under the period its block covers, in the library row of its concept and members, the first for an opening balance and the last for a closing one. A balance row between two movements is read as the closing balance of the first.
+- A statement of equity with member header rows is not compared; its cells count in the `coverage` denominator.
 - A page row is aligned only when `compare()` matched at least one of its cells, so a row whose cells are all `missing` or `not_comparable` is `row_not_comparable`.
 - Heading rows under a member header are not compared, and `to_dataframe()` names only the first axis of a row with several, so such library rows are `library_row_not_identifiable`.
 - It reports what each side shows. Whether a disagreement is a library defect is for the reader to decide.

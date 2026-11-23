@@ -32,7 +32,6 @@ def test_item_read_from_row_text_when_anchor_and_link_text_lack_it():
     assert mapping.get("part_i_item_3") == "market_risk"
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_tesla_10q_2023q2_part_i_items():
     from edgar import find
@@ -55,7 +54,6 @@ def test_thin_row_text_result_does_not_suppress_generic_scan():
     assert via_dfin == generic
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_tesla_10q_2023q1_part_i_item_1_is_not_the_contents_page():
     """Tesla's previous 10-Q, 0000950170-23-013890 (quarter ended 2023-03-31), returned the same
@@ -70,7 +68,6 @@ def test_tesla_10q_2023q1_part_i_item_1_is_not_the_contents_page():
     assert len(tenq["Part I, Item 4"]) == 1886
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_broad_street_realty_10q_part_i_item_1_is_not_the_contents_page():
     """Broad Street Realty's 10-Q 0000950170-23-026097 (quarter ended 2023-03-31) returned a

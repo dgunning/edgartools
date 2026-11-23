@@ -13,10 +13,15 @@
 # to produce them — the few CI minutes a markdown-only run costs are cheaper than
 # a merge queue that deadlocks on documentation.
 #
-# REQUIRED CHECKS ARE PINNED TO JOB NAMES. `main` requires exactly two contexts:
+# REQUIRED CHECKS ARE PINNED TO JOB NAMES. `main` requires exactly four contexts,
+# two from this file, one from agent-config-guard.yml and one from
+# regression-tests.yml:
 #
 #     Cassette safety gate
 #     test-fast (3.13)
+#     Agent config guard     (agent-config-guard.yml: a security gate, never remove)
+#     Regression gate        (regression-tests.yml: reports on every pull request,
+#                             passing when the regression suite does not apply)
 #
 # The second name is generated from the matrix below, which is event-dependent —
 # a pull request builds only 3.13, so the context is literally "test-fast (3.13)".
@@ -67,6 +72,13 @@ on:
 # main are never cancelled: PRs merge without being up to date with main, so the
 # post-merge run is the only check that the combination works, and back-to-back
 # merges used to cancel it before it finished.
+# Read-only by default. Jobs that write (the red-main `report` job) grant
+# their own job-level permissions; nothing else inherits the token's write scope.
+permissions:
+  contents: read
+  pull-requests: read
+  issues: read
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name != 'push' }}
@@ -80,9 +92,9 @@ jobs:
     name: Cassette safety gate
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python 3.13
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: '3.13'
     - name: Install PyYAML
@@ -92,9 +104,10 @@ jobs:
 
   test-fast:
     # PRs to main: single version for a quick gate. Push/schedule: the declared
-    # floor (requires-python >=3.11) plus 3.13, so the minimum is exercised rather
-    # than merely asserted. A 5.*.x maintenance branch tests 3.10 from its own
-    # copy of this file (see the note above `on:`), not from this one.
+    # floor (requires-python >=3.11), 3.13, and the newest release (3.15), so both
+    # ends of the supported range are exercised rather than merely asserted. A
+    # 5.*.x maintenance branch tests 3.10 from its own copy of this file (see the
+    # note above `on:`), not from this one.
     # The main-PR leg must stay exactly ["3.13"]: branch protection requires the
     # context "test-fast (3.13)" (see the header of this file).
     needs: cassette-gate
@@ -102,15 +115,38 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ${{ (github.event_name == 'pull_request' && github.base_ref == 'main') && fromJSON('["3.13"]') || fromJSON('["3.11", "3.13"]') }}
+        python-version: ${{ (github.event_name == 'pull_request' && github.base_ref == 'main') && fromJSON('["3.13"]') || fromJSON('["3.11", "3.13", "3.15"]') }}
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      if: matrix.python-version != '3.15'
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+
+    # setup-python's 3.15 builds (3.15.0 to 3.15.2) ship without the C `_decimal`
+    # extension: CPython 3.15 no longer bundles libmpdec, and those builds were
+    # made without it. `decimal` then falls back to `_pydecimal`, which goes
+    # through int<->str and hits the 4300-digit limit, so the 10,000-digit
+    # fraction cases in test_issue_1766.py fail there and nowhere else. uv's
+    # Python builds include `_decimal`. The venv is seeded with pip so every
+    # later step runs the same `python -m pip` commands on all three legs.
+    - name: Set up Python 3.15 (uv build, with _decimal)
+      if: matrix.python-version == '3.15'
+      uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+    - name: Create the 3.15 venv
+      if: matrix.python-version == '3.15'
+      run: |
+        uv venv --seed --managed-python --python 3.15 "$RUNNER_TEMP/py315"
+        echo "$RUNNER_TEMP/py315/bin" >> "$GITHUB_PATH"
+
+    # Fails loudly instead of letting a build without the C decimal module turn
+    # into four "needs the SEC" findings in the offline audit below.
+    - name: Check the interpreter has the C decimal module
+      run: python -c "import sys, _decimal; print(sys.version)"
+
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -212,9 +248,9 @@ jobs:
         # push), and --cov with branch coverage doubles this step: 273 s vs 577 s
         # locally at 4 workers (edgartools-07lk.26 step B).
         if [ "${{ github.event_name }}" = "pull_request" ]; then
-          pytest -n auto -m 'fast'
+          pytest -rs -n auto -m 'fast'
         else
-          pytest -n auto --cov --cov-report=xml -m 'fast'
+          pytest -rs -n auto --cov --cov-report=xml -m 'fast'
         fi
 
     # Section-boundary accuracy, gated on the pull requests that can move it
@@ -255,12 +291,12 @@ jobs:
         fi
         echo "Section-extraction inputs changed:"
         echo "$TRIGGERS"
-        pytest -m slow -n 2 --dist loadfile \
+        pytest -rs -m slow -n 2 --dist loadfile \
           tests/meta/test_boundary_truth.py \
           tests/meta/test_section_self_consistency_ratchet.py
 
     - name: Upload coverage data
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       if: matrix.python-version == '3.13' && github.event_name != 'pull_request'
       with:
         name: coverage-fast
@@ -283,9 +319,9 @@ jobs:
       EDGAR_LOCAL_DATA_DIR: ${{ github.workspace }}/.edgar-data
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python 3.12
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: "3.12"
         cache: 'pip'
@@ -296,7 +332,7 @@ jobs:
     # run_id-suffixed key always writes a fresh entry; restore-keys warm-starts
     # from the most recent prior cache (monotonic, GH evicts LRU at the 10GB cap).
     - name: Restore SEC HTTP cache
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ github.workspace }}/.edgar-data/_tcache
         key: edgar-tcache-network-${{ github.run_id }}
@@ -313,10 +349,10 @@ jobs:
       run: |
         # Sequential - respects SEC rate limits. --enable-cache persists HTTP
         # responses to _tcache (immutable /Archives data cached forever).
-        pytest --cov --cov-report=xml -m 'network and not slow and not regression' --enable-cache
+        pytest -rs --cov --cov-report=xml -m 'network and not slow and not regression' --enable-cache
 
     - name: Upload coverage data
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: coverage-network
         path: |
@@ -334,16 +370,16 @@ jobs:
       EDGAR_LOCAL_DATA_DIR: ${{ github.workspace }}/.edgar-data
 
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python 3.12
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: "3.12"
         cache: 'pip'
 
     # Persist the SEC HTTP cache (see test-network for rationale).
     - name: Restore SEC HTTP cache
-      uses: actions/cache@27d5ce7f107fe9357f9df03efb73ab90386fccae # v5.0.5
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
       with:
         path: ${{ github.workspace }}/.edgar-data/_tcache
         key: edgar-tcache-slow-${{ github.run_id }}
@@ -359,10 +395,10 @@ jobs:
     - name: Run slow tests
       run: |
         # Sequential - often network-heavy. --enable-cache persists HTTP responses.
-        pytest --cov --cov-report=xml -m 'slow and not regression' --enable-cache
+        pytest -rs --cov --cov-report=xml -m 'slow and not regression' --enable-cache
 
     - name: Upload coverage data
-      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+      uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
       with:
         name: coverage-slow
         path: |
@@ -378,9 +414,9 @@ jobs:
     needs: [test-fast, test-network, test-slow]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python
-      uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
+      uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: "3.11"
         cache: 'pip'
@@ -388,19 +424,19 @@ jobs:
       run: pip install coverage[toml]
 
     - name: Download coverage data (fast)
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
         name: coverage-fast
         path: coverage-fast/
 
     - name: Download coverage data (network)
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
         name: coverage-network
         path: coverage-network/
 
     - name: Download coverage data (slow)
-      uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+      uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
       with:
         name: coverage-slow
         path: coverage-slow/
@@ -420,7 +456,7 @@ jobs:
         coverage xml -o combined-coverage.xml
 
     - name: Upload combined coverage to Codecov
-      uses: codecov/codecov-action@e79a6962e0d4c0c17b229090214935d2e33f8354 # v6.0.1
+      uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
       with:
         files: combined-coverage.xml
         fail_ci_if_error: false

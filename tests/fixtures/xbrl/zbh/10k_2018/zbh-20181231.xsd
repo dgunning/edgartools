@@ -1,0 +1,895 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<!-- DFS ActiveDisclosure(SM) XBRL Schema Document - http://www.dfsco.com/financial-services/ -->
+<!-- Creation Date      : 2019-02-26T00:55:53.4724239+00:00 -->
+<!-- Version            : 3.3.6989.14284 -->
+<!-- Package ID         : 95d19d9406514572b7fc67b48bc84781 -->
+<!-- Copyright (c) 2019 Donnelley Financial, LLC. All Rights Reserved. -->
+<schema xmlns:nonnum="http://www.xbrl.org/dtr/type/non-numeric" xmlns:num="http://www.xbrl.org/dtr/type/numeric" xmlns:us-types="http://fasb.org/us-types/2018-01-31" xmlns:stpr="http://xbrl.sec.gov/stpr/2018-01-31" xmlns:srt-types="http://fasb.org/srt-types/2018-01-31" xmlns:naics="http://xbrl.sec.gov/naics/2017-01-31" xmlns:invest="http://xbrl.sec.gov/invest/2013-01-31" xmlns:xbrldt="http://xbrl.org/2005/xbrldt" xmlns:srt="http://fasb.org/srt/2018-01-31" xmlns:us-gaap="http://fasb.org/us-gaap/2018-01-31" xmlns:dei="http://xbrl.sec.gov/dei/2018-01-31" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:country="http://xbrl.sec.gov/country/2017-01-31" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:currency="http://xbrl.sec.gov/currency/2017-01-31" xmlns:zbh="http://www.zimmerbiomet.com/20181231" xmlns:exch="http://xbrl.sec.gov/exch/2018-01-31" xmlns:sic="http://xbrl.sec.gov/sic/2011-01-31" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.zimmerbiomet.com/20181231" xmlns="http://www.w3.org/2001/XMLSchema">
+  <import schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd" namespace="http://www.xbrl.org/2003/instance" />
+  <import schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd" namespace="http://www.xbrl.org/2003/linkbase" />
+  <import schemaLocation="http://www.xbrl.org/2005/xbrldt-2005.xsd" namespace="http://xbrl.org/2005/xbrldt" />
+  <import schemaLocation="https://xbrl.sec.gov/dei/2018/dei-2018-01-31.xsd" namespace="http://xbrl.sec.gov/dei/2018-01-31" />
+  <import schemaLocation="http://xbrl.fasb.org/us-gaap/2018/elts/us-gaap-2018-01-31.xsd" namespace="http://fasb.org/us-gaap/2018-01-31" />
+  <import schemaLocation="http://xbrl.fasb.org/srt/2018/elts/srt-2018-01-31.xsd" namespace="http://fasb.org/srt/2018-01-31" />
+  <import schemaLocation="http://xbrl.fasb.org/us-gaap/2018/elts/us-types-2018-01-31.xsd" namespace="http://fasb.org/us-types/2018-01-31" />
+  <import schemaLocation="http://www.xbrl.org/dtr/type/numeric-2009-12-16.xsd" namespace="http://www.xbrl.org/dtr/type/numeric" />
+  <import schemaLocation="http://www.xbrl.org/dtr/type/nonNumeric-2009-12-16.xsd" namespace="http://www.xbrl.org/dtr/type/non-numeric" />
+  <import schemaLocation="http://xbrl.fasb.org/srt/2018/elts/srt-types-2018-01-31.xsd" namespace="http://fasb.org/srt-types/2018-01-31" />
+  <import schemaLocation="http://xbrl.sec.gov/country/2017/country-2017-01-31.xsd" namespace="http://xbrl.sec.gov/country/2017-01-31" />
+  <import schemaLocation="https://xbrl.sec.gov/currency/2017/currency-2017-01-31.xsd" namespace="http://xbrl.sec.gov/currency/2017-01-31" />
+  <import schemaLocation="https://xbrl.sec.gov/exch/2018/exch-2018-01-31.xsd" namespace="http://xbrl.sec.gov/exch/2018-01-31" />
+  <import schemaLocation="https://xbrl.sec.gov/invest/2013/invest-2013-01-31.xsd" namespace="http://xbrl.sec.gov/invest/2013-01-31" />
+  <import schemaLocation="https://xbrl.sec.gov/naics/2017/naics-2017-01-31.xsd" namespace="http://xbrl.sec.gov/naics/2017-01-31" />
+  <import schemaLocation="https://xbrl.sec.gov/sic/2011/sic-2011-01-31.xsd" namespace="http://xbrl.sec.gov/sic/2011-01-31" />
+  <import schemaLocation="https://xbrl.sec.gov/stpr/2018/stpr-2018-01-31.xsd" namespace="http://xbrl.sec.gov/stpr/2018-01-31" />
+  <annotation>
+    <appinfo>
+      <link:roleType id="TemplateLink" roleURI="http://www.zimmerbiomet.com/20181231/role/TemplateLink" xmlns:link="http://www.xbrl.org/2003/linkbase">
+        <link:definition>00000 - Document - Template Link</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:linkbaseRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="zbh-20181231_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:title="Calculation Links, all" xlink:type="simple" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:xlink="http://www.w3.org/1999/xlink" />
+      <link:linkbaseRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="zbh-20181231_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:title="Definition Links, all" xlink:type="simple" />
+      <link:linkbaseRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="zbh-20181231_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:title="Label Links, all" xlink:type="simple" />
+      <link:linkbaseRef xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="zbh-20181231_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:title="Presentation Links, all" xlink:type="simple" />
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DocumentDocumentAndEntityInformation" id="Role_DocumentDocumentAndEntityInformation">
+        <link:definition>100000 - Document - Document and Entity Information</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/StatementConsolidatedStatementsOfEarnings" id="Role_StatementConsolidatedStatementsOfEarnings">
+        <link:definition>100010 - Statement - Consolidated Statements of Earnings</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/StatementConsolidatedStatementsOfComprehensiveIncomeLoss" id="Role_StatementConsolidatedStatementsOfComprehensiveIncomeLoss">
+        <link:definition>100020 - Statement - Consolidated Statements of Comprehensive Income (Loss)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/StatementConsolidatedBalanceSheets" id="Role_StatementConsolidatedBalanceSheets">
+        <link:definition>100030 - Statement - Consolidated Balance Sheets</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/StatementConsolidatedBalanceSheetsParenthetical" id="Role_StatementConsolidatedBalanceSheetsParenthetical">
+        <link:definition>100040 - Statement - Consolidated Balance Sheets (Parenthetical)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/StatementConsolidatedStatementsOfStockholdersEquity" id="Role_StatementConsolidatedStatementsOfStockholdersEquity">
+        <link:definition>100050 - Statement - Consolidated Statements of Stockholders&apos; Equity</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/StatementConsolidatedStatementsOfStockholdersEquityParenthetical" id="Role_StatementConsolidatedStatementsOfStockholdersEquityParenthetical">
+        <link:definition>100060 - Statement - Consolidated Statements of Stockholders&apos; Equity (Parenthetical)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/StatementConsolidatedStatementsOfCashFlows" id="Role_StatementConsolidatedStatementsOfCashFlows">
+        <link:definition>100070 - Statement - Consolidated Statements of Cash Flows</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureBusiness" id="Role_DisclosureBusiness">
+        <link:definition>100080 - Disclosure - Business</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureSignificantAccountingPolicies" id="Role_DisclosureSignificantAccountingPolicies">
+        <link:definition>100090 - Disclosure - Significant Accounting Policies</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRevenueRecognition" id="Role_DisclosureRevenueRecognition">
+        <link:definition>100100 - Disclosure - Revenue Recognition</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureShareBasedCompensation" id="Role_DisclosureShareBasedCompensation">
+        <link:definition>100110 - Disclosure - Share-Based Compensation</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureInventories" id="Role_DisclosureInventories">
+        <link:definition>100120 - Disclosure - Inventories</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosurePropertyPlantAndEquipment" id="Role_DisclosurePropertyPlantAndEquipment">
+        <link:definition>100130 - Disclosure - Property, Plant and Equipment</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureTransfersOfFinancialAssets" id="Role_DisclosureTransfersOfFinancialAssets">
+        <link:definition>100140 - Disclosure - Transfers of Financial Assets</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureFairValueMeasurementsOfAssetsAndLiabilities" id="Role_DisclosureFairValueMeasurementsOfAssetsAndLiabilities">
+        <link:definition>100150 - Disclosure - Fair Value Measurements of Assets and Liabilities</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureGoodwillAndOtherIntangibleAssets" id="Role_DisclosureGoodwillAndOtherIntangibleAssets">
+        <link:definition>100160 - Disclosure - Goodwill and Other Intangible Assets</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureOtherCurrentLiabilities" id="Role_DisclosureOtherCurrentLiabilities">
+        <link:definition>100170 - Disclosure - Other Current Liabilities</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDebt" id="Role_DisclosureDebt">
+        <link:definition>100180 - Disclosure - Debt</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureAccumulatedOtherComprehensiveLossIncome" id="Role_DisclosureAccumulatedOtherComprehensiveLossIncome">
+        <link:definition>100190 - Disclosure - Accumulated Other Comprehensive (Loss) Income</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDerivativeInstrumentsAndHedgingActivities" id="Role_DisclosureDerivativeInstrumentsAndHedgingActivities">
+        <link:definition>100200 - Disclosure - Derivative Instruments and Hedging Activities</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlans" id="Role_DisclosureRetirementBenefitPlans">
+        <link:definition>100210 - Disclosure - Retirement Benefit Plans</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureIncomeTaxes" id="Role_DisclosureIncomeTaxes">
+        <link:definition>100220 - Disclosure - Income Taxes</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureCapitalStockAndEarningsPerShare" id="Role_DisclosureCapitalStockAndEarningsPerShare">
+        <link:definition>100230 - Disclosure - Capital Stock and Earnings per Share</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureSegmentData" id="Role_DisclosureSegmentData">
+        <link:definition>100240 - Disclosure - Segment Data</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureLeases" id="Role_DisclosureLeases">
+        <link:definition>100250 - Disclosure - Leases</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureCommitmentsAndContingencies" id="Role_DisclosureCommitmentsAndContingencies">
+        <link:definition>100260 - Disclosure - Commitments and Contingencies</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureQuarterlyFinancialInformationUnaudited" id="Role_DisclosureQuarterlyFinancialInformationUnaudited">
+        <link:definition>100270 - Disclosure - Quarterly Financial Information (Unaudited)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureValuationAndQualifyingAccounts" id="Role_DisclosureValuationAndQualifyingAccounts">
+        <link:definition>100280 - Disclosure - Valuation and Qualifying Accounts</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureSignificantAccountingPoliciesPolicies" id="Role_DisclosureSignificantAccountingPoliciesPolicies">
+        <link:definition>100290 - Disclosure - Significant Accounting Policies (Policies)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureSignificantAccountingPoliciesTables" id="Role_DisclosureSignificantAccountingPoliciesTables">
+        <link:definition>100300 - Disclosure - Significant Accounting Policies (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRevenueRecognitionTables" id="Role_DisclosureRevenueRecognitionTables">
+        <link:definition>100310 - Disclosure - Revenue Recognition (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureShareBasedCompensationTables" id="Role_DisclosureShareBasedCompensationTables">
+        <link:definition>100320 - Disclosure - Share-Based Compensation (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureInventoriesTables" id="Role_DisclosureInventoriesTables">
+        <link:definition>100330 - Disclosure - Inventories (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosurePropertyPlantAndEquipmentTables" id="Role_DisclosurePropertyPlantAndEquipmentTables">
+        <link:definition>100340 - Disclosure - Property, Plant and Equipment (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureFairValueMeasurementsOfAssetsAndLiabilitiesTables" id="Role_DisclosureFairValueMeasurementsOfAssetsAndLiabilitiesTables">
+        <link:definition>100350 - Disclosure - Fair Value Measurements of Assets and Liabilities (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureGoodwillAndOtherIntangibleAssetsTables" id="Role_DisclosureGoodwillAndOtherIntangibleAssetsTables">
+        <link:definition>100360 - Disclosure - Goodwill and Other Intangible Assets (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureOtherCurrentLiabilitiesTables" id="Role_DisclosureOtherCurrentLiabilitiesTables">
+        <link:definition>100370 - Disclosure - Other Current Liabilities (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDebtTables" id="Role_DisclosureDebtTables">
+        <link:definition>100380 - Disclosure - Debt (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureAccumulatedOtherComprehensiveLossIncomeTables" id="Role_DisclosureAccumulatedOtherComprehensiveLossIncomeTables">
+        <link:definition>100390 - Disclosure - Accumulated Other Comprehensive (Loss) Income (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDerivativeInstrumentsAndHedgingActivitiesTables" id="Role_DisclosureDerivativeInstrumentsAndHedgingActivitiesTables">
+        <link:definition>100400 - Disclosure - Derivative Instruments and Hedging Activities (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansTables" id="Role_DisclosureRetirementBenefitPlansTables">
+        <link:definition>100410 - Disclosure - Retirement Benefit Plans (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureIncomeTaxesTables" id="Role_DisclosureIncomeTaxesTables">
+        <link:definition>100420 - Disclosure - Income Taxes (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureCapitalStockAndEarningsPerShareTables" id="Role_DisclosureCapitalStockAndEarningsPerShareTables">
+        <link:definition>100430 - Disclosure - Capital Stock and Earnings per Share (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureSegmentDataTables" id="Role_DisclosureSegmentDataTables">
+        <link:definition>100440 - Disclosure - Segment Data (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureLeasesTables" id="Role_DisclosureLeasesTables">
+        <link:definition>100450 - Disclosure - Leases (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureQuarterlyFinancialInformationUnauditedTables" id="Role_DisclosureQuarterlyFinancialInformationUnauditedTables">
+        <link:definition>100460 - Disclosure - Quarterly Financial Information (Unaudited) (Tables)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureSignificantAccountingPoliciesAdditionalInformationDetail" id="Role_DisclosureSignificantAccountingPoliciesAdditionalInformationDetail">
+        <link:definition>100470 - Disclosure - Significant Accounting Policies - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureSignificantAccountingPoliciesSummaryOfImpactsOfASUOnCondensedConsolidatedFinancialStatementsDetail" id="Role_DisclosureSignificantAccountingPoliciesSummaryOfImpactsOfASUOnCondensedConsolidatedFinancialStatementsDetail">
+        <link:definition>100480 - Disclosure - Significant Accounting Policies - Summary of Impacts of ASU on Condensed Consolidated Financial Statements (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRevenueRecognitionAdditionalInformationDetail" id="Role_DisclosureRevenueRecognitionAdditionalInformationDetail">
+        <link:definition>100490 - Disclosure - Revenue Recognition - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRevenueRecognitionScheduleOfNetSalesByGeographyDetail" id="Role_DisclosureRevenueRecognitionScheduleOfNetSalesByGeographyDetail">
+        <link:definition>100500 - Disclosure - Revenue Recognition - Schedule of Net Sales by Geography (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRevenueRecognitionScheduleOfNetSalesByProductCategoryDetail" id="Role_DisclosureRevenueRecognitionScheduleOfNetSalesByProductCategoryDetail">
+        <link:definition>100510 - Disclosure - Revenue Recognition - Schedule of Net Sales by Product Category (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureShareBasedCompensationShareBasedCompensationExpenseDetail" id="Role_DisclosureShareBasedCompensationShareBasedCompensationExpenseDetail">
+        <link:definition>100520 - Disclosure - Share-Based Compensation - Share-Based Compensation Expense (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureShareBasedCompensationAdditionalInformationDetail" id="Role_DisclosureShareBasedCompensationAdditionalInformationDetail">
+        <link:definition>100530 - Disclosure - Share-Based Compensation - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureShareBasedCompensationSummaryOfStockOptionActivityDetail" id="Role_DisclosureShareBasedCompensationSummaryOfStockOptionActivityDetail">
+        <link:definition>100540 - Disclosure - Share-Based Compensation - Summary of Stock Option Activity (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureShareBasedCompensationWeightedAverageFairValueForStockOptionsGrantedDetail" id="Role_DisclosureShareBasedCompensationWeightedAverageFairValueForStockOptionsGrantedDetail">
+        <link:definition>100550 - Disclosure - Share-Based Compensation - Weighted Average Fair Value for Stock Options Granted (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureShareBasedCompensationSummaryOfNonvestedRSUActivityDetail" id="Role_DisclosureShareBasedCompensationSummaryOfNonvestedRSUActivityDetail">
+        <link:definition>100560 - Disclosure - Share-Based Compensation - Summary of Nonvested RSU Activity (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureInventoriesSummaryOfInventoriesDetail" id="Role_DisclosureInventoriesSummaryOfInventoriesDetail">
+        <link:definition>100570 - Disclosure - Inventories - Summary of Inventories (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureInventoriesAdditionalInformationDetail" id="Role_DisclosureInventoriesAdditionalInformationDetail">
+        <link:definition>100580 - Disclosure - Inventories - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosurePropertyPlantAndEquipmentSummaryOfPropertyPlantAndEquipmentDetail" id="Role_DisclosurePropertyPlantAndEquipmentSummaryOfPropertyPlantAndEquipmentDetail">
+        <link:definition>100590 - Disclosure - Property, Plant and Equipment - Summary of Property, Plant and Equipment (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosurePropertyPlantAndEquipmentAdditionalInformationDetail" id="Role_DisclosurePropertyPlantAndEquipmentAdditionalInformationDetail">
+        <link:definition>100600 - Disclosure - Property, Plant and Equipment - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureTransfersOfFinancialAssetsAdditionalInformationDetail" id="Role_DisclosureTransfersOfFinancialAssetsAdditionalInformationDetail">
+        <link:definition>100610 - Disclosure - Transfers of Financial Assets - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureFairValueMeasurementsOfAssetsAndLiabilitiesFairValueMeasurementsOfAssetsAndLiabilitiesDetail" id="Role_DisclosureFairValueMeasurementsOfAssetsAndLiabilitiesFairValueMeasurementsOfAssetsAndLiabilitiesDetail">
+        <link:definition>100620 - Disclosure - Fair Value Measurements of Assets and Liabilities - Fair Value Measurements of Assets and Liabilities (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureFairValueMeasurementsOfAssetsAndLiabilitiesSummaryOfReconciliationOfItemsMeasuredAtFairValueOnRecurringBasisDetail" id="Role_DisclosureFairValueMeasurementsOfAssetsAndLiabilitiesSummaryOfReconciliationOfItemsMeasuredAtFairValueOnRecurringBasisDetail">
+        <link:definition>100630 - Disclosure - Fair Value Measurements of Assets and Liabilities - Summary of Reconciliation of Items Measured at Fair Value on Recurring Basis (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureGoodwillAndOtherIntangibleAssetsChangesInCarryingAmountOfGoodwillDetail" id="Role_DisclosureGoodwillAndOtherIntangibleAssetsChangesInCarryingAmountOfGoodwillDetail">
+        <link:definition>100640 - Disclosure - Goodwill and Other Intangible Assets - Changes in Carrying Amount of Goodwill (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureGoodwillAndOtherIntangibleAssetsAdditionalInformationDetail" id="Role_DisclosureGoodwillAndOtherIntangibleAssetsAdditionalInformationDetail">
+        <link:definition>100650 - Disclosure - Goodwill and Other Intangible Assets - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureGoodwillAndOtherIntangibleAssetsComponentsOfIdentifiableIntangibleAssetsDetail" id="Role_DisclosureGoodwillAndOtherIntangibleAssetsComponentsOfIdentifiableIntangibleAssetsDetail">
+        <link:definition>100660 - Disclosure - Goodwill and Other Intangible Assets - Components of Identifiable Intangible Assets (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureGoodwillAndOtherIntangibleAssetsEstimatedAnnualAmortizationExpenseBasedOnIntangibleAssetsRecognizedDetail" id="Role_DisclosureGoodwillAndOtherIntangibleAssetsEstimatedAnnualAmortizationExpenseBasedOnIntangibleAssetsRecognizedDetail">
+        <link:definition>100670 - Disclosure - Goodwill and Other Intangible Assets - Estimated Annual Amortization Expense Based on Intangible Assets Recognized (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureOtherCurrentLiabilitiesSummaryOfOtherCurrentLiabilitiesDetail" id="Role_DisclosureOtherCurrentLiabilitiesSummaryOfOtherCurrentLiabilitiesDetail">
+        <link:definition>100680 - Disclosure - Other Current Liabilities - Summary of Other Current Liabilities (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDebtSummaryOfDebtInstrumentsDetail" id="Role_DisclosureDebtSummaryOfDebtInstrumentsDetail">
+        <link:definition>100690 - Disclosure - Debt - Summary of Debt Instruments (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDebtSummaryOfDebtInstrumentsParentheticalDetail" id="Role_DisclosureDebtSummaryOfDebtInstrumentsParentheticalDetail">
+        <link:definition>100700 - Disclosure - Debt - Summary of Debt Instruments (Parenthetical) (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDebtAdditionalInformationDetail" id="Role_DisclosureDebtAdditionalInformationDetail">
+        <link:definition>100710 - Disclosure - Debt - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureAccumulatedOtherComprehensiveIncomeChangesInComponentsOfAccumulatedOtherComprehensiveIncomeNetOfTaxDetail" id="Role_DisclosureAccumulatedOtherComprehensiveIncomeChangesInComponentsOfAccumulatedOtherComprehensiveIncomeNetOfTaxDetail">
+        <link:definition>100720 - Disclosure - Accumulated Other Comprehensive Income - Changes in Components of Accumulated Other Comprehensive Income, Net of Tax (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureAccumulatedOtherComprehensiveIncomeReclassificationAdjustmentsFromAccumulatedOtherComprehensiveIncomeDetail" id="Role_DisclosureAccumulatedOtherComprehensiveIncomeReclassificationAdjustmentsFromAccumulatedOtherComprehensiveIncomeDetail">
+        <link:definition>100730 - Disclosure - Accumulated Other Comprehensive Income - Reclassification Adjustments from Accumulated Other Comprehensive Income (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureAccumulatedOtherComprehensiveLossIncomeTaxEffectsOnEachComponentOfAccumulatedOtherComprehensiveIncomeRecognizedInStatementsOfComprehensiveIncomeLossDetail" id="Role_DisclosureAccumulatedOtherComprehensiveLossIncomeTaxEffectsOnEachComponentOfAccumulatedOtherComprehensiveIncomeRecognizedInStatementsOfComprehensiveIncomeLossDetail">
+        <link:definition>100740 - Disclosure - Accumulated Other Comprehensive (Loss) Income - Tax Effects on Each Component of Accumulated Other Comprehensive Income Recognized in Statements of Comprehensive Income (Loss) (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDerivativeInstrumentsAndHedgingActivitiesAdditionalInformationDetail" id="Role_DisclosureDerivativeInstrumentsAndHedgingActivitiesAdditionalInformationDetail">
+        <link:definition>100750 - Disclosure - Derivative Instruments and Hedging Activities - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDerivativeInstrumentsAndHedgingActivitiesScheduleOfAmountsRecordedOnBalanceSheetRelatedToCumulativeBasisAdjustmentsForFairValueHedgesDetail" id="Role_DisclosureDerivativeInstrumentsAndHedgingActivitiesScheduleOfAmountsRecordedOnBalanceSheetRelatedToCumulativeBasisAdjustmentsForFairValueHedgesDetail">
+        <link:definition>100760 - Disclosure - Derivative Instruments and Hedging Activities - Schedule of Amounts Recorded On Balance Sheet Related To Cumulative Basis Adjustments For Fair Value Hedges (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDerivativeInstrumentsAndHedgingActivitiesGrossUnrealizedLossesFromDerivativeInstrumentsDetail" id="Role_DisclosureDerivativeInstrumentsAndHedgingActivitiesGrossUnrealizedLossesFromDerivativeInstrumentsDetail">
+        <link:definition>100770 - Disclosure - Derivative Instruments and Hedging Activities - Gross Unrealized Losses from Derivative Instruments (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDerivativeInstrumentsAndHedgingActivitiesEffectsOfFairValueAndCashFlowHedgeAccountingOnCondensedConsolidatedStatementsOfEarningsDetail" id="Role_DisclosureDerivativeInstrumentsAndHedgingActivitiesEffectsOfFairValueAndCashFlowHedgeAccountingOnCondensedConsolidatedStatementsOfEarningsDetail">
+        <link:definition>100780 - Disclosure - Derivative Instruments and Hedging Activities - Effects of Fair Value and Cash flow Hedge Accounting on Condensed Consolidated Statements of Earnings (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDerivativeInstrumentsAndHedgingActivitiesDerivativeInstrumentsNotDesignatedAsHedgingInstrumentsDetail" id="Role_DisclosureDerivativeInstrumentsAndHedgingActivitiesDerivativeInstrumentsNotDesignatedAsHedgingInstrumentsDetail">
+        <link:definition>100790 - Disclosure - Derivative Instruments and Hedging Activities - Derivative Instruments Not Designated as Hedging Instruments (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDerivativeInstrumentsAndHedgingActivitiesFairValueOfDerivativeInstrumentsOnGrossBasisDetail" id="Role_DisclosureDerivativeInstrumentsAndHedgingActivitiesFairValueOfDerivativeInstrumentsOnGrossBasisDetail">
+        <link:definition>100800 - Disclosure - Derivative Instruments and Hedging Activities - Fair Value of Derivative Instruments on Gross Basis (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDerivativeInstrumentsAndHedgingActivitiesScheduleOfEffectsOfMasterNettingAgreementsOnConsolidatedBalanceSheetsDetail" id="Role_DisclosureDerivativeInstrumentsAndHedgingActivitiesScheduleOfEffectsOfMasterNettingAgreementsOnConsolidatedBalanceSheetsDetail">
+        <link:definition>100810 - Disclosure - Derivative Instruments and Hedging Activities - Schedule of Effects of Master Netting Agreements on Consolidated Balance Sheets (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureDerivativeInstrumentsAndHedgingActivitiesNetInvestmentHedgeGainsRecognizedOnConsolidatedStatementsOfComprehensiveIncomeDetail" id="Role_DisclosureDerivativeInstrumentsAndHedgingActivitiesNetInvestmentHedgeGainsRecognizedOnConsolidatedStatementsOfComprehensiveIncomeDetail">
+        <link:definition>100820 - Disclosure - Derivative Instruments and Hedging Activities - Net Investment Hedge Gains Recognized on Consolidated Statements of Comprehensive Income (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansComponentsOfNetPensionExpenseDetail" id="Role_DisclosureRetirementBenefitPlansComponentsOfNetPensionExpenseDetail">
+        <link:definition>100830 - Disclosure - Retirement Benefit Plans - Components of Net Pension Expense (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansWeightedAverageActuarialAssumptionsUsedToDetermineNetPensionExpenseForOurDefinedBenefitRetirementPlansDetail" id="Role_DisclosureRetirementBenefitPlansWeightedAverageActuarialAssumptionsUsedToDetermineNetPensionExpenseForOurDefinedBenefitRetirementPlansDetail">
+        <link:definition>100840 - Disclosure - Retirement Benefit Plans - Weighted Average Actuarial Assumptions Used to Determine Net Pension Expense for Our Defined Benefit Retirement Plans (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansChangesInProjectedBenefitObligationsAndPlanAssetsDetail" id="Role_DisclosureRetirementBenefitPlansChangesInProjectedBenefitObligationsAndPlanAssetsDetail">
+        <link:definition>100850 - Disclosure - Retirement Benefit Plans - Changes in Projected Benefit Obligations and Plan Assets (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlanChangesInFairValueOfPlanAssetsDetail" id="Role_DisclosureRetirementBenefitPlanChangesInFairValueOfPlanAssetsDetail">
+        <link:definition>100860 - Disclosure - Retirement Benefit Plan - Changes in Fair Value of Plan Assets (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlanSummaryOfAmountsRecognizedInBalanceSheetDetail" id="Role_DisclosureRetirementBenefitPlanSummaryOfAmountsRecognizedInBalanceSheetDetail">
+        <link:definition>100870 - Disclosure - Retirement Benefit Plan - Summary of Amounts Recognized in Balance Sheet (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlanSummaryOfAmountsRecognizedInAOCIDetail" id="Role_DisclosureRetirementBenefitPlanSummaryOfAmountsRecognizedInAOCIDetail">
+        <link:definition>100880 - Disclosure - Retirement Benefit Plan - Summary of Amounts Recognized in AOCI (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansWeightedAverageActuarialAssumptionsUsedToDetermineProjectedBenefitObligationForDefinedBenefitRetirementPlansDetail" id="Role_DisclosureRetirementBenefitPlansWeightedAverageActuarialAssumptionsUsedToDetermineProjectedBenefitObligationForDefinedBenefitRetirementPlansDetail">
+        <link:definition>100890 - Disclosure - Retirement Benefit Plans - Weighted Average Actuarial Assumptions Used to Determine Projected Benefit Obligation for Defined Benefit Retirement Plans (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansPlansWithBenefitObligationsInExcessOfPlanAssetsDetail" id="Role_DisclosureRetirementBenefitPlansPlansWithBenefitObligationsInExcessOfPlanAssetsDetail">
+        <link:definition>100900 - Disclosure - Retirement Benefit Plans - Plans with Benefit Obligations in Excess of Plan Assets (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansTotalAccumulatedBenefitObligationsAndPlansWithAccumulatedBenefitObligationsInExcessOfPlanAssetsDetail" id="Role_DisclosureRetirementBenefitPlansTotalAccumulatedBenefitObligationsAndPlansWithAccumulatedBenefitObligationsInExcessOfPlanAssetsDetail">
+        <link:definition>100910 - Disclosure - Retirement Benefit Plans - Total Accumulated Benefit Obligations and Plans with Accumulated Benefit Obligations in Excess of Plan Assets (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansSummaryOfBenefitsExpectedToBePaidOutDetail" id="Role_DisclosureRetirementBenefitPlansSummaryOfBenefitsExpectedToBePaidOutDetail">
+        <link:definition>100920 - Disclosure - Retirement Benefit Plans - Summary of Benefits Expected to be Paid Out (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansAdditionalInformationDetail" id="Role_DisclosureRetirementBenefitPlansAdditionalInformationDetail">
+        <link:definition>100930 - Disclosure - Retirement Benefit Plans - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansFairValueOfUSAndPuertoRicoPensionPlanAssetsDetail" id="Role_DisclosureRetirementBenefitPlansFairValueOfUSAndPuertoRicoPensionPlanAssetsDetail">
+        <link:definition>100940 - Disclosure - Retirement Benefit Plans - Fair Value of U.S. and Puerto Rico Pension Plan Assets (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansFairValueOfForeignPensionPlanAssetsDetail" id="Role_DisclosureRetirementBenefitPlansFairValueOfForeignPensionPlanAssetsDetail">
+        <link:definition>100950 - Disclosure - Retirement Benefit Plans - Fair Value of Foreign Pension Plan Assets (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureRetirementBenefitPlansReconciliationOfBeginningAndEndingBalancesOfForeignPensionPlanAssetsMeasuredAtFairValueDetail" id="Role_DisclosureRetirementBenefitPlansReconciliationOfBeginningAndEndingBalancesOfForeignPensionPlanAssetsMeasuredAtFairValueDetail">
+        <link:definition>100960 - Disclosure - Retirement Benefit Plans - Reconciliation of Beginning and Ending Balances of Foreign Pension Plan Assets Measured at Fair Value (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureIncomeTaxesAdditionalInformationDetail" id="Role_DisclosureIncomeTaxesAdditionalInformationDetail">
+        <link:definition>100970 - Disclosure - Income Taxes - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureIncomeTaxesComponentsOfEarningsLossBeforeTaxesDetail" id="Role_DisclosureIncomeTaxesComponentsOfEarningsLossBeforeTaxesDetail">
+        <link:definition>100980 - Disclosure - Income Taxes - Components of Earnings (Loss) Before Taxes (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureIncomeTaxesProvisionBenefitForIncomeTaxesAndIncomeTaxesPaidDetail" id="Role_DisclosureIncomeTaxesProvisionBenefitForIncomeTaxesAndIncomeTaxesPaidDetail">
+        <link:definition>100990 - Disclosure - Income Taxes - Provision/Benefit for Income Taxes and Income Taxes Paid (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureIncomeTaxesReconciliationOfUSStatutoryIncomeTaxRateToOurEffectiveTaxRateDetail" id="Role_DisclosureIncomeTaxesReconciliationOfUSStatutoryIncomeTaxRateToOurEffectiveTaxRateDetail">
+        <link:definition>101000 - Disclosure - Income Taxes - Reconciliation of U.S. Statutory Income Tax Rate to Our Effective Tax Rate (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureIncomeTaxesComponentsOfDeferredTaxesDetail" id="Role_DisclosureIncomeTaxesComponentsOfDeferredTaxesDetail">
+        <link:definition>101010 - Disclosure - Income Taxes - Components of Deferred Taxes (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureIncomeTaxesTabularReconciliationOfTotalAmountsOfUnrecognizedTaxBenefitsDetail" id="Role_DisclosureIncomeTaxesTabularReconciliationOfTotalAmountsOfUnrecognizedTaxBenefitsDetail">
+        <link:definition>101020 - Disclosure - Income Taxes - Tabular Reconciliation of Total Amounts of Unrecognized Tax Benefits (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureCapitalStockAndEarningsPerShareAdditionalInformationDetail" id="Role_DisclosureCapitalStockAndEarningsPerShareAdditionalInformationDetail">
+        <link:definition>101030 - Disclosure - Capital Stock and Earnings per Share - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureCapitalStockAndEarningsPerShareReconciliationOfWeightedAverageSharesForBasicAndDilutedSharesComputationsDetail" id="Role_DisclosureCapitalStockAndEarningsPerShareReconciliationOfWeightedAverageSharesForBasicAndDilutedSharesComputationsDetail">
+        <link:definition>101040 - Disclosure - Capital Stock and Earnings per Share - Reconciliation of Weighted Average Shares for Basic and Diluted Shares Computations (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureSegmentDataAdditionalInformationDetail" id="Role_DisclosureSegmentDataAdditionalInformationDetail">
+        <link:definition>101050 - Disclosure - Segment Data - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureSegmentDataSummaryOfNetSalesAndOtherInformationBySegmentDetail" id="Role_DisclosureSegmentDataSummaryOfNetSalesAndOtherInformationBySegmentDetail">
+        <link:definition>101060 - Disclosure - Segment Data - Summary of Net Sales and Other Information by Segment (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureSegmentDataDisclosureOnGeographicAreasLongLivedAssetsDetail" id="Role_DisclosureSegmentDataDisclosureOnGeographicAreasLongLivedAssetsDetail">
+        <link:definition>101070 - Disclosure - Segment Data - Disclosure on Geographic Areas, Long-Lived Assets (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureLeasesAdditionalInformationDetail" id="Role_DisclosureLeasesAdditionalInformationDetail">
+        <link:definition>101080 - Disclosure - Leases - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureLeasesScheduleOfFutureMinimumRentalCommitmentsUnderNonCancelableOperatingLeasesDetail" id="Role_DisclosureLeasesScheduleOfFutureMinimumRentalCommitmentsUnderNonCancelableOperatingLeasesDetail">
+        <link:definition>101090 - Disclosure - Leases - Schedule of Future Minimum Rental Commitments Under Non-Cancelable Operating Leases (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureCommitmentsAndContingenciesAdditionalInformationDetail" id="Role_DisclosureCommitmentsAndContingenciesAdditionalInformationDetail">
+        <link:definition>101100 - Disclosure - Commitments and Contingencies - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureQuarterlyFinancialInformationUnauditedQuarterlyFinancialInformationUnauditedDetail" id="Role_DisclosureQuarterlyFinancialInformationUnauditedQuarterlyFinancialInformationUnauditedDetail">
+        <link:definition>101110 - Disclosure - Quarterly Financial Information (Unaudited) - Quarterly Financial Information (Unaudited) (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureQuarterlyFinancialInformationUnauditedAdditionalInformationDetail" id="Role_DisclosureQuarterlyFinancialInformationUnauditedAdditionalInformationDetail">
+        <link:definition>101120 - Disclosure - Quarterly Financial Information (Unaudited) - Additional Information (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType roleURI="http://www.zimmerbiomet.com/20181231/taxonomy/role/DisclosureScheduleValuationAndQualifyingAccountsDetail" id="Role_DisclosureScheduleValuationAndQualifyingAccountsDetail">
+        <link:definition>101130 - Disclosure - Schedule - Valuation and Qualifying Accounts (Detail)</link:definition>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+    </appinfo>
+  </annotation>
+  <element id="zbh_DerivativeOffset" name="DerivativeOffset" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_LiabilityDerivativesOffset" name="LiabilityDerivativesOffset" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_DocumentAndEntityInformationAbstract" name="DocumentAndEntityInformationAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_AcquisitionIntegrationAndRelatedExpenses" name="AcquisitionIntegrationAndRelatedExpenses" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_QualityRemediationCosts" name="QualityRemediationCosts" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_InventoryStepUp" name="InventoryStepUp" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_AdditionsToInstruments" name="AdditionsToInstruments" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_NetCashFlowsBetweenTransfereeAndTransferorUnremittedCollectionsFromFactoringPrograms" name="NetCashFlowsBetweenTransfereeAndTransferorUnremittedCollectionsFromFactoringPrograms" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_LDRHoldingCorporationMember" name="LDRHoldingCorporationMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_RevenueFromContractWithCustomerShippingAndHandlingCostsPolicyPolicyTextBlock" name="RevenueFromContractWithCustomerShippingAndHandlingCostsPolicyPolicyTextBlock" type="nonnum:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_QualityRemediationPolicyTextBlock" name="QualityRemediationPolicyTextBlock" type="nonnum:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_InstrumentsPolicyTextBlock" name="InstrumentsPolicyTextBlock" type="nonnum:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_TreasuryStockPolicyTextBlock" name="TreasuryStockPolicyTextBlock" type="nonnum:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_ScheduleOfDefinedBenefitPlanWeightedAverageAssumptionsUsedInCalculatingBenefitObligationTableTextBlock" name="ScheduleOfDefinedBenefitPlanWeightedAverageAssumptionsUsedInCalculatingBenefitObligationTableTextBlock" type="nonnum:textBlockItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_BusinessAndSignificantAccountingPoliciesLineItems" name="BusinessAndSignificantAccountingPoliciesLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_BusinessAndSignificantAccountingPoliciesTable" name="BusinessAndSignificantAccountingPoliciesTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_InstrumentsMember" name="InstrumentsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_AccountingStandardsUpdateTwoThousandEighteenZeroTwoMember" name="AccountingStandardsUpdateTwoThousandEighteenZeroTwoMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_EmployeesDedicationPercentageForDedicatedProjectPersonnelExpenses" name="EmployeesDedicationPercentageForDedicatedProjectPersonnelExpenses" type="num:percentItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_TaxCutsAndJobsActOf2017ReclassificationFromAociToRetainedEarningsTaxEffect" name="TaxCutsAndJobsActOf2017ReclassificationFromAociToRetainedEarningsTaxEffect" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_SpecialItems" name="SpecialItems" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_AccountingStandardsUpdateTwoThousandSeventeenZeroSevenMember" name="AccountingStandardsUpdateTwoThousandSeventeenZeroSevenMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ReclassificationsMember" name="ReclassificationsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_PercentageOfSalesThroughDirectChannel" name="PercentageOfSalesThroughDirectChannel" type="num:percentItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_PeriodTermsForPayment" name="PeriodTermsForPayment" type="us-types:durationStringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_PercentageOfSalesThroughIndirectChannel" name="PercentageOfSalesThroughIndirectChannel" type="num:percentItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_SalesInformationLineItems" name="SalesInformationLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_SalesInformationTable" name="SalesInformationTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_KneesMember" name="KneesMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_HipsMember" name="HipsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_SETMember" name="SETMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_DentalMember" name="DentalMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_SpineAndCMFMember" name="SpineAndCMFMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_OtherProductCategoryMember" name="OtherProductCategoryMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_NumberOfEquityCompensationPlans" name="NumberOfEquityCompensationPlans" type="xbrli:integerItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_TwoThousandAndNineStockIncentivePlanAndStockPlanForNonEmployeeDirectorsMember" name="TwoThousandAndNineStockIncentivePlanAndStockPlanForNonEmployeeDirectorsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionExpectedToVestNumber" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardEquityInstrumentsOtherThanOptionExpectedToVestNumber" type="xbrli:sharesItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" />
+  <element id="zbh_BuildingAndEquipmentMember" name="BuildingAndEquipmentMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_CurrentMaximumFundingLimit" name="CurrentMaximumFundingLimit" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_MaximumCreditExposureOfTransferredAssetsNotCoveredByInsurance" name="MaximumCreditExposureOfTransferredAssetsNotCoveredByInsurance" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_UnitedStatesAndJapanRevolvingArrangementsMember" name="UnitedStatesAndJapanRevolvingArrangementsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_IncrementalOperatingCashInflows" name="IncrementalOperatingCashInflows" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_ImmaterialProductCategoryOperatingSegmentsMember" name="ImmaterialProductCategoryOperatingSegmentsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ProductCategoryOperatingSegmentsMember" name="ProductCategoryOperatingSegmentsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_OfficeBasedTechnologiesMember" name="OfficeBasedTechnologiesMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_SpineMember" name="SpineMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_InsignificantReportingUnitMember" name="InsignificantReportingUnitMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_OtherReportingUnitsMember" name="OtherReportingUnitsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_BiometMember" name="BiometMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_IdentifiableIntangibleAssetsAcquiredLineItems" name="IdentifiableIntangibleAssetsAcquiredLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_IdentifiableIntangibleAssetsAcquiredTable" name="IdentifiableIntangibleAssetsAcquiredTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_LicenseAndServiceAgreements" name="LicenseAndServiceAgreements" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_LitigationAndProductLiability" name="LitigationAndProductLiability" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_LongDebtHedgedByInterestRateSwap" name="LongDebtHedgedByInterestRateSwap" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_EquityMethodInvestmentsAndCostMethodInvestmentsAbstract" name="EquityMethodInvestmentsAndCostMethodInvestmentsAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_UsTermLoanBMember" name="UsTermLoanBMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_FloatingRateNotesMember" name="FloatingRateNotesMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_EuroNotesMember" name="EuroNotesMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_UsTermLoanAMember" name="UsTermLoanAMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_UsTermLoanCMember" name="UsTermLoanCMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_JapanTermLoanAMember" name="JapanTermLoanAMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_JapanTermLoanBMember" name="JapanTermLoanBMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoPointZeroPercentageMember" name="TwoPointZeroPercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_FourPointSixTwoFivePercentageMember" name="FourPointSixTwoFivePercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoPointSevenZeroPercentageMember" name="TwoPointSevenZeroPercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ThreePointThreeSevenFivePercentageMember" name="ThreePointThreeSevenFivePercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ThreePointOneFiveZeroPercentageMember" name="ThreePointOneFiveZeroPercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ThreePointSevenZeroPercentageMember" name="ThreePointSevenZeroPercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ThreePointFiveFiveZeroPercentageMember" name="ThreePointFiveFiveZeroPercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_FourPointTwoFiveZeroPercentageMember" name="FourPointTwoFiveZeroPercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_FivePointSevenFiveZeroPercentageMember" name="FivePointSevenFiveZeroPercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_FourPointFourFiveZeroPercentageMember" name="FourPointFourFiveZeroPercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_OnePointFourOneFourPercentageMember" name="OnePointFourOneFourPercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoPointFourTwoFivePercentageMember" name="TwoPointFourTwoFivePercentageMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandEighteenMember" name="TwoThousandEighteenMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandNineteenMember" name="TwoThousandNineteenMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandTwentyMember" name="TwoThousandTwentyMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandTwentyOneMember" name="TwoThousandTwentyOneMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandTwentyTwoMember" name="TwoThousandTwentyTwoMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandTwentyThreeMember" name="TwoThousandTwentyThreeMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandTwentyFiveMember" name="TwoThousandTwentyFiveMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandThirtyFiveMember" name="TwoThousandThirtyFiveMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandThirtyNineMember" name="TwoThousandThirtyNineMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandFortyFiveMember" name="TwoThousandFortyFiveMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandTwentySixMember" name="TwoThousandTwentySixMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_MultiDrawTermLoanFacilityMember" name="MultiDrawTermLoanFacilityMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandAndEighteenCreditAgreementMember" name="TwoThousandAndEighteenCreditAgreementMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_MultiCurrencyRevolvingFacilityMember" name="MultiCurrencyRevolvingFacilityMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandSixteenCreditAgreementMember" name="TwoThousandSixteenCreditAgreementMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TermLoanThroughJuneTwentyFourTwoThousandSeventeenMember" name="TermLoanThroughJuneTwentyFourTwoThousandSeventeenMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ThereafterTermLoanMember" name="ThereafterTermLoanMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TwoThousandFourteenCreditAgreementMember" name="TwoThousandFourteenCreditAgreementMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_FourPointFourFiveZeroPercentageSeniorNotesDueTwoThousandFortyFiveMember" name="FourPointFourFiveZeroPercentageSeniorNotesDueTwoThousandFortyFiveMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_JapanTermLoanAAndJapanTermLoanBMember" name="JapanTermLoanAAndJapanTermLoanBMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_InterestOnNotesPayableCommencementDate" name="InterestOnNotesPayableCommencementDate" type="xbrli:dateItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_DebtInstrumentAmendedAndRestatedDate" name="DebtInstrumentAmendedAndRestatedDate" type="xbrli:dateItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_DebtInstrumentAmendmentDate" name="DebtInstrumentAmendmentDate" type="xbrli:dateItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_LineOfCreditFacilityCovenantTermsMaximumLeverageRatio" name="LineOfCreditFacilityCovenantTermsMaximumLeverageRatio" type="xbrli:decimalItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_DebtInstrumentRedemptionPeriod" name="DebtInstrumentRedemptionPeriod" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_AvailableUncommittedCreditFacilitiesNet" name="AvailableUncommittedCreditFacilitiesNet" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" />
+  <element id="zbh_OtherComprehensiveIncomeLossReclassificationAdjustmentFromAOCIToRetainedEarnings" name="OtherComprehensiveIncomeLossReclassificationAdjustmentFromAOCIToRetainedEarnings" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_AmountsReclassifiedOutOfAccumulatedOtherComprehensiveIncomeLossAbstract" name="AmountsReclassifiedOutOfAccumulatedOtherComprehensiveIncomeLossAbstract" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_OtherComprehensiveIncomeLossLineItems" name="OtherComprehensiveIncomeLossLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_OtherComprehensiveIncomeLossTable" name="OtherComprehensiveIncomeLossTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ForwardStartingInterestRateSwapsMember" name="ForwardStartingInterestRateSwapsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_PriorServiceCostMember" name="PriorServiceCostMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_UnrecognizedActuarialLossMember" name="UnrecognizedActuarialLossMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TermLoanBMember" name="TermLoanBMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TerminatedCrossCurrencyInterestRateSwapMember" name="TerminatedCrossCurrencyInterestRateSwapMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_CarryingAmountOfHedgedLiabilitiesMember" name="CarryingAmountOfHedgedLiabilitiesMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_CumulativeFairValueHedgingAdjustmentCarryingAmountOfHedgedLiabilitiesMember" name="CumulativeFairValueHedgingAdjustmentCarryingAmountOfHedgedLiabilitiesMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ForwardStartingInterestRateSwapCashFlowHedgeRemainingToBeAmortized" name="ForwardStartingInterestRateSwapCashFlowHedgeRemainingToBeAmortized" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_PercentageOfDebtDesignatedAsNetInvestmentHedges" name="PercentageOfDebtDesignatedAsNetInvestmentHedges" type="num:percentItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_DerivativeTerminatedNotionalAmount" name="DerivativeTerminatedNotionalAmount" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_InterestExpenseNetMember" name="InterestExpenseNetMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_OtherExpenseNetMember" name="OtherExpenseNetMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_FairValueOfOutstandingDerivativeInstrumentsNetUnrealizedGainLossDeferredInOtherComprehensiveIncome" name="FairValueOfOutstandingDerivativeInstrumentsNetUnrealizedGainLossDeferredInOtherComprehensiveIncome" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_FairValueOfOutstandingDerivativeInstrumentsUnrealizedGainLossNetOfTaxesExpectedToBeReclassifiedToEarnings" name="FairValueOfOutstandingDerivativeInstrumentsUnrealizedGainLossNetOfTaxesExpectedToBeReclassifiedToEarnings" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_DerivativeIncomeExpenseEffectsOfFairValueCashFlowAndNetInvestmentHedges" name="DerivativeIncomeExpenseEffectsOfFairValueCashFlowAndNetInvestmentHedges" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_DiscontinuedInterestRateSwapsMember" name="DiscontinuedInterestRateSwapsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ScheduleOfExpectedFuturePensionBenefitPaymentLineItems" name="ScheduleOfExpectedFuturePensionBenefitPaymentLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ScheduleOfExpectedFuturePensionBenefitPaymentTable" name="ScheduleOfExpectedFuturePensionBenefitPaymentTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_PensionPlansPostretirementAndOtherEmployeeBenefitsLineItems" name="PensionPlansPostretirementAndOtherEmployeeBenefitsLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_PensionPlansPostretirementAndOtherEmployeeBenefitsTable" name="PensionPlansPostretirementAndOtherEmployeeBenefitsTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_DefinedBenefitPlanExpensesPaid" name="DefinedBenefitPlanExpensesPaid" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_NonTraditionalInvestmentsMember" name="NonTraditionalInvestmentsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_OtherFundsMember" name="OtherFundsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_IntermediateFixedIncomeDebtSecuritiesMember" name="IntermediateFixedIncomeDebtSecuritiesMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_DefinedBenefitPlanOtherInvestmentsMember" name="DefinedBenefitPlanOtherInvestmentsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ScheduleOfFairValuesOfPlanAssetsLineItems" name="ScheduleOfFairValuesOfPlanAssetsLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ScheduleOfFairValuesOfPlanAssetsTable" name="ScheduleOfFairValuesOfPlanAssetsTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_EffectiveIncomeTaxRateReconciliationGlobalIntangibleLowTaxedIncomeTaxRate" name="EffectiveIncomeTaxRateReconciliationGlobalIntangibleLowTaxedIncomeTaxRate" type="num:percentItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_IncomeTaxesDisclosureLineItems" name="IncomeTaxesDisclosureLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_IncomeTaxesDisclosureTable" name="IncomeTaxesDisclosureTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_TaxCutsAndJobsActOf2017ChangeInTaxRateIncomeTaxExpenseBenefit" name="TaxCutsAndJobsActOf2017ChangeInTaxRateIncomeTaxExpenseBenefit" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_TaxCutsAndJobsActOf2017IncomeTaxExpenseBenefit" name="TaxCutsAndJobsActOf2017IncomeTaxExpenseBenefit" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_EffectiveIncomeTaxRateReconciliationTaxCutsAndJobsActTransitionTaxOnAccumulatedForeignEarningsAmount" name="EffectiveIncomeTaxRateReconciliationTaxCutsAndJobsActTransitionTaxOnAccumulatedForeignEarningsAmount" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_TaxCutsAndJobsActChangeInTaxRateDeferredTaxLiabilityIncomeTaxBenefit" name="TaxCutsAndJobsActChangeInTaxRateDeferredTaxLiabilityIncomeTaxBenefit" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_EffectiveIncomeTaxRateReconciliationNonRecurringTransactions" name="EffectiveIncomeTaxRateReconciliationNonRecurringTransactions" type="num:percentItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_EffectiveIncomeTaxReconciliationDomesticTaxReform" name="EffectiveIncomeTaxReconciliationDomesticTaxReform" type="num:percentItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_NetOperatingLossCarryforwardExpirationPeriod" name="NetOperatingLossCarryforwardExpirationPeriod" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_DeferredTaxAssetsTaxCreditCarryforwardsSubjectToExpiration" name="DeferredTaxAssetsTaxCreditCarryforwardsSubjectToExpiration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_TaxCreditCarryforwardsExpirationPeriod" name="TaxCreditCarryforwardsExpirationPeriod" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_CapitalLossCarryforwardExpirationPeriod" name="CapitalLossCarryforwardExpirationPeriod" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_ValuationAllowancesAndReservesCapitalLossCarryforward" name="ValuationAllowancesAndReservesCapitalLossCarryforward" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_TaxCreditCarryforwardValuationAllowanceForPeriod" name="TaxCreditCarryforwardValuationAllowanceForPeriod" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_DeferredTaxAssetsCapitalLossCarryforwardsNotSubjectToExpiration" name="DeferredTaxAssetsCapitalLossCarryforwardsNotSubjectToExpiration" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_UnremittedEarnings" name="UnremittedEarnings" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_ForeignCashAndNotes" name="ForeignCashAndNotes" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_IncomeTaxExpenseRemittingOnEarningsOfForeignEntities" name="IncomeTaxExpenseRemittingOnEarningsOfForeignEntities" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_CapitalLossCarryforwards" name="CapitalLossCarryforwards" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_UnrecognizedTaxBenefitsIncomeTaxPenaltiesAndInterestExpenseIncreaseRelatedToMerger" name="UnrecognizedTaxBenefitsIncomeTaxPenaltiesAndInterestExpenseIncreaseRelatedToMerger" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_ExaminingPeriodForStateIncomeTaxReturns" name="ExaminingPeriodForStateIncomeTaxReturns" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_StateExaminationPeriodAfterNotification" name="StateExaminationPeriodAfterNotification" type="us-types:durationStringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_InventoryStepupAndOtherCharges" name="InventoryStepupAndOtherCharges" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_Litigation" name="Litigation" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_EuropeanUnionMedicalDeviceRegulationCharges" name="EuropeanUnionMedicalDeviceRegulationCharges" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_NetSalesAndOperatingProfitInformationLineItems" name="NetSalesAndOperatingProfitInformationLineItems" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_NetSalesAndOperatingProfitInformationTable" name="NetSalesAndOperatingProfitInformationTable" type="xbrli:stringItemType" substitutionGroup="xbrldt:hypercubeItem" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_OthersCountriesMember" name="OthersCountriesMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_ShareOfRevenueFromIndividualCountryInNetSales" name="ShareOfRevenueFromIndividualCountryInNetSales" type="xbrli:stringItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_CertainClaims" name="CertainClaims" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_DuromCupRelatedClaimsMember" name="DuromCupRelatedClaimsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_BiometMetalOnMetalHipImplantClaimsMember" name="BiometMetalOnMetalHipImplantClaimsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_HeraeusTradeSecretMisappropriationLawsuitsMember" name="HeraeusTradeSecretMisappropriationLawsuitsMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_StrykerCorporationMember" name="StrykerCorporationMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_DeferredProsecutionAgreementMember" name="DeferredProsecutionAgreementMember" type="nonnum:domainItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="true" />
+  <element id="zbh_LossContingencyJuryAwardedDamagesValue" name="LossContingencyJuryAwardedDamagesValue" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="debit" />
+  <element id="zbh_NumberOfPatentInfringements" name="NumberOfPatentInfringements" type="xbrli:integerItemType" substitutionGroup="xbrli:item" xbrli:periodType="instant" nillable="true" abstract="false" />
+  <element id="zbh_LitigationSettlementOutstanding" name="LitigationSettlementOutstanding" type="xbrli:monetaryItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" xbrli:balance="credit" />
+  <element id="zbh_DurationOfAgreement" name="DurationOfAgreement" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+  <element id="zbh_ExtendedTermOfAgreement" name="ExtendedTermOfAgreement" type="xbrli:durationItemType" substitutionGroup="xbrli:item" xbrli:periodType="duration" nillable="true" abstract="false" />
+</schema>

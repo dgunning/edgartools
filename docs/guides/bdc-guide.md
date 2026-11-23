@@ -523,6 +523,13 @@ if result.custom_concept_rate is not None:
     print(f"Computed rate (footnotes):  {result.nonaccrual_rate:.2%}")
 ```
 
+The investment rows follow the footnote links in the filer's XBRL, and those can be looser than the marks in its printed schedule: a filer can link its non-accrual footnote to a loan its schedule does not mark. Nothing in the XBRL tells such a link from a real one. When the filer also tags a non-accrual total at cost or fair value, or a count of non-accrual loans, and the rows disagree with it, `result.warnings` says so:
+
+```python
+for warning in result.warnings:
+    print(warning)
+```
+
 ### Batch Extraction
 
 Extract non-accrual data for all active BDCs at once:

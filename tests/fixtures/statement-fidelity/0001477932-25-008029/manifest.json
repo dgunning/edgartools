@@ -1,0 +1,15 @@
+{
+ "accession": "0001477932-25-008029",
+ "filer": "Scientist Home Future Health Ltd",
+ "form": "10-Q",
+ "filing_date": "2025-11-12",
+ "role": "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited",
+ "page": "R5.htm",
+ "short_name": "CONDENSED CONSOLIDATED STATEMENT OF STOCKHOLDERS EQUITY (Unaudited)",
+ "sic": "2844",
+ "period_of_report": "2025-09-30",
+ "menu_categories": {
+  "http://scientist.com/role/CondensedConsolidatedStatementOfStockholdersEquityUnaudited": "Statements"
+ },
+ "access": "statement_of_equity()"
+}

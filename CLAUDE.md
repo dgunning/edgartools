@@ -68,6 +68,8 @@ bd create --title "..." --type bug --priority P1  # Create issue
 
 **Statuses**: `open`, `in_progress`, `blocked`, `closed`
 
+**Bead IDs are the maintainer's internal tracker.** Never publish a bead identifier (`edgartools-xxxx`), or anything else from the internal workflow, on GitHub: not in issues, PR titles or bodies, review comments, commit messages, or changelog fragments. Refer to the GitHub issue number, or describe the problem in words.
+
 ## Development
 
 | Task | Reference |
@@ -119,7 +121,7 @@ Only parallelize fast tests to avoid SEC rate limits.
 ## Changelog
 
 **Never edit `CHANGELOG.md` in a PR** — concurrent PRs conflict on it. Add a fragment
-`changelog.d/<bead-or-issue-id>.<section>.md` (section: added/changed/fixed/...) with the
+`changelog.d/<issue-number-or-slug>.<section>.md` (section: added/changed/fixed/...) with the
 bullet text; see `changelog.d/README.md`. A bullet is a bold headline plus one or two sentences
 with one measured value, **at most 500 characters** — the root cause goes in the commit and PR.
 Fragments are folded into `[Unreleased]` at release by `scripts/release/assemble_changelog.py`.

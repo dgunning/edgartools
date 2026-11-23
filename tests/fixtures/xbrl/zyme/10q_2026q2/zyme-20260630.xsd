@@ -1,0 +1,427 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!--XBRL Document Created with the Workiva Platform-->
+<!--Copyright 2026 Workiva-->
+<!--r:019ebbf8-0bf5-7898-b29f-e789e21cdc98,g:dad34a4d-e33f-4d93-aa23-4cf272e4291f-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:link="http://www.xbrl.org/2003/linkbase" xmlns:zyme="http://www.zymeworks.com/20260630" xmlns:xbrli="http://www.xbrl.org/2003/instance" xmlns:dtr-types="http://www.xbrl.org/dtr/type/2024-01-31" attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://www.zymeworks.com/20260630">
+  <xs:import namespace="http://fasb.org/srt/2026" schemaLocation="https://xbrl.fasb.org/srt/2026/elts/srt-2026.xsd"/>
+  <xs:import namespace="http://fasb.org/us-gaap/2026" schemaLocation="https://xbrl.fasb.org/us-gaap/2026/elts/us-gaap-2026.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/instance" schemaLocation="http://www.xbrl.org/2003/xbrl-instance-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/2003/linkbase" schemaLocation="http://www.xbrl.org/2003/xbrl-linkbase-2003-12-31.xsd"/>
+  <xs:import namespace="http://www.xbrl.org/dtr/type/2024-01-31" schemaLocation="https://www.xbrl.org/dtr/type/2024-01-31/types.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/currency/2026" schemaLocation="https://xbrl.sec.gov/currency/2026/currency-2026.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/dei/2026" schemaLocation="https://xbrl.sec.gov/dei/2026/dei-2026.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/ecd/2026" schemaLocation="https://xbrl.sec.gov/ecd/2026/ecd-2026.xsd"/>
+  <xs:import namespace="http://xbrl.sec.gov/stpr/2026" schemaLocation="https://xbrl.sec.gov/stpr/2026/stpr-2026.xsd"/>
+  <xs:annotation>
+    <xs:appinfo>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="zyme-20260630_pre.xml" xlink:role="http://www.xbrl.org/2003/role/presentationLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="zyme-20260630_def.xml" xlink:role="http://www.xbrl.org/2003/role/definitionLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="zyme-20260630_lab.xml" xlink:role="http://www.xbrl.org/2003/role/labelLinkbaseRef" xlink:type="simple"/>
+      <link:linkbaseRef xmlns:xlink="http://www.w3.org/1999/xlink" xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase" xlink:href="zyme-20260630_cal.xml" xlink:role="http://www.xbrl.org/2003/role/calculationLinkbaseRef" xlink:type="simple"/>
+      <link:roleType id="CoverPage" roleURI="http://www.zymeworks.com/role/CoverPage">
+        <link:definition>0000001 - Document - Cover Page</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CondensedConsolidatedBalanceSheets" roleURI="http://www.zymeworks.com/role/CondensedConsolidatedBalanceSheets">
+        <link:definition>9952151 - Statement - Condensed Consolidated Balance Sheets</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CondensedConsolidatedBalanceSheetsParenthetical" roleURI="http://www.zymeworks.com/role/CondensedConsolidatedBalanceSheetsParenthetical">
+        <link:definition>9952152 - Statement - Condensed Consolidated Balance Sheets (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CondensedConsolidatedStatementsofLossIncomeandComprehensiveLossIncome" roleURI="http://www.zymeworks.com/role/CondensedConsolidatedStatementsofLossIncomeandComprehensiveLossIncome">
+        <link:definition>9952153 - Statement - Condensed Consolidated Statements of (Loss) Income and Comprehensive (Loss) Income</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CondensedConsolidatedStatementsofLossIncomeandComprehensiveLossIncomeParenthetical" roleURI="http://www.zymeworks.com/role/CondensedConsolidatedStatementsofLossIncomeandComprehensiveLossIncomeParenthetical">
+        <link:definition>9952154 - Statement - Condensed Consolidated Statements of (Loss) Income and Comprehensive (Loss) Income (Parenthetical)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CondensedConsolidatedStatementofChangesinStockholdersEquity" roleURI="http://www.zymeworks.com/role/CondensedConsolidatedStatementofChangesinStockholdersEquity">
+        <link:definition>9952155 - Statement - Condensed Consolidated Statement of Changes in Stockholders' Equity</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CondensedConsolidatedStatementsofCashFlows" roleURI="http://www.zymeworks.com/role/CondensedConsolidatedStatementsofCashFlows">
+        <link:definition>9952156 - Statement - Condensed Consolidated Statements of Cash Flows</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NatureofOperations" roleURI="http://www.zymeworks.com/role/NatureofOperations">
+        <link:definition>9952157 - Disclosure - Nature of Operations</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPolicies" roleURI="http://www.zymeworks.com/role/SummaryofSignificantAccountingPolicies">
+        <link:definition>9952158 - Disclosure - Summary of Significant Accounting Policies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RecentAccountingPronouncements" roleURI="http://www.zymeworks.com/role/RecentAccountingPronouncements">
+        <link:definition>9952159 - Disclosure - Recent Accounting Pronouncements</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetLossPerShare" roleURI="http://www.zymeworks.com/role/NetLossPerShare">
+        <link:definition>9952160 - Disclosure - Net Loss Per Share</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashCashEquivalentsandMarketableSecurities" roleURI="http://www.zymeworks.com/role/CashCashEquivalentsandMarketableSecurities">
+        <link:definition>9952161 - Disclosure - Cash, Cash Equivalents and Marketable Securities</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Goodwill" roleURI="http://www.zymeworks.com/role/Goodwill">
+        <link:definition>9952162 - Disclosure - Goodwill</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RoyaltyRevenueMonetization" roleURI="http://www.zymeworks.com/role/RoyaltyRevenueMonetization">
+        <link:definition>9952163 - Disclosure - Royalty Revenue Monetization</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquity" roleURI="http://www.zymeworks.com/role/StockholdersEquity">
+        <link:definition>9952164 - Disclosure - Stockholders' Equity</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ResearchCollaborationandLicensingAgreements" roleURI="http://www.zymeworks.com/role/ResearchCollaborationandLicensingAgreements">
+        <link:definition>9952165 - Disclosure - Research, Collaboration and Licensing Agreements</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="Leases" roleURI="http://www.zymeworks.com/role/Leases">
+        <link:definition>9952166 - Disclosure - Leases</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingencies" roleURI="http://www.zymeworks.com/role/CommitmentsandContingencies">
+        <link:definition>9952167 - Disclosure - Commitments and Contingencies</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BusinessSegments" roleURI="http://www.zymeworks.com/role/BusinessSegments">
+        <link:definition>9952168 - Disclosure - Business Segments</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesPolicies" roleURI="http://www.zymeworks.com/role/SummaryofSignificantAccountingPoliciesPolicies">
+        <link:definition>9955511 - Disclosure - Summary of Significant Accounting Policies (Policies)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetLossPerShareTables" roleURI="http://www.zymeworks.com/role/NetLossPerShareTables">
+        <link:definition>9955512 - Disclosure - Net Loss Per Share (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashCashEquivalentsandMarketableSecuritiesTables" roleURI="http://www.zymeworks.com/role/CashCashEquivalentsandMarketableSecuritiesTables">
+        <link:definition>9955513 - Disclosure - Cash, Cash Equivalents and Marketable Securities (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RoyaltyRevenueMonetizationTables" roleURI="http://www.zymeworks.com/role/RoyaltyRevenueMonetizationTables">
+        <link:definition>9955514 - Disclosure - Royalty Revenue Monetization (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityTables" roleURI="http://www.zymeworks.com/role/StockholdersEquityTables">
+        <link:definition>9955515 - Disclosure - Stockholders' Equity (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ResearchCollaborationandLicensingAgreementsTables" roleURI="http://www.zymeworks.com/role/ResearchCollaborationandLicensingAgreementsTables">
+        <link:definition>9955516 - Disclosure - Research, Collaboration and Licensing Agreements (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesTables" roleURI="http://www.zymeworks.com/role/LeasesTables">
+        <link:definition>9955517 - Disclosure - Leases (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BusinessSegmentsTables" roleURI="http://www.zymeworks.com/role/BusinessSegmentsTables">
+        <link:definition>9955518 - Disclosure - Business Segments (Tables)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NatureofOperationsDetails" roleURI="http://www.zymeworks.com/role/NatureofOperationsDetails">
+        <link:definition>9955519 - Disclosure - Nature of Operations (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="SummaryofSignificantAccountingPoliciesDetails" roleURI="http://www.zymeworks.com/role/SummaryofSignificantAccountingPoliciesDetails">
+        <link:definition>9955520 - Disclosure - Summary of Significant Accounting Policies (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="NetLossPerShareDetails" roleURI="http://www.zymeworks.com/role/NetLossPerShareDetails">
+        <link:definition>9955521 - Disclosure - Net Loss Per Share (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashCashEquivalentsandMarketableSecuritiesScheduleofMarketableSecuritiesDetails" roleURI="http://www.zymeworks.com/role/CashCashEquivalentsandMarketableSecuritiesScheduleofMarketableSecuritiesDetails">
+        <link:definition>9955522 - Disclosure - Cash, Cash Equivalents and Marketable Securities - Schedule of Marketable Securities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CashCashEquivalentsandMarketableSecuritiesScheduleofCashCashEquivalentsandMarketableSecuritiesMeasuredatFairValueonaRecurringBasisDetails" roleURI="http://www.zymeworks.com/role/CashCashEquivalentsandMarketableSecuritiesScheduleofCashCashEquivalentsandMarketableSecuritiesMeasuredatFairValueonaRecurringBasisDetails">
+        <link:definition>9955523 - Disclosure - Cash, Cash Equivalents and Marketable Securities - Schedule of Cash, Cash Equivalents and Marketable Securities Measured at Fair Value on a Recurring Basis (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="GoodwillDetails" roleURI="http://www.zymeworks.com/role/GoodwillDetails">
+        <link:definition>9955524 - Disclosure - Goodwill (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RoyaltyRevenueMonetizationNarrativeDetails" roleURI="http://www.zymeworks.com/role/RoyaltyRevenueMonetizationNarrativeDetails">
+        <link:definition>9955525 - Disclosure - Royalty Revenue Monetization - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="RoyaltyRevenueMonetizationScheduleofLiabilityRelatedtoSaleofFutureRoyaltiesDetails" roleURI="http://www.zymeworks.com/role/RoyaltyRevenueMonetizationScheduleofLiabilityRelatedtoSaleofFutureRoyaltiesDetails">
+        <link:definition>9955526 - Disclosure - Royalty Revenue Monetization - Schedule of Liability Related to Sale of Future Royalties (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityNarrativeDetails" roleURI="http://www.zymeworks.com/role/StockholdersEquityNarrativeDetails">
+        <link:definition>9955527 - Disclosure - Stockholders' Equity - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityScheduleofRepurchaseAgreementsDetails" roleURI="http://www.zymeworks.com/role/StockholdersEquityScheduleofRepurchaseAgreementsDetails">
+        <link:definition>9955528 - Disclosure - Stockholders' Equity - Schedule of Repurchase Agreements (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityScheduleofRSUandPSUActivityDetails" roleURI="http://www.zymeworks.com/role/StockholdersEquityScheduleofRSUandPSUActivityDetails">
+        <link:definition>9955529 - Disclosure - Stockholders' Equity - Schedule of RSU and PSU Activity (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityScheduleofStockOptionsGrantedDetails" roleURI="http://www.zymeworks.com/role/StockholdersEquityScheduleofStockOptionsGrantedDetails">
+        <link:definition>9955530 - Disclosure - Stockholders' Equity - Schedule of Stock Options Granted (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityScheduleofStockBasedCompensationExpenseforEquityClassifiedInstrumentsDetails" roleURI="http://www.zymeworks.com/role/StockholdersEquityScheduleofStockBasedCompensationExpenseforEquityClassifiedInstrumentsDetails">
+        <link:definition>9955531 - Disclosure - Stockholders' Equity - Schedule of Stock-Based Compensation Expense for Equity Classified Instruments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityScheduleofStockBasedCompensationExpenseforEquityClassifiedInstrumentsDetails_1" roleURI="http://www.zymeworks.com/role/StockholdersEquityScheduleofStockBasedCompensationExpenseforEquityClassifiedInstrumentsDetails_1">
+        <link:definition>9955531 - Disclosure - Stockholders' Equity - Schedule of Stock-Based Compensation Expense for Equity Classified Instruments (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="StockholdersEquityScheduleofEstimatedFairValueofStockOptionsGrantedandWeightedAverageOptionPricingAssumptionsDetails" roleURI="http://www.zymeworks.com/role/StockholdersEquityScheduleofEstimatedFairValueofStockOptionsGrantedandWeightedAverageOptionPricingAssumptionsDetails">
+        <link:definition>9955532 - Disclosure - Stockholders' Equity - Schedule of Estimated Fair Value of Stock Options Granted and Weighted-Average Option Pricing Assumptions (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ResearchCollaborationandLicensingAgreementsScheduleofRevenueRecognizedfromStrategicPartnershipsDetails" roleURI="http://www.zymeworks.com/role/ResearchCollaborationandLicensingAgreementsScheduleofRevenueRecognizedfromStrategicPartnershipsDetails">
+        <link:definition>9955533 - Disclosure - Research, Collaboration and Licensing Agreements - Schedule of Revenue Recognized from Strategic Partnerships (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="ResearchCollaborationandLicensingAgreementsNarrativeDetails" roleURI="http://www.zymeworks.com/role/ResearchCollaborationandLicensingAgreementsNarrativeDetails">
+        <link:definition>9955534 - Disclosure - Research, Collaboration and Licensing Agreements - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesNarrativeDetails" roleURI="http://www.zymeworks.com/role/LeasesNarrativeDetails">
+        <link:definition>9955535 - Disclosure - Leases - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesScheduleofBalanceSheetClassificationofLeaseLiabilitiesDetails" roleURI="http://www.zymeworks.com/role/LeasesScheduleofBalanceSheetClassificationofLeaseLiabilitiesDetails">
+        <link:definition>9955536 - Disclosure - Leases - Schedule of Balance Sheet Classification of Lease Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesScheduleofMaturitiesofOperatingLeaseLiabilitiesDetails" roleURI="http://www.zymeworks.com/role/LeasesScheduleofMaturitiesofOperatingLeaseLiabilitiesDetails">
+        <link:definition>9955537 - Disclosure - Leases - Schedule of Maturities of Operating Lease Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesScheduleofMaturitiesofOperatingLeaseLiabilitiesDetails_1" roleURI="http://www.zymeworks.com/role/LeasesScheduleofMaturitiesofOperatingLeaseLiabilitiesDetails_1">
+        <link:definition>9955537 - Disclosure - Leases - Schedule of Maturities of Operating Lease Liabilities (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="LeasesScheduleofCostComponentsofOperatingLeasesDetails" roleURI="http://www.zymeworks.com/role/LeasesScheduleofCostComponentsofOperatingLeasesDetails">
+        <link:definition>9955538 - Disclosure - Leases - Schedule of Cost Components of Operating Leases (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="CommitmentsandContingenciesDetails" roleURI="http://www.zymeworks.com/role/CommitmentsandContingenciesDetails">
+        <link:definition>9955539 - Disclosure - Commitments and Contingencies (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BusinessSegmentsNarrativeDetails" roleURI="http://www.zymeworks.com/role/BusinessSegmentsNarrativeDetails">
+        <link:definition>9955540 - Disclosure - Business Segments - Narrative (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+      <link:roleType id="BusinessSegmentsScheduleofSegmentReportingInformationbySegmentDetails" roleURI="http://www.zymeworks.com/role/BusinessSegmentsScheduleofSegmentReportingInformationbySegmentDetails">
+        <link:definition>9955541 - Disclosure - Business Segments - Schedule of Segment Reporting Information, by Segment (Details)</link:definition>
+        <link:usedOn>link:presentationLink</link:usedOn>
+        <link:usedOn>link:calculationLink</link:usedOn>
+        <link:usedOn>link:definitionLink</link:usedOn>
+      </link:roleType>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element id="zyme_AccruedSaleOfFutureRoyalties" abstract="false" name="AccruedSaleOfFutureRoyalties" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_ExchangeableSharesValueIssued" abstract="false" name="ExchangeableSharesValueIssued" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_ExchangeableSharesIssued" abstract="false" name="ExchangeableSharesIssued" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="zyme_ExchangeableSharesOutstanding" abstract="false" name="ExchangeableSharesOutstanding" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="zyme_InterestExpenseAndAmortizationRelatedToSaleOfFutureRoyalties" abstract="false" name="InterestExpenseAndAmortizationRelatedToSaleOfFutureRoyalties" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_ExchangeableSharesMember" abstract="true" name="ExchangeableSharesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_NonCashRoyaltyRevenueRelatedToSaleOfRoyalties" abstract="false" name="NonCashRoyaltyRevenueRelatedToSaleOfRoyalties" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_NonCashInterestExpenseRelatedToSaleOfRoyalties" abstract="false" name="NonCashInterestExpenseRelatedToSaleOfRoyalties" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_IncreaseDecreaseInOperatingLeaseLiabilities" abstract="false" name="IncreaseDecreaseInOperatingLeaseLiabilities" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_ProceedsFromIssuanceOfSharesUnderEmployeeSharePurchasePlan" abstract="false" name="ProceedsFromIssuanceOfSharesUnderEmployeeSharePurchasePlan" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_ProceedsFromSaleOfFutureRoyalties" abstract="false" name="ProceedsFromSaleOfFutureRoyalties" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_PaymentsForTransactionCostsRelatedToSaleOfFutureRoyalties" abstract="false" name="PaymentsForTransactionCostsRelatedToSaleOfFutureRoyalties" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_IssuanceCostsRelatedToSaleOfFutureRoyaltiesNotYetPaid" abstract="false" name="IssuanceCostsRelatedToSaleOfFutureRoyaltiesNotYetPaid" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_RoyaltyRevenueMonetizationTextBlock" abstract="false" name="RoyaltyRevenueMonetizationTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="zyme_LicenseAgreementsResearchCollaborationsAndDevelopmentAgreementsAbstract" abstract="true" name="LicenseAgreementsResearchCollaborationsAndDevelopmentAgreementsAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="zyme_LiabilityRelatedToSaleOfFutureRoyaltiesPolicyTextBlock" abstract="false" name="LiabilityRelatedToSaleOfFutureRoyaltiesPolicyTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="zyme_ScheduleOfLeaseLiabilitiesClassificationTableTextBlock" abstract="false" name="ScheduleOfLeaseLiabilitiesClassificationTableTextBlock" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:textBlockItemType"/>
+  <xs:element id="zyme_TheravanceBiopharmaIncMember" abstract="true" name="TheravanceBiopharmaIncMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_SeniorSecuredNotesMember" abstract="true" name="SeniorSecuredNotesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_BusinessCombinationPercentageOfSharesRequiredToApproveAcquisition" abstract="false" name="BusinessCombinationPercentageOfSharesRequiredToApproveAcquisition" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="zyme_JohnsonJohnsonInnovativeMedicineMember" abstract="true" name="JohnsonJohnsonInnovativeMedicineMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_JazzMember" abstract="true" name="JazzMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_ShareBasedCompensationArrangementByShareBasedPaymentAwardPerformancePeriod" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardPerformancePeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="zyme_ShareBasedCompensationArrangementByShareBasedPaymentAwardServiceConditionPeriod" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardServiceConditionPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="zyme_ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingRightsAbsoluteTotalShareholderReturnPercentage" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingRightsAbsoluteTotalShareholderReturnPercentage" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="zyme_ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingRightsRelativeTotalShareholderReturnPercentage" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardAwardVestingRightsRelativeTotalShareholderReturnPercentage" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="zyme_FairValueOptionAdjustmentForChangeInFairValueOfLiabilityClassifiedStockOptions" abstract="false" name="FairValueOptionAdjustmentForChangeInFairValueOfLiabilityClassifiedStockOptions" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_IncrementalCommonSharesAttributableToDilutiveEffectOfShareBasedPaymentArrangementsLiabilityClassified" abstract="false" name="IncrementalCommonSharesAttributableToDilutiveEffectOfShareBasedPaymentArrangementsLiabilityClassified" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="zyme_DebtSecuritiesAvailableForSaleFiscalYearMaturityYearOneAbstract" abstract="true" name="DebtSecuritiesAvailableForSaleFiscalYearMaturityYearOneAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="zyme_DebtSecuritiesAvailableForSaleUnrealizedGainLossMaturityAllocatedAndSingleMaturityDateYearOne" abstract="false" name="DebtSecuritiesAvailableForSaleUnrealizedGainLossMaturityAllocatedAndSingleMaturityDateYearOne" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_DebtSecuritiesAvailableForSaleFiscalYearMaturityYearOneThroughThreeAbstract" abstract="true" name="DebtSecuritiesAvailableForSaleFiscalYearMaturityYearOneThroughThreeAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="zyme_DebtSecuritiesAvailableForSaleAmortizedCostMaturityAllocatedAndSingleMaturityDateAfterYearOneThroughThree" abstract="false" name="DebtSecuritiesAvailableForSaleAmortizedCostMaturityAllocatedAndSingleMaturityDateAfterYearOneThroughThree" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_DebtSecuritiesAvailableForSaleUnrealizedGainLossMaturityAllocatedAndSingleMaturityDateAfterYearOneThroughThree" abstract="false" name="DebtSecuritiesAvailableForSaleUnrealizedGainLossMaturityAllocatedAndSingleMaturityDateAfterYearOneThroughThree" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_DebtSecuritiesAvailableForSaleFairValueMaturityAllocatedAndSingleMaturityDateAfterYearOneThroughThree" abstract="false" name="DebtSecuritiesAvailableForSaleFairValueMaturityAllocatedAndSingleMaturityDateAfterYearOneThroughThree" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_DebtSecuritiesAndEquitySecuritiesWithoutReadilyDeterminableFairValueCost" abstract="false" name="DebtSecuritiesAndEquitySecuritiesWithoutReadilyDeterminableFairValueCost" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_DebtSecuritiesAvailableForSaleUnrealizedGainLossMaturityAllocatedAndSingleMaturityDateAfterYearOneThroughFour" abstract="false" name="DebtSecuritiesAvailableForSaleUnrealizedGainLossMaturityAllocatedAndSingleMaturityDateAfterYearOneThroughFour" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_DebtSecuritiesAndEquitySecuritiesWithoutReadilyDeterminableFairValue" abstract="false" name="DebtSecuritiesAndEquitySecuritiesWithoutReadilyDeterminableFairValue" nillable="true" xbrli:periodType="instant" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_ZymeworksRoyaltyLimitedPartnershipMember" abstract="true" name="ZymeworksRoyaltyLimitedPartnershipMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_RoyaltyPharmaMember" abstract="true" name="RoyaltyPharmaMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_JazzAndBeOneMember" abstract="true" name="JazzAndBeOneMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_LicenseAndCollaborationAgreementMember" abstract="true" name="LicenseAndCollaborationAgreementMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_NonRecourseSecuredTermLoanMember" abstract="true" name="NonRecourseSecuredTermLoanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_AmountDueIfPaidAtMaturityMember" abstract="true" name="AmountDueIfPaidAtMaturityMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_AmountDueIfPaidOnOrBeforeDecember312033Member" abstract="true" name="AmountDueIfPaidOnOrBeforeDecember312033Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_FutureRoyaltyPercentageSold" abstract="false" name="FutureRoyaltyPercentageSold" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="zyme_FutureRoyaltyPercentageNotToExceedThresholdPercentageOfLoanPayable" abstract="false" name="FutureRoyaltyPercentageNotToExceedThresholdPercentageOfLoanPayable" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="zyme_RoyaltyPercentageRetained" abstract="false" name="RoyaltyPercentageRetained" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="dtr-types:percentItemType"/>
+  <xs:element id="zyme_SaleOfFutureRoyaltiesIssuanceCosts" abstract="false" name="SaleOfFutureRoyaltiesIssuanceCosts" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_RoyaltyPayments" abstract="false" name="RoyaltyPayments" nillable="true" xbrli:periodType="duration" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_InterestExpenseRelatedToSaleOfFutureRoyalties" abstract="false" name="InterestExpenseRelatedToSaleOfFutureRoyalties" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_AmortizationOfIssuanceCostsRelatedToSaleOfFutureRoyalties" abstract="false" name="AmortizationOfIssuanceCostsRelatedToSaleOfFutureRoyalties" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_ZymeworksBCIncMember" abstract="true" name="ZymeworksBCIncMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_RepurchaseProgram2024Member" abstract="true" name="RepurchaseProgram2024Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_RepurchaseProgram2025Member" abstract="true" name="RepurchaseProgram2025Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_RepurchaseProgram2026Member" abstract="true" name="RepurchaseProgram2026Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_RepurchaseProgram2025And2026Member" abstract="true" name="RepurchaseProgram2025And2026Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_InducementPlanMember" abstract="true" name="InducementPlanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_AllClassesOfStockSharesAuthorized" abstract="false" name="AllClassesOfStockSharesAuthorized" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="zyme_RedomicileTransactionNumberOfSharesIssued" abstract="false" name="RedomicileTransactionNumberOfSharesIssued" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="zyme_TemporaryEquityStockIssuedDuringPeriodSharesNewIssues" abstract="false" name="TemporaryEquityStockIssuedDuringPeriodSharesNewIssues" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:sharesItemType"/>
+  <xs:element id="zyme_ShareRepurchaseProgramCommissionExpense" abstract="false" name="ShareRepurchaseProgramCommissionExpense" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_TreasuryStockPayable" abstract="false" name="TreasuryStockPayable" nillable="true" xbrli:periodType="instant" xbrli:balance="credit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_ShareBasedCompensationArrangementByShareBasedPaymentAwardExercisablePeriod" abstract="false" name="ShareBasedCompensationArrangementByShareBasedPaymentAwardExercisablePeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="zyme_ShareBasedCompensationByShareBasedPaymentAwardUnamortizedCompensationExpense" abstract="false" name="ShareBasedCompensationByShareBasedPaymentAwardUnamortizedCompensationExpense" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_CADDollarsUnderTheNewStockOptionPlanMember" abstract="true" name="CADDollarsUnderTheNewStockOptionPlanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_USDollarsUnderTheNewStockOptionPlanMember" abstract="true" name="USDollarsUnderTheNewStockOptionPlanMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_LiabilityClassifiedStockOptionsMember" abstract="true" name="LiabilityClassifiedStockOptionsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_BeOneMedicinesLtd.Member" abstract="true" name="BeOneMedicinesLtd.Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_BristolMyersSquibbCompanyMember" abstract="true" name="BristolMyersSquibbCompanyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_GSKMember" abstract="true" name="GSKMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_DaiichiSankyoCoLtdMember" abstract="true" name="DaiichiSankyoCoLtdMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_ResearchSupportPaymentsAndOtherServiceMember" abstract="true" name="ResearchSupportPaymentsAndOtherServiceMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_DrugSupplyForOngoingStudiesMember" abstract="true" name="DrugSupplyForOngoingStudiesMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_DrugSupplyMember" abstract="true" name="DrugSupplyMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_MilestoneRevenueMember" abstract="true" name="MilestoneRevenueMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_RecognitionOfDeferredRevenueMember" abstract="true" name="RecognitionOfDeferredRevenueMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_OptionExerciseFeeMember" abstract="true" name="OptionExerciseFeeMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_LesseeOperatingLeaseNumberOfRenewalOptions" abstract="false" name="LesseeOperatingLeaseNumberOfRenewalOptions" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="zyme_WeightedAverageRemainingLeaseTermAbstract" abstract="true" name="WeightedAverageRemainingLeaseTermAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="zyme_WeightedAverageDiscountRateAbstract" abstract="true" name="WeightedAverageDiscountRateAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+  <xs:element id="zyme_BusinessCombinationContingentConsiderationNumberOfExtensionPeriods" abstract="false" name="BusinessCombinationContingentConsiderationNumberOfExtensionPeriods" nillable="true" xbrli:periodType="instant" substitutionGroup="xbrli:item" type="xbrli:integerItemType"/>
+  <xs:element id="zyme_BusinessCombinationContingentConsiderationExtensionPeriod" abstract="false" name="BusinessCombinationContingentConsiderationExtensionPeriod" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:durationItemType"/>
+  <xs:element id="zyme_BusinessCombinationReverseTerminationFeeAmount" abstract="false" name="BusinessCombinationReverseTerminationFeeAmount" nillable="true" xbrli:periodType="duration" xbrli:balance="debit" substitutionGroup="xbrli:item" type="xbrli:monetaryItemType"/>
+  <xs:element id="zyme_ReportableSegmentMember" abstract="true" name="ReportableSegmentMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_ZymeworksZanidatamabIncMember" abstract="true" name="ZymeworksZanidatamabIncMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_ZW171Member" abstract="true" name="ZW171Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_ZW191Member" abstract="true" name="ZW191Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_ZW220Member" abstract="true" name="ZW220Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_ZW251Member" abstract="true" name="ZW251Member" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_OtherPreclinicalAndResearchProgramsMember" abstract="true" name="OtherPreclinicalAndResearchProgramsMember" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="dtr-types:domainItemType"/>
+  <xs:element id="zyme_SegmentExpensesAbstract" abstract="true" name="SegmentExpensesAbstract" nillable="true" xbrli:periodType="duration" substitutionGroup="xbrli:item" type="xbrli:stringItemType"/>
+</xs:schema>
