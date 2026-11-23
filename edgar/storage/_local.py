@@ -1,13 +1,11 @@
 import os
 import re
-from collections import defaultdict
 from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from contextlib import closing
 from datetime import date, datetime, timedelta
 from itertools import islice
 from operator import index
 from pathlib import Path
-from threading import Event
 from typing import TYPE_CHECKING, List, Optional, Union
 
 if TYPE_CHECKING:
@@ -350,6 +348,7 @@ def download_filings(filing_date: Optional[str] = None,
     With ``filings``, only those filings are downloaded. By default each one is
     fetched as its own full submission file, the same file ``Filing.sgml()`` reads
     from SEC, so a 10-K costs tens of MB rather than its day's feed file.
+    Repeated accession numbers are processed once per call, even when overwriting.
     ``source='feed'`` downloads the feed file for each filing's date instead and keeps
     only the requested filings from it; that downloads far more, and is only worth it
     when the filings make up a large share of the days they were filed on.
@@ -560,6 +559,15 @@ def _download_filing_submissions(filings: 'Filings',
     Each one goes to <data_directory>/<YYYYMMDD of its filing date>/<accession>.nc,
     where the local readers look first. Returns the number of filings stored.
     """
+    filings_by_accession = {}
+    for filing in filings:
+        filings_by_accession.setdefault(filing.accession_no, filing)
+
+    total_filings = len(filings_by_accession)
+    duplicate_count = len(filings) - total_filings
+    if duplicate_count:
+        log.info('Ignoring %d duplicate accession entries.', duplicate_count)
+
     def download_one(filing):
         return _download_single_submission(
             filing,
@@ -570,34 +578,19 @@ def _download_filing_submissions(filings: 'Filings',
         )
 
     def download_results():
+        unique_filings = iter(filings_by_accession.values())
         if max_workers == 1:
-            for filing in filings:
+            for filing in unique_filings:
                 yield download_one(filing)
             return
 
-        # Workers for the same accession would collide on the .part file.
-        filings_by_accession = defaultdict(list)
-        for filing in filings:
-            filings_by_accession[filing.accession_no].append(filing)
-
-        stop_requested = Event()
-
-        def download_group(group):
-            results = []
-            for filing in group:
-                if stop_requested.is_set():
-                    break
-                results.append(download_one(filing))
-            return results
-
-        groups = iter(filings_by_accession.values())
         pool = ThreadPoolExecutor(max_workers=max_workers)
         in_flight = set()
         try:
             while True:
                 available_slots = max_workers - len(in_flight)
-                for group in islice(groups, available_slots):
-                    in_flight.add(pool.submit(download_group, group))
+                for filing in islice(unique_filings, available_slots):
+                    in_flight.add(pool.submit(download_one, filing))
 
                 if not in_flight:
                     break
@@ -605,9 +598,8 @@ def _download_filing_submissions(filings: 'Filings',
                 completed, in_flight = wait(in_flight, return_when=FIRST_COMPLETED)
                 # Check every completed result before submitting more work.
                 for future in completed:
-                    yield from future.result()
+                    yield future.result()
         finally:
-            stop_requested.set()
             pool.shutdown(cancel_futures=True)
 
     stored = skipped = 0
@@ -615,7 +607,7 @@ def _download_filing_submissions(filings: 'Filings',
     try:
         # Run the downloader's cleanup even if progress handling is interrupted.
         with closing(download_results()) as results:
-            for outcome, accession in tqdm(results, desc='Downloading filing(s)', total=len(filings),
+            for outcome, accession in tqdm(results, desc='Downloading filing(s)', total=total_filings,
                                            disable=disable_progress):
                 if outcome == "stored":
                     stored += 1
@@ -625,7 +617,7 @@ def _download_filing_submissions(filings: 'Filings',
                     not_found.append(accession)
     finally:
         if not_found:
-            log.warning('%d of %d filings were not found at SEC: %s', len(not_found), len(filings),
+            log.warning('%d of %d filings were not found at SEC: %s', len(not_found), total_filings,
                         ', '.join(not_found[:10]) + (' ...' if len(not_found) > 10 else ''))
 
     log.info('Download complete. Stored %d filings, skipped %d already stored.', stored, skipped)

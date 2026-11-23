@@ -7,6 +7,7 @@ import pytest
 
 from edgar import httpclient
 from edgar._filings import Filings
+from edgar.storage import download_filings
 
 
 @pytest.fixture
@@ -27,15 +28,16 @@ def test_downloads_known_submissions_with_two_workers(uncached_http_manager, tmp
         ("0000077476-17-000050", date(2017, 10, 13), "pepsicoform8-koctober2017.htm"),
         ("0000077476-26-000042", date(2026, 9, 17), "pep-20260917.htm"),
     ]
+    entries = [*submissions, submissions[0]]
     filings = Filings(pa.table({
-        "accession_number": [accession for accession, _, _ in submissions],
-        "filing_date": [filing_date for _, filing_date, _ in submissions],
-        "cik": [77476, 77476],
-        "form": ["8-K", "8-K"],
-        "company": ["PEPSICO INC", "PEPSICO INC"],
+        "accession_number": [accession for accession, _, _ in entries],
+        "filing_date": [filing_date for _, filing_date, _ in entries],
+        "cik": [77476] * len(entries),
+        "form": ["8-K"] * len(entries),
+        "company": ["PEPSICO INC"] * len(entries),
     }))
-    filings.download(data_directory=str(tmp_path), compress=False, disable_progress=True,
-                     source="submission", max_workers=2)
+    download_filings(filings=filings, data_directory=str(tmp_path), compress=False,
+                     disable_progress=True, overwrite_existing=True, max_workers=2)
 
     for accession, filing_date, primary_document in submissions:
         saved = tmp_path / filing_date.strftime("%Y%m%d") / f"{accession}.nc"

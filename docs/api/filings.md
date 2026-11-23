@@ -443,7 +443,8 @@ def download(
     max_workers: int = 1,
 )
 ```
-Download all filings in collection to local storage.
+Download all filings in the collection to local storage. With `source="submission"`,
+the downloader processes each accession once per call.
 
 **Parameters:**
 - `data_directory`: Download directory (defaults to Edgar data directory)
