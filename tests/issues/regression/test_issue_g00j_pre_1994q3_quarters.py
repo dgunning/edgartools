@@ -11,11 +11,14 @@ https://www.sec.gov/Archives/edgar/full-index/1993/QTR1/form.gz through
 `get_by_accession_number("0000003673-94-000052")` - a real 35-CERT filed by
 Allegheny Power System Inc on 1994-06-30 (1994 Q2) - returned None.
 """
+import gzip
 import itertools
+from pathlib import Path
 
 import pytest
 
 from edgar._filings import available_quarters, expand_quarters
+from edgar.httprequests import decode_content
 
 
 @pytest.mark.fast
@@ -52,11 +55,50 @@ class TestAvailableQuartersCoversPre1994Q3:
         assert expand_quarters(1992, 4) == []
 
 
-@pytest.mark.network
+FULL_INDEX = Path(__file__).parents[2] / "fixtures" / "full_index"
+
+
+def _serve_full_index(requested: list):
+    """A `download_text` stand-in serving the committed SEC quarterly form indexes."""
+
+    def _download_text(url, *args, **kwargs):
+        requested.append(url)
+        prefix = "https://www.sec.gov/Archives/edgar/full-index/"
+        if not url.startswith(prefix):
+            raise AssertionError(f"unexpected request in an offline test: {url}")
+        path = FULL_INDEX / url[len(prefix):]
+        if not path.is_file():
+            raise AssertionError(f"no recorded full-index for {url} (expected {path})")
+        return decode_content(gzip.decompress(path.read_bytes()))
+
+    return _download_text
+
+
+@pytest.fixture
+def recorded_full_index(monkeypatch):
+    """Resolve accessions through the committed 1993-1994 H1 full-index files.
+
+    EFTS only indexes 2001 onward, so for these accessions it always misses and
+    the lookup falls through to the quarterly index scan, which is the path this
+    bug blocked. Stubbing the EFTS miss keeps the test on that path offline.
+    """
+    from edgar import _filings
+
+    requested = []
+    monkeypatch.setattr(_filings, "_filing_from_efts", lambda accession_number: None)
+    monkeypatch.setattr(_filings, "download_text", _serve_full_index(requested))
+    _filings.get_filing_by_accession.cache_clear()
+    _filings._get_cached_filings.cache_clear()
+    yield requested
+    _filings.get_filing_by_accession.cache_clear()
+    _filings._get_cached_filings.cache_clear()
+
+
+@pytest.mark.fast
 class TestPre1994Q3AccessionLookup:
     """End-to-end: a real filing from before the old 1994 Q3 boundary must resolve."""
 
-    def test_1994_q2_filing_resolves(self):
+    def test_1994_q2_filing_resolves(self, recorded_full_index):
         from edgar import get_by_accession_number
 
         # Real 35-CERT filed by Allegheny Power System Inc, 1994 Q2 - previously
@@ -69,8 +111,11 @@ class TestPre1994Q3AccessionLookup:
         assert filing.company == "ALLEGHENY POWER SYSTEM INC"
         assert filing.form == "35-CERT"
         assert str(filing.filing_date) == "1994-06-30"
+        # Q1 is scanned and misses, Q2 holds the filing.
+        assert [u.split("full-index/")[1] for u in recorded_full_index] == [
+            "1994/QTR1/form.gz", "1994/QTR2/form.gz"]
 
-    def test_1993_filing_resolves(self):
+    def test_1993_filing_resolves(self, recorded_full_index):
         from edgar import get_by_accession_number
 
         # Real 24F-2NT filed 1993-09-28, accessioned with a genuine "-93-" year
@@ -83,3 +128,5 @@ class TestPre1994Q3AccessionLookup:
         assert filing.company == "MERRILL LYNCH FL MUN BOND FD OF MERRILL LYNCH MUL ST MUN SER"
         assert filing.form == "24F-2NT"
         assert str(filing.filing_date) == "1993-09-28"
+        assert [u.split("full-index/")[1] for u in recorded_full_index] == [
+            "1993/QTR1/form.gz", "1993/QTR2/form.gz", "1993/QTR3/form.gz"]
