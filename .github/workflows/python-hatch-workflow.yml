@@ -68,10 +68,6 @@ on:
     - cron: '0 7 * * *'
   workflow_dispatch:
 
-# Cancel an in-progress run when a newer commit lands on the same PR. Pushes to
-# main are never cancelled: PRs merge without being up to date with main, so the
-# post-merge run is the only check that the combination works, and back-to-back
-# merges used to cancel it before it finished.
 # Read-only by default. Jobs that write (the red-main `report` job) grant
 # their own job-level permissions; nothing else inherits the token's write scope.
 permissions:
@@ -79,9 +75,22 @@ permissions:
   pull-requests: read
   issues: read
 
+# Only pull-request runs are ever cancelled, by a newer commit on the same PR.
+# Every other run (a push to main, the nightly, a manual dispatch) gets a group
+# of its own, keyed by commit, so nothing can supersede it.
+#
+# `cancel-in-progress: false` was not enough. It protects a RUNNING run, but
+# GitHub keeps at most one PENDING run per group and cancels the older pending
+# one when a newer run queues. With one group for all of main, every merge
+# that arrived while a run was in progress cancelled the merge waiting before
+# it, and that commit got no run at all: 43 of the 100 push runs of
+# python-hatch-workflow.yml from 2026-11-11 to 2026-11-23 were cancelled
+# before any job started (6 of 100 here), among them the merges of #2028 and
+# #2029. PRs merge without being up to date with main, so the post-merge run
+# is the only check that the combination works.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'push' }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # Must pass before any job that runs pytest. vcrpy loads cassettes with

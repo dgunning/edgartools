@@ -71,15 +71,21 @@ permissions:
   pull-requests: read
   issues: read
 
-# Cancel a superseded pull-request run when a newer commit lands on the same PR.
-# Pushes to main are never cancelled, matching python-hatch-workflow.yml: PRs
-# merge without being up to date with main, so the post-merge run is the only
-# check that the combination works. With `true` here, the run for 4f710f58 (the
-# merge that added the Regression gate) was cancelled 15 seconds in by the next
-# merge, and that commit never got a regression run.
+# Only pull-request runs are ever cancelled, by a newer commit on the same PR.
+# Every other run (a push to main, the nightly, a manual dispatch) gets a group
+# of its own, keyed by commit, so nothing can supersede it. Same rule as
+# python-hatch-workflow.yml, which explains the pending-run trap in full.
+#
+# Two ways a push run on main was lost here. With cancel-in-progress true for
+# pushes, the next merge cancelled a RUNNING run: the run for 4f710f58, the
+# merge that added the Regression gate, was cancelled 15 seconds in. With it
+# false, GitHub still cancels a PENDING run when a newer one queues in the same
+# group: 6 of the 100 push runs from 2026-11-11 to 2026-11-23 were cancelled
+# before any job started. PRs merge without being up to date with main, so the
+# post-merge run is the only check that the combination works.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'push' }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # Decides whether this change can affect the regression suite. Only pull
