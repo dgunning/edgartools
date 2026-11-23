@@ -17,6 +17,7 @@ set. One role may legally be split across several extended links, or files.
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+from edgar.core import log
 from edgar.xbrl.core import catalog_entry, extract_element_id
 from edgar.xbrl.models import (
     CalculationArc,
@@ -158,39 +159,63 @@ class CalculationParser(BaseParser):
             self._seen_arcs.add(key)
             candidates.append(candidate)
 
-    def _parse_weight_attribute(self, arc) -> float:
-        """Parse the weight attribute, defaulting to 1.0 when absent or unusable."""
+    def _parse_weight_attribute(self, arc) -> Optional[float]:
+        """The arc's weight, or None when it is missing, unparseable or zero.
+
+        `weight` is required on a calculationArc and MUST NOT be zero (XBRL 2.1
+        section 5.2.5.2.1). There is no default to fall back on: reading a
+        missing weight as 1.0 invented a contribution the filer never stated.
+        """
+        raw = arc.get('weight')
+        if raw is None:
+            return None
         try:
-            return float(arc.get('weight', '1.0'))
-        except (TypeError, ValueError):
-            return 1.0
+            weight = float(raw)
+        except ValueError:
+            return None
+        return weight if weight != 0 else None
 
     def _rebuild_calculation_trees(self) -> None:
         """Rebuild every role's tree from all the relationships seen so far."""
         self.calculation_trees.clear()
 
         for role, candidates in self._candidates_by_role.items():
-            relationships = self._one_per_edge(effective_relationships(candidates))
+            relationships = self._one_per_edge(role, effective_relationships(candidates))
             if relationships:
                 self._build_calculation_tree(role, relationships)
 
     @staticmethod
-    def _one_per_edge(relationships: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _one_per_edge(role: str, relationships: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         """
-        Keep the first effective relationship per arcrole, parent and child.
+        One relationship per arcrole, parent and child, or none where they conflict.
 
         Equivalent relationships are already one by now (XBRL 2.1 section
-        3.5.3.9.7.5). Two that are not, because their weight or order differs,
-        would count the child into the total twice. Relationships with
-        different arcroles belong to different networks and are both kept.
+        3.5.3.9.7.5). Two that differ only in `order` carry the same weight, so
+        the first is kept. Two with different weights are a duplicate
+        calculation relationship (Calculations 1.1 section 4.2,
+        calc11e:duplicateCalculationRelationships): the child's contribution
+        to that total is unknowable, so the edge is dropped with a warning
+        rather than resolved by document order. An arc with a missing, unusable
+        or zero weight is dropped the same way. Relationships with different
+        arcroles belong to different networks and are both kept.
         """
-        seen = set()
-        kept = []
+        edges: Dict[tuple, List[Dict[str, Any]]] = {}
         for rel in relationships:
-            edge = (rel['arcrole'], rel['from_element'], rel['to_element'])
-            if edge not in seen:
-                seen.add(edge)
-                kept.append(rel)
+            if rel['weight'] is None:
+                log.warning("Calculation arc %s -> %s in %s has a missing, unusable or zero "
+                            "weight and is not used.", rel['from_element'], rel['to_element'], role)
+                continue
+            edges.setdefault((rel['arcrole'], rel['from_element'], rel['to_element']), []).append(rel)
+
+        kept = []
+        for (_, parent, child), rels in edges.items():
+            weights = sorted({rel['weight'] for rel in rels})
+            if len(weights) > 1:
+                log.warning("Calculation arcs %s -> %s in %s have conflicting weights %s; "
+                            "the relationship is not used.", parent, child, role, weights)
+                continue
+            kept.append(rels[0])
+        # `edges` was filled in document order, so `kept` is in document order.
         return kept
 
     def _build_calculation_tree(self, role: str, relationships: List[Dict[str, Any]]) -> None:
