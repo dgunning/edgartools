@@ -14,11 +14,81 @@ Solution Applied (Phases 1-3):
 1. Fixed definition linkbase table creation (edgartools-rqxi)
 2. Connected definition linkbase to dimension filtering (edgartools-cf9o)
 3. Enhanced heuristics for incomplete definition linkbase (edgartools-u649)
+
+Offline: each company's XBRL is read from verbatim SEC files committed gzipped under
+tests/fixtures/xbrl_gz/ (accessions and checksums in its README), instead of the
+company's latest 10-K, so the filing under test no longer changes when a company files
+again. For every filing used here, XBRL.from_directory() on those files gives the same
+statements as filing.xbrl() on the live filing (checked 2026-11-22).
+
+Ground truth, read directly from the instance documents (not through edgartools):
+- Boeing 10-K, accession 0001628280-26-004357, FY2025: CostOfGoodsAndServicesSold is
+  reported only on srt:ProductOrServiceAxis, ProductMember 73,761,000,000 and
+  ServiceMember 11,413,000,000 (together 85,174,000,000).
+- CSX 10-K, accession 0000277948-26-000006, at 2025-12-31: PropertyPlantAndEquipmentNet
+  with no dimension is 36,811,000,000; Road and track assets (RoadTotalMember) is
+  27,300,000,000 on PropertyPlantAndEquipmentByTypeAxis.
+- Boston Scientific 10-K, accession 0000885725-26-000010, at 2025-12-31: Goodwill with no
+  dimension is 18,282,000,000; on BusinessAcquisitionAxis, AllOtherMember is 507,000,000.
 """
 
-import pytest
-import pandas as pd
+import gzip
+from pathlib import Path
 from typing import Optional, Tuple
+
+import pandas as pd
+import pytest
+
+from edgar.xbrl import XBRL
+
+pytestmark = pytest.mark.fast
+
+FIXTURES = Path(__file__).parents[2] / "fixtures" / "xbrl_gz"
+
+# ticker -> fixture directory (see tests/fixtures/xbrl_gz/README.md for accessions)
+FILINGS = {
+    "BA": "ba/10k_2025",
+    "BSX": "bsx/10k_2025",
+    "CARR": "carr/10k_2025",
+    "CSX": "csx/10k_2025",
+    "GD": "gd/10k_2025",
+    "HII": "hii/10k_2025",
+    "HLT": "hlt/10k_2025",
+    "IBM": "ibm/10k_2025",
+    "INTU": "intu/10k_2026",
+    "JKHY": "jkhy/10k_2026",
+    "NOC": "noc/10k_2025",
+    "RTX": "rtx/10k_2025",
+    "SLB": "slb/10k_2025",
+    "WDAY": "wday/10k_2026",
+}
+
+
+@pytest.fixture(scope="module")
+def load_xbrl(tmp_path_factory):
+    """Decompress a company's fixture files into a temp directory and parse them, once per module."""
+    cache = {}
+
+    def _load(ticker: str) -> XBRL:
+        if ticker not in cache:
+            src = FIXTURES / FILINGS[ticker]
+            gz_files = sorted(src.glob("*.gz"))
+            assert gz_files, f"No XBRL fixture files in {src}"
+            dest = tmp_path_factory.mktemp(ticker.lower())
+            for gz in gz_files:
+                (dest / gz.name[:-3]).write_bytes(gzip.decompress(gz.read_bytes()))
+            cache[ticker] = XBRL.from_directory(dest)
+        return cache[ticker]
+
+    return _load
+
+
+def test_the_fixtures_are_present():
+    """Absent is not passing: every company has an instance and a schema."""
+    for ticker, rel in FILINGS.items():
+        src = FIXTURES / rel
+        assert list(src.glob("*_htm.xml.gz")), f"{ticker}: no instance in {src}"
+        assert list(src.glob("*.xsd.gz")), f"{ticker}: no schema in {src}"
 
 
 def get_concept_values(df: pd.DataFrame, concept_pattern: str) -> pd.DataFrame:
@@ -35,7 +105,7 @@ def has_dimensional_values(df: pd.DataFrame, concept_pattern: str) -> bool:
     value_cols = [c for c in df.columns if '-' in c and c[:4].isdigit()]
     if not value_cols:
         return False
-    dim_rows = concept_rows[concept_rows['dimension'] == True]
+    dim_rows = concept_rows[concept_rows['dimension'].eq(True)]
     if len(dim_rows) == 0:
         return False
     return dim_rows[value_cols[0]].notna().any()
@@ -58,22 +128,25 @@ def get_face_value_sum(df: pd.DataFrame, concept_pattern: str) -> Optional[float
     return values.sum()
 
 
+def concept_rows(df: pd.DataFrame, concept: str) -> pd.DataFrame:
+    """Rows for exactly one concept, with the most recent period's value as `value`."""
+    value_col = [c for c in df.columns if '-' in c and c[:4].isdigit()][0]
+    rows = df[df['concept'] == concept]
+    return rows.assign(value=rows[value_col])
+
+
 # =============================================================================
 # INCOME STATEMENT TEST CASES - CostOfGoodsAndServicesSold
 # =============================================================================
 
-@pytest.mark.network
 class TestIncomeStatementCOGS:
     """Test that COGS face values are preserved for dimensional-only filers."""
 
     @pytest.fixture
-    def load_income_statement(self):
+    def load_income_statement(self, load_xbrl):
         """Helper to load income statement for a company."""
         def _load(ticker: str) -> Tuple[pd.DataFrame, pd.DataFrame, bool]:
-            from edgar import Company
-            company = Company(ticker)
-            filing = company.get_filings(form="10-K").latest()
-            xbrl = filing.xbrl()
+            xbrl = load_xbrl(ticker)
 
             stmt = xbrl.statements.income_statement()
             df_all = stmt.to_dataframe(view='detailed')
@@ -104,6 +177,21 @@ class TestIncomeStatementCOGS:
         assert cogs_all is not None, "Boeing should have COGS values"
         assert cogs_filtered is not None, "Boeing COGS should be preserved when filtering"
         assert cogs_filtered is not None and cogs_filtered != 0, "Boeing COGS should have non-zero value"
+
+    def test_boeing_cogs_face_values_match_the_filing(self, load_income_statement):
+        """The filtered view keeps Boeing's product and service COGS at the filed amounts.
+
+        Boeing tags CostOfGoodsAndServicesSold only on ProductOrServiceAxis, so filtering that
+        axis out as a breakdown would drop its cost of sales from the face statement.
+        """
+        _, df_filtered, _ = load_income_statement("BA")
+
+        rows = concept_rows(df_filtered, "us-gaap_CostOfGoodsAndServicesSold")
+        amounts = {abs(v) for v in rows["value"].dropna()}
+
+        assert {73_761_000_000, 11_413_000_000} <= amounts, amounts
+        total = rows[rows["dimension"].eq(False)]["value"].abs()
+        assert list(total) == [85_174_000_000]
 
     def test_carrier_cogs_preserved(self, load_income_statement):
         """Carrier reports COGS via ProductOrServiceAxis."""
@@ -201,28 +289,25 @@ class TestIncomeStatementCOGS:
 # BALANCE SHEET TEST CASES - Goodwill
 # =============================================================================
 
-@pytest.mark.network
+@pytest.fixture
+def load_balance_sheet(load_xbrl):
+    """Helper to load balance sheet for a company."""
+    def _load(ticker: str) -> Tuple[pd.DataFrame, pd.DataFrame, bool]:
+        xbrl = load_xbrl(ticker)
+
+        stmt = xbrl.statements.balance_sheet()
+        df_all = stmt.to_dataframe(view='detailed')
+        df_filtered = stmt.to_dataframe(view='standard')
+
+        _, role_uri, _ = xbrl.find_statement("BalanceSheet")
+        has_def = xbrl.has_definition_linkbase_for_role(role_uri) if role_uri else False
+
+        return df_all, df_filtered, has_def
+    return _load
+
+
 class TestBalanceSheetGoodwill:
     """Test that Goodwill face values are preserved."""
-
-    @pytest.fixture
-    def load_balance_sheet(self):
-        """Helper to load balance sheet for a company."""
-        def _load(ticker: str) -> Tuple[pd.DataFrame, pd.DataFrame, bool]:
-            from edgar import Company
-            company = Company(ticker)
-            filing = company.get_filings(form="10-K").latest()
-            xbrl = filing.xbrl()
-
-            stmt = xbrl.statements.balance_sheet()
-            df_all = stmt.to_dataframe(view='detailed')
-            df_filtered = stmt.to_dataframe(view='standard')
-
-            _, role_uri, _ = xbrl.find_statement("BalanceSheet")
-            has_def = xbrl.has_definition_linkbase_for_role(role_uri) if role_uri else False
-
-            return df_all, df_filtered, has_def
-        return _load
 
     def test_boston_scientific_goodwill_preserved(self, load_balance_sheet):
         """BSX Goodwill should be preserved (non-dimensional value exists)."""
@@ -241,6 +326,18 @@ class TestBalanceSheetGoodwill:
         # Should have fewer rows when breakdowns are filtered
         assert len(goodwill_filtered_rows) <= len(goodwill_all), \
             "BSX Goodwill breakdowns should be filtered"
+
+    def test_boston_scientific_goodwill_matches_the_filing(self, load_balance_sheet):
+        """BSX's face goodwill is kept at the filed amount; its acquisition breakdown is not."""
+        df_all, df_filtered, _ = load_balance_sheet("BSX")
+
+        filtered = concept_rows(df_filtered, "us-gaap_Goodwill")
+        assert list(filtered["value"]) == [18_282_000_000]
+        assert list(filtered["dimension"]) == [False]
+
+        detailed = concept_rows(df_all, "us-gaap_Goodwill")
+        assert 507_000_000 in set(detailed["value"].dropna()), \
+            "the All Other acquisition breakdown should still be in the detailed view"
 
     def test_ibm_goodwill_preserved(self, load_balance_sheet):
         """IBM Goodwill should be preserved."""
@@ -265,28 +362,8 @@ class TestBalanceSheetGoodwill:
 # BALANCE SHEET TEST CASES - PPE
 # =============================================================================
 
-@pytest.mark.network
 class TestBalanceSheetPPE:
     """Test that PPE face values are preserved."""
-
-    @pytest.fixture
-    def load_balance_sheet(self):
-        """Helper to load balance sheet for a company."""
-        def _load(ticker: str) -> Tuple[pd.DataFrame, pd.DataFrame, bool]:
-            from edgar import Company
-            company = Company(ticker)
-            filing = company.get_filings(form="10-K").latest()
-            xbrl = filing.xbrl()
-
-            stmt = xbrl.statements.balance_sheet()
-            df_all = stmt.to_dataframe(view='detailed')
-            df_filtered = stmt.to_dataframe(view='standard')
-
-            _, role_uri, _ = xbrl.find_statement("BalanceSheet")
-            has_def = xbrl.has_definition_linkbase_for_role(role_uri) if role_uri else False
-
-            return df_all, df_filtered, has_def
-        return _load
 
     def test_boston_scientific_ppe_preserved(self, load_balance_sheet):
         """BSX PPE should be preserved."""
@@ -309,6 +386,18 @@ class TestBalanceSheetPPE:
         assert ppe_filtered is not None and ppe_filtered > 0, \
             "CSX PPE should be preserved via heuristic fallback"
 
+    def test_csx_ppe_net_matches_the_filing(self, load_balance_sheet):
+        """CSX's net PP&E stays at the filed amount and its by-type breakdown is filtered out."""
+        df_all, df_filtered, _ = load_balance_sheet("CSX")
+
+        filtered = concept_rows(df_filtered, "us-gaap_PropertyPlantAndEquipmentNet")
+        assert list(filtered["value"]) == [36_811_000_000]
+        assert list(filtered["dimension"]) == [False]
+
+        detailed = concept_rows(df_all, "us-gaap_PropertyPlantAndEquipmentNet")
+        assert 27_300_000_000 in set(detailed["value"].dropna()), \
+            "Road and track assets should still be in the detailed view"
+
     def test_hilton_ppe_preserved(self, load_balance_sheet):
         """Hilton PPE should be preserved."""
         df_all, df_filtered, has_def = load_balance_sheet("HLT")
@@ -326,15 +415,11 @@ class TestBalanceSheetPPE:
 class TestBreakdownsFiltered:
     """Test that breakdown dimensions are still correctly filtered."""
 
-    @pytest.mark.network
-    def test_geographic_breakdown_filtered(self):
+    def test_geographic_breakdown_filtered(self, load_xbrl):
         """StatementGeographicalAxis should be filtered as breakdown."""
-        from edgar import Company
         from edgar.xbrl.dimensions import is_breakdown_dimension
 
-        ba = Company("BA")
-        filing = ba.get_filings(form="10-K").latest()
-        xbrl = filing.xbrl()
+        xbrl = load_xbrl("BA")
 
         # Create mock item with geographic axis
         item = {
@@ -350,7 +435,6 @@ class TestBreakdownsFiltered:
         assert is_breakdown_dimension(item, xbrl=xbrl, role_uri=role_uri), \
             "Geographic axis should be filtered as breakdown"
 
-    @pytest.mark.fast
     def test_business_segment_breakdown_filtered(self):
         """StatementBusinessSegmentsAxis should be filtered as breakdown."""
         from edgar.xbrl.dimensions import is_breakdown_dimension
@@ -365,7 +449,6 @@ class TestBreakdownsFiltered:
         assert is_breakdown_dimension(item), \
             "Business segment axis should be filtered as breakdown"
 
-    @pytest.mark.fast
     def test_product_service_axis_preserved(self):
         """ProductOrServiceAxis should NOT be filtered (it's a face axis)."""
         from edgar.xbrl.dimensions import is_breakdown_dimension
@@ -385,22 +468,17 @@ class TestBreakdownsFiltered:
 # SUMMARY VALIDATION
 # =============================================================================
 
-@pytest.mark.network
 class TestSummaryValidation:
     """Summary tests to verify overall fix effectiveness."""
 
-    def test_all_income_statement_cases_have_cogs(self):
+    def test_all_income_statement_cases_have_cogs(self, load_xbrl):
         """Verify all income statement test cases have COGS values."""
-        from edgar import Company
-
         tickers = ['BA', 'CARR', 'GD', 'INTU', 'SLB']  # Subset for faster testing
         results = {}
 
         for ticker in tickers:
             try:
-                company = Company(ticker)
-                filing = company.get_filings(form="10-K").latest()
-                xbrl = filing.xbrl()
+                xbrl = load_xbrl(ticker)
 
                 stmt = xbrl.statements.income_statement()
                 df = stmt.to_dataframe(view='standard')
@@ -423,13 +501,9 @@ class TestSummaryValidation:
         failed = {t: why for t, why in results.items() if why is not None}
         assert not failed, f"These companies failed COGS validation: {failed}"
 
-    def test_dimension_filtering_reduces_row_count(self):
+    def test_dimension_filtering_reduces_row_count(self, load_xbrl):
         """Verify that dimension filtering still reduces row count (breakdowns filtered)."""
-        from edgar import Company
-
-        ba = Company("BA")
-        filing = ba.get_filings(form="10-K").latest()
-        xbrl = filing.xbrl()
+        xbrl = load_xbrl("BA")
 
         stmt = xbrl.statements.income_statement()
         df_all = stmt.to_dataframe(view='detailed')

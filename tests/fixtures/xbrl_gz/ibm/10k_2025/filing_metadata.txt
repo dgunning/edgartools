@@ -1,0 +1,6 @@
+ticker=IBM
+accession=0000051143-26-000010
+form=10-K
+filing_date=2026-02-24
+cik=51143
+company=INTERNATIONAL BUSINESS MACHINES CORP

@@ -1,0 +1,6 @@
+ticker=HLT
+accession=0001585689-26-000007
+form=10-K
+filing_date=2026-02-11
+cik=1585689
+company=Hilton Worldwide Holdings Inc.

@@ -1,0 +1,6 @@
+ticker=RTX
+accession=0000101829-26-000006
+form=10-K
+filing_date=2026-02-06
+cik=101829
+company=RTX Corp
