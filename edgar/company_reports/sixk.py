@@ -79,7 +79,7 @@ class SixK:
     (typically EX-99.x).
 
     Properties:
-        exhibits: Non-graphic attachments (press releases, financial statements)
+        exhibits: Content exhibits, the EX-* documents (press releases, financial statements)
         press_releases: EX-99.x press release exhibits
         content_description: What the filing contains (from cover page)
         commission_file_number: SEC file number
@@ -160,15 +160,18 @@ class SixK:
     @cached_property
     def exhibits(self) -> List:
         """
-        Non-graphic exhibit attachments.
+        The content exhibits: the filing's EX-* documents (press releases,
+        financial statements), without the cover page.
 
-        Returns list of Attachment objects, excluding graphics (JPG/GIF/PNG).
+        Uses the rule ``filing.exhibits`` applies, so graphics and the XBRL
+        files SEC adds to a filing (the instance, linkbases, R*.htm viewer
+        pages, Financial_Report.xlsx, the xbrl .zip) are not exhibits.
         """
         return [
-            att for att in self._filing.attachments
-            if att.document_type
-            and att.document_type != 'GRAPHIC'
-            and att.document_type != self._filing.form  # Exclude the cover page itself
+            att for att in self._filing.exhibits
+            if att is not None
+            and att.document_type
+            and att.document_type.startswith('EX-')
         ]
 
     @property
@@ -201,7 +204,7 @@ class SixK:
         return Financials.extract(self._filing)
 
     def text(self) -> str:
-        """Get the full text content of the 6-K including exhibits."""
+        """Get the full text content of the 6-K: the cover page and its exhibits."""
         return rich_to_text(self._content_renderables())
 
     def _get_exhibit_content(self, exhibit) -> Optional[str]:
@@ -221,10 +224,14 @@ class SixK:
                 return attachment_html_to_text(html_content)
 
     def _content_renderables(self):
-        """Get exhibit content as rich renderables."""
+        """The cover page and the content exhibits as rich renderables.
+
+        A 6-K's content is either inline in the cover page or in its exhibits,
+        so both are rendered, as ``EightK`` does through ``filing.exhibits``.
+        """
         renderables = []
-        for exhibit in self.exhibits:
-            if exhibit.is_binary():
+        for exhibit in self._filing.exhibits:
+            if exhibit is None or exhibit.is_binary():
                 continue
             exhibit_content = self._get_exhibit_content(exhibit)
             if exhibit_content:
