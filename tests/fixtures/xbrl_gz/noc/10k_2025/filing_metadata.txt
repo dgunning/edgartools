@@ -1,0 +1,6 @@
+ticker=NOC
+accession=0001133421-26-000003
+form=10-K
+filing_date=2026-01-27
+cik=1133421
+company=NORTHROP GRUMMAN CORP /DE/

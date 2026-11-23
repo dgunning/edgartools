@@ -1,0 +1,6 @@
+ticker=GD
+accession=0000040533-26-000006
+form=10-K
+filing_date=2026-01-30
+cik=40533
+company=GENERAL DYNAMICS CORP
