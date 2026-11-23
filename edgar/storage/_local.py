@@ -1,7 +1,7 @@
 import os
 import re
 from collections import defaultdict
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import FIRST_COMPLETED, ThreadPoolExecutor, wait
 from contextlib import closing
 from datetime import date, datetime, timedelta
 from itertools import islice
@@ -592,18 +592,19 @@ def _download_filing_submissions(filings: 'Filings',
 
         groups = iter(filings_by_accession.values())
         pool = ThreadPoolExecutor(max_workers=max_workers)
+        in_flight = set()
         try:
-            # Submit one batch at a time so a failure leaves later filings untouched.
             while True:
-                batch = list(islice(groups, max_workers))
-                if not batch:
+                available_slots = max_workers - len(in_flight)
+                for group in islice(groups, available_slots):
+                    in_flight.add(pool.submit(download_group, group))
+
+                if not in_flight:
                     break
 
-                futures = []
-                for group in batch:
-                    futures.append(pool.submit(download_group, group))
-
-                for future in as_completed(futures):
+                completed, in_flight = wait(in_flight, return_when=FIRST_COMPLETED)
+                # Check every completed result before submitting more work.
+                for future in completed:
                     yield from future.result()
         finally:
             stop_requested.set()

@@ -1,5 +1,6 @@
 """Tests for bounded submission downloads (GitHub issue #1985)."""
 
+from concurrent.futures import ThreadPoolExecutor
 from datetime import date
 from threading import Barrier, Event, Lock
 
@@ -35,7 +36,7 @@ def test_concurrent_submissions_respect_worker_limit_and_skip_duplicates(monkeyp
 
     # Track how many fake downloads are active at once.
     lock = Lock()
-    # Four distinct accessions let both batches reach the barrier in pairs.
+    # Four distinct accessions let the downloads reach the barrier in pairs.
     pair = Barrier(2, timeout=5)
     active = 0
     requested = []
@@ -80,9 +81,17 @@ def test_concurrent_submissions_stop_after_error(monkeypatch, tmp_path, caplog, 
     }))
     missing_url = filings[0].text_url
     failing_url = filings[1].text_url
+    next_url = filings[2].text_url
     second_started = Event()
     missing_counted = Event()
+    next_started = Event()
+    shutting_down = Event()
     requested = []
+
+    class TestExecutor(ThreadPoolExecutor):
+        def shutdown(self, *args, **kwargs):
+            shutting_down.set()
+            super().shutdown(*args, **kwargs)
 
     def fetch(url):
         requested.append(url)
@@ -92,7 +101,14 @@ def test_concurrent_submissions_stop_after_error(monkeypatch, tmp_path, caplog, 
             second_started.set()
             assert missing_counted.wait(timeout=5)
             if failure is RuntimeError:
+                # The freed slot refills while this download is still in flight.
+                assert next_started.wait(timeout=5)
                 raise RuntimeError("stop downloading")
+            return Response(404, request=Request("GET", url))
+        if url == next_url:
+            next_started.set()
+            # Keep this request in flight until the caller observes the error.
+            assert shutting_down.wait(timeout=5)
             return Response(404, request=Request("GET", url))
         return Response(200, content=b"should never be stored")
 
@@ -107,12 +123,15 @@ def test_concurrent_submissions_stop_after_error(monkeypatch, tmp_path, caplog, 
 
     monkeypatch.setattr("edgar.httprequests.get_with_retry", fetch)
     monkeypatch.setattr("edgar.storage._local.tqdm", track_progress)
+    monkeypatch.setattr("edgar.storage._local.ThreadPoolExecutor", TestExecutor)
 
     with pytest.raises(failure, match="stop downloading"):
         download_filings(filings=filings, data_directory=str(tmp_path), compress=False,
                          disable_progress=True, max_workers=2)
 
-    assert sorted(requested) == sorted([missing_url, failing_url])
+    assert not set(requested).intersection(filings[i].text_url for i in range(3, 6))
+    if failure is RuntimeError:
+        assert next_url in requested
     assert f"1 of 6 filings were not found at SEC: {accessions[0]}" in caplog.text
     assert not list(tmp_path.rglob("*.nc*"))
 
