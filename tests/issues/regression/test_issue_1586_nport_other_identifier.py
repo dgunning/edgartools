@@ -33,7 +33,6 @@ def test_a_stated_other_identifier_reaches_investment_data_offline():
     assert (row['cusip'], row['other_id'], row['other_id_type']) == ('379006355', 'LX123456', 'LoanX ID')
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_bhk_states_an_other_identifier_on_121_holdings():
     """Ground truth: BHK's NPORT-P for 2026-06-30, accession 0001410368-26-085673."""

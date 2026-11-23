@@ -80,7 +80,6 @@ def _xbrl_only(**filing):
     return filing.xbrl()
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_bxp_quarter_tagged_fy_reports_its_quarter():
     """BXP 10-Q 2026-06-30, 0001037540-26-000034: Revenues 895,699 (f-215), net income

@@ -1,0 +1,6 @@
+ticker=JKHY
+accession=0000779152-26-000067
+form=10-K
+filing_date=2026-08-28
+cik=779152
+company=JACK HENRY & ASSOCIATES INC

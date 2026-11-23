@@ -66,7 +66,6 @@ def _xbrl_only(**filing):
     return filing.xbrl()
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_10x_genomics_reports_its_combined_share_count():
     """10x Genomics 10-K FY2019, 0001193125-20-052640: "Weighted-average shares used

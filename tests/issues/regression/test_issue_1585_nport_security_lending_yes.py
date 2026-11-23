@@ -49,7 +49,6 @@ def test_every_yes_condition_in_the_schema_is_read():
     assert (lending.is_loan_by_fund, lending.loan_value) == ('Y', Decimal('5.55'))
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_sgov_states_one_cash_collateral_yes_and_two_loans():
     """Ground truth: SGOV's NPORT-P for 2026-05-31, accession 0002071691-26-016719."""

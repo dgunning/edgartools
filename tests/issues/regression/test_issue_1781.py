@@ -55,7 +55,6 @@ def test_statement_outranks_longer_segment_table():
 
 
 @pytest.mark.regression
-@pytest.mark.network
 @pytest.mark.vcr
 def test_issue_1781_mueller_consolidated_statement():
     # Mueller Water Products 8-K 0001350593-25-000054, EX-99.1 condensed consolidated statements
@@ -71,7 +70,6 @@ def test_issue_1781_mueller_consolidated_statement():
 
 
 @pytest.mark.regression
-@pytest.mark.network
 @pytest.mark.vcr
 def test_issue_1781_groupon_q2_2025():
     # Groupon 8-K 0001490281-25-000040, EX-99.1 consolidated statement of operations (thousands):

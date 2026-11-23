@@ -60,7 +60,6 @@ def test_a_non_accrual_copy_of_a_holding_counts_once():
     assert [e.investment.identifier for e in excluded] == ['ACI Parent Inc. | Preferred shares']
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_phenixfin_subtotals_are_not_holdings():
     """Ground truth: PhenixFIN 10-Q for 2026-06-30, accession 0001213900-26-085667."""

@@ -77,7 +77,6 @@ def test_repeated_period_label_is_still_read():
 
 
 @pytest.mark.regression
-@pytest.mark.network
 @pytest.mark.vcr
 def test_issue_1777_asgn_q3_2025_columns():
     # ASGN 8-K 0000890564-25-000058, EX-99.1 "Results of Operations" (millions):

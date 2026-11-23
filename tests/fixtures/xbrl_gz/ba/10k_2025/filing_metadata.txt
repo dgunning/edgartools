@@ -1,0 +1,6 @@
+ticker=BA
+accession=0001628280-26-004357
+form=10-K
+filing_date=2026-01-30
+cik=12927
+company=BOEING CO

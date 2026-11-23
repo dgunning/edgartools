@@ -59,7 +59,6 @@ def test_separators_and_invalid_numbers(monkeypatch):
 
 
 @pytest.mark.regression
-@pytest.mark.network
 @pytest.mark.vcr
 def test_issue_1773_live_parsed_items_match_sec_metadata():
     filings = Company(710782).get_filings(form="8-K", filing_date="2024-01-01:2024-12-31")

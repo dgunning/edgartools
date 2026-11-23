@@ -1,0 +1,6 @@
+ticker=HII
+accession=0001501585-26-000006
+form=10-K
+filing_date=2026-02-05
+cik=1501585
+company=HUNTINGTON INGALLS INDUSTRIES, INC.

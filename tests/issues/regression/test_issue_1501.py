@@ -32,7 +32,6 @@ WAGNER_FORM4 = dict(cik=1059235, company="WAGNER SUSAN", form="4", filing_date="
                     accession_no="0001059235-26-000004")
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_accepted_at_is_the_index_page_time_in_new_york():
     summer = Filing(**APPLE_10Q).accepted_at
@@ -45,7 +44,6 @@ def test_accepted_at_is_the_index_page_time_in_new_york():
     assert winter.astimezone(timezone.utc) == datetime(2026, 2, 26, 23, 34, 19, tzinfo=timezone.utc)
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_bulk_accepted_at_matches_one_by_one():
     rows = [APPLE_10Q, WAGNER_FORM4]
