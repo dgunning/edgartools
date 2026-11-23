@@ -531,8 +531,11 @@ def direct_get_fund_with_filings(contract_or_series_id: str, filing_type: Option
         # Company Info
         company_info = _FundCompanyInfo.from_html(fund_text)
 
-        # Get the remaining filings
-        start, count = 101, 100
+        # Get the remaining filings. browse-edgar's `start` is zero-based: the
+        # first page covered positions 0-99, so the next one begins at 100.
+        # Starting at 101 skipped one filing for every series or class with
+        # more than 100 of them.
+        start, count = 100, 100
 
         filing_index = company_info.filings.data
         while True:

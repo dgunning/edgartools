@@ -54,7 +54,6 @@ def test_the_latest_instant_stays_the_default_when_the_report_date_has_no_holdin
     assert PortfolioInvestments.from_xbrl(_xbrl(FACTS)).period == '2026-12-31'
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_tcpc_q1_2026_reads_its_march_schedule():
     """Ground truth: BlackRock TCP Capital 10-Q for 2026-03-31, accession 0001193125-26-210632."""

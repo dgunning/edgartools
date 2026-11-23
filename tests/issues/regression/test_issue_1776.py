@@ -49,7 +49,6 @@ def test_non_ex99_html_is_still_ignored():
 
 
 @pytest.mark.regression
-@pytest.mark.network
 @pytest.mark.vcr
 def test_issue_1776_accenture_ex99_earnings_found():
     # Accenture 8-K 0001467373-25-000221, EX-99 news release: Revenues $18,742,125 thousand

@@ -32,7 +32,6 @@ def test_a_denial_in_the_participle_is_still_a_denial(text):
     assert _classify_nonaccrual_footnote(text.lower(), linked_to_investments=True) is False
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_blackrock_direct_lending_reads_its_non_accruing_footnote():
     """BlackRock Direct Lending Corp 10-Q for 2026-09-30 (0001193125-26-449587).

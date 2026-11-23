@@ -76,7 +76,6 @@ def _xbrl_only(**filing):
     return filing.xbrl()
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_adp_reports_its_filed_current_totals():
     """ADP 10-K 2026-06-30, 0000008670-26-000030 (millions): Total current assets

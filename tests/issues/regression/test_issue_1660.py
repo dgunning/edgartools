@@ -77,7 +77,6 @@ def _xbrl_only(**filing):
     return filing.xbrl()
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_essential_utilities_reports_cash_capex():
     """Essential Utilities 10-Q, six months to 2026-06-30, 0000078128-26-000077 ($K):
@@ -90,7 +89,6 @@ def test_essential_utilities_reports_cash_capex():
     assert wtrg.get_free_cash_flow() == -73187000
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_thor_reports_cash_capex():
     """Thor Industries 10-K FY2026, 0000730263-26-000027 ($K): Purchases of property,

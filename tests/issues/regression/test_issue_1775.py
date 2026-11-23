@@ -54,7 +54,6 @@ def test_scale_caption_wording(caption, expected):
 
 
 @pytest.mark.regression
-@pytest.mark.network
 @pytest.mark.vcr
 def test_issue_1775_graphic_packaging_net_income_under_its_quarter():
     # Graphic Packaging 8-K 0001408075-25-000020, EX-99.1: Net Income $104 (Q2 2025), $190 (Q2 2024)
@@ -66,7 +65,6 @@ def test_issue_1775_graphic_packaging_net_income_under_its_quarter():
 
 
 @pytest.mark.regression
-@pytest.mark.network
 @pytest.mark.vcr
 def test_issue_1775_home_depot_current_quarter():
     # Home Depot 8-K 0000354950-26-000026, EX-99.1, quarter ended February 1, 2026 (millions):

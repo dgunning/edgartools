@@ -86,7 +86,6 @@ def test_without_any_signal_the_result_is_still_unknown():
     assert result.num_nonaccrual is None
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_stone_point_reads_its_tagged_zero():
     """Stone Point Credit Corp 10-K for 2025-12-31 (0001193125-26-096955).

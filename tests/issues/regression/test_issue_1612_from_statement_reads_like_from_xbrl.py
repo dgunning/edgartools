@@ -50,7 +50,6 @@ def vcr_cassette_name():
     return 'test_hercules_non_accruals_are_named_by_company'
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_hercules_statement_reads_its_holdings():
     """Ground truth: Hercules Capital 10-Q for 2026-06-30, accession 0001280784-26-000042."""

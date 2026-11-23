@@ -250,7 +250,6 @@ def _cash_rows(accession, concept):
     return rendered, rows[0], rows[1]
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_sap_fy2025_cash_balances_render_in_euros():
     """SAP 20-F FY2025, 0001104659-26-020058, R6."""
@@ -269,7 +268,6 @@ def test_sap_fy2025_cash_balances_render_in_euros():
     assert not any("$" in c.get_formatted_value() for c in opening.cells + closing.cells)
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_gsk_fy2025_cash_and_overdrafts_render_in_pounds():
     """GSK 20-F FY2025, 0001131399-26-000004, R7 -- keeps its cash-and-overdrafts concept.
@@ -285,7 +283,6 @@ def test_gsk_fy2025_cash_and_overdrafts_render_in_pounds():
     assert closing.cells[0].value == 3_207_000_000
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_novo_nordisk_fy2025_cash_balances_render_in_kroner():
     """Novo Nordisk 20-F FY2025, 0000353278-26-000012, R5."""
@@ -294,7 +291,6 @@ def test_novo_nordisk_fy2025_cash_balances_render_in_kroner():
     assert closing.cells[0].get_formatted_value() == "kr26,464"
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_deutsche_bank_fy2024_cash_balances_render_in_euros():
     """Deutsche Bank 20-F FY2024, 0001159508-25-000020, R12."""

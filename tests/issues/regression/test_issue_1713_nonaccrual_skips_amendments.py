@@ -38,7 +38,6 @@ def test_resolve_filing_excludes_amendments():
     assert seen == {"form": "10-K", "amendments": False}
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_arcc_resolves_original_10k():
     from edgar.bdc import get_bdc_list
@@ -79,7 +78,6 @@ def test_full_amendment_with_investment_data_supersedes_original(monkeypatch):
     assert na.extract_nonaccrual(entity).source_filing == "orig"
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_arcc_data_less_amendment_warns():
     from edgar import find

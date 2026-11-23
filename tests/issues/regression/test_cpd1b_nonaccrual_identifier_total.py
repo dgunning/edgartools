@@ -46,7 +46,6 @@ def test_two_different_totals_are_not_guessed_between():
     assert _identifier_grand_total(facts, '2026-03-31') is None
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_oxford_square_rate_uses_its_tagged_total():
     """Oxford Square 10-Q for 2026-03-31 (0001213900-26-050934)."""

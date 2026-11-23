@@ -515,7 +515,6 @@ class TestFootnoteMarkersInValueCells:
         """
         assert _parse_percentage(cell) is None
 
-    @pytest.mark.network
     @pytest.mark.vcr
     def test_date_cells_no_longer_clobber_the_best_worst_quarter(self):
         """GMO Trust's quarter table, hand-read from the filing:
@@ -532,7 +531,6 @@ class TestFootnoteMarkersInValueCells:
         assert prospectus.best_quarter[0] == Decimal("6.02")
         assert prospectus.worst_quarter[0] == Decimal("-6.88")
 
-    @pytest.mark.network
     @pytest.mark.vcr
     def test_john_hancock_fees_are_not_glued_to_footnotes(self):
         """Ground truth hand-read from the filing's fee table.

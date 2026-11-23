@@ -88,7 +88,6 @@ def _xbrl_only(**filing):
     return filing.xbrl()
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_shell_reports_its_cash_flows():
     """Shell 20-F FY2025, 0001628280-26-017024, R7 ($M): Cash flow from operating
