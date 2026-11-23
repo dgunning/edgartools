@@ -458,6 +458,14 @@ class FilingRun:
     traceback: str = ''
     attempts: int = 1
     seconds: float = 0.0
+    #: balance_sheet().validate(level='fundamental').status ('valid', 'invalid', 'inconclusive'),
+    #: 'no_balance_sheet', 'error' (validate raised) or '' (the check did not get that far)
+    bs_validation: str = ''
+    bs_validation_message: str = ''
+    #: for an invalid result, which check ran and the non-standard equity concepts on the sheet,
+    #: e.g. 'equation_check|TemporaryEquityCarryingAmountAttributableToParent'; the sweep groups on it
+    bs_validation_shape: str = ''
+    bs_validation_traceback: str = ''
 
 
 class _FilingTimeoutError(Exception):
@@ -490,6 +498,42 @@ def _record_error(run: FilingRun, e: BaseException, stage: str) -> None:
     # The whole stack: scripts/fidelity_sweep.py keys a failure on its innermost edgar/ frame,
     # which a deep pandas or lxml stack pushes out of a short tail.
     run.traceback = ' || '.join(traceback.format_exc().strip().splitlines())
+
+
+# Equity components outside Liabilities + Equity + NCI; an invalid result that has one is
+# probably the validator missing it (GH #2055), and such results share one issue.
+_UNUSUAL_EQUITY_WORDS = ('TemporaryEquity', 'RedeemableNoncontrollingInterest', 'PartnersCapital',
+                         'MembersEquity', 'NetAssets')
+
+
+def validate_balance_sheet(run: FilingRun, xbrl) -> None:
+    """Record the balance sheet's own consistency check, ``validate(level='fundamental')``.
+
+    The statement check compares the library with the SEC's pages; this one checks that the
+    library's balance sheet balances (Assets = Liabilities + Equity). A statement can match its
+    page and still fail here when the library picked the wrong totals, or when the validator
+    misses an equity component (GH #2055). A raise is recorded here and does not fail the filing.
+    """
+    try:
+        bs = xbrl.statements.balance_sheet()
+        if bs is None:
+            run.bs_validation = 'no_balance_sheet'
+            return
+        result = bs.validate(level='fundamental')
+        run.bs_validation = result.status
+        run.bs_validation_message = ' | '.join(i.message for i in result.errors)[:500]
+        if result.status == 'invalid':
+            method = 'liab_equity_check' if 'liab_equity_check' in result.metadata else 'equation_check'
+            df = bs.to_dataframe()
+            concepts = sorted({str(c).split('_', 1)[-1] for c in df.get('concept', [])
+                               if any(w in str(c) for w in _UNUSUAL_EQUITY_WORDS)})
+            run.bs_validation_shape = '|'.join([method, *concepts])
+    except _FilingTimeoutError:
+        raise
+    except Exception as e:  # noqa: BLE001 - a validator crash is a finding, not a failed filing
+        run.bs_validation = 'error'
+        run.bs_validation_message = f"{type(e).__name__}: {' '.join(str(e).split())}"[:500]
+        run.bs_validation_traceback = ' || '.join(traceback.format_exc().strip().splitlines())
 
 
 def run_filing(row: Dict[str, Any], timeout: int = DEFAULT_TIMEOUT) -> FilingRun:
@@ -529,6 +573,7 @@ def run_filing(row: Dict[str, Any], timeout: int = DEFAULT_TIMEOUT) -> FilingRun
                         run.statements = viewer.compare_statements(xbrl)
                         run.facts = run.statements.facts
                         run.outcome = 'ok'
+                        validate_balance_sheet(run, xbrl)
             except KeyboardInterrupt:
                 raise
             except BaseException as e:  # noqa: BLE001 - every failure is recorded, none stops the run
@@ -749,7 +794,8 @@ class ScorecardWriter:
         for s in self.surfaces:
             fields += [f'{s}_compared_cells', f'{s}_cell_matched', f'{s}_value_rate', f'{s}_coverage',
                        f'{s}_disagreement', f'{s}_presentation', f'{s}_not_comparable']
-        return fields + ['traceback']
+        return fields + ['bs_validation', 'bs_validation_message', 'bs_validation_shape',
+                         'bs_validation_traceback', 'traceback']
 
     def _append(self, name: str, df, cols_attr: str):
         cols = getattr(self, cols_attr)
@@ -769,7 +815,9 @@ class ScorecardWriter:
         rec = {k: r.get(k, '') for k in ('accession_number', 'form', 'era', 'group', 'topup', 'cik', 'company')}
         rec.update(outcome=run.outcome, has_viewer=run.has_viewer, error_type=run.error_type,
                    error_message=run.error_message, error_stage=run.error_stage, attempts=run.attempts,
-                   seconds=run.seconds, traceback=run.traceback)
+                   seconds=run.seconds, traceback=run.traceback, bs_validation=run.bs_validation,
+                   bs_validation_message=run.bs_validation_message, bs_validation_shape=run.bs_validation_shape,
+                   bs_validation_traceback=run.bs_validation_traceback)
         facts, st = run.facts, run.statements
         if facts is not None:
             rec.update(facts_cells=facts.total, facts_matched=facts.matched, facts_mismatched=facts.mismatched,

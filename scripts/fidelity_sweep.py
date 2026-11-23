@@ -12,7 +12,13 @@ filings the library has never seen, and then:
   rate: one large filing can move the pooled rate by several points);
 - files one issue per new failure signature among the filings whose check raised
   (see ``scripts/scheduled_issues.py``). Value mismatches are listed in the
-  scorecard's worst-filings table, not filed one by one.
+  scorecard's worst-filings table, not filed one by one;
+- checks that each balance sheet balances, ``validate(level='fundamental')``. A
+  statement can match the SEC page and still not balance when the library picked
+  the wrong totals or the validator misses an equity component (GH #2055).
+  Invalid results are grouped by shape (which check ran, and any temporary,
+  redeemable or partners' equity on the sheet), one issue per shape; a validator
+  that raises is filed like any other exception.
 
 The window is ``--days`` days ending yesterday and the seed is the window's last
 day as YYYYMMDD, so a rerun of the same week draws the same filings.
@@ -29,6 +35,7 @@ from __future__ import annotations
 import argparse
 import csv
 import sys
+from collections import Counter
 from datetime import date, timedelta
 from pathlib import Path
 from typing import List, Optional, Sequence
@@ -45,14 +52,54 @@ SCORECARD_TITLE = 'As-filed fidelity scorecard (weekly)'
 csv.field_size_limit(sys.maxsize)   # filings.csv carries whole tracebacks
 
 
-def failures_from(filings_csv: Path) -> List[si.Failure]:
-    """Every filing whose check raised, from the scorecard's filings.csv."""
+VALIDATE_STAGE = 'balance sheet validate'
+INVALID = 'Balance sheet does not balance'
+
+
+def _rows(filings_csv: Path) -> List[dict]:
     if not filings_csv.exists():
         return []
     with open(filings_csv, newline='') as f:
-        return [si.Failure(r['accession_number'], r['form'], r['company'], r.get('error_stage') or 'check',
-                           r['error_type'], r['error_message'], r.get('traceback', ''))
-                for r in csv.DictReader(f) if r.get('outcome') == 'error']
+        return list(csv.DictReader(f))
+
+
+def failures_from(filings_csv: Path) -> List[si.Failure]:
+    """Every filing whose check or balance-sheet validation raised, from the scorecard's filings.csv."""
+    out = []
+    for r in _rows(filings_csv):
+        if r.get('outcome') == 'error':
+            out.append(si.Failure(r['accession_number'], r['form'], r['company'], r.get('error_stage') or 'check',
+                                  r['error_type'], r['error_message'], r.get('traceback', '')))
+        if r.get('bs_validation') == 'error':
+            error_type = (r.get('bs_validation_message') or 'Exception').split(':', 1)[0]
+            out.append(si.Failure(r['accession_number'], r['form'], r['company'], VALIDATE_STAGE, error_type,
+                                  r.get('bs_validation_message', ''), r.get('bs_validation_traceback', '')))
+    return out
+
+
+def invalid_findings(filings_csv: Path) -> List[tuple]:
+    """``(shape, Failure)`` for every balance sheet whose validation is invalid."""
+    return [(r.get('bs_validation_shape') or 'unknown',
+             si.Failure(r['accession_number'], r['form'], r['company'], VALIDATE_STAGE, INVALID,
+                        r.get('bs_validation_message', '')))
+            for r in _rows(filings_csv) if r.get('bs_validation') == 'invalid']
+
+
+def validation_summary(filings_csv: Path) -> str:
+    """The scorecard section for balance-sheet validation: counts by status, then each invalid filing."""
+    rows = [r for r in _rows(filings_csv) if r.get('bs_validation')]
+    counts = Counter(r['bs_validation'] for r in rows)
+    lines = ['## Balance-sheet validation (`validate(level="fundamental")`)', '',
+             '| Status | Filings |', '|---|---|']
+    lines += [f"| {k} | {counts[k]} |" for k in ('valid', 'invalid', 'inconclusive', 'no_balance_sheet', 'error')
+              if counts[k]]
+    invalid = [r for r in rows if r['bs_validation'] == 'invalid']
+    if invalid:
+        lines += ['', '| Filing | Form | Company | Shape | Message |', '|---|---|---|---|---|']
+        lines += [f"| {r['accession_number']} | {r['form']} | {si._md(r['company'])[:50]} | "
+                  f"`{r.get('bs_validation_shape', '')}` | {si._md(r.get('bs_validation_message', ''))[:160]} |"
+                  for r in invalid]
+    return '\n'.join(lines)
 
 
 def parse_args(argv: Optional[Sequence[str]] = None) -> argparse.Namespace:
@@ -79,8 +126,11 @@ def main(argv: Optional[Sequence[str]] = None) -> int:
                                     '--timeout', str(args.timeout)])
     if code != 0:
         return code
-    card = (args.out / 'scorecard.md').read_text()
-    signatures = si.group_failures(JOB, failures_from(args.out / 'filings.csv'))
+    filings_csv = args.out / 'filings.csv'
+    card = (args.out / 'scorecard.md').read_text() + '\n\n' + validation_summary(filings_csv)
+    (args.out / 'scorecard.md').write_text(card)
+    signatures = (si.group_failures(JOB, failures_from(filings_csv))
+                  + si.group_findings(JOB, INVALID, VALIDATE_STAGE, invalid_findings(filings_csv)))
     if args.repo or args.dry_run:
         si.publish(args.repo, job=JOB, label=LABEL, label_description=LABEL_DESCRIPTION,
                    scorecard_title=SCORECARD_TITLE, scorecard_md=card, signatures=signatures,

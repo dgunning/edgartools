@@ -100,9 +100,14 @@ class Signature:
     stage: str
     frame: str
     failures: List[Failure] = field(default_factory=list)
+    #: a check's finding (an invalid result) rather than an exception; ``shape`` is what it is grouped on
+    finding: bool = False
+    shape: str = ''
 
     @property
     def title(self) -> str:
+        if self.finding:
+            return f"[{self.job} sweep] {self.error_type}: {self.shape}"
         where = self.frame or 'outside edgar/'
         return f"[{self.job} sweep] {self.error_type} in {self.stage}: {where}"
 
@@ -120,6 +125,22 @@ def group_failures(job: str, failures: Iterable[Failure]) -> List[Signature]:
         digest = signature(job, f.error_type, f.traceback, f.stage)
         if digest not in groups:
             groups[digest] = Signature(job, digest, f.error_type, f.stage, edgar_frame(f.traceback))
+        groups[digest].failures.append(f)
+    return sorted(groups.values(), key=lambda s: (-len(s.failures), s.digest))
+
+
+def group_findings(job: str, kind: str, stage: str, findings: Iterable[tuple]) -> List[Signature]:
+    """Group a check's findings, ``(shape, Failure)`` pairs, into one signature per shape.
+
+    For results that are not exceptions, such as a balance sheet that does not balance: the
+    shape says what kind of filing failed the check, so one validator gap is one issue however
+    many filings show it.
+    """
+    groups: Dict[str, Signature] = {}
+    for shape, f in findings:
+        digest = hashlib.sha256('|'.join((job, kind, shape)).encode()).hexdigest()[:12]
+        if digest not in groups:
+            groups[digest] = Signature(job, digest, kind, stage, '', finding=True, shape=shape)
         groups[digest].failures.append(f)
     return sorted(groups.values(), key=lambda s: (-len(s.failures), s.digest))
 
@@ -161,12 +182,14 @@ def _md(text: str) -> str:
 
 
 def failure_issue_body(s: Signature, run_label: str) -> str:
-    lines = [
-        f"The scheduled **{s.job} sweep** ({run_label}) raised `{s.error_type}` in `{s.stage}` "
-        f"on {len(s.failures)} filing(s).",
-        '',
-        f"- **Innermost edgar frame:** `{s.frame or 'none (raised outside edgar/)'}`",
-        '',
+    if s.finding:
+        head = [f"The scheduled **{s.job} sweep** ({run_label}) found **{s.error_type}** "
+                f"(`{s.stage}`) on {len(s.failures)} filing(s).", '', f"- **Shape:** `{s.shape}`", '']
+    else:
+        head = [f"The scheduled **{s.job} sweep** ({run_label}) raised `{s.error_type}` in `{s.stage}` "
+                f"on {len(s.failures)} filing(s).", '',
+                f"- **Innermost edgar frame:** `{s.frame or 'none (raised outside edgar/)'}`", '']
+    lines = head + [
         '| Filing | Form | Company | Message |',
         '|---|---|---|---|',
     ]

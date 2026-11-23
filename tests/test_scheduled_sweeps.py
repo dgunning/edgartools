@@ -162,3 +162,106 @@ class TestFidelitySweep:
         failures = fidelity.failures_from(path)
         assert [(f.accession, f.stage) for f in failures] == [("0000000002-26-000002", "statements")]
         assert fidelity.failures_from(tmp_path / "missing.csv") == []
+
+
+class TestFindings:
+
+    def _finding(self, acc, shape="equation_check|TemporaryEquityCarryingAmountAttributableToParent"):
+        return (shape, si.Failure(acc, "10-K", "Gladstone Capital", "balance sheet validate",
+                                  "Balance sheet does not balance", "Assets (973,474,000) != ..."))
+
+    def test_one_signature_per_shape(self):
+        groups = si.group_findings("fidelity", "Balance sheet does not balance", "balance sheet validate", [
+            self._finding("0001143513-26-000014"), self._finding("0001143513-26-000099"),
+            self._finding("0000000001-26-000001", shape="liab_equity_check")])
+        assert [len(g.failures) for g in groups] == [2, 1]
+        assert groups[0].title == ("[fidelity sweep] Balance sheet does not balance: "
+                                   "equation_check|TemporaryEquityCarryingAmountAttributableToParent")
+        body = si.failure_issue_body(groups[0], "run")
+        assert "**Shape:**" in body and "edgar frame" not in body
+        assert si.known_signatures([{"number": 1, "state": "OPEN", "body": body}], "fidelity")
+
+
+class _Issue:
+    def __init__(self, message):
+        self.message = message
+
+
+class _Result:
+    def __init__(self, status, errors=(), metadata=None):
+        self.status, self.errors, self.metadata = status, [_Issue(m) for m in errors], metadata or {}
+
+
+class _BalanceSheet:
+    def __init__(self, result, concepts=()):
+        self.result, self.concepts = result, list(concepts)
+
+    def validate(self, level):
+        assert level == "fundamental"
+        if isinstance(self.result, Exception):
+            raise self.result
+        return self.result
+
+    def to_dataframe(self):
+        import pandas as pd
+        return pd.DataFrame({"concept": self.concepts})
+
+
+class _Xbrl:
+    def __init__(self, bs):
+        self.statements = type("S", (), {"balance_sheet": staticmethod(lambda: bs)})()
+
+
+class TestBalanceSheetValidation:
+    """scripts/fidelity_scorecard.validate_balance_sheet on stand-in statements."""
+
+    sc = importlib.import_module("fidelity_scorecard")
+
+    def _run(self, bs):
+        run = self.sc.FilingRun(row={}, outcome="ok")
+        self.sc.validate_balance_sheet(run, _Xbrl(bs))
+        return run
+
+    def test_invalid_records_the_check_and_unusual_equity(self):
+        # Gladstone Capital 10-K 0001143513-26-000014: 453,111,000 + 469,298,000 + temporary
+        # equity 51,065,000 = 973,474,000, but the validator leaves temporary equity out (GH #2055).
+        run = self._run(_BalanceSheet(
+            _Result("invalid", ["Accounting equation doesn't balance: Assets (973,474,000) != ..."],
+                    {"equation_check": {}}),
+            ["us-gaap_Assets", "us-gaap_TemporaryEquityCarryingAmountAttributableToParent", "us-gaap_Liabilities"]))
+        assert run.bs_validation == "invalid"
+        assert run.bs_validation_shape == "equation_check|TemporaryEquityCarryingAmountAttributableToParent"
+        assert run.outcome == "ok"
+
+    def test_valid_and_missing_sheet(self):
+        assert self._run(_BalanceSheet(_Result("valid"))).bs_validation == "valid"
+        assert self._run(None).bs_validation == "no_balance_sheet"
+
+    def test_a_raising_validator_is_recorded_not_fatal(self):
+        run = self._run(_BalanceSheet(KeyError("Assets")))
+        assert run.bs_validation == "error" and run.outcome == "ok"
+        assert run.bs_validation_message == "KeyError: 'Assets'"
+        assert "KeyError" in run.bs_validation_traceback
+
+    def test_sweep_reads_validation_back(self, tmp_path):
+        path = tmp_path / "filings.csv"
+        fields = ["accession_number", "form", "company", "outcome", "error_type", "error_message", "error_stage",
+                  "traceback", "bs_validation", "bs_validation_message", "bs_validation_shape",
+                  "bs_validation_traceback"]
+        with open(path, "w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=fields)
+            w.writeheader()
+            w.writerow({"accession_number": "0001143513-26-000014", "form": "10-K", "company": "GLADSTONE",
+                        "outcome": "ok", "bs_validation": "invalid", "bs_validation_message": "doesn't balance",
+                        "bs_validation_shape": "equation_check|TemporaryEquityCarryingAmountAttributableToParent"})
+            w.writerow({"accession_number": "0000000002-26-000002", "form": "10-Q", "company": "B",
+                        "outcome": "ok", "bs_validation": "error", "bs_validation_message": "KeyError: 'Assets'",
+                        "bs_validation_traceback": _tb(FACTS_FRAME)})
+            w.writerow({"accession_number": "0000000003-26-000003", "form": "10-Q", "company": "C",
+                        "outcome": "ok", "bs_validation": "valid"})
+        assert [(s, f.accession) for s, f in fidelity.invalid_findings(path)] == [
+            ("equation_check|TemporaryEquityCarryingAmountAttributableToParent", "0001143513-26-000014")]
+        [crashed] = fidelity.failures_from(path)
+        assert (crashed.stage, crashed.error_type) == ("balance sheet validate", "KeyError")
+        summary = fidelity.validation_summary(path)
+        assert "| valid | 1 |" in summary and "| invalid | 1 |" in summary and "| error | 1 |" in summary
