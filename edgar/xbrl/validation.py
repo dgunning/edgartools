@@ -396,6 +396,34 @@ def _find_total(df: pd.DataFrame, key: str, columns: List[str]) -> Optional[floa
     return result[1] if result else None
 
 
+# Temporary (mezzanine) equity sits between liabilities and equity: redeemable preferred
+# stock, SPAC shares subject to redemption, redeemable noncontrolling interests. It is
+# in neither us-gaap:Liabilities nor us-gaap:StockholdersEquity (nor the NCI-inclusive
+# equity total), so the component form of the equation must add it (GH #2055).
+TEMPORARY_EQUITY_TOTAL = "us-gaap_TemporaryEquityCarryingAmountIncludingPortionAttributableToNoncontrollingInterests"
+TEMPORARY_EQUITY_PARTS = (
+    "us-gaap_TemporaryEquityCarryingAmountAttributableToParent",
+    "us-gaap_RedeemableNoncontrollingInterestEquityCarryingAmount",
+)
+
+
+def _temporary_equity(df: pd.DataFrame, column: Optional[str]) -> Optional[float]:
+    """Temporary equity on the balance sheet in ``column``, or None when the sheet reports none.
+
+    The total that includes redeemable noncontrolling interests when the filer reports it;
+    otherwise the parent's temporary equity plus redeemable noncontrolling interests, which
+    filers show as separate mezzanine lines.
+    """
+    if column is None:
+        return None
+    total = _first_value(_total_concept_rows(df, [TEMPORARY_EQUITY_TOTAL]), [column])
+    if total is not None:
+        return total
+    parts = [_first_value(_total_concept_rows(df, [c]), [column]) for c in TEMPORARY_EQUITY_PARTS]
+    parts = [v for v in parts if v is not None]
+    return sum(parts) if parts else None
+
+
 def _value_columns(df: pd.DataFrame) -> List[str]:
     """The DataFrame's value columns, in order: numeric columns other than metadata."""
     label_col = _label_column(df)
@@ -476,10 +504,12 @@ def _get_balance_sheet_values(df: pd.DataFrame, column: Optional[str] = None) ->
         Every value comes from the same column.
     """
     column = column if column is not None else _select_period_column(df)
-    return {
+    values = {
         key: _find_total(df, key, [column]) if column is not None else None
         for key in {**BALANCE_SHEET_TOTALS, **BALANCE_SHEET_SECTIONS}
     }
+    values["temporary_equity"] = _temporary_equity(df, column)
+    return values
 
 
 _SECTION_LABELS = {
@@ -695,6 +725,7 @@ def validate_balance_sheet(
     liabilities = values.get("total_liabilities")
     liab_equity = values.get("liabilities_and_equity")
     nci = values.get("noncontrolling_interest")
+    temporary_equity = values.get("temporary_equity")
 
     # Check for required values
     if assets is None:
@@ -754,6 +785,9 @@ def validate_balance_sheet(
             # Only add NCI if we're using stockholders_equity (not total_equity which already includes it)
             if total_equity is None and nci is not None:
                 expected += nci
+            # Temporary equity is in neither total, whichever equity total was used
+            if temporary_equity is not None:
+                expected += temporary_equity
 
             diff = abs(assets - expected)
             diff_pct = _relative_difference(diff, assets)
@@ -763,6 +797,7 @@ def validate_balance_sheet(
                 "liabilities": liabilities,
                 "equity": equity_for_calc,
                 "nci": nci if total_equity is None else None,
+                "temporary_equity": temporary_equity,
                 "expected": expected,
                 "difference": diff,
                 "difference_pct": diff_pct
@@ -772,7 +807,11 @@ def validate_balance_sheet(
                 issues.append(ValidationIssue(
                     severity=ValidationSeverity.ERROR,
                     code="EQUATION_IMBALANCE",
-                    message=f"Accounting equation doesn't balance: Assets ({assets:,.0f}) != Liabilities ({liabilities:,.0f}) + Equity ({equity_for_calc:,.0f})",
+                    message=(f"Accounting equation doesn't balance: Assets ({assets:,.0f}) != "
+                             f"Liabilities ({liabilities:,.0f}) + "
+                             + (f"Temporary Equity ({temporary_equity:,.0f}) + " if temporary_equity is not None
+                                else "")
+                             + f"Equity ({equity_for_calc:,.0f})"),
                     details={
                         "assets": assets,
                         "liabilities_plus_equity": expected,
