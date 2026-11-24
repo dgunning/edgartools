@@ -824,10 +824,20 @@ class FactQuery:
     def by_extension(self) -> FactQuery:
         """Filter to facts in the namespaces declared by the filing's schemas.
 
-        A query returns no matches when the filing schema is unavailable.
+        Requires a single filing with its extension schema loaded.
         """
+        if not isinstance(self._facts_view, FactsView):
+            raise NotImplementedError(
+                "by_extension() only supports single-filing XBRL queries. Query each filing separately."
+            )
+
         xbrl = self._facts_view.xbrl
         target_namespaces = xbrl.parser.schema_parser.target_namespaces
+        if not target_namespaces:
+            raise ValidationError(
+                "by_extension() cannot filter facts because no filing schema with a target namespace was loaded.",
+                suggestions=["Pass the extension schema as schema_file to XBRL.from_files()."],
+            )
 
         def is_extension_fact(fact):
             fact_key = fact['fact_key']
