@@ -10,7 +10,7 @@ upgrade-guide entry does not, and nothing caught the difference: PRs #1200 and
 the entries had to be reconstructed after release (bead edgartools-07lk.14).
 
 THE RULE: a pull request whose added lines stage a 6.0 change must also touch
-the current upgrade guide (``GUIDE`` below, ``docs/upgrade/6.4.md``). Staging means any of
+the current upgrade guide (``GUIDE`` below, ``docs/upgrade/6.5.md``). Staging means any of
 
 - a call that warns about the future: ``warn_will_raise(...)``, or any function
   whose name says ``deprecat`` (``deprecated_alias``, ``_deprecation_warning``)
@@ -58,7 +58,7 @@ from typing import Iterable, Iterator
 
 # The current upgrade guide: the next release's. Bump it in each minor release,
 # when __about__.py moves to that version (tests/meta reads it from here).
-GUIDE = "docs/upgrade/6.4.md"
+GUIDE = "docs/upgrade/6.5.md"
 SKIP_LABEL = "no-upgrade-guide"
 
 # Module-local helpers that exist only to emit a deprecation warning, whose

@@ -1,1 +1,0 @@
-**`Company` objects now compare and hash by CIK.** `Company("AAPL") == Company(320193)` is now `True`, where it was `False` before (equality was object identity), so companies de-duplicate in sets and work as dictionary keys. An `Entity` equals a `Company` with the same CIK; a successor and its predecessor stay unequal.
