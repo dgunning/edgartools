@@ -21,7 +21,7 @@ Generated from: data/xbrl-mappings/gaap_taxonomy_mapping.csv
 import json
 import logging
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Dict, List, Optional, Tuple
 
 from edgar.exceptions import ValidationError
@@ -137,6 +137,23 @@ class MappingResult:
     def primary_display_name(self) -> Optional[str]:
         """Get the primary (first) display name."""
         return self.display_names[0] if self.display_names else None
+
+
+@dataclass(frozen=True)
+class MappingMember:
+    """One stored key and its effective mapping in a standard concept family."""
+
+    mapping_key: str
+    """Exact key in the mapping data."""
+
+    qualified_tag: Optional[str]
+    """Taxonomy-family spelling when established by the mapping key."""
+
+    identity_status: str
+    """Whether the mapping identity is qualified or unqualified."""
+
+    result: MappingResult
+    """Independent lookup result with all surviving candidates and metadata."""
 
 
 class ReverseIndex:
@@ -445,6 +462,71 @@ class ReverseIndex:
             applied_industry=applied_industry,
             metadata_origins=metadata_origins,
         )
+
+    def members_of(
+        self, standard_concept: str, *, industry: Optional[str] = None
+    ) -> tuple[MappingMember, ...]:
+        """Discover effective mappings for an exact standard concept identifier.
+
+        An identifier is a value used in `MappingResult.standard_concepts`,
+        such as `Revenue`. A known family with no accepted members returns an
+        empty tuple. Industry overrides follow the same rules as `lookup()`.
+
+        Results are sorted by stored key for repeatable inspection. A family
+        can contain both totals and components. Membership and order do not
+        imply that tags are interchangeable or can be added together. Absence
+        from the family does not establish that a filed fact is absent or zero.
+
+        Raises:
+            TypeError: If standard_concept is not a string.
+            ValidationError: If the identifier is empty or unknown. This is a ValueError.
+        """
+        if not isinstance(standard_concept, str):
+            raise TypeError("standard_concept must be a string")
+        if not standard_concept or not self._knows_standard_concept(standard_concept):
+            raise ValidationError(
+                f"Unknown standard concept {standard_concept!r}.",
+                parameter="standard_concept",
+                invalid_value=standard_concept,
+                suggestions=["Use an exact identifier from MappingResult.standard_concepts, such as 'Revenue'."],
+            )
+
+        members = []
+        for key in sorted(self._index):
+            result = self.lookup(key, industry=industry)
+            if result is None or standard_concept not in result.standard_concepts:
+                continue
+
+            qualified_tag = self._qualified_member_tag(key)
+            # Forward lookup can return the stored candidate list directly.
+            members.append(MappingMember(
+                mapping_key=key,
+                qualified_tag=qualified_tag,
+                identity_status="qualified" if qualified_tag else "unqualified",
+                result=replace(result, standard_concepts=result.standard_concepts.copy()),
+            ))
+        return tuple(members)
+
+    def _knows_standard_concept(self, concept: str) -> bool:
+        if concept in self._display_names or concept in self._embedded_display_names:
+            return True
+        return any(
+            concept in entry.get("standard_tags", ())
+            or any(
+                concept in override.get("standard_tags", ())
+                for override in (entry.get("industry_overrides") or {}).values()
+            )
+            for entry in self._index.values()
+        )
+
+    @staticmethod
+    def _qualified_member_tag(key: str) -> Optional[str]:
+        if _is_ifrs_tag(key):
+            return _canonical_ifrs_key(key).replace("_", ":", 1)
+        for taxonomy in ("us-gaap", "srt", "dei"):
+            if key.startswith((f"{taxonomy}:", f"{taxonomy}_")):
+                return f"{taxonomy}:{key[len(taxonomy) + 1:]}"
+        return None
 
     def _may_resolve_to(self, key: str, entry: dict, concept: str, display_name: str) -> bool:
         """Whether the index entry `key` may resolve to `concept` (the total guard in lookup())."""
@@ -880,6 +962,13 @@ def lookup(xbrl_tag: str) -> Optional[MappingResult]:
         MappingResult or None
     """
     return get_reverse_index().lookup(xbrl_tag)
+
+
+def members_of(
+    standard_concept: str, *, industry: Optional[str] = None
+) -> tuple[MappingMember, ...]:
+    """Discover effective mappings using the default reverse index."""
+    return get_reverse_index().members_of(standard_concept, industry=industry)
 
 
 def get_standard_concept(

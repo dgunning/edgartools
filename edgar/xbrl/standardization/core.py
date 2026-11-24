@@ -497,13 +497,14 @@ class MappingStore:
 
     def get_company_concepts(self, standard_concept: str) -> Set[str]:
         """
-        Get all company concepts mapped to a standard concept.
+        Get the company concept keys stored in this legacy mapping store.
 
         Args:
             standard_concept: The standard concept
 
         Returns:
-            Set of company concepts mapped to the standard concept
+            Set of legacy keys for the standard concept. Use ReverseIndex.members_of()
+            to discover effective mappings in the reverse index.
         """
         return self.mappings.get(standard_concept, set())
 

@@ -619,6 +619,31 @@ The new fields are appended with defaults, so existing six-argument `MappingResu
 construction still works. `dataclasses.asdict()` now includes the new fields;
 consumers with strict serialized schemas should account for that additive change.
 
+### Discovering Tags for a Standard Concept
+
+Use `members_of()` with an exact standard concept identifier from
+`MappingResult.standard_concepts`. For example, the `Revenue` family
+includes the tag for earned premiums:
+
+```python
+from edgar.xbrl.standardization.reverse_index import members_of
+
+for member in members_of("Revenue"):
+    if member.mapping_key == "PremiumsEarnedNet":
+        print(member.mapping_key, member.result.standard_concepts)
+        # PremiumsEarnedNet ['Revenue']
+```
+
+Each record keeps the exact stored key and the full lookup result, including
+any other surviving candidates. Inspect `qualified_tag` when you need the
+taxonomy-family spelling. A bare mapping key can have unknown qualification.
+Pass `industry=` to apply the same overrides as `lookup()`.
+
+Families can contain both totals and components. The results are sorted by
+stored key for repeatable inspection. Check the filing context before
+selecting, comparing, or adding amounts. A tag's absence from a family
+tells you nothing about whether a filing reports that fact or whether its value is zero.
+
 ### Checking Coverage
 
 ```python
