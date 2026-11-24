@@ -24,6 +24,15 @@ What these tests pin:
 1. ALGN balance sheet and income statement scaling agree (both in thousands)
 2. ABNB scaling is the page-declared scale for each of four fiscal years
 3. Canary 5-ticker subset reports the scale each page declares
+4. The XBRL ``decimals`` estimate used for a report with no title cell, run
+   on real filings: it matches the page where the filer's rounding matches its
+   display scale, and is not the display scale where they differ
+
+Every test reads a fixed 10-K. The ALGN and AAPL tests used to read
+``Company(...).get_filings(form='10-K').latest()``, and the rest resolved their
+accessions with ``find()``, which downloads the SEC quarterly index; filings are
+now built with ``tests._offline_filings.offline_filing`` and only each filing's
+own R pages are fetched.
 
 GitHub Issue: https://github.com/dgunning/edgartools/issues/807
 """
@@ -31,10 +40,12 @@ from __future__ import annotations
 
 import pytest
 
-from edgar import Company, find
+from tests._offline_filings import offline_filing
 
-
-VALID_MONETARY_SCALES = {1, 1_000, 1_000_000, 1_000_000_000}
+AAPL_FY2026 = '0000320193-26-000026'
+ALGN_FY2025 = '0001097149-26-000014'
+ABNB_FY2024 = '0001559720-25-000010'
+AMGN_FY2025 = '0000318154-26-000010'
 
 
 def _primary_statement(viewer, *needles: str, exclude=("Parenthetical",)):
@@ -55,8 +66,7 @@ def test_algn_balance_sheet_and_income_statement_scaling_agree():
     """ALGN was the reporter's canonical same-filing mismatch example
     (BS=0, IS=1_000 in the issue text). The two primary statements MUST
     report identical currency scaling within a single filing."""
-    f = Company('ALGN').get_filings(form='10-K').latest()
-    viewer = f.viewer
+    viewer = offline_filing(ALGN_FY2025).viewer
     bs = _primary_statement(viewer, 'balance', 'sheet')
     is_ = _primary_statement(viewer, 'statements', 'of', 'operations')
     assert bs is not None and is_ is not None, "ALGN primary statements not found"
@@ -64,7 +74,8 @@ def test_algn_balance_sheet_and_income_statement_scaling_agree():
         f"ALGN scaling mismatch: BS={bs.currency_scaling}, "
         f"IS={is_.currency_scaling}"
     )
-    assert bs.currency_scaling in VALID_MONETARY_SCALES
+    # ALGN FY2025: R3 and R5 both "$ in Thousands"
+    assert bs.currency_scaling == 1_000
 
 
 def _income_statement(viewer):
@@ -113,7 +124,7 @@ def test_abnb_scaling_is_the_page_declared_scale_each_year(accession, bs_scale, 
     two pages legitimately differ. ``currency_scaling`` is the factor that
     turns a displayed value into the raw amount, which makes the page's own
     declaration the only correct answer: 11,102,000,000 x 1, not x 1,000,000."""
-    viewer = find(accession).viewer
+    viewer = offline_filing(accession).viewer
     bs = _primary_statement(viewer, 'balance', 'sheet')
     is_ = _income_statement(viewer)
     assert bs is not None and is_ is not None, f"ABNB {accession}: primary statements not found"
@@ -132,7 +143,7 @@ def test_canary_tickers_report_page_declared_scales(ticker, accession, bs_scale,
     value was read from. Every primary statement reports the scale its own
     page declares; AMGN shows that the balance sheet and income statement of
     one filing can differ (millions and thousands)."""
-    viewer = find(accession).viewer
+    viewer = offline_filing(accession).viewer
     bs = _primary_statement(viewer, 'balance', 'sheet')
     is_ = _income_statement(viewer)
     assert bs is not None and is_ is not None, f"{ticker} {accession}: primary statements not found"
@@ -146,27 +157,51 @@ def test_canary_tickers_report_page_declared_scales(ticker, accession, bs_scale,
 
 @pytest.mark.network
 def test_aapl_matches_canonical_million_scale():
-    """AAPL is the control: its R*.htm headers DO match the original
-    ``$ in Millions`` text pattern, so both the XBRL-derived path and the
-    text-match fallback path return the same answer. This pins the
-    no-regression baseline."""
-    f = Company('AAPL').get_filings(form='10-K').latest()
-    viewer = f.viewer
+    """AAPL is the control: its R*.htm headers match the original
+    ``$ in Millions`` text pattern, so the old and new parsers agree."""
+    viewer = offline_filing(AAPL_FY2026).viewer
     stmt = viewer.financial_statements[0]
     assert stmt.currency_scaling == 1_000_000
+
+
+# (accession, statement, scale the page declares, scale XBRL decimals imply)
+DECIMALS_ESTIMATES = [
+    # Rounding matches display: the estimate is the page's scale.
+    (AAPL_FY2026, 'BS', 1_000_000, 1_000_000),
+    (ALGN_FY2025, 'BS', 1_000, 1_000),
+    (ALGN_FY2025, 'IS', 1_000, 1_000),
+    # Revenue "$ 11,102,000,000" on a whole-dollar page, filed in millions.
+    (ABNB_FY2024, 'IS', 1, 1_000_000),
+    # Revenues "$ 36,751,000" on a page in thousands, filed in millions.
+    (AMGN_FY2025, 'IS', 1_000, 1_000_000),
+]
 
 
 @pytest.mark.network
-def test_xbrl_unavailable_falls_back_to_text_match():
-    """Force the XBRL path off by stubbing ``_get_xbrl`` to None; verify
-    the resolver returns the text-match value from ConceptReport (AAPL's
-    is 1_000_000 because its header matches the original pattern)."""
-    f = Company('AAPL').get_filings(form='10-K').latest()
-    viewer = f.viewer
-    # Disable XBRL lazy-load so _resolve_currency_scaling takes the fallback.
+@pytest.mark.parametrize('accession, which, declared, estimated', DECIMALS_ESTIMATES)
+def test_decimals_estimate_on_real_xbrl(accession, which, declared, estimated):
+    """``_resolve_currency_scaling`` is the estimate used only when a report has
+    no title cell. Every offline test of that routing mocks it, so this is the
+    one place its body runs, on each filing's own XBRL. The ABNB and AMGN rows
+    show why a declared scale always wins: there the estimate is off by a
+    factor of 1,000 and 1,000,000."""
+    viewer = offline_filing(accession).viewer
+    vr = (_primary_statement(viewer, 'balance', 'sheet') if which == 'BS'
+          else _income_statement(viewer))
+    assert vr.concept_report.header_found
+    assert vr.currency_scaling == declared
+    assert viewer._resolve_currency_scaling(vr.concept_report, vr._report.role) == estimated
+
+
+@pytest.mark.network
+def test_without_xbrl_the_estimate_falls_back_to_the_page():
+    """With no XBRL to read decimals from, the estimate returns the
+    ConceptReport's own value. This used to be checked through
+    ``currency_scaling``, which never calls the estimate for a page with a title
+    cell, so it passed whether or not the fallback worked."""
+    viewer = offline_filing(ALGN_FY2025).viewer
     viewer._xbrl = None
     viewer._xbrl_loaded = True
-    stmt = viewer.financial_statements[0]
-    # The text-match value on AAPL is 1_000_000 (it matches "$ in Millions").
-    assert stmt.currency_scaling == stmt.concept_report.currency_scaling
-    assert stmt.currency_scaling == 1_000_000
+    bs = _primary_statement(viewer, 'balance', 'sheet')
+    assert bs.concept_report.currency_scaling == 1_000
+    assert viewer._resolve_currency_scaling(bs.concept_report, bs._report.role) == 1_000
