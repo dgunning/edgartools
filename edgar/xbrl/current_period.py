@@ -29,6 +29,56 @@ if TYPE_CHECKING:
     from edgar.xbrl.statements import Statement
 
 
+# Statements whose current period is a duration. A statement of equity is a
+# roll-forward over the year: under an instant it lost every flow row (net
+# income, dividends, buybacks) and showed the closing balance as its opening
+# one (Apple FY2023: 62,146M on both rows instead of 50,672M and 62,146M).
+_DURATION_STATEMENTS = frozenset({
+    'IncomeStatement', 'CashFlowStatement', 'ComprehensiveIncome', 'StatementOfOperations',
+    'StatementOfCashFlows', 'StatementOfEquity',
+})
+_INSTANT_STATEMENTS = frozenset({'BalanceSheet', 'StatementOfFinancialPosition'})
+
+# A cash flow statement is reported year to date: a second-quarter 10-Q files
+# six months of cash flows and only a handful of three-month ones (Tesla Q2
+# 2024: 34 rows against 2). So its current period is the longest duration up
+# to a year; the other flow statements prefer the year, then the quarter.
+_CASH_FLOW_STATEMENTS = frozenset({'CashFlowStatement', 'StatementOfCashFlows'})
+_YEAR_TO_DATE_PRIORITY = {'Annual': 1, 'Nine Months': 2, 'Semi-Annual': 3, 'Quarterly': 4}
+_DEFAULT_PRIORITY = {'Annual': 1, 'Quarterly': 2}
+
+
+def _current_period_cells(items, period_key: str, statement_type: str):
+    """Yield ``(item, value)`` for the value each row shows under ``period_key``.
+
+    Uses ``balance_cell_key``, the rule ``Statement.to_dataframe()`` and the
+    rendered table share, so an instant balance under a duration column (a
+    cash flow's beginning and ending cash, an equity roll-forward's opening and
+    closing balances) shows its value instead of dropping out of the statement.
+    ``items`` must already be filtered to the rows being shown: the first of a
+    repeated (concept, label) pair on a statement of equity is its opening balance.
+    """
+    from edgar.xbrl.core import balance_cell_key
+    from edgar.xbrl.rendering import EQUITY_POSITION_STATEMENTS
+
+    by_position = statement_type in EQUITY_POSITION_STATEMENTS
+    totals: Dict[tuple, int] = {}
+    if by_position:
+        for item in items:
+            row = (item.get('concept', ''), item.get('label', ''))
+            totals[row] = totals.get(row, 0) + 1
+    seen: Dict[tuple, int] = {}
+    for item in items:
+        opening_by_position = False
+        if by_position:
+            row = (item.get('concept', ''), item.get('label', ''))
+            seen[row] = seen.get(row, 0) + 1
+            opening_by_position = seen[row] == 1 and totals[row] > 1
+        values = item.get('values') or {}
+        key = balance_cell_key(values, period_key, item.get('preferred_label'), opening_by_position)
+        yield item, (values[key] if key else None)
+
+
 class CurrentPeriodView:
     """
     Convenient access to current period financial data.
@@ -187,8 +237,9 @@ class CurrentPeriodView:
         """
         Get the appropriate period type for the given statement type.
 
-        Balance sheet items are point-in-time (instant periods).
-        Income statement and cash flow items represent activities over time (duration periods).
+        Balance sheet items are point-in-time (instant periods). Income,
+        cash flow and equity statements report activity over time (duration
+        periods); a cash flow statement takes its year-to-date duration.
 
         Args:
             statement_type: Type of statement ('BalanceSheet', 'IncomeStatement', etc.)
@@ -196,26 +247,10 @@ class CurrentPeriodView:
         Returns:
             Period key appropriate for the statement type
         """
-        # Statements that use instant periods (point in time)
-        instant_statements = {
-            'BalanceSheet',
-            'StatementOfEquity',
-            'StatementOfFinancialPosition'
-        }
-
-        # Statements that use duration periods (period of time)
-        duration_statements = {
-            'IncomeStatement',
-            'CashFlowStatement',
-            'ComprehensiveIncome',
-            'StatementOfOperations',
-            'StatementOfCashFlows'
-        }
-
-        if statement_type in instant_statements:
+        if statement_type in _INSTANT_STATEMENTS:
             # Use the current instant period
             return self.period_key
-        elif statement_type in duration_statements:
+        elif statement_type in _DURATION_STATEMENTS:
             # Find the most recent duration period with the same end date
             if not self.xbrl.reporting_periods:
                 return self.period_key  # Fallback to current period
@@ -243,8 +278,11 @@ class CurrentPeriodView:
                         return self.period_key  # Fallback
 
             if current_end_date:
-                # Look for a duration period ending on the same date
-                # Prefer annual periods, then quarterly, then other durations
+                # Look for a duration period ending on the same date, ranked
+                # by _YEAR_TO_DATE_PRIORITY for a cash flow statement and by
+                # _DEFAULT_PRIORITY (annual, then quarterly) otherwise
+                priorities = (_YEAR_TO_DATE_PRIORITY if statement_type in _CASH_FLOW_STATEMENTS
+                              else _DEFAULT_PRIORITY)
                 matching_periods = []
 
                 for period in self.xbrl.reporting_periods:
@@ -257,13 +295,13 @@ class CurrentPeriodView:
                                 end_date = datetime.strptime(parts[2], '%Y-%m-%d').date()
                                 if end_date == current_end_date:
                                     period_type = period.get('period_type', '')
-                                    priority = 1 if period_type == 'Annual' else (2 if period_type == 'Quarterly' else 3)
+                                    priority = priorities.get(period_type, len(priorities) + 1)
                                     matching_periods.append((priority, period_key, period.get('label', period_key)))
                             except (ValueError, IndexError):
                                 continue
 
                 if matching_periods:
-                    # Sort by priority (1=Annual, 2=Quarterly, 3=Other) and return the best match
+                    # Sort by priority and return the best match
                     matching_periods.sort(key=lambda x: x[0])
                     selected_period = matching_periods[0][1]
                     log.debug(f"Selected duration period for {statement_type}: {selected_period}")
@@ -458,26 +496,22 @@ class CurrentPeriodView:
             concept_metadata = self._build_concept_metadata(statement_data)
 
             # Convert to DataFrame
+            # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
+            # Skip breakdown dimensions when include_dimensions=False
+            # Issue #569: Keep classification dimensions (PPE type, equity components) on face
+            # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
+            # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
+            shown = [
+                item for item in statement_data
+                if not is_xbrl_structural_element(item)
+                and (include_dimensions or not item.get('is_dimension', False)
+                     or not is_breakdown_dimension(item, statement_type=statement_type,
+                                                   xbrl=self.xbrl, role_uri=role_uri))
+            ]
+
             rows = []
-            for item in statement_data:
-                # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
-                if is_xbrl_structural_element(item):
-                    continue
-
+            for item, current_value in _current_period_cells(shown, period_filter, statement_type):
                 is_dimension = item.get('is_dimension', False)
-
-                # Skip breakdown dimensions when include_dimensions=False
-                # Issue #569: Keep classification dimensions (PPE type, equity components) on face
-                # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
-                # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
-                if not include_dimensions and is_dimension:
-                    if is_breakdown_dimension(item, statement_type=statement_type,
-                                              xbrl=self.xbrl, role_uri=role_uri):
-                        continue
-
-                # Get the value for appropriate period
-                values = item.get('values', {})
-                current_value = values.get(period_filter)
 
                 if current_value is not None:
                     concept_name = self._get_concept_name(item, raw_concepts)
@@ -947,25 +981,22 @@ class CurrentPeriodStatement:
         concept_metadata = self._build_concept_metadata(raw_data)
 
         # Convert to DataFrame format matching Statement.to_dataframe() schema
+        # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
+        # Skip breakdown dimensions when include_dimensions=False
+        # Issue #569: Keep classification dimensions (PPE type, equity components) on face
+        # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
+        # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
+        shown = [
+            item for item in raw_data
+            if not is_xbrl_structural_element(item)
+            and (dims or not item.get('is_dimension', False)
+                 or not is_breakdown_dimension(item, statement_type=self.canonical_type,
+                                               xbrl=self.xbrl, role_uri=self.role_or_type))
+        ]
+
         rows = []
-        for item in raw_data:
-            # Issue #03zg: Skip XBRL structural elements (Axis, Domain, Table, Line Items)
-            if is_xbrl_structural_element(item):
-                continue
-
+        for item, current_value in _current_period_cells(shown, self.period_filter, self.canonical_type):
             is_dimension = item.get('is_dimension', False)
-
-            # Skip breakdown dimensions when include_dimensions=False
-            # Issue #569: Keep classification dimensions (PPE type, equity components) on face
-            # Pass statement_type for context-aware filtering (e.g., EquityComponentsAxis on StatementOfEquity)
-            # Issue #577/cf9o: Pass xbrl and role_uri for definition linkbase-based filtering
-            if not dims and is_dimension:
-                if is_breakdown_dimension(item, statement_type=self.canonical_type,
-                                          xbrl=self.xbrl, role_uri=self.role_or_type):
-                    continue
-
-            values = item.get('values', {})
-            current_value = values.get(self.period_filter)
 
             if current_value is not None:
                 concept_name = item.get('concept', '')
