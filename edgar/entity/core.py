@@ -11,6 +11,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING, Iterable, List, Optional, Tuple, TypeVar, Union
 
 import pyarrow as pa
+import pyarrow.compute as pc
 
 if TYPE_CHECKING:
     import pandas as pd
@@ -28,6 +29,7 @@ from rich.table import Table
 from rich.text import Text
 
 from edgar._filings import Filings
+from edgar.core import listify
 from edgar.company_reports import TenK, TenQ
 from edgar.display.styles import get_style, SYMBOLS
 from edgar.entity.data import Address, CompanyData, EntityData
@@ -36,7 +38,7 @@ from edgar.exceptions import CompanyFactsNotFoundError, CompanyNotFoundError, Va
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.display.formatting import cik_text, datefmt, reverse_name
-from edgar.reference.successors import get_predecessor
+from edgar.reference.successors import Predecessor, get_predecessor, get_predecessor_chain, get_successor
 from edgar.reference.tickers import find_cik
 from edgar.richtools import Docs, repr_rich
 
@@ -244,6 +246,23 @@ class Entity(SecFiler):
 
         self._data = None
 
+    def __eq__(self, other):
+        """
+        Two entities are equal when they are the same registrant: the same CIK.
+
+        ``Company("XOM") == Company(2115436)`` whether it was found by ticker or
+        CIK, and an ``Entity`` equals a ``Company`` with its CIK. A successor and
+        its predecessor are different registrants and are never equal:
+        ``Company("XOM") != Company(34088)``, though one's history includes the
+        other's.
+        """
+        if not isinstance(other, Entity):
+            return NotImplemented
+        return self.cik == other.cik
+
+    def __hash__(self):
+        return hash((Entity, self.cik))
+
     @property
     def cik(self) -> int:
         """Get the CIK number for this entity."""
@@ -396,7 +415,9 @@ class Entity(SecFiler):
                    is_xbrl: Optional[bool] = None,
                    is_inline_xbrl: Optional[bool] = None,
                    sort_by: Optional[Union[str, List[Tuple[str, str]]]] = None,
-                   trigger_full_load: bool = True) -> 'EntityFilings':
+                   trigger_full_load: bool = True,
+                   report_date: Optional[str] = None,
+                   predecessors: bool = True) -> 'EntityFilings':
         """
         Get the entity's filings and optionally filter by multiple criteria.
 
@@ -413,18 +434,28 @@ class Entity(SecFiler):
             file_number: The file number e.g. 001-39504
             filing_date: Filter by filing date (YYYY-MM-DD or range)
             date: Alias for filing_date
+            report_date: Filter by exact period-of-report date (YYYY-MM-DD)
             amendments: Whether to include amendments (default: True)
             is_xbrl: Whether the filing is XBRL
             is_inline_xbrl: Whether the filing is Inline XBRL
             sort_by: Sort criteria
             trigger_full_load: Whether to load all historical filings if not already loaded
+            predecessors: Include the filings of the registrants this one succeeded
+                (default: True). When a company forms a holding company or
+                redomiciles, SEC gives its ticker to a new CIK and leaves the
+                earlier filings under the old one: Company("XOM") is ExxonMobil
+                Holdings Corp since 2026-07-01, and its 10-Ks up to FY2025 were
+                filed by Exxon Mobil Corp (CIK 34088). Only successions reviewed
+                by hand are followed. A predecessor contributes what it filed
+                before the succession, plus 10-K, 10-Q, 20-F and 40-F reports for
+                periods that ended before it. The result then has ``cik`` and
+                ``company`` columns naming each row's filer. Pass False for this
+                registrant's own filings only.
 
         Returns:
             Filtered filings matching the criteria
         """
-        # Simply delegate to the EntityData implementation
-        # This preserves the lazy-loading behavior while keeping the API clean
-        return self.data.get_filings(
+        query = dict(
             year=year,
             quarter=quarter,
             form=form,
@@ -435,8 +466,51 @@ class Entity(SecFiler):
             is_xbrl=is_xbrl,
             is_inline_xbrl=is_inline_xbrl,
             sort_by=sort_by,
-            trigger_full_load=trigger_full_load
+            trigger_full_load=trigger_full_load,
+            report_date=report_date,
         )
+        # EntityData keeps the lazy loading of this registrant's own filings
+        filings = self.data.get_filings(**query)
+        if not predecessors or filings is None:
+            return filings
+        if not self._predecessor_chain:
+            return filings
+        # An accession lookup the registrant's own filings answered needs nothing more
+        if accession_number and len(filings) >= len(set(listify(accession_number))):
+            return filings
+        return self._with_predecessor_filings(filings, query)
+
+    @cached_property
+    def _predecessor_chain(self) -> List[Tuple[Predecessor, 'Company']]:
+        """The registrants this one continues, nearest first, with their successions."""
+        return [(predecessor, Company(predecessor.cik)) for predecessor in get_predecessor_chain(self.cik)]
+
+    @property
+    def _predecessor_companies(self) -> List['Company']:
+        return [company for _, company in self._predecessor_chain]
+
+    def _with_predecessor_filings(self, filings: 'EntityFilings', query: dict) -> 'EntityFilings':
+        """This registrant's filings followed by those its predecessors filed for it (GH #2034)."""
+        from edgar.entity.filings import EntityFilings, before_succession, with_filer, without_reports_of
+        tables = [with_filer(filings.data, self.cik, self.name)]
+        seen = pa.array(filings.data['accession_number'].to_pylist(), pa.string())
+        for predecessor, company in self._predecessor_chain:
+            own = company.get_filings(**query, predecessors=False)
+            if own is None or own.empty:
+                continue
+            table = before_succession(own.data, predecessor.effective_date)
+            # A filing made under both CIKs is listed once, as the successor's
+            table = table.filter(pc.invert(pc.is_in(table['accession_number'], value_set=seen)))
+            # So is a period both registrants reported on separately after the succession
+            table = without_reports_of(table, tables[0], predecessor.effective_date)
+            seen = pa.concat_arrays([seen, table['accession_number'].combine_chunks().cast(pa.string())])
+            tables.append(with_filer(table, company.cik, company.name))
+        # An empty submissions list is built with a fixed schema that differs from the one
+        # inferred from SEC's JSON (string sizes, naive acceptance times): cast empties to match.
+        schema = next((t.schema for t in tables if t.num_rows), tables[0].schema)
+        merged = pa.concat_tables([t if t.schema == schema else t.cast(schema) for t in tables])
+        sort_by = query.get('sort_by') or [('filing_date', 'descending')]
+        return EntityFilings(merged.sort_by(sort_by), cik=self.cik, company_name=self.name)
 
     def _empty_company_filings(self):
         """
@@ -611,9 +685,9 @@ class Company(Entity):
 
         When a company forms a holding company or redomiciles, SEC gives the ticker to
         the new CIK and leaves the earlier 10-Ks and XBRL facts under the old one.
-        get_facts() already includes the predecessor's facts; get_financials() reads
-        this company's own latest annual report. Only successions reviewed by hand
-        are listed.
+        get_facts() and get_filings() already include the predecessor's history, so
+        latest_tenk and get_financials() read its 10-Ks until this company files its
+        own. Only successions reviewed by hand are listed.
 
         Example::
 
@@ -623,20 +697,56 @@ class Company(Entity):
         Returns:
             The predecessor Company, or None if this company has no listed predecessor
         """
-        predecessor = get_predecessor(self.cik)
-        return Company(predecessor.cik) if predecessor else None
+        return self._predecessor_companies[0] if self._predecessor_companies else None
+
+    @cached_property
+    def successor(self) -> Optional['Company']:
+        """
+        The registrant that continues this one, when a reviewed succession lists it.
+
+        The reverse of ``predecessor``: Exxon Mobil Corp (CIK 34088) is continued by
+        ExxonMobil Holdings Corp (CIK 2115436), which holds the XOM ticker since
+        2026-07-01. This company's own filings and facts are unchanged.
+
+        Example::
+
+            >>> Company(34088).successor     # ExxonMobil Holdings Corp
+
+        Returns:
+            The successor Company, or None if no reviewed succession lists one
+        """
+        successor_cik = get_successor(self.cik)
+        return Company(successor_cik) if successor_cik else None
 
     def _warn_history_with_predecessor(self, problem: str, method: str) -> None:
+        import warnings
         predecessor = get_predecessor(self.cik)
         if predecessor is None:
+            self._hint_unreviewed_succession(problem)
+            return
+        # get_filings() already searched the predecessor's recent filings too (GH #2034),
+        # so sending the user to Company(predecessor) would find nothing more.
+        warnings.warn(
+            f"{self.name} (CIK {self.cik}) {problem}, and neither has CIK {predecessor.cik}, which it "
+            f"succeeded on {predecessor.effective_date}, among its recent filings. "
+            f"company.get_filings(form='10-K') searches the full history of both.",
+            PredecessorHistoryWarning,
+            stacklevel=3,
+        )
+
+    def _hint_unreviewed_succession(self, problem: str) -> None:
+        # An 8-K12B marks a successor registrant; without a reviewed pair it may be
+        # a merger, so this only says where the history might be (GH #2034).
+        succession = self.get_filings(form='8-K12B', trigger_full_load=False, predecessors=False).latest()
+        if succession is None or not self.tickers:
             return
         import warnings
         warnings.warn(
-            f"{self.name} (CIK {self.cik}) {problem}. It succeeded CIK {predecessor.cik} on "
-            f"{predecessor.effective_date}, and the earlier filings are under that CIK: "
-            f"Company({predecessor.cik}).{method}() or company.predecessor.{method}()",
+            f"{self.name} (CIK {self.cik}) {problem}. It filed an 8-K12B on {succession.filing_date}, "
+            f"so it may continue an earlier registrant whose filings are under another CIK; "
+            f"this succession has not been reviewed yet.",
             PredecessorHistoryWarning,
-            stacklevel=3,
+            stacklevel=4,
         )
 
     def get_financials(self) -> Optional[Financials]:
@@ -797,7 +907,8 @@ class Company(Entity):
         Returns:
             Set of form type strings (e.g., {'10-K', '10-Q', '8-K'})
         """
-        filings = self.get_filings(trigger_full_load=False)
+        # This registrant's own forms: a predecessor's would classify another filer
+        filings = self.get_filings(trigger_full_load=False, predecessors=False)
         if filings is None or filings.empty:
             return set()
 

@@ -106,5 +106,8 @@ sharp_edges:
     solution: |
       xom = Company("XOM")                 # ExxonMobil Holdings Corp (CIK 2115436) since 2026-07-01
       xom.get_facts().income_statement()   # already includes predecessor history (FY2016-)
-      xom.get_financials()                 # None + PredecessorHistoryWarning: no 10-K filed yet
-      financials = xom.predecessor.get_financials()   # Exxon Mobil Corp (CIK 34088) latest 10-K
+      xom.get_financials()                 # the latest 10-K under either CIK: filings follow the predecessor
+      xom.get_filings(form="10-K")         # 31 rows; the cik/company columns name each row's filer (34088)
+      xom.get_filings(predecessors=False)  # the new CIK's own filings only
+      Company(34088).successor             # the reverse: ExxonMobil Holdings Corp
+      # Unreviewed successions are not merged: a PredecessorHistoryWarning names the 8-K12B

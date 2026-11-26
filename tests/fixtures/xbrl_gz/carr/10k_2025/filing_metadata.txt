@@ -1,0 +1,6 @@
+ticker=CARR
+accession=0001783180-26-000008
+form=10-K
+filing_date=2026-02-05
+cik=1783180
+company=CARRIER GLOBAL Corp

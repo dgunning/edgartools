@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [6.4.0] - 2026-11-24
+
+### Added
+
+- **Statement exports can skip metadata lookups.** `Statement.to_dataframe(include_metadata=False)` omits balance, weight, preferred sign, and both parent columns while preserving statement values. On ExxonMobil's FY2022 income statement, median export time was 14 ms without metadata and 119 ms with metadata. (GH #2019)
+- **`Company.get_filings(report_date=...)` finds a filing by the period it reports on.** `Company("AAPL").get_filings(form="10-K", report_date="2023-09-30")` returns the FY2023 10-K (`0000320193-23-000106`), filed 2023-11-03; it combines with the filing-date filters, and an invalid date raises an error naming `report_date`. (GH #2008)
+- **`Cell.xbrl_fact_ids` exposes Inline XBRL IDs from HTML table cells.** Oracle's filed $3,726 million EMEA revenue cell can be traced to its explicit Inline XBRL footnote through the existing document APIs. (GH #2016)
+- **`edgar_read` can now return more or less than 6,000 characters per text section.** The new optional `max_chars` parameter sets the cap per section; omitting it keeps the 6,000-character default, and 13F-HR holdings stay bounded by `limit`. Very large values can return a whole filing in one result.
+- **Missing balance-sheet totals can be reconstructed with `Financials.derive_total_liabilities()`.** Amazon's Q2 2026 10-Q (`0001018724-26-000026`) omits a standalone total. The method reconciles $544,069 million of reported components against assets less equity and returns both calculations for audit. Existing getters and ratios continue to use filed totals. (GH #1878)
+- **Python 3.15 is supported.** The fast suite passes on CPython 3.15.1 (52,212 tests), and post-merge CI now runs it on 3.15 alongside 3.11 and 3.13.
+
+### Changed
+
+- **`Company("NAVI")` facts reach back past Navient's 2026 holding-company reorganization.** Navient Holdings (CIK 2152623) is now listed as the successor of Navient Corp (CIK 1593538), so `get_facts()` merges the predecessor's history; FY2024 net income reads $131 million from Navient Corp's 10-K.
+- **`Company` objects now compare and hash by CIK.** `Company("AAPL") == Company(320193)` is now `True`, where it was `False` before (equality was object identity), so companies de-duplicate in sets and work as dictionary keys. An `Entity` equals a `Company` with the same CIK; a successor and its predecessor stay unequal.
+- **`Company.get_filings()` now includes a successor registrant's predecessor history.** For the 10 reviewed successions, filings follow the old CIK as `get_facts()` already did, so `Company("XOM").get_filings(form="10-K")` returns Exxon Mobil Corp's 31 10-Ks instead of none, with `cik` and `company` columns naming each filer. Pass `predecessors=False` for the new CIK alone; `Company.successor` gives the reverse.
+
+### Fixed
+
+- **Balance-sheet validation counts temporary equity.** When a balance sheet has no combined liabilities-and-equity total, `validate()` now adds temporary (mezzanine) equity such as redeemable preferred stock, so Gladstone Capital's 10-K (`0001143513-26-000014`: assets $973,474,000 = liabilities $453,111,000 + equity $469,298,000 + temporary equity $51,065,000) is valid instead of invalid.
+- **497K fee tables no longer drop filed waivers or quarter dates.** Waiver rows that name the management fee, gross totals qualified "before fee waivers", wrapped labels and "fees waived" wording each lost or misplaced a filed value; over 150 sampled 497Ks, share classes where total plus waiver does not equal net fell from 7 to 0. Best/worst quarter labels written "4Q 2023" or "12/31/2023" are now kept.
+- **10-K and 10-Q sections laid out as absolutely positioned lines lost lines at their edges.** A line holding an empty spacer `div` was read as having no text, so Henry Schein's FY2023 Item 7 stopped at "please see" and Item 2 opened mid-sentence. Over 17 filings in this layout, 20 sections now open on their own heading and 55 have a corrected end, most of them a truncated sentence or the next item's heading.
+- **`get_gross_profit()` from components now answers the fiscal year when `annual=True`.** For filers that tag no GrossProfit, revenue and cost were each the newest fact of any length, so Procter & Gamble's annual gross profit was one quarter ($11,598M); it is now FY2026's $43,670M. Both parts come from the same latest period, and no older year stands in when that period's cost is untagged.
+- **`SixK.text()` rendered a 6-K's XBRL files and skipped its cover page.** Every attachment but graphics counted as an exhibit, so the FUTU 6-K's text was 13.5 million characters of XBRL instance, linkbases and viewer pages (now 666 thousand, in 1.5 s instead of 28 s), and a 6-K with its content in the cover came back empty. `SixK.exhibits` now holds the EX-* documents, and `text()` renders the cover page and those exhibits, as `EightK.text()` does. (GH #844)
+- **A successor registrant's merged filings no longer list one quarter twice.** NorthWestern Energy Group's 10-Q for the quarter to 2023-09-30 appeared twice, its own and its predecessor's; the successor's is now kept. Merging also no longer fails when one registrant's filing list is empty, `filter(ticker=)` keeps predecessor rows, and accession lookups the successor answers skip the predecessor download.
+- **The facts frame now drops an extensible-enumeration fact repeated with different whitespace.** One member set filed once with spaces and once with line breaks stayed as two rows, because duplicates were compared as raw strings. Enumeration values now compare with whitespace collapsed, while `value` is still returned as filed; row counts across the 47 bundled XBRL fixtures (94,996 facts) are unchanged.
+- **Calculation trees no longer invent or guess a weight.** A calculation arc with a missing, unparseable or zero weight used to count as +1 (or 0), and two arcs between the same concepts with different weights kept whichever came first. Both are now left out of the tree with a warning; all 7,006 calculation arcs in the 50 bundled filing fixtures are unchanged.
+- **EntityFacts no longer reports a continuing-operations subtotal as total operating cash flow when the same period has nonzero discontinued operating cash.** SIFCO's FY2025 lookup returned the $127,000 continuing subtotal despite a separately reported $5,000 discontinued amount. (GH #1987)
+- **`edgar_trends(..., period="quarterly")` no longer overwrites quarterly revenue with 6M/9M YTD cumulative figures.** `_prefer_consolidated_totals` now compares only within the period-filtered window so Apple Q3 FY2026 (`0000320193-26-000020`) returns $109.4B instead of $364.4B (9M YTD) while MetLife Q3 2026 (`0001099219-26-000062`) still upgrades its $728M ASC-606 slice to $20.5B consolidated quarterly revenue.
+- **A fund series or class with more than 100 filings was missing one.** Paging through SEC's series filing list skipped position 100, so `Fund("VEXMX")`'s series returned 485 of its 486 filings and silently dropped a 2023 24F-2NT. The second page now starts at 100.
+- **Match exact text values in filing XBRL queries.** On Tesla's June 2024 Form 10-Q, `by_value("10-Q")` now finds the one filed document-type fact instead of returning zero matches. (GH #2003)
+- **EntityFacts now requires matching reporting dates when deriving revenue or gross profit.** The gross profit fallback returned $33.68B for Starbucks by subtracting a 2020 half-year cost from FY2026 revenue. It now returns `None` for those inputs. (GH #1979)
+
+### Performance
+
+- **Parsing an inline XBRL filing no longer re-scans nested TextBlocks node by node.** Removing ix: tags from escaped TextBlock values now runs inside lxml, cutting that step from 17.9 ms to 8.3 ms on Apple's FY2026 10-K and full parsing by about 2.5%. Extracted facts are unchanged across 247,860 facts in 86 fixtures.
+
 ## [6.3.0] - 2026-11-17
 
 ### Added

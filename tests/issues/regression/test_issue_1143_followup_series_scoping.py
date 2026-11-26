@@ -23,7 +23,6 @@ import pytest
 
 from edgar._filings import Filings
 
-
 # --- The report accessors must ask for their own series ---------------------
 
 def test_latest_report_is_series_scoped_when_the_fund_names_a_series():
@@ -95,28 +94,71 @@ def test_no_filter_is_still_no_filter():
     assert _apply_series_filters(empty, {}) is empty
 
 
-# --- Network -----------------------------------------------------------------
+# --- Against SEC's own pages, offline ----------------------------------------
+#
+# browse-edgar pages for VEXMX's series S000002841, saved verbatim on 2026-11-22
+# under tests/fixtures/funds/ (see the READMEs there). The Fund is built with the
+# series already named, so no ticker lookup is involved: the question here is
+# which series the answer belongs to, not how a ticker resolves.
+#
+# Ground truth, read without edgartools:
+# * The newest NPORT-P on S000002841's own listing is 0000036405-26-000478
+#   (period 2026-06-30, filed 2026-08-28). Its SEC header lists exactly one
+#   series, S000002841.
+# * The series' unfiltered listing holds 486 unique filings: 22 filed in 2023
+#   and 29 in 2024, counted from the page HTML.
 
-@pytest.mark.network
-@pytest.mark.regression
-def test_the_latest_report_belongs_to_the_fund_that_was_asked():
+VEXMX_SERIES = "S000002841"
+VEXMX_LATEST_NPORT = "0000036405-26-000478"
+
+
+class _TrustWide:
+    """The umbrella trust. Reaching it from a series question is the bug."""
+
+    def get_filings(self, **kwargs):
+        raise AssertionError(f"asked the whole trust instead of the series: {kwargs}")
+
+
+@pytest.fixture
+def sec_pages(monkeypatch):
+    from tests._browse_edgar_pages import serve_recorded_pages
+
+    requested = []
+    monkeypatch.setattr("edgar.funds.data.download_text", serve_recorded_pages(requested))
+    return requested
+
+
+def test_the_recorded_pages_are_present():
+    """Absent is not passing."""
+    from tests._browse_edgar_pages import FORM_PAGES, SERIES_PAGES
+
+    for name in ("S000002841-NPORT-P-start0.html", "S000002841-NPORT-P-start100.html"):
+        assert (FORM_PAGES / name).is_file(), name
+    for start in range(0, 700, 100):
+        assert (SERIES_PAGES / f"S000002841-start{start}.html").is_file(), start
+
+
+def test_the_latest_report_belongs_to_the_fund_that_was_asked(sec_pages, monkeypatch):
+    from edgar._filings import Filing
     from edgar.funds.core import Fund
 
-    report = Fund("VEXMX").get_latest_report()
+    fund = Fund.__new__(Fund)
+    fund._target_series_id = VEXMX_SERIES
+    fund._entity = fund._company = _TrustWide()
+    fund._series = fund._class = None
+    # Parsing the 3 MB NPORT document is not what is under test; which filing
+    # get_latest_report() picked is.
+    monkeypatch.setattr(Filing, "obj", lambda self: self.accession_no)
 
-    assert report.general_info.series_id == "S000002841", (
-        f"VEXMX was handed {report.general_info.series_id}'s report"
-    )
+    assert fund.get_latest_report() == VEXMX_LATEST_NPORT
+    assert all(f"CIK={VEXMX_SERIES}&type=NPORT-P" in url for url in sec_pages)
 
 
-@pytest.mark.network
-@pytest.mark.regression
-def test_a_list_of_years_narrows_the_result():
-    from edgar.funds import find_fund
+def test_a_list_of_years_narrows_the_result(sec_pages):
+    from edgar.funds.core import FundSeries
 
-    series = find_fund("VEXMX").series
-    everything = len(series.get_filings())
-    two_years = len(series.get_filings(year=[2023, 2024]))
-    one_year = len(series.get_filings(year=2024))
+    series = FundSeries(VEXMX_SERIES, "Vanguard Extended Market Index Fund", fund_company=_TrustWide())
 
-    assert 0 < one_year < two_years < everything
+    assert len(series.get_filings()) == 486
+    assert len(series.get_filings(year=[2023, 2024])) == 51
+    assert len(series.get_filings(year=2024)) == 29

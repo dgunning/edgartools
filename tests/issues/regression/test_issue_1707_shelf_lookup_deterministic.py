@@ -122,7 +122,6 @@ def test_registration_related_filings_reload_full_history_when_current_filing_mi
         assert obj.related_filings is full
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_bofa_424b2_finds_s3_shelf_for_suffixed_registration_number():
     from edgar import find

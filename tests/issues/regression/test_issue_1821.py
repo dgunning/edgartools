@@ -58,7 +58,8 @@ def test_company_predecessor_is_the_old_registrant():
 
 
 def test_get_financials_points_a_successor_to_its_predecessor(no_annual_reports):
-    with pytest.warns(PredecessorHistoryWarning, match=r"succeeded CIK 34088 on 2026-07-01.*Company\(34088\)\.get_financials\(\)"):
+    # get_filings() already includes the predecessor (GH #2034), so the warning says both were searched
+    with pytest.warns(PredecessorHistoryWarning, match=r"neither has CIK 34088, which it succeeded on 2026-07-01.*full history of both"):
         assert Company(XOM_HOLDINGS).get_financials() is None
 
 
@@ -114,9 +115,17 @@ def test_a_missing_predecessor_leaves_the_successor_facts_and_says_so(monkeypatc
         assert entity_facts._with_predecessor_facts(XOM_HOLDINGS, successor) is successor
 
 
+def test_navient_holdings_succeeds_navient_corp():
+    # 8-K12B 0001193125-26-436899: Navient Corp merged into Navient LLC under the new
+    # holding company Navient Holdings on 2026-10-28 (GH #1889)
+    predecessor = _get_predecessor_lookup()[2152623]
+    assert predecessor.cik == 1593538
+    assert predecessor.effective_date == "2026-10-28"
+
+
 def test_listed_successions_are_well_formed():
     lookup = _get_predecessor_lookup()
-    assert len(lookup) == 10
+    assert len(lookup) == 11
     for successor, predecessor in lookup.items():
         assert successor != predecessor.cik
         assert predecessor.cik not in lookup, "chained successions are not supported"
@@ -140,3 +149,11 @@ def test_xom_facts_include_the_predecessor_history():
 def test_xom_history_is_reachable_through_the_predecessor():
     financials = Company("XOM").predecessor.get_financials()
     assert financials.get_revenue() == 332_238_000_000
+
+
+@pytest.mark.network
+def test_navi_facts_include_the_predecessor_history():
+    income = Company("NAVI").get_facts().income_statement(periods=6, annual=True, as_dataframe=True)
+    # Net income FY2024 from Navient Corp's 10-K 0000950170-25-029207 (SEC companyconcept,
+    # CIK 1593538, read 2026-11-23); the successor CIK 2152623 has no annual facts of its own
+    assert income.loc["NetIncomeLoss", "FY 2024"] == 131_000_000

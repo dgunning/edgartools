@@ -232,13 +232,13 @@ class TestMCPServer:
     
     def test_edgar_tools_server_creation(self):
         """Test creating EdgarTools MCP server."""
-        # Test that the server module can be imported
-        try:
-            import edgar.ai.edgartools_mcp_server as server_module
-            assert hasattr(server_module, 'app'), "Server should have app instance"
-            assert hasattr(server_module, 'main'), "Server should have main function"
-        except ImportError as e:
-            pytest.skip(f"MCP server not available: {e}")
+        # The module moved to edgar.ai.mcp.server; the old path,
+        # edgar.ai.edgartools_mcp_server, made this skip on every run. MCP
+        # being installed is the class's skipif, so an ImportError here is a
+        # failure, not a skip.
+        import edgar.ai.mcp.server as server_module
+        assert hasattr(server_module, 'app'), "Server should have app instance"
+        assert hasattr(server_module, 'main'), "Server should have main function"
 
 
 # Fixture for financial fact testing

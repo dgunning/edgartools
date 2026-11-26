@@ -29,7 +29,6 @@ def test_no_period_falls_back_to_the_investment_instant():
     assert _determine_latest_instant(facts) == '2025-12-31'
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_cover_page_amendment_is_read_at_its_own_period():
     """Ares Capital 10-K/A for 2025-12-31 (0001628280-26-020560): a cover page only."""
@@ -45,7 +44,6 @@ def test_cover_page_amendment_is_read_at_its_own_period():
         assert any('no investment data' in w for w in result.warnings)
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_off_calendar_amendment_keeps_its_fiscal_year_end():
     """PennantPark Investment 10-K/A for 2025-09-30 (0001193125-26-292627) came back as 2025-03-31."""
@@ -57,7 +55,6 @@ def test_off_calendar_amendment_keeps_its_fiscal_year_end():
     assert result.nonaccrual_rate is None
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_a_quarter_is_not_read_from_another_quarters_schedule():
     """Oxford Square 10-Q for 2026-09-30 (0001213900-26-115688): balance sheet investments $260,081,298."""

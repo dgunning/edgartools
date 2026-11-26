@@ -4,6 +4,7 @@ Filings-related classes for the Entity package.
 This module contains classes related to SEC filings for entities, including
 collections of filings and filing facts.
 """
+import datetime
 import warnings
 from typing import List, Optional, Union
 
@@ -237,9 +238,14 @@ class EntityFilings(Filings):
 
     def get_filing_at(self, item: int):
         """Get the filing at the specified index."""
+        # Filings merged across a successor and its predecessors name each row's filer (GH #2034)
+        if 'cik' in self.data.column_names:
+            cik, company = self.data['cik'][item].as_py(), self.data['company'][item].as_py()
+        else:
+            cik, company = self.cik, self.company_name
         return EntityFiling(
-            cik=self.cik,
-            company=self.company_name,
+            cik=cik,
+            company=company,
             form=self.data['form'][item].as_py(),
             filing_date=self.data['filing_date'][item].as_py(),
             report_date=self.data['reportDate'][item].as_py(),
@@ -279,6 +285,23 @@ class EntityFilings(Filings):
         Returns:
             Filtered EntityFilings
         """
+        if ticker:
+            # Entity filings may have no cik column, and merged ones list a successor's
+            # predecessors under their own CIKs, which hold no ticker (GH #2034)
+            from edgar.reference.successors import get_predecessor_chain
+            from edgar.reference.tickers import find_cik
+            ticker_ciks = {c for c in (find_cik(t) for t in listify(ticker)) if c}
+            ticker_ciks |= {p.cik for c in list(ticker_ciks) for p in get_predecessor_chain(c)}
+            if 'cik' in self.data.column_names:
+                cik = sorted(ticker_ciks | {int(c) for c in listify(cik)} if cik else ticker_ciks) or [-1]
+            elif int(self.cik) not in ticker_ciks:
+                return EntityFilings(data=self.data.slice(0, 0), cik=self.cik, company_name=self.company_name)
+            ticker = None
+        if cik and 'cik' not in self.data.column_names:
+            # One registrant's own filings: every row is self.cik
+            if int(self.cik) not in {int(c) for c in listify(cik)}:
+                return EntityFilings(data=self.data.slice(0, 0), cik=self.cik, company_name=self.company_name)
+            cik = None
         # The super filter returns Filings. We want EntityFilings
         res = super().filter(form=form,
                              amendments=amendments,
@@ -687,6 +710,57 @@ COMPANY_FILINGS_SCHEMA = schema = pa.schema([
             ('primaryDocument', pa.string()),
             ('primaryDocDescription', pa.string())
         ])
+
+# Periodic reports a predecessor may file after the succession for a period before it
+_PERIODIC_FORMS = pa.array(['10-K', '10-Q', '20-F', '40-F', '10-KT', '10-QT', '20-FT'])
+
+
+def before_succession(data: pa.Table, effective_date: str) -> pa.Table:
+    """
+    The rows of a predecessor's filings that belong to its successor's history.
+
+    Everything filed before ``effective_date``, plus periodic reports (and their
+    amendments) for a period that ended before it: Summit Midstream's predecessor
+    filed its 10-Q for the quarter to 2024-06-30 after the 2024-08-01 succession.
+    What the predecessor files afterwards as a subsidiary (8-Ks, Form 4s,
+    prospectuses) stays on its own CIK.
+    """
+    filed_before = pc.less(data['filing_date'], pa.scalar(datetime.date.fromisoformat(effective_date)))
+    base_form = pc.replace_substring(data['form'], pattern='/A', replacement='')
+    report_date = pc.fill_null(data['reportDate'], '')
+    late_periodic = pc.and_(
+        pc.is_in(base_form, value_set=_PERIODIC_FORMS),
+        pc.and_(pc.not_equal(report_date, ''), pc.less(report_date, effective_date)))
+    return data.filter(pc.fill_null(pc.or_(filed_before, late_periodic), False))
+
+
+def without_reports_of(data: pa.Table, successor: pa.Table, effective_date: str) -> pa.Table:
+    """
+    Drop a predecessor's report filed after the succession for a period the successor reported too.
+
+    NorthWestern Corp and NorthWestern Energy Group each filed a 10-Q for the quarter to
+    2023-09-30 after the 2023-10-02 succession, under separate accession numbers. The
+    successor's is kept. Reports filed before the succession are never dropped.
+    """
+    if data.num_rows == 0 or successor.num_rows == 0:
+        return data
+    reported = {(form, report) for form, report in zip(successor['form'].to_pylist(),
+                                                      successor['reportDate'].to_pylist(), strict=True) if report}
+    if not reported:
+        return data
+    succession = datetime.date.fromisoformat(effective_date)
+    keep = [filed < succession or (form, report) not in reported
+            for form, report, filed in zip(data['form'].to_pylist(), data['reportDate'].to_pylist(),
+                                           data['filing_date'].to_pylist(), strict=True)]
+    return data.filter(pa.array(keep))
+
+
+def with_filer(data: pa.Table, cik: int, company_name: str) -> pa.Table:
+    """Add ``cik`` and ``company`` columns naming the filer of every row."""
+    rows = data.num_rows
+    data = data.append_column('cik', pa.array([int(cik)] * rows, pa.int64()))
+    return data.append_column('company', pa.array([company_name] * rows, pa.string()))
+
 
 def empty_company_filings(cik:IntString, company_name:str):
     """

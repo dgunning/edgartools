@@ -60,7 +60,6 @@ def _xbrl_only(**filing):
     return filing.xbrl()
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_nextera_reports_its_operating_revenue_total():
     """NextEra 10-Q Q2 2026, 0000753308-26-000060: OPERATING REVENUES 7,534 (2025: 6,700) $M."""
@@ -70,7 +69,6 @@ def test_nextera_reports_its_operating_revenue_total():
     assert nextera.get_revenue(1) == 6700000000
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_mge_reports_its_total_not_its_gas_revenue_line():
     """MGE Energy 10-Q Q2 2026, 0001193125-26-333969 ($K): Total Operating Revenues

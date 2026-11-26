@@ -322,19 +322,19 @@ class TestSchedule13DToContext:
 
     @pytest.fixture(scope="class")
     def schedule13d(self):
-        from edgar import get_filings
-        filings = get_filings(form="SC 13D", amendments=False)
-        for filing in filings:
-            obj = filing.obj()
-            if obj is not None:
-                return obj
-        pytest.skip("No parseable SC 13D filing found")
+        # Pinned. This used to search the current quarter for form "SC 13D",
+        # which SEC replaced with the XML "SCHEDULE 13D" in December 2024, so it
+        # found nothing and skipped on every run. Equinox Partners' 13D on
+        # Silvercrest, filed 2026-09-30; values below read from primary_doc.xml.
+        from tests._offline_filings import offline_filing
+        return offline_filing("0001013594-26-000998").obj()
 
     @pytest.mark.network
     def test_minimal_format(self, schedule13d):
         ctx = schedule13d.to_context('minimal')
-        assert "SCHEDULE13D" in ctx
-        assert "Ownership:" in ctx
+        assert "SCHEDULE13D: Silvercrest Asset Management Group Inc." in ctx
+        assert "Ownership: 7.1% (554,736 shares)" in ctx
+        assert "Filer: Equinox Partners Investment Management LLC, Equinox Partners, L.P., Sean M. Fieler" in ctx
 
     @pytest.mark.network
     def test_standard_has_actions(self, schedule13d):
@@ -433,18 +433,19 @@ class TestFundReportToContext:
 class TestMoneyMarketFundToContext:
     @pytest.fixture(scope="class")
     def mmf(self):
-        from edgar import get_filings
-        for filing in get_filings(form="N-MFP2"):
-            obj = filing.obj()
-            if obj is not None:
-                return obj
-        pytest.skip("No parseable N-MFP2 found")
+        # Pinned. This used to search the current quarter for form "N-MFP2",
+        # which N-MFP3 replaced in June 2024, so it skipped on every run. AB
+        # Government Money Market Portfolio (S000011990), report date
+        # 2026-08-31, 72 securities, read from primary_doc.xml.
+        from tests._offline_filings import offline_filing
+        return offline_filing("0001410368-26-090983").obj()
 
     @pytest.mark.network
     def test_minimal_format(self, mmf):
         ctx = mmf.to_context('minimal')
-        assert "MONEYMARKETFUND:" in ctx
-        assert "Securities:" in ctx
+        assert "MONEYMARKETFUND: AB Fixed-Income Shares, Inc. - AB Government Money Market Portfolio" in ctx
+        assert "Report Date: 2026-08-31" in ctx
+        assert "Securities: 72" in ctx
 
     @pytest.mark.network
     def test_standard_has_actions(self, mmf):

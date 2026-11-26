@@ -319,59 +319,57 @@ class TestCombinedParameters:
 # Performance Tests
 # ========================================
 
+def _fastest_call_seconds(statement, variants, rounds=7):
+    """The fastest single `to_dataframe()` call per variant, measured interleaved.
+
+    One warm-up call per variant first: the first call on a statement is cold
+    (about 1.5x a steady call) and used to land entirely in whichever batch ran
+    first. Interleaving puts both variants under the same runner load, and the
+    fastest call discounts a garbage-collection pause or a preempted CPU, which
+    is what made the old batch-against-batch ratio fail on CI (test-fast 3.15,
+    2026-11-22) with no code change behind it.
+    """
+    for kwargs in variants.values():
+        statement.to_dataframe(**kwargs)
+    best = {name: float("inf") for name in variants}
+    for _ in range(rounds):
+        for name, kwargs in variants.items():
+            start = time.perf_counter()
+            statement.to_dataframe(**kwargs)
+            best[name] = min(best[name], time.perf_counter() - start)
+    return best
+
+
 class TestPerformanceOverhead:
     """Test that new parameters have minimal performance impact."""
 
     def test_no_overhead_when_not_used(self, aapl_xbrl):
-        """Test that there's minimal overhead when parameters are not used."""
+        """Passing the new parameters as False costs nothing over the defaults."""
         income_statement = aapl_xbrl.statements.income_statement()
+        best = _fastest_call_seconds(income_statement, {
+            "defaults": {},
+            "disabled": {"include_unit": False, "include_point_in_time": False},
+        })
 
-        # Time without new parameters
-        start = time.time()
-        for _ in range(10):
-            df1 = income_statement.to_dataframe()
-        time_without = time.time() - start
-
-        # Time with new parameters disabled (should be same)
-        start = time.time()
-        for _ in range(10):
-            df2 = income_statement.to_dataframe(
-                include_unit=False,
-                include_point_in_time=False
-            )
-        time_with_false = time.time() - start
-
-        # Should have minimal overhead (<50%)
-        # Note: Small timing variances are expected due to system load, Python GC, etc.
-        # Threshold increased from 25% to 50% in v4.20.1 due to period selection optimization
-        # introducing minor caching effects (Issue #464 performance improvements)
-        overhead = abs(time_with_false - time_without) / time_without
-        assert overhead < 0.50, \
-            f"Overhead when parameters disabled should be <50%, got {overhead:.1%}"
+        # One-sided: the disabled call being faster is not overhead.
+        overhead = best["disabled"] / best["defaults"] - 1
+        assert overhead < 0.50, (
+            f"Overhead when parameters disabled should be <50%, got {overhead:.1%} "
+            f"({best})"
+        )
 
     def test_reasonable_overhead_when_enabled(self, aapl_xbrl):
-        """Test that overhead is reasonable when parameters are enabled."""
+        """Adding the unit and point-in-time columns stays a modest cost."""
         income_statement = aapl_xbrl.statements.income_statement()
+        best = _fastest_call_seconds(income_statement, {
+            "defaults": {},
+            "enabled": {"include_unit": True, "include_point_in_time": True},
+        })
 
-        # Time without new columns
-        start = time.time()
-        for _ in range(10):
-            df1 = income_statement.to_dataframe()
-        time_without = time.time() - start
-
-        # Time with both new columns
-        start = time.time()
-        for _ in range(10):
-            df2 = income_statement.to_dataframe(
-                include_unit=True,
-                include_point_in_time=True
-            )
-        time_with = time.time() - start
-
-        # Should have reasonable overhead (<50%)
-        overhead = (time_with - time_without) / time_without
-        assert overhead < 0.50, \
-            f"Overhead when enabled should be <50%, got {overhead:.1%}"
+        overhead = best["enabled"] / best["defaults"] - 1
+        assert overhead < 0.50, (
+            f"Overhead when enabled should be <50%, got {overhead:.1%} ({best})"
+        )
 
 
 # ========================================

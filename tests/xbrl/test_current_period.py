@@ -230,7 +230,8 @@ class TestCurrentPeriodView:
         assert isinstance(stmt, CurrentPeriodStatement)
         # Verify it's a statement of equity
         assert stmt.canonical_type == 'StatementOfEquity'
-        assert 'instant_' in stmt.period_filter  # Should use instant period
+        # A roll-forward over the year, not a snapshot (GH #429)
+        assert stmt.period_filter == 'duration_2023-01-01_2023-12-31'
 
     @pytest.mark.fast
     def test_comprehensive_income(self, mock_xbrl):

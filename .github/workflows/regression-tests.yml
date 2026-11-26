@@ -6,38 +6,32 @@ name: Regression Tests
 on:
   # Manual trigger
   workflow_dispatch:
-  # Run weekly on Sundays
+  # Nightly, an hour after python-hatch-workflow.yml's full run. This is the
+  # run that measures the lane's coverage for Codecov; pushes to main skip it
+  # (see "Run regression tests" below).
   schedule:
-    - cron: '0 8 * * 0'
+    - cron: '0 8 * * *'
 
-  # ADVISORY pre-merge run. This lane MUST NEVER become a required check.
+  # PRE-MERGE GATE. The required context is the `Regression gate` job at the end
+  # of this file, never the `regression` job itself.
   #
-  # The 647 network-marked regression tests gate nothing today: they run only
-  # after merge, so a break is invisible on the pull request that caused it.
-  # That is not hypothetical — three of four consecutive post-merge runs failed
-  # the week of 2026-08-08 with 16 failures across three files, all network-
-  # marked, one of them genuine content loss in `Filing.text()` that sat on main
-  # for three commits (bead edgartools-07lk.24, finding 1).
+  # The network-marked regression tests used to gate nothing: they ran only
+  # after merge, so a break was invisible on the pull request that caused it.
+  # Three of four consecutive post-merge runs failed the week of 2026-08-08,
+  # one of them genuine content loss in `Filing.text()` that sat on main for
+  # three commits, and auto-merge later merged a pull request whose advisory
+  # run was red.
   #
-  # Advisory, for two independent reasons, and both have to hold:
-  #   1. It is paths-filtered. A docs-only pull request produces no run at all,
-  #      and a required check that never reports blocks the pull request forever
-  #      (the deadlock documented at the top of python-hatch-workflow.yml).
-  #   2. It is ~26 minutes against the live SEC, so it is far too slow and too
-  #      network-dependent to sit in front of a merge.
-  # The required contexts stay exactly the three listed in python-hatch-workflow.yml.
-  # Making this one required is the fastest way to deadlock the repository.
+  # There is deliberately NO paths filter on this trigger. A required check that
+  # never reports blocks the pull request forever (the deadlock documented at
+  # the top of python-hatch-workflow.yml), so every pull request must produce
+  # the `Regression gate` context. The `changes` job decides instead whether the
+  # suite is relevant, using the same path list as the push trigger below; when
+  # it is not, the suite is skipped and the gate passes. Keep the two lists in
+  # step. The lane takes 12-19 minutes on a pull request (no coverage), running
+  # alongside test-fast, which takes 13-23.
   pull_request:
     branches: [ "main", "5.*.x" ]
-    paths:
-      - 'tests/issues/regression/**'
-      - 'edgar/**'
-      - '.github/workflows/regression-tests.yml'
-      - 'tests/conftest.py'
-      - 'tests/_offline_filings.py'
-      - 'tests/_offline_harness.py'
-      - 'tests/_vcr_safety.py'
-      - 'pyproject.toml'
 
   # Also run on main branch pushes that touch the library.
   #
@@ -70,7 +64,6 @@ on:
       - 'tests/_vcr_safety.py'
       - 'pyproject.toml'
 
-# Cancel superseded regression runs on the same ref.
 # Read-only by default. Jobs that write (the red-main `report` job) grant
 # their own job-level permissions; nothing else inherits the token's write scope.
 permissions:
@@ -78,11 +71,70 @@ permissions:
   pull-requests: read
   issues: read
 
+# Only pull-request runs are ever cancelled, by a newer commit on the same PR.
+# Every other run (a push to main, the nightly, a manual dispatch) gets a group
+# of its own, keyed by commit, so nothing can supersede it. Same rule as
+# python-hatch-workflow.yml, which explains the pending-run trap in full.
+#
+# Two ways a push run on main was lost here. With cancel-in-progress true for
+# pushes, the next merge cancelled a RUNNING run: the run for 4f710f58, the
+# merge that added the Regression gate, was cancelled 15 seconds in. With it
+# false, GitHub still cancels a PENDING run when a newer one queues in the same
+# group: 6 of the 100 push runs from 2026-11-11 to 2026-11-23 were cancelled
+# before any job started. PRs merge without being up to date with main, so the
+# post-merge run is the only check that the combination works.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  # Decides whether this change can affect the regression suite. Only pull
+  # requests are filtered here; push runs are already filtered by the trigger's
+  # `paths`, and scheduled and manual runs always run the suite.
+  #
+  # The patterns below mirror the push trigger's `paths` list. In a `case`
+  # pattern `*` also matches `/`, so `edgar/*` covers the whole package. The
+  # pull-request files API lists at most 3,000 files; a larger change is treated
+  # as relevant. If the API call fails, this job fails and so does the gate:
+  # failing closed costs a re-run, failing open would let a break through.
+  changes:
+    name: Regression scope
+    runs-on: ubuntu-latest
+    outputs:
+      relevant: ${{ steps.scope.outputs.relevant }}
+    steps:
+    - name: Decide whether the regression suite applies
+      id: scope
+      env:
+        GH_TOKEN: ${{ github.token }}
+        REPO: ${{ github.repository }}
+        PR: ${{ github.event.pull_request.number }}
+        EVENT: ${{ github.event_name }}
+      run: |
+        if [ "$EVENT" != "pull_request" ]; then
+          echo "relevant=true" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        files=$(gh api --paginate "repos/$REPO/pulls/$PR/files" --jq '.[].filename')
+        count=$(printf '%s\n' "$files" | grep -c . || true)
+        relevant=false
+        if [ "$count" -ge 3000 ]; then
+          relevant=true
+        fi
+        while IFS= read -r f; do
+          case "$f" in
+            edgar/*|tests/issues/regression/*|.github/workflows/regression-tests.yml|\
+            tests/conftest.py|tests/_offline_filings.py|tests/_offline_harness.py|\
+            tests/_vcr_safety.py|pyproject.toml)
+              relevant=true
+              echo "relevant because of: $f"
+              break
+              ;;
+          esac
+        done <<< "$files"
+        echo "relevant=$relevant" >> "$GITHUB_OUTPUT"
+        echo "$count changed files; regression suite relevant: $relevant"
+
   # See python-hatch-workflow.yml: cassettes are loaded with PyYAML's unsafe
   # loader, so this has to pass before anything runs pytest.
   #
@@ -96,6 +148,8 @@ jobs:
   # of the two you get depends on reporting order. Keep the names distinct.
   cassette-gate:
     name: Cassette safety gate (regression)
+    needs: changes
+    if: needs.changes.outputs.relevant == 'true'
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -161,12 +215,16 @@ jobs:
     # tests and the few marked neither fast nor network.
     - name: Run regression tests
       run: |
-        # No coverage on pull requests: the Codecov upload below skips them, so
-        # it would be computed and thrown away (edgartools-07lk.26 step B).
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          pytest -m 'regression and not fast' --enable-cache
+        # Coverage only on the nightly and manual runs. It roughly doubles the
+        # lane: push runs on main took 25-37 min with it (November 2026) against
+        # 12-19 min for the same tests on a pull request without it, and a push
+        # run's job is to say quickly whether main is red. Codecov carries the
+        # `regression` flag forward between nightly uploads (codecov.yml), so
+        # commits in between keep this lane's lines in their total.
+        if [ "${{ github.event_name }}" = "schedule" ] || [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+          pytest -rs --cov --cov-report=xml -m 'regression and not fast' --enable-cache
         else
-          pytest --cov --cov-report=xml -m 'regression and not fast' --enable-cache
+          pytest -rs -m 'regression and not fast' --enable-cache
         fi
 
     # `always()`: a run that failed still warmed the cache, and the next one
@@ -178,12 +236,13 @@ jobs:
         path: ${{ github.workspace }}/.edgar-data/_tcache
         key: edgar-tcache-regression-${{ github.run_id }}
 
-    # Not on pull requests. Codecov posts its own commit statuses, and a partial
-    # `regression`-flag upload from an advisory lane would put a red check on a
-    # pull request that this workflow is explicitly not allowed to influence.
+    # Only from the runs that measured coverage: the nightly and manual ones.
+    # Never on pull requests: Codecov posts its own commit statuses, and a
+    # partial `regression`-flag upload would put a red check on a pull request
+    # that only the `Regression gate` job may decide.
     - name: Upload coverage reports
       uses: codecov/codecov-action@303a32d7a59b442fa8d48b6a1cc6825c09c847a5 # v7.1.1
-      if: matrix.python-version == '3.12' && github.event_name != 'pull_request'
+      if: matrix.python-version == '3.12' && (github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
       with:
         files: coverage.xml
         fail_ci_if_error: false
@@ -256,3 +315,41 @@ jobs:
           gh issue close --repo "$REPO" "$number" \
             --comment "Green again at $SHA — $RUN_URL"
         fi
+
+  # THE REQUIRED CONTEXT. Branch protection on `main` requires "Regression gate",
+  # the name of this job. Renaming it retires the context and blocks every pull
+  # request; update the protection contexts in the same commit (see the top of
+  # python-hatch-workflow.yml).
+  #
+  # It runs on every event (`always()`), so the context always reports. It passes
+  # when the suite was not relevant, or when the cassette gate and the suite both
+  # passed. Anything else fails it, including a failed or cancelled `changes` job
+  # and a cancelled suite, because a check that passes when nothing ran is not a
+  # gate.
+  gate:
+    name: Regression gate
+    needs: [changes, cassette-gate, regression]
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+    - name: Pass only when the suite passed or did not apply
+      env:
+        SCOPE: ${{ needs.changes.result }}
+        RELEVANT: ${{ needs.changes.outputs.relevant }}
+        CASSETTES: ${{ needs['cassette-gate'].result }}
+        REGRESSION: ${{ needs.regression.result }}
+      run: |
+        echo "scope=$SCOPE relevant=$RELEVANT cassette-gate=$CASSETTES regression=$REGRESSION"
+        if [ "$SCOPE" != "success" ]; then
+          echo "::error::Could not decide whether the regression suite applies."
+          exit 1
+        fi
+        if [ "$RELEVANT" != "true" ]; then
+          echo "No library or regression-harness change: the suite does not apply."
+          exit 0
+        fi
+        if [ "$CASSETTES" = "success" ] && [ "$REGRESSION" = "success" ]; then
+          exit 0
+        fi
+        echo "::error::The regression suite did not pass (cassette gate: $CASSETTES, regression: $REGRESSION)."
+        exit 1

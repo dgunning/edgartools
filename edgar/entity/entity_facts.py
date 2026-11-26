@@ -87,18 +87,25 @@ def _load_company_facts_json(cik: int) -> Dict[str, Any]:
 
 
 def _with_predecessor_facts(cik: int, company_facts_json: Dict[str, Any]) -> Dict[str, Any]:
-    """Add the history a successor registrant's predecessor filed under its own CIK (GH #1821)."""
-    from edgar.reference.successors import get_predecessor
-    predecessor = get_predecessor(cik)
-    if predecessor is None:
-        return company_facts_json
-    try:
-        predecessor_json = _load_company_facts_json(predecessor.cik)
-    except CompanyFactsNotFoundError:
-        warnings.warn(f"No company facts found for CIK {predecessor.cik}, the predecessor of CIK {cik}; "
-                      f"facts from before {predecessor.effective_date} are missing.", stacklevel=3)
-        return company_facts_json
-    return merge_predecessor_facts(company_facts_json, predecessor_json, predecessor.effective_date)
+    """Add the history a successor registrant's predecessors filed under their own CIKs (GH #1821).
+
+    Follows the whole reviewed chain, nearest predecessor first, each with its own
+    effective date: the same chain ``Company.get_filings()`` follows (GH #2034).
+    """
+    from edgar.reference.successors import get_predecessor_chain
+    successor_cik = cik
+    for predecessor in get_predecessor_chain(cik):
+        try:
+            predecessor_json = _load_company_facts_json(predecessor.cik)
+        except CompanyFactsNotFoundError:
+            warnings.warn(f"No company facts found for CIK {predecessor.cik}, the predecessor of CIK {successor_cik}; "
+                          f"facts from before {predecessor.effective_date} are missing.", stacklevel=3)
+        else:
+            company_facts_json = merge_predecessor_facts(company_facts_json, predecessor_json,
+                                                         predecessor.effective_date)
+        # A hop with no facts does not end the chain: older registrants may still have them
+        successor_cik = predecessor.cik
+    return company_facts_json
 
 
 def merge_predecessor_facts(successor_json: Dict[str, Any], predecessor_json: Dict[str, Any],
@@ -1357,6 +1364,10 @@ class EntityFacts:
             return (f.filing_date or date.min, f.period_end or date.min)
 
         def _build_result(value, tag, unit_used, fact):
+            if (group.name == 'operating_cash_flow'
+                    and fact.concept == 'us-gaap:NetCashProvidedByUsedInOperatingActivitiesContinuingOperations'
+                    and self._has_discontinued_operating_cash(fact)):
+                return None
             if not return_metadata:
                 return value
             result = {
@@ -1443,6 +1454,20 @@ class EntityFacts:
             return _build_result(value, tag, unit_used, fact)
 
         return None
+
+    def _has_discontinued_operating_cash(self, continuing: FinancialFact) -> bool:
+        # Match the actual dates: a quarter and a year-to-date fact can both be labeled Q2.
+        facts = self._fact_index['by_concept'].get(
+            'us-gaap:CashProvidedByUsedInOperatingActivitiesDiscontinuedOperations', []
+        )
+        for fact in facts:
+            if (fact.period_start == continuing.period_start
+                    and fact.period_end == continuing.period_end
+                    and fact.unit == continuing.unit
+                    and not fact.is_dimensioned
+                    and fact.numeric_value not in (None, 0)):
+                return True
+        return False
 
     def discover_concept_tags(self, concept_name: str) -> List[str]:
         """
@@ -2835,7 +2860,7 @@ class EntityFacts:
         # Try fallback calculation if provided
         if fallback_calculation:
             try:
-                fallback_value = fallback_calculation(period, target_unit, strict_unit_match)
+                fallback_value = fallback_calculation(period, target_unit, strict_unit_match, annual=annual)
                 if fallback_value is not None:
                     if return_detailed:
                         return UnitResult(  # type: ignore[return-value]
@@ -2890,131 +2915,117 @@ class EntityFacts:
             return True
         return not strict_unit_match and UnitNormalizer.are_compatible(component_unit, target_unit)
 
-    def _calculate_revenue_from_components(self, period: Optional[str] = None, unit: str = 'USD',
-                                               strict_unit_match: bool = False) -> Optional[float]:
-        """
-        Calculate revenue from Gross Profit + Cost of Revenue when explicit revenue not available.
+    # Component concepts for the revenue and gross-profit fallbacks, in priority order
+    _COMPONENT_REVENUE = ('Revenues', 'RevenueFromContractWithCustomerExcludingAssessedTax', 'SalesRevenueNet', 'Revenue')
+    _COMPONENT_GROSS_PROFIT = ('GrossProfit',)
+    _COMPONENT_COST = ('CostOfRevenue', 'CostOfGoodsAndServicesSold', 'CostOfGoodsSold', 'CostOfSales')
 
-        This follows the same logic as the enhanced_statement.py revenue deduplication.
+    # A fiscal year runs 52 or 53 weeks; SEC's FY tag also covers comparative quarters (#408)
+    _ANNUAL_MIN_DAYS = 300
+
+    def _component_facts(self, concepts) -> List[tuple]:
+        """Every usable fact for the concepts, as (priority, fact); priority is the concept's index."""
+        found, seen = [], set()
+        for priority, concept in enumerate(concepts):
+            for spelling in (concept, f'us-gaap:{concept}', f'ifrs-full:{concept}'):
+                for fact in self._fact_index['by_concept'].get(spelling, []):
+                    if (id(fact) in seen or fact.numeric_value is None or fact.is_dimensioned
+                            or fact.period_start is None or fact.period_end is None):
+                        continue
+                    seen.add(id(fact))
+                    found.append((priority, fact))
+        return found
+
+    def _matched_component_pair(self, anchor_concepts, other_concepts, period: Optional[str], annual: bool):
         """
+        The anchor fact and the other component's fact for the same reporting period (GH #1979).
+
+        The anchor (revenue, or gross profit) is chosen over every concept variant: for a
+        named ``period`` among that period's facts, otherwise the latest period, full-year
+        only when ``annual`` is set and a full-year fact exists. A same-ended 3-month and
+        year-to-date pair resolve to the shorter one. The other component must cover exactly
+        that period's start and end, so a quarter is never subtracted from a year, nor 2024
+        from 2025. An older period that has both is not used instead: it would answer a
+        current question with a stale year.
+
+        Returns:
+            (anchor_fact, other_fact), or None when the anchor's latest period has no match
+        """
+        anchors = self._component_facts(anchor_concepts)
+        if period:
+            period = normalize_period_to_entity_facts(period)
+            anchors = [(p, f) for p, f in anchors if f"{f.fiscal_year}-{f.fiscal_period}" == period]
+        elif annual:
+            full_year = [(p, f) for p, f in anchors
+                         if (f.period_end - f.period_start).days >= self._ANNUAL_MIN_DAYS]
+            anchors = full_year or anchors
+
+        others: Dict[tuple, tuple] = {}
+        for priority, fact in self._component_facts(other_concepts):
+            key = (fact.period_start, fact.period_end)
+            best = others.get(key)
+            # The higher-priority concept, then the latest filing (a restatement)
+            if best is None or (priority, -fact.filing_date.toordinal()) < (best[0], -best[1].filing_date.toordinal()):
+                others[key] = (priority, fact)
+
+        ranked = sorted(anchors, key=lambda pf: (-pf[1].period_end.toordinal(),
+                                                 (pf[1].period_end - pf[1].period_start).days,
+                                                 pf[0],
+                                                 -pf[1].filing_date.toordinal()))
+        if not ranked:
+            return None
+        # Only the anchor's latest period: when its cost is not tagged, an older year
+        # that has both would be a stale answer (Starbucks last tagged
+        # CostOfGoodsAndServicesSold for FY2019).
+        latest = (ranked[0][1].period_start, ranked[0][1].period_end)
+        other = others.get(latest)
+        if other is None:
+            return None
+        anchor = next(f for _, f in ranked if (f.period_start, f.period_end) == latest)
+        return anchor, other[1]
+
+    def _combine_components(self, first, second, sign: int, unit: str, strict_unit_match: bool) -> Optional[float]:
+        """first + sign * second, in the unit the caller asked for."""
         from edgar.entity.unit_handling import UnitNormalizer
 
-        self._suppress_warnings = True
-        try:
-            gross_profit_fact = self.get_fact('GrossProfit', period)
-            cost_of_revenue_fact = self.get_fact('CostOfRevenue', period)
+        a = UnitNormalizer.get_normalized_value(first, target_unit=unit, apply_scale=True,
+                                                strict_unit_match=strict_unit_match)
+        b = UnitNormalizer.get_normalized_value(second, target_unit=unit, apply_scale=True,
+                                                strict_unit_match=strict_unit_match)
+        if a.success and b.success:
+            return a.value + sign * b.value
 
-            # Try alternative cost concepts
-            if not cost_of_revenue_fact:
-                for cost_concept in ['CostOfGoodsAndServicesSold', 'CostOfGoodsSold', 'CostOfSales']:
-                    cost_of_revenue_fact = self.get_fact(cost_concept, period)
-                    if cost_of_revenue_fact:
-                        break
-        finally:
-            self._suppress_warnings = False
-
-        if (gross_profit_fact and cost_of_revenue_fact and
-            gross_profit_fact.numeric_value is not None and
-            cost_of_revenue_fact.numeric_value is not None):
-
-            if (
-                gross_profit_fact.period_start != cost_of_revenue_fact.period_start
-                or gross_profit_fact.period_end != cost_of_revenue_fact.period_end
-            ):
-                return None
-
-            # Use enhanced unit compatibility checking
-            gp_result = UnitNormalizer.get_normalized_value(gross_profit_fact, target_unit=unit, apply_scale=True,
-                                                            strict_unit_match=strict_unit_match)
-            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True,
-                                                            strict_unit_match=strict_unit_match)
-
-            if gp_result.success and cr_result.success:
-                return gp_result.value + cr_result.value
-
-            # Try compatibility check if direct match failed.
-            #
-            # Compatibility BETWEEN THE COMPONENTS says only that they can be
-            # combined with each other. The result still has to answer the unit
-            # the caller asked for, and normalising with no target at all did
-            # not check that: Apple's GrossProfit and CostOfGoodsAndServicesSold
-            # are both USD, so their sum was returned as the answer to
-            # unit='EUR' and to unit='shares' alike.
-            if (UnitNormalizer.are_compatible(gross_profit_fact.unit, cost_of_revenue_fact.unit)
-                    and self._components_answer_unit(gross_profit_fact.unit, unit, strict_unit_match)):
-                # Same unit type but different representations - try calculation anyway
-                gp_normalized = UnitNormalizer.get_normalized_value(gross_profit_fact, apply_scale=True, strict_unit_match=False)
-                cr_normalized = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, apply_scale=True, strict_unit_match=False)
-
-                if gp_normalized.success and cr_normalized.success:
-                    return gp_normalized.value + cr_normalized.value
-
+        # Try compatibility check if direct match failed.
+        #
+        # Compatibility BETWEEN THE COMPONENTS says only that they can be
+        # combined with each other. The result still has to answer the unit
+        # the caller asked for, and normalising with no target at all did
+        # not check that: Apple's GrossProfit and CostOfGoodsAndServicesSold
+        # are both USD, so their sum was returned as the answer to
+        # unit='EUR' and to unit='shares' alike.
+        if (UnitNormalizer.are_compatible(first.unit, second.unit)
+                and self._components_answer_unit(first.unit, unit, strict_unit_match)):
+            a = UnitNormalizer.get_normalized_value(first, apply_scale=True, strict_unit_match=False)
+            b = UnitNormalizer.get_normalized_value(second, apply_scale=True, strict_unit_match=False)
+            if a.success and b.success:
+                return a.value + sign * b.value
         return None
+
+    def _calculate_revenue_from_components(self, period: Optional[str] = None, unit: str = 'USD',
+                                           strict_unit_match: bool = False, annual: bool = True) -> Optional[float]:
+        """Revenue as Gross Profit + Cost of Revenue for one period, when no revenue is tagged."""
+        pair = self._matched_component_pair(self._COMPONENT_GROSS_PROFIT, self._COMPONENT_COST, period, annual)
+        if pair is None:
+            return None
+        return self._combine_components(pair[0], pair[1], +1, unit, strict_unit_match)
 
     def _calculate_gross_profit_from_components(self, period: Optional[str] = None, unit: str = 'USD',
-                                                    strict_unit_match: bool = False) -> Optional[float]:
-        """
-        Calculate gross profit from Revenue - Cost of Revenue when explicit gross profit not available.
-        """
-        from edgar.entity.unit_handling import UnitNormalizer
-
-        # Try to get revenue using standardized method (but avoid infinite recursion)
-        self._suppress_warnings = True
-        try:
-            revenue_fact = None
-            for concept in ['Revenues', 'RevenueFromContractWithCustomerExcludingAssessedTax', 'SalesRevenueNet', 'Revenue']:
-                revenue_fact = self.get_fact(concept, period)
-                if revenue_fact:
-                    break
-
-            cost_of_revenue_fact = self.get_fact('CostOfRevenue', period)
-
-            # Try alternative cost concepts
-            if not cost_of_revenue_fact:
-                for cost_concept in ['CostOfGoodsAndServicesSold', 'CostOfGoodsSold', 'CostOfSales']:
-                    cost_of_revenue_fact = self.get_fact(cost_concept, period)
-                    if cost_of_revenue_fact:
-                        break
-        finally:
-            self._suppress_warnings = False
-
-        if (revenue_fact and cost_of_revenue_fact and
-            revenue_fact.numeric_value is not None and
-            cost_of_revenue_fact.numeric_value is not None):
-
-            if (
-                revenue_fact.period_start != cost_of_revenue_fact.period_start
-                or revenue_fact.period_end != cost_of_revenue_fact.period_end
-            ):
-                return None
-
-            # Use enhanced unit compatibility checking
-            rev_result = UnitNormalizer.get_normalized_value(revenue_fact, target_unit=unit, apply_scale=True,
-                                                             strict_unit_match=strict_unit_match)
-            cr_result = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, target_unit=unit, apply_scale=True,
-                                                            strict_unit_match=strict_unit_match)
-
-            if rev_result.success and cr_result.success:
-                return rev_result.value - cr_result.value
-
-            # Try compatibility check if direct match failed.
-            #
-            # Compatibility BETWEEN THE COMPONENTS says only that they can be
-            # combined with each other. The result still has to answer the unit
-            # the caller asked for, and normalising with no target at all did
-            # not check that: Apple's GrossProfit and CostOfGoodsAndServicesSold
-            # are both USD, so their sum was returned as the answer to
-            # unit='EUR' and to unit='shares' alike.
-            if (UnitNormalizer.are_compatible(revenue_fact.unit, cost_of_revenue_fact.unit)
-                    and self._components_answer_unit(revenue_fact.unit, unit, strict_unit_match)):
-                # Same unit type but different representations - try calculation anyway
-                rev_normalized = UnitNormalizer.get_normalized_value(revenue_fact, apply_scale=True)
-                cr_normalized = UnitNormalizer.get_normalized_value(cost_of_revenue_fact, apply_scale=True)
-
-                if rev_normalized.success and cr_normalized.success:
-                    return rev_normalized.value - cr_normalized.value
-
-        return None
+                                                strict_unit_match: bool = False, annual: bool = True) -> Optional[float]:
+        """Gross profit as Revenue - Cost of Revenue for one period, when no gross profit is tagged."""
+        pair = self._matched_component_pair(self._COMPONENT_REVENUE, self._COMPONENT_COST, period, annual)
+        if pair is None:
+            return None
+        return self._combine_components(pair[0], pair[1], -1, unit, strict_unit_match)
 
     def get_concept_mapping_info(self, concept_variants: List[str]) -> Dict[str, Any]:
         """

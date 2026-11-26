@@ -76,7 +76,6 @@ def test_own_heading_after_the_anchor_wins():
     assert item1.lstrip().startswith("ITEM 1. FINANCIAL STATEMENTS")
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_bxp_10q_part_i_item_1_opens_on_its_heading():
     from edgar import find

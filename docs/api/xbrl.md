@@ -419,11 +419,17 @@ Render the statement with rich formatting.
 ```python
 def to_dataframe(
     self,
+    period_filter: Optional[str] = None,
+    period_view: Optional[str] = None,
+    standard: bool = True,
     view: ViewType = None,
     *,
     include_unit: bool = False,
     include_point_in_time: bool = False,
-    presentation: bool = False
+    include_standardization: bool = False,
+    presentation: bool = True,
+    matrix: bool = False,
+    include_metadata: bool = True,
 ) -> pd.DataFrame
 ```
 Convert statement to pandas DataFrame with optional transformations.
@@ -433,25 +439,26 @@ Convert statement to pandas DataFrame with optional transformations.
   `include_dimensions`, which was removed in 6.0 (`True` is `"detailed"`, `False` is `"standard"`)
 - `include_unit`: Include unit column (USD, shares, etc.) (default: False)
 - `include_point_in_time`: Include point-in-time column for instant facts (default: False)
-- `presentation`: Apply HTML-matching transformations using preferred_sign (default: False)
-  - False (default): Raw instance values from XML
+- `presentation`: Apply HTML-matching transformations using preferred_sign (default: True)
   - True: Transform values to match SEC filing HTML display
+  - False: Raw instance values from XML
+- `include_metadata`: Include the metadata columns below (default: True). Set to
+  False to skip metadata lookups while preserving the selected rows and values.
 
 **Returns:** DataFrame with the following columns:
-- **Core columns**: `concept`, `label`, period columns (dates)
-- **Metadata columns** (always included):
+- **Core columns**: `concept`, `label`, period columns (dates), `level` (nesting depth),
+  and `abstract` (whether the row is a heading)
+- **Metadata columns** (with `include_metadata=True`):
   - `balance` — debit or credit (from XBRL taxonomy)
   - `weight` — calculation tree weight (+1 or -1)
   - `preferred_sign` — how the value should be displayed (from presentation linkbase)
-  - `level` — nesting depth in the presentation tree (0=root, 1=section header, 2=line item, etc.)
-  - `abstract` — True if this row is a section header, not a data row
   - `parent_concept` — calculation tree parent (the metric concept this rolls up to for summation math)
   - `parent_abstract_concept` — presentation tree parent (the section header this appears under for display hierarchy)
 - **Optional columns**: `dimension`, `unit`, `point_in_time`
 
 **Value Modes:**
-- **Raw mode** (default): Preserves values exactly as reported in instance document
-- **Presentation mode** (`presentation=True`): Applies transformations to match SEC HTML rendering
+- **Raw mode** (`presentation=False`): Preserves values exactly as reported in instance document
+- **Presentation mode** (default): Applies transformations to match SEC HTML rendering
   - Every statement, parentheticals and statements of equity included: a row with preferred_sign=-1 (a negated label on its presentation arc) has its values negated, as the SEC page shows them
   - The result does not depend on how the statement was reached (`income_statement()` or `xbrl.statements[role]`)
 
@@ -459,13 +466,16 @@ Convert statement to pandas DataFrame with optional transformations.
 ```python
 statement = xbrl.statements.income_statement()
 
-# Raw values (default)
-df_raw = statement.to_dataframe()
+# Raw values
+df_raw = statement.to_dataframe(presentation=False)
 # Returns actual XML values + metadata columns
 
 # Presentation mode (matches SEC HTML)
-df_presentation = statement.to_dataframe(presentation=True)
+df_presentation = statement.to_dataframe()
 # Returns transformed values matching 10-K HTML display
+
+df_lean = statement.to_dataframe(include_metadata=False)
+# Returns the same displayed values with fewer columns
 
 # Check metadata
 print(df_raw[['concept', 'balance', 'weight', 'preferred_sign']].head())

@@ -44,7 +44,7 @@ The `annual_report_form` field reflects whether the issuer files annual reports 
 
 ## Access Exhibits
 
-6-K content is almost always in exhibits rather than inline in the cover page. The `exhibits` property returns all non-graphic attachments:
+6-K content is almost always in exhibits rather than inline in the cover page. The `exhibits` property returns the filing's `EX-*` documents. Graphics, the cover page and the XBRL files SEC adds to a filing (`R*.htm` viewer pages, linkbases, `Financial_Report.xlsx`) are left out:
 
 ```python
 six_k.has_exhibits   # True
@@ -128,7 +128,7 @@ for filing in recent:
 
 ## Get the Full Text
 
-`text()` returns the complete filing content, including all exhibit text rendered as plain text:
+`text()` returns the complete filing content, the cover page and every exhibit, rendered as plain text:
 
 ```python
 content = six_k.text()

@@ -13,12 +13,15 @@
 # to produce them — the few CI minutes a markdown-only run costs are cheaper than
 # a merge queue that deadlocks on documentation.
 #
-# REQUIRED CHECKS ARE PINNED TO JOB NAMES. `main` requires exactly three contexts,
-# two from this file and one from agent-config-guard.yml:
+# REQUIRED CHECKS ARE PINNED TO JOB NAMES. `main` requires exactly four contexts,
+# two from this file, one from agent-config-guard.yml and one from
+# regression-tests.yml:
 #
 #     Cassette safety gate
 #     test-fast (3.13)
 #     Agent config guard     (agent-config-guard.yml: a security gate, never remove)
+#     Regression gate        (regression-tests.yml: reports on every pull request,
+#                             passing when the regression suite does not apply)
 #
 # The second name is generated from the matrix below, which is event-dependent —
 # a pull request builds only 3.13, so the context is literally "test-fast (3.13)".
@@ -65,10 +68,6 @@ on:
     - cron: '0 7 * * *'
   workflow_dispatch:
 
-# Cancel an in-progress run when a newer commit lands on the same PR. Pushes to
-# main are never cancelled: PRs merge without being up to date with main, so the
-# post-merge run is the only check that the combination works, and back-to-back
-# merges used to cancel it before it finished.
 # Read-only by default. Jobs that write (the red-main `report` job) grant
 # their own job-level permissions; nothing else inherits the token's write scope.
 permissions:
@@ -76,9 +75,22 @@ permissions:
   pull-requests: read
   issues: read
 
+# Only pull-request runs are ever cancelled, by a newer commit on the same PR.
+# Every other run (a push to main, the nightly, a manual dispatch) gets a group
+# of its own, keyed by commit, so nothing can supersede it.
+#
+# `cancel-in-progress: false` was not enough. It protects a RUNNING run, but
+# GitHub keeps at most one PENDING run per group and cancels the older pending
+# one when a newer run queues. With one group for all of main, every merge
+# that arrived while a run was in progress cancelled the merge waiting before
+# it, and that commit got no run at all: 43 of the 100 push runs of
+# python-hatch-workflow.yml from 2026-11-11 to 2026-11-23 were cancelled
+# before any job started (6 of 100 here), among them the merges of #2028 and
+# #2029. PRs merge without being up to date with main, so the post-merge run
+# is the only check that the combination works.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name != 'push' }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
   # Must pass before any job that runs pytest. vcrpy loads cassettes with
@@ -117,14 +129,49 @@ jobs:
     steps:
     - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
     - name: Set up Python ${{ matrix.python-version }}
+      if: matrix.python-version != '3.15'
       uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
+
+    # setup-python's 3.15 builds (3.15.0 to 3.15.2) ship without the C `_decimal`
+    # extension: CPython 3.15 no longer bundles libmpdec, and those builds were
+    # made without it. `decimal` then falls back to `_pydecimal`, which goes
+    # through int<->str and hits the 4300-digit limit, so the 10,000-digit
+    # fraction cases in test_issue_1766.py fail there and nowhere else. uv's
+    # Python builds include `_decimal`. The venv is seeded with pip so every
+    # later step runs the same `python -m pip` commands on all three legs.
+    - name: Set up Python 3.15 (uv build, with _decimal)
+      if: matrix.python-version == '3.15'
+      uses: astral-sh/setup-uv@68559e99cc807c1eb7e9238fd43a15bba460eec2 # v10.3.3
+    - name: Create the 3.15 venv
+      if: matrix.python-version == '3.15'
+      run: |
+        uv venv --seed --managed-python --python 3.15 "$RUNNER_TEMP/py315"
+        echo "$RUNNER_TEMP/py315/bin" >> "$GITHUB_PATH"
+
+    # Fails loudly instead of letting a build without the C decimal module turn
+    # into four "needs the SEC" findings in the offline audit below.
+    - name: Check the interpreter has the C decimal module
+      run: python -c "import sys, _decimal; print(sys.version)"
+
+    # The 3.13 leg (the one pull requests run) also installs the `cloud` and
+    # `data` extras, so the tests that importorskip fsspec, duckdb and zstandard
+    # run instead of skipping: 4 of the 9 skips on 2026-11-22. The 3.11 floor
+    # leg keeps the bare `.[ai]` install, so the library is still tested
+    # without them. 3.15 does too: zstandard has no 3.15 wheel yet (0.25.0), and
+    # building it from source there is not what that leg is for.
     - name: Install dependencies
+      env:
+        PYTHON_VERSION: ${{ matrix.python-version }}
       run: |
         python -m pip install --upgrade pip
-        python -m pip install -e ".[ai]"
+        if [ "$PYTHON_VERSION" = "3.13" ]; then
+          python -m pip install -e ".[ai,cloud,data]"
+        else
+          python -m pip install -e ".[ai]"
+        fi
         python -m pip install pytest pytest-cov pytest-env pytest-xdist pytest-asyncio pytest-retry pytest-mock pytest-vcr "vcrpy>=8.3.0,<9" freezegun==1.5.1 filelock tqdm responses
 
     # The floor leg installs the declared pandas floor itself, so both majors
@@ -164,15 +211,16 @@ jobs:
     - name: Check no new test needs the SEC while marked fast
       env:
         GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.number }}
       run: |
         set -euo pipefail
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
+        if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
           # The API, not `git diff`: this checkout is shallow, so no merge base
           # with the target branch exists to diff against. Only test modules
           # (pytest's test_*.py / *_test.py): a helper under tests/ collects
           # nothing, and the audit reads an empty run as a broken one (#1527).
           CHANGED=$(gh api --paginate \
-            "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
+            "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" \
             --jq '.[] | select(.status != "removed") | .filename' \
             | grep -E '^tests/(.*/)?(test_[^/]*|[^/]*_test)\.py$' | tr '\n' ' ' || true)
           if [ -z "$CHANGED" ]; then
@@ -186,7 +234,7 @@ jobs:
         fi
 
     # A pull request that stages a 6.0 change (a deprecation, a will-raise
-    # warning, "removed in 6.0") has to touch the current upgrade guide (docs/upgrade/6.1.md) in the same PR.
+    # warning, "removed in 6.0") has to touch the current upgrade guide (docs/upgrade/6.5.md) in the same PR.
     # #1200/#1201 shipped 5.55.0 deprecations with no guide entry, and nothing
     # mechanical noticed (bead edgartools-07lk.14). Pull requests only: the check
     # reads the PR's diff, and main has no PR to read. Labels are read live
@@ -196,12 +244,13 @@ jobs:
       if: github.event_name == 'pull_request'
       env:
         GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.number }}
       run: |
         set -euo pipefail
         gh api --paginate \
-          "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
+          "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" \
           --jq '.[] | {filename, status, patch} | tojson' > "$RUNNER_TEMP/pr_files.jsonl"
-        PR_LABELS=$(gh api "repos/${{ github.repository }}/issues/${{ github.event.number }}/labels" \
+        PR_LABELS=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/labels" \
           --jq '[.[].name] | join(",")') \
           python scripts/check_upgrade_guide.py "$RUNNER_TEMP/pr_files.jsonl"
 
@@ -221,10 +270,10 @@ jobs:
         # upload below and the Combine Coverage job with its 65% floor run on
         # push), and --cov with branch coverage doubles this step: 273 s vs 577 s
         # locally at 4 workers (edgartools-07lk.26 step B).
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          pytest -n auto -m 'fast'
+        if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+          pytest -rs -n auto -m 'fast'
         else
-          pytest -n auto --cov --cov-report=xml -m 'fast'
+          pytest -rs -n auto --cov --cov-report=xml -m 'fast'
         fi
 
     # Section-boundary accuracy, gated on the pull requests that can move it
@@ -253,10 +302,11 @@ jobs:
       if: github.event_name == 'pull_request'
       env:
         GH_TOKEN: ${{ github.token }}
+        PR_NUMBER: ${{ github.event.number }}
       run: |
         set -euo pipefail
         TRIGGERS=$(gh api --paginate \
-          "repos/${{ github.repository }}/pulls/${{ github.event.number }}/files" \
+          "repos/$GITHUB_REPOSITORY/pulls/$PR_NUMBER/files" \
           --jq '.[].filename' \
           | grep -E '^(edgar/documents/|tests/fixtures/(parser_corpus|html|parity_gate|heldout_retired)/|tests/meta/test_(boundary_truth|section_self_consistency_ratchet)\.py$|\.github/workflows/python-hatch-workflow\.yml$)' || true)
         if [ -z "$TRIGGERS" ]; then
@@ -265,7 +315,7 @@ jobs:
         fi
         echo "Section-extraction inputs changed:"
         echo "$TRIGGERS"
-        pytest -m slow -n 2 --dist loadfile \
+        pytest -rs -m slow -n 2 --dist loadfile \
           tests/meta/test_boundary_truth.py \
           tests/meta/test_section_self_consistency_ratchet.py
 
@@ -323,7 +373,7 @@ jobs:
       run: |
         # Sequential - respects SEC rate limits. --enable-cache persists HTTP
         # responses to _tcache (immutable /Archives data cached forever).
-        pytest --cov --cov-report=xml -m 'network and not slow and not regression' --enable-cache
+        pytest -rs --cov --cov-report=xml -m 'network and not slow and not regression' --enable-cache
 
     - name: Upload coverage data
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -369,7 +419,7 @@ jobs:
     - name: Run slow tests
       run: |
         # Sequential - often network-heavy. --enable-cache persists HTTP responses.
-        pytest --cov --cov-report=xml -m 'slow and not regression' --enable-cache
+        pytest -rs --cov --cov-report=xml -m 'slow and not regression' --enable-cache
 
     - name: Upload coverage data
       uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

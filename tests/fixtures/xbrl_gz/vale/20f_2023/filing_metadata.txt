@@ -1,0 +1,6 @@
+ticker=VALE
+accession=0001292814-24-001463
+form=20-F
+filing_date=2024-04-19
+cik=917851
+company=Vale S.A.

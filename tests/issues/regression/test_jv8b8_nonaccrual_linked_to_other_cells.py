@@ -65,7 +65,6 @@ def test_a_flag_on_a_duration_fact_or_an_undimensioned_total_resolves_nothing():
     assert result.extraction_method == 'none'
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_new_mountain_guardian_iv_reads_a_flag_on_the_pik_rate():
     """New Mountain Guardian IV BDC 10-Q for 2026-09-30 (0001925531-26-000020).

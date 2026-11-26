@@ -180,7 +180,6 @@ TRV_FILES = ("trv-20251231.xsd", "trv-20251231_pre.xml", "trv-20251231_lab.xml",
              "trv-20251231_def.xml", "trv-20251231_htm.xml")
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_main_street_revenue_is_total_investment_income(tmp_path):
     """Main Street Capital FY2025 10-K, 0001396440-26-000016."""
@@ -196,7 +195,6 @@ def test_main_street_revenue_is_total_investment_income(tmp_path):
     assert Financials(xbrl).get_revenue() == 566_391_000  # was None
 
 
-@pytest.mark.network
 @pytest.mark.vcr
 def test_travelers_revenue_is_unchanged(tmp_path):
     """Travelers FY2025 10-K, 0000086312-26-000065: an insurer's net investment income is one

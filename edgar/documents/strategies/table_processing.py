@@ -12,6 +12,7 @@ from lxml.html import HtmlElement
 
 from edgar.documents.config import ParserConfig
 from edgar.documents.strategies.style_parser import StyleParser
+from edgar.documents.strategies.xbrl_extraction import _IX_CLARK_PREFIX, XBRLExtractor
 from edgar.documents.table_nodes import Cell, Row, TableNode
 from edgar.documents.types import TableType
 
@@ -41,6 +42,34 @@ def _text_content(elem) -> str:
         if child.tail:
             parts.append(child.tail)
     return ''.join(parts)
+
+
+_CELL_FACT_TAGS = (
+    *(f"ix:{tag}" for tag in XBRLExtractor.FACT_TAGS),
+    f"{_IX_CLARK_PREFIX}nonFraction",
+    f"{_IX_CLARK_PREFIX}nonNumeric",
+    f"{_IX_CLARK_PREFIX}fraction",
+)
+_INLINE_XBRL_CONTAINERS = (
+    "ix:hidden", "ix:header", f"{_IX_CLARK_PREFIX}hidden", f"{_IX_CLARK_PREFIX}header",
+)
+_CELL_FACT_BOUNDARIES = ("td", "th", "table", *_INLINE_XBRL_CONTAINERS)
+
+
+def _cell_xbrl_fact_ids(cell: HtmlElement) -> tuple[str, ...]:
+    """Keep the IDs of inline facts whose closest cell or boundary is this cell."""
+    if not len(cell):
+        return ()
+
+    fact_ids = []
+    for fact in cell.iterdescendants(*_CELL_FACT_TAGS):
+        fact_id = fact.get("id")
+        if fact_id and fact_id.strip() and next(fact.iterancestors(*_CELL_FACT_BOUNDARIES), None) is cell:
+            fact_ids.append(fact_id)
+
+    if fact_ids and next(cell.iterancestors(*_INLINE_XBRL_CONTAINERS), None) is None:
+        return tuple(fact_ids)
+    return ()
 
 
 class TableProcessor:
@@ -451,7 +480,8 @@ class TableProcessor:
             colspan=colspan,
             rowspan=rowspan,
             is_header=is_header,
-            align=align
+            align=align,
+            xbrl_fact_ids=_cell_xbrl_fact_ids(elem),
         )
 
         return cell
