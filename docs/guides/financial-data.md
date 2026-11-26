@@ -141,15 +141,36 @@ income = quarterly.income_statement()
 
 ### Foreign private issuers (6-K)
 
-A foreign private issuer such as TSMC files its annual report on Form 20-F with XBRL, so `get_financials()` works as usual. Its quarterly results arrive on Form 6-K, where the numbers sit in an HTML press release (an EX-99 exhibit) with no XBRL behind it. For those companies `get_quarterly_financials()` returns `None`, because there are no statements to read.
-
-To get the quarter's figures, read the press release tables with `EarningsRelease`:
+When a company has no 10-Q, `get_quarterly_financials()` checks up to 10
+unamended 6-Ks filed in the last 183 days, newest first. Each filing's XBRL
+takes priority. An HTML earnings exhibit with identifiable quarterly columns
+and explicit units can supply a `QuarterlyIncome` result. A monthly notice
+alone cannot. The search limit can be set with `max_6k_filings`.
 
 ```python
-from edgar import Company, find
-from edgar.earnings import EarningsRelease
+from edgar import Company, Financials, QuarterlyIncome
 
-Company("TSM").get_quarterly_financials()   # None: TSMC's 6-Ks carry no XBRL
+quarterly = Company("TSM").get_quarterly_financials()
+if isinstance(quarterly, QuarterlyIncome):
+    print(quarterly.get_net_income())  # Actual currency units
+    print(quarterly.to_dataframe(include_unit=True))
+    print(quarterly.source_url, quarterly.notes)
+elif isinstance(quarterly, Financials):
+    print(quarterly.balance_sheet())
+```
+
+The income table preserves the exhibit's period labels. A `period_offset`
+of 1 selects the next reported comparison column, which can be a year earlier.
+`to_dataframe()` scales monetary amounts to currency units and leaves per-share
+values as reported. Generic EPS has no inferred basic or diluted classification.
+When no supported filing is found, the method returns `None`.
+
+To inspect a particular historical release and read the amounts in their
+original printed scale, use its accession:
+
+```python
+from edgar import find
+from edgar.earnings import EarningsRelease
 
 filing = find("0001046179-26-000726")        # TSMC's 3Q26 earnings release, filed 2026-10-15
 release = EarningsRelease.from_filing(filing)

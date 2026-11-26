@@ -15,6 +15,7 @@ import pyarrow.compute as pc
 
 if TYPE_CHECKING:
     import pandas as pd
+    from edgar._html_financials import QuarterlyIncome
     from edgar.entity.enhanced_statement import MultiPeriodStatement, StructuredStatement
     from edgar.entity.filings import EntityFilings
     from edgar.enums import FilerCategory, FormType, PeriodType
@@ -33,7 +34,7 @@ from edgar.company_reports import TenK, TenQ
 from edgar.display.styles import get_style, SYMBOLS
 from edgar.entity.data import Address, CompanyData, EntityData
 from edgar.entity.entity_facts import EntityFacts, get_company_facts
-from edgar.exceptions import CompanyFactsNotFoundError, CompanyNotFoundError
+from edgar.exceptions import CompanyFactsNotFoundError, CompanyNotFoundError, ValidationError
 from edgar.entity.tickers import get_icon_from_ticker
 from edgar.financials import Financials
 from edgar.display.formatting import cik_text, datefmt, reverse_name
@@ -783,38 +784,26 @@ class Company(Entity):
         self._warn_history_with_predecessor("has filed no annual report yet", "get_financials")
         return None
 
-    def get_quarterly_financials(self) -> Optional[Financials]:
+    def get_quarterly_financials(self, *, max_6k_filings: int = 10) -> Optional[Union[Financials, 'QuarterlyIncome']]:
+        """Read the latest 10-Q, or search recent unamended 6-Ks newest first.
+
+        XBRL yields Financials. An HTML exhibit with explicit quarterly amounts
+        and units yields QuarterlyIncome, which exposes the income statement.
+        Returns None if neither is available. For a particular historical 6-K
+        use edgar.earnings.EarningsRelease.from_filing(filing).
+
+        max_6k_filings bounds the number examined within the last 183 days.
         """
-        Get financial statements from this company's latest quarterly report.
-
-        Checks 10-Q first, then falls back to 6-K (foreign private issuers).
-        Returns a Financials object with the same interface as get_financials(),
-        but with quarterly data instead of annual.
-
-        Returns:
-            Financials object, or None when there are no statements to read:
-            this company has filed no 10-Q or 6-K, or the latest one carries no
-            XBRL (most 6-Ks don't). It is never how a failure is reported; a
-            transport or parsing failure raises.
-
-            A 6-K filer's quarterly figures are usually in an HTML press
-            release instead; read them with
-            ``edgar.earnings.EarningsRelease.from_filing(filing)``.
-
-        Example::
-
-            quarterly = Company("AAPL").get_quarterly_financials()
-            quarterly.income_statement()
-            quarterly.balance_sheet()
-        """
+        if isinstance(max_6k_filings, bool) or not isinstance(max_6k_filings, int) or max_6k_filings < 1:
+            raise ValidationError('max_6k_filings must be a positive integer',
+                                  parameter='max_6k_filings', invalid_value=max_6k_filings)
         tenq_filing = self.latest_tenq
         if tenq_filing is not None:
             return tenq_filing.financials
-        # Fall back to 6-K (foreign private issuers)
-        filing = self.get_filings(form='6-K', amendments=False, trigger_full_load=False).latest()
-        if filing is not None:
-            return Financials.extract(filing)
-        return None
+        from edgar._html_financials import _recent_quarterly_income
+
+        filings = self.get_filings(form='6-K', amendments=False, trigger_full_load=False)
+        return _recent_quarterly_income(filings, max_6k_filings, getattr(self, 'fiscal_year_end', None))
 
     @property
     def fiscal_year_end(self):

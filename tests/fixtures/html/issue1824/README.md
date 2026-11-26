@@ -25,8 +25,14 @@ The EPS footnote is a smaller font positioned above the baseline, not a plain
 magnitude suffix. Footnote a says the 3Q2026 figures have not been approved by
 the Board of Directors.
 
-The primary and month-end 6-K fixtures belong to the Company fallback tests in
-PR #1825 and are intentionally absent from this standalone parser change.
+The accompanying 6-K documents were saved on 2026-11-01. The primary
+filing links the earnings exhibit. The later month-end notice has no
+quarterly income statement.
+
+| Document | Accession | SHA-256 |
+| --- | --- | --- |
+| [tsm-20261015x6k.htm](https://www.sec.gov/Archives/edgar/data/1046179/000104617926000726/tsm-20261015x6k.htm) | 0001046179-26-000726 | `43a0be1d03e92a19e49e8e55b18a0165811a5a7a105a5a89f731b53022bc664f` |
+| [tsm-monthend6kx20261022.htm](https://www.sec.gov/Archives/edgar/data/1046179/000104617926000728/tsm-monthend6kx20261022.htm) | 0001046179-26-000728 | `9183c7d03daf67fd0efa4547cdc7e37fbcaaf33a593e71f37d27dba7dbc24878` |
 
 ## Cardlytics currency regression
 

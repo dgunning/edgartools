@@ -53,6 +53,7 @@ _EXPORTS_BY_MODULE = {
         "get_entity", "get_icon_from_ticker",
     ),
     "edgar.filesystem": ("is_cloud_storage_enabled", "sync_to_cloud", "use_cloud_storage"),
+    "edgar._html_financials": ("QuarterlyIncome",),
     "edgar.financials": ("Financials", "MultiFinancials"),
     "edgar.funds": ("Fund", "FundClass", "FundCompany", "FundSeries", "find_fund", "find_funds"),
     "edgar.funds.ncen": ("NCEN_FORMS", "FundCensus"),
@@ -165,7 +166,7 @@ __all__ = [
     "ValidationError",
 
     # -- Financial statements ------------------------------------------------
-    "Financials", "MultiFinancials", "XBRL",
+    "Financials", "MultiFinancials", "QuarterlyIncome", "XBRL",
 
     # -- Funds ---------------------------------------------------------------
     "Fund", "FundCompany", "FundClass", "FundSeries",
