@@ -259,6 +259,7 @@ def test_html_and_xbrl_share_dataframe_parameters(release):
     {'include_unit': True, 'include_point_in_time': True},
     {'standard': False}, {'include_standardization': True},
     {'standard': False, 'include_standardization': True},
+    {'include_metadata': False},
 ])
 def test_real_tsm_and_nvda_share_columns_and_standard_flag(release, nvda_statement, options):
     statement = _extract_6k_income_statement(release)

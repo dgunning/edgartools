@@ -57,6 +57,10 @@ _XBRL_METADATA = (
     'dimension_member', 'dimension_member_label', 'dimension_label', 'balance',
     'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept',
 )
+# The columns Statement.to_dataframe(include_metadata=False) leaves out.
+_STATEMENT_METADATA = frozenset((
+    'balance', 'weight', 'preferred_sign', 'parent_concept', 'parent_abstract_concept',
+))
 
 
 def _normalize_label(label):
@@ -154,7 +158,8 @@ class QuarterlyIncome(FinancialTable):
                      include_point_in_time: bool = False,
                      include_standardization: bool = False,
                      presentation: bool = True,
-                     matrix: bool = False) -> pd.DataFrame:
+                     matrix: bool = False,
+                     include_metadata: bool = True) -> pd.DataFrame:
         """Statement-compatible columns with honest HTML provenance.
 
         Amounts use actual currency units and EPS stays unscaled. Source XBRL
@@ -164,8 +169,10 @@ class QuarterlyIncome(FinancialTable):
         ``period_filter`` selects an exact source column from ``periods``.
         XBRL period/dimensional views, raw-instance signs and equity matrices
         are unavailable and raise rather than being silently ignored.
+        ``include_metadata=False`` drops the columns Statement drops.
         """
         for name, value in (('standard', standard), ('include_unit', include_unit),
+                            ('include_metadata', include_metadata),
                             ('include_point_in_time', include_point_in_time),
                             ('include_standardization', include_standardization),
                             ('presentation', presentation), ('matrix', matrix)):
@@ -200,7 +207,8 @@ class QuarterlyIncome(FinancialTable):
         if include_point_in_time:
             frame['point_in_time'] = False  # Explicit quarterly durations, never instants.
         for name in _XBRL_METADATA:
-            frame[name] = None
+            if include_metadata or name not in _STATEMENT_METADATA:
+                frame[name] = None
         frame.attrs.update(source='HTML', currency=self.currency, reported_scale=self.scale.value,
                            source_url=self.source_url, notes=self.notes, period_columns=columns,
                            standardization_source='HTML exact labels' if standard else None)
