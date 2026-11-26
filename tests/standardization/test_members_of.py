@@ -100,10 +100,10 @@ def test_industry_changes_membership_and_preserves_provenance(build_index):
 def test_member_identity_preserves_distinct_keys(build_index):
     index = build_index({key: {"standard_tags": ["TradeReceivables"]} for key in ("us-gaap:Example", "ifrs-full_Example", "Example")})
     members = index.members_of("TradeReceivables")
-    assert [(member.mapping_key, member.qualified_tag, member.identity_status) for member in members] == [
-        ("Example", None, "unqualified"),
-        ("ifrs-full_Example", "ifrs-full:Example", "qualified"),
-        ("us-gaap:Example", "us-gaap:Example", "qualified"),
+    assert [(member.mapping_key, member.qualified_tag) for member in members] == [
+        ("Example", None),
+        ("ifrs-full_Example", "ifrs-full:Example"),
+        ("us-gaap:Example", "us-gaap:Example"),
     ]
 
 
@@ -118,6 +118,27 @@ def test_unknown_identifier_raises(build_index, value):
     index = build_index({"Example": {"standard_tags": ["Revenue"]}}, labels={"Revenue": "Total Sales"})
     with pytest.raises(ValueError, match=r"(?i)standard concept"):
         index.members_of(value)
+
+
+@pytest.mark.parametrize(
+    "value, expected",
+    [("Revenues", "Revenue"), ("NetIncomeLoss", "NetIncome"), ("TotalAssets", "Assets")],
+)
+def test_unknown_identifier_suggests_known_concepts(index, value, expected):
+    with pytest.raises(ValueError, match=rf"Did you mean .*\b{expected}\b"):
+        index.members_of(value)
+
+
+def test_suggestions_include_registry_and_override_concepts(build_index):
+    index = build_index(
+        {"Example": {"industry_overrides": {"Insur": {"standard_tags": ["UnderwritingIncome"]}}}},
+        labels={"RegistryOnly": "Registry Label"},
+    )
+
+    with pytest.raises(ValueError, match=r"Did you mean RegistryOnly"):
+        index.members_of("RegistryOnl")
+    with pytest.raises(ValueError, match=r"Did you mean UnderwritingIncome"):
+        index.members_of("UnderwritingIncom")
 
 
 def test_known_family_without_members_returns_empty_tuple(build_index):

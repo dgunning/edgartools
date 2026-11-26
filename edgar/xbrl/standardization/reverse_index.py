@@ -22,6 +22,7 @@ import json
 import logging
 import os
 from dataclasses import dataclass, field, replace
+from difflib import get_close_matches
 from typing import Dict, List, Optional, Tuple
 
 from edgar.exceptions import ValidationError
@@ -147,10 +148,7 @@ class MappingMember:
     """Exact key in the mapping data."""
 
     qualified_tag: Optional[str]
-    """Taxonomy-family spelling when established by the mapping key."""
-
-    identity_status: str
-    """Whether the mapping identity is qualified or unqualified."""
+    """Taxonomy-family spelling when established by the key, or None for a bare key."""
 
     result: MappingResult
     """Independent lookup result with all surviving candidates and metadata."""
@@ -483,12 +481,17 @@ class ReverseIndex:
         """
         if not isinstance(standard_concept, str):
             raise TypeError("standard_concept must be a string")
-        if not standard_concept or not self._knows_standard_concept(standard_concept):
+        known_concepts = self._known_standard_concepts()
+        if not standard_concept or standard_concept not in known_concepts:
+            matches = get_close_matches(standard_concept, known_concepts)
+            suggestion = "Use an exact identifier from MappingResult.standard_concepts, such as 'Revenue'."
+            if matches:
+                suggestion = f"Did you mean {', '.join(matches)}? {suggestion}"
             raise ValidationError(
                 f"Unknown standard concept {standard_concept!r}.",
                 parameter="standard_concept",
                 invalid_value=standard_concept,
-                suggestions=["Use an exact identifier from MappingResult.standard_concepts, such as 'Revenue'."],
+                suggestions=[suggestion],
             )
 
         members = []
@@ -497,27 +500,21 @@ class ReverseIndex:
             if result is None or standard_concept not in result.standard_concepts:
                 continue
 
-            qualified_tag = self._qualified_member_tag(key)
             # Forward lookup can return the stored candidate list directly.
             members.append(MappingMember(
                 mapping_key=key,
-                qualified_tag=qualified_tag,
-                identity_status="qualified" if qualified_tag else "unqualified",
+                qualified_tag=self._qualified_member_tag(key),
                 result=replace(result, standard_concepts=result.standard_concepts.copy()),
             ))
         return tuple(members)
 
-    def _knows_standard_concept(self, concept: str) -> bool:
-        if concept in self._display_names or concept in self._embedded_display_names:
-            return True
-        return any(
-            concept in entry.get("standard_tags", ())
-            or any(
-                concept in override.get("standard_tags", ())
-                for override in (entry.get("industry_overrides") or {}).values()
-            )
-            for entry in self._index.values()
-        )
+    def _known_standard_concepts(self) -> set[str]:
+        concepts = set(self._display_names)
+        for entry in self._index.values():
+            concepts.update(entry.get("standard_tags", ()))
+            for override in (entry.get("industry_overrides") or {}).values():
+                concepts.update(override.get("standard_tags", ()))
+        return concepts
 
     @staticmethod
     def _qualified_member_tag(key: str) -> Optional[str]:

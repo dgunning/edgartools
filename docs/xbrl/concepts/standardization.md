@@ -636,8 +636,13 @@ for member in members_of("Revenue"):
 
 Each record keeps the exact stored key and the full lookup result, including
 any other surviving candidates. Inspect `qualified_tag` when you need the
-taxonomy-family spelling. A bare mapping key can have unknown qualification.
-Pass `industry=` to apply the same overrides as `lookup()`.
+taxonomy-family spelling. A bare mapping key has `qualified_tag=None`.
+Pass `industry=` to apply the same overrides as `lookup()`. If you pass an
+unknown identifier, the error suggests similar known identifiers when available.
+
+This API reflects the XBRL statement mappings. `company.get_facts()` uses a
+separate mapping path, and its `get_revenue()` method selects facts using that
+path's rules.
 
 Families can contain both totals and components. The results are sorted by
 stored key for repeatable inspection. Check the filing context before
