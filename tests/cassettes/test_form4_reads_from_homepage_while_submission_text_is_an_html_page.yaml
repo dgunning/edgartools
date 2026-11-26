@@ -1,0 +1,289 @@
+interactions:
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/2087401/000089843226000808/0000898432-26-000808-index.html
+  response:
+    body:
+      string: "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 4.01 Transitional//EN\" \"http://www.w3.org/TR/html4/loose.dtd\">\n<html
+        xmlns=\"http://www.w3.org/1999/xhtml\">\n<head>\n<meta http-equiv=\"Content-Type\"
+        content=\"text/html; charset=utf-8\" />\n<meta http-equiv=\"Last-Modified\"
+        content=\"Tue, 24 Nov 2026 21:19:56 GMT\" />\n<title>EDGAR Filing Documents
+        for 0000898432-26-000808</title>\n<link  rel=\"stylesheet\" href=\"/edgar/search/global/css/bootstrap/bootstrap.min.css\"
+        type=\"text/css\" />\n<link rel=\"stylesheet\" type=\"text/css\" href=\"/include/interactive2.css\"
+        />\n</head>\n<body style=\"margin: 0; font-size: 16px; \">\n<!-- SEC Web Analytics
+        - For information please visit: https://www.sec.gov/privacy.htm#collectedinfo
+        -->\n<noscript><iframe src=\"//www.googletagmanager.com/ns.html?id=GTM-TD3BKV\"\nheight=\"0\"
+        width=\"0\" style=\"display:none;visibility:hidden\"></iframe></noscript>\n<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':\nnew
+        Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],\nj=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=\n'//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);\n})(window,document,'script','dataLayer','GTM-TD3BKV');</script>\n<!--
+        End SEC Web Analytics -->\n<noscript><div style=\"color:red; font-weight:bold;
+        text-align:center;\">This page uses Javascript. Your browser either doesn't
+        support Javascript or you have it turned off. To see this page as it is meant
+        to appear please use a Javascript enabled browser.</div></noscript>\n<!--
+        BEGIN BANNER -->\n<div  id=\"header\" style=\"text-align: center;\">\n   <nav
+        id=\"main-navbar\" class=\"navbar navbar-expand\">\n      <ul class=\"navbar-nav\">\n
+        \        <li class=\"nav-item\">\n            <a class=\"nav__sec_link\" href=\"https://www.sec.gov\">\n
+        \              <img src=\"/edgar/search/images/edgar-logo-2x.png\" alt=\"\"
+        style=\"height:6.25rem\">\n            </a>\n         </li>\n         <li
+        class=\"nav-item\">\n            <a class=\"nav__sec_link\" href=\"https://www.sec.gov\">\n
+        \              <span class=\"link-text d-inline\">SEC.gov</span>\n            </a>\n
+        \        </li>\n         <li class=\"nav-item\">\n            <a class=\"nav__link\"
+        href=\"//www.sec.gov/submit-filings/about-edgar\" id=\"edgar-short-form\"><span
+        class=\"link-text\">EDGAR</span></a>\n         </li>\n      </ul>\n\n      <ul
+        class=\"navbar-nav ml-auto\">\n         <li class=\"nav-item\">\n\t\t\t<a
+        href=\"/cgi-bin/browse-edgar?action=getcurrent\" class=\"nav__link\">Latest
+        Filings</a> \n         </li>\n         <li class=\"nav-item\">\n            <a
+        href=\"https://www.sec.gov/edgar/search-and-access\" class=\"nav__link\">Filings
+        search tools</a>\n         </li>\n      </ul>\n   </nav>\n   <div style=\"position:
+        absolute;width: 100%;\"> <h1 style=\"position: relative;top: -60px;\">Filing
+        Detail</h1></div>\n</div>\n<!-- END BANNER -->\n\n\n<!-- BEGIN BREADCRUMBS
+        -->\n<div id=\"breadCrumbs\">\n   <ul>\n      <li><a href=\"/index.htm\">SEC
+        Home</a> &#187;</li>\n      <li><a href=\"/edgar/searchedgar/companysearch.html\">Company
+        Search</a> &#187;</li>\n      <li class=\"last\">Current Page</li>\n   </ul>\n</div>\n<!--
+        END BREADCRUMBS -->\n\n<div id=\"contentDiv\">\n<!-- START FILING DIV -->\n<div
+        class=\"formDiv\">\n   <div id=\"formHeader\">\n      <div id=\"formName\">\n
+        \        <strong>Form 4</strong> - Statement of changes in beneficial ownership
+        of securities \n      </div>\n      <div id=\"secNum\">\n         <strong><acronym
+        title=\"Securities and Exchange Commission\">SEC</acronym> Accession <acronym
+        title=\"Number\">No.</acronym></strong> 0000898432-26-000808\n      </div>\n
+        \  </div>\n   <div class=\"formContent\">\n   \n      <div class=\"formGrouping\">\n
+        \        <div class=\"infoHead\">Filing Date</div>\n         <div class=\"info\">2026-11-24</div>\n
+        \        <div class=\"infoHead\">Accepted</div>\n         <div class=\"info\">2026-11-24
+        16:19:56</div>\n         <div class=\"infoHead\">Documents</div>\n         <div
+        class=\"info\">1</div>\n      </div>\n      <div class=\"formGrouping\">\n
+        \        <div class=\"infoHead\">Period of Report</div>\n         <div class=\"info\">2026-11-24</div>\n
+        \     </div>\n      <div style=\"clear:both\"></div>\n<!-- END FILING DIV
+        -->\n<!-- START DOCUMENT DIV -->\n  </div>\n    </div>\n<div class=\"formDiv\">\n
+        \  <div style=\"padding: 0px 0px 4px 0px; font-size: 12px; margin: 0px 2px
+        0px 5px; width: 100%; overflow:hidden\">\n      <p>Document Format Files</p>\n
+        \     <table class=\"tableFile\" summary=\"Document Format Files\">\n         <tr>\n
+        \           <th scope=\"col\" style=\"width: 5%;\"><acronym title=\"Sequence
+        Number\">Seq</acronym></th>\n            <th scope=\"col\" style=\"width:
+        40%;\">Description</th>\n            <th scope=\"col\" style=\"width: 20%;\">Document</th>\n
+        \           <th scope=\"col\" style=\"width: 10%;\">Type</th>\n            <th
+        scope=\"col\">Size</th>\n         </tr>\n         <tr>\n            <td scope=\"row\">1</td>\n
+        \           <td scope=\"row\">FORM 4</td>\n            <td scope=\"row\"><a
+        href=\"/Archives/edgar/data/1981546/000089843226000808/xslF345X06/form4.xml\">form4.html</a></td>\n
+        \           <td scope=\"row\">4</td>\n            <td scope=\"row\">&nbsp;</td>\n
+        \        </tr>\n         <tr class=\"evenRow\">\n            <td scope=\"row\">1</td>\n
+        \           <td scope=\"row\">FORM 4</td>\n            <td scope=\"row\"><a
+        href=\"/Archives/edgar/data/1981546/000089843226000808/form4.xml\">form4.xml</a></td>\n
+        \           <td scope=\"row\">4</td>\n            <td scope=\"row\">3603</td>\n
+        \        </tr>\n         <tr>\n            <td scope=\"row\">&nbsp;</td>\n
+        \           <td scope=\"row\">Complete submission text file</td>\n            <td
+        scope=\"row\"><a href=\"/Archives/edgar/data/1981546/000089843226000808/0000898432-26-000808.txt\">0000898432-26-000808.txt</a></td>\n
+        \           <td scope=\"row\">&nbsp;</td>\n            <td scope=\"row\">5034</td>\n
+        \        </tr>\n      </table>\t\n   </div>\n</div>\n<!-- END DOCUMENT DIV
+        -->\n<!-- START FILER DIV -->\n<div class=\"filerDiv\">\n   <div class=\"mailer\">Mailing
+        Address\n      <span class=\"mailerAddress\">6710 CUMBERLAND GAP PARKWAY</span>\n
+        \     <span class=\"mailerAddress\">\nHARROGATE       <span class=\"mailerAddress\">TN</span>\n37752
+        \     </span>\n   </div>\n   <div class=\"mailer\">Business Address\n      <span
+        class=\"mailerAddress\">6710 CUMBERLAND GAP PARKWAY</span>\n      <span class=\"mailerAddress\">\nHARROGATE
+        \      <span class=\"mailerAddress\">TN</span>\n37752      </span>\n      <span
+        class=\"mailerAddress\">423-869-5151</span>\n   </div>\n<div class=\"companyInfo\">\n
+        \ <span class=\"companyName\">Commercial Bancgroup, Inc. (<a href=\"/cgi-bin/own-disp?CIK=0001981546&amp;action=getissuer\">Issuer</a>)\n
+        <acronym title=\"Central Index Key\">CIK</acronym>: <a href=\"/cgi-bin/browse-edgar?CIK=0001981546&amp;action=getcompany\">0001981546
+        (see all company filings)</a></span>\n<p class=\"identInfo\"><acronym title=\"Internal
+        Revenue Service Number\">EIN.</acronym>: <strong>621039469</strong> | State
+        of Incorp.: <strong>TN</strong> | Fiscal Year End: <strong>1231</strong><br
+        /><acronym title=\"Standard Industrial Code\">SIC</acronym>: <b><a href=\"/cgi-bin/browse-edgar?action=getcompany&amp;SIC=6022&amp;owner=include\">6022</a></b>
+        State Commercial Banks<br />(CF Office: 02 Finance)</p>\n</div>\n<div class=\"clear\"></div>\n</div>\n<div
+        class=\"filerDiv\">\n   <div class=\"mailer\">Mailing Address\n      <span
+        class=\"mailerAddress\">C/O COMMERCIAL BANCGROUP, INC.</span>\n      <span
+        class=\"mailerAddress\">6710 CUMBERLAND GAP PARKWAY</span>\n      <span class=\"mailerAddress\">\nHARROGATE
+        \      <span class=\"mailerAddress\">TN</span>\n37752      </span>\n   </div>\n
+        \  <div class=\"mailer\">Business Address\n   </div>\n<div class=\"companyInfo\">\n
+        \ <span class=\"companyName\">Metheny Philip J. (<a href=\"/cgi-bin/own-disp?CIK=0002087401&amp;action=getowner\">Reporting</a>)\n
+        <acronym title=\"Central Index Key\">CIK</acronym>: <a href=\"/cgi-bin/browse-edgar?CIK=0002087401&amp;action=getcompany\">0002087401
+        (see all company filings)</a></span>\n<p class=\"identInfo\">Type: <strong>4</strong>
+        | Act: <strong>34</strong> | File No.: <a href=\"/cgi-bin/browse-edgar?filenum=001-42889&amp;action=getcompany\"><strong>001-42889</strong></a>
+        | Film No.: <strong>261592207</strong></p>\n</div>\n<div class=\"clear\"></div>\n</div>\n<!--
+        END FILER DIV -->\n</div>\n"
+    headers:
+      cache-control:
+      - no-cache
+      connection:
+      - keep-alive
+      content-length:
+      - '8041'
+      content-type:
+      - text/html
+      date:
+      - Thu, 26 Nov 2026 08:21:29 GMT
+      last-modified:
+      - Tue, 24 Nov 2026 21:19:56 GMT
+      set-cookie:
+      - _abck=17FAB096B0D0C0E2DCC6C71DDC2FC29E~-1~YAAQUOwXAsJE98KhAQAAIAXyFhADwv3araiJyECv6d/fLM8+mMVbENvuXz5o925/Bk3YSeatu5kqGZEEZtaBnsv3A3/Oxvsno4dnMZIjWRh/i9BH8Wlpn2mExfRzFjAcHo4h1hYkMTTPe+wwnwrE1iLOa0uy/ldifM8t92MSZ5+QHsTict9o6INq6wji1i74a1xMM3/O9UQNII+5O7wdHY31CLVAwM9s6igQCcAPdWqg5w1OygYvfI864wugcz9We7Yd2MqoJ6Bfa33pypX3UNsobgH2chUOobqa2vVXFycwGgatrcYELtPFr/f/D3M9IjYq84l9Z0jDE8GixrDMxIM0xjXEHTI96lruziJ7069w9FLtqCFPZdwg1b3EDd4TDasMvrUFRAHmRYUUGLdf2iTrVrRON40UAiwTIyfUlA2FErDuDNivZUe98JUbEB3GI9PM/zkT5hA6Zg==~-1~-1~-1~-1~-1;
+        Domain=.sec.gov; Path=/; Expires=Fri, 26 Nov 2027 08:21:29 GMT; Max-Age=31536000;
+        SameSite=None; Secure
+      - bm_sz=4BAC6BE76A79576ABE4B74C00032086F~YAAQUOwXAsNE98KhAQAAIAXyFgHduSpdvxy7QGhHOIrifkk61l+legJv/ZnZ4ZPcWrlatS3f+pJPGK6bDeT9xX7DcadR+s8CpVJ4Eq7XqOLJJ+7blwAxkWaHn259gxFcQNuB3O/g+UDjBp8WxZ1wNoZljmsMe/Md45R12XhS83GHaZgmKMsrdF7YCQzZM0Ypoq1KlrZp8u124twTnUwEiquHTWvFVs4K5E7zTqzQ8/JwBF9aXZcx//jxBXNSMlEWlgWsBFq2iSYFwMCS6bclmm4xO0lDpC//lNQpdbHOybcpUnU7idkwNZzTAHEj8jpQVCzIUeXPGcrHKDPjA3geEsZhvFg6pNMjnd26I9+iO7oJiUaB~4539956~4602164;
+        Domain=.sec.gov; Path=/; Expires=Thu, 26 Nov 2026 12:21:29 GMT; Max-Age=14400;
+        SameSite=None; Secure
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-akamai-transformed:
+      - 0 - 0 -
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      cookie:
+      - _abck=17FAB096B0D0C0E2DCC6C71DDC2FC29E~-1~YAAQUOwXAsJE98KhAQAAIAXyFhADwv3araiJyECv6d/fLM8+mMVbENvuXz5o925/Bk3YSeatu5kqGZEEZtaBnsv3A3/Oxvsno4dnMZIjWRh/i9BH8Wlpn2mExfRzFjAcHo4h1hYkMTTPe+wwnwrE1iLOa0uy/ldifM8t92MSZ5+QHsTict9o6INq6wji1i74a1xMM3/O9UQNII+5O7wdHY31CLVAwM9s6igQCcAPdWqg5w1OygYvfI864wugcz9We7Yd2MqoJ6Bfa33pypX3UNsobgH2chUOobqa2vVXFycwGgatrcYELtPFr/f/D3M9IjYq84l9Z0jDE8GixrDMxIM0xjXEHTI96lruziJ7069w9FLtqCFPZdwg1b3EDd4TDasMvrUFRAHmRYUUGLdf2iTrVrRON40UAiwTIyfUlA2FErDuDNivZUe98JUbEB3GI9PM/zkT5hA6Zg==~-1~-1~-1~-1~-1;
+        bm_sz=4BAC6BE76A79576ABE4B74C00032086F~YAAQUOwXAsNE98KhAQAAIAXyFgHduSpdvxy7QGhHOIrifkk61l+legJv/ZnZ4ZPcWrlatS3f+pJPGK6bDeT9xX7DcadR+s8CpVJ4Eq7XqOLJJ+7blwAxkWaHn259gxFcQNuB3O/g+UDjBp8WxZ1wNoZljmsMe/Md45R12XhS83GHaZgmKMsrdF7YCQzZM0Ypoq1KlrZp8u124twTnUwEiquHTWvFVs4K5E7zTqzQ8/JwBF9aXZcx//jxBXNSMlEWlgWsBFq2iSYFwMCS6bclmm4xO0lDpC//lNQpdbHOybcpUnU7idkwNZzTAHEj8jpQVCzIUeXPGcrHKDPjA3geEsZhvFg6pNMjnd26I9+iO7oJiUaB~4539956~4602164
+      host:
+      - www.sec.gov
+    method: GET
+    uri: https://www.sec.gov/Archives/edgar/data/1981546/000089843226000808/form4.xml
+  response:
+    body:
+      string: "<?xml version=\"1.0\"?>\n<ownershipDocument>\n\n    <schemaVersion>X0609</schemaVersion>\n\n
+        \   <documentType>4</documentType>\n\n    <periodOfReport>2026-11-24</periodOfReport>\n\n
+        \   <issuer>\n        <issuerCik>0001981546</issuerCik>\n        <issuerName>Commercial
+        Bancgroup, Inc.</issuerName>\n        <issuerTradingSymbol>CBK</issuerTradingSymbol>\n
+        \       <issuerForeignTradingSymbol></issuerForeignTradingSymbol>\n    </issuer>\n\n
+        \   <reportingOwner>\n        <reportingOwnerId>\n            <rptOwnerCik>0002087401</rptOwnerCik>\n
+        \           <rptOwnerName>Metheny Philip J.</rptOwnerName>\n        </reportingOwnerId>\n
+        \       <reportingOwnerAddress>\n            <rptOwnerNonUSAddressFlag>false</rptOwnerNonUSAddressFlag>\n
+        \           <rptOwnerStreet1>C/O COMMERCIAL BANCGROUP, INC.</rptOwnerStreet1>\n
+        \           <rptOwnerStreet2>6710 CUMBERLAND GAP PARKWAY</rptOwnerStreet2>\n
+        \           <rptOwnerCity>HARROGATE</rptOwnerCity>\n            <rptOwnerState>TN</rptOwnerState>\n
+        \           <rptOwnerZipCode>37752</rptOwnerZipCode>\n            <rptOwnerStateDescription></rptOwnerStateDescription>\n
+        \       </reportingOwnerAddress>\n        <reportingOwnerRelationship>\n            <isDirector>false</isDirector>\n
+        \           <isOfficer>true</isOfficer>\n            <isTenPercentOwner>false</isTenPercentOwner>\n
+        \           <isOther>false</isOther>\n            <officerTitle>EVP, Chief
+        Financial Officer</officerTitle>\n        </reportingOwnerRelationship>\n
+        \   </reportingOwner>\n\n    <aff10b5One>false</aff10b5One>\n\n    <nonDerivativeTable>\n
+        \       <nonDerivativeTransaction>\n            <securityTitle>\n                <value>Common
+        Stock</value>\n            </securityTitle>\n            <transactionDate>\n
+        \               <value>2026-11-24</value>\n            </transactionDate>\n
+        \           <transactionCoding>\n                <transactionFormType>4</transactionFormType>\n
+        \               <transactionCode>P</transactionCode>\n                <equitySwapInvolved>false</equitySwapInvolved>\n
+        \           </transactionCoding>\n            <transactionAmounts>\n                <transactionShares>\n
+        \                   <value>350</value>\n                </transactionShares>\n
+        \               <transactionPricePerShare>\n                    <value>32.155</value>\n
+        \               </transactionPricePerShare>\n                <transactionAcquiredDisposedCode>\n
+        \                   <value>A</value>\n                </transactionAcquiredDisposedCode>\n
+        \           </transactionAmounts>\n            <postTransactionAmounts>\n
+        \               <sharesOwnedFollowingTransaction>\n                    <value>14851.69</value>\n
+        \                   <footnoteId id=\"F1\"/>\n                </sharesOwnedFollowingTransaction>\n
+        \           </postTransactionAmounts>\n            <ownershipNature>\n                <directOrIndirectOwnership>\n
+        \                   <value>D</value>\n                </directOrIndirectOwnership>\n
+        \           </ownershipNature>\n        </nonDerivativeTransaction>\n    </nonDerivativeTable>\n\n
+        \   <footnotes>\n        <footnote id=\"F1\">Includes an award of 1,119 restricted
+        stock units (collectively, the &quot;RSUs&quot; and each, an &quot;RSU&quot;)
+        granted pursuant to the Commercial Bancgroup, Inc. 2025 Omnibus Incentive
+        Plan. Each RSU represents a contingent right to receive one share of the issuer's
+        common stock. The RSUs vest in three equal annual installments on each of
+        January 1, 2027, January 1, 2028, and January 1, 2029.</footnote>\n    </footnotes>\n\n
+        \   <ownerSignature>\n        <signatureName>/s/ Philip J. Metheny</signatureName>\n
+        \       <signatureDate>2026-11-24</signatureDate>\n    </ownerSignature>\n</ownershipDocument>\n"
+    headers:
+      accept-ranges:
+      - bytes
+      connection:
+      - keep-alive
+      content-length:
+      - '3603'
+      content-type:
+      - text/xml
+      date:
+      - Thu, 26 Nov 2026 08:21:29 GMT
+      last-modified:
+      - Tue, 24 Nov 2026 21:20:16 GMT
+      strict-transport-security:
+      - max-age=31536000 ; includeSubDomains ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-id-2:
+      - 4OwMUOWgNxynT5c2jSY7madW4PjRe+HPldGOPofBvJv7iDhGYUI90ckpE+dXUY1Yh62pzG1lVM9DfdpwII80zftbVIYkXwnh
+      x-amz-meta-mode:
+      - '33188'
+      x-amz-replication-status:
+      - PENDING
+      x-amz-request-id:
+      - Q9FRWDFYYDG53CQV
+      x-amz-server-side-encryption:
+      - AES256
+      x-amz-version-id:
+      - UZJRcJXM.vfvdIiqPepzwsf9a6aIETeG
+      x-content-type-options:
+      - nosniff
+      x-frame-options:
+      - SAMEORIGIN
+      x-xss-protection:
+      - 1; mode=block
+    status:
+      code: 200
+      message: OK
+- request:
+    body: ''
+    headers:
+      accept:
+      - '*/*'
+      accept-encoding:
+      - gzip, deflate
+      connection:
+      - keep-alive
+      cookie:
+      - _abck=17FAB096B0D0C0E2DCC6C71DDC2FC29E~-1~YAAQUOwXAsJE98KhAQAAIAXyFhADwv3araiJyECv6d/fLM8+mMVbENvuXz5o925/Bk3YSeatu5kqGZEEZtaBnsv3A3/Oxvsno4dnMZIjWRh/i9BH8Wlpn2mExfRzFjAcHo4h1hYkMTTPe+wwnwrE1iLOa0uy/ldifM8t92MSZ5+QHsTict9o6INq6wji1i74a1xMM3/O9UQNII+5O7wdHY31CLVAwM9s6igQCcAPdWqg5w1OygYvfI864wugcz9We7Yd2MqoJ6Bfa33pypX3UNsobgH2chUOobqa2vVXFycwGgatrcYELtPFr/f/D3M9IjYq84l9Z0jDE8GixrDMxIM0xjXEHTI96lruziJ7069w9FLtqCFPZdwg1b3EDd4TDasMvrUFRAHmRYUUGLdf2iTrVrRON40UAiwTIyfUlA2FErDuDNivZUe98JUbEB3GI9PM/zkT5hA6Zg==~-1~-1~-1~-1~-1;
+        bm_sz=4BAC6BE76A79576ABE4B74C00032086F~YAAQUOwXAsNE98KhAQAAIAXyFgHduSpdvxy7QGhHOIrifkk61l+legJv/ZnZ4ZPcWrlatS3f+pJPGK6bDeT9xX7DcadR+s8CpVJ4Eq7XqOLJJ+7blwAxkWaHn259gxFcQNuB3O/g+UDjBp8WxZ1wNoZljmsMe/Md45R12XhS83GHaZgmKMsrdF7YCQzZM0Ypoq1KlrZp8u124twTnUwEiquHTWvFVs4K5E7zTqzQ8/JwBF9aXZcx//jxBXNSMlEWlgWsBFq2iSYFwMCS6bclmm4xO0lDpC//lNQpdbHOybcpUnU7idkwNZzTAHEj8jpQVCzIUeXPGcrHKDPjA3geEsZhvFg6pNMjnd26I9+iO7oJiUaB~4539956~4602164
+      host:
+      - data.sec.gov
+    method: GET
+    uri: https://data.sec.gov/submissions/CIK0002087401.json
+  response:
+    body:
+      string: '{"cik":"0002087401","entityType":"other","sic":"","sicDescription":"","ownerOrg":"","insiderTransactionForOwnerExists":1,"insiderTransactionForIssuerExists":0,"name":"Metheny
+        Philip J.","tickers":[],"exchanges":[],"ein":null,"lei":null,"description":"","website":"","investorWebsite":"","category":"","fiscalYearEnd":null,"stateOfIncorporation":"","stateOfIncorporationDescription":"","addresses":{"mailing":{"street1":"C/O
+        COMMERCIAL BANCGROUP, INC.","street2":"6710 CUMBERLAND GAP PARKWAY","city":"HARROGATE","stateOrCountry":"TN","zipCode":"37752","stateOrCountryDescription":"TN","isForeignLocation":0,"foreignStateTerritory":null,"country":null,"countryCode":null},"business":{"street1":null,"street2":null,"city":null,"stateOrCountry":null,"zipCode":null,"stateOrCountryDescription":null,"isForeignLocation":null,"foreignStateTerritory":null,"country":null,"countryCode":null}},"phone":null,"flags":"","formerNames":[],"filings":{"recent":{"accessionNumber":["0000898432-26-000808","0000898432-26-000694","0000898432-26-000690","0000898432-26-000580","0000898432-26-000306","0000898432-26-000017","0000898432-25-000926","0000898432-25-000824","0000898432-25-000774"],"filingDate":["2026-11-24","2026-08-27","2026-08-21","2026-08-04","2026-05-01","2026-01-05","2025-11-25","2025-10-09","2025-10-03"],"reportDate":["2026-11-24","2026-08-25","2026-08-20","2026-08-03","2026-04-30","2026-01-01","2025-11-21","2025-10-03","2025-10-01"],"acceptanceDateTime":["2026-11-24T21:19:56.000Z","2026-08-27T20:11:39.000Z","2026-08-21T20:10:30.000Z","2026-08-04T20:10:25.000Z","2026-05-01T23:27:10.000Z","2026-01-06T00:02:48.000Z","2025-11-25T14:05:38.000Z","2025-10-09T20:14:26.000Z","2025-10-03T20:58:27.000Z"],"act":["34","34","34","34","34","34","34","34","34"],"form":["4","4","4","4","4","4","4","4","3"],"fileNumber":["001-42889","001-42889","001-42889","001-42889","001-42889","001-42889","001-42889","001-42889","001-42889"],"filmNumber":["261592207","261330384","261304806","261238732","26934266","26508695","251515463","251385221","251374744"],"items":["","","","","","","","",""],"core_type":["4","4","4","4","4","4","4","4","3"],"size":[5034,6444,5032,5032,5419,4725,4793,4215,49376],"isXBRL":[0,0,0,0,0,0,0,0,0],"isInlineXBRL":[0,0,0,0,0,0,0,0,0],"isXBRLNumeric":[0,0,0,0,0,null,null,null,null],"primaryDocument":["xslF345X06/form4.xml","xslF345X06/form4.xml","xslF345X06/form4.xml","xslF345X06/form4.xml","xslF345X06/form4.xml","xslF345X05/form4.xml","xslF345X05/form4.xml","xslF345X05/form4.xml","xslF345X02/form3.xml"],"primaryDocDescription":["FORM
+        4","FORM 4","FORM 4","FORM 4","","","","",""]},"files":[]}}'
+    headers:
+      access-control-allow-origin:
+      - '*'
+      connection:
+      - keep-alive
+      content-length:
+      - '2616'
+      content-type:
+      - application/json
+      date:
+      - Thu, 26 Nov 2026 08:21:29 GMT
+      strict-transport-security:
+      - max-age=31536000 ; preload
+      vary:
+      - Accept-Encoding
+      x-amz-apigw-id:
+      - HcHRlH6ZIAMEB4A=
+      x-amzn-requestid:
+      - 41c21e94-e859-4f5a-b74d-b5df51c4fdb9
+      x-amzn-trace-id:
+      - Root=1-6b07ec09-f636b78d08c415ac12167ef6
+    status:
+      code: 200
+      message: OK
+version: 1

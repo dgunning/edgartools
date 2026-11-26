@@ -2022,13 +2022,14 @@ class Filing:
             except (ValueError, Exception) as e:
                 from edgar.exceptions import FilingNotFoundError, IdentityNotSetError
                 from edgar.httprequests import IdentityNotSetError
-                from edgar.sgml.sgml_parser import SECIdentityError
+                from edgar.sgml.sgml_parser import SECHTMLResponseError, SECIdentityError
                 # Don't fall back on permanent errors — propagate them
                 if isinstance(e, (SECIdentityError, FilingNotFoundError, IdentityNotSetError)):
                     raise
                 # Propagate network/HTTP failures in both error modes. Caching
                 # a homepage-only SGML here would prevent a later download retry.
-                if is_unreachable(e) or http_status(e) is not None:
+                # SECHTMLResponseError carries no status, but SEC did answer: it is a content error.
+                if not isinstance(e, SECHTMLResponseError) and (is_unreachable(e) or http_status(e) is not None):
                     raise
                 # Transient content errors (empty response, HTML error page) — fall back to homepage
                 log.warning(
