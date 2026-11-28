@@ -241,6 +241,8 @@ class Fact(BaseModel):
     # value '' and numeric_value None (GH #1254).
     is_nil: bool = False
 
+    # Used by filing queries while preserving the serialized Fact format.
+    namespace: Optional[str] = Field(default=None, exclude=True)
 
 class Footnote(BaseModel):
     """

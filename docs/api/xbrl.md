@@ -659,6 +659,20 @@ def by_concept(self, pattern: str, exact: bool = False) -> FactQuery
 def by_label(self, pattern: str, exact: bool = False) -> FactQuery
 ```
 
+#### by_extension()
+
+Filter a single filing's facts to concepts in the namespaces declared by its
+loaded extension schemas.
+
+```python
+extension_facts = xbrl.query().by_extension().to_dataframe()
+```
+
+If a filing schema with a target namespace wasn't loaded, the filter raises
+`ValidationError`. When loading local files, pass the extension schema as
+`schema_file` to `XBRL.from_files()`. Stitched queries raise
+`NotImplementedError`. Run the filter on each filing's XBRL separately.
+
 #### by_value()
 ```python
 def by_value(self, value_filter: Union[Callable, str, int, float, list, tuple]) -> FactQuery

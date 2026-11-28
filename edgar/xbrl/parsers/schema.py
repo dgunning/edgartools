@@ -47,6 +47,7 @@ class SchemaParser(BaseParser):
 
         # Store references to data structures
         self.element_catalog = element_catalog
+        self.target_namespaces: set[str] = set()
         self.role_types = role_types if role_types is not None else {}
 
         # Will be set by coordinator when needed
@@ -120,6 +121,17 @@ class SchemaParser(BaseParser):
             enum_head_usable=enum_attribute(element, 'headUsable'),
         )
 
+    def _record_schema_declarations(self, root) -> None:
+        """Record the schema's target namespace and declared elements."""
+        target_namespace = root.get('targetNamespace')
+        if target_namespace:
+            self.target_namespaces.add(target_namespace)
+
+        for element in root.findall('.//{http://www.w3.org/2001/XMLSchema}element'):
+            element_id = element.get('id') or element.get('name')
+            if element_id:
+                self.element_catalog[element_id] = self._catalog_entry(element_id, element)
+
     def parse_schema_content(self, content: str) -> None:
         """Parse schema content and extract element information."""
         try:
@@ -127,11 +139,7 @@ class SchemaParser(BaseParser):
             root = self._safe_parse_xml(content)
             self._record_namespace_bindings(root)
 
-            # Extract element declarations
-            for element in root.findall('.//{http://www.w3.org/2001/XMLSchema}element'):
-                element_id = element.get('id') or element.get('name')
-                if element_id:
-                    self.element_catalog[element_id] = self._catalog_entry(element_id, element)
+            self._record_schema_declarations(root)
 
             # Extract embedded linkbases if present
             embedded_linkbases = self._extract_embedded_linkbases(content)
